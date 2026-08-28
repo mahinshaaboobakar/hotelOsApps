@@ -54,4 +54,4 @@ in which an application ever reaches a property.
 
 | App | Status |
 |---|---|
-| `workforce/` | in design — `workforce/docs/chapters/01-the-workforce-application.md` |
+| `workforce/` | in design — chapter `workforce/docs/chapters/01-the-workforce-application.md` · gold mockup `workforce/docs/mockups/01-workforce-gold.html` (awaiting owner approval) |
