@@ -152,7 +152,7 @@ slice 1 is strictly first because AA's pipeline is its substrate.
 
 | ID | Question | Recommendation |
 |---|---|---|
-| **WF-Q1** | Does MOD carry permissions (a time-boxed elevation), or is it operational display only? **Planner question** — a temporal grant is a new authorization concept | v1: display + audit only; the duty events exist, so a later ruling can attach tuples without schema change |
+| **WF-Q1** | Does MOD carry permissions (a time-boxed elevation), or is it operational display only? | **RULED — planner, 2026-08-29: MOD is a duty assignment, not an authorization role.** Display, roster, visibility where the person's existing permissions already allow it, audit and duty status — **no FGA tuples in v1**. Any future elevation needs a new authorization ADR in the platform repository (capability, scope, start/end, revocation); the duty's lifecycle events are the hook |
 | **WF-Q2** | Does the shell surface today's MOD (status bar / property card)? | not in v1; module-only until ruled |
 | **WF-Q3** | Multiple postings per person (cross-department) in v1? | yes structurally (the schema allows it — ADR 0052's primary flag exists for this), UI keeps one primary + additional |
 | **WF-Q4** | Do shift definitions (M/A/N times) live per property or per department? | per property, department overrides later if asked |
