@@ -50,8 +50,28 @@ this one included), distributed through the hosted registry, installed by
 Software Center. Git is how apps are *developed*; `.hopkg` is the only form
 in which an application ever reaches a property.
 
-## Applications
+## Connectors live here too — owner direction, 2026-08-30
 
-| App | Status |
-|---|---|
-| `workforce/` | in design — chapter `workforce/docs/chapters/01-the-workforce-application.md` · gold mockup `workforce/docs/mockups/01-workforce-gold.html` (awaiting owner approval) |
+> *"Apps and connectors are root folders, and their docs are kept there."*
+
+A connector is developed exactly as an application is: **one root directory
+per connector**, self-contained, carrying its own `docs/chapters/` and
+`docs/decisions/`, binding to the platform only through the contracts and the
+package. What differs is what it is a package *of* — platform `CONN-Q1` rules
+the connector package kind — and where its runtime sits: a connector is
+installed into the **Integration Hub**, which is platform core and lives in
+the platform repository, never here. So the split is:
+
+```text
+platform repository     the Integration Hub — inbox, dedupe, normalisation,
+                        replay; the connector runtime; the contracts
+this repository         each connector — its PMS study, its design, its
+                        mapping and its package
+```
+
+## Applications and connectors
+
+| Directory | Kind | Status |
+|---|---|---|
+| `workforce/` | application | in design — chapter `workforce/docs/chapters/01-the-workforce-application.md` · gold mockup `workforce/docs/mockups/01-workforce-gold.html` (awaiting owner approval) |
+| `pms-oracle/` | connector (working name — `CONN-Q1` and the owner's "which PMS first" decide the final one) | in study — Stream DD; the reference study lands as `pms-oracle/docs/chapters/01-the-oracle-pms-reference-study.md` |
