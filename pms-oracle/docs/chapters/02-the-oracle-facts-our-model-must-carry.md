@@ -256,8 +256,9 @@ merely which kind of entity. Two ids of one reservation, mapped under one
 `entity_type`, collide on a constraint that is doing exactly its job.
 
 This is a refinement of an accepted ADR, and therefore a **finding to report,
-not a change to make**: the register row belongs to the architect, and this
-page records the evidence for it.
+not a change to make**. **Registered as `CONN-Q8`** (architect, 2026-08-30) —
+an amendment to ADR 0016: the mapping key gains the identifier kind. This page
+holds its evidence; the ruling is the planner's.
 
 ### R11 · Guest identity inside a reservation is a search, and every step of it can fail
 *(42b G-C12 · study §5.4)*
@@ -395,8 +396,7 @@ from the source*, and nothing derives from it.
 ## 5 · Commercial terms
 
 ### R18 · Guarantee, deposit and cancellation terms are structured, and their deadlines are offsets
-*(brief §2's "guarantee types" · study §5.5 — **not separately numbered in
-`42b` §4**; see this page's closing note)*
+*(42b G-C20 · brief §2's "guarantee types" · study §5.5)*
 
 **Fact.** A guarantee is not a policy string. It carries a code, a short
 description, `onHold` and `reserveInventory` flags, a `defaultGuarantee` flag,
@@ -425,8 +425,7 @@ but unbuilt (`CTX-Q2` / ADR 0089, and brief §4). Recorded here as a source
 fact.
 
 ### R19 · Money must be typed, and currency travels with it
-*(study §3.2, §6 — **not separately numbered in `42b` §4**; see this page's
-closing note)*
+*(42b G-C21 · study §3.2, §6)*
 
 **Fact.** The same amount is a `String` on the two on-site flavours, parsed
 with `Float.parseFloat` at the point of use, and an `int` on the cloud flavour.
@@ -613,7 +612,8 @@ while every connector-level signal is green.
 ## 8 · One requirement that is about the connector, not the reservation
 
 ### R28 · Three flavours of one vendor are three sources
-*(study §1, §8.7 — an input to `CONN-Q1`)*
+*(study §1, §8.7 — **attached to `CONN-Q1`** by the architect, 2026-08-30, as
+the fact that the packaging unit is the integration, not the brand)*
 
 **Fact.** `oracle-cloud`, `oracle-onpremise` and `oracle-web` differ in
 transport, direction, credential model, capability set and status vocabulary.
@@ -682,14 +682,17 @@ G-C3 and G-C4→R5, G-C5→R3, G-C6→R4, G-C7→R20 and R22, G-C8→R21, G-C9�
 G-C10→R24, G-C11a–f→R12–R17, G-C12→R11, G-C13→R10, G-C14→R9, G-C15→R7,
 G-C16→R8, G-C17→R26, G-C18→R25, G-C19→R27.
 
-**Two requirements here have no `42b` number, because `42b` §4 under-listed
+**Two requirements here had no `42b` number, because `42b` §4 under-listed
 them:** R18 (guarantee, deposit and cancellation terms) and R19 (money and
 currency). Both are class C by the brief's test — PMS facts the model must
 carry — and the guarantee half is named explicitly in brief §2's list of what
 to extract. They were established in the study (§5.5, §3.2, §6) and lost
 between it and the gap analysis's numbered list.
 
-`42b` is accepted and goes to the planner tonight, so this is **reported
-rather than patched**: correcting it means two added findings and §0's class C
-count moving from 19 to 21. That is the architect's call, not a change to make
-under a page already in a package.
+**Closed.** Reported rather than patched, and then ruled: the architect
+patched `42b` on 2026-08-30 before the planner package, adding **G-C20**
+(guarantee terms → R18) and **G-C21** (money and currency → R19) and moving the
+class C count 19 → 21. The reasoning is worth keeping: `42b` is *evidence* for
+the planner's questions rather than part of the package's text, so correcting
+the evidence before it is read is the honest act — and leaving a known gap
+because a page had been accepted would be the opposite.
