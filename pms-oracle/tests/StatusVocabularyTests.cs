@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Vocabularies;
 using Xunit;
 
