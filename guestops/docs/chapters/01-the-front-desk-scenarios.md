@@ -314,15 +314,36 @@ room**, so the arrivals list must be usable when half of it is unassigned.
 is an assignment, not an amendment (S28). And **check-in refuses an unassigned
 stay**, which is the one hard gate this scenario creates.
 
-### S9 · The room is not ready — **OPEN**
+### S9 · The room is not ready — *ruled*
 **SITUATION.** The guest is at the desk at 11:40 and the room is dirty.
 
-**EXPRESSIBLE.** Room Care's cleaning is **policy-driven, not event-driven**
-(APPS-Q1, owner, 2026-08-31) and Room Care is an *installable* application
-that may not be installed at all. So GuestOps cannot assume it can ask, and
-must not assume the answer would be binding. Whether a check-in into an
-unreleased room is refused, warned, or simply recorded is a hotel policy.
-**`OPEN` — §15 (e).**
+**EXPRESSIBLE. GuestOps never refuses.** Owner, 2026-08-31, answering §15 (e)
+with a rule that reaches further than this scenario:
+
+> **An application's own flow is never gated on another application being
+> installed. An absent dependency loses its *capability*, never the *flow*.**
+> *"If Jobs is not installed we cannot create a job. If there is no Room Care,
+> the cleaning process cannot be tracked. Check-in and check-out are GuestOps's
+> responsibility."*
+
+So the check-in proceeds and is recorded. Where Room Care is present and the
+resolver exists (§B4 of `03-the-open-questions.md`), the desk may be **shown**
+that the room is not released — a display, never a gate. Where Room Care is
+absent, the question simply has no answer and nothing about the check-in
+changes.
+
+**The distinction this draws, and it is the one to keep:**
+
+```text
+GuestOps gates on its OWN facts        check-in refuses an unassigned
+                                       stay — S8's one hard gate
+GuestOps never gates on ANOTHER
+application's facts                    room readiness · open jobs ·
+                                       cleaning state
+```
+
+A cross-application gate would make an *installable* application effectively
+mandatory, which is the opposite of what a modular platform is for.
 
 ### S10 · The early arrival, across the business-day boundary
 **SITUATION.** A guest booked for the 15th walks in at 02:30 on the 15th. The
@@ -810,11 +831,10 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
-**Five are ruled** and are struck through below rather than deleted, so the
-scenarios that cite them still resolve. **Two remain open** — (e) and (g) —
-and neither blocks the design: (e) is carried as property configuration, (g)
-as a records list whose contents the owner fills in. The design chapter and
-the gold mockup proceed on the five.
+**Six are ruled** and are struck through below rather than deleted, so the
+scenarios that cite them still resolve. **One remains open** — (g), the
+registration card's statutory contents — carried as a records list whose
+fields the owner fills in, and blocking nothing structural.
 
 | | Subject | Why it cannot be settled here |
 |---|---|---|
@@ -822,7 +842,7 @@ the gold mockup proceed on the five.
 | ~~**(b)**~~ | ~~Is a room-stay valid **without a room**?~~ (S8) | **RULED — GUEST-Q2 addendum, 2026-08-31: yes.** The anchor's *"one room"* is one room **type**; the room number is an **assignment**, absent at booking, changeable through the stay, and **required at check-in**. Carried in §1's vocabulary and S8; the letter is kept rather than re-lettered so every citation above still resolves |
 | ~~**(c)**~~ | ~~On a standing disagreement, which value do the board, Room Care and Context see — and who clears it?~~ (S35) | **RULED — GUEST-Q3, 2026-08-31.** The standing **override** is the answer everywhere while the disagreement stands; the disagreement is a flag on the one truth, never a second answer. Clearing belongs to the stay's **write permission**, choosing *keep ours* or *take the PMS's*, recorded with both values kept. Clearing to the PMS's side emits the same correction event a room move does. The S11 gate note is ratified in the same row |
 | ~~**(d)**~~ | ~~When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns?~~ (S36) | **RULED — GUEST-Q4, 2026-08-31: there is no second mode.** PMS-writes-first at all times; a matching inbound fact settles an override **silently as confirmed**, so only differing values are a disagreement; the outage shows as per-capability **staleness**, not as a mode; the backlog lands in event order and groups as one outage batch. The S26 boundary is ratified in the same row |
-| **(e)** | Does GuestOps refuse a check-in into a room Room Care has not released? (S9) | Cleaning is policy-driven (APPS-Q1), and Room Care is installable — it may be absent entirely |
+| ~~**(e)**~~ | ~~Does GuestOps refuse a check-in into a room Room Care has not released?~~ (S9) | **RULED — owner, 2026-08-31: no, and the rule is platform-wide.** *An application's own flow is never gated on another application being installed; an absent dependency loses its capability, never the flow.* Check-in and check-out are GuestOps's responsibility. Room readiness may be **displayed** when Room Care is present and the resolver exists — never a gate. The number is the architect's to claim |
 | ~~**(f)**~~ | ~~Is the folio — charges, deposits, guarantee and cancellation terms — in GuestOps v1?~~ (S6, S25) | **RULED — GUEST-Q6, 2026-08-31:** v1 is **the book plus the stay's commercial terms** (rate, guarantee and cancellation offsets, every amount with currency and tax basis). The **folio** — posting, payments, settlement, invoicing, night-audit posting — is **Finance's domain, a later round**. Accepted knowingly: a standalone property cannot settle a guest in v1, and the first deployments are PMS-connected. The walk-in / PMS-unknown distinction is ratified in the same row |
 | **(g)** | What must the registration card capture, and is there a statutory report behind it? (§12) | The hotelier reference has a `grcNo`; what an Indian property is legally required to record, for domestic and foreign guests, is the owner's knowledge and not the record's |
 
@@ -833,12 +853,12 @@ the gold mockup proceed on the five.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven subjects are listed in §15; five —
+* **No answer to an open question.** Seven subjects are listed in §15; six —
   (b) the roomless stay, (c) the standing disagreement, (d) the silent feed,
-  (a) the PMS-unknown stay and (f) money in v1 — were ruled on 2026-08-31 and
-  are carried in §1, §3, S5, S6, S8, S11, S13, S25, S34, S35 and S36. The
-  other two are not resolved above, and neither is anticipated. S26 records
-  where GUEST-Q3 deliberately does **not** reach.
+  (a) the PMS-unknown stay, (f) money in v1 and (e) the unreleased room — were
+  ruled on 2026-08-31 and are carried in §1, §3, S5, S6, S8, S9, S11, S13,
+  S25, S34, S35 and S36. Only (g) is unresolved, and it is not anticipated.
+  S26 records where GUEST-Q3 deliberately does **not** reach.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.

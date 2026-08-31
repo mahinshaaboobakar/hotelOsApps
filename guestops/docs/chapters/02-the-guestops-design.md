@@ -604,7 +604,7 @@ jobs raised from this stay                 Jobs        NO
 servicing across this stay, per night      Room Care   NO
   — the mockup's "Servicing" tab
 the room's readiness before check-in       Room Care   NO
-  — scenario-record §15 (e), carried as configuration
+  — DISPLAY ONLY: S9 rules it is never a gate
 ```
 
 **The rule is not in doubt; the resolver is.** *"Context over joins"* — an
@@ -615,6 +615,18 @@ summary and nothing else (ADR 0089 §"The v1 scope this fixes"). There is no
 *stay → jobs* and no *stay → servicing* resolver, and the contributing
 domains — Jobs, Room Care — would each have to own a read view the way §8
 has GuestOps own three.
+
+**And none of them may gate an operation — ruled, owner, 2026-08-31:**
+
+> **An application's own flow is never gated on another application being
+> installed. An absent dependency loses its *capability*, never the *flow*.**
+
+That rule reaches past this section and is the reason the design has exactly
+one hard gate: **check-in refuses an unassigned stay** (S8), because the
+assignment is GuestOps's own fact. Room readiness, open jobs and cleaning
+state are *displayed* when their owner is present and the resolver exists, and
+are simply absent otherwise. A cross-application gate would make an
+*installable* application effectively mandatory.
 
 Three consequences the design accepts rather than works around:
 
@@ -751,7 +763,7 @@ domain through.
 | **ADR 0061 authorization materialisation** | **Ruled, unbuilt** — nothing writes tuples today | any stay-level authorization object. v1 needs none (property + application scope), so this is named rather than depended on |
 | **`CONN-Q8` — the identifier kind** | **Open** (an amendment to ADR 0016) | nothing now; §6's `id_kind` exists so the ruling changes no model |
 | **The reservation-identifier mapping's home** | **Reported, §14** | which service answers *"which stay is this fact about"* |
-| **§15 (e) — check-in into an unreleased room** | **Open** | nothing: carried as **property configuration** (refuse · warn · record), defaulting to *warn*, and absent entirely when Room Care is not installed |
+| **§15 (e) — check-in into an unreleased room** | **Ruled — owner, 2026-08-31** | nothing, and **no configuration either**: GuestOps never refuses. An absent dependency loses its capability, never the flow; readiness is display-only when Room Care and the resolver are both present (§8.1) |
 | **§15 (g) — the registration card's contents** | **Open** | nothing: carried as a **records list** — `grc_no`, documents, signature — whose statutory fields the owner fills in |
 | **Finance** | **Not started** | settlement in a standalone property, knowingly (GUEST-Q6) |
 

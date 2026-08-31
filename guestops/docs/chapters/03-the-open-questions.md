@@ -39,21 +39,32 @@ page.
 ## A · For the owner — still open from the scenario record
 
 ### A1 · Does GuestOps refuse a check-in into a room Room Care has not released?
-*(scenario record §15 (e), S9)*
+*(scenario record §15 (e), S9)* — **RULED, owner, 2026-08-31: no.**
 
-**The facts.** Cleaning is **policy-driven, not event-driven** (APPS-Q1,
-owner) — a checked-out room becoming a task is a hotel policy, never an
-automatic consequence. Room Care is an *installable* application and may not
-be present at all, and the *stay → room-readiness* Context resolver does not
-exist yet either (§B4). So GuestOps can neither assume it can ask nor assume
-the answer would bind.
+> **An application's own flow is never gated on another application being
+> installed. An absent dependency loses its *capability*, never the *flow*.**
+> *"If Jobs is not installed we cannot create a job. If there is no Room Care,
+> the cleaning process cannot be tracked. Check-in and check-out are
+> GuestOps's responsibility."*
 
-**Carried, not blocked.** The design holds this as **property configuration** —
-*refuse · warn · record* — defaulting to **warn**, and absent entirely when
-Room Care is not installed. Nothing is built that a ruling would have to undo.
+**And the ruling is wider than the question.** It answers A1 — check-in
+proceeds, readiness is display-only where Room Care and the resolver both
+exist — and it states a **platform principle** that binds every application
+round, not this one. It is recorded here because this round asked; **the
+architect's register row and its number are outstanding**, and §B5 below says
+why that matters beyond GuestOps.
 
-**The question.** Does a property get that choice, or does the platform take
-one position?
+**What it removed from the design:** the *refuse · warn · record* property
+configuration is gone entirely, not defaulted. There was never a policy to
+configure — there was a gate that should not exist.
+
+**The distinction the design keeps:**
+
+```text
+gate on OUR OWN facts        check-in refuses an unassigned stay (S8)
+gate on ANOTHER app's facts  never — it would make an installable
+                             application effectively mandatory
+```
 
 ### A2 · What must the registration card capture, and is there a statutory report behind it?
 *(scenario record §15 (g), §12)*
@@ -124,6 +135,30 @@ reads another's tables, and a cross-domain relationship comes from the Context
 Service (ADR 0089 §CTX-Q1 — each contributing domain owns its view). So what
 is missing is not a decision but **two contributing read views**, owned by
 Jobs' and Room Care's rounds. Slice 4 of the design is blocked on them.
+
+**A1's ruling narrows what they are for.** All three resolvers are
+**display-only**: none of them may gate a GuestOps operation, so their absence
+costs a panel and never a flow. That is worth stating where the work is
+scheduled, because a resolver commissioned as *"the check-in readiness check"*
+would be built as a gate.
+
+### B5 · A1's ruling is a platform principle, and it has no home yet
+
+The owner's answer to A1 — *an application's own flow is never gated on
+another application being installed; an absent dependency loses its
+capability, never the flow* — is **not specific to GuestOps**. It binds Jobs,
+Room Care, EngineeringOps, Guest360 and every application after them, and it
+is the operational half of what ADR 0116 §5 already implies by making every
+application per-user gateable: an application a property has not installed, or
+a user cannot open, must not be able to stop somebody else's work.
+
+Nothing in the record states it. `CLAUDE.md` §"Modular platform" and ADR 0051
+§"An application is a bundle" describe modularity structurally; neither says
+what happens at run time when the neighbour is missing.
+
+**Reported for a register row and a number** — the architect's, not this
+round's. Recorded in this application's pages meanwhile so that the design is
+not carrying an unattributed rule.
 
 ---
 
@@ -309,8 +344,8 @@ is here at all.
 | C11 | *"three stays on this record"* | **v1** — narrower than Guest360, no overlap |
 | C4 | upgrade: assignment or amendment | **ruling first** — small, wrong once if guessed |
 | C6 | who may see a full phone number | **ruling first** — before slice 1 ships |
-| A1 | check-in into an unreleased room | **carried as configuration** — blocks nothing |
-| A2 | the registration card's contents | **owner** — possibly a deployment obligation |
+| A1 | check-in into an unreleased room | **RULED — never refuses; no configuration.** The principle needs a register row (§B5) |
+| A2 | the registration card's contents | **owner** — possibly a deployment obligation. **The last question this round holds** |
 | C9 | company / travel agent profiles | **next**, keeping the booker's text now |
 | C10 | rooming-list import | **next** |
 | C12 | reporting | **next**, and it depends on C3 |
