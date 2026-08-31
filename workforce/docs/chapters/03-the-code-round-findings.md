@@ -165,6 +165,62 @@ independent answers to one shape:
 
 ---
 
+## F6 · An installed application has no grant on `event_store`
+
+**Found by scaffolding the migration**, 2026-08-31, and it is the one finding
+that would have failed at runtime rather than silently.
+
+`StoredEventConfiguration` maps to **`event_store.events`** and
+`event_store.publish_state`, both `ExcludeFromMigrations()`: *"a different
+schema, and not one this service owns — the relationship is the one a service
+has with the write-ahead log: it appends, it does not own, and it cannot
+modify."* Correct, and it means an application's `migrate` verb creates its own
+tables and **not** the event store's.
+
+So appending needs an `INSERT` grant on two tables in a schema this package does
+not own. `deployment/database/04-grants.sql` grants `event_store` usage to
+`hotelos_kernel_admin` and `SELECT` to the four platform runtimes
+(`ai_runtime`, `analytics`, `connector_runtime`, `readonly`); the table-level
+grants live in a later file, keyed to roles that exist at bootstrap.
+
+**Nothing in that path provisions a role for an installed application.**
+`ADR 0092`'s install steps create the schema and run the migration; whether they
+also grant the package's role `INSERT` on the event store is not something this
+stream could find. If they do not, the first announcement fails with a
+permission error — loudly, which is the better failure, and after the
+`AUTHZ-Q20` contract has already been declared done.
+
+Recorded now rather than when the announcement lands, because the fix belongs to
+the package contract and not to this application.
+
+## APPS-Q3 · three schemas still carry old application names
+
+**Reported, not fixed** — colleague files, per the standing order. Found by the
+same sweep that cleared this application's own surface.
+
+```text
+deployment/database/03-schemas.sql:72   CREATE SCHEMA housekeeping   → roomcare
+deployment/database/03-schemas.sql:77   CREATE SCHEMA workorder      → jobs
+deployment/database/03-schemas.sql       CREATE SCHEMA reservations   → guestops
+deployment/database/02-roles.sql:31-32   the owner-role list, twice
+deployment/database/02-roles.sql:58-59   their connection limits
+deployment/database/02-roles.sql:107-108 and again
+deployment/database/04-grants.sql        7 references
+```
+
+`APPS-Q3` names schemas explicitly — *Jobs, schema `jobs`; Room Care, schema
+`roomcare`; GuestOps, schema `guestops`* — and nothing has shipped on any of
+the three, so they are renames outright rather than migrations. The Kernel's
+event domains were already swept (`streams.rs`, `jetstream.rs`); the database
+scripts were not.
+
+**Two occurrences deliberately excluded from that list**, on the distinction the
+rule now carries: `ZoneTypes.Housekeeping` and the `housekeeping_operator`
+relation are the **department and the function**, not the application. Room Care
+is the app; Housekeeping is the department, and it stays Housekeeping.
+
+---
+
 ## Claimed as `AUTHZ-Q20` — unsplit, and half answered the same day
 
 **Architect, 2026-08-31.** The question is claimed whole, as argued, and its

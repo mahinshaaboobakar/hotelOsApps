@@ -207,7 +207,7 @@ the chapter as it stands on 2026-08-31, before the owner's answers touch it.
 3  Leave · mine   a request in three fields: type, dates, note
 4  Leave · queue  the manager's approvals, with the team's calendar for those
                   dates beside the decision
-5  Duty Roster    the MOD month strip; assign by clicking a day and picking
+5  Duty Register    the MOD month strip; assign by clicking a day and picking
                   any active staff member, from any department
 6  People         postings — each staff member's identity read-only from
                   Master Data, with posting(s), job role, reporting manager
@@ -1186,7 +1186,7 @@ drawn into the **shape** of two views rather than stated in a caption:
 
 | | What is drawn | Against M1 |
 |---|---|---|
-| **Frame 5 · Duty Roster** | *"a month strip showing who is MOD each day"* — one cell per day, one name in it | **A day cell cannot hold a span.** A 20:00→08:00 duty belongs partly to two cells, and the strip has no way to say so |
+| **Frame 5 · Duty Register** | *"a month strip showing who is MOD each day"* — one cell per day, one name in it | **A day cell cannot hold a span.** A 20:00→08:00 duty belongs partly to two cells, and the strip has no way to say so |
 | **Frame 2 · the MOD ribbon** | one name per day column — `Priya T.` under Mon, `Rahul N. · SEC` under Wed, `—` under Sun | **A day column can now hold two MODs** — the one ending at 08:00 and the one starting at 20:00. The ribbon's one-name-per-column shape is the per-day model made visual |
 
 Both are listed for deliverable 3, and neither is a small correction: *what does

@@ -50,9 +50,20 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
         // service. Two event appenders drift, and one of them stops writing the
         // queue row.
         //
-        // It takes no schema: `HasDefaultSchema` above places it, which is what
-        // puts this application's event store inside this application's schema
-        // rather than beside another's.
+        // **It does not live in this schema, and it is not this application's to
+        // create.** The configuration names `event_store.events` and
+        // `event_store.publish_state` explicitly and marks both
+        // `ExcludeFromMigrations()`: the Kernel owns that schema and migrates it,
+        // and the relationship an application has with it is the one it has with
+        // a write-ahead log — it appends, it does not own, and it cannot modify.
+        // Scaffolding a `CREATE TABLE events` from here would put two components
+        // in charge of one table.
+        //
+        // Corrected after reading the scaffolded migration: this comment
+        // previously claimed `HasDefaultSchema` placed the event store in the
+        // `workforce` schema, which the generated SQL disproves — one table,
+        // `postings`, and no event store. A comment asserting an outcome nothing
+        // checks is the failure CLAUDE.md names, and this one survived a review.
         modelBuilder.AddPlatformEventStore();
 
         modelBuilder.Entity<Posting>(posting =>
