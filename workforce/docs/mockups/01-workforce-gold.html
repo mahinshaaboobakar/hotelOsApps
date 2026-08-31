@@ -188,405 +188,749 @@
   .not{max-width:1220px;margin:14px auto 0;border:1px dashed var(--line2);border-radius:14px;padding:14px 18px;font-size:12.5px;color:var(--dim);line-height:1.7}
   .not b{color:var(--text)}
   @media (prefers-reduced-motion:no-preference){.create,.opt,.pp{transition:transform .15s ease-out}}
+  /* ── revision 2 ─────────────────────────────────────────────── */
+  /* shift chip, now rendered from data: colour is the definition's, text is its short code */
+  .sh.d{background:color-mix(in srgb, var(--c) 14%, transparent);color:var(--c);border-color:color-mix(in srgb, var(--c) 26%, transparent)}
+  .sh.d i{background:var(--c)}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:9px 14px;background:var(--glass);border:1px solid var(--line);border-radius:12px;font-size:11.5px;color:var(--faint)}
+  .legend b{color:var(--dim);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;margin-right:2px}
+  .lg{display:inline-flex;gap:7px;align-items:center;color:var(--dim)}
+  .lg em{font-style:normal;color:var(--faint)}
+  .zn{font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:5px;background:rgba(125,211,252,.10);color:var(--cyan);letter-spacing:.03em}
+  /* MOD as a timeline, not a row of day cells */
+  .tl{position:relative;background:rgba(251,191,36,.05);border-bottom:1px solid var(--line);height:46px}
+  .tlgrid{position:absolute;inset:0;display:grid;grid-template-columns:190px repeat(7,1fr)}
+  .tlgrid>div{border-right:1px solid var(--line)}
+  .tlgrid>div:last-child{border-right:none}
+  .tllab{position:absolute;left:0;top:0;bottom:0;width:190px;display:flex;align-items:center;padding:0 10px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--duty);font-weight:700;gap:6px;z-index:2}
+  .bars{position:absolute;left:190px;right:0;top:7px;bottom:7px}
+  .bar{position:absolute;top:0;bottom:0;border-radius:7px;background:rgba(251,191,36,.16);border:1px solid rgba(251,191,36,.4);display:flex;align-items:center;padding:0 9px;gap:7px;font-size:11px;color:var(--duty);white-space:nowrap;overflow:hidden}
+  .bar b{font-weight:600;color:#fde68a}
+  .bar em{font-style:normal;color:rgba(251,191,36,.65);font-size:10px}
+  .bar.gap{background:transparent;border-style:dashed;border-color:var(--line2);color:var(--faint)}
+  .nowrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .nowc{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 15px;display:flex;gap:12px;align-items:center}
+  .nowc.on{border-color:rgba(251,191,36,.42);background:rgba(251,191,36,.06)}
+  .nowc .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:700}
+  .nowc b{display:block;font-size:14px;font-weight:600;margin-top:3px}
+  .nowc span{font-size:11.5px;color:var(--faint)}
+  /* attendance */
+  .arow{display:grid;grid-template-columns:1.25fr 120px 110px 110px 1fr;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
+  .arow:last-child{border-bottom:none}
+  .arow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .arow .sub{color:var(--faint);font-size:11.5px;display:block}
+  .tm{font-variant-numeric:tabular-nums;font-size:13px}
+  .tm.miss{color:var(--faint)}
+  .flag{display:inline-flex;gap:6px;align-items:center;padding:2px 9px;border-radius:6px;font-size:11px;font-weight:600}
+  .flag.late{background:rgba(251,191,36,.13);color:var(--warn)}
+  .flag.abs{background:rgba(248,113,113,.12);color:var(--bad)}
+  .flag.unr{background:rgba(129,140,248,.13);color:var(--indigo)}
+  .flag.in{background:rgba(52,211,153,.12);color:var(--ok)}
+  .src{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+  /* policy */
+  .polrow{display:grid;grid-template-columns:1.1fr 130px 130px 1fr;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
+  .polrow:last-child{border-bottom:none}
+  .polrow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .ro{display:inline-flex;gap:6px;align-items:center;font-size:10.5px;color:var(--faint);border:1px dashed var(--line2);border-radius:6px;padding:2px 8px}
+  .sect{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:700;margin:2px 0 -2px}
+  /* report */
+  .rep{width:100%;border-collapse:collapse;font-size:12.5px}
+  .rep th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;text-align:right;padding:9px 12px;background:rgba(10,12,18,.3);border-bottom:1px solid var(--line)}
+  .rep th:first-child{text-align:left}
+  .rep td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+  .rep td:first-child{text-align:left}
+  .rep tr:last-child td{border-bottom:none}
+  .rep .nm b{font-weight:500}
+  .rep .nm span{display:block;color:var(--faint);font-size:11px}
+  .rep .ot{color:var(--warn);font-weight:600}
+  /* the printed week — a light artifact, deliberately not the screen */
+  .paper{background:#fff;color:#111;border-radius:6px;padding:26px 28px;font:11.5px/1.5 "Segoe UI",system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+  .paper h2{font-size:15px;font-weight:700;margin:0}
+  .paper .psub{font-size:11px;color:#555;margin-top:2px}
+  .ptab{width:100%;border-collapse:collapse;margin-top:14px;font-size:11px}
+  .ptab th,.ptab td{border:1px solid #999;padding:5px 6px;text-align:center}
+  .ptab th{background:#eee;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+  .ptab td.nm{text-align:left;font-weight:600}
+  .ptab td.nm span{display:block;font-weight:400;color:#555;font-size:10px}
+  .ptab td.off{color:#777}
+  .ptab .duty{background:#f4f4f4;font-size:10px;font-weight:700}
+  .pleg{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px;font-size:10px;color:#333;border-top:1px solid #bbb;padding-top:8px}
+  .pleg b{border:1px solid #333;border-radius:3px;padding:0 5px;margin-right:5px;font-size:10px}
+  .pchg{margin-top:12px;border-top:1px solid #bbb;padding-top:8px;font-size:10px;color:#222}
+  .pchg b{display:block;text-transform:uppercase;letter-spacing:.06em;font-size:9.5px;color:#555;margin-bottom:4px}
+  .pchg li{margin-left:14px}
+  /* swap proposal card */
+  .swap{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;background:rgba(10,12,18,.45);border:1px solid var(--line);border-radius:11px;padding:12px 14px}
+  .swap .sd{text-align:center}
+  .swap .sd b{display:block;font-size:12.5px;font-weight:600}
+  .swap .sd span{font-size:11px;color:var(--faint)}
+  .swx{color:var(--indigo);font-size:16px}
+  .prov{font-size:11px;color:var(--faint);border-left:2px solid var(--line2);padding-left:10px;line-height:1.55}
+  .prov b{color:var(--dim);font-weight:500}
+  .steps{display:flex;gap:0;align-items:center;font-size:11px;color:var(--faint)}
+  .stp{padding:3px 10px;border:1px solid var(--line);border-radius:99px}
+  .stp.on{border-color:var(--indigo);color:var(--text);background:rgba(129,140,248,.12)}
+  .stp.done{border-color:rgba(52,211,153,.4);color:var(--ok)}
+  .stpar{padding:0 6px;color:var(--faint)}
 </style>
 </head><body>
 
-<div class="lead"><b>Workforce — the gold design, for the owner's approval.</b> Who works here, as what, where, and when. Five sections, one primary action per screen, and three marks the whole app is built from: a <span class="sh m"><i></i>shift</span> chip in three tints, a <span class="sh lv">struck day</span> for leave, and the <span class="mod">MOD</span> ribbon for the Manager on Duty — a duty for the day, never a change of role. Frames are the desktop window at 1220 wide; the rail, sheet, dialog and confirmation rule are the platform's (ADR 0106), unchanged.</div>
+<div class="lead"><b>Workforce — the gold design, revision 2, for the owner's read.</b> Revision 1 was drawn from a chapter written before the owner had been asked anything. Eight subjects of the comparison study and the rulings <b>WF-Q1–Q16</b> later, six frames change and four surfaces are new. Three marks the app is built from, and two of them have changed: a shift chip that renders <b>from the property's own catalogue</b> — its colour, its short code (<span class="sh d" style="--c:#7dd3fc"><i></i>M</span> <span class="sh d" style="--c:#818cf8"><i></i>A</span> <span class="sh d" style="--c:#fbbf24"><i></i>SB</span>) — a <span class="sh lv">struck day</span> for leave, and the <span class="mod">MOD</span> duty, now drawn as a <b>span that crosses midnight</b> rather than a name in a day cell. Frames are the desktop window at 1220 wide; rail, sheet, dialog and the confirmation rule are the platform's (ADR 0106), unchanged.</div>
 
-<!-- 1 · My Schedule -->
-<h1 style="margin-top:18px">1 · <b>My Schedule</b> — the default landing. A staff member opens Workforce and sees their own month first: shifts, leave, and the day they hold MOD</h1>
+<div class="not"><b>What changed, and what ruled it.</b> <b>Frame 2</b> — the chip is data, not three hardcoded classes (<b>WF-Q11</b>, N2); the MOD ribbon is a timeline (<b>WF-Q8</b>); the zone appears (<b>WF-Q7</b>). <b>Frame 1</b> gains its first action (<b>WF-Q9</b>). <b>Frame 4</b> becomes two kinds of queue. <b>Frame 5</b> stops being a month of day cells. <b>Frame 6</b> gains the zone. <b>Frames 7–11 are new</b>: attendance (<b>WF-Q10</b>), the property's workforce policy (<b>WF-Q11/Q13/Q14</b>), <b>creating a shift</b> (owner, 2026-08-31 — the catalogue had no page of its own), the month-end sheet (<b>§3.7</b>), and the printed week (<b>N1</b>, <b>SHELL-Q23</b>). <b>Frame 1 was renamed and re-aimed</b> on the owner's reading that Workforce is not accessed by every staff member — a scope correction rather than a label, and the closing note reports what it moves. Nothing here is drawn on a guess: every frame's caption names the ruling it implements.</div>
+
+<!-- 1 · Staff Schedule -->
+<h1 style="margin-top:38px">1 · <b>Staff Schedule</b> — one person's month, chosen from a picker. Workforce is a <i>manager's</i> application, not one every staff member opens</h1>
 <div class="win" style="height:640px">
   <div class="rail">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri on">◫ &nbsp;My Schedule</div>
+    <div class="ri on">◫ &nbsp;Staff Schedule</div>
     <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave <span class="cnt">1 pending</span></div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
     <div class="ri">★ &nbsp;Duty Roster</div>
     <div class="ri">◎ &nbsp;People</div>
-    <div class="me"><b>Anjali Menon</b>Front Office · Receptionist<br>Reports to Priya Thomas</div>
-  </div>
-  <div class="main">
-    <div class="head">
-      <div><div class="ht">My Schedule</div><div class="hsub">August 2026 · Backwater Grand, Kochi</div></div>
-      <div class="grow"></div>
-      <div class="btn2">‹ &nbsp;July</div><div class="btn2">September &nbsp;›</div>
-      <div class="create">◷ &nbsp;Request leave</div>
-    </div>
-    <div class="body">
-      <div class="strip">
-        <div class="stat"><b>Morning · 07:00–15:00</b><span>Today, Fri 28 Aug — and you are <span style="color:var(--duty)">MOD</span> today</span></div>
-        <div class="stat"><b>5 shifts</b><span>this week · Sunday off</span></div>
-        <div class="stat"><b>Casual 6 · Earned 12</b><span>leave remaining · 1 request pending</span></div>
-      </div>
-      <div class="month">
-        <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
-        <div class="cells">
-          <div class="c dimmed"><div class="d">27</div></div><div class="c dimmed"><div class="d">28</div></div><div class="c dimmed"><div class="d">29</div></div><div class="c dimmed"><div class="d">30</div></div><div class="c dimmed"><div class="d">31</div></div>
-          <div class="c we"><div class="d">1</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">2</div><span class="sh off">Week-off</span></div>
-          <div class="c"><div class="d">3</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">4</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">5</div><span class="sh a"><i></i>Afternoon</span></div><div class="c"><div class="d">6</div><span class="sh a"><i></i>Afternoon</span></div><div class="c"><div class="d">7</div><span class="sh a"><i></i>Afternoon</span></div><div class="c we"><div class="d">8</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">9</div><span class="sh off">Week-off</span></div>
-          <div class="c"><div class="d">10</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">11</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">12</div><span class="sh lv">Casual leave</span></div><div class="c"><div class="d">13</div><span class="sh lv">Casual leave</span></div><div class="c"><div class="d">14</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">15</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">16</div><span class="sh off">Week-off</span></div>
-          <div class="c"><div class="d">17</div><span class="sh n"><i></i>Night</span></div><div class="c"><div class="d">18</div><span class="sh n"><i></i>Night</span></div><div class="c"><div class="d">19</div><span class="sh n"><i></i>Night</span></div><div class="c"><div class="d">20</div><span class="sh off">Week-off</span></div><div class="c"><div class="d">21</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">22</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">23</div><span class="sh off">Week-off</span></div>
-          <div class="c"><div class="d">24</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">25</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">26</div><span class="sh m"><i></i>Morning</span></div><div class="c"><div class="d">27</div><span class="sh a"><i></i>Afternoon</span></div><div class="c today"><div class="d">28</div><span class="sh m"><i></i>Morning</span><span class="mod">★ MOD</span></div><div class="c we"><div class="d">29</div><span class="sh m"><i></i>Morning</span></div><div class="c we"><div class="d">30</div><span class="sh off">Week-off</span></div>
-          <div class="c"><div class="d">31</div><span class="sh m"><i></i>Morning</span></div><div class="c dimmed"><div class="d">1</div></div><div class="c dimmed"><div class="d">2</div></div><div class="c dimmed"><div class="d">3</div><span class="sh lv pend">Casual · requested</span></div><div class="c dimmed"><div class="d">4</div><span class="sh lv pend">Casual · requested</span></div><div class="c dimmed we"><div class="d">5</div></div><div class="c dimmed we"><div class="d">6</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cap"><b>Reads at 7 a.m.</b> The summary strip answers the only three questions a person has — what am I on today, what is my week, what leave do I have left. A pending request shows as a dashed strike; an approved one as a solid strike. The MOD badge sits in the day, not in a separate list. No settings, no filters — this screen has nothing to configure.</div>
-
-<!-- 2 · Team Rota -->
-<h1>2 · <b>Team Rota</b> — the calendar view. One department, one week, people down and days across; the MOD ribbon runs above every day; a click on a cell assigns</h1>
-<div class="win" style="height:620px">
-  <div class="rail">
-    <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
-    <div class="ri on">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave <span class="cnt">3 to approve</span></div>
-    <div class="ri">★ &nbsp;Duty Roster</div>
-    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
     <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
     <div class="head">
-      <div><div class="ht">Team Rota</div><div class="hsub">6 people · 27 shifts this week · 1 on leave</div></div>
+      <div><div class="ht">Staff Schedule</div><div class="hsub">August 2026 · 22 shifts · 2 days leave · MOD on the 28th</div></div>
+      <div class="sel" style="margin-left:14px;min-width:200px"><span style="display:flex;gap:8px;align-items:center"><span class="av" style="width:21px;height:21px;font-size:9.5px">AM</span>Anjali Menon</span> <span>▾</span></div>
+      <div class="grow"></div>
+      <div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">August 2026</div><div class="btn2">›</div>
+      <div class="btn2">⇄ &nbsp;Propose swap for Anjali</div>
+      <div class="create">＋ Request leave for Anjali</div>
+    </div>
+    <div class="body">
+      <div class="strip">
+        <div class="stat"><b>22</b><span>shifts this month</span></div>
+        <div class="stat"><b>2</b><span>days leave taken</span></div>
+        <div class="stat"><b>1</b><span>MOD duty · Fri 28, 20:00–08:00</span></div>
+        <div class="stat"><b>4 <span style="font-size:11px;color:var(--faint)">of 8</span></b><span>casual leave remaining</span></div>
+      </div>
+      <div class="month">
+        <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
+        <div class="cells">
+          <div class="c dimmed"><span class="d">28</span></div>
+          <div class="c dimmed"><span class="d">29</span></div>
+          <div class="c dimmed"><span class="d">30</span></div>
+          <div class="c dimmed"><span class="d">31</span></div>
+          <div class="c"><span class="d">1</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c we"><span class="d">2</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c we"><span class="d">3</span><span class="sh off">OFF</span></div>
+
+          <div class="c"><span class="d">4</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">5</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">6</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">7</span><span class="sh lv">Casual</span></div>
+          <div class="c"><span class="d">8</span><span class="sh lv">Casual</span></div>
+          <div class="c we"><span class="d">9</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c we"><span class="d">10</span><span class="sh off">OFF</span></div>
+
+          <div class="c"><span class="d">11</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c"><span class="d">12</span><span class="sh d" style="--c:#fbbf24"><i></i>SB</span></div>
+          <div class="c"><span class="d">13</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c"><span class="d">14</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c"><span class="d">15</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c we"><span class="d">16</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c we"><span class="d">17</span><span class="sh off">OFF</span></div>
+
+          <div class="c"><span class="d">18</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">19</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">20</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">21</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c"><span class="d">22</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c we"><span class="d">23</span><span class="sh off">OFF</span></div>
+          <div class="c we"><span class="d">24</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+
+          <div class="c"><span class="d">25</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c"><span class="d">26</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c"><span class="d">27</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
+          <div class="c today"><span class="d">28</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span><span class="mod">MOD 20:00→08:00</span></div>
+          <div class="c"><span class="d">29</span><span class="sh off">OFF</span><span class="mod" style="opacity:.55">…08:00</span></div>
+          <div class="c we"><span class="d">30</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+          <div class="c we"><span class="d">31</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
+        </div>
+      </div>
+      <div class="legend"><b>This property's shifts</b>
+        <span class="lg"><span class="sh d" style="--c:#7dd3fc"><i></i>M</span>Morning <em>07:00–15:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#818cf8"><i></i>A</span>Afternoon <em>15:00–23:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#c084fc"><i></i>N</span>Night <em>23:00–07:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#fbbf24"><i></i>SB</span>Split — Banquet <em>10–14, 18–22</em></span>
+        <span class="lg"><span class="sh off">OFF</span>Week-off</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Renamed, and re-aimed — owner, 2026-08-31: <i>"this is not access by every staff."</i></b> Revision 1 called this <i>My Schedule</i> and described it as <i>"a staff member opens Workforce and sees their own life first"</i>. That assumed a per-staff application, and Workforce is not one: it is a <b>manager and HR application</b>, so the frame is <b>Staff Schedule</b> with a <b>picker</b> — a supervisor looks up whoever they need. The actions read <b>for Anjali</b>, not <i>mine</i>, and that is not a wording change: it makes the supervisor-on-behalf path (<b>WF-Q9</b>(b)) the one the frame actually offers, with <code style="color:var(--dim)">entered_by</code> recorded on everything it raises. <b>The MOD duty crosses midnight on the 28th</b> and is drawn as such: the badge names its span, and the 29th carries the tail at reduced weight, because a duty that runs 20:00→08:00 genuinely belongs to two dates (<b>WF-Q8</b>). <b>Week-off is a shift, not leave</b> — an <span class="sh off">OFF</span> entry in the property's own catalogue, with no request and no balance (<b>WF-Q12</b>). The legend is not decoration: it is what makes the short codes legible, and it is the same legend the printed week carries (frame 10).</div>
+
+<!-- 2 · Team Rota -->
+<h1>2 · <b>Team Rota</b> — three changes in one frame: the chip is data, the MOD ribbon is a timeline, and the zone is visible</h1>
+<div class="win" style="height:660px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri on">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Team Rota</div><div class="hsub">6 people · 27 shifts · 1 on leave · 1 slot uncovered</div></div>
       <div class="sel" style="margin-left:14px">Front Office <span>▾</span></div>
       <div class="grow"></div>
-      <div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Month</span></div><div class="btn2">›</div>
+      <div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Week</span></div><div class="btn2">›</div>
       <div class="btn2">⧉ &nbsp;Copy last week</div>
       <div class="btn2">⇄ &nbsp;Swap</div>
+      <div class="btn2">⎙ &nbsp;Print</div>
       <div class="create">＋ Assign shift</div>
     </div>
     <div class="body">
       <div class="rota">
         <div class="rrow hd"><div></div><div><span class="dn">Mon</span><span class="dd">24</span></div><div><span class="dn">Tue</span><span class="dd">25</span></div><div><span class="dn">Wed</span><span class="dd">26</span></div><div><span class="dn">Thu</span><span class="dd">27</span></div><div class="today"><span class="dn">Fri</span><span class="dd">28</span></div><div><span class="dn">Sat</span><span class="dd">29</span></div><div><span class="dn">Sun</span><span class="dd">30</span></div></div>
-        <div class="rrow duty"><div>★ MOD</div><div><span class="mod">Priya T.</span></div><div><span class="mod">Priya T.</span></div><div><span class="mod">Rahul N. · SEC</span></div><div><span class="mod">Priya T.</span></div><div><span class="mod">Anjali M.</span></div><div><span class="mod">Rahul N. · SEC</span></div><div><span class="mod" style="opacity:.45">—</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">PT</div><div><b>Priya Thomas <span class="crown">★ head</span></b><span>Supervisor</span></div></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh off">Off</span></div><div><span class="sh off">Off</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">AM</div><div><b>Anjali Menon</b><span>Receptionist</span></div></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div class="cell on"><span class="sh a"><i></i>A</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh off">Off</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">VD</div><div><b>Vishnu Das</b><span>Night auditor</span></div></div><div><span class="sh n"><i></i>N</span></div><div><span class="sh n"><i></i>N</span></div><div><span class="sh n"><i></i>N</span></div><div><span class="sh n"><i></i>N</span></div><div><span class="sh n"><i></i>N</span></div><div><span class="sh off">Off</span></div><div><span class="sh n"><i></i>N</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">SI</div><div><b>Sneha Iyer</b><span>Receptionist</span></div></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh lv">Sick</span></div><div><span class="sh lv">Sick</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh off">Off</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">JK</div><div><b>Joseph Kurian</b><span>Bell captain</span></div></div><div><span class="sh off">Off</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh m"><i></i>M</span></div><div><span class="sh m"><i></i>M</span></div></div>
-        <div class="rrow"><div class="who"><div class="av">RR</div><div><b>Rani Rajan</b><span>Guest relations</span></div></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh off">Off</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="sh a"><i></i>A</span></div><div><span class="empty">＋</span></div></div>
+
+        <div class="tl">
+          <div class="tlgrid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+          <div class="tllab">★ MOD</div>
+          <div class="bars">
+            <div class="bar" style="left:4.76%;width:7.14%"><b>Priya T.</b></div>
+            <div class="bar" style="left:11.90%;width:7.14%"><b>Rahul N.</b><em>SEC</em></div>
+            <div class="bar" style="left:19.05%;width:7.14%"><b>Priya T.</b></div>
+            <div class="bar" style="left:26.19%;width:7.14%"><b>Rahul N.</b><em>SEC</em></div>
+            <div class="bar" style="left:33.33%;width:7.14%"><b>Anjali M.</b></div>
+            <div class="bar" style="left:40.48%;width:7.14%"><b>Vishnu D.</b></div>
+            <div class="bar" style="left:47.62%;width:7.14%"><b>Priya T.</b></div>
+            <div class="bar" style="left:54.76%;width:7.14%"><b>Rahul N.</b><em>SEC</em></div>
+            <div class="bar" style="left:61.90%;width:7.14%"><b>Priya T.</b></div>
+            <div class="bar" style="left:69.05%;width:7.14%"><b>Anjali M.</b><em>20:00→08:00</em></div>
+            <div class="bar" style="left:76.19%;width:7.14%"><b>Vishnu D.</b></div>
+            <div class="bar gap" style="left:83.33%;width:7.14%">no MOD</div>
+            <div class="bar" style="left:90.48%;width:7.14%"><b>Priya T.</b></div>
+          </div>
+        </div>
+
+        <div class="rrow"><div class="who"><div class="av">PT</div><div><b>Priya Thomas <span class="crown">★ head</span></b><span>Supervisor · <span class="zn">Zone 1</span></span></div></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh off">OFF</span></div><div><span class="sh off">OFF</span></div></div>
+        <div class="rrow"><div class="who"><div class="av">AM</div><div><b>Anjali Menon</b><span>Receptionist · <span class="zn">Zone 3</span></span></div></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div class="cell on"><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh off">OFF</span></div></div>
+        <div class="rrow"><div class="who"><div class="av">VD</div><div><b>Vishnu Das</b><span>Night auditor · <span class="zn">Zone 1</span></span></div></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div><span class="sh off">OFF</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div></div>
+        <div class="rrow"><div class="who"><div class="av">SI</div><div><b>Sneha Iyer</b><span>Receptionist · <span class="zn">Zone 2</span></span></div></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh lv">Sick</span></div><div><span class="sh lv">Sick</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh off">OFF</span></div></div>
+        <div class="rrow"><div class="who"><div class="av">JK</div><div><b>Joseph Kurian</b><span>Bell captain · <span class="zn">Zone 1</span></span></div></div><div><span class="sh off">OFF</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#fbbf24"><i></i>SB</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div></div>
+        <div class="rrow"><div class="who"><div class="av">RR</div><div><b>Rani Rajan</b><span>Guest relations · <span class="zn">Zone 2</span></span></div></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh off">OFF</span></div><div style="background:rgba(248,113,113,.06)"><span class="sh lv pend">gap — cover?</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div><span class="empty">＋</span></div></div>
+      </div>
+      <div class="legend"><b>This property's shifts</b>
+        <span class="lg"><span class="sh d" style="--c:#7dd3fc"><i></i>M</span>Morning <em>07:00–15:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#818cf8"><i></i>A</span>Afternoon <em>15:00–23:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#c084fc"><i></i>N</span>Night <em>23:00–07:00</em></span>
+        <span class="lg"><span class="sh d" style="--c:#fbbf24"><i></i>SB</span>Split — Banquet <em>10–14, 18–22</em></span>
+        <span class="lg"><span class="sh d" style="--c:#34d399"><i></i>G</span>General <em>09:00–18:00</em></span>
+        <span class="lg"><span class="sh off">OFF</span>Week-off</span>
+        <span class="lg" style="margin-left:auto"><span class="ro">edit a shift → effective forward only</span></span>
       </div>
     </div>
-    <div class="pop" style="left:520px;top:236px">
+    <div class="pop" style="left:520px;top:300px">
       <div class="pt">Anjali Menon · Thu 27 Aug</div>
-      <div class="ps">Posted to Front Office · one shift per day</div>
+      <div class="ps">Front Office · Zone 3 · one shift per day</div>
       <div class="opts">
-        <div class="opt"><span>Morning</span><small>07:00 – 15:00</small></div>
-        <div class="opt on"><span>Afternoon</span><small>15:00 – 23:00</small></div>
-        <div class="opt"><span>Night</span><small>23:00 – 07:00</small></div>
-        <div class="opt"><span>Custom hours…</span><small></small></div>
-        <div class="opt"><span>Week-off</span><small></small></div>
+        <div class="opt"><span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span> &nbsp;Morning</span><small>07:00 – 15:00</small></div>
+        <div class="opt on"><span><span class="sh d" style="--c:#818cf8"><i></i>A</span> &nbsp;Afternoon</span><small>15:00 – 23:00</small></div>
+        <div class="opt"><span><span class="sh d" style="--c:#c084fc"><i></i>N</span> &nbsp;Night</span><small>23:00 – 07:00</small></div>
+        <div class="opt"><span><span class="sh d" style="--c:#fbbf24"><i></i>SB</span> &nbsp;Split — Banquet</span><small>10–14, 18–22</small></div>
+        <div class="opt"><span><span class="sh d" style="--c:#34d399"><i></i>G</span> &nbsp;General</span><small>09:00 – 18:00</small></div>
+        <div class="opt"><span><span class="sh off">OFF</span> &nbsp;Week-off</span><small></small></div>
+        <div class="opt"><span>Custom hours…</span><small>this day only</small></div>
       </div>
-      <div class="pf"><div class="ghost" style="padding:7px 14px">Clear</div><div class="create" style="box-shadow:none;padding:7px 16px">Save</div></div>
+      <div class="hint">The property's own catalogue — <b style="color:var(--dim)">Policy → Shifts</b> adds to this list.</div>
+      <div class="pf" style="margin-top:12px"><div class="ghost" style="padding:7px 14px">Clear</div><div class="create" style="box-shadow:none;padding:7px 16px">Save</div></div>
     </div>
   </div>
 </div>
-<div class="cap"><b>Simple beats clever.</b> Shift codes are the property's three (M · A · N, per WF-Q4) plus custom hours; a cell holds one chip. Leave placed by the Leave section shows here struck and cannot be overwritten from the rota — the rota reads leave, it never edits it. <b>The MOD ribbon</b> is the owner's scenario made visible: on Wednesday and Saturday the Manager on Duty is Rahul Nair from <b>Security</b> — shown in Front Office's rota because MOD is property-wide, with his department beside his name. <b>Copy last week</b> fills empty cells only; <b>Swap</b> picks two people and exchanges their week. There is no "publish" step — a saved rota is the rota.</div>
+<div class="cap"><b>Three rulings, one frame.</b> <b>(1) The chip is data.</b> Revision 1 drew three hardcoded tints for three fixed codes; the catalogue is now the property's own, of any length, and each entry carries <b>name + typed short code + colour</b>. The popover is that catalogue, not a fixed list of five — and <i>Custom hours…</i> survives as the one-off. The short code is typed by the property, never derived: a derived initial collides the day <i>Morning</i> meets <i>Mid-shift</i>, and a collision in a cell is two shifts that look identical on paper (<b>N2</b>). <b>(2) The MOD ribbon is a timeline.</b> A day cell cannot hold a 20:00→08:00 duty, so the ribbon stopped being cells: bars sit on a continuous week and straddle midnight where the duty does. <b>Friday shows two MODs</b> — Priya's day and Anjali's night — which the old one-name-per-column shape could not express. Saturday night is drawn as an honest dashed <b>no MOD</b> rather than left blank (<b>WF-Q8</b>). <b>(3) The zone is on the posting</b> and reads under the person, because <i>"Anita has zone 3"</i> is incomplete without the department that gives it meaning (<b>WF-Q7</b>). <b>A gap is a mark on a cell</b> — Rani's Wednesday, vacated by leave — and deliberately <b>not</b> a computed staffing shortfall, which would need a headcount model nothing in eight subjects asked for.</div>
 
 <!-- 3 · Leave · my requests -->
-<h1>3 · <b>Leave — My requests</b> — a request is three fields, and the balance is on the sheet where the decision is made</h1>
-<div class="win" style="height:560px">
+<h1>3 · <b>Leave — My requests</b> — three fields, the balance on the sheet where the decision is made, and a balance that survives a minus sign</h1>
+<div class="win" style="height:580px">
   <div class="rail">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
     <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri on">◷ &nbsp;Leave</div>
+    <div class="ri on">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
     <div class="ri">★ &nbsp;Duty Roster</div>
     <div class="ri">◎ &nbsp;People</div>
-    <div class="me"><b>Anjali Menon</b>Front Office · Receptionist</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Leave</div><div class="hsub">Balances reset 1 April · Backwater Grand, Kochi</div></div><div class="grow"></div><div class="create">◷ &nbsp;Request leave</div></div>
-    <div class="tabs"><div class="tab on">My requests</div><div class="tab">Approvals</div></div>
+    <div class="head"><div><div class="ht">Leave &amp; Requests</div><div class="hsub">Requests · 1 pending</div></div><div class="grow"></div><div class="create">＋ Request leave</div></div>
+    <div class="tabs"><div class="tab on">Requests</div><div class="tab">Approvals <span class="cnt">3</span></div></div>
     <div class="body" style="padding-top:14px">
       <div class="strip">
-        <div class="stat"><b>6 <span style="color:var(--faint);font-weight:400;font-size:12px">of 12</span></b><span>Casual</span></div>
-        <div class="stat"><b>4 <span style="color:var(--faint);font-weight:400;font-size:12px">of 6</span></b><span>Sick</span></div>
-        <div class="stat"><b>12 <span style="color:var(--faint);font-weight:400;font-size:12px">of 15</span></b><span>Earned</span></div>
-        <div class="stat"><b>1</b><span>Comp-off</span></div>
+        <div class="stat"><b>4 <span style="font-size:11px;color:var(--faint)">of 8</span></b><span>Casual · accrues 2 / month</span></div>
+        <div class="stat"><b>6 <span style="font-size:11px;color:var(--faint)">of 12</span></b><span>Sick</span></div>
+        <div class="stat"><b style="color:var(--warn)">−1 <span style="font-size:11px;color:var(--faint)">of 15</span></b><span>Earned · approved overdraw</span></div>
+        <div class="stat"><b>2</b><span>Comp-off · granted by HR</span></div>
       </div>
       <div class="card">
-        <div class="lrow hd"><div>Request</div><div>Type</div><div>Days</div><div>Status</div></div>
-        <div class="lrow"><div>3 – 4 Sep 2026<span class="sub">Cousin's wedding in Thrissur</span></div><div>Casual</div><div>2</div><div><span class="pill warn">Requested</span></div></div>
-        <div class="lrow"><div>12 – 13 Aug 2026<span class="sub">—</span></div><div>Casual</div><div>2</div><div><span class="pill ok">Approved</span></div></div>
-        <div class="lrow"><div>19 Jun 2026<span class="sub">Fever</span></div><div>Sick</div><div>1</div><div><span class="pill ok">Approved</span></div></div>
-        <div class="lrow"><div>2 – 6 May 2026<span class="sub">Family trip</span></div><div>Earned</div><div>5</div><div><span class="pill bad2">Declined</span><span class="sub">Priya: peak week, ask again for the 9th?</span></div></div>
+        <div class="lrow hd"><div>Request</div><div>Dates</div><div>Days</div><div>Status</div></div>
+        <div class="lrow"><div>Casual leave<span class="sub">Family function — will be back Monday</span></div><div>7 – 8 Sep</div><div>2</div><div><span class="pill warn">Requested</span></div></div>
+        <div class="lrow"><div>Earned leave<span class="sub">Approved with the balance overdrawn by 1</span></div><div>18 – 22 Aug</div><div>5</div><div><span class="pill ok">Approved</span></div></div>
+        <div class="lrow"><div>Sick leave<span class="sub">—</span></div><div>3 Aug</div><div>1</div><div><span class="pill ok">Approved</span></div></div>
+        <div class="lrow"><div>Casual leave<span class="sub">Withdrawn before the decision — the balance was credited back</span></div><div>11 Jul</div><div>1</div><div><span class="pill neu">Cancelled</span></div></div>
       </div>
     </div>
     <div class="scrim"></div>
     <div class="sheet">
-      <div class="sh2"><div class="st">Request leave</div><div class="ss">Goes to Priya Thomas, your reporting manager.</div></div>
+      <div class="sh2"><div class="st">Request leave</div><div class="ss">Raised by Priya Thomas</div></div>
       <div class="sb">
-        <label>Leave type</label>
-        <div class="in sel2">Casual &nbsp;<span style="color:var(--faint);font-size:12px">6 remaining</span><span style="color:var(--faint)">▾</span></div>
-        <div class="two"><div><label>From</label><input class="in f" value="Thu 3 Sep 2026"></div><div><label>To</label><input class="in" value="Fri 4 Sep 2026"></div></div>
-        <div class="hint">2 days · Casual balance after approval: <b style="color:var(--text)">4</b></div>
-        <label>Note <span style="color:var(--faint);font-weight:400">optional</span></label>
-        <input class="in" value="Cousin's wedding in Thrissur">
-        <div class="hint w">⚠ Sneha Iyer is already away on 3 Sep. Your manager will see this — you can still ask.</div>
+        <label>For</label><div class="in sel2"><span style="display:flex;gap:8px;align-items:center"><span class="av" style="width:21px;height:21px;font-size:9.5px">JK</span>Joseph Kurian</span> <span style="color:var(--faint)">▾</span></div>
+        <div class="hint">Recorded as <b style="color:var(--dim)">raised by Priya Thomas on behalf of Joseph Kurian</b>. The record never claims Joseph did it himself.</div>
+        <label>Type</label><div class="in sel2">Earned leave <span style="color:var(--faint)">▾</span></div>
+        <div class="hint w">⚠ &nbsp;Balance is <b>−1 of 15</b>. The request can still be made and approved — your manager sees the balance on the decision.</div>
+        <label>Dates</label>
+        <div class="two"><div class="in f">14 Sep 2026</div><div class="in">16 Sep 2026</div></div>
+        <div class="hint">3 days. 2 of your team are already away on the 15th.</div>
+        <label>Note</label><div class="in" style="height:76px;color:var(--faint)">Brother's wedding — travelling on the 13th.</div>
       </div>
-      <div class="sf"><div class="ghost">Cancel</div><div class="create" style="box-shadow:none">Request leave</div></div>
+      <div class="sf"><div class="ghost">Cancel</div><div class="create">Raise request</div></div>
     </div>
   </div>
 </div>
-<div class="cap"><b>Warn and allow</b> (WF-Q5): an exhausted balance or a crowded day is shown on the sheet, never a wall. The declined row carries the manager's note where the requester will read it, not in a notification they have already dismissed. Leave types are the property's configured list, seeded Casual · Sick · Earned · Comp-off · Week-off.</div>
+<div class="cap"><b>Warn, never block — and the frame is drawn against the negative it permits.</b> <b>WF-Q5</b> is warn-and-allow, and a ledger debited on approval means an overdrawn balance is a <i>real state</i>, not an error: it reads <b>−1 of 15, approved overdraw</b>, in amber, and the request sheet says plainly that the request can still be made. Revision 1 drew the balance as a plain positive number and had never been tested against a minus sign. <b>The balance is a ledger</b>: accrual credits it, approval debits it, cancelling an approved request credits it back — the row at the bottom says so, because a debit with no matching credit turns a cancellation into a silent forfeit. <b>Accrual is a rate, not an annual grant</b> — <i>2 / month</i>, the owner's own policy, which an annual allowance cannot express (<b>WF-Q11</b>). <b>Four types, not five</b>: Week-off left for the shift catalogue (<b>WF-Q12</b>), and comp-off is granted by HR rather than accrued (<b>WF-Q13</b>).</div>
 
-<!-- 4 · Leave · approvals -->
-<h1>4 · <b>Leave — Approvals</b> — the manager's queue, with the team's calendar for those dates beside the decision; approving confirms by naming the consequence</h1>
-<div class="win" style="height:600px">
+<!-- 4 · Approvals -->
+<h1>4 · <b>Approvals</b> — one queue, two kinds: leave requests and swap proposals, both landing with the manager the posting resolves</h1>
+<div class="win" style="height:610px">
   <div class="rail">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
     <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri on">◷ &nbsp;Leave <span class="cnt">3</span></div>
+    <div class="ri on">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
     <div class="ri">★ &nbsp;Duty Roster</div>
     <div class="ri">◎ &nbsp;People</div>
-    <div class="me"><b>Meera Joseph</b>Housekeeping · Supervisor<br>Head of Housekeeping</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Leave</div><div class="hsub">3 requests waiting for you</div></div></div>
-    <div class="tabs"><div class="tab">My requests</div><div class="tab on">Approvals <span class="cnt">3</span></div></div>
+    <div class="head"><div><div class="ht">Approvals</div><div class="hsub">3 waiting · 2 leave · 1 swap</div></div><div class="grow"></div><div class="sel">All kinds <span>▾</span></div></div>
+    <div class="tabs"><div class="tab">Requests</div><div class="tab on">Approvals <span class="cnt">3</span></div></div>
     <div class="body" style="padding-top:14px">
       <div class="split">
         <div class="card" style="align-self:start">
-          <div class="lrow on" style="grid-template-columns:1fr 90px"><div class="who"><div class="av">SK</div><div><b>Suresh Kumar</b><span>2 – 3 Sep · Casual · 2 days</span></div></div><div><span class="pill warn">Waiting</span></div></div>
-          <div class="lrow" style="grid-template-columns:1fr 90px"><div class="who"><div class="av">LP</div><div><b>Lakshmi Pillai</b><span>7 Sep · Comp-off · 1 day</span></div></div><div><span class="pill warn">Waiting</span></div></div>
-          <div class="lrow" style="grid-template-columns:1fr 90px"><div class="who"><div class="av">BN</div><div><b>Biju Nair</b><span>14 – 18 Sep · Earned · 5 days</span></div></div><div><span class="pill warn">Waiting</span></div></div>
-          <div class="lrow" style="grid-template-columns:1fr 90px;opacity:.55"><div class="who"><div class="av">AJ</div><div><b>Asha John</b><span>25 Aug · Sick · 1 day</span></div></div><div><span class="pill ok">Approved</span></div></div>
+          <div class="lrow hd" style="grid-template-columns:1fr 96px 92px"><div>Waiting on you</div><div>Kind</div><div>Dates</div></div>
+          <div class="lrow on" style="grid-template-columns:1fr 96px 92px"><div>Anjali Menon &amp; Sneha Iyer<span class="sub">Swap — accepted by Sneha, awaiting you</span></div><div><span class="pill neu">Swap</span></div><div>27 Aug</div></div>
+          <div class="lrow" style="grid-template-columns:1fr 96px 92px"><div>Joseph Kurian<span class="sub">Casual · 2 days</span></div><div><span class="pill neu">Leave</span></div><div>7–8 Sep</div></div>
+          <div class="lrow" style="grid-template-columns:1fr 96px 92px"><div>Rani Rajan<span class="sub">Earned · 4 days · balance 1 of 15</span></div><div><span class="pill neu">Leave</span></div><div>12–15 Sep</div></div>
         </div>
         <div class="detail">
-          <div class="who"><div class="av" style="width:36px;height:36px">SK</div><div><b style="font-size:15px">Suresh Kumar</b><span>Room attendant · Housekeeping · reports to you</span></div></div>
-          <div class="kv"><span>Dates</span>Wed 2 – Thu 3 Sep 2026 · 2 days</div>
-          <div class="kv"><span>Type · balance</span>Casual · 5 → 3 after approval</div>
-          <div class="kv"><span>Note</span>Temple festival at home</div>
-          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-top:4px">Housekeeping on those days</div>
-          <div class="mini">
-            <div class="h"></div><div class="h">Tue 1</div><div class="h">Wed 2</div><div class="h">Thu 3</div><div class="h">Fri 4</div>
-            <div>Suresh K.</div><div>M</div><div class="ask">asks</div><div class="ask">asks</div><div>M</div>
-            <div>Lakshmi P.</div><div>M</div><div>M</div><div>M</div><div>M</div>
-            <div>Biju N.</div><div>A</div><div>A</div><div class="away">Earned</div><div class="away">Earned</div>
-            <div>Asha J.</div><div>M</div><div>M</div><div>M</div><div>Off</div>
-            <div>+3 more</div><div>·</div><div>·</div><div>·</div><div>·</div>
+          <div><div style="font-size:15px;font-weight:600">Shift swap · Thursday 27 August</div><div style="color:var(--faint);font-size:12px;margin-top:3px">Proposed by Anjali Menon · accepted by Sneha Iyer</div></div>
+          <div class="steps"><span class="stp done">Proposed</span><span class="stpar">→</span><span class="stp done">Accepted</span><span class="stpar">→</span><span class="stp on">Your approval</span></div>
+          <div class="swap">
+            <div class="sd"><b>Anjali Menon</b><span>Receptionist · Zone 3</span><div style="margin-top:7px"><span class="sh d" style="--c:#818cf8"><i></i>A</span> → <span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div></div>
+            <div class="swx">⇄</div>
+            <div class="sd"><b>Sneha Iyer</b><span>Receptionist · Zone 2</span><div style="margin-top:7px"><span class="sh d" style="--c:#7dd3fc"><i></i>M</span> → <span class="sh d" style="--c:#818cf8"><i></i>A</span></div></div>
           </div>
-          <div class="hint">On Thu 3 Sep Housekeeping would have <b style="color:var(--text)">5 of 7</b> on the rota.</div>
-          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:auto"><div class="ghost">Decline…</div><div class="create" style="box-shadow:none">Approve</div></div>
+          <div class="prov"><b>Anjali proposed it</b> on 24 Aug, 18:40, from My Schedule.<br><b>Sneha accepted</b> on 24 Aug, 19:02. Your approval commits both cells at once.</div>
+          <div class="mini">
+            <div class="h">Thu 27</div><div class="h">Morning</div><div class="h">Afternoon</div><div class="h">Night</div><div class="h">Cover</div>
+            <div>After the swap</div><div>Anjali</div><div>Sneha</div><div>Vishnu</div><div>—</div>
+            <div>Also on duty</div><div>Priya</div><div>Joseph</div><div>—</div><div>—</div>
+          </div>
+          <div class="hint">Approving writes <b style="color:var(--dim)">both</b> rota cells together. Declining leaves the rota untouched and tells both people.</div>
+          <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:auto"><div class="ghost">Decline…</div><div class="create">Approve swap</div></div>
         </div>
       </div>
     </div>
-    <div class="scrim"></div>
-    <div class="dlg">
-      <div class="dt">Approve leave for Suresh Kumar?</div>
-      <p><b>Wed 2 – Thu 3 Sep, Casual, 2 days.</b> Housekeeping will have 5 of 7 on the rota on the 3rd. His balance becomes 3. He will see this the moment you approve.</p>
-      <div style="display:flex;gap:10px;justify-content:flex-end"><div class="ghost">Cancel</div><div class="create" style="box-shadow:none">Approve leave</div></div>
-    </div>
   </div>
 </div>
-<div class="cap"><b>The decision is informed, not just recorded.</b> The request shows the team's week for those dates with the requester's days marked <span style="color:var(--bad)">asks</span> and anyone already away struck, so the manager never leaves to check the rota. <b>Decline…</b> opens a one-field note that reaches the requester. The confirmation follows ADR 0106 §3 to the letter: the object, the dates, and what the department looks like afterwards.</div>
+<div class="cap"><b>Two kinds, one queue, one approver.</b> <b>WF-Q9</b> made a staff swap an object with a lifecycle, so it needs a decision surface — and it belongs beside leave because both resolve to the same person: <b>the reporting manager when the posting names one, the department head otherwise</b> (a department head's own leave goes to the general manager). One rule, one queue; revision 1's <i>"reporting manager or department head"</i> was two. <b>The accept step is visible and already done.</b> Sneha accepted before Priya ever saw this — <b>a manager's approval must never commit someone who did not agree</b> — and the three-step strip shows exactly where the proposal stands. <b>Provenance is on the card</b>, not in an audit screen: who proposed it, from where, and when the colleague agreed. <b>Approval is atomic</b> — two rota cells change together or neither does, which is the reason a swap could not have been a reshaped leave request.</div>
 
 <!-- 5 · Duty Roster -->
-<h1>5 · <b>Duty Roster</b> — the MOD register. Who holds the duty each day; assign by clicking a day and picking anyone active, from any department</h1>
-<div class="win" style="height:620px">
-  <div class="rail">
-    <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave</div>
-    <div class="ri on">★ &nbsp;Duty Roster</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="me"><b>Thomas George</b>General Manager</div>
-  </div>
-  <div class="main">
-    <div class="head">
-      <div><div class="ht">Duty Roster</div><div class="hsub">Manager on Duty · one per day, property-wide · 3 days unassigned this month</div></div>
-      <div class="grow"></div>
-      <div class="btn2">‹ &nbsp;July</div><div class="btn2">August 2026</div><div class="btn2">September &nbsp;›</div>
-      <div class="create">★ &nbsp;Assign MOD</div>
-    </div>
-    <div class="body">
-      <div class="dstrip">
-        <div class="dday"><div class="d">Mon<b>24</b></div><div class="nm">Priya Thomas<span>Front Office</span></div></div>
-        <div class="dday"><div class="d">Tue<b>25</b></div><div class="nm">Priya Thomas<span>Front Office</span></div></div>
-        <div class="dday"><div class="d">Wed<b>26</b></div><div class="nm">Rahul Nair<span>Security</span></div></div>
-        <div class="dday"><div class="d">Thu<b>27</b></div><div class="nm">Priya Thomas<span>Front Office</span></div></div>
-        <div class="dday today"><div class="d">Fri<b>28</b></div><div class="nm">Anjali Menon<span>Front Office</span></div></div>
-        <div class="dday on"><div class="d">Sat<b>29</b></div><div class="nm">Priya Thomas<span>Front Office</span></div></div>
-        <div class="dday none"><div class="d">Sun<b>30</b></div><div class="nm">Nobody yet</div></div>
-        <div class="dday"><div class="d">Mon<b>31</b></div><div class="nm">Meera Joseph<span>Housekeeping</span></div></div>
-        <div class="dday none" style="opacity:.6"><div class="d">Tue<b>1 Sep</b></div><div class="nm">Nobody yet</div></div>
-        <div class="dday" style="opacity:.6"><div class="d">Wed<b>2</b></div><div class="nm">Rahul Nair<span>Security</span></div></div>
-        <div class="dday" style="opacity:.6"><div class="d">Thu<b>3</b></div><div class="nm">Priya Thomas<span>Front Office</span></div></div>
-        <div class="dday" style="opacity:.6"><div class="d">Fri<b>4</b></div><div class="nm">Deepa Varghese<span>Food &amp; Beverage</span></div></div>
-        <div class="dday none" style="opacity:.6"><div class="d">Sat<b>5</b></div><div class="nm">Nobody yet</div></div>
-        <div class="dday" style="opacity:.6"><div class="d">Sun<b>6</b></div><div class="nm">Thomas George<span>General Manager</span></div></div>
-      </div>
-      <div class="card">
-        <div class="lrow hd" style="grid-template-columns:1fr 1fr 120px"><div>This month</div><div>Days as MOD</div><div></div></div>
-        <div class="lrow" style="grid-template-columns:1fr 1fr 120px"><div class="who"><div class="av">PT</div><div><b>Priya Thomas</b><span>Front Office</span></div></div><div>11</div><div></div></div>
-        <div class="lrow" style="grid-template-columns:1fr 1fr 120px"><div class="who"><div class="av">RN</div><div><b>Rahul Nair</b><span>Security</span></div></div><div>7</div><div></div></div>
-        <div class="lrow" style="grid-template-columns:1fr 1fr 120px"><div class="who"><div class="av">MJ</div><div><b>Meera Joseph</b><span>Housekeeping</span></div></div><div>5</div><div></div></div>
-      </div>
-    </div>
-    <div class="scrim"></div>
-    <div class="sheet">
-      <div class="sh2"><div class="st">Manager on Duty · Sat 29 Aug</div><div class="ss">A duty for the day. The person's posting does not change.</div></div>
-      <div class="sb">
-        <label>Who</label>
-        <div class="in f" style="display:flex;gap:9px;color:var(--faint)">⌕ <span style="color:var(--text)">rah</span></div>
-        <div class="plist">
-          <div class="pp on"><div class="av">RN</div><div><b>Rahul Nair</b><span>Security officer · on Morning shift that day</span></div><span class="dep">SEC</span></div>
-          <div class="pp"><div class="av">RR</div><div><b>Rani Rajan</b><span>Guest relations · on Afternoon shift</span></div><span class="dep">FO</span></div>
-          <div class="pp" style="opacity:.5"><div class="av">RK</div><div><b>Ramesh Kutty</b><span>Cook · on leave that day</span></div><span class="dep">FNB</span></div>
-        </div>
-        <div class="hint">Anyone active at the property can hold the duty — Rahul stays Security; on Saturday he is also the Manager on Duty.</div>
-        <label>Note <span style="color:var(--faint);font-weight:400">optional</span></label>
-        <input class="in" value="Priya at the owners' meeting">
-        <label>Repeat</label>
-        <div class="in sel2">This day only <span style="color:var(--faint)">▾</span></div>
-      </div>
-      <div class="sf"><div class="ghost">Cancel</div><div class="create" style="box-shadow:none">Assign MOD</div></div>
-    </div>
-    <div class="dlg" style="top:46%">
-      <div class="dt">Replace Priya Thomas as MOD on Sat 29 Aug?</div>
-      <p><b>Rahul Nair (Security)</b> becomes Manager on Duty for that day. Priya's posting and shifts are untouched; both will see the change in My Schedule.</p>
-      <div style="display:flex;gap:10px;justify-content:flex-end"><div class="ghost">Keep Priya</div><div class="create" style="box-shadow:none">Replace with Rahul</div></div>
-    </div>
-  </div>
-</div>
-<div class="cap"><b>The owner's exact scenario.</b> Rahul Nair is Security. On Wednesday and Saturday he is also MOD. Nothing about his posting moves; the register says who holds the duty and the calendars show it. The list searches across every department, shows what the person is doing that day (on shift, off, on leave — leave dims but does not forbid), and <b>one MOD per day</b> is kept by the named replace confirm rather than a rule the user has to know. Repeat covers "every Sunday" without a schedule engine. <b>What a MOD may do is WF-Q1 — a planner question.</b> This screen rosters, displays and audits the duty; it attaches no permission, and is drawn so the answer can be added without redrawing.</div>
-
-<!-- 6 · People -->
-<h1>6 · <b>People</b> — postings. Every staff member from Master Data, with where they are posted, as what, and to whom they report</h1>
+<h1>5 · <b>Duty Roster</b> — the register stops being a month of day cells, because a duty that runs 20:00→08:00 does not fit in one</h1>
 <div class="win" style="height:600px">
   <div class="rail">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
     <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave</div>
-    <div class="ri">★ &nbsp;Duty Roster</div>
-    <div class="ri on">◎ &nbsp;People</div>
-    <div class="me"><b>Thomas George</b>General Manager</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri on">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
-      <div><div class="ht">People</div><div class="hsub">42 staff · 39 posted · <span style="color:var(--warn)">3 not yet posted</span></div></div>
-      <div class="sel" style="margin-left:14px">All departments <span>▾</span></div>
-      <div class="grow"></div>
-      <div class="sel" style="min-width:190px;color:var(--faint)">⌕ Find a person… <span></span></div>
-      <div class="create">＋ Post to department</div>
-    </div>
-    <div class="body">
-      <div class="card">
-        <div class="prow hd"><div>Person</div><div>Department</div><div>Job role</div><div>Reports to</div><div>Since</div></div>
-        <div class="prow"><div class="who"><div class="av">PT</div><div><b>Priya Thomas <span class="crown">★ head</span></b><span class="sub">Employee 1043</span></div></div><div><span class="dep">FO</span> Front Office</div><div>Supervisor</div><div>Thomas George</div><div>Mar 2024</div></div>
-        <div class="prow"><div class="who"><div class="av">AM</div><div><b>Anjali Menon</b><span class="sub">Employee 1102</span></div></div><div><span class="dep">FO</span> Front Office</div><div>Receptionist</div><div>Priya Thomas</div><div>Jan 2026</div></div>
-        <div class="prow" style="background:rgba(129,140,248,.06)"><div class="who"><div class="av">RN</div><div><b>Rahul Nair</b><span class="sub">Employee 1077</span></div></div><div><span class="dep">SEC</span> Security</div><div>Security officer</div><div>Arjun Pillai</div><div>Aug 2025</div></div>
-        <div class="prow"><div class="who"><div class="av">MJ</div><div><b>Meera Joseph <span class="crown">★ head</span></b><span class="sub">Employee 1012</span></div></div><div><span class="dep">HK</span> Housekeeping</div><div>Supervisor</div><div>Thomas George</div><div>Nov 2022</div></div>
-        <div class="prow"><div class="who"><div class="av">SK</div><div><b>Suresh Kumar</b><span class="sub">Employee 1119</span></div></div><div><span class="dep">HK</span> Housekeeping</div><div>Room attendant</div><div>Meera Joseph</div><div>Feb 2026</div></div>
-        <div class="prow"><div class="who"><div class="av">DV</div><div><b>Deepa Varghese <span class="crown">★ head</span></b><span class="sub">Employee 1031</span></div></div><div><span class="dep">FNB</span> Food &amp; Beverage</div><div>Restaurant manager</div><div>Thomas George</div><div>Jun 2023</div></div>
-        <div class="prow" style="opacity:.75"><div class="who"><div class="av">NS</div><div><b>Nithin Shaji</b><span class="sub">Employee 1131 · joined Mon</span></div></div><div><span class="pill warn">Not posted</span></div><div style="color:var(--faint)">—</div><div style="color:var(--faint)">—</div><div style="color:var(--indigo)">Post now →</div></div>
+    <div class="head"><div><div class="ht">Duty Roster</div><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">24 – 30 Aug</div><div class="btn2">›</div><div class="create">＋ Assign duty</div></div>
+    <div class="body" style="padding-top:16px">
+      <div class="nowrow">
+        <div class="nowc on"><div class="mod">NOW</div><div><b>Anjali Menon</b><span>Front Office · since 20:00 · ends 08:00 tomorrow</span></div></div>
+        <div class="nowc"><div class="lab">Next</div><div><b>Vishnu Das</b><span>Front Office · Sat 29, 08:00 → 20:00</span></div></div>
+      </div>
+      <div class="rota" style="margin-top:4px">
+        <div class="rrow hd" style="grid-template-columns:190px repeat(7,1fr)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)">This week</div><div><span class="dn">Mon</span><span class="dd">24</span></div><div><span class="dn">Tue</span><span class="dd">25</span></div><div><span class="dn">Wed</span><span class="dd">26</span></div><div><span class="dn">Thu</span><span class="dd">27</span></div><div class="today"><span class="dn">Fri</span><span class="dd">28</span></div><div><span class="dn">Sat</span><span class="dd">29</span></div><div><span class="dn">Sun</span><span class="dd">30</span></div></div>
+        <div class="tl" style="height:120px;border-bottom:none">
+          <div class="tlgrid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+          <div class="tllab">★ Duty</div>
+          <div class="bars">
+            <div class="bar" style="left:4.76%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+            <div class="bar" style="left:11.90%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
+            <div class="bar" style="left:19.05%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+            <div class="bar" style="left:26.19%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
+            <div class="bar" style="left:33.33%;width:7.14%;top:0;height:32px"><b>Anjali M.</b><em>08–20</em></div>
+            <div class="bar" style="left:40.48%;width:7.14%;top:38px;height:32px"><b>Vishnu D.</b><em>20–08</em></div>
+            <div class="bar" style="left:47.62%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+            <div class="bar" style="left:54.76%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
+            <div class="bar" style="left:61.90%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+            <div class="bar" style="left:69.05%;width:7.14%;top:38px;height:32px;border-color:rgba(251,191,36,.85);box-shadow:0 0 0 2px rgba(251,191,36,.18)"><b>Anjali M.</b><em>20–08</em></div>
+            <div class="bar" style="left:76.19%;width:7.14%;top:0;height:32px"><b>Vishnu D.</b><em>08–20</em></div>
+            <div class="bar gap" style="left:83.33%;width:7.14%;top:38px;height:32px">no MOD · 20–08</div>
+            <div class="bar" style="left:90.48%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+          </div>
+        </div>
+      </div>
+      <div class="legend"><b>Reading it</b>
+        <span class="lg">Upper band <em>day duties</em></span>
+        <span class="lg">Lower band <em>night duties, which cross midnight</em></span>
+        <span class="lg"><span class="bar gap" style="position:static;padding:1px 8px;font-size:10.5px">dashed</span> <em>nobody holds the duty</em></span>
+        <span class="lg" style="margin-left:auto"><em>MOD is property-wide — the person keeps their own department and posting</em></span>
       </div>
     </div>
-    <div class="scrim"></div>
-    <div class="sheet">
-      <div class="sh2"><div class="st">Post Nithin Shaji</div><div class="ss">From Master Data · Employee 1131 · joined Mon 24 Aug</div></div>
-      <div class="sb">
-        <label>Department</label>
-        <div class="in sel2 f">Security &nbsp;<span class="dep">SEC</span><span style="color:var(--faint);margin-left:auto">▾</span></div>
-        <label>Job role</label>
-        <input class="in" value="Security officer">
-        <label>Reports to</label>
-        <div class="in sel2">Arjun Pillai &nbsp;<span style="color:var(--faint);font-size:12px">Head of Security</span><span style="color:var(--faint);margin-left:auto">▾</span></div>
-        <label>Effective from</label>
-        <input class="in" value="Mon 24 Aug 2026">
-        <div class="tog"><div>Primary posting<span>Shifts default to this department</span></div><div class="sw on"></div></div>
-        <div class="tog"><div>Head of department<span>Approves the department's leave; replaces Arjun Pillai</span></div><div class="sw"></div></div>
-        <div class="hint" style="margin-top:14px">Saving this posting is what opens Security's folders in My Hotel to Nithin. Until someone is posted, a department's grants wait.</div>
+    <div class="pop" style="left:610px;top:250px;width:330px">
+      <div class="pt">Assign Manager on Duty</div>
+      <div class="ps">Friday 28 August</div>
+      <label style="margin-top:12px">From</label><div class="two"><div class="in f">Fri 28 · 20:00</div><div class="in">Sat 29 · 08:00</div></div>
+      <div class="hint">12 hours, crossing midnight. Both dates carry the duty.</div>
+      <div class="plist">
+        <div class="pp on"><div class="av">AM</div><div><b>Anjali Menon</b><span>Receptionist</span></div><span class="dep">FO</span></div>
+        <div class="pp"><div class="av">RN</div><div><b>Rahul Nair</b><span>Security officer</span></div><span class="dep">SEC</span></div>
+        <div class="pp"><div class="av">VD</div><div><b>Vishnu Das</b><span>Night auditor</span></div><span class="dep">FO</span></div>
       </div>
-      <div class="sf"><div class="ghost">Cancel</div><div class="create" style="box-shadow:none">Post to Security</div></div>
+      <label>Handover note <span style="color:var(--faint);font-weight:400">— optional</span></label>
+      <div class="in" style="height:52px;color:var(--faint);font-size:12.5px">Banquet finishes 23:30 — lobby staffing until then.</div>
+      <div class="pf" style="margin-top:12px"><div class="ghost" style="padding:7px 14px">Cancel</div><div class="create" style="box-shadow:none;padding:7px 16px">Assign</div></div>
     </div>
   </div>
 </div>
-<div class="cap"><b>Identity is read-only here.</b> Name, employee number, join date come from Master Data and cannot be edited in Workforce — the sheet is titled <i>Post Nithin</i>, not <i>Edit Nithin</i>. Department is picked from the canon (ADR 0119) and shown by code. A second posting is <b>＋ Post to department</b> on an already-posted person (WF-Q3: one primary, others additional). "Head of department" names who it replaces, because that is the consequence. The last hint is the whole reason this app is built first: <b>a posting is the writer for <code>department#posted</code></b>.</div>
+<div class="cap"><b>The shape was the thing that was wrong.</b> Revision 1 drew a month strip with one name per day, which cannot express the owner's own sentence: <i>"MOD may run 8:00 pm to 8:00 am — it covers two dates."</i> So the register is a <b>timeline in two bands</b> — day duties above, night duties below, the night bars sitting visibly between two dates. <b>"Who is MOD right now" is the clock against the span</b>, which is why the top of the frame is <b>Now</b> and <b>Next</b> rather than a calendar: it is the question the register is actually opened to answer, and it is computed, never stored (<b>WF-Q8</b>). <b>Saturday night has no MOD and says so</b> in dashed outline — a gap the manager can see beats a blank cell that could mean either. <b>Assignment takes two datetimes</b>, not a date, and the sheet says <i>"12 hours, crossing midnight"</i> in place. Two duties may not overlap — that is <b>refused</b>, because <i>"who is MOD now"</i> with two answers is a corrupt record, not a judgment call (<b>WF-Q16</b>). The handover note is free text and blocks nothing.</div>
 
-<!-- 7 · Empty -->
-<h1>7 · <b>First run</b> — Workforce starts with people. The empty state invites the prerequisite action, and nothing else exists until it is taken</h1>
-<div class="win" style="height:330px">
+<!-- 6 · People -->
+<h1>6 · <b>People</b> — postings, and the zone that makes a posting complete</h1>
+<div class="win" style="height:560px">
   <div class="rail">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;My Schedule</div>
-    <div class="ri on">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
     <div class="ri">★ &nbsp;Duty Roster</div>
-    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri on">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="void">
-      <div class="big">◎</div>
-      <div style="font-size:16px;font-weight:600">Nobody is posted yet</div>
-      <p>A rota needs people in departments. Core Administration has <b style="color:var(--text)">42 staff</b>; post the first one to a department and the calendar appears.</p>
-      <div class="create">＋ Post the first person</div>
+    <div class="head"><div><div class="ht">People</div><div class="hsub">42 posted · 6 in Front Office · 2 certifications expiring</div></div><div class="sel" style="margin-left:14px">All departments <span>▾</span></div><div class="grow"></div><div class="create">＋ Post a staff member</div></div>
+    <div class="body" style="padding-top:14px">
+      <div class="card">
+        <div class="prow hd" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div>Person</div><div>Department</div><div>Zone</div><div>Job role</div><div>Reports to</div><div>Capability</div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Priya Thomas</b> <span class="crown">★ head</span><span class="sub">Since 12 Mar 2023</span></div><div><span class="dep">FO</span></div><div><span class="zn">Zone 1</span></div><div>Supervisor</div><div style="color:var(--faint)">— department head</div><div><span class="pill ok">3 valid</span></div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Anjali Menon</b><span class="sub">Since 4 Jan 2025</span></div><div><span class="dep">FO</span></div><div><span class="zn">Zone 3</span></div><div>Receptionist</div><div>Priya Thomas</div><div><span class="pill warn">1 expiring</span></div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Vishnu Das</b><span class="sub">Since 19 Aug 2021</span></div><div><span class="dep">FO</span></div><div><span class="zn">Zone 1</span></div><div>Night auditor</div><div>Priya Thomas</div><div><span class="pill ok">2 valid</span></div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Rajan Pillai</b><span class="sub">Since 2 Feb 2020 · 2 postings</span></div><div><span class="dep">KIT</span> <span class="dep" style="opacity:.6">BQT</span></div><div><span class="zn">Zone 5</span></div><div>Sous chef</div><div>Mathew George</div><div><span class="pill bad2">1 expired</span></div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Rahul Nair</b><span class="sub">Since 8 Jun 2024</span></div><div><span class="dep">SEC</span></div><div><span class="zn">Zone 1</span></div><div>Security officer</div><div>Thomas Varghese</div><div><span class="pill ok">4 valid</span></div></div>
+        <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Sneha Iyer</b><span class="sub">Since 30 Nov 2025</span></div><div><span class="dep">FO</span></div><div><span class="zn">Zone 2</span></div><div>Receptionist</div><div>Priya Thomas</div><div><span class="pill neu">none recorded</span></div></div>
+      </div>
+      <div class="not" style="margin:0;max-width:none"><b>Identity is Master Data's and read-only here.</b> Name, employee number, contact and photograph belong to the person and are edited in Core Administration. This screen owns what is <i>operational</i> — the posting, the job role, the reporting line, the zone and the department head — which is the half ADR 0063 §Q5 moved out of Core, and the reason Core Administration's Staff section deliberately no longer shows it.</div>
     </div>
   </div>
 </div>
-<div class="cap">The guided hierarchy, ADR 0106 §4: Team Rota, Leave and Duty Roster each show this until a posting exists — the invitation names the count Core Administration already holds, so the user knows the people are there and only the posting is missing.</div>
+<div class="cap"><b>The zone is on the posting, not beside it.</b> <i>"Anjali has zone 3"</i> is an incomplete fact; <i>"Anjali has zone 3 <b>as Front Office</b>"</i> is complete — so the zone lives on the posting that already carries the department, which makes the incomplete state impossible to write rather than merely discouraged (<b>WF-Q7</b>). It is <b>optional</b>: most postings have none, and a receptionist posted to Front Office and to no area is the ordinary case. It is <b>durable until changed</b> — a standing arrangement edited here or on the rota, not re-decided each morning — and it inherits the posting's effective dating. <b>Rajan carries two postings</b> (<b>WF-Q3</b>) and one <b>expired</b> certification, which is shown and named and blocks nothing (<b>WF-Q16</b>). <b>This screen is why Room Care can ask "who has zone 3"</b> — through the Context Service, never by reading this application's tables (<b>CTX-Q4</b>, <b>WF-Q6</b>).</div>
 
-<!-- FLOWS -->
-<h1>Flows — what happens between the screens</h1>
-<div class="flows">
-  <div class="flow">
-    <div class="ft">A · posting</div>
-    <div class="fn">A person becomes part of a department <span>slice 1 · the reason Workforce ships first</span></div>
-    <div class="rail2">
-      <div class="fs"><b>Core Administration</b>creates the staff member<small>identity only — name, number, contacts</small></div><div class="arr">→</div>
-      <div class="fs"><b>People</b>shows them as <i>Not posted</i><small>with <b>Post now →</b> in the row</small></div><div class="arr">→</div>
-      <div class="fs"><b>Post sheet</b>department · role · reports to · from<small>identity read-only</small></div><div class="arr">→</div>
-      <div class="fs ev"><b>Saved + event, one transaction</b><code>user.posted</code><small>the Kernel materialises <code>department#posted</code></small></div><div class="arr">→</div>
-      <div class="fs"><b>My Hotel</b>the department's folders open to them<small>and every waiting department grant comes alive</small></div>
-    </div>
+<!-- 7 · Attendance -->
+<h1>7 · <b>Attendance</b> — new. Who was posted, who actually came, and the lateness that is kept rather than noticed</h1>
+<div class="win" style="height:600px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri on">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
-  <div class="flow">
-    <div class="ft">B · leave</div>
-    <div class="fn">A request becomes a struck day on two calendars <span>slice 3</span></div>
-    <div class="rail2">
-      <div class="fs"><b>Request leave</b>type · dates · note<small>balance and clashes shown, never blocking</small></div><div class="arr">→</div>
-      <div class="fs"><b>My Schedule</b>dashed strike, <i>requested</i></div><div class="arr">→</div>
-      <div class="fs"><b>Manager's queue</b>request beside the team's week<small>reporting manager or department head</small></div><div class="arr">→</div>
-      <div class="fs dt"><b>Confirm</b>names the person, dates, and the department after<small>ADR 0106 §3</small></div><div class="arr">→</div>
-      <div class="fs"><b>Approved</b>solid strike on My Schedule and Team Rota<small>the rota reads leave, never edits it</small></div>
-    </div>
-    <div class="branch">
-      <div class="fs stop"><b>Declined</b>one-field note → shown on the requester's row, where it will be read</div>
-      <div class="fs stop"><b>Cancelled by requester</b>allowed until the first day; the manager sees it leave the queue</div>
-    </div>
-  </div>
-  <div class="flow">
-    <div class="ft">C · manager on duty</div>
-    <div class="fn">A Security officer is MOD for a day and stays Security <span>slice 2 · the owner's scenario</span></div>
-    <div class="rail2">
-      <div class="fs"><b>Duty Roster</b>click a day<small>or ★ Assign MOD</small></div><div class="arr">→</div>
-      <div class="fs"><b>Pick anyone active</b>every department; the list says what they're doing that day</div><div class="arr">→</div>
-      <div class="fs dt"><b>Day already has a MOD?</b>named replace confirm<small>one per property per day</small></div><div class="arr">→</div>
-      <div class="fs ev"><b>Assigned + event</b><code>duty.assigned</code> · <code>duty.ended</code><small>lifecycle events the granting pipeline can consume later</small></div><div class="arr">→</div>
-      <div class="fs"><b>Shown everywhere</b>badge on My Schedule · ribbon on every Team Rota<small>posting untouched</small></div>
-    </div>
-    <div class="branch">
-      <div class="fs stop"><b>Permissions — WF-Q1, planner.</b> v1 displays and audits the duty and attaches nothing to the graph. The events exist so a ruling adds tuples without a schema change</div>
-      <div class="fs stop"><b>Shell surfacing — WF-Q2.</b> Today's MOD in the status bar or property card is drawn only if ruled; this app is module-only until then</div>
-    </div>
-  </div>
-  <div class="flow">
-    <div class="ft">D · the rota</div>
-    <div class="fn">A week is built in three gestures <span>slice 2</span></div>
-    <div class="rail2">
-      <div class="fs"><b>Choose</b>department · week<small>defaults: your department, this week</small></div><div class="arr">→</div>
-      <div class="fs"><b>Copy last week</b>fills empty cells only<small>leave and MOD are never copied</small></div><div class="arr">→</div>
-      <div class="fs"><b>Click a cell</b>M · A · N · custom · off<small>one chip per day per person</small></div><div class="arr">→</div>
-      <div class="fs"><b>Swap</b>two people exchange their week</div><div class="arr">→</div>
-      <div class="fs"><b>It is the rota</b>no publish step<small>everyone's My Schedule already shows it</small></div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Attendance</div><div class="hsub">Friday 28 August · business day · 6 posted · 5 present · 1 not rostered</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">Fri 28 Aug</div><div class="btn2">›</div><div class="create">＋ Mark attendance</div></div>
+    <div class="body" style="padding-top:14px">
+      <div class="strip">
+        <div class="stat"><b>5 <span style="font-size:11px;color:var(--faint)">of 6</span></b><span>present against posted</span></div>
+        <div class="stat"><b style="color:var(--warn)">2</b><span>late</span></div>
+        <div class="stat"><b style="color:var(--bad)">1</b><span>absent</span></div>
+        <div class="stat"><b style="color:var(--indigo)">1</b><span>present, not rostered</span></div>
+      </div>
+      <div class="card">
+        <div class="arow hd"><div>Person</div><div>Posted</div><div>In</div><div>Out</div><div>Against the rota</div></div>
+        <div class="arow"><div><b>Priya Thomas</b><span class="sub">Supervisor · Zone 1</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span> <span style="color:var(--faint);font-size:11px">07:00</span></div><div class="tm">06:52</div><div class="tm">15:04</div><div><span class="flag in">On time</span> <span class="src">manual</span></div></div>
+        <div class="arow"><div><b>Anjali Menon</b><span class="sub">Receptionist · Zone 3</span></div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span> <span style="color:var(--faint);font-size:11px">07:00</span></div><div class="tm">07:20</div><div class="tm">15:10</div><div><span class="flag late">Late 20 min</span> <span class="src">manual</span></div></div>
+        <div class="arow"><div><b>Vishnu Das</b><span class="sub">Night auditor · Zone 1</span></div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span> <span style="color:var(--faint);font-size:11px">23:00</span></div><div class="tm">22:55</div><div class="tm miss">— still in</div><div><span class="flag in">On shift</span> <span class="src">manual</span></div></div>
+        <div class="arow"><div><b>Sneha Iyer</b><span class="sub">Receptionist · Zone 2</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span> <span style="color:var(--faint);font-size:11px">15:00</span></div><div class="tm">15:38</div><div class="tm">23:02</div><div><span class="flag late">Late 38 min</span> <span class="src">manual</span></div></div>
+        <div class="arow"><div><b>Rani Rajan</b><span class="sub">Guest relations · Zone 2</span></div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span> <span style="color:var(--faint);font-size:11px">15:00</span></div><div class="tm miss">—</div><div class="tm miss">—</div><div><span class="flag abs">Absent</span></div></div>
+        <div class="arow"><div><b>Joseph Kurian</b><span class="sub">Bell captain · Zone 1</span></div><div style="color:var(--faint);font-size:12px">not rostered</div><div class="tm">09:05</div><div class="tm">17:30</div><div><span class="flag unr">Present, not rostered</span> <span class="src">manual</span></div></div>
+      </div>
+      <div class="not" style="margin:0;max-width:none"><b>Three sources, one fact.</b> Every row carries where it came from — <span class="src">manual</span> today, <span class="src">device</span> when a property's fingerprint or face terminal is connected through the Integration Hub, <span class="src">mobile</span> when the staff app ships. The model carries all three from the first migration so that installing a reader later is a configuration change and not a schema change; the mark on the row is not decoration, it is <b>the difference between evidence and an assertion</b>.</div>
     </div>
   </div>
 </div>
-<div class="not"><b>Deliberately not drawn.</b> Capability — skills, languages, shift patterns — is slice 4 and gets its own frame when it is next. Shell-side MOD (WF-Q2) and MOD permissions (WF-Q1) wait for rulings. Payroll, attendance, accrual, shift bidding and compliance rules are not Workforce — each is a future application or connector. Light theme: the same tokens, per ADR 0106; drawn once the dark frames are approved, as every other gold set was.</div>
+<div class="cap"><b>New, because the refusal did not survive being asked.</b> Revision 1 said <i>"no attendance, no punch clock"</i>. Every property tracks it — only the mechanism varies — so the <b>fact</b> belongs here while the <b>device</b> remains a connector (ADR 0128). <b>Manual is the v1 floor</b>, and it captures <b>in and out times, not a tick</b>: the month-end sheet counts hours, and hours need times. <b>Lateness is kept, not noticed</b> — <b>WF-Q10</b>, <i>"keep late information"</i> — and it is <b>derived, never stored</b>: 07:00 posted and 07:20 clocked are the two facts; <i>"late 20 min"</i> is arithmetic over them, and a stored late-minutes column is a number that can disagree with the two times beside it. <b>The last row is the one that matters most.</b> Joseph was present and not rostered — attendance contradicting the rota — and both facts are kept with the discrepancy shown, never silently reconciled into one. The day is the <b>business day</b>, not the calendar day, which is why Vishnu's 23:00 night shift sits on Friday.</div>
+
+<!-- 8 · Policy -->
+<h1>8 · <b>Policy</b> — new. The four things a property configures, on one screen, and the one it does not</h1>
+<div class="win" style="height:640px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri on">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Workforce policy</div><div class="hsub">Kochi Beach Resort · applies to every department</div></div><div class="grow"></div><div class="create">Save changes</div></div>
+    <div class="body" style="padding-top:16px">
+      <div class="sect">Shifts — the property's own catalogue</div>
+      <div class="card">
+        <div class="polrow hd"><div>Shift</div><div>Short code</div><div>Times</div><div>Colour &amp; kind</div></div>
+        <div class="polrow"><div>Morning</div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div>07:00 – 15:00</div><div><span style="color:var(--cyan)">●</span> Cyan · working</div></div>
+        <div class="polrow"><div>Afternoon</div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div>15:00 – 23:00</div><div><span style="color:var(--indigo)">●</span> Indigo · working</div></div>
+        <div class="polrow"><div>Night</div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div>23:00 – 07:00</div><div><span style="color:var(--violet)">●</span> Violet · working</div></div>
+        <div class="polrow"><div>Split — Banquet</div><div><span class="sh d" style="--c:#fbbf24"><i></i>SB</span></div><div>10–14, 18–22</div><div><span style="color:var(--warn)">●</span> Amber · working</div></div>
+        <div class="polrow"><div>General</div><div><span class="sh d" style="--c:#34d399"><i></i>G</span></div><div>09:00 – 18:00</div><div><span style="color:var(--ok)">●</span> Emerald · working</div></div>
+        <div class="polrow"><div>Week-off</div><div><span class="sh off">OFF</span></div><div style="color:var(--faint)">—</div><div><span style="color:var(--faint)">○</span> None · <b style="color:var(--dim)">off</b></div></div>
+      </div>
+      <div class="hint" style="margin:0">Editing a shift's times takes effect <b style="color:var(--dim)">forward from a date you choose</b> — rotas already worked keep the times they were worked under.</div>
+
+      <div class="sect" style="margin-top:8px">Leave</div>
+      <div class="card">
+        <div class="polrow hd"><div>Type</div><div>Accrues</div><div>Per year</div><div>Notes</div></div>
+        <div class="polrow"><div>Casual</div><div>2 / month</div><div>24</div><div style="color:var(--faint)">—</div></div>
+        <div class="polrow"><div>Sick</div><div>1 / month</div><div>12</div><div style="color:var(--faint)">—</div></div>
+        <div class="polrow"><div>Earned</div><div>1.25 / month</div><div>15</div><div style="color:var(--faint)">—</div></div>
+        <div class="polrow"><div>Comp-off</div><div style="color:var(--faint)">granted by HR</div><div style="color:var(--faint)">—</div><div>Holidays worked are counted; HR grants the credit</div></div>
+      </div>
+      <div class="hint" style="margin:0">Seeded from a <b style="color:var(--dim)">template chosen for this property</b>, then edited here. A balance may be overdrawn — the manager sees it and decides.</div>
+
+      <div class="sect" style="margin-top:8px">Overtime</div>
+      <div class="card"><div class="polrow" style="grid-template-columns:1.1fr 130px 130px 1fr"><div>Overtime begins after</div><div><b>9 h</b> / day</div><div><b>48 h</b> / week</div><div style="color:var(--faint)">Warns while the rota is being built. Never blocks.</div></div></div>
+
+      <div class="sect" style="margin-top:8px">Holidays <span class="ro" style="margin-left:8px">read-only · Core Administration</span></div>
+      <div class="card"><div class="polrow" style="grid-template-columns:1fr"><div style="color:var(--dim)">14 declared holidays this year — 26 Jan, 1 May, 15 Aug, 2 Oct, Onam (4 days), Diwali (2), Christmas… &nbsp;<span style="color:var(--faint)">The administrator sets these for the property; Workforce plans around them.</span></div></div></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>New, and it is where four rulings landed together.</b> The <b>shift catalogue</b> is the property's own and free-form — the screen that makes frame 2's popover what it is (<b>WF-Q11</b>) — and editing times is <b>effective-forward from a chosen date</b>, which is what keeps last March's rota honest (<b>WF-Q15</b>). <b>Leave is a rate, not an allowance</b>, and the four types are the owner's; <b>comp-off has no accrual row</b> because HR grants it (<b>WF-Q13</b>). <b>The seed is a template chosen for the property, never a literal</b> — the product is sold into India and the GCC, and <i>Casual</i>/<i>Earned</i> is one region's vocabulary, not the world's. <b>Overtime is one threshold</b> that <b>warns at planning time</b> (<b>WF-Q14</b>). And <b>the holiday calendar is read-only here</b>, because the administrator establishes it in Core Administration exactly as they establish check-in time — Workforce reads it and does not own it (<b>WF-Q16</b>).</div>
+
+<!-- 9 · Creating a shift -->
+<h1>9 · <b>Creating a shift</b> — the page the whole catalogue rests on: a property invents the shifts it actually runs</h1>
+<div class="win" style="height:660px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri on">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Shifts</div><div class="hsub">Kochi Beach Resort · 6 shifts · shared by every department</div></div><div class="grow"></div><div class="create">＋ New shift</div></div>
+    <div class="body" style="padding-top:14px">
+      <div class="card">
+        <div class="polrow hd" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Shift</div><div>Short code</div><div>Times</div><div>Colour</div><div>In use</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Morning</div><div><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div><div>07:00 – 15:00</div><div><span style="color:#7dd3fc">●</span> Cyan</div><div style="color:var(--faint)">412 assignments</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Afternoon</div><div><span class="sh d" style="--c:#818cf8"><i></i>A</span></div><div>15:00 – 23:00</div><div><span style="color:#818cf8">●</span> Indigo</div><div style="color:var(--faint)">380 assignments</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Night</div><div><span class="sh d" style="--c:#c084fc"><i></i>N</span></div><div>23:00 – 07:00</div><div><span style="color:#c084fc">●</span> Violet</div><div style="color:var(--faint)">196 assignments</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr;background:rgba(129,140,248,.08);box-shadow:inset 2.5px 0 0 var(--indigo)"><div>Split — Banquet</div><div><span class="sh d" style="--c:#fbbf24"><i></i>SB</span></div><div>10–14, 18–22</div><div><span style="color:#fbbf24">●</span> Amber</div><div style="color:var(--faint)">44 assignments</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>General</div><div><span class="sh d" style="--c:#34d399"><i></i>G</span></div><div>09:00 – 18:00</div><div><span style="color:#34d399">●</span> Emerald</div><div style="color:var(--faint)">88 assignments</div></div>
+        <div class="polrow" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Week-off <span class="pill neu" style="margin-left:8px">off</span></div><div><span class="sh off">OFF</span></div><div style="color:var(--faint)">— non-working</div><div style="color:var(--faint)">○ None</div><div style="color:var(--faint)">203 assignments</div></div>
+      </div>
+      <div class="hint" style="margin:0">One catalogue, used by every department at this property. Nothing is preset beyond the starting template — <b style="color:var(--dim)">the property invents the shifts it actually runs</b>.</div>
+    </div>
+    <div class="scrim"></div>
+    <div class="sheet" style="width:412px">
+      <div class="sh2"><div class="st">New shift</div><div class="ss">It appears in the rota picker the moment it is saved</div></div>
+      <div class="sb">
+        <label>Name</label><div class="in f">Split — Banquet</div>
+        <div class="hint">What people read. Any length.</div>
+
+        <label>Short code</label><div class="in" style="width:112px;text-align:center;letter-spacing:.08em;font-weight:600">SB</div>
+        <div class="hint">Two or three characters — what fits a rota cell and <b style="color:var(--dim)">survives a black-and-white photocopy</b>. You choose it, because <i>Morning</i> and <i>Mid-shift</i> would both want "M", and two shifts that look identical on paper is the mistake this prevents.</div>
+
+        <label>Kind</label>
+        <div class="two"><div class="in sel2" style="border-color:var(--indigo);background:rgba(129,140,248,.1)">Working <span style="color:var(--indigo)">✓</span></div><div class="in sel2" style="color:var(--dim)">Off <span style="color:var(--faint)">—</span></div></div>
+        <div class="hint">An <b style="color:var(--dim)">off</b> shift has no times and counts no hours — that is what <i>Week-off</i> is. A rota marker, not a leave type: no request, no balance.</div>
+
+        <label>Times</label>
+        <div class="two"><div class="in">10:00</div><div class="in">14:00</div></div>
+        <div class="two" style="margin-top:8px"><div class="in">18:00</div><div class="in">22:00</div></div>
+        <div class="hint">A second span makes it a split shift. A span ending before it starts crosses midnight — <i>Night</i> is 23:00 → 07:00.</div>
+
+        <label>Colour</label>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:2px">
+          <span style="width:26px;height:26px;border-radius:8px;background:#7dd3fc;opacity:.32"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#818cf8;opacity:.32"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#c084fc;opacity:.32"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#fbbf24;box-shadow:0 0 0 2px rgba(255,255,255,.8)"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#34d399;opacity:.32"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#f87171;opacity:.32"></span>
+          <span style="width:26px;height:26px;border-radius:8px;background:#94a3b8;opacity:.32"></span>
+        </div>
+        <div class="hint">How the week reads at a glance. <b style="color:var(--dim)">Colour is the shift's own attribute</b>, not a consequence of its code — and the short code is what survives when colour is lost.</div>
+
+        <div style="margin-top:16px;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:rgba(10,12,18,.45)">
+          <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:700;margin-bottom:9px">Preview</div>
+          <div style="display:flex;gap:14px;align-items:center">
+            <span class="sh d" style="--c:#fbbf24"><i></i>SB</span>
+            <span style="color:var(--faint);font-size:12px">on screen</span>
+            <span style="margin-left:auto;display:flex;gap:9px;align-items:center"><span style="border:1px solid #333;background:#fff;color:#111;border-radius:3px;padding:1px 8px;font-size:11px;font-weight:700">SB</span><span style="color:var(--faint);font-size:12px">printed</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="sf"><div class="ghost">Cancel</div><div class="create">Create shift</div></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Asked for by the owner, 2026-08-31 — and it was the page the design was missing.</b> Revision 2 listed the catalogue on the Policy screen and gave the property nowhere to <i>make</i> one, which is a real gap: the shift catalogue is the object the entire rota is drawn from, so it needs a page rather than a settings row. <b>Three attributes, and the sheet says what each is for</b> — the name people read, the <b>short code that survives a photocopier</b>, and the <b>colour that makes a week readable at a glance</b>. The preview shows both fates side by side, on screen and on paper, because they are the two places a shift has to be legible and only one of them has colour. <b>The short code is typed, never derived</b>, and the reason sits next to the field. <b>Kind is where Week-off lives</b>: an <i>off</i> shift has no times and counts no hours, which is what a weekly off is — and it is why the leave-type list is four and not five (<b>WF-Q12</b>). <b>Editing an existing shift's times takes effect forward from a chosen date</b>, so a rota already worked keeps the times it was worked under (<b>WF-Q15</b>).</div>
+
+<!-- 9 · Reports -->
+<h1>10 · <b>Reports</b> — new. Correct numbers, handed over. Workforce never calculates pay</h1>
+<div class="win" style="height:580px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri">◎ &nbsp;People</div>
+    <div class="ri on">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Month-end summary</div><div class="hsub">August 2026 · Front Office · 6 people · business days 1–31</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">⎙ &nbsp;Print</div><div class="create">↓ &nbsp;Export CSV</div></div>
+    <div class="body" style="padding-top:14px">
+      <div class="card" style="overflow:auto">
+        <table class="rep">
+          <thead><tr><th>Person</th><th>Posted</th><th>Present</th><th>Late</th><th>Casual</th><th>Sick</th><th>Earned</th><th>Comp</th><th>Holidays worked</th><th>Hours</th><th>Overtime</th></tr></thead>
+          <tbody>
+            <tr><td class="nm"><b>Priya Thomas</b><span>Supervisor</span></td><td>26</td><td>26</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td><td>2</td><td>208.5</td><td class="ot">6.5</td></tr>
+            <tr><td class="nm"><b>Anjali Menon</b><span>Receptionist</span></td><td>24</td><td>22</td><td>4</td><td>2</td><td>0</td><td>0</td><td>0</td><td>1</td><td>176.0</td><td>0</td></tr>
+            <tr><td class="nm"><b>Vishnu Das</b><span>Night auditor</span></td><td>26</td><td>26</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>3</td><td>212.0</td><td class="ot">10.0</td></tr>
+            <tr><td class="nm"><b>Sneha Iyer</b><span>Receptionist</span></td><td>23</td><td>21</td><td>3</td><td>0</td><td>2</td><td>0</td><td>0</td><td>0</td><td>168.0</td><td>0</td></tr>
+            <tr><td class="nm"><b>Joseph Kurian</b><span>Bell captain</span></td><td>25</td><td>25</td><td>0</td><td>0</td><td>0</td><td>5</td><td>0</td><td>2</td><td>200.0</td><td class="ot">2.0</td></tr>
+            <tr><td class="nm"><b>Rani Rajan</b><span>Guest relations</span></td><td>24</td><td>23</td><td>2</td><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td><td>184.0</td><td>0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="not" style="margin:0;max-width:none"><b>These are inputs, not a payslip.</b> Workforce produces days posted, days present, lateness, leave by type, holidays worked, hours and overtime — and stops there. Pay calculation differs by country (WPS, PF, ESI, gratuity) and by hotel (allowances, deductions, contracts), and getting it wrong is a salary dispute rather than a bug. The accountant or the payroll system takes this file; a <b>payroll connector</b> is a later capability, because the connector contract is inbound-only today.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>New, and deliberately unambitious.</b> <b>Workforce produces the numbers; it never calculates pay</b> — the same boundary GuestOps drew at the folio, one application over. Every column here is traceable to a fact the app already holds: <i>posted</i> from the rota, <i>present</i> and <i>late</i> from attendance, <i>leave</i> from the ledger, <i>holidays worked</i> from attendance against the property's calendar, <i>hours</i> from in/out times, <i>overtime</i> from hours against the property's threshold. <b>The export is a file, and that is not a compromise</b>: an outbound payroll connector is outside the v1 connector contract entirely, so a file is the only honest thing on offer today. Nothing on this screen can be edited — a number you can type over is not a record.</div>
+
+<!-- 10 · The printed week -->
+<h1>11 · <b>The printed week</b> — new. How the rota actually reaches staff in v1: on paper, through a photocopier, in black and white</h1>
+<div class="win" style="height:700px;grid-template-columns:1fr">
+  <div class="main">
+    <div class="head" style="border-bottom:1px solid var(--line)"><div><div class="ht">Print preview</div><div class="hsub">Front Office · 24 – 30 August 2026 · A4 landscape</div></div><div class="grow"></div><div class="btn2">Page setup</div><div class="create">⎙ &nbsp;Print</div></div>
+    <div class="body" style="padding:20px 26px 22px">
+      <div class="paper">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div><h2>Front Office — Duty Rota</h2><div class="psub">Kochi Beach Resort · Week of Monday 24 August 2026 · issued Fri 21 Aug, 16:40 by P. Thomas</div></div>
+          <div style="font-size:10px;text-align:right;color:#555">Page 1 of 1<br>Printed 24 Aug 2026</div>
+        </div>
+        <table class="ptab">
+          <tr><th style="width:150px">Staff</th><th>Mon 24</th><th>Tue 25</th><th>Wed 26</th><th>Thu 27</th><th>Fri 28</th><th>Sat 29</th><th>Sun 30</th></tr>
+          <tr class="duty"><td class="nm" style="font-size:10px">MANAGER ON DUTY</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>A.Menon 08–20<br>V.Das 20–08</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>P.Thomas 08–20<br>A.Menon 20–08</td><td>V.Das 08–20<br>— 20–08</td><td>P.Thomas 08–20</td></tr>
+          <tr><td class="nm">Priya Thomas<span>Supervisor · Zone 1</span></td><td>M</td><td>M</td><td>M</td><td>M</td><td>M</td><td class="off">OFF</td><td class="off">OFF</td></tr>
+          <tr><td class="nm">Anjali Menon<span>Receptionist · Zone 3</span></td><td>M</td><td>M</td><td>M</td><td>A</td><td>M</td><td>M</td><td class="off">OFF</td></tr>
+          <tr><td class="nm">Vishnu Das<span>Night auditor · Zone 1</span></td><td>N</td><td>N</td><td>N</td><td>N</td><td>N</td><td class="off">OFF</td><td>N</td></tr>
+          <tr><td class="nm">Sneha Iyer<span>Receptionist · Zone 2</span></td><td>A</td><td>A</td><td class="off">SICK</td><td class="off">SICK</td><td>A</td><td>A</td><td class="off">OFF</td></tr>
+          <tr><td class="nm">Joseph Kurian<span>Bell captain · Zone 1</span></td><td class="off">OFF</td><td>M</td><td>SB</td><td>A</td><td>A</td><td>M</td><td>M</td></tr>
+          <tr><td class="nm">Rani Rajan<span>Guest relations · Zone 2</span></td><td>A</td><td class="off">OFF</td><td class="off">—</td><td>A</td><td>A</td><td>A</td><td class="off">—</td></tr>
+        </table>
+        <div class="pleg">
+          <span><b>M</b>Morning 07:00–15:00</span>
+          <span><b>A</b>Afternoon 15:00–23:00</span>
+          <span><b>N</b>Night 23:00–07:00</span>
+          <span><b>SB</b>Split — Banquet 10–14, 18–22</span>
+          <span><b>G</b>General 09:00–18:00</span>
+          <span><b>OFF</b>Week-off</span>
+          <span><b>—</b>Not assigned</span>
+        </div>
+        <div class="pchg"><b>Changes since this rota was issued</b>
+          <ul>
+            <li>Tue 25 — R. Nair took MOD 20:00–08:00 in place of P. Thomas.</li>
+            <li>Wed 26 — S. Iyer marked sick; her afternoon was <b>covered by J. Kurian</b> (split shift).</li>
+            <li>Thu 27 — A. Menon and S. Iyer swapped (M ⇄ A), approved by P. Thomas.</li>
+            <li>Sat 29 — no Manager on Duty assigned for 20:00–08:00.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Not a print stylesheet on frame 2 — a different artifact.</b> No rail, no header controls, no hover, no colour: the whole department on one page, built for a <b>monochrome photocopier</b>, which is how the rota actually reaches staff while the staff app is a version away (<b>N1</b>). <b>This is what the short code is for.</b> A photocopy destroys colour and keeps glyphs, so the cell carries text that survives losing every colour in the design, and the <b>legend beneath the grid</b> is what makes it readable — the same legend the screen carries, doing more work here. <b>The MOD row shows two names on most days</b>, because the duty crosses midnight and a printed sheet has no hover to explain it. <b>The change list is the week's record, not somebody's memory</b> — <i>"covered by J. Kurian"</i> is a cause, and it is rendered from the events the app already publishes rather than kept as a second list that could disagree. Saturday's missing MOD prints as an <b>absence, stated</b>. The dialog is the shell's (<b>SHELL-Q23</b>): this application hands over a print-ready view and writes no printer code.</div>
+
+<!-- 11 · First run -->
+<h1>12 · <b>First run</b> — Workforce starts with people, and says what it will unlock</h1>
+<div class="win" style="height:470px">
+  <div class="rail">
+    <div class="app"><div class="mark">W</div>Workforce</div>
+    <div class="ri">◫ &nbsp;Staff Schedule</div>
+    <div class="ri">▦ &nbsp;Team Rota</div>
+    <div class="ri">◷ &nbsp;Leave &amp; Requests</div>
+    <div class="ri">◉ &nbsp;Attendance</div>
+    <div class="ri">★ &nbsp;Duty Roster</div>
+    <div class="ri on">◎ &nbsp;People</div>
+    <div class="ri">▤ &nbsp;Reports</div>
+    <div class="ri">⚙ &nbsp;Policy</div>
+    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">People</div><div class="hsub">Nobody is posted yet</div></div></div>
+    <div class="body" style="justify-content:center">
+      <div class="void">
+        <div class="big">◎</div>
+        <div style="font-size:15px;font-weight:600">Post your first staff member</div>
+        <p>A posting says where a person works and as what. Everything else in Workforce is built on it — the rota, leave, the duty roster and attendance all need somebody posted first.</p>
+        <p style="color:var(--faint);font-size:12px">It also opens the department folders in My Hotel: until a property has postings, department-based document access has nobody to resolve to.</p>
+        <div class="create" style="margin-top:4px">＋ Post a staff member</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The empty state names the consequence rather than the button.</b> A posting is not paperwork — it is the record the whole platform has been waiting for: until one exists, <code style="color:var(--dim)">department#posted</code> resolves to nobody and every department-scoped document grant in My Hotel is dormant. Saying so here is honest and it is also the strongest argument for doing it first. Staff themselves come from <b>Core Administration</b> — this screen posts people who already exist, and does not create them, because identity is Master Data's.</div>
+
+<div class="not"><b>What the rename moves, reported rather than absorbed — owner, 2026-08-31.</b> <i>"This is not access by every staff"</i> corrects a founding assumption: revision 1 called frame 1 <i>My Schedule</i> and described it as the screen <i>"a staff member opens Workforce and sees their own life first"</i>. If Workforce is a <b>manager and HR application</b>, one ruled decision shifts underneath it. <b>WF-Q9</b>(b) gave a swap proposal <b>two</b> entry paths — <i>My Schedule for login-holders, supervisor-on-behalf for the majority</i> — and with no per-staff surface in v1 the first path has nowhere to live: <b>every proposal and every leave request is raised on behalf, with <code style="color:var(--dim)">entered_by</code> recorded</b>, which is why frames 1 and 3 now read <i>for Anjali</i> and <i>raised by Priya Thomas on behalf of Joseph Kurian</i>. That is drawn as asked. <b>What it does not settle is whether v1 has any staff-facing surface at all</b> — the study assumed a minority of staff would hold logins and use one. If the answer is none until the staff app ships, <b>WF-Q9</b>(b)'s first path should be recorded as deferred rather than built, and the staff-proposes half of <b>WF-Q9</b> is exercised only through a supervisor. <b>Not decided here.</b></div>
+
+<div class="not"><b>What is deliberately not drawn.</b> No shell-side MOD badge — <b>WF-Q2</b> keeps Workforce's facts inside the module until ruled otherwise. No mobile screens: the staff app is next version (ADR 0115 is parked), and this design's job is only to <i>publish the events</i> so that when it arrives it subscribes and notifies with no change here. No device-attendance configuration: a fingerprint or face terminal arrives as a connector through the Integration Hub, configured there, not here. No payslip, no rotation-pattern builder, no shift-bidding, no required-headcount model, and no incident log — each is either another application's or a refusal this round tested and kept.</div>
 </body></html>
