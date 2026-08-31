@@ -55,4 +55,47 @@
     <SelfContained>false</SelfContained>
   </PropertyGroup>
 
+  <!--
+    The platform's normalised-fact contract — `hotelos/integration/v1/dto.proto`.
+
+    # Why a sibling path
+
+    The application repository's charter permits two forms while the SDK is
+    unpublished: "a sibling-path reference to the platform checkout, or a copied
+    `shared/protos` — an implementation choice for now, until an SDK-publishing
+    round makes them proper artifacts (ADR 0122 addendum)".
+
+    Of the two, the path. **A copy drifts silently; a path fails loudly when the
+    checkout is absent**, and loud beats silent everywhere in this platform —
+    the same reasoning that puts an unrecognised status value into a rejected
+    record instead of a null.
+
+    # Interim, and it dies with the SDK-publishing round
+
+    Noted here the way `manifest.yaml` notes its own pending half. This
+    `..\..\..\HosPilotOS\` assumes the two repositories are checked out beside
+    each other, which is true of every machine today and is not a contract.
+    When the SDK ships as an artifact this ItemGroup becomes a PackageReference
+    and the assumption goes with it.
+
+    `GrpcServices="None"`: the connector reads and writes these messages. It
+    serves no gRPC of its own, and the Hub's service surface does not exist yet.
+  -->
+  <ItemGroup>
+    <Protobuf Include="..\..\..\HosPilotOS\shared\protos\hotelos\integration\v1\dto.proto"
+              ProtoRoot="..\..\..\HosPilotOS\shared\protos"
+              GrpcServices="None" />
+    <Protobuf Include="..\..\..\HosPilotOS\shared\protos\hotelos\common\v1\common.proto"
+              ProtoRoot="..\..\..\HosPilotOS\shared\protos"
+              GrpcServices="None" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.29.3" />
+    <PackageReference Include="Grpc.Tools" Version="2.71.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
 </Project>
