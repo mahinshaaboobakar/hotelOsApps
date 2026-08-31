@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    pms-oracle's tests — ADR 0025: their own package, never beside the source.
+
+    They test the vocabularies, which is where this connector's first real
+    behaviour is. The parsers are worth testing before anything else because
+    they are the one place the reference failed in a way that hid itself: six
+    status parsers across five vendors, each ending `default: return null`, so
+    an unhandled value became an absent value and nobody could say afterwards
+    what those systems emit.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>PmsOracle.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\backend\PmsOracle.Connector.csproj" />
+  </ItemGroup>
+
+</Project>

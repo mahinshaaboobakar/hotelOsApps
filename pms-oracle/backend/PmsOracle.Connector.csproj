@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    pms-oracle — the Oracle PMS connector.
+
+    # Why `Microsoft.NET.Sdk` and not `Sdk.Web`, today
+
+    The manifest declares `runtime.kind: dotnet-service`, and this will be a
+    hosted service. It is a library right now because **the surface it would
+    host does not exist**: the Integration Hub is designed (platform brief
+    §7–§20) and unbuilt, `shared/protos/hotelos/integration/` carries no
+    contract, and there is no `integration-service` for this process to
+    register with.
+
+    What *is* buildable today is everything ADR 0128 §5 makes the connector's
+    own — "the connector supplies protocol and business mapping: endpoints, the
+    authentication adapter, request/response mapping, the status parser,
+    normalisation rules, capability declaration". None of that needs the Hub to
+    exist; all of it is wrong to invent twice.
+
+    So this project holds the connector's own knowledge, and the host arrives
+    with the contract it would serve. That is a one-line SDK change and a
+    `Program.cs`, not a restructure.
+
+    # What it deliberately does not reference
+
+    No `Microsoft.EntityFrameworkCore`, no `Npgsql`. The connector owns no
+    schema — the Hub owns the `integration` schema and Master Data owns rooms —
+    and the manifest carries no `database:` block. A package that referenced an
+    ORM would be a package that had somewhere to put a `property` table, which
+    is the reference system's nine-copies defect (design §2.7).
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>PmsOracle</RootNamespace>
+    <!--
+      Fixed, because the manifest names it: `runtime.assembly` is
+      `PmsOracle.Connector.dll`. If the two drift, an install fails with a
+      file-not-found that reads like a broken package.
+    -->
+    <AssemblyName>PmsOracle.Connector</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <!-- ADR 0027: the build is the lint. -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- ADR 0057: every public member is documented, and the build says so. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!--
+      Framework-dependent — ADR 0090 §Q23: the platform chains the runtime, so
+      a package carries its own assemblies and not a copy of .NET.
+    -->
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+</Project>

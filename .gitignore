@@ -1,0 +1,31 @@
+# HotelOsApps — the application repository.
+#
+# Mirrors the platform repository's patterns for the things this repo actually
+# produces. Kept short deliberately: a long ignore list in a repo that builds
+# one .NET project is a list nobody reads before adding to it.
+
+# ---------- secrets ----------
+# Never commit. A connector's credentials live in the Token Vault, and a
+# package's signing key never enters any repository — README, "The deliverable".
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+
+# ---------- .NET ----------
+[Bb]in/
+[Oo]bj/
+*.user
+
+# ---------- packages ----------
+# A built `.hopkg` is never committed. It goes stale against its own source and
+# gets trusted anyway — the same reason hello-hotel's archive is written to a
+# scratchpad and not to the tree.
+*.hopkg
+
+# ---------- editors ----------
+.idea/
+.vscode/

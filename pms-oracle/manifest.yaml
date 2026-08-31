@@ -1,0 +1,158 @@
+# pms-oracle — the Oracle PMS connector.
+#
+# Three integrations in one package: `oracle-cloud` (we pull from OHIP),
+# `oracle-onpremise` and `oracle-web` (the PMS pushes to the property ingress).
+# Owner ruling `CONN-Q2(a)`, 2026-08-31 — Oracle first, three flavours as three
+# integrations in one package, because a PMS brand is not the connector unit
+# (ADR 0128 §2; requirement R28).
+#
+# Design: `docs/chapters/03-the-oracle-connector-design.md`.
+# The Hub this installs into: `docs/working/42-the-connector-round.md` §7–§20
+# in the platform repository.
+#
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT VALIDATES THIS TODAY, AND WHAT DOES NOT
+#
+# Written under `CONN-Q10`, ruled 2026-08-31: a connector declares itself with a
+# top-level `kind`, keeps `runtime.kind: dotnet-service`, and carries **no**
+# `runtime.principal` — ADR 0019 gives a connector no Kernel principal of its
+# own, because it authenticates as the Integration Hub (`integration`).
+#
+# The Kernel-side half of that ruling is platform work that arrives with the Hub
+# itself: the conditional validation that permits an absent principal for
+# `kind: connector`, and the install path that registers a connector with the
+# Hub instead of provisioning a schema and a service certificate. Today
+# `kernel-core`'s `Manifest` has no `kind` field and `Runtime.principal` is
+# required, so **this file is validated by a schema that does not yet accept
+# it, and installed by a path that does not yet exist.**
+#
+# It is written this way regardless, because the frozen ruling is what the
+# manifest should say. hello-hotel documents its own absent `ui:` block for the
+# same reason: the honest declaration comes first, and the mechanism catches up.
+# ─────────────────────────────────────────────────────────────────────────────
+
+manifest_version: 1
+
+# `CONN-Q10`, ruled: what this package *is*, as distinct from how it runs.
+kind: connector
+
+id: pms-oracle
+name: "Oracle PMS"
+version: 0.1.0
+publisher: hotelos
+category: integration
+description: "Oracle OPERA and OHIP — reservations, stays and room state, inbound."
+
+platform:
+  min_version: "0.1.0"
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+runtime:
+  # How it runs. A connector is still a .NET service — `CONN-Q10` separates the
+  # two axes rather than adding a runtime kind, because the process model has
+  # not changed.
+  kind: dotnet-service
+  assembly: PmsOracle.Connector.dll
+
+  # NO `principal:`, and its absence is the point.
+  #
+  # ADR 0019: *"a connector holds no Kernel principal — an Oracle Opera adapter
+  # authenticates as the Integration Hub, whose principal is `integration`."*
+  # Writing `principal: pms-oracle` would mint an identity that ruling forbids;
+  # writing `principal: integration` would have a package assert the Hub's own
+  # identity, which is the forgery ADR 0020's closed-set validation exists to
+  # prevent. So the field is absent, and `CONN-Q10` makes that legal.
+
+# NO `database:` block.
+#
+# The connector owns no schema. The Integration Hub owns the `integration`
+# schema — inbox, outbox, mappings, sync state, errors (Chapter 21) — and
+# Master Data owns rooms and properties. A connector that could create a
+# `property` table is the reference's nine-copies-of-master-data defect
+# (design §2.7), and here it is not refused by review: with no `database:`
+# there is no role, and with no role there is nothing to create a table with.
+
+resources:
+  # Requests, not rights — ADR 0092 rule 3.
+  #
+  # Three integrations, one of which polls on a schedule and two of which
+  # receive pushes. Modest: the Hub owns the inbox, the queue, retry and the
+  # cache (ADR 0128 §5), so this process holds no durable state of its own.
+  memory: "256Mi"
+  cpu: "0.25"
+  db_connections: 0
+  event_rate: 200
+
+permissions:
+  # Requests with reasons — ADR 0092 rule 2. Every id exists in
+  # `infrastructure/openfga/permissions.yaml`; install refuses one that does not.
+  - id: room.read
+    reason: "Resolve a PMS room number onto the property's canonical room during Enrich"
+  - id: external_mapping.read
+    reason: "Look up what this property's PMS calls a room, a reservation or a guest"
+
+  # NOT requested: `external_mapping.update`.
+  #
+  # Creating a mapping is an operator action in Operations Center — design §14's
+  # `unmappable` queue. A connector able to write mappings could resolve its own
+  # unmappable records silently, which is the whole point of holding them where
+  # a person decides. It reads mappings; it never makes one.
+
+events:
+  # Empty in both directions, and both are statements.
+  #
+  # `publishes: []` — ADR 0093's addendum makes this load-bearing: `PublishEvent`
+  # from a package is allowed only for the subjects listed here. A connector
+  # publishes nothing itself. It hands normalised facts to the Hub, and **the
+  # Hub** appends and asserts the registered connector identifier, which the
+  # Kernel validates against its closed set (ADR 0020). A connector that could
+  # publish directly would be a second publisher with no `source` derivation
+  # behind it.
+  publishes: []
+
+  # `subscribes: []` — v1 is inbound-only (ADR 0128 §4). Write-back is a later
+  # capability, and a connector that listened for HotelOS events today would be
+  # listening for a reason that does not exist yet.
+  subscribes: []
+
+configuration:
+  # Empty, deliberately, and this is the same reasoning that decided `CONN-Q9`.
+  #
+  # A property configures **three integrations**, each with an endpoint, a
+  # credential, an authentication shape, a two-tier polling schedule and a
+  # source allow-list. ADR 0092's `key / type / default / scope` list is flat
+  # and per-package: it cannot express "per integration", a secret that goes to
+  # the Token Vault and is never returned, a list, or a schedule. Trying to make
+  # it express them is what the planner refused — *"quickly becomes a second
+  # programming language"* (ADR 0128 §7).
+  #
+  # So configuration is submitted by the connector's `ui.module` through
+  # platform APIs to the Integration Hub, which holds it per property and per
+  # integration. Nothing about it belongs in this list.
+
+dependencies: []
+
+# NO `ui:` BLOCK YET — and, as with hello-hotel, the absence is deliberate.
+#
+# `CONN-Q9` ruled (b): this connector ships a signed `ui.module` and Software
+# Center hosts it inside Integration Management. That is the design, and
+# `docs/mockups/01-oracle-connector.html` draws it.
+#
+# It is not declared yet because **nothing can host it**. The desktop's module
+# registry composes built-in modules only — `registry.ts`: *"Today it composes
+# built-in modules; when Software Center lands it composes built-in modules
+# **and** installed packages"* — and `kernel-core`'s `validate` refuses a
+# declared `ui:` whose `ui/` payload is absent. Shipping a bundle nothing can
+# render is what hello-hotel called *"the same dishonesty pointing the other
+# way"* when it deleted its own block.
+#
+# Architect sequencing ruling, 2026-08-31: backend now, `ui/` when the shell
+# phase lands. The block and the payload arrive together, in one change.
+
+files:
+  # Placeholder. The packager publishes `backend/`, hashes every file and
+  # replaces this whole map — a digest written by hand is a digest that goes
+  # stale on the next build and then gets "fixed" by pasting whatever the
+  # failure printed.
+  "backend/PmsOracle.Connector.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
