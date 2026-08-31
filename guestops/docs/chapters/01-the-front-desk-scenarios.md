@@ -1,13 +1,14 @@
 # 01 · The front desk scenarios — what GuestOps must be able to do
 
 **Status:** scenario record, 2026-08-31 — accepted by the owner, then amended
-the same day to carry four rulings: the **GUEST-Q2 addendum** (a stay's anchor
+the same day to carry five rulings: the **GUEST-Q2 addendum** (a stay's anchor
 is the room *type*; the room number is an assignment required at check-in),
 **GUEST-Q3** (while a disagreement stands, the standing override is the one
 answer that leaves the application), **GUEST-Q4** (there is no second mode —
-PMS-writes-first always; a matching fact confirms silently) and **GUEST-Q5**
+PMS-writes-first always; a matching fact confirms silently), **GUEST-Q5**
 (staff may create a PMS-unknown stay; the join is a staff-confirmed link,
-never a match). Stream FF,
+never a match) and **GUEST-Q6** (v1 is the book plus the stay's commercial
+terms; the folio is Finance's, later). Stream FF,
 deliverable 1 of the GuestOps round — brief
 `docs/working/45-the-guestops-round.md` §3.1, **in the platform repository**.
 **Authority.** There is **no chapter for GuestOps**. Chapter 26 states the
@@ -243,13 +244,26 @@ deposit deadline as an **offset from the booking date**, a cancellation
 deadline as an **offset from arrival** plus a drop time, and an amount with a
 basis, a number of nights and a currency (R18).
 
-**EXPRESSIBLE.** If GuestOps carries these at all, it carries the **offsets**,
-never resolved timestamps — an offset survives the arrival date changing and a
-resolved deadline does not, and a cancellation deadline that silently stops
-matching its reservation is a chargeable error (R18). And an amount carries
-**three** things or it is not an amount: the value, its currency, and whether
-tax is included (R19). Whether v1 carries money at all is
-**`OPEN` — §15 (f)**.
+**EXPRESSIBLE. GUEST-Q6 (2026-08-31) rules v1's line:**
+
+```text
+IN v1     the book, plus the stay's COMMERCIAL TERMS — the rate, the
+          guarantee and cancellation offsets, every amount with its
+          currency and tax basis
+LATER     the FOLIO — posting, payments, settlement, invoicing, the
+          night-audit posting. Finance's domain, a later round
+```
+
+The terms are carried as **offsets**, never resolved timestamps — an offset
+survives the arrival date changing and a resolved deadline does not, and a
+cancellation deadline that silently stops matching its reservation is a
+chargeable error (R18). An amount carries **three** things or it is not an
+amount: the value, its currency, and whether tax is included (R19).
+
+**The consequence is accepted knowingly and recorded with the ruling: a
+standalone property cannot settle a guest in v1.** The first deployments are
+PMS-connected, where the bill is the PMS's and write-back is deferred anyway
+(`CONN-Q5`).
 
 ---
 
@@ -514,8 +528,9 @@ two-mode split.
 
 **EXPRESSIBLE.** A cancelled stay is not a deleted stay — the cancellation
 time matters (R14 records that the source derives it from the last-modified
-timestamp), the penalty may be chargeable (S6), and the room returns to
-inventory. Cancellation is a **business fact about the stay**, not the
+timestamp), the penalty is **computable from the terms v1 carries** and
+**charged nowhere in v1** (GUEST-Q6: the folio is Finance's), and the room
+returns to inventory. Cancellation is a **business fact about the stay**, not the
 platform's lifecycle vocabulary: ADR 0062's `active` / `deleted_at` says
 whether a record exists, and a cancelled reservation exists.
 
@@ -795,11 +810,11 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
-**Four are ruled** and are struck through below rather than deleted, so the
-scenarios that cite them still resolve. **Three remain open**, and one — (f),
-whether money is in v1 — is load-bearing: it decides how much of the schema
-exists at all. (e) and (g) are carried as property configuration and as a
-records list, and block nothing.
+**Five are ruled** and are struck through below rather than deleted, so the
+scenarios that cite them still resolve. **Two remain open** — (e) and (g) —
+and neither blocks the design: (e) is carried as property configuration, (g)
+as a records list whose contents the owner fills in. The design chapter and
+the gold mockup proceed on the five.
 
 | | Subject | Why it cannot be settled here |
 |---|---|---|
@@ -808,7 +823,7 @@ records list, and block nothing.
 | ~~**(c)**~~ | ~~On a standing disagreement, which value do the board, Room Care and Context see — and who clears it?~~ (S35) | **RULED — GUEST-Q3, 2026-08-31.** The standing **override** is the answer everywhere while the disagreement stands; the disagreement is a flag on the one truth, never a second answer. Clearing belongs to the stay's **write permission**, choosing *keep ours* or *take the PMS's*, recorded with both values kept. Clearing to the PMS's side emits the same correction event a room move does. The S11 gate note is ratified in the same row |
 | ~~**(d)**~~ | ~~When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns?~~ (S36) | **RULED — GUEST-Q4, 2026-08-31: there is no second mode.** PMS-writes-first at all times; a matching inbound fact settles an override **silently as confirmed**, so only differing values are a disagreement; the outage shows as per-capability **staleness**, not as a mode; the backlog lands in event order and groups as one outage batch. The S26 boundary is ratified in the same row |
 | **(e)** | Does GuestOps refuse a check-in into a room Room Care has not released? (S9) | Cleaning is policy-driven (APPS-Q1), and Room Care is installable — it may be absent entirely |
-| **(f)** | Is the folio — charges, deposits, guarantee and cancellation terms — in GuestOps v1? (S6, S25) | The source carries the structure (R18, R19) and the brief names a folio as a room-move consumer, but no ruling scopes money into this application |
+| ~~**(f)**~~ | ~~Is the folio — charges, deposits, guarantee and cancellation terms — in GuestOps v1?~~ (S6, S25) | **RULED — GUEST-Q6, 2026-08-31:** v1 is **the book plus the stay's commercial terms** (rate, guarantee and cancellation offsets, every amount with currency and tax basis). The **folio** — posting, payments, settlement, invoicing, night-audit posting — is **Finance's domain, a later round**. Accepted knowingly: a standalone property cannot settle a guest in v1, and the first deployments are PMS-connected. The walk-in / PMS-unknown distinction is ratified in the same row |
 | **(g)** | What must the registration card capture, and is there a statutory report behind it? (§12) | The hotelier reference has a `grcNo`; what an Indian property is legally required to record, for domestic and foreign guests, is the owner's knowledge and not the record's |
 
 ---
@@ -818,12 +833,12 @@ records list, and block nothing.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven subjects are listed in §15; four —
-  (b) the roomless stay, (c) the standing disagreement, (d) the silent feed and
-  (a) the PMS-unknown stay — were ruled on 2026-08-31 and are carried in §1,
-  §3, S5, S8, S11, S13, S34, S35 and S36. The other three are not resolved
-  above, and none is anticipated. S26 records where GUEST-Q3 deliberately does
-  **not** reach.
+* **No answer to an open question.** Seven subjects are listed in §15; five —
+  (b) the roomless stay, (c) the standing disagreement, (d) the silent feed,
+  (a) the PMS-unknown stay and (f) money in v1 — were ruled on 2026-08-31 and
+  are carried in §1, §3, S5, S6, S8, S11, S13, S25, S34, S35 and S36. The
+  other two are not resolved above, and neither is anticipated. S26 records
+  where GUEST-Q3 deliberately does **not** reach.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.
