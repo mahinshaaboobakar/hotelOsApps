@@ -23,11 +23,17 @@ Three groups, because they go to three different people:
 
 ```text
 A  the owner        operational judgments only a hotelier can make
+                    — BOTH RULED, 2026-08-31. Kept for the reasoning
 B  the planner /    contradictions and gaps in the platform's own record
    architect
 C  scope            things the design found while drawing, each with a
                     v1 / next-version recommendation the owner decides
 ```
+
+**Group A is closed.** Every question this round put to the owner has been
+answered; what is left is the platform's own record (B) and the scope choices
+(C). The A rows are kept rather than deleted because the *reasoning* behind a
+ruling is the part that stops it being re-litigated in six months.
 
 Group C carries **the architect's recommendation** in each row. A
 recommendation is not a ruling and carries no authority — it exists so the
@@ -67,18 +73,28 @@ gate on ANOTHER app's facts  never — it would make an installable
 ```
 
 ### A2 · What must the registration card capture, and is there a statutory report behind it?
-*(scenario record §15 (g), §12)*
+*(scenario record §15 (g), §12, S19b)* — **RULED, owner, 2026-08-31.**
 
-**The facts.** The hotelier reference carries a `grcNo`; the design holds
-`Registration` as a short list plus document references and grows it when this
-is answered. What an Indian property is legally required to record — and what
-it must file for **foreign nationals** — is the owner's knowledge and is
-nowhere in this repository.
+**The card:** *"we can go with your idea."* The design proposes the field list
+(§2.7 of the design chapter) — name as on the ID, date of birth, nationality,
+permanent address, the identity document and its number, arriving from and
+proceeding to, purpose of visit, vehicle, signature, and a separate
+**foreign-national block** for the passport, the visa, the arrival in country
+and the port — and **the property configures which of them are required**,
+domestic and foreign separately (§2.8).
 
-**Why this one is not merely a field list.** If a statutory filing exists, it
-is a **deployment obligation, not a feature**: a property cannot legally
-operate without it, and it would move from "slice 3" to "slice 1" the moment
-that is confirmed. It is flagged here rather than left to be discovered.
+**The report:** *"setup screen … if need they will use."* So it is a
+**per-property capability, not a hardcoded law**: the policy, the flag on a
+stay that needs filing, and the record of a filing that was made — with the
+authority, the reference, the person and the time.
+
+**What this deliberately did not become.** Not a compulsory workflow every
+property must satisfy, and not an assumption that HotelOS submits anything.
+The obligation differs by jurisdiction and by property, and a platform that
+hardcoded one country's rule would be wrong everywhere else.
+
+**And the flag is a to-do, never a gate** — S19b, applying A1's ruling to our
+*own* obligation: an outstanding filing does not stop a check-in.
 
 ---
 
@@ -141,6 +157,34 @@ Jobs' and Room Care's rounds. Slice 4 of the design is blocked on them.
 costs a panel and never a flow. That is worth stating where the work is
 scheduled, because a resolver commissioned as *"the check-in readiness check"*
 would be built as a gate.
+
+### B6 · An automatic guest filing is an outbound connector, and v1's connector contract is inbound-only
+
+A2 leaves GuestOps holding the policy, the flag and the record of a filing —
+and **not** the submission. Sending guest data to a police or immigration
+system is an integration, and the constitution is unambiguous: *"no hardcoded
+integrations — all integrations must use the Integration Hub"*, with a
+connector as the unit (`CONN-Q1`, ADR 0128 §2).
+
+Two facts about the platform meet here, and neither is a blocker for A2's v1
+but both decide what the next step costs:
+
+```text
+ADR 0128 §4   v1 connector scope is INBOUND-ONLY. Write-back — anything
+              this platform sends outward — is a separate connector
+              capability in a later round
+a filing      is outbound by nature. There is no inbound half of it
+```
+
+So a *"file with the authority"* button is not a small addition to GuestOps.
+It is the **first outbound connector** the platform would build, and it would
+land on the write-back capability that `CONN-Q5` deliberately deferred — with
+a credential, an authority-specific format, a retry story and an audit
+obligation heavier than a PMS push, because a filing is a legal assertion.
+
+**Reported so the sequence is visible**: v1 records what a person filed, which
+is useful on its own and costs nothing; the automatic filing waits for the
+outbound connector round and is that round's decision, not this one's.
 
 ### B5 · A1's ruling is a platform principle, and it has no home yet
 
@@ -345,7 +389,7 @@ is here at all.
 | C4 | upgrade: assignment or amendment | **ruling first** — small, wrong once if guessed |
 | C6 | who may see a full phone number | **ruling first** — before slice 1 ships |
 | A1 | check-in into an unreleased room | **RULED — never refuses; no configuration.** The principle needs a register row (§B5) |
-| A2 | the registration card's contents | **owner** — possibly a deployment obligation. **The last question this round holds** |
+| A2 | the registration card, and guest reporting | **RULED — the field list is the design's, the required set is per property; reporting is a setup screen with a recorded filing.** The automatic submission is an outbound connector (§B6) |
 | C9 | company / travel agent profiles | **next**, keeping the booker's text now |
 | C10 | rooming-list import | **next** |
 | C12 | reporting | **next**, and it depends on C3 |

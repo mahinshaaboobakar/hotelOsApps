@@ -485,6 +485,38 @@ next time. The person is Guest360's (G360-Q1). GuestOps holds the stay-scoped
 note; the durable preference belongs with the guest identity record and is
 surfaced by whatever owns the person-graph.
 
+### S19b · The guest is a foreign national, and somebody has to be told
+**SITUATION.** A guest checks in on a passport. The property has an obligation
+to report the stay to an authority — and a property in another country, or a
+property that does not take foreign guests, has no such obligation at all.
+
+**STANDALONE and PMS-CONNECTED.** Both. The obligation follows the property
+and the guest, never the PMS.
+
+**EXPRESSIBLE.** Ruled by the owner, 2026-08-31: **a setup screen, and the
+property uses it if it needs it.** So three things must be representable, and
+a fourth must not be assumed:
+
+```text
+the policy        per property: is reporting required, for whom
+                  (foreign nationals · everyone), and by when
+the flag          this stay needs reporting, and has not been
+the record        it was filed — when, by whom, with what reference
+NOT assumed       that HotelOS submits it. See below
+```
+
+**Submitting to an external authority is an integration**, and the
+constitution routes every integration through the Integration Hub as a
+connector — never hardcoded into an application. So v1 records the filing that
+a person performed; an automatic submission is a connector capability with an
+owner, a credential and a round of its own, and this scenario does not invent
+one (`03-the-open-questions.md` §B6).
+
+**And the flag is a to-do, never a gate.** A guest whose filing is outstanding
+is still checked in, still served, still checked out — S9's rule, applied to
+our own obligation rather than a neighbour's: the platform tells the desk what
+is owed and stops nothing.
+
 ### S20 · Day use
 **SITUATION.** A room sold from 10:00 to 18:00 on the same day. Airport hotels
 sell a large share of their inventory this way.
@@ -775,9 +807,11 @@ arrival & departure detail   actual times, walk-in flag, early/late    S10, S22
 the stay's own corrections   overrides and their reconciliation        §10
 ```
 
-Two of these cannot be scoped without the owner: what a registration card must
-capture (**§15 (g)**), and whether the folio and money are in v1 at all
-(**§15 (f)**).
+Both of those are now ruled: the folio's line is GUEST-Q6, and the
+registration card's contents are §15 (g) — **the design proposes the field
+list and the property configures which of them are required** (owner,
+2026-08-31: *"card we can go with your idea"*), with guest reporting as a
+**setup screen a property uses if it needs it** (S19b).
 
 ---
 
@@ -831,10 +865,11 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
-**Six are ruled** and are struck through below rather than deleted, so the
-scenarios that cite them still resolve. **One remains open** — (g), the
-registration card's statutory contents — carried as a records list whose
-fields the owner fills in, and blocking nothing structural.
+**All seven are ruled**, and are struck through below rather than deleted so
+the scenarios that cite them still resolve. What remains open in this round is
+no longer an owner question: it is the platform's own record — four findings
+and twelve scope items in `03-the-open-questions.md`, for the planner and the
+architect.
 
 | | Subject | Why it cannot be settled here |
 |---|---|---|
@@ -844,7 +879,7 @@ fields the owner fills in, and blocking nothing structural.
 | ~~**(d)**~~ | ~~When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns?~~ (S36) | **RULED — GUEST-Q4, 2026-08-31: there is no second mode.** PMS-writes-first at all times; a matching inbound fact settles an override **silently as confirmed**, so only differing values are a disagreement; the outage shows as per-capability **staleness**, not as a mode; the backlog lands in event order and groups as one outage batch. The S26 boundary is ratified in the same row |
 | ~~**(e)**~~ | ~~Does GuestOps refuse a check-in into a room Room Care has not released?~~ (S9) | **RULED — owner, 2026-08-31: no, and the rule is platform-wide.** *An application's own flow is never gated on another application being installed; an absent dependency loses its capability, never the flow.* Check-in and check-out are GuestOps's responsibility. Room readiness may be **displayed** when Room Care is present and the resolver exists — never a gate. The number is the architect's to claim |
 | ~~**(f)**~~ | ~~Is the folio — charges, deposits, guarantee and cancellation terms — in GuestOps v1?~~ (S6, S25) | **RULED — GUEST-Q6, 2026-08-31:** v1 is **the book plus the stay's commercial terms** (rate, guarantee and cancellation offsets, every amount with currency and tax basis). The **folio** — posting, payments, settlement, invoicing, night-audit posting — is **Finance's domain, a later round**. Accepted knowingly: a standalone property cannot settle a guest in v1, and the first deployments are PMS-connected. The walk-in / PMS-unknown distinction is ratified in the same row |
-| **(g)** | What must the registration card capture, and is there a statutory report behind it? (§12) | The hotelier reference has a `grcNo`; what an Indian property is legally required to record, for domestic and foreign guests, is the owner's knowledge and not the record's |
+| ~~**(g)**~~ | ~~What must the registration card capture, and is there a statutory report behind it?~~ (§12, S19b) | **RULED — owner, 2026-08-31.** The card: *"we can go with your idea"* — the design proposes the field list and **the property configures which fields are required**, for domestic and foreign guests separately. The report: **a setup screen, used by properties that need it** — the policy, the flag and the record of a filing are GuestOps's; **the submission to an authority is an integration** and therefore a connector, not built here (§B6 of `03-the-open-questions.md`) |
 
 ---
 
@@ -853,12 +888,11 @@ fields the owner fills in, and blocking nothing structural.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven subjects are listed in §15; six —
-  (b) the roomless stay, (c) the standing disagreement, (d) the silent feed,
-  (a) the PMS-unknown stay, (f) money in v1 and (e) the unreleased room — were
-  ruled on 2026-08-31 and are carried in §1, §3, S5, S6, S8, S9, S11, S13,
-  S25, S34, S35 and S36. Only (g) is unresolved, and it is not anticipated.
-  S26 records where GUEST-Q3 deliberately does **not** reach.
+* **No answer to an open question.** All seven §15 subjects were ruled on
+  2026-08-31 and are carried in §1, §3, §12, S5, S6, S8, S9, S11, S13, S19b,
+  S25, S34, S35 and S36. S26 records where GUEST-Q3 deliberately does **not**
+  reach, and S19b records what a filing obligation is **not** allowed to
+  become — a gate.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.

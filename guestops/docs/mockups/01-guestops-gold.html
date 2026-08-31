@@ -930,6 +930,134 @@
 </div>
 <div class="cap"><b>GuestOps's first day is not an empty book.</b> The Integration Hub has been normalising reservation and guest facts since the connector shipped and holding them <i>deferred</i> — with their business date and provenance — precisely because this domain did not exist to own them (ADR 0128; connector brief §12). Installing this application is what turns that queue on, and the replay is idempotent by construction: a fact that has already been applied changes nothing and publishes nothing. <b>The empty state that would be wrong here is the usual one</b> — "no reservations yet, create your first booking" — on a property with two thousand of them waiting.</div>
 
+<div class="sub">Registration, and telling the authorities</div>
+
+<!-- 14 · the card -->
+<h1 style="margin-top:12px">14 · <b>The registration card</b> — what the guest signs. The fields are the design's proposal; which of them are <i>required</i> is the property's setting</h1>
+<div class="win" style="min-height:640px">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">2</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Checking in · Fatima Sheikh</div><div class="hsub">Room 506 · 31 Aug → 4 Sep</div></div><div class="grow"></div><div class="btn2">Print card</div></div>
+    <div class="body"><div class="strip"><div class="stat"><b>14</b><span>Arrivals</span></div><div class="stat"><b>42</b><span>In house</span></div><div class="stat"><b>11</b><span>Departures</span></div><div class="stat"><b>2</b><span>Attention</span></div></div></div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Registration card</b><span>GRC 2026/08/1152 · the property's series, next number taken on save</span></div>
+        <div class="sh_b">
+          <div class="fld"><label>Name as on the ID</label><div class="inp">Fatima Sheikh</div></div>
+          <div class="row2">
+            <div class="fld"><label>Date of birth</label><div class="inp">14 Mar 1986</div></div>
+            <div class="fld"><label>Nationality</label><div class="inp">United Arab Emirates <span class="grow">▾</span></div></div>
+          </div>
+          <div class="fld"><label>Permanent address</label><div class="inp tall">Villa 22, Al Barsha 2<br>Dubai · United Arab Emirates</div></div>
+          <div class="row2">
+            <div class="fld"><label>Identity document</label><div class="inp">Passport <span class="grow">▾</span></div></div>
+            <div class="fld"><label>Number</label><div class="inp">P•••••4412</div></div>
+          </div>
+          <div class="row2">
+            <div class="fld"><label>Arriving from</label><div class="inp">Dubai</div></div>
+            <div class="fld"><label>Proceeding to</label><div class="inp">Bengaluru</div></div>
+          </div>
+          <div class="row2">
+            <div class="fld"><label>Purpose of visit</label><div class="inp">Business <span class="grow">▾</span></div></div>
+            <div class="fld"><label>Vehicle</label><div class="inp ph">optional at this property</div></div>
+          </div>
+          <div class="card" style="background:rgba(125,211,252,.05);border-color:rgba(125,211,252,.28)">
+            <div class="ch" style="color:var(--cyan)">Foreign national <div class="grow">shown because the nationality is not India</div></div>
+            <div class="cb">
+              <div class="row2">
+                <div class="fld"><label>Passport issue · expiry</label><div class="inp">02 Feb 2021 · 01 Feb 2031</div></div>
+                <div class="fld"><label>Place of issue</label><div class="inp">Dubai</div></div>
+              </div>
+              <div class="row2">
+                <div class="fld"><label>Visa type · number</label><div class="inp">Business · V•••8890</div></div>
+                <div class="fld"><label>Visa expiry</label><div class="inp">18 Dec 2026</div></div>
+              </div>
+              <div class="row2">
+                <div class="fld"><label>Arrived in India</label><div class="inp">29 Aug 2026</div></div>
+                <div class="fld"><label>Port of arrival</label><div class="inp">Kochi (COK)</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="fld"><label>Documents</label><div class="inp">Passport page · visa page <span class="grow">2 scanned</span></div></div>
+          <div class="fld"><label>Signature</label><div class="inp ph">Captured on the pad, or printed and scanned</div></div>
+          <div class="note" style="padding:10px 12px"><b>The block above appears because of the nationality, not because of a country's law written into the product.</b> Which fields are required — here, and for domestic guests — is this property's setting.</div>
+        </div>
+        <div class="sh_f"><div class="hint">Filing due 1 Sep (24 h after arrival).</div><div class="grow"></div><div class="mini">Cancel</div><div class="mini pri">Save and check in</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The card is a proposal the property tailors, not a form the platform imposes.</b> The field list is the design's (§2.7); the <b>required</b> set is configuration, separately for domestic and foreign guests, because a resort taking Indian weekend guests and a city hotel taking business visas do not collect the same things. <b>A field a property does not use is not deleted from the model</b> — a registration card is a record that must stay readable for years, so an unused field is simply not required. <b>The foreign-national block is conditional on the guest, not on the country the software runs in.</b> And the footer states the obligation without enforcing it: <i>filing due 1 Sep</i> — S19b, where an outstanding filing never blocks a check-in.</div>
+
+<!-- 15 · setup -->
+<h1>15 · <b>Setup · Registration and guest reporting</b> — the screen the owner asked for. A property that has to tell an authority turns it on; a property that does not never sees it</h1>
+<div class="win">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri on">Setup</div>
+    <div class="me"><b>Rakesh Varma</b>General Manager · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">Setup</div><div class="hsub">GuestOps's own settings for this property</div></div><div class="grow"></div><div class="btn2">Discard</div><div class="create">Save</div></div>
+    <div class="body">
+      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stay defaults</div></div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">Guest reporting <div class="grow"><span class="pill ok">on</span></div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">Applies to</div><div class="v">Foreign nationals only <span class="lock">OR EVERYONE</span></div></div>
+            <div class="fr"><div class="k">Authority</div><div class="v">Kerala Police — Form C portal</div></div>
+            <div class="fr"><div class="k">Due</div><div class="v"><b>24 hours</b> after arrival <span class="lock">AN OFFSET, NOT A DATE</span></div></div>
+            <div class="fr"><div class="k">Who may file</div><div class="v">Front Office Manager · Duty Manager <span class="lock">reporting.file</span></div></div>
+            <div class="fr"><div class="k">How it is sent</div><div class="v"><span class="lock no">BY A PERSON, ON THE AUTHORITY'S PORTAL</span></div></div>
+            <div class="note" style="padding:10px 12px"><b>HotelOS does not submit anything.</b> This screen sets the policy, raises the flag and records what was filed — the authority, the reference, who filed it and when. Sending it automatically is an <b>integration</b>, and every integration on this platform is a connector; that one does not exist and is not pretended here.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">Due to file <div class="grow">3 stays</div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">Fatima Sheikh</div><div class="v">arrived 31 Aug · <span class="pill warn">due 1 Sep</span></div></div>
+            <div class="fr"><div class="k">Daniel Fernandes</div><div class="v">arrived 31 Aug · <span class="pill warn">due 1 Sep</span></div></div>
+            <div class="fr"><div class="k">Chen Wei</div><div class="v">arrived 29 Aug · <span class="pill bad2">overdue</span></div></div>
+            <div class="fr"><div class="k">Filed today</div><div class="v">2 · <span class="hint">by Anitha Menon, ref KP/2026/8841</span></div></div>
+            <div style="display:flex;gap:9px"><div class="mini pri">Record a filing</div><div class="mini">Open the list</div></div>
+            <div class="hint"><b>Overdue is shown, never enforced.</b> Chen Wei is checked in, served and will check out on time — the platform says what is owed and stops nothing.</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">Registration card</div>
+        <div class="cb">
+          <div class="cols even">
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div class="fr"><div class="k">GRC series</div><div class="v">2026/08/•••• · resets yearly · next 1153</div></div>
+              <div class="fr"><div class="k">Accepted IDs</div><div class="v">Aadhaar · PAN · Driving licence · Voter ID · Passport</div></div>
+              <div class="fr"><div class="k">Signature</div><div class="v">Required · pad or scan</div></div>
+              <div class="fr"><div class="k">Print at check-in</div><div class="v">Yes <span class="lock">PLATFORM PRINT SURFACE — SEE §C8</span></div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <div class="fr"><div class="k">Required · domestic</div><div class="v">name · address · ID type &amp; number · purpose</div></div>
+              <div class="fr"><div class="k">Required · foreign</div><div class="v">the above <b>+</b> passport, visa, arrival in country, port</div></div>
+              <div class="hint">Two required sets, because the same hotel collects different things from a weekend guest and a business visitor. Everything not required stays on the card as optional — it is never removed from the record.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>This is the screen the owner asked for, and what it deliberately is not.</b> It is a <b>property capability</b>, not a country's law compiled into the product: a property that has no reporting obligation turns it off and never sees the tab, the flag or the list. <b>The deadline is an offset</b> — <i>24 hours after arrival</i> — for the same reason a cancellation deadline is (R18): move the arrival and the deadline moves with it, while a stored date silently stops matching. <b>Configuration is the application's own</b> — an application is a bundle of UI, backend, schema, permissions, events and <i>configuration</i> (ADR 0051) — and none of it belongs in Master Data, because none of it describes what the property <i>is</i>. <b>And the one honest limit is stated on the screen itself</b>: HotelOS does not send anything. An automatic filing is an outbound connector, which the platform has never built and which v1's inbound-only connector contract excludes — reported as §B6 rather than drawn as a button that would not work.</div>
+
 <div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What this mockup does not draw, and why.</b> <b>No folio posting, payment or invoice</b> — GUEST-Q6 puts them in Finance's later round; frame 7's second band shows exactly where the line falls and is reported as a finding rather than proposed. <b>No guest merge, no person-graph, no "same guest, third stay" panel</b> — that sentence is Guest360's answer surfaced here, and Guest360 does not exist yet (G360-Q1). <b>No write-back to Opera anywhere</b>: nothing on any screen reaches the PMS in v1 (<code>CONN-Q5</code>), and frame 8's cancellation dialog says so out loud rather than leaving it to be discovered. <b>No room state and no cleaning decisions</b> — Room Care owns clean, ready and who cleans; frame 6 reports its record and asserts nothing (APPS-Q1, S21). <b>No job assignment</b> — Jobs owns work; frame 5 hands over a request and stops. <b>No mode switch</b>, because there is no second mode (GUEST-Q4). <b>Every frame traces to a scenario</b>; the two cross-application tabs (5, 6) and frame 7's second band are the only places drawing something the platform cannot do today, and each is marked where it is drawn.</div>
 
 </body></html>

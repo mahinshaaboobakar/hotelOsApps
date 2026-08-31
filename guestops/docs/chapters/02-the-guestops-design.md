@@ -48,7 +48,7 @@ through domain-owned read views, and touches no other application's tables.
 
 ---
 
-## 2 · The domain, nine aggregates
+## 2 · The domain
 
 Field lists below are the design's proposal; types are indicative, and the
 **canonical contract is the proto** in `shared/protos` (ADR 0026 — there is no
@@ -91,7 +91,7 @@ current_room_id     Master Data ref, nullable — a DERIVED PROJECTION of the
                     derived projection")
 arrival_date        date, as the source gave it            R12
 departure_date      date, as the source gave it            R12
-arrival_at          Timestamp value object (see §2.8)      R12·R13·R14
+arrival_at          Timestamp value object (see §2.9)      R12·R13·R14
 departure_at        Timestamp value object
 lifecycle           Booked | InHouse | Departed | Cancelled | NoShow   §3
 completeness        a set of what is missing — see below   R6·R9·S11
@@ -198,7 +198,7 @@ dies with the stay.
 ```text
 stay_id
 rate_code · rate_name
-amount            Money (§2.8)                              R19
+amount            Money (§2.9)                              R19
 guarantee_code · guarantee_description
 on_hold · reserves_inventory · is_default   R18's flags
 deposit_offset_from_booking     interval                    R18
@@ -230,10 +230,70 @@ StayNote
   note_id · stay_id · text · author · at        this stay only
 
 Registration
-  stay_id · grc_no
-  document_refs   the platform's media/asset references, never blobs here
-  signed_at · captured_by
+  stay_id · grc_no                      the property's own series
+  name_as_on_id · date_of_birth · nationality
+  address_line · city · state · country · postcode
+  id_type       aadhaar | pan | driving_licence | voter_id | passport
+  id_number · id_issuer · id_expiry
+  arriving_from · proceeding_to · purpose_of_visit
+  vehicle_number                        optional; many properties record it
+  document_refs the platform's media/asset references, never blobs here
+  signature_ref · signed_at · captured_by
+
+Registration · the foreign-national block          filled only when it applies
+  passport_number · passport_issue · passport_expiry · passport_place
+  visa_type · visa_number · visa_issue · visa_expiry
+  arrived_in_country_on · port_of_arrival
 ```
+
+**The field list is the design's proposal and the property decides what is
+required** — owner, 2026-08-31 (*"card we can go with your idea"*), with the
+required set configurable **separately for domestic and foreign guests**
+(§2.8). A field a property does not use is not deleted from the model; it is
+simply not required, because a card is a legal-ish record whose shape differs
+by property and whose history must stay readable.
+
+```text
+StayReporting                            S19b — the filing obligation
+  stay_id · required_by       a date, from the property's policy
+  state       needed | filed | not_required
+  filed_at · filed_by · authority · reference
+```
+
+**Three rules the design commits to here, and the third is the important one:**
+
+* **The obligation is a property policy** (§2.8), never a hardcoded law. A
+  property that takes no foreign guests, or is not in a jurisdiction that asks,
+  configures it off and no screen mentions it.
+* **The record is of a filing, not a submission.** v1 records that a person
+  filed, when, with which authority and under what reference — which is
+  genuinely useful even when the filing is done by hand on a government portal.
+* **HotelOS does not submit it.** Sending data to an external authority is an
+  **integration**, and the constitution routes every integration through the
+  Integration Hub as a connector — *"no hardcoded integrations"*. An automatic
+  filing is therefore a connector with its own owner, credential and round.
+  §14 finding 6 reports what that runs into.
+
+**And the flag never gates anything.** A stay with an outstanding filing checks
+in, is served and checks out — S19b, applying S9's ruling to our *own*
+obligation rather than a neighbour's capability.
+
+### 2.8 · The application's own configuration
+
+An application is a bundle — *UI + backend + schema + migrations + permissions
++ events + **configuration** + lifecycle* (ADR 0051). This is GuestOps's, and
+it is not Master Data's: none of it describes what a property *is*.
+
+```text
+registration    the required-field set, domestic and foreign, separately
+                accepted id types · signature required · print on check-in
+                the grc_no series: prefix, reset rule, next number
+reporting       required? · who it applies to (foreign nationals | everyone)
+                the authority's name · the deadline, as an offset from arrival
+```
+
+The deadline is an **offset**, for R18's reason: *"within 24 hours of arrival"*
+survives the arrival moving, and a stored date does not.
 
 **A request is GuestOps's, and the work is not.** *"What needs doing"* is
 Jobs' domain (APPS-Q1), so raising a job from the stay page **records the
@@ -246,7 +306,7 @@ scenario-record §15 (g) is open, and what an Indian property must legally
 capture for domestic and foreign guests is the owner's knowledge. The shape
 holds; the field list grows when (g) is answered.
 
-### 2.8 · Two value objects the whole schema depends on
+### 2.9 · Two value objects the whole schema depends on
 
 ```text
 Money      amount_minor  int64      never a float, never a string   R19
@@ -659,6 +719,11 @@ stay.write              the lifecycle: check in · check out · cancel ·
 stay.assign             assign a room · move a room
 guest.write             identity records, contact points, preferences
 registration.capture    the registration card, the documents, the signature
+reporting.file          recording that a guest filing was made (S19b) —
+                        separate from capture, because it is an assertion
+                        about an external obligation, not about our record
+guestops.configure      the application's own settings (§2.8): the required
+                        fields, the grc series, the reporting policy
 request.manage          guest requests and their hand-off to Jobs
 ```
 
