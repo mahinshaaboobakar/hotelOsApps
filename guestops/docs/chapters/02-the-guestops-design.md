@@ -141,6 +141,25 @@ needs the pair.
 `RoomStay.current_room_id` is the projection of the open row, resolved by the
 service. The create and move messages carry no such field.
 
+**An upgrade is an assignment — GUEST-Q8 (b).** Putting a guest booked into a
+Deluxe King in an Executive Suite is a **higher-type room with the terms
+unchanged**, so it is `stay.room_changed` like any other assignment (R8), with
+`reason = upgrade` recording why.
+
+```text
+assignment   the ROOM changed · booked type and terms stand
+             → stay.room_changed
+amendment    the BOOKED TYPE or the TERMS themselves changed
+             → stay.amended
+```
+
+**The line is what changed, not what the guest got.** A free upgrade at the
+desk leaves the sale exactly as booked — the rate, the group's expected types
+and every later availability calculation still read the booked type, which is
+why the anchor must not move. A guest who *buys* the suite has amended their
+booking, and then the anchor does move. Treating the free upgrade as an
+amendment would silently rewrite what was sold.
+
 ### 2.4 · `StayGuest` — the party
 
 ```text
@@ -709,7 +728,7 @@ event.
 
 ---
 
-## 7 · Identifiers, and the one thing this design cannot settle
+## 7 · Identifiers — minting *is* the mapping
 
 Every identifier GuestOps mints is a **UUIDv7 of ours**. Opera's confirmation
 number is never a key.
@@ -734,17 +753,47 @@ that the ruling would cost no remodelling. A design that had encoded the
 restriction — one external reference per stay, with the kind implied — would
 be migrating today.
 
-**What this page cannot settle, and reports instead (§15, finding 2):**
-whether that table is GuestOps's or the Hub's. The brief says PMS identifiers
-are external ids in mapping tables and that the PMS-id mapping is the Hub's
-(ADR 0016) — which is plainly right for *rooms*, where Master Data owns the
-canonical id and the Hub resolves it during Enrich. It cannot be applied
-unchanged to a **stay**, because the canonical id does not exist until this
-application mints it, so the Hub has nothing to map to when the first fact
-arrives. The design proposes GuestOps holding the reservation-side references
-and answering *"which stay is this fact about"* itself — the same reasoning
-that makes GUEST-Q5's candidate link a domain decision — and asks for a
-ruling rather than assuming one.
+### 7.1 · The gap dissolves — GUEST-Q8
+
+The question this page asked was *"the Hub has nothing to map to before
+GuestOps mints the canonical id — so whose table is this?"* **Ruled, planner,
+2026-08-31: minting is the mapping.**
+
+```text
+an inbound fact arrives, carrying external references
+        │
+        ├─ a reference we know  →  it names the stay. Apply the fact
+        │
+        └─ none of them known   →  CREATE the stay AND its
+                                   StayExternalRef rows,
+                                   IN ONE GuestOps TRANSACTION
+```
+
+There was never a moment needing a pre-existing canonical id, because the id
+and its external references are **born together**. The problem was an
+assumption — that mapping is a lookup performed *before* the entity exists —
+and it dissolves rather than being bridged.
+
+**And the split it fixes, platform-wide:**
+
+| | |
+|---|---|
+| **master entities** | resolve through **ADR 0016's mapping** — Core's, and unchanged. A PMS room number → `masterdata.room_id` is exactly this |
+| **operational entities** | their typed identifiers **ride on the fact** for the owning domain to record. **The Hub keeps no reservation-id table** |
+
+That is why the Hub was never the right home: a mapping table exists to
+resolve an id somebody else owns, and nobody owns a stay's id but us.
+
+**One transaction, and it matters.** The stay and its references commit
+together with the event — the same rule `events.append(tx, event)` follows.
+A crash between minting the stay and recording what it came from would leave a
+stay nothing could ever match again, and the next inbound fact would create a
+duplicate.
+
+**This is the second time the defensive `id_kind` bet paid.** `CONN-Q8`'s
+ruling cost no remodelling, and this one is prose rather than a migration —
+because the references were modelled as a typed set from the start instead of
+as one column that assumed a single kind.
 
 ---
 
@@ -1001,7 +1050,7 @@ domain through.
 | **ADR 0061 authorization materialisation** | **Ruled, unbuilt** — nothing writes tuples today | any stay-level authorization object. v1 needs none (property + application scope), so this is named rather than depended on |
 | **`CONN-Q8` — the identifier kind** | **Ruled 2026-08-31**; the v1 restriction is withdrawn | nothing — §7's `id_kind` was modelled before the ruling, so it cost no migration |
 | **A platform print surface** | **Does not exist** — no chapter, ADR or mockup in the repository has one | the registration card the guest signs (§2.7, gold mockup frame 14). The button stands; **its register row is raised when this reaches wiring**, per the owner's direction |
-| **The reservation-identifier mapping's home** | **Reported, §14** | which service answers *"which stay is this fact about"* |
+| **The reservation-identifier mapping's home** | **Ruled — GUEST-Q8, 2026-08-31: minting is the mapping** (§7.1) | nothing. The Hub keeps no reservation-id table |
 | **§15 (e) — check-in into an unreleased room** | **Ruled — owner, 2026-08-31** | nothing, and **no configuration either**: GuestOps never refuses. An absent dependency loses its capability, never the flow; readiness is display-only when Room Care and the resolver are both present (§8.1) |
 | **§15 (g) — the registration card's contents** | **Open** | nothing: carried as a **records list** — `grc_no`, documents, signature — whose statutory fields the owner fills in |
 | **Finance** | **Not started** | settlement in a standalone property, knowingly (GUEST-Q6) |
@@ -1020,15 +1069,15 @@ and `stay.departed`. The list is illustrative and an example given in passing
 is not a ruling, but the constitution should not carry a subject the model
 forbids. **Reported for the architect; not silently resolved either way.**
 
-**2 · Where does the reservation ↔ PMS-identifier mapping live? — asked
-formally, 2026-08-31.** Stream DD's sweep confirmed this lands on **both**
-designs, the connector's and this one, so it is put once and answered once.
-§7 states the problem: ADR 0016's mapping is bijective on a canonical id that, for a
-stay, does not exist until GuestOps mints it, so the Hub cannot map the first
-inbound fact. Either the Hub completes its mapping from `stay.created`
-(carrying the external reference), or GuestOps owns the reservation-side
-references outright. The design proposes the latter and does not assume it.
-**A question for the register — the architect's number to claim.**
+**2 · Where does the reservation ↔ PMS-identifier mapping live? — CLOSED,
+GUEST-Q8, 2026-08-31: minting is the mapping** (§7.1). Asked once for both
+designs on Stream DD's sweep, and answered once. The finding is kept rather
+than deleted because *what was wrong with the question* is the reusable part:
+it assumed mapping must be a lookup performed **before** the entity exists,
+and for an operational entity that assumption is what created the gap. Master
+entities resolve through ADR 0016 (Core's, unchanged); an operational entity's
+typed identifiers ride the fact and are recorded by the domain that mints the
+id, in the same transaction.
 
 **3 · Chapter 26's `GuestContext` includes `vip_status`.** ADR 0089 §CTX-Q3
 excluded it from v1. The chapter's head note now marks three superseded parts;

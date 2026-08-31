@@ -670,6 +670,21 @@ change** must not be woken by it. R8 is the requirement; the reference had
 four verbs downstream and the branch distinguishing change from update was
 commented out.
 
+**And the case that sits exactly on the line: the upgrade.** Ruled by the
+planner, 2026-08-31 (GUEST-Q8): a better room with the **terms unchanged** is
+an **assignment**, not an amendment — it becomes an amendment only when the
+booked type or the terms themselves change.
+
+```text
+free upgrade to a Suite        an assignment. The sale stands as booked
+the guest BUYS the Suite       an amendment. The booked type moves
+```
+
+The test is *what changed*, not *what the guest got*. The rate, the group's
+expected room types and every availability calculation read the **booked**
+type, so treating a courtesy upgrade as an amendment would quietly rewrite
+what was sold.
+
 ---
 
 ## 9 · The group page

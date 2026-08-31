@@ -31,9 +31,10 @@ C  scope            things the design found while drawing, each with a
 ```
 
 **Groups A and C are closed** — every owner question this round raised has
-been answered, six of them as **GUEST-Q7** on 2026-08-31. What remains is the
-platform's own record: group B, and one question asked formally of the
-planner.
+been answered: six as **GUEST-Q7** and the upgrade boundary as **GUEST-Q8 (b)**,
+all on 2026-08-31. **B2 is closed too** (GUEST-Q8 (a) — minting is the
+mapping). What remains is **group B minus B2**: five items of the platform's
+own record, going to the planner and the architect **one at a time**.
 
 The rows are kept rather than deleted because the *reasoning* behind a ruling
 is the part that stops it being re-litigated in six months.
@@ -129,22 +130,27 @@ the constitution should not carry a subject the ruled model forbids.
 **Reported for reconciliation; not resolved either way by this round.**
 
 ### B2 · Where does the reservation ↔ PMS-identifier mapping live?
-**Asked formally, 2026-08-31 — the round's outstanding question.** Stream DD's
-sweep confirmed it lands on **both** designs, the connector's and this one, so
-it is put once and answered once for both.
+**RULED — GUEST-Q8, planner, 2026-08-31: minting is the mapping.** Asked once
+for both designs on Stream DD's sweep, and answered once.
 
-ADR 0016 makes an external mapping unique and bijective on
-`(property_id, integration, entity_type, external_id)` ↔ a **canonical id**.
-That works for a room, where Master Data owns the canonical id and the Hub
-resolves it during Enrich. It cannot transfer unchanged to a **stay**: the
-canonical id does not exist until GuestOps mints it, so the Hub has nothing to
-map when the first inbound fact arrives.
+**The question was built on a wrong assumption, and that is the reusable
+part.** It assumed mapping must be a **lookup performed before the entity
+exists** — true for a room, where Master Data owns the canonical id and the
+Hub resolves it during Enrich, and false for a stay. The first inbound fact
+carrying an unknown external reference **creates the stay and its
+`StayExternalRef` rows in one GuestOps transaction**: the id and its
+references are born together, so there is never a moment that needs a
+pre-existing canonical id. The gap dissolves rather than being bridged.
 
-Either the Hub completes its mapping from `stay.created` carrying the external
-reference, or **GuestOps owns the reservation-side references outright**. The
-design proposes the latter — answering *"which stay is this fact about"* is a
-domain decision, the same reasoning that makes GUEST-Q5's candidate link
-staff-confirmed — and does not assume it.
+```text
+master entities        ADR 0016's mapping — Core's, unchanged
+operational entities   typed identifiers ride the fact; the owning
+                       domain records them as it mints the id
+                       → the Hub keeps NO reservation-id table
+```
+
+A mapping table exists to resolve an id somebody else owns, and nobody owns a
+stay's id but GuestOps. That is why the Hub was never the right home.
 
 Related and now **ruled**: **`CONN-Q8`** (the mapping key gains the identifier
 kind, R10) was closed on 2026-08-31 and its v1 restriction withdrawn. The
@@ -292,7 +298,15 @@ the moment it arrives is **unrecoverable later**. Carrying a source code costs
 one field; reconstructing six months of channel mix does not happen.
 
 ### C4 · An upgrade — is it an assignment, or an amendment?
-**Recommendation: needs a ruling; small, and it will be wrong once if guessed.**
+**RULED — GUEST-Q8 (b), 2026-08-31: an assignment.** A higher-type room with
+the **terms unchanged** is `stay.room_changed` like any assignment (R8); it
+becomes an **amendment** only when the booked type or the terms themselves
+change. The test is *what changed*, not *what the guest got* — a courtesy
+upgrade leaves the sale as booked, and treating it as an amendment would
+rewrite what was sold. Carried in design §2.3 and scenario S28.
+
+*The original framing is kept below, because it is why the answer is not
+obvious.*
 
 GUEST-Q2's addendum makes the **room type** the anchor and the **room number**
 an assignment. So when the desk puts a guest booked into a Deluxe King into an
@@ -410,17 +424,21 @@ is here at all.
 | C5 | pseudo rooms are unmappable | **v1** — a boundary check, no feature |
 | C7 | reinstate a cancelled stay | **v1** — small |
 | C11 | *"three stays on this record"* | **v1** — narrower than Guest360, no overlap |
-| C4 | upgrade: assignment or amendment | **ruling first** — small, wrong once if guessed |
+| C4 | upgrade: assignment or amendment | **RULED — GUEST-Q8 (b): an assignment**, unless the booked type or the terms change |
 | A1 | check-in into an unreleased room | **RULED — never refuses; no configuration.** The principle needs a register row (§B5) |
 | A2 | the registration card, and guest reporting | **RULED — the field list is the design's, the required set is per property; reporting is a setup screen with a recorded filing.** The automatic submission is an outbound connector (§B6) |
 | C9 | company / travel agent profiles | **next**, keeping the booker's reference now (C3 keeps it) |
 | C10 | rooming-list import | **next** |
 | C12 | reporting | **next** — and C3's widening is what makes it possible later |
 
-**Six of the twelve were ruled into slice 1 on the day they were raised.** The
-three still marked *v1* are the design's own small items, and **C4 is the only
-one waiting on a ruling** — it is small, and guessing it would be wrong once
-in a way the rate and the group's expected types would both inherit.
+**Seven of the twelve were ruled within a day of being raised**, six into
+slice 1 and C4 as a boundary. The three still marked *v1* are the design's own
+small items and need nobody's decision; the three marked *next* are scope the
+owner has already placed.
+
+**Group C is closed.** What remains in this document is group B — the
+platform's own record — and it goes to the planner and the architect one item
+at a time.
 
 ---
 
