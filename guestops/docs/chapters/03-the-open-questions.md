@@ -32,9 +32,10 @@ C  scope            things the design found while drawing, each with a
 
 **Groups A and C are closed** — every owner question this round raised has
 been answered: six as **GUEST-Q7** and the upgrade boundary as **GUEST-Q8 (b)**,
-all on 2026-08-31. **B2 is closed too** (GUEST-Q8 (a) — minting is the
-mapping). What remains is **group B minus B2**: five items of the platform's
-own record, going to the planner and the architect **one at a time**.
+all on 2026-08-31. **B1 and B2 are closed too** — B2 by GUEST-Q8 (a), minting
+is the mapping; B1 by a correction to `CLAUDE.md` itself. What remains is
+**B3–B6**: four items of the platform's own record, going to the planner and
+the architect **one at a time**.
 
 The rows are kept rather than deleted because the *reasoning* behind a ruling
 is the part that stops it being re-litigated in six months.
@@ -126,8 +127,14 @@ checking in happens to a **room-stay** — there is no such thing as checking in
 a group (S23). The design publishes `stay.arrived` and `stay.departed`.
 
 The list is illustrative and an example given in passing is not a ruling, but
-the constitution should not carry a subject the ruled model forbids.
-**Reported for reconciliation; not resolved either way by this round.**
+the constitution should not carry a subject the ruled model forbids — and it
+is the **most-read document in the repository**, so a new stream designing
+against reservations would copy the shape it saw there.
+
+**CLOSED — corrected in `CLAUDE.md`, 2026-08-31.** The examples now read
+`stay.arrived` / `stay.departed`, with the reasoning kept as a dated note. The
+boundary held: the finding was raised, not fixed from this round, because the
+constitution is the architect's file.
 
 ### B2 · Where does the reservation ↔ PMS-identifier mapping live?
 **RULED — GUEST-Q8, planner, 2026-08-31: minting is the mapping.** Asked once

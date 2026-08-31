@@ -1067,7 +1067,11 @@ name an operation that cannot occur — a group does not check in (S23: there is
 no such thing as checking out a group). This design publishes `stay.arrived`
 and `stay.departed`. The list is illustrative and an example given in passing
 is not a ruling, but the constitution should not carry a subject the model
-forbids. **Reported for the architect; not silently resolved either way.**
+forbids. **CLOSED — corrected in `CLAUDE.md`, 2026-08-31:** the examples now
+read `stay.arrived` / `stay.departed`, with the reasoning kept as a dated note
+so the correction cannot read as silent drift later. Raised rather than fixed
+from here, because the constitution is the architect's file and this round has
+no authority over it.
 
 **2 · Where does the reservation ↔ PMS-identifier mapping live? — CLOSED,
 GUEST-Q8, 2026-08-31: minting is the mapping** (§7.1). Asked once for both
