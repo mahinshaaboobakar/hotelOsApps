@@ -1,4 +1,4 @@
-# 02 · The current system and the gaps — what the owner runs, measured against chapter 01
+X`# 02 · The current system and the gaps — what the owner runs, measured against chapter 01
 
 **Status:** comparison study — **complete, for the owner's read**, 2026-08-31.
 Stream GG, deliverable 1 of the Workforce round — brief
@@ -725,13 +725,110 @@ the property-policy surface as new work rather than a revision.
 ---
 
 
+### 3.4 · Swaps and covers — two verbs that were never one operation
+
+The brief's item 4 was answered in two halves, months apart in nothing but
+sequence: **covers** were settled by §3.3b's `DEFAULT` rows L9/L10, and
+**swaps** were the last thing the walk had not asked. `WF-Q10` closed the other
+§4.8 open on the same day; this one is `WF-Q9`.
+
+**Ruled — owner, 2026-08-31:**
+
+> **Yes — a staff member may propose exchanging a shift with a colleague, and
+> it takes effect only on the manager's approval.**
+
+#### The rows
+
+| # | Feature | Verdict | Why |
+|---|---|---|---|
+| S1 | A **staff member may propose** a swap with a named colleague | **GAP** — `OWNER` — proposed **IN v1** | Nothing in chapter 01 or the mockup lets a staff member initiate anything. My Schedule is a *view* |
+| S2 | It takes effect **only on the manager's approval** — a proposal with its own lifecycle, `proposed → approved / declined` | **GAP** — `OWNER` — proposed **IN v1** | This is the aggregate §4.8 anticipated, and it is real |
+| S3 | A **manager moving shifts directly** needs no proposal | **COVERED** | Frame 2's `⇄ Swap` already does this, and it is a **different operation** — see below |
+| S4 | Where a proposal is **entered** in v1, before the staff app exists | **OPEN** — deliverable 2 must answer it honestly | The constraint the ruling names explicitly. Below |
+| L9 · L10 | A **cover** is a manual reassignment against the vacated slot, surfaced as a gap | **COVERED** — `DEFAULT`, from §3.3b | Recorded here so the brief's item 4 reads as one subject |
+
+#### S3 · A swap and a manager's rearrangement are not the same operation, and the study is explicit about it
+
+The word *swap* names two things that look identical on the rota and differ
+completely in what they are:
+
+```text
+manager's swap      frame 2's ⇄ Swap — pick two people, exchange their week.
+                    An action. It happens, and it is done
+staff swap          a REQUEST between two people that a third approves.
+                    An object with a state, an author, and an outcome
+```
+
+Folding them would be the same error §3.3 avoided when it kept the manager's
+cover distinct from a workflow engine. **The manager's tool is not the staff
+proposal with the approval step removed** — it never had one, because the
+manager *is* the authority. Deliverable 2 keeps both, and the rota shows the
+same result either way.
+
+#### S2 · What the proposal needs that a leave request does not
+
+`LeaveRequest` is the nearest existing shape and it is not close enough to
+reuse, which is worth stating before someone tries:
+
+| | `LeaveRequest` | swap proposal |
+|---|---|---|
+| Who it concerns | **one** person | **two**, and both shifts must exist |
+| What approval changes | one person's availability | **two people's rota cells, atomically** |
+| A second party's consent | none | **the colleague's** — does Anita agree before Priya sees it? |
+
+The third row is the one the ruling does not settle and deliverable 2 must
+choose: whether the colleague accepts first (`proposed → accepted → approved`)
+or whether the manager's approval is the only gate and the colleague simply
+learns of it. Both are defensible; the first is what most rota products do and
+costs one more state.
+
+**The approver resolves exactly as L8's does** — the department head from
+Workforce's own postings — so this adds a lifecycle, not a second authority.
+
+#### S4 · Where a proposal is entered, and the fact that decides it
+
+The ruling names the constraint rather than waving at it: the staff mobile app
+is **next version** (ADR 0115 parked, §3.2's A5, §3.9's N4), so v1 must say
+where a staff member actually enters a proposal.
+
+**The fact that shapes the honest answer**, measured rather than assumed —
+`services/kernel/crates/kernel/src/events/streams.rs:88-90`:
+
+> *"`staff` is master data about a person, and distinct from `user`: **most
+> staff have no login.**"*
+
+So *"the staff member enters it in My Schedule"* is a true answer for a
+minority and silence for everybody else. Chapter 01's My Schedule frame
+presupposes a signed-in person, and ADR 0116 §5 gates application access
+per user — both correct, and neither reaches a room attendant with no account.
+
+Two shapes for deliverable 2, with their consequences, and **the study chooses
+neither**:
+
+* **Only staff with a login may propose.** Honest and small; the capability
+  simply does not exist for most of the workforce until the staff app ships, and
+  the UI must say so rather than appear broken.
+* **A supervisor may enter a proposal on someone's behalf**, recorded as such —
+  *proposed by X on behalf of Y*. Reaches everyone, and the provenance must be
+  kept or the record quietly claims the staff member did something they did not.
+  That is the same provenance rule §3.2's A7 established for attendance, and it
+  is the reason this option is not free.
+
+#### The delta against the gold mockup
+
+**Frame 1 · My Schedule** is a read-only month today. S1 gives it its first
+*action*, which changes what the frame is. **Frame 4 · Leave Approvals** is the
+natural home for the manager's side, and it becomes a queue of **two kinds** —
+leave requests and swap proposals — or gains a sibling. Deliverable 3's call;
+recorded so it is not discovered while drawing.
+
+---
+
 > **A note on numbering.** The two rulings below were relayed as *"subject 4"*
 > and *"subject 5"*. Against the brief's §2 seed list they are items **5**
 > (overtime and hours) and **6** (skills and certifications), and they are
 > written up here as §3.5 and §3.6 so that a section number and a seed-list
-> item never disagree. The brief's item 4 — swaps and covers — is **half
-> answered**: §3.3b's L9/L10 settled what a *cover* is, and staff-initiated
-> *swaps* have not been asked.
+> item never disagree. The brief's item 4 is §3.4, above.
 
 ### 3.5 · Overtime and hours — Workforce produces the numbers and never calculates pay
 
@@ -1591,7 +1688,10 @@ can hold two names in one day column (M1), and the zone needs a place (Z1, Z3).
 Redrawing it is not a touch-up.
 
 **Frame 5** cannot stay a one-name-per-day month strip (M1). **Frame 6** gains
-the zone. **Frames 3 and 4** must survive a negative balance (L6 × `WF-Q5`).
+the zone. **Frames 3 and 4** must survive a negative balance (L6 × `WF-Q5`), and
+frame 4 becomes a queue of **two kinds** — leave requests and swap proposals —
+or gains a sibling (S2). **Frame 1 · My Schedule** stops being read-only: S1
+gives it its first action, which changes what the frame is.
 
 **And four surfaces do not exist at all:**
 
@@ -1601,11 +1701,14 @@ property workforce policy   leave types · accrual rate · OT threshold ·
 reporting                   the month-end sheet and its export   (O9)
 print view                  a different artifact from frame 2, not a
                             print stylesheet on it                (N1)
-attendance                  posted-versus-present, and marking    (A1–A3)
+attendance                  posted-versus-present, marking, and
+                            lateness against the rota      (A1–A3, A8)
 ```
 
-The attendance surface is the one still waiting on an answer — §3.2's residue
-decides whether it is a frame or a line in another one.
+**The attendance surface is no longer waiting on an answer.** `WF-Q10`'s
+*"visible against the rota"* is its mandate — the duty manager's
+posted-versus-present view is in, and what deliverable 3 decides is its shape,
+not its existence.
 
 ### 4.6 · What this round found outside itself
 
