@@ -362,7 +362,7 @@
             <div class="fr"><div class="k">Departure</div><div class="v">4 Sep <b>11:00</b> <span class="lock">DERIVED FROM PROPERTY CLOCK</span></div></div>
             <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King <span class="lock">FROM OPERA</span></div></div>
             <div class="fr"><div class="k">Party</div><div class="v">Rajesh Pillai <span class="pill neu">primary</span> · Lakshmi Pillai <span class="link">＋ add</span></div></div>
-            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <span class="lock">MOBILE · PRIMARY</span> · rajesh.p@•••••.com</div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <span class="link">reveal</span> <span class="lock">MOBILE · PRIMARY</span> · rajesh.p@•••••.com <span class="link">reveal</span></div></div>
             <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/08/1147 · ID captured <span class="pill ok">complete</span></div></div>
             <div class="fr"><div class="k">Preferences</div><div class="v"><span class="un">High floor, away from the lift</span> <span class="lock">GUEST · CARRIES TO NEXT STAY</span></div></div>
             <div class="fr"><div class="k">Note</div><div class="v"><span class="un">Anniversary — cake sent 31 Aug</span> <span class="lock">THIS STAY ONLY</span></div></div>
@@ -384,7 +384,7 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>S33 and S35, drawn as one screen.</b> The rule the whole PMS mode rests on: <b>one truth leaves the application</b> — the standing override is what the board shows, what Room Care hears and what Context resolves; the disagreement is a flag on that answer, never a second answer (GUEST-Q3). <b>Clearing is the stay's write permission</b> — the same permission that made the override — with two named values and both kept in history; no separate permission, no supervisor escalation. <b>Read-from-PMS versus staff-editable is a mark, not a lock</b>: <span class="lock">FROM OPERA</span> says who established the value, and staff may still write it — PMS-connected has never meant read-only (GUEST-Q1, amended). Every timestamp carries its basis (R12, R13, S22). <b>A preference carries to the next stay; a note dies with this one</b> (S19) — the same distinction the schema draws, made visible where it is entered.</div>
+<div class="cap"><b>S33 and S35, drawn as one screen.</b> The rule the whole PMS mode rests on: <b>one truth leaves the application</b> — the standing override is what the board shows, what Room Care hears and what Context resolves; the disagreement is a flag on that answer, never a second answer (GUEST-Q3). <b>Clearing is the stay's write permission</b> — the same permission that made the override — with two named values and both kept in history; no separate permission, no supervisor escalation. <b>Read-from-PMS versus staff-editable is a mark, not a lock</b>: <span class="lock">FROM OPERA</span> says who established the value, and staff may still write it — PMS-connected has never meant read-only (GUEST-Q1, amended). Every timestamp carries its basis (R12, R13, S22). <b>A preference carries to the next stay; a note dies with this one</b> (S19) — the same distinction the schema draws, made visible where it is entered. <b>Contacts are masked and <i>reveal</i> is one click</b> for anyone holding the stay's write permission — and <b>the reveal is recorded</b>, which is the half that matters: masking alone is a speed bump a busy desk works around within a week, while a recorded reveal is what separates a late-arrival phone call from a thousand-row harvest.</div>
 
 <!-- 4 · Activity -->
 <h1>4 · <b>The stay · Activity</b> — everything that has happened to this booking, with who said it. The desk's answer to "why does it say that?"</h1>
@@ -930,10 +930,75 @@
 </div>
 <div class="cap"><b>GuestOps's first day is not an empty book.</b> The Integration Hub has been normalising reservation and guest facts since the connector shipped and holding them <i>deferred</i> — with their business date and provenance — precisely because this domain did not exist to own them (ADR 0128; connector brief §12). Installing this application is what turns that queue on, and the replay is idempotent by construction: a fact that has already been applied changes nothing and publishes nothing. <b>The empty state that would be wrong here is the usual one</b> — "no reservations yet, create your first booking" — on a property with two thousand of them waiting.</div>
 
+<div class="sub">Selling the room</div>
+
+<!-- 14 · availability -->
+<h1 style="margin-top:12px">14 · <b>New booking</b> — the answer before the sale. Availability is computed from what we already hold; it is not a table anyone feeds</h1>
+<div class="win" style="min-height:620px">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">2</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head"><div><div class="ht">New booking</div><div class="hsub">Standalone — this property is the book</div></div><div class="grow"></div><div class="btn2">Walk-in</div></div>
+    <div class="body">
+      <div style="display:flex;gap:10px">
+        <div class="inp" style="flex:1">Arrive <b style="margin-left:6px">3 Sep</b></div>
+        <div class="inp" style="flex:1">Depart <b style="margin-left:6px">7 Sep</b></div>
+        <div class="inp" style="flex:1">1 room · 2 adults <span class="grow">▾</span></div>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Stop-sell</div><div>Free</div></div>
+        <div class="tr list">
+          <div class="nm"><b>Deluxe King</b><span>₹ 8 400 · gross</span></div>
+          <div>24</div><div>19</div><div>1 <span class="sh oth"><i></i>EngineeringOps</span></div><div>0</div>
+          <div><b style="color:var(--ok);font-size:15px">4</b></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Deluxe Twin</b><span>₹ 8 400 · gross</span></div>
+          <div>18</div><div>18</div><div>0</div><div>0</div>
+          <div><b style="color:var(--faint);font-size:15px">0</b></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Executive Suite</b><span>₹ 12 000 · gross</span></div>
+          <div>6</div><div>2</div><div>0</div><div>4 <span class="sh dis"><i></i>wedding party</span></div>
+          <div><b style="color:var(--faint);font-size:15px">0</b></div>
+        </div>
+      </div>
+      <div class="note"><b>The Suite row is the one that explains the design.</b> Four suites are physically fine, unsold, and <b>not for sale</b> — a manager held them for a wedding party. That is <b>stop-sell</b>: our own setting, per room type and date range, the seller's control. The Deluxe King's out-of-order room is a different thing entirely — <b>EngineeringOps says that room cannot be used</b>, and we hear it as an event. Neither number is stored as inventory here.</div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">Where each number comes from</div>
+          <div class="cb">
+            <div class="fr"><div class="k">Total rooms</div><div class="v">Master Data <span class="lock">READ, NEVER COPIED</span></div></div>
+            <div class="fr"><div class="k">Sold</div><div class="v">our own stays holding that type on those dates</div></div>
+            <div class="fr"><div class="k">Out of order</div><div class="v">EngineeringOps <span class="lock">HEARD AS AN EVENT</span></div></div>
+            <div class="fr"><div class="k">Stop-sell</div><div class="v">ours — room type + date range + reason</div></div>
+            <div class="hint">If the out-of-order projection is a few seconds behind, the answer is <b>conservative</b> and no number anywhere becomes wrong. That is the difference between an event-derived read model and a copy of somebody else's table.</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">Assigning room 214 · the conflict check</div>
+          <div class="cb">
+            <div class="ban dis"><div><b>214 already has a stay over these dates.</b> Rajesh Pillai, 31 Aug → 4 Sep.<br><span style="color:var(--faint)">Assign anyway, or pick another room.</span></div></div>
+            <div style="display:flex;gap:9px"><div class="mini">Pick another</div><div class="mini pri">Assign anyway</div></div>
+            <div class="hint"><b>It warns and never forbids.</b> When staff answer <i>"two different stays"</i> to a candidate link, the room is genuinely double-booked and that is the truth — a hard block would make a ruled outcome unreachable. So it names the other stay and lets a person decide.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>GUEST-Q7: both modes are fully v1, so availability is slice-1 work</b> — a standalone property that cannot say what is free is not a property that can open. <b>And no new inventory owner was created to do it.</b> The rooms stay Master Data's, out-of-order stays EngineeringOps's and arrives as an event, and what GuestOps adds is its own two things: the stays it already holds, and stop-sell. <b>The same computation answers both questions</b> — <i>how many of this type are free</i> and <i>is this room free</i> — which is why the conflict check runs on every assignment, every move and every extension, in both modes, with no branch. <b>What this is not:</b> no pricing by occupancy, no minimum stay, no closed-to-arrival, no travel-agent allotments — those are revenue-management concepts and the platform has not named an owner for them.</div>
+
 <div class="sub">Registration, and telling the authorities</div>
 
 <!-- 14 · the card -->
-<h1 style="margin-top:12px">14 · <b>The registration card</b> — what the guest signs. The fields are the design's proposal; which of them are <i>required</i> is the property's setting</h1>
+<h1 style="margin-top:12px">15 · <b>The registration card</b> — what the guest signs. The fields are the design's proposal; which of them are <i>required</i> is the property's setting</h1>
 <div class="win" style="min-height:640px">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -997,7 +1062,7 @@
 <div class="cap"><b>The card is a proposal the property tailors, not a form the platform imposes.</b> The field list is the design's (§2.7); the <b>required</b> set is configuration, separately for domestic and foreign guests, because a resort taking Indian weekend guests and a city hotel taking business visas do not collect the same things. <b>A field a property does not use is not deleted from the model</b> — a registration card is a record that must stay readable for years, so an unused field is simply not required. <b>The foreign-national block is conditional on the guest, not on the country the software runs in.</b> And the footer states the obligation without enforcing it: <i>filing due 1 Sep</i> — S19b, where an outstanding filing never blocks a check-in.</div>
 
 <!-- 15 · setup -->
-<h1>15 · <b>Setup · Registration and guest reporting</b> — the screen the owner asked for. A property that has to tell an authority turns it on; a property that does not never sees it</h1>
+<h1>16 · <b>Setup · Registration, stop-sell and guest reporting</b> — the screen the owner asked for. A property that has to tell an authority turns it on; a property that does not never sees it</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -1010,7 +1075,16 @@
   <div class="main">
     <div class="head"><div><div class="ht">Setup</div><div class="hsub">GuestOps's own settings for this property</div></div><div class="grow"></div><div class="btn2">Discard</div><div class="create">Save</div></div>
     <div class="body">
-      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stay defaults</div></div>
+      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stop-sell</div><div class="tab">Stay defaults</div></div>
+      <div class="card">
+        <div class="ch">Stop-sell <div class="grow">the seller's control — not an inventory fact</div></div>
+        <div class="cb">
+          <div class="fr"><div class="k">Executive Suite</div><div class="v">3 Sep → 7 Sep · 4 rooms · <span class="un">wedding party</span> <span class="hint">set by Rakesh Varma, 22 Aug</span></div></div>
+          <div class="fr"><div class="k">Deluxe Twin</div><div class="v">14 Oct → 20 Oct · all · <span class="un">corridor renovation</span></div></div>
+          <div class="hint"><b>This says "we choose not to sell", never "this room cannot be used."</b> A room that is genuinely unusable is <b>out of order</b> — EngineeringOps's to declare and ours only to hear. Two sentences, two owners, and availability subtracts both.</div>
+          <div class="mini">＋ Close a room type for dates</div>
+        </div>
+      </div>
       <div class="cols">
         <div class="card">
           <div class="ch">Guest reporting <div class="grow"><span class="pill ok">on</span></div></div>

@@ -128,6 +128,28 @@
 </div>
 <div class="cap"><b>Why one rule and not three mechanisms.</b> The system this replaces met out-of-order arrival and answered it with per-flavour <code>forceCheckIn</code> flags, <code>directCheckout</code> fallbacks marked <i>"Todo remove after data flow is ok"</i>, and a commented-out replay that would have <b>injected a check-in that never happened</b> — all live at once, with the decision record being the comments themselves (R7). The cost was not complexity; it was that nobody could say which path a given stay had taken. <b>A single comparison on lifecycle rank answers every row above</b>, and the rows are consequences rather than cases.</div>
 
+<h1>2b · <b>Availability, computed.</b> Four inputs, three owners, and no new inventory table anywhere</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">GUEST-Q7 · S1b</div>
+    <div class="fn">"How many Deluxe Kings are sellable on 3 September?" <span>an answer, not a stored number</span></div>
+    <div class="rail2">
+      <div class="fs"><b>Rooms of the type</b>Master Data<small>read · never copied</small></div><div class="arr">−</div>
+      <div class="fs"><b>Stays holding it</b>ours<small>Booking · RoomStay · Assignment</small></div><div class="arr">−</div>
+      <div class="fs oth"><b>Out of order</b>EngineeringOps<small>consumed by <b>event</b> into a local read model — never their table, never authoritative</small></div><div class="arr">−</div>
+      <div class="fs"><b>Stop-sell</b>ours<small>room type + date range + reason</small></div><div class="arr">=</div>
+      <div class="fs good"><b>Free</b>computed at the moment it is asked</div>
+    </div>
+    <div class="branch">
+      <div class="fs"><b>The projection may lag, and nothing breaks</b><small>a few seconds behind makes the answer <b>conservative</b>; no number anywhere becomes wrong. That is the line between an event-derived read model and duplicated master data</small></div>
+      <div class="fs"><b>The same computation, one room wide</b><small>"is 214 free on these dates?" — the conflict check, run on every assignment, every move and every extension, in both modes</small></div>
+      <div class="fs warn"><b>It warns; it never forbids</b><small>GUEST-Q5 made a double-booked room a possible truth, so a hard block would put a ruled outcome out of reach. It names the other stay</small></div>
+      <div class="fs stop"><b>Not built</b>pricing by occupancy · minimum stay · closed-to-arrival · travel-agent allotments<small>revenue management, and the platform has named no owner</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The ruling's shape was the design constraint, not just its scope</b> — <i>"design it as an answer GuestOps computes, never a table someone else must feed."</i> A stored availability table would need every one of these four inputs to write into it, which is four ways to drift and one more owner of the truth about rooms. Computing it means the only things GuestOps stores are the two it already owns: <b>its stays, and its stop-sell</b>.</div>
+
 <div class="sub">Who writes</div>
 
 <h1>3 · <b>The two write paths.</b> One rule in every condition — because GUEST-Q4 removed the second mode rather than choosing a branch</h1>
@@ -300,7 +322,7 @@
     <div class="rail2">
       <div class="fs pms"><b>PMS-connected</b>the night audit marks it and it arrives as a fact</div><div class="arr">→</div>
       <div class="fs"><b>Business fact, not a lifecycle verb</b><code>RecordNoShow</code> — chargeable and reportable<small>and distinguishable from a cancellation, for both reasons</small></div><div class="arr">→</div>
-      <div class="fs warn"><b>Standalone: who marks it?</b><small>there is no night-audit owner in the platform — the property's day roll flags unarrived stays <b>for staff</b>, and nothing marks itself</small></div>
+      <div class="fs warn"><b>Standalone: the day roll</b><small>GUEST-Q7, slice 1 — no night-audit owner exists in the platform, so GuestOps rolls the day and <b>flags</b> unarrived stays for staff. It marks nothing: a guest who arrived at 23:50 is not a no-show, and only the desk knows that</small></div>
     </div>
   </div>
   <div class="flow">
@@ -372,7 +394,7 @@
   <b>The folio.</b> Posting, payments, settlement, invoicing and the night-audit posting are Finance's later round (GUEST-Q6). The stay's <b>commercial terms</b> are in v1 and are drawn in the gold mockup's frame 7; the balance beside them is dashed, and the <b>connector balance-fetch is recorded as a candidate capability for the connector's second round</b> — it is a read, but v1's inbound contract excludes it.<br>
   <b>Guest merge.</b> The person-graph, suggested links and merges are Guest360's (G360-Q1). GuestOps holds <code>guest_id</code>; a merge re-points the person and rewrites no stay, which is exactly why no <code>person_id</code> is stored here.<br>
   <b>Write-back of any kind.</b> Not a check-in, not a room assignment, not a guest detail (<code>CONN-Q5</code>).<br>
-  <b>Availability and inventory.</b> Nothing here answers <i>"do we have a Deluxe King on 3 September?"</i> — see the round's open-questions page; it is the largest gap the design knows about, and it is named rather than quietly assumed.<br>
+  <b>Revenue management.</b> Availability itself is now drawn (flow 2b, GUEST-Q7) — what is <i>not</i> is pricing by occupancy, minimum stay, closed-to-arrival and travel-agent allotments. Those need an owner the platform has not named.<br>
   <b>Room state.</b> Clean, ready, inspected and who cleans are Room Care's; these flows announce occupancy and departure and assert nothing about what work that becomes (APPS-Q1).<br>
   <b>Authorization tuples.</b> ADR 0061's materialisation is unbuilt platform-wide; v1 needs no stay-level object, so it is named rather than depended on.
 </div>

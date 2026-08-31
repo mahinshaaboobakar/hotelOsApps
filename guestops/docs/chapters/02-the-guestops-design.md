@@ -26,12 +26,12 @@ The scenario record said what must be handled. This page says **how**: the
 schema, the state machine, the events, the read views, the permissions, the
 tree and the slices. It is a design under review, not a decision record — the
 rulings are in the platform register, and an ADR is written when the planner
-rules on what §14 reports.
+rules on what §15 reports.
 
 Three things it deliberately does not contain: **no folio** (GUEST-Q6 —
 Finance's), **no merge logic** (G360-Q1 — Guest360's), and **no code**. The
 brief gates code behind the owner's verification of the mockup and behind the
-application-caller authorization round (§13).
+application-caller authorization round (§14).
 
 ---
 
@@ -98,7 +98,7 @@ completeness        a set of what is missing — see below   R6·R9·S11
 walk_in             bool — how the guest arrived           S13
 pms_unknown         bool — who knows about them (GUEST-Q5) S5
 business_date       the property's operating day this stay's arrival
-                    belongs to — attached, never computed here (§7)
+                    belongs to — attached, never computed here (§8)
 row_version         optimistic concurrency
 ```
 
@@ -175,6 +175,20 @@ ContactPoint
   source        staff | pms
 ```
 
+**Masked by default, revealed by a click, and the reveal is recorded** —
+GUEST-Q7, ruled rather than asked, as standard practice for stored contact
+PII. A contact renders as `+91 98470 •••• 12`; a staff member holding the
+**stay's write permission** reveals it in one action; and the reveal is
+written to the platform's audit — who, which guest, when. No new permission
+and no bespoke table: the permission that lets a person act on the stay is the
+one that lets them ring the guest, and the audit model is Chapter 26's.
+
+**Recording the reveal is the part that does the work.** Masking alone is a
+speed bump — every receptionist needs real numbers all day, so a policy that
+made reveal rare would be worked around within a week. What makes a thousand-row
+harvest different from a late-arrival phone call is that one of them leaves a
+trail.
+
 **GuestOps now owns the phone blind index**, which ADR 0089 §CTX-Q2 left
 waiting for *"the domain that owns the phone number"*. The mechanism is the
 platform's, already designed (`docs/working/05-secrets.html` §"Searchable
@@ -211,6 +225,40 @@ penalty_amount    Money · penalty_nights int · penalty_basis R18
 date changing and a resolved timestamp does not, and *"a cancellation deadline
 that silently stops matching its reservation is a chargeable error"*. The
 deadline is computed when it is displayed.
+
+### 2.6b · The stay's commercial and source detail — GUEST-Q7
+
+The owner widened C3 from *booking source* to **every significant field the
+PMS sends on a reservation**. The study's §3.2 is the list the flat flavours
+actually carry, and this is the **kept set** — named explicitly, because *a
+field is kept by decision, never by accident of the payload*:
+
+```text
+source            direct · OTA · corporate · walk-in · the source's own code
+travel_agent      as sent — a reference, not a profile (§C9)
+market_code       the segment every hotel reports on
+meal_plan         EP · CP · MAP · AP, or the source's own code
+guest_counts      adults · children — R9's counts, separately
+rate_code         with the terms, §2.6
+```
+
+**And what is not modelled is retained rather than discarded:**
+
+```text
+source_detail     the remaining significant fields of the inbound fact,
+                  kept as given, with the integration that sent them
+```
+
+This is the R25 lesson turned around. The reference **dropped** a reservation
+that had no phone and **fabricated** an email when a downstream field demanded
+one — two ways of losing the truth. Retention is the third option: what we
+have not yet modelled is kept as it arrived, so the day it earns a column the
+history is there, and nobody is inventing it retrospectively.
+
+**Two limits, so retention does not become a dumping ground.** `source_detail`
+is **never read to drive behaviour** — a field that decides something gets
+modelled first — and it is **not a second copy of the raw payload**, which is
+the Hub's and stays there (ADR 0128 §5, store-before-process).
 
 **No folio.** No charge, no payment, no settlement, no invoice, no
 night-audit posting — GUEST-Q6 puts all of it in Finance's later round, and
@@ -272,7 +320,7 @@ StayReporting                            S19b — the filing obligation
   **integration**, and the constitution routes every integration through the
   Integration Hub as a connector — *"no hardcoded integrations"*. An automatic
   filing is therefore a connector with its own owner, credential and round.
-  §14 finding 6 reports what that runs into.
+  §15 finding 6 reports what that runs into.
 
 **And the flag never gates anything.** A stay with an outstanding filing checks
 in, is served and checks out — S19b, applying S9's ruling to our *own*
@@ -377,7 +425,7 @@ replay that would have injected a check-in that never happened — reduce to it:
 | `checked_out` for a stay we have never seen (S12) | create the stay directly in `Departed`; `arrival_at` is absent and `completeness` carries `no_arrival_time`. **Nothing is invented** (R25) |
 | `checked_in` arriving after `Departed` | rank 1 < 2 → not applied to the lifecycle; it *fills* `arrival_at` if that is unknown, and is recorded |
 | `cancelled` for an in-house stay (S26) | rank below `InHouse` → **a recorded contradiction**, and the guest stays served |
-| the same fact twice (replay, §7) | equal rank, same values → idempotent; nothing changes and nothing is published |
+| the same fact twice (replay, §8) | equal rank, same values → idempotent; nothing changes and nothing is published |
 
 **The one deliberate exception, named:** a **staff correction** may move the
 lifecycle backwards (S24 — checked out in error at 07:00 and still asleep in
@@ -390,6 +438,37 @@ check-out permanent.
 (§4) — the stay's write permission, two named values, both kept. That is
 deliberate reuse: two clearing mechanisms would drift, and GUEST-Q3 already
 settled what clearing means.
+
+---
+
+### 3.3 · The day roll — GUEST-Q7
+
+The business day rolls at the property's boundary, and **nothing in the
+platform rolls with it**: ADR 0128 §6 leaves the night-audit transition
+without an owner. In a PMS-connected property that costs nothing — the PMS
+runs its audit and the no-show arrives as a fact. In a standalone property a
+stay that never arrived would sit in `Booked` for ever, the arrivals list
+would keep yesterday's guests, and *no-show* would be a number nobody records.
+
+So GuestOps runs a property-local day roll, and what it does is deliberately
+small:
+
+```text
+at the boundary    yesterday's business day closes
+it FLAGS           stays that were due in and never arrived
+it MARKS NOTHING   no-show is a business fact a person records
+                   (S27, ADR 0062's RecordNoShow)
+```
+
+**Flag, never mark**, for the reason APPS-Q1 gives about cleaning: a
+consequence is a policy, not an automatic act. A guest who arrived at 23:50
+and was checked in at 00:10 is not a no-show, and only a person at the desk
+knows that.
+
+**Where this belongs is a platform question, not a GuestOps one.** If a Night
+Audit owner is ever named (ADR 0128 §6 anticipates one), the roll moves there
+and this becomes a consumer. The design puts it in `Background/` and says so,
+rather than claiming the night audit.
 
 ---
 
@@ -469,7 +548,7 @@ StayLinkCandidate
 ```text
 candidate test    same room + OVERLAPPING DATES
 name similarity   may rank · may NEVER link
-confirmed         one stay · the PMS identifiers mapped on (§6)
+confirmed         one stay · the PMS identifiers mapped on (§7)
 rejected          two stays, honestly — a double-booked room is then
                   the truth, not an artefact
 undecided         sits on Attention, like any disagreement
@@ -493,7 +572,95 @@ is worse than a duplicate — the same reasoning G360-Q1 gives for guest merges.
 
 ---
 
-## 5 · The events
+## 5 · Availability — an answer GuestOps computes, never a table someone feeds
+
+**GUEST-Q7 (owner, 2026-08-31): both modes are fully v1, so availability is
+v1 work** — and the ruling's shape is the design constraint, not just its
+scope:
+
+> **Room-type availability is computed from GuestOps's own stays plus the
+> facts it already hears. The room-level conflict check applies in both modes.
+> Stop-sell is a GuestOps setting per room type and date range — the seller's
+> control, not inventory ownership.**
+
+That sentence is what keeps this from becoming a second Master Data. GuestOps
+does not *own* inventory; it **answers a question** from things it already has.
+
+### 5.1 · The three inputs, and where each comes from
+
+```text
+the rooms of a type        Master Data — canonical, read, never copied
+the stays on those dates   OURS. Booking · RoomStay · Assignment
+rooms out of order         EngineeringOps, CONSUMED BY EVENT into a local
+                           read model — never authoritative, never queried
+                           from their schema, and stale-tolerant by design
+stop-sell                  OURS — §5.3
+```
+
+**The out-of-order projection is the one to read carefully.** It is a
+projection built from events this application already receives, not a copy of
+another application's table, and **EngineeringOps remains the owner**: if the
+projection is behind, availability is conservative for a few seconds and no
+number anywhere becomes wrong. That distinction — *event-derived read model*
+versus *duplicated master data* — is the line the constitution's
+no-duplicated-master-data rule actually draws, and it is why this needs no new
+inventory owner.
+
+### 5.2 · Two questions, two answers, two costs
+
+```text
+"is room 214 free on these dates?"        THE CONFLICT CHECK
+  → an overlap query over Assignment. Cheap, exact, and it runs in
+    BOTH modes on every assignment and every move
+
+"how many Deluxe Kings are sellable on 3 Sep?"   ROOM-TYPE AVAILABILITY
+  → rooms of the type
+      − stays holding that type on the date
+      − rooms out of order (the projection)
+      − stop-sell
+```
+
+**The conflict check warns; it does not forbid.** GUEST-Q5 ruled that a
+double-booked room can be *the truth* — when staff answer *"two different
+stays"* to a candidate link, the second stay is real and the room is genuinely
+double-booked. A hard block would make a ruled outcome unreachable. So the
+check names the other stay and lets a person decide, which is the same shape
+as every other decision in this design.
+
+**Availability is a number the desk sees, not a lock on a button.** In a
+PMS-connected property Opera is still where the booking is made, and our
+number is informational; in a standalone property it is the number the sale is
+made on. Same computation, and no mode branch — GUEST-Q4's rule holds here too.
+
+### 5.3 · `StopSell` — the seller's control
+
+```text
+stop_sell_id · property_id
+room_type_id      Master Data ref
+from_date · to_date
+reason            free text — "renovation", "block for the wedding party"
+set_by · set_at
+```
+
+Stop-sell is **not** an inventory fact and does not say a room is unusable —
+EngineeringOps says that, through out-of-order. It says *we choose not to sell
+this type on these dates*, which is a commercial decision belonging to whoever
+runs the book. It subtracts from the computed answer and from nothing else.
+
+### 5.4 · What this deliberately is not
+
+* **Not a rates or yield engine.** No pricing by occupancy, no minimum stay,
+  no closed-to-arrival. Those are revenue-management concepts and they need an
+  owner this platform has not named.
+* **Not an allocation or allotment model** — blocks held for a travel agent,
+  release-back rules. Named here so a later reader knows it was considered.
+* **Not a booking engine.** Nothing here faces a guest or a channel.
+* **Not authoritative over EngineeringOps or Master Data.** Both are read;
+  neither is copied.
+
+---
+
+## 6 · The events
 
 Business facts, never process events (ADR 0016 Part 2). Names are proposed
 here and are **subject to the register's event-subject stability rule** — a
@@ -542,7 +709,7 @@ event.
 
 ---
 
-## 6 · Identifiers, and the one thing this design cannot settle
+## 7 · Identifiers, and the one thing this design cannot settle
 
 Every identifier GuestOps mints is a **UUIDv7 of ours**. Opera's confirmation
 number is never a key.
@@ -556,13 +723,18 @@ StayExternalRef
   stay_id · integration_id · id_kind · external_id
 ```
 
-**`CONN-Q8` is open and this design lives inside its v1 restriction:** until
-the mapping key gains the identifier kind, the Hub maps **one identifier kind
-per entity type** — the connector's declared primary — and the others ride on
-the fact as references. `id_kind` exists here so that the day `CONN-Q8` is
-ruled, nothing is remodelled.
+**`CONN-Q8` was ruled on 2026-08-31 and its v1 restriction is withdrawn** —
+the mapping key now carries the identifier kind, so the Hub no longer maps
+only one kind per entity type. *(Corrected 2026-08-31 on Stream DD's sweep,
+which found this paragraph one day stale.)*
 
-**What this page cannot settle, and reports instead (§14, finding 2):**
+**Nothing here changed as a result**, and that is the point worth keeping:
+`id_kind` was modelled while the restriction was still in force, precisely so
+that the ruling would cost no remodelling. A design that had encoded the
+restriction — one external reference per stay, with the kind implied — would
+be migrating today.
+
+**What this page cannot settle, and reports instead (§15, finding 2):**
 whether that table is GuestOps's or the Hub's. The brief says PMS identifiers
 are external ids in mapping tables and that the PMS-id mapping is the Hub's
 (ADR 0016) — which is plainly right for *rooms*, where Master Data owns the
@@ -576,7 +748,7 @@ ruling rather than assuming one.
 
 ---
 
-## 7 · What the Hub's deferred queue drains into
+## 8 · What the Hub's deferred queue drains into
 
 The Hub has been normalising reservation and guest facts since the connector
 round and holding them **`deferred`**, with `business_date` and provenance,
@@ -613,7 +785,7 @@ action the day this application installs, and the connector is untouched.
 
 ---
 
-## 8 · What Context asks, and what GuestOps answers
+## 9 · What Context asks, and what GuestOps answers
 
 ADR 0089 §CTX-Q1 fixes the shape: Context owns no tables, writes nothing, and
 reads **stable domain-owned views** through EF Core keyless entities —
@@ -651,7 +823,7 @@ Three rules that come with them:
 `vip_status` stays out (ADR 0089 §CTX-Q3, deferred): no authoritative
 definition of VIP exists, and this round does not invent one.
 
-### 8.1 · What GuestOps asks *of* Context — and what does not exist yet
+### 9.1 · What GuestOps asks *of* Context — and what does not exist yet
 
 The three views above are what this domain **answers**. The stay page also
 **asks**, and this is the direction the design cannot satisfy today.
@@ -673,7 +845,7 @@ obtained through the Context Service. Both panels are therefore Context
 questions, and Context v1 ships room, rooms, staff, asset and property
 summary and nothing else (ADR 0089 §"The v1 scope this fixes"). There is no
 *stay → jobs* and no *stay → servicing* resolver, and the contributing
-domains — Jobs, Room Care — would each have to own a read view the way §8
+domains — Jobs, Room Care — would each have to own a read view the way §9
 has GuestOps own three.
 
 **And none of them may gate an operation — ruled, owner, 2026-08-31:**
@@ -697,13 +869,13 @@ Three consequences the design accepts rather than works around:
   A property without Jobs still has a guest complaining about the air
   conditioning, so the **request** is GuestOps's own record always, and only
   the raising and the status are conditional (the mockup draws both states).
-* **This is reported, not designed around** — §14, finding 4. Inventing a
+* **This is reported, not designed around** — §15, finding 4. Inventing a
   direct read into Jobs' schema to make a tab work would break the one rule
   the whole platform's modularity rests on.
 
 ---
 
-## 9 · Permissions
+## 10 · Permissions
 
 ADR 0007 naming — one per capability, the verb naming what it lets a person
 do:
@@ -739,7 +911,7 @@ unreachable authorization store withholds this application, by design.
 
 ---
 
-## 10 · The application bundle
+## 11 · The application bundle
 
 Per the apps repository charter and CLAUDE.md's .NET template. **Nothing in
 this tree is created in this phase** — the brief gates code, and this is the
@@ -775,19 +947,20 @@ service suite, a connection goes in E2E); an absent database **fails** the run
 
 ---
 
-## 11 · Slices
+## 12 · Slices
 
 | | Ships | Unblocks |
 |---|---|---|
-| **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the bookings list · the four day lists · the stay's overview and activity · standalone writes · cancel · the state machine · `stay.*` facts · the three views | a standalone property can run its front desk; **Context's guest chain turns on** |
+| **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the bookings list · the four day lists · the stay's overview and activity · standalone writes · cancel · the state machine · `stay.*` facts · the three views — **plus GUEST-Q7's four: availability and stop-sell (§5), the room-level conflict check, the day roll (§3.3), and the kept source set (§2.6b)** | a standalone property can run its front desk **and know what it has left to sell**; **Context's guest chain turns on** |
 | **2 · The PMS mode** | the deferred queue drains · overrides · disagreements · silent confirmation · candidate links · the staleness banner | the Hub's backlog stops accumulating; Oracle properties go live |
 | **3 · The rest of the desk** | commercial terms · registration · requests · notes · preferences · the group page's full behaviour | *"every other guest operation"* (GUEST-Q1) is complete |
 | **4 · The neighbours** | the *stay → jobs* and *stay → servicing* panels | **blocked on finding 4, ratified 2026-08-31 as "drawn, not built"** — two contributing-domain read views and their Context RPCs, owned by Jobs' and Room Care's rounds |
 
-**Two v1 items this table does not yet carry, because they are not ruled:**
-the **room-level double-booking guard** and the **standalone day roll**
-(`03-the-open-questions.md` §C1a, §C2). Both are recommended for slice 1 and
-neither is built on a recommendation.
+**Slice 1 grew on 2026-08-31 and it grew deliberately.** GUEST-Q7 put both
+modes fully in v1, which makes availability slice-1 work rather than a later
+convenience — a standalone property that cannot say what is free is not a
+property that can open. The four items are additive to the schema and none of
+them reopens a ruled decision.
 
 **The stay's activity view is slice 1, and it is assembled rather than
 stored**: GuestOps's own rows come from its event stream, and another
@@ -802,7 +975,7 @@ domain through.
 
 ---
 
-## 12 · What this design deliberately does not do
+## 13 · What this design deliberately does not do
 
 * **No folio** — GUEST-Q6. No charge, payment, settlement, invoice or
   night-audit posting.
@@ -819,14 +992,15 @@ domain through.
 
 ---
 
-## 13 · The gates — named, not worked around
+## 14 · The gates — named, not worked around
 
 | | State | What it blocks |
 |---|---|---|
 | **The application-caller authorization round** | **Open** — APPS-Q1: no .NET application principal exists | GuestOps's service calling the Kernel and Context as itself. **The whole backend**, and the brief gates code behind it |
 | **The registry-driven shell** | **Open** — APPS-Q1: `PLATFORM_APPS` is hardcoded | the desktop module appearing without editing the shell |
 | **ADR 0061 authorization materialisation** | **Ruled, unbuilt** — nothing writes tuples today | any stay-level authorization object. v1 needs none (property + application scope), so this is named rather than depended on |
-| **`CONN-Q8` — the identifier kind** | **Open** (an amendment to ADR 0016) | nothing now; §6's `id_kind` exists so the ruling changes no model |
+| **`CONN-Q8` — the identifier kind** | **Ruled 2026-08-31**; the v1 restriction is withdrawn | nothing — §7's `id_kind` was modelled before the ruling, so it cost no migration |
+| **A platform print surface** | **Does not exist** — no chapter, ADR or mockup in the repository has one | the registration card the guest signs (§2.7, gold mockup frame 14). The button stands; **its register row is raised when this reaches wiring**, per the owner's direction |
 | **The reservation-identifier mapping's home** | **Reported, §14** | which service answers *"which stay is this fact about"* |
 | **§15 (e) — check-in into an unreleased room** | **Ruled — owner, 2026-08-31** | nothing, and **no configuration either**: GuestOps never refuses. An absent dependency loses its capability, never the flow; readiness is display-only when Room Care and the resolver are both present (§8.1) |
 | **§15 (g) — the registration card's contents** | **Open** | nothing: carried as a **records list** — `grc_no`, documents, signature — whose statutory fields the owner fills in |
@@ -834,7 +1008,7 @@ domain through.
 
 ---
 
-## 14 · Findings — reported, not resolved
+## 15 · Findings — reported, not resolved
 
 **1 · The constitution's event examples name the wrong aggregate.** CLAUDE.md
 §"Event-first architecture" lists `reservation.checked_in` and
@@ -846,8 +1020,10 @@ and `stay.departed`. The list is illustrative and an example given in passing
 is not a ruling, but the constitution should not carry a subject the model
 forbids. **Reported for the architect; not silently resolved either way.**
 
-**2 · Where does the reservation ↔ PMS-identifier mapping live?** §6 states
-the problem: ADR 0016's mapping is bijective on a canonical id that, for a
+**2 · Where does the reservation ↔ PMS-identifier mapping live? — asked
+formally, 2026-08-31.** Stream DD's sweep confirmed this lands on **both**
+designs, the connector's and this one, so it is put once and answered once.
+§7 states the problem: ADR 0016's mapping is bijective on a canonical id that, for a
 stay, does not exist until GuestOps mints it, so the Hub cannot map the first
 inbound fact. Either the Hub completes its mapping from `stay.created`
 (carrying the external reference), or GuestOps owns the reservation-side
@@ -886,7 +1062,7 @@ the largest, and named rather than assumed.
 
 ---
 
-## 15 · What this page does not contain
+## 16 · What this page does not contain
 
 * **No code, and no created tree.** §10 is a proposal; the brief gates the
   build.

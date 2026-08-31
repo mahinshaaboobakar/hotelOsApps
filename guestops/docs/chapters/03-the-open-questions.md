@@ -30,10 +30,27 @@ C  scope            things the design found while drawing, each with a
                     v1 / next-version recommendation the owner decides
 ```
 
-**Group A is closed.** Every question this round put to the owner has been
-answered; what is left is the platform's own record (B) and the scope choices
-(C). The A rows are kept rather than deleted because the *reasoning* behind a
-ruling is the part that stops it being re-litigated in six months.
+**Groups A and C are closed** — every owner question this round raised has
+been answered, six of them as **GUEST-Q7** on 2026-08-31. What remains is the
+platform's own record: group B, and one question asked formally of the
+planner.
+
+The rows are kept rather than deleted because the *reasoning* behind a ruling
+is the part that stops it being re-litigated in six months.
+
+**And a process instruction arrived with GUEST-Q7 that binds this page**, and
+every page like it:
+
+> **Where a modern standard exists, rule it — do not ask.**
+
+C6 is the worked example. *"Who may see a guest's full phone number?"* was
+raised here as a question; it should have been **applied** — masked by
+default, revealed deliberately, the reveal recorded — because that is settled
+practice for stored contact PII and there was nothing property-specific to
+decide. A question that has a standard answer costs a round trip and teaches
+the reader that the matter is genuinely open, which it was not. The test
+before a row is added here: *is this a judgment about this business, or a
+solved problem I have not looked up?*
 
 Group C carries **the architect's recommendation** in each row. A
 recommendation is not a ruling and carries no authority — it exists so the
@@ -112,6 +129,9 @@ the constitution should not carry a subject the ruled model forbids.
 **Reported for reconciliation; not resolved either way by this round.**
 
 ### B2 · Where does the reservation ↔ PMS-identifier mapping live?
+**Asked formally, 2026-08-31 — the round's outstanding question.** Stream DD's
+sweep confirmed it lands on **both** designs, the connector's and this one, so
+it is put once and answered once for both.
 
 ADR 0016 makes an external mapping unique and bijective on
 `(property_id, integration, entity_type, external_id)` ↔ a **canonical id**.
@@ -126,8 +146,11 @@ design proposes the latter — answering *"which stay is this fact about"* is a
 domain decision, the same reasoning that makes GUEST-Q5's candidate link
 staff-confirmed — and does not assume it.
 
-Related and already open: **`CONN-Q8`** (the mapping key gains the identifier
-kind, R10). The design carries `id_kind` so that ruling changes no model.
+Related and now **ruled**: **`CONN-Q8`** (the mapping key gains the identifier
+kind, R10) was closed on 2026-08-31 and its v1 restriction withdrawn. The
+design already carried `id_kind`, so the ruling cost no remodelling — which is
+the argument for modelling defensively against an open question rather than
+encoding its restriction.
 
 ### B3 · Chapter 26's `GuestContext` still carries `vip_status`
 
@@ -376,28 +399,28 @@ is here at all.
 
 ## D · Recommendations, gathered
 
-| | Subject | Recommendation |
+| | Subject | Outcome |
 |---|---|---|
-| C1a | room-level double-booking guard | **v1** — small, and stops the worst outcome |
-| C1b | type-level availability / inventory | **needs a ruling** — no owner exists for sellable inventory |
-| C2 | the day roll and no-show in standalone | **v1** — a hole, not a feature |
-| C3 | booking source / market segment | **v1** — carry it or lose it |
+| C1a | room-level double-booking guard | **RULED — GUEST-Q7: slice 1, both modes.** Warns and names the other stay; never forbids, because GUEST-Q5 made a double-booked room a possible truth |
+| C1b | type-level availability | **RULED — GUEST-Q7: slice 1, and no new inventory owner.** *Computed* from our own stays, Master Data's rooms, out-of-order **consumed by event**, and stop-sell. Design chapter §5 |
+| C2 | the day roll and no-show in standalone | **RULED — GUEST-Q7: slice 1.** It **flags** unarrived stays and marks nothing; §3.3 |
+| C3 | booking source / market segment | **RULED — GUEST-Q7, and widened:** keep **every significant field** the PMS sends — source, travel agent, market code, meal plan, guest counts — named as a kept set, with the rest retained as `source_detail` rather than discarded. §2.6b |
+| C6 | who may see a full phone number | **RULED — GUEST-Q7, as standard practice:** masked by default, one-click reveal on the stay's write permission, **the reveal recorded**. §2.5 |
+| C8 | the registration card printed | **RULED — GUEST-Q7: the button stands.** The platform has no print surface; **its register row is raised when this reaches wiring**, not now |
 | C5 | pseudo rooms are unmappable | **v1** — a boundary check, no feature |
 | C7 | reinstate a cancelled stay | **v1** — small |
-| C8 | the registration card printed | **v1 capability**, content waits on A2 |
 | C11 | *"three stays on this record"* | **v1** — narrower than Guest360, no overlap |
 | C4 | upgrade: assignment or amendment | **ruling first** — small, wrong once if guessed |
-| C6 | who may see a full phone number | **ruling first** — before slice 1 ships |
 | A1 | check-in into an unreleased room | **RULED — never refuses; no configuration.** The principle needs a register row (§B5) |
 | A2 | the registration card, and guest reporting | **RULED — the field list is the design's, the required set is per property; reporting is a setup screen with a recorded filing.** The automatic submission is an outbound connector (§B6) |
-| C9 | company / travel agent profiles | **next**, keeping the booker's text now |
+| C9 | company / travel agent profiles | **next**, keeping the booker's reference now (C3 keeps it) |
 | C10 | rooming-list import | **next** |
-| C12 | reporting | **next**, and it depends on C3 |
+| C12 | reporting | **next** — and C3's widening is what makes it possible later |
 
-**Nothing in group C is being built on the strength of a recommendation.** The
-design chapter's slices stand as written until the owner rules; this page
-exists so that the choice is visible rather than made silently by whoever
-writes the first migration.
+**Six of the twelve were ruled into slice 1 on the day they were raised.** The
+three still marked *v1* are the design's own small items, and **C4 is the only
+one waiting on a ruling** — it is small, and guessing it would be wrong once
+in a way the rate and the group's expected types would both inherit.
 
 ---
 

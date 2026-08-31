@@ -152,6 +152,44 @@ GuestOps instead is **S5's case**, not this one.
 case — *"every operation happens to a room-stay"* means the one-room booking
 and the fifty-room booking take the same path.
 
+### S1b · *"Do we have anything on the 3rd?"*
+**SITUATION.** Before any of S1 can happen, someone has to answer the question
+the caller actually asked. And a week later the manager closes the Deluxe
+Kings for two nights because a wedding party has them.
+
+**STANDALONE.** GuestOps is the book, so GuestOps answers — and if it cannot,
+the property sells the same room twice in its first week.
+
+**PMS-CONNECTED.** Opera answers, and the desk books there. Our number is
+still shown, because the desk reads our screens all day.
+
+**EXPRESSIBLE.** Ruled by the owner, 2026-08-31 (GUEST-Q7): **both modes are
+fully v1, and availability is an answer GuestOps computes — never a table
+somebody else must feed.**
+
+```text
+"is room 214 free on these dates?"    a conflict check over our own stays.
+                                      Runs in BOTH modes, on every
+                                      assignment and every move
+"how many Deluxe Kings on 3 Sep?"     rooms of the type (Master Data)
+                                      − stays holding it (ours)
+                                      − out of order (EngineeringOps's,
+                                        heard as events)
+                                      − stop-sell (ours, per type + dates)
+```
+
+**Two things this must not become.** It must not become a **second inventory
+owner** — the rooms are Master Data's and out-of-order is EngineeringOps's,
+and both are read or heard, never copied as a source of truth. And the
+conflict check must **warn rather than forbid**: GUEST-Q5 already ruled that a
+double-booked room can be *the truth*, so a hard block would make a ruled
+outcome unreachable. It names the other stay and lets a person decide.
+
+**Stop-sell is the seller's control, not an inventory fact.** *"We choose not
+to sell this type on these dates"* is a commercial decision belonging to
+whoever runs the book; *"this room cannot be used"* is EngineeringOps's, and
+they are different sentences.
+
 ### S2 · A booking of several rooms, made at once
 **SITUATION.** Three rooms, same dates, one payer, one of the three guests
 named and the other two *"colleagues, names to follow"*.
@@ -445,8 +483,12 @@ them.
 either the room is free tomorrow and the stay's departure moves, or **the room
 is already sold to somebody else** and the extension needs a move (S14) or a
 refusal. *"When is this room next sold"* is a forward-looking fact that cannot
-be derived from any current status (R3). In standalone mode GuestOps holds
-that answer itself, because it is the book.
+be derived from any current status (R3).
+
+**This is S1b's conflict check, in its second use** — extending a stay is
+asking whether the room is free for one more night, which is the same question
+the desk asked before assigning it. One computation, two places, and the same
+answer: it warns and names the other stay rather than refusing.
 
 ### S16 · The stay is shortened
 **SITUATION.** The guest leaves a day early.
