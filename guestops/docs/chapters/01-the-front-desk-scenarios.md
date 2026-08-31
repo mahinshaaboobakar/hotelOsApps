@@ -1,8 +1,10 @@
 # 01 · The front desk scenarios — what GuestOps must be able to do
 
-**Status:** scenario record, 2026-08-31. Stream FF, deliverable 1 of the
-GuestOps round — brief `docs/working/45-the-guestops-round.md` §3.1, **in the
-platform repository**.
+**Status:** scenario record, 2026-08-31 — accepted by the owner, then amended
+the same day to carry the **GUEST-Q2 addendum** (a stay's anchor is the room
+*type*; the room number is an assignment required at check-in). Stream FF,
+deliverable 1 of the GuestOps round — brief
+`docs/working/45-the-guestops-round.md` §3.1, **in the platform repository**.
 **Authority.** There is **no chapter for GuestOps**. Chapter 26 states the
 ownership boundary (*"guests are operational entities"*) and sketches a
 six-field `Reservation`; ADR 0089 §CTX-Q2 rules that the guest and the
@@ -56,7 +58,8 @@ differently — `docs/working/42c` §2 found that the level a PMS calls a
 | Word | Means here |
 |---|---|
 | **booking** *(= reservation)* | the **group**. What the guest thinks they made. Carries a group identifier from day one |
-| **room-stay** | the **anchor**. One property · one room · one date range · its own guest set. **Every operation happens to a room-stay, never to the group** |
+| **room-stay** | the **anchor**. One property · one room **type** · one date range · its own guest set. **Every operation happens to a room-stay, never to the group** |
+| **the assignment** | the **room number** on a stay. Absent at booking, chosen the night before or at the desk, changeable until and during the stay — a room move *is* an assignment change (R8) — and **required at check-in**: a person cannot be checked into no room. GUEST-Q2 addendum, 2026-08-31 |
 | **the party** | the guests attached to one room-stay. May be *"not yet named"* (GUEST-Q2), may be several people, may have nobody marked primary (R11) |
 | **guest identity record** | GuestOps's record of a person as known to this property. **Not a person-graph** — linking and merging are Guest360's (G360-Q1) |
 | **mode** | PMS-connected or standalone, decided per property by whether a PMS connector is active (GUEST-Q1) |
@@ -221,8 +224,9 @@ tax is included (R19). Whether v1 carries money at all is
 is given a room and a key.
 
 **STANDALONE.** Staff check the stay in: confirm the party, capture ID and the
-registration card, assign the room if it is not already assigned, record the
-actual arrival time.
+registration card, **assign the room if it is not already assigned — the
+check-in cannot proceed without one** (S8) — and record the actual arrival
+time.
 
 **PMS-CONNECTED.** The check-in **arrives as a fact**. The registration card,
 the ID and the guest's details are still GuestOps's work — they are *"every
@@ -233,19 +237,32 @@ to learn the room is occupied and EngineeringOps that work in it now disturbs
 a guest. GuestOps announces the fact; it never calls another application (the
 constitution, §"Event-driven communication").
 
-### S8 · The room is not assigned yet — **OPEN**
+### S8 · The room is not assigned yet — *ruled*
 **SITUATION.** The booking is for a room *type*. The room number is chosen the
 night before, or at the desk while the guest is standing there, or changed for
 an upgrade at that moment.
 
 **STANDALONE and PMS-CONNECTED.** Both, and it is the ordinary case rather
 than the exception: Oracle's own reject vocabulary contains `BLANK ROOM NO`
-(R26), so the source produces roomless stays too.
+(R26), so the source produces roomless stays too — **a model that refused them
+would refuse the PMS.**
 
-**EXPRESSIBLE.** GUEST-Q2 defines the anchor as *"one property + one room +
-dates + its own guest set"*. A stay that has a room **type** and no room does
-not fit that sentence, and half the arrival scenarios on this page depend on
-it. **`OPEN` — §15 (b).**
+**EXPRESSIBLE.** Ruled as a **GUEST-Q2 addendum, 2026-08-31**: the anchor's
+*"one room"* is precisely one room **type**, and the room number is an
+**assignment** on the stay. So:
+
+```text
+booked          stay exists · room type · dates · party · no assignment
+assigned        a room number, chosen the night before or at the desk
+                — and changeable, right through the stay (S14)
+checked in      requires an assignment · a person cannot be in no room
+```
+
+Three consequences the design inherits. A stay is **valid and workable with no
+room**, so the arrivals list must be usable when half of it is unassigned.
+**Assignment is its own operation** with its own audit — an upgrade at the desk
+is an assignment, not an amendment (S28). And **check-in refuses an unassigned
+stay**, which is the one hard gate this scenario creates.
 
 ### S9 · The room is not ready — **OPEN**
 **SITUATION.** The guest is at the desk at 11:40 and the room is dirty.
@@ -281,6 +298,14 @@ check-in is complete only when both have arrived (R6).
 **EXPRESSIBLE.** A stay must be able to be **partially known** and still be
 displayed honestly: *"checked in, room not yet reported"*. The desk sees the
 gap rather than a blank that looks like data.
+
+**And the check-in gate of S8 does not apply here.** That gate is on the
+*operation staff perform* — GuestOps will not let a receptionist check a guest
+into no room. An inbound PMS fact is not that operation: it is a report of
+something that already happened elsewhere, and refusing it would drop a real
+stay for failing a rule of ours (R25's first failure). So an arrived-but-unassigned
+stay is **accepted, marked incomplete, and shown on the Attention list** until
+the second message supplies the room.
 
 ### S12 · The stay whose first news is its departure *(R7)*
 **SITUATION.** The first fact GuestOps ever receives about a stay is its
@@ -322,8 +347,11 @@ moved to another room.
 usually a PMS fact; a move the desk makes at 01:00 and enters into the PMS
 afterwards is an override until the PMS catches up.
 
-**EXPRESSIBLE.** A room change is **its own fact**, never an update to the
-stay (R8) — the register records this as ruled, with `stay.room_changed` named
+**EXPRESSIBLE.** A room move **is an assignment change** (GUEST-Q2 addendum,
+S8) — and it is **its own fact**, never an update to the stay (R8). The two
+statements do not compete: the assignment is the thing that changes, and the
+change is announced as a move rather than folded into an amendment. The
+register records this as ruled, with `stay.room_changed` named
 and its consumers listed (brief §2.4): Room Care (both rooms' axes flip),
 GuestOps's own folio and registration, Jobs/EngineeringOps (open work on
 either room), Guest360 (history). Folding the move into an update publishes
@@ -665,10 +693,15 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
+**One is ruled** and is struck through below rather than deleted, so the
+scenarios that cite it still resolve. **Six remain open**, and four of them —
+(a), (c), (d), (f) — are load-bearing for the design: they decide the schema's
+shape, the write paths and what the Context Service is told.
+
 | | Subject | Why it cannot be settled here |
 |---|---|---|
 | **(a)** | May staff create a stay the PMS has never seen? (S5, S13) | Write-back is out of scope, so such a stay never reaches the PMS and its night audit never reconciles it. GUEST-Q1 permits *overrides* of PMS-managed stays; creating one is not an override of anything |
-| **(b)** | Is a room-stay valid **without a room**? (S8) | GUEST-Q2 defines the anchor as *"one property + one room + dates + its own guest set"*. Booking a room *type* and assigning the room at check-in is the ordinary case, and the source produces roomless stays too (`BLANK ROOM NO`, R26) |
+| ~~**(b)**~~ | ~~Is a room-stay valid **without a room**?~~ (S8) | **RULED — GUEST-Q2 addendum, 2026-08-31: yes.** The anchor's *"one room"* is one room **type**; the room number is an **assignment**, absent at booking, changeable through the stay, and **required at check-in**. Carried in §1's vocabulary and S8; the letter is kept rather than re-lettered so every citation above still resolves |
 | **(c)** | On a standing disagreement, which value do the board, Room Care and Context see — and who clears it? (S35) | GUEST-Q1 rules the disagreement recorded, not overwritten, and stops there. Two rooms cannot both be occupied by one guest downstream |
 | **(d)** | When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns? (S36) | Changes what reconciliation means afterwards, and what the desk is told at the time |
 | **(e)** | Does GuestOps refuse a check-in into a room Room Care has not released? (S9) | Cleaning is policy-driven (APPS-Q1), and Room Care is installable — it may be absent entirely |
@@ -682,8 +715,9 @@ anticipating an answer.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven are listed in §15 and none is
-  resolved above.
+* **No answer to an open question.** Seven subjects are listed in §15; one —
+  (b), the roomless stay — was ruled on 2026-08-31 and is carried in §1 and
+  S8. The other six are not resolved above, and none is anticipated.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.
