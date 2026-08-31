@@ -32,10 +32,23 @@ C  scope            things the design found while drawing, each with a
 
 **Groups A and C are closed** — every owner question this round raised has
 been answered: six as **GUEST-Q7** and the upgrade boundary as **GUEST-Q8 (b)**,
-all on 2026-08-31. **B1–B4 are closed too** — B2 by GUEST-Q8 (a), minting is
-the mapping; B1 by a correction to `CLAUDE.md` itself; B3 by a fourth item in
-Chapter 26's head note; B4 by `CTX-Q4`, which rules how Context's surface
-grows. What remains is **B5 and B6**, both asked on 2026-08-31.
+all on 2026-08-31. **Group B is closed as well**, the same day: B1 by a
+correction to `CLAUDE.md` itself; B2 by GUEST-Q8 (a), minting is the mapping;
+B3 by a fourth item in Chapter 26's head note; B4 by `CTX-Q4`, which rules how
+Context's surface grows; B5 as `APPS-Q2`, binding on every application round;
+B6 on `CONN-Q5`'s row, where the outbound round will read it.
+
+> **Nothing on this page is open.** Two items are *placed elsewhere and
+> pending there*, neither blocking this round: `APPS-Q2`'s final **home** is a
+> planner placement question (the rule binds meanwhile), and the **platform
+> print surface** gets its register row when this application reaches wiring,
+> by the owner's direction — flagged in the design's gate table so it cannot
+> be forgotten at that moment.
+
+**Why the closed rows are kept.** Six of the twelve C items were ruled within
+a day, and every A and B row here records *the reasoning*, not just the
+outcome. The reasoning is what stops a settled question being re-litigated in
+six months by someone who has only the answer.
 
 The rows are kept rather than deleted because the *reasoning* behind a ruling
 is the part that stops it being re-litigated in six months.
@@ -229,6 +242,20 @@ the half of this finding most likely to be lost, because it had to survive
 months and a different team.
 
 ### B6 · An automatic guest filing is an outbound connector, and v1's connector contract is inbound-only
+**CLOSED — 2026-08-31, recorded on `CONN-Q5`'s own row**, where the outbound
+round's author will read it rather than in an application's chapter they may
+never open:
+
+> **A statutory filing is a distinct capability class — a legal assertion, no
+> silent retry, and the receipt is part of the record — not one more push
+> beside room status.**
+
+**One consequence lands back on this design.** *The receipt is part of the
+record* is why `StayReporting` carries `reference` today, ahead of any
+connector: the row is the property's evidence that it complied, so the shape
+does not change when submission is automated. A person files and records the
+receipt now; the connector files and records the same receipt later, on the
+same row.
 
 A2 leaves GuestOps holding the policy, the flag and the record of a filing —
 and **not** the submission. Sending guest data to a police or immigration
@@ -257,6 +284,12 @@ is useful on its own and costs nothing; the automatic filing waits for the
 outbound connector round and is that round's decision, not this one's.
 
 ### B5 · A1's ruling is a platform principle, and it has no home yet
+**CLOSED — `APPS-Q2`, 2026-08-31: the absent-neighbour principle is ruled and
+binding on every application round now.** Its *home* — this page's reading,
+that it belongs as an amendment to ADR 0116 §5 beside the launch-time half —
+is with the planner as a placement question. **The rule binds regardless of
+where it finally sits**, which is the part that matters: no application round
+may now gate its own flow on a neighbour being installed.
 
 The owner's answer to A1 — *an application's own flow is never gated on
 another application being installed; an absent dependency loses its

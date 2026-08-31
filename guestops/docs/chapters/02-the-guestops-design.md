@@ -338,8 +338,18 @@ StayReporting                            S19b — the filing obligation
 * **HotelOS does not submit it.** Sending data to an external authority is an
   **integration**, and the constitution routes every integration through the
   Integration Hub as a connector — *"no hardcoded integrations"*. An automatic
-  filing is therefore a connector with its own owner, credential and round.
-  §15 finding 6 reports what that runs into.
+  filing is therefore a connector with its own owner, credential and round,
+  and it is a **distinct capability class** rather than one more push beside
+  room status — *a legal assertion, no silent retry, and the receipt is part
+  of the record* (recorded on `CONN-Q5`'s register row, 2026-08-31;
+  `03-the-open-questions.md` §B6).
+
+**`reference` is the receipt, and that is why this record exists ahead of the
+connector.** A filing is a legal assertion, so what the authority gives back is
+part of the record and not a log line — the row is the property's evidence that
+it complied. The shape therefore does not change when submission is automated:
+a person files and records the receipt today; the connector files and records
+the same receipt later, on the same row.
 
 **And the flag never gates anything.** A stay with an outstanding filing checks
 in, is served and checks out — S19b, applying S9's ruling to our *own*
