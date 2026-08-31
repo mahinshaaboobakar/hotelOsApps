@@ -1796,22 +1796,21 @@ including the marked-as-a-reading treatment of the contradiction cases; and
 **stored-versus-derived as argued — the times are facts, *"twenty minutes late"*
 is arithmetic, and there is no late-minutes column.**
 
-### 4.10 · What remains open
+### 4.10 · What remains open — halved by `WF-Q16`, 2026-08-31
 
-Four `§5` questions, none of them blocking deliverable 2:
+**`WF-Q16` closed two of the four**, both as the study recommended:
 
-* **Does an attendance terminal speak HTTP at all** — a platform question
-  (ADR 0128 §3), met first by this application.
-* **Who writes the staff ↔ device mapping**, and on which surface.
-* **Whose is the property holiday calendar** — recommendation Core, not taken.
-* **Which precedent does *warn, never forbid* stand on** — reported, with the
-  architect.
+| | Ruled |
+|---|---|
+| **The property holiday calendar is Core's** | The recommendation confirmed by **ADR 0051's own ownership rule — who establishes the value**: the administrator configures the property's holidays exactly as Core configures `check_in_time` while Housekeeping plans around it. **Workforce reads it**, and owns no calendar |
+| **Warn versus forbid** | **The proposed reading is the ruling: the platform refuses the physically impossible and warns on a judgment.** `GUEST-Q7`'s refused double-booking and `WF-Q5`'s warned balance were never in tension — they sit on opposite sides of that line. §3.6's C4 now stands on a stated principle rather than on a mis-cited analogy |
 
-Plus the two that left for the platform register: `PKG-Q39` and `SHELL-Q23`.
+**Two remain, both device-shaped and neither reachable from here** — whether an
+attendance terminal speaks HTTP at all (ADR 0128 §3), and who writes the staff ↔
+device mapping. Plus `PKG-Q39`'s planner half and `SHELL-Q23` in the platform
+register.
 
-**The first three are all device- or platform-shaped**, and none is reachable
-before the connector round. That is the honest state: **nothing owner-decidable
-about Workforce v1 is still open.**
+**Nothing owner-decidable about Workforce v1 is open.**
 
 ## 5 · Questions this study raises
 
