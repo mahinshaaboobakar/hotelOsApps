@@ -101,7 +101,7 @@ public sealed class OnSiteNormaliser
             return Reject(RejectionReason.UnreadableValue, "DepartureDate", push.DepartureDate);
         }
 
-        return new NormalisationOutcome.Normalised(
+        return new NormalisationOutcome.StayNormalised(
             BuildFact(push, meaning.Lifecycle, arrival.Value, departure.Value));
     }
 

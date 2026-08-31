@@ -40,7 +40,7 @@ public sealed class OnSiteNormaliserTests
     };
 
     private static RoomStayFact FactFrom(OnSiteNormaliser normaliser, OnSitePush push) =>
-        Assert.IsType<NormalisationOutcome.Normalised>(normaliser.Normalise(push)).Fact;
+        Assert.IsType<NormalisationOutcome.StayNormalised>(normaliser.Normalise(push)).Fact;
 
     [Fact]
     public void a_booking_becomes_a_room_stay_fact()

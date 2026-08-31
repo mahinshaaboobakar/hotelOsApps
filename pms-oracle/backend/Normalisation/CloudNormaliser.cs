@@ -104,7 +104,7 @@ public sealed class CloudNormaliser
             fact.TotalAmount = amount;
         }
 
-        return new NormalisationOutcome.Normalised(fact);
+        return new NormalisationOutcome.StayNormalised(fact);
     }
 
     /// <summary>

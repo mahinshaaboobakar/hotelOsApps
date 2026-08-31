@@ -71,7 +71,7 @@ public abstract record NormalisationOutcome
     {
     }
 
-    /// <summary>A complete fact, ready for the Hub to enrich and publish.</summary>
+    /// <summary>A complete room-stay fact, ready for the Hub to enrich and publish.</summary>
     /// <param name="Fact">
     /// Populated with everything the source determines. <b>Three things are
     /// deliberately left empty</b> for the Hub: <c>header.business_date</c>,
@@ -80,7 +80,17 @@ public abstract record NormalisationOutcome
     /// which is the inbox row's; and <c>room_id</c>, which Enrich resolves from
     /// the external reference carried here.
     /// </param>
-    public sealed record Normalised(RoomStayFact Fact) : NormalisationOutcome;
+    public sealed record StayNormalised(RoomStayFact Fact) : NormalisationOutcome;
+
+    /// <summary>A complete room-state fact.</summary>
+    /// <param name="Fact">
+    /// The four axes as the source reported them, with the same three fields
+    /// left for the Hub. Its own variant rather than a shared one holding a
+    /// base type: the two facts are different shapes with different consumers,
+    /// and a caller that had to test which it received would be a caller that
+    /// could forget to.
+    /// </param>
+    public sealed record RoomStateNormalised(RoomStateFact Fact) : NormalisationOutcome;
 
     /// <summary>
     /// Half of a two-part check-in, waiting for its partner.

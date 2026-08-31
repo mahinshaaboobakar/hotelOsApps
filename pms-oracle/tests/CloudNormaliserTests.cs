@@ -52,7 +52,7 @@ public sealed class CloudNormaliserTests
             Emails: [new OhipEmail("meera@example.com", "PERSONAL", true)]));
 
     private static RoomStayFact FactFrom(OhipReservation reservation) =>
-        Assert.IsType<NormalisationOutcome.Normalised>(Kochi().Normalise(reservation)).Fact;
+        Assert.IsType<NormalisationOutcome.StayNormalised>(Kochi().Normalise(reservation)).Fact;
 
     [Fact]
     public void a_reserved_booking_becomes_a_room_stay_fact()
