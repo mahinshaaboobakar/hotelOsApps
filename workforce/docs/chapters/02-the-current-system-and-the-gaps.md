@@ -1608,9 +1608,11 @@ no biometric integration      re-sited, not refused: it happens, and it
 questioned**, and three of these are now defensible where before they were
 merely asserted.
 
-### 4.3 · The v1 scope proposal
+### 4.3 · The v1 scope — **approved, `WF-Q11`, owner 2026-08-31**
 
-Proposals, not decisions — the owner rules v1.
+Written as proposals; **ruled as proposed** at the scope walk — the IN list
+whole, the OUT list with its rulings (§4.9). What follows is therefore the
+settled v1 scope, not a recommendation.
 
 **Proposed IN.** Postings with a zone (Z1) · the open shift catalogue with name,
 typed short code, colour (R1–R5, N2) · the rota, copy-last-week and swap
@@ -1747,21 +1749,69 @@ starting point is selected rather than assumed. It joins §4.4's spine as item 1
 **because** WPS, PF and ESI differ by country — a country-shaped fact used to
 justify a boundary, never written into a field.
 
-### 4.8 · What the study leaves unanswered
+### 4.8 · The two opens — both closed before the plan, 2026-08-31
 
-Honest, because a study that reads as complete when it is not is worse than one
-that names its holes:
+This section named two holes on the day the study was accepted, on the grounds
+that a study reading as complete when it is not is worse than one naming its
+gaps. **Both were then put to the owner and ruled, before deliverable 2 rather
+than during it** — the better order, because each would otherwise have been
+answered by assumption inside a plan.
 
-* **§3.2's residue** — late/absent semantics, the posted-versus-present view,
-  and attendance contradicting the rota. §3.5's O3/O6 imply lateness and times
-  are recorded; that is an implication and has not been confirmed.
-* **§3.4's other half** — staff-initiated swaps. *Covers* are settled (L9, L10);
-  whether a staff member can propose an exchange with a colleague, and what
-  approves it, was never asked. It is the one remaining thing that could still
-  add an aggregate.
-* **The ten `§5` questions**, two of which have left for the register.
+| | Was open | Closed by |
+|---|---|---|
+| **§3.2's residue** | lateness, the posted-versus-present view, attendance contradicting the rota | **`WF-Q10`** — *"keep late information"*. Lateness is first-class and visible against the rota, which also gives the posted-versus-present surface its mandate; the contradiction cases follow the same principle — **confirmed as the ruling's intent**: both facts kept, discrepancy surfaced, never silently reconciled |
+| **§3.4's other half** | staff-initiated swaps | **`WF-Q9`** — staff propose, the manager approves. The aggregate this section anticipated is real, and §3.4 is written |
 
-None of these blocks the feature plan. All of them would block a build.
+**The implication is retired.** §3.5's O3/O6 were carrying *"lateness and in/out
+times must be recorded"* as a deduction from a report's contents, flagged for
+confirmation precisely so it could not harden into a schema by default.
+`WF-Q10` confirms it as an owner ruling, and A3's manual floor now captures
+times on an instruction rather than on an inference.
+
+### 4.9 · The scope walk — ruled 2026-08-31, and what each ruling moves
+
+The owner walked the study's decision points one at a time. **Seven rulings**,
+registered `WF-Q11`–`WF-Q15` with a `WF-Q9` addendum, and this is what each one
+changes in the spine.
+
+| | Ruling | What it moves |
+|---|---|---|
+| **`WF-Q11`** | **Scope approved as §4.3 proposed** — the IN list whole, the OUT list with its rulings | §4.3 stops being a proposal. Deliverable 2 is written to a settled scope, which is the difference between a plan and a wish list |
+| **`WF-Q12`** | **`Week-off` is a rota marker** — an *off* entry in the shift catalogue. No request, no balance. It **leaves the leave-type list** | The §3.1 ↔ §3.3 contradiction resolves toward the owner's own four-type list. Frame 2's popover was right to offer it and chapter 01 §3 was wrong to seed it. **Spine item 4 loses a type**; the catalogue gains a kind |
+| **`WF-Q13`** | **Comp-off is manual in v1** — O5 counts holidays worked, HR grants through L11's adjustment tool; auto-credit waits for device attendance at least | The rota and the balance ledger stay **uncoupled** in v1. The cheap half first, and the expensive half gated on a source that does not exist yet |
+| **`WF-Q14`** | **Overtime warns at planning time**, on planned hours against the property threshold, **warn-never-block** per `WF-Q5`; actuals at month-end; live mid-week alerting **deferred while attendance is manual** | §3.5's *report versus control* question resolves to **both, at different moments** — a planning-time warning and a month-end number. And the deferral names its own unblocking condition, which is what makes it a decision rather than a postponement |
+| **`WF-Q15`** | **An edited definition never rewrites history** — effective-forward from a **manager-chosen** date | The question §3.1's aggregate split was explicitly waiting on. **The split's shape is effective-dated**, and the historical-truth argument the study recorded against the split is answered rather than overruled |
+| **`WF-Q9`(a)** | **The colleague accepts before the manager sees it** — `proposed → accepted → approved / declined` | The one state it costs is bought, for the reason that settles it: **a manager's approval must never commit someone who did not agree.** §3.4's two-verbs split stands whole — the manager's rearrangement stays consent-free, because the manager is the authority |
+| **`WF-Q9`(b)** | **Both entry paths for `S4`, provenance mandatory** — My Schedule for login-holders, supervisor-on-behalf for the majority, `entered_by` kept | The study offered two shapes and chose neither; the owner took both. **A7's provenance obligation at its second surface** — the record must never quietly claim a staff member did something they did not |
+
+**What `WF-Q12` does to the type list is worth stating once**, because it is the
+walk's last model change: leave types become **Casual · Sick · Earned ·
+Comp-off** — the owner's own four, exactly as spoken in §3.3 — and the fifth
+that chapter 01 had seeded turns out not to have been a leave type at all.
+
+**Ratified from the study at the same walk:** the `LeaveRequest`-isn't-close-
+enough table (the atomic two-cell change and the second party's consent are why
+a swap is a new aggregate rather than a reuse); `WF-Q10`'s residue closure
+including the marked-as-a-reading treatment of the contradiction cases; and
+**stored-versus-derived as argued — the times are facts, *"twenty minutes late"*
+is arithmetic, and there is no late-minutes column.**
+
+### 4.10 · What remains open
+
+Four `§5` questions, none of them blocking deliverable 2:
+
+* **Does an attendance terminal speak HTTP at all** — a platform question
+  (ADR 0128 §3), met first by this application.
+* **Who writes the staff ↔ device mapping**, and on which surface.
+* **Whose is the property holiday calendar** — recommendation Core, not taken.
+* **Which precedent does *warn, never forbid* stand on** — reported, with the
+  architect.
+
+Plus the two that left for the platform register: `PKG-Q39` and `SHELL-Q23`.
+
+**The first three are all device- or platform-shaped**, and none is reachable
+before the connector round. That is the honest state: **nothing owner-decidable
+about Workforce v1 is still open.**
 
 ## 5 · Questions this study raises
 
@@ -1774,13 +1824,13 @@ in the table so the trail is readable, marked with where they went.
 | §3.9 | How a packaged application declares its event subjects | **`PKG-Q39` — claimed 2026-08-31**, evidence carried whole. Two halves: the interim pre-naming to CC; manifest-declared domains materialised at install to the planner, with the package rounds |
 | §3.5 · §3.6 · §3.9 | A print surface, and a file handed to the user | **`SHELL-Q23`** — print is the shell's; an application hands it a print-ready view. The row now cites §3.9 and counts the certification register as a third consumer. **The file half is deliberately left open**: the month-end payroll export is a file payroll software takes, and that is a different shell capability |
 | §3.1 | What a colour chip says | **CLOSED by §3.9's N2**, ratified: name + colour + a **typed** short code, short code in the cell, legend beneath. Decided by the monochrome-photocopy consequence the question itself named. Kept rather than deleted, so the trail survives |
-| §3.1 · §3.3 | Is `Week-off` a shift or a leave type | **open** — one question, two pieces of evidence: the rota popover offers it as a shift while chapter 01 seeds it as a leave type, and the owner's own list named four types without it |
-| §3.1 | How an edited shift definition treats rotas already worked | **open** — needed before the aggregate split is written into chapter 01 |
+| §3.1 · §3.3 | Is `Week-off` a shift or a leave type | **CLOSED — `WF-Q12`, owner 2026-08-31: a rota marker.** An *off* entry in the shift catalogue; no request, no balance; it **leaves the leave-type list**, resolving toward the owner's own four-type list. Was — one question, two pieces of evidence: the rota popover offers it as a shift while chapter 01 seeds it as a leave type, and the owner's own list named four types without it |
+| §3.1 | How an edited shift definition treats rotas already worked | **CLOSED — `WF-Q15`, owner 2026-08-31: an edited definition never rewrites history — effective-forward from a manager-chosen date.** So the aggregate split's shape is **effective-dated**. Was — needed before the aggregate split is written into chapter 01 |
 | §3.2 | Does an attendance terminal speak HTTP at all | **open** — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
 | §3.2 | Who writes the staff ↔ device mapping, and on which surface | **open** — the table's home is ruled (Master Data, ADR 0063); the writer is not |
 | §3.3 | Whose is the property holiday calendar | **open** — recommendation: Core, on the `FiscalYearStartMonth` precedent. Not taken, because it adds a column to a Master Data entity |
-| §3.3 | Does working a holiday credit comp-off automatically | **open**, with a direction — §3.5's O5 produces *holidays worked* now and defers the credit |
-| §3.5 | Is overtime alerted during the week, or only at month end | **open** — the difference between a report and a control |
+| §3.3 | Does working a holiday credit comp-off automatically | **CLOSED — `WF-Q13`, owner 2026-08-31: manual in v1.** O5 counts holidays worked; HR grants through the L11 adjustment tool; auto-credit waits for device attendance at least. Was — §3.5's O5 produces *holidays worked* now and defers the credit |
+| §3.5 | Is overtime alerted during the week, or only at month end | **CLOSED — `WF-Q14`, owner 2026-08-31: warns at planning time**, on planned hours against the property threshold, warn-never-block per `WF-Q5`; actuals at month-end; live mid-week alerting deferred while attendance is manual. Was — the difference between a report and a control |
 | §3.6 | Which precedent does *warn, never forbid* stand on | **reported, not resolved** — the double-booked room is **refused** (`GUEST-Q7`), not warned; `WF-Q5`'s warn-and-allow is the precedent that does support it. Proposed reading: the platform refuses the physically impossible and warns on a judgment. With the architect |
 
 ### Ratified since, and folded into the record
