@@ -105,7 +105,7 @@ builder.Services.AddHotelOsPlatform<WorkforceDbContext>(
 // connect callback decides where the bytes go. A hand-rolled handler here would
 // get the server half wrong in the way the SDK's own comment records.
 //
-// EVT-Q1's boundary, stated at the registration: this is a platform-internal
+// EVT-Q3's boundary, stated at the registration: this is a platform-internal
 // *question*, not a call to a neighbouring application, and not a command.
 builder.Services
     .AddGrpcClient<MasterDataService.MasterDataServiceClient>(options =>

@@ -28,7 +28,7 @@ that out before asking anything else. Stream GG's search, 2026-08-31, before
 the answer arrived: the connector round's read-only reference root
 `C:\Users\…\Documents\HotelOs-References\` holds `pms-integrations` and nothing
 else, and a sweep of the owner's `Documents` and `PycharmProjects` trees found
-no workforce, HR, roster or attendance system.
+no workforce, HR, rota or attendance system.
 
 So this study takes **GuestOps's shape, not the Oracle connector's**. It
 carries no `file:line` citations, because there is no code to cite. Stream FF
@@ -262,7 +262,7 @@ architect; a subject is written up when its answer lands.
 | 3.6 | Skills and certifications — expiry, the compliance view | **ruled 2026-08-31** ↓ — architect, owner shown |
 | 3.7 | The MOD duty in daily operation | **answered 2026-08-31** ↓ — one structural owner fact; the rest are defaults |
 | 3.8 | Departments and zones in practice — how postings map to Room Care's *"who cleans zone 3 today"* | **answered 2026-08-31** ↓ — *from Workforce* |
-| 3.9 | Notifications — how staff actually learn their roster | **ruled 2026-08-31** ↓ — architect; v1 is the printed week |
+| 3.9 | Notifications — how staff actually learn their rota | **ruled 2026-08-31** ↓ — architect; v1 is the printed week |
 
 ---
 
@@ -271,7 +271,7 @@ architect; a subject is written up when its answer lands.
 **The owner's answer, 2026-08-31**, relayed through the architect:
 
 > *"Shifts are property-created entities, free-form — name, times, and a colour
-> as a first-class attribute; the roster calendar renders each staff member's
+> as a first-class attribute; the rota calendar renders each staff member's
 > day as their shift's colour badge, so a week reads at a glance by colour. No
 > template/rotation machinery in v1 unless a later answer adds it — the owner's
 > model is create the shifts you use, paint the calendar with them."*
@@ -1437,7 +1437,7 @@ events today.**
 
 * And `services/kernel/crates/kernel/tests/jetstream.rs:288-320` shows the
   platform's own remedy: subjects belonging to **unbuilt** applications —
-  `room.zone_changed`, `workorder.created`, `housekeeping.task.assigned` — are
+  `room.zone_changed`, `job.created`, `roomcare.task.assigned` — are
   named in advance *"because the stream filters must already cover them"*.
   **Workforce's are not among them.**
 

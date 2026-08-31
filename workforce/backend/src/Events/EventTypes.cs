@@ -23,14 +23,23 @@ public static class EventTypes
 {
     /// <summary>The aggregate a posting announcement is made against.</summary>
     /// <remarks>
-    /// <b>The user, not the posting.</b> Chapter 01 §4 and AUTHZ-Q7's shape:
-    /// what consumes this is the Kernel's authorization registration, and the
-    /// tuple it materialises is <c>department:{id}#posted@user:{uid}</c>. An
-    /// announcement on a <c>posting</c> aggregate would be about a record;
-    /// this one is about a person gaining a place in the property, which is the
-    /// fact the graph is interested in.
+    /// <para>
+    /// <b>The posting</b> — <c>AUTHZ-Q20</c>, ruled 2026-08-31 on
+    /// <c>HUB-Q4</c>'s announce-against-what-you-own. A service announces
+    /// against the aggregate it owns, and Workforce owns the posting: neither
+    /// the user nor the department is its row to speak for.
+    /// </para>
+    /// <para>
+    /// It is also the only shape that versions. The event store's
+    /// <c>uq_events__aggregate_version</c> is
+    /// <c>UNIQUE (aggregate_type, aggregate_id, entity_version)</c>, and a
+    /// posting carries its own counter — so a person holding two postings
+    /// announces twice without collision, and no foreign row is incremented to
+    /// make room. Announcing against the user had no version this application
+    /// could legally supply.
+    /// </para>
     /// </remarks>
-    public const string UserAggregate = "user";
+    public const string PostingAggregate = "posting";
 
     /// <summary>This user now works in this department.</summary>
     public const string UserPosted = "user.posted";

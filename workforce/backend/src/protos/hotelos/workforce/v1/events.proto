@@ -13,19 +13,28 @@ syntax = "proto3";
 //
 // **Four domains, not three.** `attendance` cannot ride inside `shift.>`,
 // because `WF-Q10` keeps an attendance record that answers no shift at all —
-// somebody present on an unrostered day. Swaps deliberately add no fifth: they
+// somebody present on a day they hold no shift. Swaps add no fifth: they
 // are `shift.swap_*`, because a swap is a fact about a shift.
 //
 // An unrouted subject is **acked, matches nothing, and dead-letters silently** —
 // which looks exactly like working. That is why the routing was confirmed before
 // this file named a subject.
 //
-// # Slice 1 announces on the `user` aggregate, deliberately
+// # The announcement is made against the POSTING — `AUTHZ-Q20`
 //
-// Chapter 01 §4 and AUTHZ-Q7's shape: a posting's announcement is about the
-// **user**, because what consumes it is the Kernel's authorization registration,
-// and the tuple it materialises is `department:{id}#posted@user:{uid}`.
-// `property.*.user.>` has been routed since Master Data grew staff.
+// Ruled 2026-08-31, on `HUB-Q4`'s announce-against-what-you-own: **a service
+// announces against the aggregate it owns.** Workforce owns the posting; it
+// owns neither the user nor the department, and it holds no row of either whose
+// version it could legally increment.
+//
+// That settles the versioning outright. `uq_events__aggregate_version` is
+// UNIQUE (aggregate_type, aggregate_id, entity_version), and `posting_id` has
+// its **own** sequence: one posting, one counter, no collision when a person
+// holds two postings, and no foreign row bumped to make room.
+//
+// Revision 1 of this file said the `user` aggregate, following chapter 01 §4.
+// That was the shape before the question was put, and it is superseded rather
+// than reinterpreted.
 //
 // The posting's *own* lifecycle is not an event in slice 1: nothing consumes it
 // yet, and a subject published for no reader is a vocabulary somebody has to

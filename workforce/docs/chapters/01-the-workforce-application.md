@@ -313,7 +313,7 @@ arithmetic over them, and a stored value can disagree with the two times beside
 it. Store the boundary facts, compute the judgment.
 
 **Attendance may contradict the rota, and both facts are kept** — present on an
-unrostered day, absent on a rostered one. The discrepancy is **surfaced, never
+day they hold no shift, absent on a day they do. The discrepancy is **surfaced, never
 silently reconciled.**
 
 **The device source is out of v1 as code** and enters as a `kind: connector`
@@ -392,8 +392,12 @@ asks for.
 ## 4 · Authorization
 
 * **A posting is the writer for `department#posted`.** `PostingService` records
-  the posting and appends `user.posted` / `user.posting_ended` in the **same
-  transaction**; the Kernel's registration consumer materialises
+  the posting and appends its announcement in the **same transaction** —
+  **against the `posting` aggregate**, per `AUTHZ-Q20` (2026-08-31) on
+  `HUB-Q4`'s *announce against what you own*. Revision 2 of this page said the
+  `user` aggregate, following the pre-question shape; that is superseded, and
+  the reason is that a posting carries its own version sequence while this
+  application holds no user row whose version it could legally increment; the Kernel's registration consumer materialises
   `department:{id}#posted@user:{uid}`. **No service writes a tuple** (ADR 0061).
   The day the first posting is saved, every dormant department folder grant in
   My Hotel comes alive.
@@ -483,7 +487,7 @@ up.
 > `leave`, `duty`"*) — written before this plan existed, and **an illustrative
 > list does not override a design finding** (CLAUDE.md's precedence rule).
 > `attendance` cannot ride `shift.>`, because `WF-Q10` keeps an attendance
-> record that answers **no shift at all** — present on an unrostered day — and
+> record that answers **no shift at all** — present on a day with no shift — and
 > filing it under `shift` would misname the fact where ADR 0006 routes by
 > meaning. Reported rather than silently declared, and **ruled in this
 > application's favour**.
@@ -491,7 +495,7 @@ up.
 > **Landed 2026-08-31, and verified here rather than assumed** — Stream CC,
 > register `fca1b96`. `services/kernel/crates/kernel/src/events/streams.rs:122-128`
 > now routes `property.*.shift.>`, `property.*.leave.>`, `property.*.duty.>`
-> **and `property.*.attendance.>`** into `OPERATIONAL`, with the unrostered-day
+> **and `property.*.attendance.>`** into `OPERATIONAL`, with the no-shift-day
 > reasoning written at the subject and **swaps recorded beside it as the
 > counter-example** — `shift.swap_*` stays inside `shift.>` because a swap is a
 > fact about a shift. `tests/jetstream.rs:336` carries `attendance.recorded`.

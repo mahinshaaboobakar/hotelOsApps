@@ -10,7 +10,7 @@ namespace HotelOS.Workforce.Infrastructure;
 /// <remarks>
 /// <para>
 /// <b>Why a synchronous call is right here, stated where somebody would
-/// challenge it.</b> <c>EVT-Q1</c> rules that between <i>applications</i> a
+/// challenge it.</b> <c>EVT-Q3</c> rules that between <i>applications</i> a
 /// reply is an event carrying a correlation id, never a blocking call — and it
 /// preserves request/reply for platform-internal <i>questions</i>. Master Data
 /// is the platform: CLAUDE.md's non-negotiable list says applications may read

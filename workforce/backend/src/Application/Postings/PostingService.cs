@@ -15,7 +15,7 @@ namespace HotelOS.Workforce.Application.Postings;
 /// makes department-scoped authorization derive from.
 /// </para>
 /// <para>
-/// <b>On the one outbound call this service makes.</b> <c>EVT-Q1</c> rules that
+/// <b>On the one outbound call this service makes.</b> <c>EVT-Q3</c> rules that
 /// between <i>applications</i> a reply is an event carrying a correlation id and
 /// never a blocking call, and preserves request/reply for platform-internal
 /// <i>questions</i>. <see cref="IStaffDirectory"/> asks Master Data two
@@ -90,31 +90,29 @@ public class PostingService(
         // go stale. Null is the ordinary answer — most staff have no login.
         _ = await directory.FindUserIdAsync(scope.PropertyId, command.StaffId, cancellationToken);
 
-        // ── The announcement is NOT made here, and that is a gate rather than
-        //    an omission. See `docs/chapters/03-the-code-round-findings.md`.
+        // ── The announcement waits on `AUTHZ-Q20`'s remaining half.
+        //    `docs/chapters/03-the-code-round-findings.md` carries the whole.
         //
-        //    Chapter 01 §4 rules the shape — `user.posted` on the `user`
-        //    aggregate, the Kernel materialising
-        //    `department:{id}#posted@user:{uid}`. Three things it needs do not
-        //    exist, all verified in the platform tree on 2026-08-31:
+        //    Two of the four parts are ruled, and this method is already built
+        //    to them:
         //
-        //    * no consumer maps it. `grants::find` knows four kinds and this is
-        //      not one; `user` is deliberately not a registrable TYPE. A
-        //      `user.posted` published today maps to `None` and writes no
-        //      tuple — silently, which looks exactly like working;
-        //    * the announcement has no version it may carry. The platform's
-        //      pattern bumps the aggregate row's own version
-        //      (`staff.assigned` increments `staff.Version`), and this
-        //      application has no user row to bump; a per-posting version
-        //      collides on the second posting for one person, against
-        //      `uq_events__aggregate_version`;
-        //    * and the tuple addresses `department:{uuid}` while a posting
-        //      carries the canon code, so the payload must carry both.
+        //    * the announcement is made against the **posting** — the aggregate
+        //      this application owns — so `entity_version` is `posting.Version`,
+        //      which has its own sequence and cannot collide when one person
+        //      holds two postings;
+        //    * the payload carries the department's **canonical id** as well as
+        //      its code, which is why `departmentId` is resolved above rather
+        //      than at announcement time.
         //
-        //    Publishing anyway would either violate a unique constraint or
-        //    announce into a consumer that drops it. Neither is a thing to
-        //    discover later, and inventing a mechanism here would be deciding
-        //    a Kernel question inside an application.
+        //    What is not settled is the **grant kind** — which relation the
+        //    Kernel writes, on which object, from which event type — and the
+        //    late-identity-link reconciliation. Both are joint design with the
+        //    Kernel stream under frozen ADRs (0116 §6, 0061), and neither is a
+        //    thing an application decides inside itself.
+        //
+        //    Until that lands, nothing is published. A `user.posted` today maps
+        //    to `None` in `plan()` and writes no tuple — stored, relayed, acked
+        //    and dropped, which is indistinguishable from working.
 
         await db.SaveChangesAsync(cancellationToken);
         return posting;

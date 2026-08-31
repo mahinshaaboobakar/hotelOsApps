@@ -163,4 +163,52 @@ independent answers to one shape:
 > the `department#manager` counterpart (F4), and the late-identity-link
 > transition (F5).
 
-Numbers are the architect's to claim.
+---
+
+## Claimed as `AUTHZ-Q20` — unsplit, and half answered the same day
+
+**Architect, 2026-08-31.** The question is claimed whole, as argued, and its
+frame is ruled: **the capability was frozen long ago** — ADR 0116 §6 makes
+department access derive from Workforce postings *permanently* — so this is an
+**implementation contract under frozen ADRs**, jointly CC and GG, ratified
+before code. `grants.rs:118`'s own comment had been waiting for this
+application.
+
+### F2 — answered: the event carries the canonical id
+
+The constitution's own split: **the canon code is vocabulary, the id is
+identity**. The announcement carries the department's row id, and the
+`ListDepartments` resolution in `IStaffDirectory` is at the right place —
+resolved at the point of writing, never stored on the posting where it could go
+stale.
+
+### F3 — answered: the Posting is the aggregate
+
+**`HUB-Q4`'s *announce against what you own***, minted the same day for the
+Integration Hub's identical shape. A service announces against the aggregate it
+owns; Workforce owns the posting.
+
+That dissolves the versioning problem rather than working around it:
+
+```text
+posting_id has its own sequence     one posting, one counter
+no per-person collision             two postings, two aggregates
+no foreign row bumped               nothing of Identity's is incremented
+```
+
+**Applied in the code the same day**: `EventTypes.PostingAggregate`, and
+`entity_version` is `posting.Version`. Chapter 01 §4 said the `user` aggregate
+and is superseded — it was the shape before the question was put.
+
+### F1 and F5 — the joint design with CC
+
+The grant kinds (which relation, on which object, from which event type) and the
+late-arriving-identity-link reconciliation are the joint work, under the frozen
+ADRs. Nothing is published from here until that contract lands.
+
+### F4 — carried
+
+`department#manager` rides with F1: it is the same missing shape with a
+different relation on the same object.
+
+Numbers are the architect's to claim; this one was claimed as `AUTHZ-Q20`.
