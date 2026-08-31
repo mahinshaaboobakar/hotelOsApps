@@ -479,13 +479,23 @@ up.
 > then** — which is what gate 3 in §10 is about.
 >
 > **The declaration is four domains: `shift · leave · duty · attendance`.**
-> The ruling's own parenthetical names three (*"e.g. Workforce: `shift`,
+> The ruling's own parenthetical named three (*"e.g. Workforce: `shift`,
 > `leave`, `duty`"*) — written before this plan existed, and **an illustrative
 > list does not override a design finding** (CLAUDE.md's precedence rule).
 > `attendance` cannot ride `shift.>`, because `WF-Q10` keeps an attendance
 > record that answers **no shift at all** — present on an unrostered day — and
 > filing it under `shift` would misname the fact where ADR 0006 routes by
-> meaning. Reported here rather than silently declared.
+> meaning. Reported rather than silently declared, and **ruled in this
+> application's favour**.
+>
+> **Landed 2026-08-31, and verified here rather than assumed** — Stream CC,
+> register `fca1b96`. `services/kernel/crates/kernel/src/events/streams.rs:122-128`
+> now routes `property.*.shift.>`, `property.*.leave.>`, `property.*.duty.>`
+> **and `property.*.attendance.>`** into `OPERATIONAL`, with the unrostered-day
+> reasoning written at the subject and **swaps recorded beside it as the
+> counter-example** — `shift.swap_*` stays inside `shift.>` because a swap is a
+> fact about a shift. `tests/jetstream.rs:336` carries `attendance.recorded`.
+> **So this application's build-time dependency on routing is met.**
 >
 > **Swaps deliberately add no fifth domain.** They sit inside `shift.>` as
 > `shift.swap_*`, because a swap proposal is about shifts — so the vocabulary
@@ -580,11 +590,12 @@ Not this page's approval alone:
 2. **`APPS-Q1`'s two platform prerequisites** — the registry-driven shell, and
    the application-caller authorization round. They bind Workforce as they bind
    every application.
-3. **Event routing in place before Workforce publishes anything.** The
-   mechanism is ruled (ADR 0092 as amended — manifest-declared, materialised at
-   install), and its **implementation lands with the package rounds**, so the
-   Kernel's interim pre-named set is what this application actually depends on
-   at build time — **four domains, per §6.** Publishing into an unclaimed stream
-   is worse than not publishing: it looks like it worked.
+3. ~~**Event routing in place before Workforce publishes anything.**~~
+   **MET, 2026-08-31.** All four domains are routed in the Kernel's interim
+   pre-named set (§6, verified in `streams.rs:122-128`). The ruled *mechanism* —
+   manifest-declared, materialised at install (ADR 0092 as amended) — still
+   lands with the package rounds, and Workforce's `manifest.yaml` will declare
+   the same four; but nothing this application publishes will dead-letter in the
+   meantime, which was the actual gate.
 4. **`SHELL-Q23`** for the printed week — the shell owns the print dialog; this
    application hands it a print-ready view and writes no printer code.
