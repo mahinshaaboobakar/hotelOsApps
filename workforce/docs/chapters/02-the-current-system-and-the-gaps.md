@@ -1560,6 +1560,28 @@ its constraint (N5, Z2).
 10. **Slices are re-cut.** The month-end export cannot precede slices 2 and 3;
     the certification half of slice 4 is a compliance obligation that may not
     want to be last.
+11. **The leave-type seed becomes per-property seed templates**, keyed off the
+    property's own setting and never a literal — §4.7, ruled.
+
+### 4.4a · Ratified at the study's acceptance, 2026-08-31
+
+Recorded so deliverable 2 starts from them rather than re-arguing them:
+
+* **The zone goes on the `Posting`** (Z1) — completing *"Anita has zone 3"* with
+  *"as Housekeeping"* is **rule-as-type**, the house pattern: the incomplete
+  fact becomes inexpressible rather than discouraged.
+* **`Zone.DepartmentId` does not move this round.** The tension was correctly
+  reported and not resolved; **Z1 needs only the staff↔zone link**, and nothing
+  else changes.
+* **M3's overlap constraint stands** — the guarantee survives *because* the
+  study named which database object now carries it. Chapter 01's sentence is
+  kept; its implementation is not.
+* **Frame 2 is redrawn in deliverable 3, not captioned** — a day cell that
+  cannot hold a span is a shape problem, and a note under a drawing does not
+  fix a shape.
+* **`ZoneTypes` is the standard, not a flourish** — a design assuming one shared
+  zone would have diverged from shipped code silently. *Checked in code rather
+  than assumed* is the bar for the plan as it was for the study.
 
 ### 4.5 · What deliverable 3 must draw
 
@@ -1608,9 +1630,15 @@ enums** — that seed is a country written into the product.
 
 It is a small change and a real one: `Casual` and `Earned` are
 Indian-subcontinent vocabulary, and a Gulf property expects `Annual` and `Sick`.
-**Proposed for deliverable 2:** the type list ships neutral, or the seed follows
-the property's `home_country`; the types are property-configured either way, so
-only the *seed* is at issue.
+
+> **RULED — architect, 2026-08-31, upholding the finding under the standing
+> rule:** deliverable 2 replaces the seed with **per-property seed templates
+> keyed off the property's own setting — never a literal.**
+
+So the shape is settled before the plan is written: **a template chosen by the
+property's setting, not a list chosen by us.** The types stay
+property-configured, as chapter 01 already has them; what changes is that the
+starting point is selected rather than assumed. It joins §4.4's spine as item 11.
 
 §3.5's reasoning is the same rule the right way round: pay is out of scope
 **because** WPS, PF and ESI differ by country — a country-shaped fact used to
