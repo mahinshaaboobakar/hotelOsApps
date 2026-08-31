@@ -1,14 +1,21 @@
 # 02 · The current system and the gaps — what the owner runs, measured against chapter 01
 
-**Status:** comparison study, opened 2026-08-31. Stream GG, deliverable 1 of the
-Workforce round — brief `docs/working/47-the-workforce-round.md` §3.1, **in the
-platform repository**.
-**This is a live document.** The header, §1 and §2 are complete and are facts.
-§3 grows **one subject at a time** as the owner answers, in the brief's §2
-order; a subject not yet asked is listed as such rather than left invisible.
-**Nothing here is a ruling.** §1 and §2 are citations. §3's rows carry the
-owner's answers, attributed and dated. Every scope proposal is labelled a
-proposal, and the owner rules v1.
+**Status:** comparison study — **complete, for the owner's read**, 2026-08-31.
+Stream GG, deliverable 1 of the Workforce round — brief
+`docs/working/47-the-workforce-round.md` §3.1, **in the platform repository**.
+**All eight subjects of the brief's §2 seed list are walked**, one at a time
+through the architect, and §4 sorts the 54 rows they produced. Two of the
+subjects' halves are named as unasked in §4.8 rather than left invisible.
+**Nothing here is a ruling.** §1 and §2 are citations; §3's rows carry the
+owner's answers and the architect's rulings, each attributed and dated; §4 is
+the synthesis. Every scope proposal is labelled a proposal, and **the owner
+rules v1**.
+
+**What follows this page**, per the brief §3: the owner reads it, then the
+feature plan (chapter 01 revised — §4.4 is its spine), then the revised gold
+mockup and the flows page (§4.5 is their worklist). Code starts when the pages
+are verified and not before `APPS-Q1`'s two platform prerequisites have a plan
+of record.
 
 ## There is no reference backend for Workforce
 
@@ -253,8 +260,8 @@ architect; a subject is written up when its answer lands.
 | 3.4 | Swaps and covers — staff-initiated exchange, the approval chain | **half answered** — *covers* is settled by §3.3b's L9/L10; **staff-initiated swaps** are not asked |
 | 3.5 | Overtime and hours — caps, alerts, **the payroll boundary** | **ruled 2026-08-31** ↓ — architect, owner shown |
 | 3.6 | Skills and certifications — expiry, the compliance view | **ruled 2026-08-31** ↓ — architect, owner shown |
-| 3.7 | The MOD duty in daily operation | not yet asked |
-| 3.8 | Departments and zones in practice — how postings map to Room Care's *"who cleans zone 3 today"* | not yet asked |
+| 3.7 | The MOD duty in daily operation | **answered 2026-08-31** ↓ — one structural owner fact; the rest are defaults |
+| 3.8 | Departments and zones in practice — how postings map to Room Care's *"who cleans zone 3 today"* | **answered 2026-08-31** ↓ — *from Workforce* |
 | 3.9 | Notifications — how staff actually learn their roster | **ruled 2026-08-31** ↓ — architect; v1 is the printed week |
 
 ---
@@ -1014,6 +1021,231 @@ existed.
 
 ---
 
+### 3.7 · The MOD duty — a span, never a date
+
+**The owner's answer, 2026-08-31**, relayed through the architect:
+
+> *"We can't do per-day, because MOD may run 8:00 pm to 8:00 am — it covers two
+> dates."*
+
+One sentence, and it is **structural rather than a preference**. It overturns a
+line in chapter 01 §3 and the shape of two frames, and it does so for the same
+reason the platform has already met once from a different direction.
+
+#### The rows
+
+| # | Feature | Verdict | Why |
+|---|---|---|---|
+| M1 | `DutyAssignment` carries **start–end datetimes**, not a date or a date range | **DIVERGES** — `OWNER` — chapter 01 is wrong here | §3 says *"date (or date range)"*. A duty running 20:00→08:00 is neither: it is one span that happens to cross a date boundary, exactly as a night shift does |
+| M2 | *"Who is MOD right now?"* is answered by **the clock against the span** | **GAP** — `OWNER` — proposed **IN v1** | And, critically, **derived — never stored**. Below |
+| M3 | *"One MOD per property per day"* becomes **no two MOD spans overlap** | **DIVERGES** — `OWNER` — a consequence of M1 | Not one constraint in different words: one is a unique key, the other is an overlap check |
+| M4 | The MOD register shows who holds the duty **now and next** — the *"who to call"* view | **GAP** — `DEFAULT` — seen on frame 5 | The register's daily use is a lookup, not a planning grid |
+| M5 | An optional **free-text handover note** on the duty; **nothing blocks without it** | **GAP** — `DEFAULT` — seen on frame 5 | Warn-never-forbid again (§3.6's C4). A mandatory handover note is a field people type "n/a" into |
+| M6 | **Incident logging stays out of v1** — Jobs' territory when it exists | **DIVERGES** — `DEFAULT` — permanently not this application's | An incident is work that needs doing, which is Jobs' definition (`APPS-Q1`: *Jobs = what needs doing*) |
+
+#### M2 is the business-date lesson arriving from the staffing side
+
+ADR 0128 §6 (`CONN-Q6`) ruled the business date and, more usefully here, ruled
+**how** it is held:
+
+| Concept | Owner | Stored? |
+|---|---|---|
+| the business-day boundary | Core Administration | **yes** — stable configuration |
+| the **current** business date | Context Service, **derived** — `operating_day(timestamp, boundary)` | **no** |
+
+The MOD duty is the same shape one domain over: **the span is stored, the
+"current" is computed.** So there is no `is_current_mod` flag, no
+`current_mod_staff_id` on the property, and no nightly job moving a marker —
+each of which is a value that can be wrong while the data beside it is right.
+*"Who is MOD now"* is a question with a clock in it, and the answer is a query.
+
+**And the two interact.** A property whose business day rolls at 04:00 and whose
+MOD runs 20:00→08:00 has a duty spanning two business dates as well as two
+calendar ones. §3.5 established that Workforce **consumes** business-date
+semantics and must not compute them; M1 is why that is not academic.
+
+#### M3 is a different database object, and that is the part that gets missed
+
+Chapter 01's *"one MOD per property per day; assigning a day that has one
+replaces it with a named confirm"* reads as a uniqueness rule. As a date it is
+one. As a span it cannot be:
+
+```text
+per-day     UNIQUE (property_id, duty_date)          a unique key
+per-span    no two spans for a property overlap      an overlap constraint
+```
+
+The behaviour the chapter wanted survives intact — assigning over an existing
+duty still replaces it behind a named confirm — but **what detects the clash is
+no longer a unique index**, and a design that keeps the sentence while changing
+the column would silently lose the guarantee. ADR 0055 permits the DDL for this
+in a migration, so the no-native-SQL rule is not in the way; the point is that
+it must be *chosen* rather than inherited.
+
+#### The delta against the gold mockup — two frames encode the assumption
+
+The sharpest mockup finding of the walk, because the overturned assumption is
+drawn into the **shape** of two views rather than stated in a caption:
+
+| | What is drawn | Against M1 |
+|---|---|---|
+| **Frame 5 · Duty Roster** | *"a month strip showing who is MOD each day"* — one cell per day, one name in it | **A day cell cannot hold a span.** A 20:00→08:00 duty belongs partly to two cells, and the strip has no way to say so |
+| **Frame 2 · the MOD ribbon** | one name per day column — `Priya T.` under Mon, `Rahul N. · SEC` under Wed, `—` under Sun | **A day column can now hold two MODs** — the one ending at 08:00 and the one starting at 20:00. The ribbon's one-name-per-column shape is the per-day model made visual |
+
+Both are listed for deliverable 3, and neither is a small correction: *what does
+a duty crossing midnight look like on a week grid* must be answered in the
+drawing, not in a note. **And it reaches the printed week** (§3.9's N1), which
+inherits whatever the ribbon becomes.
+
+#### What M4–M6 leave open
+
+* **Is the MOD always property-wide?** `WF-Q1` and chapter 01 both say the duty
+  is property-scoped and the person keeps their department, which this answer
+  does not disturb. Recorded as untouched rather than re-confirmed.
+* **What happens in the gap** — one duty ends at 08:00, the next begins at
+  20:00, and nobody is MOD for twelve hours. A normal state the register shows
+  as *"none"* (frame 5 already draws a `—`), or a gap somebody is warned about?
+  M4's *now and next* view makes it visible, which may be all that is wanted.
+
+---
+
+### 3.8 · Postings and zones — the answer is *from Workforce*, and it makes Context the join
+
+**The owner's answer, 2026-08-31**, relayed through the architect:
+
+> **"From Workforce."** Zone assignment is a **Workforce posting**, not a Room
+> Care morning allocation: a cleaner is **posted to a zone on the roster**, and
+> Room Care reads *"who has zone 3"* through **Context**.
+
+This settles the question the index has carried since the walk opened, and it
+settles it the way that costs Room Care least: the zone is part of the standing
+arrangement, not a decision re-made at 7 a.m.
+
+#### The rows
+
+| # | Feature | Verdict | Why |
+|---|---|---|---|
+| Z1 | A staff member is **posted to a zone**, and the posting is Workforce's | **GAP** — `OWNER` — proposed **IN v1** | Chapter 01 §3's `Posting` is staff → department with **no zone**. This adds one |
+| Z2 | Room Care reads *"who has zone 3"* **through the Context Service** | **COVERED** by principle, **GAP** as work | CLAUDE.md §5 *Context over joins*, and `WF-Q6` recorded the same answer for Jobs. `CTX-Q4` makes it **this round's delivery** — below |
+| Z3 | A zone posting is **durable until changed** — a standing arrangement edited on the rota, not re-decided daily | **GAP** — `DEFAULT` — seen on frames 2 and 6 | Needs no new lifecycle: `Posting` already carries **effective from/to** (ADR 0052) |
+| Z4 | Zones are **not exclusive to one department** — Engineering and Housekeeping each hold their own assignments with their own meanings | **COVERED** — `DEFAULT` — and the implementation already says so | `ZoneTypes` ships today. Below |
+
+#### Z1 · The zone belongs **on the posting**, because the posting is what disambiguates it
+
+Proposed for deliverable 2, with the argument rather than the shape alone:
+
+```text
+proposed so far   Posting   staff · department · job role · primary ·
+                            effective from/to · reporting manager
+Z1 adds                     · zone (optional)
+```
+
+A standalone staff ↔ zone link would be the wrong object. **Z4 says a zone can
+mean different things to different departments**, so *"Anita has zone 3"* is not
+a complete fact — *"Anita has zone 3 **as Housekeeping**"* is. The `Posting`
+already carries the department, so putting the zone there makes the ambiguous
+state **inexpressible** rather than merely discouraged, and it inherits the
+effective dating Z3 needs for free.
+
+**Optional, not required**: most postings have no zone — a receptionist is
+posted to Front Office and to no area — and a required zone would make the
+common case carry a field somebody has to invent a meaning for.
+
+#### Z4 · The platform already models this, and it is worth knowing before designing it
+
+`services/masterdata-service/src/Domain/Catalogue.cs:9-19` — `ZoneTypes` ships
+today with five values:
+
+```text
+housekeeping · maintenance · inventory · security · inspection
+```
+
+So the platform's existing answer to *"can two departments share a zone"* is
+that **they hold two typed zones**, not one zone with two owners. That is a
+materially different design from the one the default's wording suggests, and it
+changes what *"zone 3"* means: there may be a **housekeeping zone 3** and a
+**maintenance zone 3** over the same physical floor, each with its own rooms and
+its own postings.
+
+Neither reading is wrong and the study does not choose. **What it records is
+that the decision is already half-made in shipped code**, and a design assuming
+one shared zone would be diverging from it without saying so.
+
+#### A live tension to report — `Zone.DepartmentId` is Workforce's by the table and Core's in the schema
+
+ADR 0063's relationship table lists **Zone → Department** as *Roster /
+Workforce's*. The column is still in Master Data — `Catalogue.cs:38-44`,
+`Zone.DepartmentId`, nullable, *"a zone is often drawn on the floor plan before
+anyone decides which department owns it"*.
+
+And ADR 0063 **explicitly did not rule it**, in its own Consequences:
+
+> *"Open and touched by this ruling — `zones.department_id` and
+> `assets.owning_department_id` are the same shape as the three columns that
+> just left, and are not ruled here."*
+
+**Reported, not resolved** — and there is a reason for care that the ownership
+matrix may not have weighed. `Catalogue.cs:27-29` records the column as
+**load-bearing for authorization**: *"a room reaches its department through its
+zone — so reassigning `DepartmentId` is one tuple write however many rooms the
+zone contains."* Moving it is not the same kind of move as the three columns
+that left `Staff`, and **this round proposes nothing about it**. Z1 needs only
+the staff↔zone link, which is new and unambiguously Workforce's.
+
+#### Z2 · `CTX-Q4` makes the resolver this round's delivery, with its constraint
+
+`CTX-Q4`, ruled by the architect on 2026-08-31: Context growth is routine and
+the principle is the gate — and the rule travelling with every commission is
+that a new resolver arrives as **one delivery by the contributing domain's
+round**: the read view, the Context RPC, **and its stated constraint**. *"A
+round that ships the view without the RPC has shipped half."*
+
+Workforce is the contributing domain, so the **zone → who is posted** resolver
+is **this round's work**, not Room Care's. Its constraint, stated here so it
+travels with it:
+
+> **Allocation input, never a gate.** The absence of a zone posting must not
+> block a Room Care task. A room still gets cleaned when nobody is posted to its
+> zone, and a readiness check built as a blocker on this resolver is the named
+> failure.
+
+That constraint is not invented — it is **`APPS-Q2`**, ruled the same day: *an
+application's own flow is never gated on another application being installed; an
+absent dependency loses its capability, never the flow.* Workforce is
+installable, so a property may run Room Care without it, and ADR 0116 §6 already
+makes department membership before Workforce **empty by design**. The capability
+Room Care loses is *knowing who has the zone*; the flow it keeps is cleaning the
+room.
+
+#### Why this makes Context the join rather than a convenience
+
+The two halves of *"who cleans zone 3 today"* live in different applications,
+and after this ruling neither can answer alone:
+
+```text
+Workforce     who is posted to zone 3      staff ↔ zone   (Z1, new)
+Room Care     which rooms are in zone 3    room  ↔ zone   (ADR 0056)
+Master Data   what a zone is               the entity     (ADR 0063 kept it)
+```
+
+Three owners, one question. That is *Context over joins* not as a style rule but
+as the only shape that works — a direct read would have to reach into two
+applications' schemas, which is the one rule modularity rests on, and Stream
+FF's round refused exactly that for the same reason.
+
+#### The delta against the gold mockup
+
+| | What is drawn | Against this subject |
+|---|---|---|
+| **Frame 6 · People** | postings — staff member, posting(s), job role, reporting manager | **No zone.** Z1 adds it to the posting, so it belongs on this frame |
+| **Frame 2 · Team Rota** | one department, people down, days across | **No zone anywhere.** Z3 says the zone is edited *"on the rota"*, so the rota needs somewhere to show and change it — a column beside the person, or the rows grouped by zone |
+
+Frame 2 now carries three changes from this walk — the shift chip (§3.1, §3.9),
+the MOD ribbon (§3.7) and the zone (§3.8). Worth saying plainly: **it is the
+frame the walk changed most**, and redrawing it is not a touch-up.
+
+---
+
 ### 3.9 · Notifications — the printed week, and events published for an app that does not exist yet
 
 **Ruled by the architect, 2026-08-31** — `ARCHITECT` throughout. Relayed as
@@ -1219,8 +1451,186 @@ short code**, with the legend below the grid on both the screen and the page.
 
 ## 4 · The verdict table
 
-Written when §3 is complete. It is §3's rows, sorted by verdict, and it is what
-the feature plan (deliverable 2) is built from.
+**All eight seed subjects are walked.** §3 produced **54 rows**; this section is
+those rows sorted by verdict, plus the four worklists they imply. It is what the
+feature plan — deliverable 2 — is built from, and it is the last section written
+because a verdict table assembled subject by subject would have hidden the
+pattern the whole walk turned out to have.
+
+```text
+DIVERGES   6    chapter 01 or the drawn surface is wrong, and why
+GAP  IN   28    proposed for v1
+GAP  OUT   4    proposed out, each with the ruling that puts it there
+COVERED   14    already right — and worth listing, because a refusal
+                that survived being tested is stronger than one nobody
+                questioned
+OPEN       2    the answer raised something nobody has ruled
+```
+
+### 4.1 · `DIVERGES` — where the record is wrong
+
+The six rows that change something already written down. These are the study's
+most load-bearing output, because each is a place a build would have gone ahead
+on a false premise.
+
+| # | What is wrong | What it becomes |
+|---|---|---|
+| **M1** | Chapter 01 §3: `DutyAssignment` is *"date (or date range)"* | **start–end datetimes**. A MOD running 20:00→08:00 is a span, and the owner's *"we can't do per-day"* is structural |
+| **M3** | Chapter 01 §3: *"one MOD per property per day"* | **no two spans overlap** — an overlap constraint, not a unique key. The behaviour survives; the database object does not |
+| **M6** | — | incident logging is **Jobs'**, not this application's |
+| **A4** | Chapter 01 §8 implies a punch clock would be built here | the device is a **connector** — ADR 0128 §2, `kind: connector` |
+| **O11** | — | pay calculation is **permanently** Finance's or the hotel's payroll. `GUEST-Q6`'s boundary, one application over |
+| **N2 / R1** | Mockup frame 2: a closed set of three shift codes, colour from three hardcoded CSS classes | an **open property catalogue**, each shift carrying name + typed short code + colour |
+
+### 4.2 · `COVERED` — and two refusals that were tested
+
+Fourteen rows were already right: R3 (times exist, on the wrong aggregate), R6,
+R7, R8, R9, R10 (the planning machinery — **the mockup agreed with the owner
+before he was asked**), A6 (the mapping mechanism), L1 (the four leave types),
+Z2 (Context as the join, by principle), Z4 (typed zones), N4, N6, and the two
+prerequisites.
+
+Chapter 01 §8's refusal list was §2.4's prediction of where the walk would pay,
+and it did — **in both directions**:
+
+```text
+no attendance / punch clock   OVERTURNED as a fact, UPHELD as an
+                              implementation — for a reason the chapter
+                              never gave (it is a connector)
+no accrual engine             NARROWED — the model gains a rate,
+                              the engine stays refused
+no payroll                    CONFIRMED, and now with the reason
+                              written down
+no shift-bidding              untouched — and §3.3's "gap" was kept
+no compliance rule engine      deliberately cheap so as not to open it
+no biometric integration      re-sited, not refused: it happens, and it
+                              happens in the Hub
+```
+
+**A refusal that survives being tested is worth more than one nobody
+questioned**, and three of these are now defensible where before they were
+merely asserted.
+
+### 4.3 · The v1 scope proposal
+
+Proposals, not decisions — the owner rules v1.
+
+**Proposed IN.** Postings with a zone (Z1) · the open shift catalogue with name,
+typed short code, colour (R1–R5, N2) · the rota, copy-last-week and swap
+(R8–R10) · the MOD register as spans, *now and next*, with a handover note
+(M1–M5) · attendance as one source-agnostic fact with provenance, manual source
+only (A1–A3, A7) · leave with a per-property policy and accrual rate, the
+balance ledger, approver from postings, covers, HR adjustment (L3–L11) · the
+produced numbers and the month-end export (O1–O9) · skills with `valid_until`,
+Attention, the certification register (C1–C5) · the printed week and the change
+list (N1, N3) · the events, and the `zone → who is posted` Context resolver with
+its constraint (N5, Z2).
+
+**Proposed OUT, each with the ruling that puts it there.**
+
+| | Why, and it is never *"no time"* |
+|---|---|
+| the biometric **device source** (A4) | a connector package — and ADR 0128's reservations gate means it **follows** this app, since the Hub can publish an attendance fact only when Workforce exists to own it |
+| the **mobile** source (A5) and the staff app (N4) | ADR 0115 §1D is **parked** by owner direction |
+| the **payroll connector** (O10) | ADR 0128 §4 rules connector v1 **inbound-only**; an outbound connector is outside the ruled contract, which is why the export is a file |
+| **pay itself** (O11) | Finance's, permanently — §4.1 |
+
+### 4.4 · What chapter 01 must change — deliverable 2's spine
+
+1. **`Shift` splits** into `ShiftDefinition` (name · short code · start–end ·
+   colour · active) and `ShiftAssignment` — with the argument against the split
+   recorded and unresolved: the one-off custom span, and rotas already worked
+   when a definition is edited.
+2. **`Posting` gains an optional zone** (Z1), on the aggregate that already
+   carries the department that gives it meaning.
+3. **`DutyAssignment` becomes a span** (M1), and its uniqueness rule becomes an
+   overlap constraint (M3).
+4. **`LeaveRequest` gains a policy** beside the type list — an accrual rate, not
+   an annual allowance (L3, L4) — and the balance becomes a ledger (L6, L7).
+5. **A new aggregate for attendance** (A7), source-agnostic from the first
+   migration, carrying provenance and in/out **times**.
+6. **A new aggregate, or a projection, for the produced numbers** (O1–O7).
+7. **`Capability` gains `valid_until`** (C1), which is the whole of §3.6.
+8. **The event vocabulary** grows `shift.assigned`, `shift.changed`,
+   `leave.approved` beside chapter 01 §4's `user.posted` — with `PKG-Q39`'s
+   prerequisite met first.
+9. **The approver rule** — chapter 01's *"reporting manager **or** department
+   head"* must become one rule with a precedence, because two possible approvers
+   with no order is two queues.
+10. **Slices are re-cut.** The month-end export cannot precede slices 2 and 3;
+    the certification half of slice 4 is a compliance obligation that may not
+    want to be last.
+
+### 4.5 · What deliverable 3 must draw
+
+**Frame 2 is the frame the walk changed most** — three independent changes: the
+shift chip renders from data and shows a short code (R4, N2), the MOD ribbon
+can hold two names in one day column (M1), and the zone needs a place (Z1, Z3).
+Redrawing it is not a touch-up.
+
+**Frame 5** cannot stay a one-name-per-day month strip (M1). **Frame 6** gains
+the zone. **Frames 3 and 4** must survive a negative balance (L6 × `WF-Q5`).
+
+**And four surfaces do not exist at all:**
+
+```text
+property workforce policy   leave types · accrual rate · OT threshold ·
+                            holiday calendar        (L3 L4 L5 O8)
+reporting                   the month-end sheet and its export   (O9)
+print view                  a different artifact from frame 2, not a
+                            print stylesheet on it                (N1)
+attendance                  posted-versus-present, and marking    (A1–A3)
+```
+
+The attendance surface is the one still waiting on an answer — §3.2's residue
+decides whether it is a frame or a line in another one.
+
+### 4.6 · What this round found outside itself
+
+Three things this application cannot do for itself, each now registered:
+
+| | |
+|---|---|
+| **`PKG-Q39`** | how a packaged application's event domains reach the Kernel's stream routing. Publishing into an unclaimed stream *looks like it worked* |
+| **`SHELL-Q23`** | the print surface — and its **file half left open**, because a file handed to the user is a different capability from a print dialog |
+| **`CTX-Q4` applied** | the `zone → who is posted` resolver is **this round's delivery**, with `APPS-Q2`'s constraint attached: allocation input, never a gate |
+
+That is the pattern worth naming: **the first real business application is what
+finds the platform's unbuilt edges**, and all three were found by checking the
+code rather than by reasoning about it.
+
+### 4.7 · One thing that cuts across every subject — no country in the product
+
+Chapter 01 §3 seeds the leave types as *"the **Indian-hotel** defaults"*. Under
+the owner's standing rule — **the product is sold into India *and* the GCC;
+`home_country` is a property setting, never a literal in code, labels or
+enums** — that seed is a country written into the product.
+
+It is a small change and a real one: `Casual` and `Earned` are
+Indian-subcontinent vocabulary, and a Gulf property expects `Annual` and `Sick`.
+**Proposed for deliverable 2:** the type list ships neutral, or the seed follows
+the property's `home_country`; the types are property-configured either way, so
+only the *seed* is at issue.
+
+§3.5's reasoning is the same rule the right way round: pay is out of scope
+**because** WPS, PF and ESI differ by country — a country-shaped fact used to
+justify a boundary, never written into a field.
+
+### 4.8 · What the study leaves unanswered
+
+Honest, because a study that reads as complete when it is not is worse than one
+that names its holes:
+
+* **§3.2's residue** — late/absent semantics, the posted-versus-present view,
+  and attendance contradicting the rota. §3.5's O3/O6 imply lateness and times
+  are recorded; that is an implication and has not been confirmed.
+* **§3.4's other half** — staff-initiated swaps. *Covers* are settled (L9, L10);
+  whether a staff member can propose an exchange with a colleague, and what
+  approves it, was never asked. It is the one remaining thing that could still
+  add an aggregate.
+* **The ten `§5` questions**, two of which have left for the register.
+
+None of these blocks the feature plan. All of them would block a build.
 
 ## 5 · Questions this study raises
 
