@@ -17,8 +17,7 @@
     <RootNamespace>HotelOS.GuestOps.Tests</RootNamespace>
     <IsPackable>false</IsPackable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- The documentation gate is inherited from the repository root. -->
   </PropertyGroup>
 
   <ItemGroup>

@@ -60,19 +60,20 @@ builder.Services.AddDbContext<GuestOpsDbContext>(options => options
 // reimplemented here — two event appenders drift, and one of them stops writing
 // the queue row.
 //
-// **`certificateDirectory` is the seam.** For a platform service it is where
-// `hotelos-kernel enroll <service>` wrote an identity at provisioning. An
-// *installed* application arrives later, from a package, and nothing enrolls it
-// — so this reads a configured path and, when none holds a certificate, the
-// channel falls back to plaintext and every authorized RPC fails closed.
+// **`certificateDirectory` is the seam — `AUTHZ-Q16`.** For a platform service
+// it is where `hotelos-kernel enroll <service>` wrote an identity at
+// provisioning. An *installed* application arrives later, from a package, and
+// nothing enrolls it — so this reads a configured path and, when none holds a
+// certificate, the channel falls back to plaintext and every authorized RPC
+// fails closed. The fallback is evidence for that row, not a workaround.
 //
 // That is the correct behaviour and it is **not** worked around here: the
 // Kernel refuses any request naming an application identity outright, because
 // an unauthenticated package claim must not be honoured either way round —
 // trusting it would let a package assert any id, and ignoring it would let a
-// package inherit its user's full authority. Round 51 (the application-caller
-// round) answers identity at install; until it does, this application can
-// migrate, start, and serve nothing that requires a decision.
+// package inherit its user's full authority. `AUTHZ-Q16` answers identity at
+// install; until it lands, this application can migrate, start, and serve
+// nothing that requires a decision.
 builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
     serviceName: "guestops",
     kernelEndpoint: new Uri(

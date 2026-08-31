@@ -48,24 +48,13 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!--
-      ADR 0057, matched deliberately rather than inherited.
-
-      The platform repository carries these two settings in a root
-      `Directory.Build.props` so a project cannot opt out by being new. **This
-      repository has no such file**, so a packaged application starts outside
-      that gate — and the gate is the point: generating the documentation file
-      is what makes the compiler resolve every `<see cref>`, and CS1574 could
-      not fire without it. Four references to a deleted type once survived a
-      build reporting zero warnings.
-
-      `CS1591` — *missing XML comment for a public member* — stays suppressed,
-      for ADR 0057's own reason: step 4 is *classify the undocumented public
-      API*, and turning it on first produces a hundred one-line restatements of
-      member names. The broken-reference diagnostics are not suppressed, and
-      those are the ones the ADR was written after.
+      `GenerateDocumentationFile` and the CS1591 suppression are **inherited**
+      from this repository's root `Directory.Build.props` (ADR 0057, extended
+      to the application repository on this stream's finding). They were set
+      here while no such file existed and are dropped now it does: a local copy
+      of a repository-wide setting is a project that can silently stop
+      inheriting the next change to it.
     -->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
     <!-- ADR 0090 §Q23: the platform chains the ASP.NET runtime. -->
     <SelfContained>false</SelfContained>
   </PropertyGroup>

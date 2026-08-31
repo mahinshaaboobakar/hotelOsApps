@@ -23,12 +23,15 @@ public static class PlatformAdapters
     public static IServiceCollection AddGuestOpsPlatformAdapters(
         this IServiceCollection services, IConfiguration configuration)
     {
-        // The Context Service, by address. **Not discovered through the
-        // Kernel**, which is how a platform service finds its peers — an
-        // installed application has no identity to discover with, and inventing
-        // a discovery path here is exactly what round 51 exists to answer. A
-        // configured address is the smallest honest stand-in and it is visible
-        // in `appsettings.json` rather than buried.
+        // The Context Service, by address — the **sanctioned interim** of
+        // `AUTHZ-Q21`, which ruled the final state is `Kernel.DiscoverService`
+        // like every other service.
+        //
+        // Not discovered here because an installed application has no identity
+        // to discover with, and inventing a discovery path is what that round
+        // exists to answer. **This line is removed in the same change that
+        // wires the app's Kernel channel** — it is an interim with an expiry
+        // rather than a configuration option.
         services.AddGrpcClient<ContextService.ContextServiceClient>(client =>
             client.Address = new Uri(
                 configuration["Context:Endpoint"] ?? "https://127.0.0.1:15053"));
@@ -57,10 +60,12 @@ public static class PlatformAdapters
     /// otherwise look like success.
     /// </para>
     /// <para>
-    /// <b>Where the key comes from for a packaged application is round 51's.</b>
-    /// A platform service reads its material from the secret store it was
-    /// provisioned with; nothing provisions one for a <c>.hopkg</c>, and this
-    /// configuration entry is the seam, not the answer.
+    /// <b>Where the key comes from for a packaged application is
+    /// <c>AUTHZ-Q22</c>, open.</b> A platform service reads its material from
+    /// the secret store it was provisioned with; nothing provisions one for a
+    /// <c>.hopkg</c>. This configuration entry is the seam, not the answer —
+    /// and refusing to start without one is the behaviour that row cites as
+    /// correct meanwhile.
     /// </para>
     /// </remarks>
     private static byte[] RequiredKey(IConfiguration configuration, string path)
