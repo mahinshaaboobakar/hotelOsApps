@@ -1,0 +1,64 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Workforce's characterisation suite.
+
+    `backend/tests/`, beside `backend/src/` — the application-owned model
+    CLAUDE.md states, and ADR 0025's rule that a production source file contains
+    no tests. `tests/e2e/` in the platform stays what it is: cross-service, both
+    processes real.
+
+    # Against a real PostgreSQL, on a scratch database of its own
+
+    No mocks and no in-memory provider for the database. A repository test that
+    does not meet the real query planner, the real check constraints and the
+    real grants is a test of the mock — and this slice's two most interesting
+    rules are a check constraint (`ck_postings__window_ordered`) and an
+    overlap query, neither of which an in-memory provider evaluates.
+
+    # And an absent database FAILS
+
+    ADR 0053. A suite that passes without a database reports success having
+    executed nothing, which is how 229 .NET tests once stayed green while doing
+    nothing at all.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Workforce.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <!-- Creating and dropping the scratch database, which no ORM expresses. -->
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\HotelOS.Workforce.csproj" />
+    <!--
+      The recording doubles for `IKernelAuthorizer` and `IEventAppender`, and the
+      scratch database harness — one implementation, shared, never copied here.
+      CLAUDE.md's no-duplicated-shared-code rule makes no exception for an
+      installed application's tests: a second recording authorizer would drift
+      from the one every platform suite asserts against.
+    -->
+    <ProjectReference
+      Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -193,6 +193,46 @@ permission error — loudly, which is the better failure, and after the
 Recorded now rather than when the announcement lands, because the fix belongs to
 the package contract and not to this application.
 
+## F7 · The test harness assumes a platform service, and an application is not one
+
+**Found by running the characterisation suite**, 2026-08-31 — the first run,
+against a live development PostgreSQL:
+
+```text
+Failed!  Failed: 15, Passed: 0, Skipped: 0
+Npgsql.PostgresException : 42704: role "hotelos_owner_workforce" does not exist
+```
+
+`ScratchDatabase.CreateSchemaAsync` creates the schema
+`AUTHORIZATION {SchemaMigration.OwnerOf(schema)}` — `hotelos_owner_workforce`
+— and that role comes from `deployment/database/02-roles.sql`, whose list is a
+**fixed enumeration of platform schemas**: identity, masterdata, platform,
+reservations, housekeeping, workorder, inventory, procurement, finance,
+integration. There is no `workforce`, and there should not be: an installable
+application's schema and owner role are created **by the installer**, on a
+property's cluster, at install time.
+
+So on a developer's cluster nothing creates them, and **an installable
+application's characterisation suite cannot stand up its own schema at all.**
+The harness was written for services that ship with the platform, and it
+encodes that assumption in one line.
+
+**The suite is written, builds clean, and fails for exactly this one reason** —
+15 failed, **0 skipped**, which is ADR 0053 working on its first outing: the
+harness could not provision, so it failed the run loudly instead of reporting
+success having executed nothing.
+
+**Two candidate fixes, and the choice is not this stream's:**
+
+| | |
+|---|---|
+| **The harness provisions it** | `CreateSchemaAsync` creates the owner role when absent, or takes one. It already creates and drops databases, so this is the authority it holds — but the role it invents would differ from the one the installer creates, and the suite would then be testing against a role no property has |
+| **The dev cluster gains it** | `02-roles.sql` grows the application schemas. Honest for a developer's machine, and it makes a fixed enumeration carry a list that is by definition open — every future application is another line, which is the shape `PKG-Q39` already refused for event domains |
+
+The second is the same shape as this page's other findings: **a platform
+mechanism enumerating what applications there are**, when the whole point of a
+package is that the platform does not know. Recorded rather than resolved.
+
 ## APPS-Q3 · three schemas still carry old application names
 
 **Reported, not fixed** — colleague files, per the standing order. Found by the
