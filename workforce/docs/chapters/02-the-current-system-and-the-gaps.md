@@ -83,6 +83,10 @@ OWNER     the owner said it. It is a fact and the design conforms to it
 DEFAULT   standard practice, designed by the stream because the owner has
           no answer to give. Not an owner fact, never cited as one, and
           VETOABLE AT THE MOCKUP READ — the point at which it is seen
+ARCHITECT the architect ruled it as the standard, and the owner was shown
+          it and did not object. Stronger than a DEFAULT — it has already
+          been seen — and still not an owner fact: cite it as an architect
+          ruling with its date, never as "the owner decided"
 ```
 
 A `DEFAULT` that is never seen is a decision made by silence, which is why each
@@ -246,9 +250,9 @@ architect; a subject is written up when its answer lands.
 | 3.1 | **Rostering** — shift templates, rotation patterns, week planning, copy-last-week | **answered 2026-08-31** ↓ |
 | 3.2 | Attendance — check-in/out, late/absent, who is *actually* here versus posted | **answered in part 2026-08-31** ↓ — the sources are answered, the semantics are not |
 | 3.3 | Leave — types, balances, requests and approval, who covers | **answered 2026-08-31** ↓ — types and policy are owner facts; balances, approval and covers are standard-practice defaults |
-| 3.4 | Swaps and covers — staff-initiated exchange, the approval chain | not yet asked |
-| 3.5 | Overtime and hours — caps, alerts, **the payroll boundary** | not yet asked |
-| 3.6 | Skills and certifications — expiry, the compliance view | not yet asked |
+| 3.4 | Swaps and covers — staff-initiated exchange, the approval chain | **half answered** — *covers* is settled by §3.3b's L9/L10; **staff-initiated swaps** are not asked |
+| 3.5 | Overtime and hours — caps, alerts, **the payroll boundary** | **ruled 2026-08-31** ↓ — architect, owner shown |
+| 3.6 | Skills and certifications — expiry, the compliance view | **ruled 2026-08-31** ↓ — architect, owner shown |
 | 3.7 | The MOD duty in daily operation | not yet asked |
 | 3.8 | Departments and zones in practice — how postings map to Room Care's *"who cleans zone 3 today"* | not yet asked |
 | 3.9 | Notifications — how staff actually learn their roster | not yet asked |
@@ -713,6 +717,303 @@ the property-policy surface as new work rather than a revision.
 
 ---
 
+
+> **A note on numbering.** The two rulings below were relayed as *"subject 4"*
+> and *"subject 5"*. Against the brief's §2 seed list they are items **5**
+> (overtime and hours) and **6** (skills and certifications), and they are
+> written up here as §3.5 and §3.6 so that a section number and a seed-list
+> item never disagree. The brief's item 4 — swaps and covers — is **half
+> answered**: §3.3b's L9/L10 settled what a *cover* is, and staff-initiated
+> *swaps* have not been asked.
+
+### 3.5 · Overtime and hours — Workforce produces the numbers and never calculates pay
+
+**Ruled by the architect, 2026-08-31, owner shown and not objecting** — an
+`ARCHITECT` row throughout, cited as an architect ruling with its date and never
+as an owner fact.
+
+> **Workforce produces the numbers; it never calculates pay.**
+
+The reasoning as given: pay calculation is a legal and compliance domain that
+differs by country — Qatar's WPS, India's PF/ESI, gratuity rules — and by hotel
+— allowances, deductions, contracts. **Building it wrong is a salary dispute.**
+It is Finance's territory, already a separate application in the plan, or the
+hotel's own accountant and payroll software. What every one of those needs from
+us is identical: correct numbers.
+
+#### This is `GUEST-Q6`'s boundary, one application over
+
+The precedent is exact and worth naming, because it means this is the platform
+being consistent rather than this round being cautious. `GUEST-Q6`, ruled by the
+owner on 2026-08-31: GuestOps v1 is the reservation book plus the stay's
+commercial terms, and **the folio is not in it** — posting, payments,
+settlement, invoicing and night-audit posting are *"Finance's domain
+(CLAUDE.md's installable list), a later round"*, with the consequence accepted
+knowingly.
+
+```text
+GuestOps    carries the stay's terms, never settles the guest      → Finance
+Workforce   carries the hours and the days, never pays the person  → Finance
+```
+
+Two applications, one boundary, the same reason: **the domain that produces a
+fact is not the domain that turns it into money.**
+
+#### What Workforce computes
+
+| # | Produced, per staff, per business-day and per month | Source |
+|---|---|---|
+| O1 | days **posted** | the rota (§3.1) |
+| O2 | days **present** | attendance (§3.2) |
+| O3 | **late** count | attendance — see the implication below |
+| O4 | **leave taken**, by type | leave (§3.3) |
+| O5 | **holidays worked** → a comp-off credit later | attendance × the holiday calendar (L5) |
+| O6 | **hours worked** | attendance in/out times |
+| O7 | **overtime hours**, flagged when hours exceed the property's configured threshold | O6 against the OT threshold |
+
+| # | The rest of the ruling | Verdict |
+|---|---|---|
+| O8 | The **OT threshold is per-property configuration** — one rule, e.g. *"OT after 9h/day or 48h/week"*, set exactly as the leave policy is | **GAP** — `ARCHITECT` — proposed **IN v1** |
+| O9 | **Month-end export** — a per-staff summary the accountant or payroll software takes. **File download in v1** | **GAP** — `ARCHITECT` — proposed **IN v1** |
+| O10 | A **payroll connector** through the Hub later, the same pattern as the biometric one | **GAP** — `ARCHITECT` — **OUT of v1**, and see below: it is outside the *ruled* connector contract, not merely later |
+| O11 | Pay itself — calculation, payslips, statutory filing | **DIVERGES** — permanently out. Finance's, or the hotel's existing payroll |
+
+> **The one thing HR configures: the overtime threshold. The one thing HR gets:
+> the month-end sheet nobody has to compile by hand.** Pay happens wherever it
+> happens today — Workforce makes its inputs indisputable.
+
+O8 gives the undrawn property-policy surface flagged in §3.3 its **second
+occupant**. One screen now holds the leave policy and the OT threshold, which is
+an argument for drawing it as *the property's workforce policy* rather than as a
+leave setting that later grows a stranger.
+
+#### O10 is not "later by preference" — the outbound half is already ruled out
+
+A payroll connector **sends data out**. ADR 0128 §4 (`CONN-Q5`, planner
+2026-08-31): *"v1 connector scope is inbound-only… Write-back is a separate
+connector capability in a later round — kept out of the initial contract so
+connector permissions stay clean."*
+
+So the file download in v1 is not a stopgap chosen for speed: **it is the only
+thing the ruled connector contract currently permits.** The parallel with §3.2
+is worth seeing — the biometric connector is inbound and fits the contract
+today; the payroll connector is outbound and waits for the capability that
+`CONN-Q5` deferred. Same pattern, opposite side of the boundary.
+
+#### O9's export mechanism exists — and it is not shared, which is the finding
+
+The natural assumption is that this is `GUEST-Q7`'s print gap again — *"no
+print surface exists in any chapter or ADR."* **It is not, and the difference
+matters.** Measured 2026-08-31:
+
+`apps/desktop/src/modules/core-administration/domain/import/download.ts:31-44`
+holds `saveFile(text, name)` — a CSV blob, an anchor download, the object URL
+revoked after the click. Its docstring records the alternative it rejected and
+why: *"Deliberately not `showSaveFilePicker`: it is behind a permission prompt,
+it is unavailable in some WebView2 configurations, and its rejection is
+indistinguishable from the user cancelling."*
+
+The mechanism exists, is proven in a shipped feature, and has already had its
+hard question answered. **What it is not is a shared surface.** It lives inside
+Core Administration's module — its own docstring says *"two callers, in two
+features"*, both of them that module's — and Workforce is a different
+application, in a different repository, binding to the platform only through the
+contracts and the SDK (`HotelOsApps/README.md`). It cannot import it.
+
+That leaves two roads and only one of them is allowed. CLAUDE.md: *"Anything two
+components must agree on lives in one place… if you are about to write it in a
+second service, it belongs in a package."* A second copy of a file-save helper
+is a small thing that drifts in exactly the way that rule describes — one of
+them forgetting `revokeObjectURL` is invisible, because the download still
+works.
+
+**What the application SDK exposes to a packaged frontend module is specified
+nowhere**, and this is the first application to need it. Registered as a
+question; it belongs with `APPS-Q1`'s registry-driven-shell prerequisite rather
+than to this round.
+
+#### The ruling resolves part of §3.2's residue, by implication
+
+§3.2 closed with three unanswered questions. **O3 and O6 answer the first one
+sideways**: a *late count* and *hours worked* cannot appear on a month-end sheet
+unless lateness and in/out times are recorded facts. So attendance is not a
+present/absent tick — **the manual floor (A3) must capture in and out times**,
+which is meaningfully more than a checkbox and is what makes manual marking
+honest enough to sit in the same column as a fingerprint.
+
+Recorded as an **implication, not an owner fact**, and flagged for confirmation
+rather than treated as settled. §3.2's other two residue questions — the
+posted-versus-present view, and what happens when attendance contradicts the
+rota — are untouched by this ruling.
+
+**And O5 gives §3.3's question 8 a direction**: *holidays worked* is produced
+now, and the comp-off credit it feeds is explicitly *later*. The number and the
+rule that consumes it are separated, which is the cheap half first.
+
+#### "Per business-day" leans on a ruling whose home is open
+
+O1–O7 are produced *per business-day*. For a night auditor rostered 23:00–07:00
+that is not a calendar date, and the platform has already been here:
+ADR 0128 §6 (`CONN-Q6`) rules the business date **a canonical property-level
+operational concept owned by the platform, not by a connector**, with the
+boundary stored beside `check_in_time` in Core Administration and the current
+business date **derived, not stored** — `operating_day(timestamp, boundary)`, in
+the Context Service.
+
+Two consequences for this application, neither of them a new decision:
+
+* Workforce **consumes** business-date semantics and must not compute them —
+  the same sentence ADR 0128 §6 wrote for connectors, and the reason
+  `Tenancy.cs:70-75` says a shift crossing midnight belongs to the property's
+  zone and *"never the server's"*;
+* the ruling states *"no storage or event is introduced now merely to solve the
+  connector problem"* — so Workforce inherits the same restraint and does not
+  invent a business-date column to make its own reporting easier.
+
+#### The delta against the gold mockup, and what the ruling does not say
+
+Nothing in the seven frames produces a number. There is no month-end view, no
+hours column, no OT indication and no export control. **Deliverable 3 gains a
+reporting surface**, alongside §3.3's property-policy surface.
+
+And two things the ruling deliberately leaves unstated, named so they are not
+read into it:
+
+* **It flags overtime; it does not prevent it.** Nothing in the ruling caps
+  hours or blocks an assignment that crosses the threshold — consistent with
+  `WF-Q5`'s warn-and-allow. Whether a manager is alerted *during* the week
+  rather than at month end is a real question the ruling does not answer, and
+  it is the difference between a report and a control.
+* **The export's format and its granularity** — per business-day rows, or one
+  month-end line per person — are not specified. CSV is the mechanism O9
+  inherits; what is *in* the file is deliverable 2's.
+
+#### Slicing: the export is a capstone, not a slice-1 item
+
+O1–O7 draw from the rota, attendance, leave and the holiday calendar. **The
+month-end sheet cannot exist before slices 2 and 3**, and chapter 01's four
+slices have no home for it — it arrives after Leave, or with the Capability
+slice. Stated because a reporting feature that looks small is often scheduled
+early and then blocks on four other things.
+
+---
+
+### 3.6 · Skills and certifications — one optional date, and a system that warns without ever forbidding
+
+**Ruled by the architect, 2026-08-31, owner shown** — `ARCHITECT` throughout.
+
+The ruling builds on ground chapter 01 already holds: the **Capability**
+aggregate (skills · languages · shift pattern, slice 4) is ADR 0063 §Q5's
+remainder, and `skills`/`languages` left `Staff` for Workforce because
+*"capability is Roster's, structure is Core's"*. Nothing here reopens that.
+
+#### The whole design is one optional field
+
+| | |
+|---|---|
+| **no date** | an **ability** — *"speaks Arabic"*, *"can operate boiler"* |
+| **with a date** | a **certification** — *"fire warden — valid until 12 Mar 2027"* |
+
+| # | The ruling | Verdict |
+|---|---|---|
+| C1 | A skill gains one optional `valid_until` | **GAP** — `ARCHITECT` — proposed **IN v1 of the Capability slice** |
+| C2 | **60 / 30 / 7 days before expiry** the skill appears on the department head's and HR's **Attention list** | **GAP** — `ARCHITECT` — new surface |
+| C3 | **After expiry** the skill reads `EXPIRED` on the person, on the People frame, **and in the answers Workforce gives** — *"Rajan — expired 12 Mar"*, never silently included and never silently hidden | **GAP** — `ARCHITECT` — and the third clause is the load-bearing one |
+| C4 | It **blocks nothing**. An expired card never stops a rota assignment; the rota **warns and names it**, a person decides | **GAP** — `ARCHITECT` — see the conflict below |
+| C5 | One report: the property's **certification register** — every dated skill, holder, expiry — the sheet a safety inspector asks for | **GAP** — `ARCHITECT` — proposed **IN v1 of the slice** |
+
+**One optional field carrying two concepts is the right shape**, and it is worth
+saying why rather than only that it is simple: the alternative is a `kind`
+discriminator that every reader must branch on and that can disagree with the
+data — a row marked *ability* with an expiry date, or *certification* without
+one. Here the date **is** the discriminator, so the inconsistent state cannot be
+written. That is the house pattern — encode the rule where violating it is
+inexpressible.
+
+> **Configuration cost to HR: typing a date when they record the skill. That is
+> all.** Which is the same test chapter 01 §1.4 sets — a duty manager at 7 a.m.,
+> not an HR system's feature list.
+
+#### C3's third clause is the one that changes another application
+
+*"and in the answers Workforce gives"*. `WF-Q6` records that Jobs reads postings
+**through the Context Service**, per the constitution, and *"who can do X"* is
+the same kind of question one application over.
+
+So the expiry state has to travel **in the Context answer**, not only on
+Workforce's own screens. If Context returns a bare list of qualified people, the
+first consumer to care about expiry re-implements the rule, the second
+implements it differently, and *"we didn't know"* becomes true again at one
+remove. Recorded as a design consequence for deliverable 2; the read-view's
+shape is Jobs' round, but **what it must carry is decided here**.
+
+#### C4 — the ruling's substance is clear, and the precedent it cites says the opposite
+
+The ruling was relayed as *"the same warn-never-forbid rule as the double-booked
+room"*. **The record says the double-booked room is refused, not warned.**
+`GUEST-Q7`, ruled by the owner on 2026-08-31: *"the room-level conflict check —
+one room, overlapping stays, **refused loudly** (in regardless of mode)"*.
+
+Per CLAUDE.md — *where a ruling and a document conflict, say so; never resolve it
+by choosing* — this is reported and **not** resolved here. What is recorded:
+
+* **C4's substance is adopted.** *Expired skills warn and never block* is
+  unambiguous and is what the design will carry.
+* **The citation does not support it**, and there is a precedent in this
+  application that does: `WF-Q5`'s warn-and-allow on exhausted leave balances —
+  *"hotels override reality daily"*.
+* **A reading that reconciles the two**, offered as a proposal and not a
+  finding: the platform refuses what is **physically impossible or
+  self-contradicting** — two stays cannot occupy one room, and a record saying
+  they do is corrupt — and warns on what is a **judgment** — a person with a
+  lapsed card can physically work the shift, and whether they should is the
+  hotel's call. If that is the rule, both rulings are consistent and neither
+  needs changing; it simply has never been written down as one sentence.
+
+**Nothing was decided on this.** The architect confirms which precedent C4
+stands on, and whether the distinction above is worth writing into the record.
+
+#### C2's Attention list is a new surface, and it stays inside the module
+
+Nothing in chapter 01's five sections is an Attention list, and no frame draws
+one. Two boundaries it must respect, both already ruled:
+
+* **`WF-Q2` is not ruled** — shell-side surfacing of Workforce facts (the
+  status bar, the property card) is *"not in v1; module-only until ruled"*. So
+  the Attention list is a **surface inside Workforce**, not a desktop
+  notification, and this ruling does not quietly grant what `WF-Q2` withheld.
+* **Who sees it is resolved from postings** — *the department head's and HR's*
+  — which is §3.3b's L8 mechanism a second time. The same posting that resolves
+  a leave approver resolves an Attention audience, and `HR` is a canon
+  department code (ADR 0119). One resolution rule, two consumers.
+
+#### C5 is the third thing that needs an export, and the second that needs a report
+
+The certification register is *"the sheet a safety inspector asks for"* — which
+means it is printed or handed over, not merely looked at. It meets **the same
+platform gap as §3.5's O9**: the file-save mechanism exists in Core
+Administration's module and is not available to a packaged application.
+
+Three surfaces now want it — the month-end payroll sheet, the certification
+register, and (from `GUEST-Q7`) GuestOps's registration-card print. That is no
+longer one application's inconvenience; it is a platform capability three rounds
+have now asked for, and the question registered under §3.5 carries both.
+
+#### Slicing: chapter 01 puts this last, and compliance may not want to be last
+
+Capability is **slice 4** — *"assignment intelligence for Jobs and the AI
+apps"*. This ruling gives that slice real content, and it also changes what the
+slice is *for*: a certification register is not assignment intelligence, it is a
+compliance obligation, and a hotel's fire-warden card expires whether or not
+Jobs has shipped.
+
+**Proposed, not decided:** the dated half of C1 with C3 and C5 is a candidate to
+move earlier than skills-for-assignment. The owner rules the slices; this is
+flagged because the argument for slice 4 was written before the compliance half
+existed.
+
+---
+
 ## 4 · The verdict table
 
 Written when §3 is complete. It is §3's rows, sorted by verdict, and it is what
@@ -730,3 +1031,9 @@ ground them.
 | §3.1 | How an edited shift definition treats rotas already worked |
 | §3.2 | Whether an attendance terminal speaks HTTP at all — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
 | §3.2 | Who writes the staff ↔ device mapping, and on which surface — the table's home is ruled, the writer is not |
+| §3.3 | Is `Week-off` a shift or a leave type — §3.1's question with the owner's four-item list added to the evidence |
+| §3.3 | Whose is the property holiday calendar — Core Administration's or Workforce's. Recommendation: Core, on the `FiscalYearStartMonth` precedent |
+| §3.3 | Does working a holiday or a week-off credit comp-off automatically, or only by HR adjustment |
+| §3.5 · §3.6 | **What the application SDK exposes to a packaged frontend module.** The file-save mechanism exists and is module-local to Core Administration; three surfaces now want it — the month-end sheet, the certification register and `GUEST-Q7`'s registration card. **A platform question**, belonging with `APPS-Q1`'s prerequisites |
+| §3.5 | Is overtime alerted during the week, or only on the month-end sheet — the difference between a report and a control |
+| §3.6 | **Which precedent does *warn, never forbid* stand on?** The double-booked room is **refused** (`GUEST-Q7`), not warned. Proposed reading: the platform refuses the physically impossible and warns on a judgment — offered, not decided |
