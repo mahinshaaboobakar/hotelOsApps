@@ -31,23 +31,27 @@
   .me{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);line-height:1.5}
   .me b{display:block;color:var(--dim);font-weight:500}
   .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-  .head{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
-  .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .head{display:flex;align-items:center;gap:10px;padding:15px 24px 11px}
+  .ht{font-size:17px;font-weight:600;letter-spacing:-.01em}
   .hsub{color:var(--faint);font-size:12px;margin-top:2px}
   .grow{margin-left:auto}
-  .btn2{display:flex;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:11px;padding:8px 15px;font-size:12.5px;color:var(--dim)}
-  .create{display:flex;gap:8px;align-items:center;background:var(--grad);color:#0a0c12;font-weight:600;padding:8px 18px;border-radius:11px;font-size:13px;box-shadow:0 6px 18px rgba(129,140,248,.35)}
-  .sel{display:flex;gap:9px;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--line);border-radius:11px;padding:7px 13px;font-size:12.5px;color:var(--text);min-width:150px}
+  .btn2{display:flex;gap:6px;align-items:center;border:1px solid var(--line2);border-radius:9px;padding:5px 11px;font-size:12px;color:var(--dim);white-space:nowrap}
+  .create{display:flex;gap:6px;align-items:center;background:var(--grad);color:#0a0c12;font-weight:600;padding:6px 13px;border-radius:9px;font-size:12.5px;white-space:nowrap;box-shadow:0 4px 14px rgba(129,140,248,.3)}
+  .sel{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--line);border-radius:9px;padding:5px 11px;font-size:12.5px;color:var(--text);min-width:150px}
   .sel span{color:var(--faint)}
   .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
   .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
   .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:rgba(255,255,255,.06);color:var(--dim)}
-  .body{padding:0 26px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+  .body{padding:0 24px 20px;overflow:auto;display:flex;flex-direction:column;gap:12px}
   /* summary strip */
   .strip{display:flex;gap:10px}
-  .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
-  .stat b{display:block;font-size:15px;font-weight:600}
+  .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+  .stat b{display:block;font-size:14px;font-weight:600;line-height:1.3}
   .stat span{color:var(--faint);font-size:11.5px}
+  /* one thin summary line, where four cards were furniture */
+  .meta{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;padding:7px 13px;background:var(--glass);border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--faint)}
+  .meta i{font-style:normal;color:var(--text);font-weight:600;margin-right:5px;font-variant-numeric:tabular-nums}
+  .meta .amt{color:var(--warn)}
   /* chips */
   .sh{display:inline-flex;gap:6px;align-items:center;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:500;white-space:nowrap;border:1px solid transparent}
   .sh i{width:6px;height:6px;border-radius:50%;display:inline-block}
@@ -296,20 +300,15 @@
   </div>
   <div class="main">
     <div class="head">
-      <div><div class="ht">Staff Schedule</div><div class="hsub">August 2026 · 22 shifts · 2 days leave · MOD on the 28th</div></div>
-      <div class="sel" style="margin-left:14px;min-width:200px"><span style="display:flex;gap:8px;align-items:center"><span class="av" style="width:21px;height:21px;font-size:9.5px">AM</span>Anjali Menon</span> <span>▾</span></div>
+      <div class="ht">Staff Schedule</div>
+      <div class="sel" style="margin-left:12px;min-width:190px"><span style="display:flex;gap:8px;align-items:center"><span class="av" style="width:20px;height:20px;font-size:9px">AM</span>Anjali Menon</span> <span>▾</span></div>
       <div class="grow"></div>
-      <div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">August 2026</div><div class="btn2">›</div>
-      <div class="btn2">⇄ &nbsp;Propose swap for Anjali</div>
-      <div class="create">＋ Request leave for Anjali</div>
+      <div class="btn2">‹</div><div class="btn2">August 2026</div><div class="btn2">›</div>
+      <div class="btn2">⇄ &nbsp;Propose swap</div>
+      <div class="create">＋ Request leave</div>
     </div>
     <div class="body">
-      <div class="strip">
-        <div class="stat"><b>22</b><span>shifts this month</span></div>
-        <div class="stat"><b>2</b><span>days leave taken</span></div>
-        <div class="stat"><b>1</b><span>MOD duty · Fri 28, 20:00–08:00</span></div>
-        <div class="stat"><b>4 <span style="font-size:11px;color:var(--faint)">of 8</span></b><span>casual leave remaining</span></div>
-      </div>
+      <div class="meta"><i>22</i>shifts <i>2</i>days leave <i>1</i>MOD duty · Fri 28, 20:00–08:00 <span style="margin-left:auto"><i>4 / 8</i>casual remaining</span></div>
       <div class="month">
         <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
         <div class="cells">
@@ -364,7 +363,7 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>Renamed, and re-aimed — owner, 2026-08-31: <i>"this is not access by every staff."</i></b> Revision 1 called this <i>My Schedule</i> and described it as <i>"a staff member opens Workforce and sees their own life first"</i>. That assumed a per-staff application, and Workforce is not one: it is a <b>manager and HR application</b>, so the frame is <b>Staff Schedule</b> with a <b>picker</b> — a supervisor looks up whoever they need. The actions read <b>for Anjali</b>, not <i>mine</i>, and that is not a wording change: it makes the supervisor-on-behalf path (<b>WF-Q9</b>(b)) the one the frame actually offers, with <code style="color:var(--dim)">entered_by</code> recorded on everything it raises. <b>The MOD duty crosses midnight on the 28th</b> and is drawn as such: the badge names its span, and the 29th carries the tail at reduced weight, because a duty that runs 20:00→08:00 genuinely belongs to two dates (<b>WF-Q8</b>). <b>Week-off is a shift, not leave</b> — an <span class="sh off">OFF</span> entry in the property's own catalogue, with no request and no balance (<b>WF-Q12</b>). The legend is not decoration: it is what makes the short codes legible, and it is the same legend the printed week carries (frame 10).</div>
+<div class="cap"><b>Renamed, and re-aimed — owner, 2026-08-31: <i>"this is not access by every staff."</i></b> Revision 1 called this <i>My Schedule</i> and described it as <i>"a staff member opens Workforce and sees their own life first"</i>. That assumed a per-staff application, and Workforce is not one: it is a <b>manager and HR application</b>, so the frame is <b>Staff Schedule</b> with a <b>picker</b> — a supervisor looks up whoever they need. <b>The picker carries the context, so the buttons stay short</b> — <i>Request leave</i>, not <i>Request leave for Anjali</i> — and what the frame offers is still the supervisor-on-behalf path (<b>WF-Q9</b>(b)), with <code style="color:var(--dim)">entered_by</code> recorded on everything raised here and named on the sheet itself (frame 3). <b>The MOD duty crosses midnight on the 28th</b> and is drawn as such: the badge names its span, and the 29th carries the tail at reduced weight, because a duty that runs 20:00→08:00 genuinely belongs to two dates (<b>WF-Q8</b>). <b>Week-off is a shift, not leave</b> — an <span class="sh off">OFF</span> entry in the property's own catalogue, with no request and no balance (<b>WF-Q12</b>). The legend is not decoration: it is what makes the short codes legible, and it is the same legend the printed week carries (frame 10).</div>
 
 <!-- 2 · Team Rota -->
 <h1>2 · <b>Team Rota</b> — three changes in one frame: the chip is data, the MOD ribbon is a timeline, and the zone is visible</h1>
@@ -386,7 +385,7 @@
       <div><div class="ht">Team Rota</div><div class="hsub">6 people · 27 shifts · 1 on leave · 1 slot uncovered</div></div>
       <div class="sel" style="margin-left:14px">Front Office <span>▾</span></div>
       <div class="grow"></div>
-      <div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Week</span></div><div class="btn2">›</div>
+      <div class="btn2">‹</div><div class="btn2">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Week</span></div><div class="btn2">›</div>
       <div class="btn2">⧉ &nbsp;Copy last week</div>
       <div class="btn2">⇄ &nbsp;Swap</div>
       <div class="btn2">⎙ &nbsp;Print</div>
@@ -569,7 +568,7 @@
     <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Duty Roster</div><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">24 – 30 Aug</div><div class="btn2">›</div><div class="create">＋ Assign duty</div></div>
+    <div class="head"><div><div class="ht">Duty Roster</div><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2">24 – 30 Aug</div><div class="btn2">›</div><div class="create">＋ Assign duty</div></div>
     <div class="body" style="padding-top:16px">
       <div class="nowrow">
         <div class="nowc on"><div class="mod">NOW</div><div><b>Anjali Menon</b><span>Front Office · since 20:00 · ends 08:00 tomorrow</span></div></div>
@@ -671,7 +670,7 @@
     <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Attendance</div><div class="hsub">Friday 28 August · business day · 6 posted · 5 present · 1 not rostered</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2" style="padding:8px 12px">Fri 28 Aug</div><div class="btn2">›</div><div class="create">＋ Mark attendance</div></div>
+    <div class="head"><div><div class="ht">Attendance</div><div class="hsub">Friday 28 August · business day</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2">Fri 28 Aug</div><div class="btn2">›</div><div class="create">＋ Mark attendance</div></div>
     <div class="body" style="padding-top:14px">
       <div class="strip">
         <div class="stat"><b>5 <span style="font-size:11px;color:var(--faint)">of 6</span></b><span>present against posted</span></div>
