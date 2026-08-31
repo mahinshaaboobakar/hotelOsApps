@@ -200,11 +200,12 @@ minus sign.
 The same posting writes `department#manager` (§4), so the approver and the
 authorization hook are one fact that cannot disagree.
 
-> **One rule where revision 1 had an ambiguity.** It said *"the reporting manager
-> **or** department head"*, with no precedence — which is two queues. **The rule
-> is: the reporting manager when the posting names one, the department head
-> otherwise.** A department head's own leave goes to `general_manager`, one of
-> ADR 0114 §5's two Workforce-era hooks. *Stream decision, recorded as such.*
+> **One rule where revision 1 had an ambiguity** — *ruled 2026-08-31.* It said
+> *"the reporting manager **or** department head"*, with no precedence, which is
+> two queues. **The rule is: the reporting manager when the posting names one,
+> the department head otherwise.** A department head's own leave goes to
+> `general_manager`, one of ADR 0114 §5's two Workforce-era hooks. **One rule,
+> one queue.**
 
 ### 3.4 · Swaps and covers
 
@@ -449,29 +450,50 @@ duty.assigned · duty.ended
 attendance.recorded
 ```
 
-**`shift.covered` is one event, not two correlated ones.** *"Tue: Rajan N→M,
-covered by Anita"* is a causal link, and inferring it from two independent
-assignment events would be reconstructing intent from coincidence. The business
-fact is *Anita covered Rajan's night shift*, so the event says that.
+**`shift.covered` is one event, not two correlated ones** — *ruled 2026-08-31,
+closing the study's deferred N3.* *"Tue: Rajan N→M, covered by Anita"* is a
+causal link, and inferring it from two independent assignment events would be
+reconstructing intent from coincidence. The business fact is *Anita covered
+Rajan's night shift*, so the event says that — **ADR 0016's
+business-facts-not-process-events rule**, applied.
 
 **The week's change list is the event stream rendered**, not a second stored
 list — a record allowed to disagree with its source is the same defect one level
 up.
 
-> ### The platform prerequisite, and one addition to it
+> ### How these reach the platform — a ruled mechanism, and one correction to its example
 >
-> `PKG-Q39`: an unrouted subject is **acked, matches nothing, and dead-letters
-> silently** — `streams.rs:85-90` records that having already happened. The
-> interim fix pre-names Workforce's domains in `OPERATIONAL`.
+> **`PKG-Q39` is ruled** (planner, 2026-08-31, amending
+> [ADR 0092](../../../../HosPilotOS/docs/decisions/0092-the-application-package-contract.md)):
 >
-> **The list must be `shift · leave · duty · attendance` — four, not three.**
-> `attendance` is a domain of its own and cannot ride `shift.>`, because
-> `WF-Q10` keeps an attendance record that answers **no shift at all** (present
-> on an unrostered day). Naming it under `shift` would misname the fact.
+> > **An application's event domains are manifest-declared and materialised at
+> > installation** — *package declares; Kernel materialises; Event Router
+> > routes.* The declaration is **input to platform registration, never access
+> > to routing**: the Kernel stays owner of the event topology — validity,
+> > conflicts, stream mapping, retention, permissions, lifecycle — and a package
+> > never touches NATS or the stream specification directly.
 >
-> **Swaps deliberately do not add a fifth.** They are modelled inside `shift.>`
-> as `shift.swap_*`, because a swap proposal is about shifts and routing is by
-> domain — so the vocabulary grows without a new routing dependency.
+> So Workforce's `manifest.yaml` declares the domains it owns, and nothing in
+> this application reaches routing. **Implementation lands with the package
+> rounds; the Kernel's interim pre-named set in `streams.rs` stands until
+> then** — which is what gate 3 in §10 is about.
+>
+> **The declaration is four domains: `shift · leave · duty · attendance`.**
+> The ruling's own parenthetical names three (*"e.g. Workforce: `shift`,
+> `leave`, `duty`"*) — written before this plan existed, and **an illustrative
+> list does not override a design finding** (CLAUDE.md's precedence rule).
+> `attendance` cannot ride `shift.>`, because `WF-Q10` keeps an attendance
+> record that answers **no shift at all** — present on an unrostered day — and
+> filing it under `shift` would misname the fact where ADR 0006 routes by
+> meaning. Reported here rather than silently declared.
+>
+> **Swaps deliberately add no fifth domain.** They sit inside `shift.>` as
+> `shift.swap_*`, because a swap proposal is about shifts — so the vocabulary
+> grows without a new routing dependency.
+>
+> Why any of it matters: an unrouted subject is **acked, matches nothing, and
+> dead-letters silently**, and `streams.rs:85-90` records that having already
+> happened once.
 
 **The Context resolver is this round's delivery** — `CTX-Q4`: a new resolver
 arrives as **one delivery by the contributing domain's round**, the read view,
@@ -492,18 +514,35 @@ surface in them. Re-cut against the ruled scope:
 | | Ships | Why here |
 |---|---|---|
 | **1 · Postings + People** | postings with zone, job roles, reporting manager, department head, the `department#posted` writer, the Context resolver | **Strictly first.** It closes the platform-wide hole, and the granting pipeline is its substrate |
-| **2 · Rota + Duty** | the shift catalogue (effective-dated), the rota, copy-last-week, manager swap, the MOD register as spans, **the printed week** | The calendar face and the owner's MOD scenario. The print view ships with the rota, not after it — a rota staff cannot read is not delivered |
-| **3 · Leave + Swaps** | policy, the balance ledger, requests, approvals, HR adjustment, staff swap proposals | Swaps join leave because they share the approval surface and the same approver resolution |
-| **4 · Attendance** | manual marking with times, posted-versus-present, lateness | Before the numbers, because it produces three of them |
-| **5 · The numbers** | `WorkforcePeriod`, the OT planning warning, the month-end export | Draws on 2, 3 and 4 — it cannot precede them |
-| **6 · Capability** | skills, languages, `valid_until`, Attention, the certification register | — |
+| **2 · Capability & compliance** | skills and languages, `valid_until`, the Attention list, the certification register | **Moved forward from last — ruled 2026-08-31.** It needs only slice 1: the Attention audience resolves from postings, and nothing else in it depends on a rota, on leave or on attendance |
+| **3 · Rota + Duty** | the shift catalogue (effective-dated), the rota, copy-last-week, manager swap, the MOD register as spans, **the printed week**, the OT planning warning | The calendar face and the owner's MOD scenario. The print view ships **with** the rota, not after it — a rota staff cannot read is not delivered |
+| **4 · Leave + Swaps** | policy, the balance ledger, requests, approvals, HR adjustment, staff swap proposals | Swaps join leave because they share the approval surface and the same approver resolution |
+| **5 · Attendance** | manual marking with in/out times, posted-versus-present, lateness | Before the numbers, because it produces three of them |
+| **6 · The numbers** | `WorkforcePeriod`, month-end actuals, the export | Draws on 3, 4 and 5 — it cannot precede them |
+| **7 · Assignment intelligence** | shift patterns, and the capability read-view Jobs consumes through Context | Waits for a consumer, which is what it is *for* |
 
-**Two honest notes about the later slices.** Slice 5's OT *planning* warning
-needs only slice 2, so it may ship early with the rota; only the actuals need
-slice 4. And **slice 6's certification half is a compliance obligation, not
-assignment intelligence** — a fire-warden card expires whether or not Jobs has
-shipped, which is an argument for moving it earlier that this plan records
-rather than takes.
+**Why certification moved.** The study surfaced it as *recorded, not taken*: a
+fire-warden card expires whether or not Jobs has shipped, so queuing a
+**compliance obligation** behind four slices of convenience was the wrong order.
+Ruled forward, and placed **where the dependency graph allows** — which is
+immediately after postings, because the Attention list needs an audience and
+nothing else in the slice needs anything.
+
+**What stayed behind, and why it is not the same thing.** Revision 1's single
+*Capability* slice bundled two unrelated purposes. The compliance half stands
+alone; the **assignment** half exists to answer *"who can do X"* for another
+application, so it ships when that application can ask. `WF-Q6` already routes
+that answer through Context, and §3.8's expiry state travels in it.
+
+**And one item worth re-examining rather than scheduling.** With the rotation
+engine refused (R7, the owner's own refusal), **`shift pattern` has no consumer
+in v1** — it is inherited from ADR 0063 §Q5's remainder list rather than asked
+for. It sits in slice 7, and what it is *for* should be established before it is
+built.
+
+**The OT planning warning moved with the rota**, not with the numbers: it works
+on *planned* hours (`WF-Q14`), so it needs slice 3 and nothing later. Only the
+actuals wait for attendance.
 
 ## 8 · What this is deliberately not
 
@@ -528,7 +567,8 @@ own practice:
 | **Ruled and built into this page** | `WF-Q1` MOD is a duty, no tuples · `WF-Q4` shifts per property · `WF-Q5` warn-and-allow · `WF-Q6` Jobs reads via Context · `WF-Q7` zone from Workforce · `WF-Q8` MOD is a span · `WF-Q9` staff propose, colleague accepts, manager approves; both entry paths with provenance · `WF-Q10` keep late information · `WF-Q11` scope approved · `WF-Q12` Week-off is a rota marker · `WF-Q13` comp-off manual · `WF-Q14` OT warns at planning · `WF-Q15` effective-forward editing · `WF-Q16` holidays are Core's, and refuse-versus-warn |
 | **Standing, unchanged** | `WF-Q2` no shell-side MOD surfacing in v1 · `WF-Q3` multiple postings structurally, one primary in the UI |
 | **Open, and neither reachable from here** | does an attendance terminal speak HTTP at all (ADR 0128 §3) · who writes the staff ↔ device mapping. **Both device-shaped**, both for the connector round |
-| **Open in the platform register** | `PKG-Q39` planner half · `SHELL-Q23` |
+| **Ruled since, mechanism only** | **`PKG-Q39`** — event domains are manifest-declared and materialised at install (ADR 0092 amended). Implementation lands with the package rounds; the interim pre-named set stands until then |
+| **Open in the platform register** | `SHELL-Q23` — the print surface, and the file half left open |
 
 ## 10 · What gates the build
 
@@ -540,8 +580,11 @@ Not this page's approval alone:
 2. **`APPS-Q1`'s two platform prerequisites** — the registry-driven shell, and
    the application-caller authorization round. They bind Workforce as they bind
    every application.
-3. **`PKG-Q39`'s interim half** — the four domains routed, **before** Workforce
-   publishes anything. Publishing into an unclaimed stream is worse than not
-   publishing: it looks like it worked.
+3. **Event routing in place before Workforce publishes anything.** The
+   mechanism is ruled (ADR 0092 as amended — manifest-declared, materialised at
+   install), and its **implementation lands with the package rounds**, so the
+   Kernel's interim pre-named set is what this application actually depends on
+   at build time — **four domains, per §6.** Publishing into an unclaimed stream
+   is worse than not publishing: it looks like it worked.
 4. **`SHELL-Q23`** for the printed week — the shell owns the print dialog; this
    application hands it a print-ready view and writes no printer code.
