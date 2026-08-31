@@ -1134,7 +1134,25 @@ question: how does a **packaged application declare its event subjects** — in
 the manifest, materialised at install as the application object already is
 (ADR 0116 §5)? Or does the platform ship a stream for application domains?
 **Nobody has ruled it**, and Workforce is the first installable application to
-need it. Registered.
+need it.
+
+**Registered as `PKG-Q39`, 2026-08-31**, with this evidence carried whole, and
+split into the two halves it turned out to be:
+
+```text
+now, CC       shift · leave · duty join the pre-named set in OPERATIONAL
+              beside staff.> and user.>, per ADR 0006's route-by-meaning
+              and the platform's own jetstream.rs precedent
+the real Q    an installed application's event domains, manifest-declared
+              and materialised at install — the CONN-Q10 pattern.
+              Planner, with the package rounds
+```
+
+`CONN-Q10` is the same shape one package kind over: a `kind: connector`
+package had no way to declare *what it is* either, and the planner's answer put
+`kind` in the canonical signed manifest. **Event domains are the second thing a
+packaged application cannot do for itself**, and the register now says so with
+the first named beside it.
 
 #### `SHELL-Q23` — cited, not improvised, and one correction to offer
 
@@ -1151,11 +1169,11 @@ The row exists and already names this round:
 **Nothing is improvised here.** N1 produces a print-ready view — HTML and print
 CSS, which is this application's problem — and the dialog is the shell's.
 
-**One correction to offer the architect**, because the register is the shared
-record: the row cites *"Workforce study §3.6"*. §3.6 is skills and
-certifications, and its certification register *is* a printed sheet, so the
-citation is not wrong — but **the weekly rota sheet the row describes is
-§3.9**, this section. Suggest the row cite both.
+**Two corrections were offered and both were applied to the row, 2026-08-31**:
+it now cites **§3.9** as well as §3.6, counts the **certification register as a
+third consumer**, and leaves the **file-save half explicitly open** rather than
+folding it in — *a file handed to the user is a different shell capability from
+a print dialog.*
 
 #### This narrows §3.5's export question rather than closing it
 
@@ -1206,20 +1224,29 @@ the feature plan (deliverable 2) is built from.
 
 ## 5 · Questions this study raises
 
-Claimed from `WF-Q7` upward by the architect, one at a time with the facts that
-ground them.
+Numbers are the architect's to claim. **Two questions this study raised have
+left it** and now live in the platform register under their own IDs — they stay
+in the table so the trail is readable, marked with where they went.
 
-| From | Question |
-|---|---|
-| §3.1 | ~~What a colour chip says~~ — **CLOSED by §3.9's N2**: name + colour + short code, short code in the cell, legend beneath. Decided by the monochrome-photocopy consequence the question itself named. Kept, not deleted, so the trail survives |
-| §3.1 | Whether `Week-off` is a shift or a leave type |
-| §3.1 | How an edited shift definition treats rotas already worked |
-| §3.2 | Whether an attendance terminal speaks HTTP at all — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
-| §3.2 | Who writes the staff ↔ device mapping, and on which surface — the table's home is ruled, the writer is not |
-| §3.3 | Is `Week-off` a shift or a leave type — §3.1's question with the owner's four-item list added to the evidence |
-| §3.3 | Whose is the property holiday calendar — Core Administration's or Workforce's. Recommendation: Core, on the `FiscalYearStartMonth` precedent |
-| §3.3 | Does working a holiday or a week-off credit comp-off automatically, or only by HR adjustment |
-| §3.5 · §3.6 | **What the application SDK exposes to a packaged frontend module — narrowed by §3.9 to the *file* half.** `SHELL-Q23` answers print; the **month-end payroll export is a file** payroll software takes, and a file-save available to a packaged module is a different capability from a print dialog. The mechanism exists and is module-local to Core Administration. **A platform question**, belonging with `APPS-Q1`'s prerequisites |
-| §3.9 | **How does a packaged application declare its event subjects?** `streams.rs` is the Kernel's and claims no `shift`, `leave` or `duty` domain; an unrouted subject dead-letters silently, which `streams.rs:85-90` records having already happened once. Manifest-declared and materialised at install, as the application object already is — or a stream for application domains? **Nobody has ruled it**, and this is the first installable application to need it |
-| §3.5 | Is overtime alerted during the week, or only on the month-end sheet — the difference between a report and a control |
-| §3.6 | **Which precedent does *warn, never forbid* stand on?** The double-booked room is **refused** (`GUEST-Q7`), not warned. Proposed reading: the platform refuses the physically impossible and warns on a judgment — offered, not decided |
+| From | Question | State |
+|---|---|---|
+| §3.9 | How a packaged application declares its event subjects | **`PKG-Q39` — claimed 2026-08-31**, evidence carried whole. Two halves: the interim pre-naming to CC; manifest-declared domains materialised at install to the planner, with the package rounds |
+| §3.5 · §3.6 · §3.9 | A print surface, and a file handed to the user | **`SHELL-Q23`** — print is the shell's; an application hands it a print-ready view. The row now cites §3.9 and counts the certification register as a third consumer. **The file half is deliberately left open**: the month-end payroll export is a file payroll software takes, and that is a different shell capability |
+| §3.1 | What a colour chip says | **CLOSED by §3.9's N2**, ratified: name + colour + a **typed** short code, short code in the cell, legend beneath. Decided by the monochrome-photocopy consequence the question itself named. Kept rather than deleted, so the trail survives |
+| §3.1 · §3.3 | Is `Week-off` a shift or a leave type | **open** — one question, two pieces of evidence: the rota popover offers it as a shift while chapter 01 seeds it as a leave type, and the owner's own list named four types without it |
+| §3.1 | How an edited shift definition treats rotas already worked | **open** — needed before the aggregate split is written into chapter 01 |
+| §3.2 | Does an attendance terminal speak HTTP at all | **open** — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
+| §3.2 | Who writes the staff ↔ device mapping, and on which surface | **open** — the table's home is ruled (Master Data, ADR 0063); the writer is not |
+| §3.3 | Whose is the property holiday calendar | **open** — recommendation: Core, on the `FiscalYearStartMonth` precedent. Not taken, because it adds a column to a Master Data entity |
+| §3.3 | Does working a holiday credit comp-off automatically | **open**, with a direction — §3.5's O5 produces *holidays worked* now and defers the credit |
+| §3.5 | Is overtime alerted during the week, or only at month end | **open** — the difference between a report and a control |
+| §3.6 | Which precedent does *warn, never forbid* stand on | **reported, not resolved** — the double-booked room is **refused** (`GUEST-Q7`), not warned; `WF-Q5`'s warn-and-allow is the precedent that does support it. Proposed reading: the platform refuses the physically impossible and warns on a judgment. With the architect |
+
+### Ratified since, and folded into the record
+
+* **N2's short code is typed, not derived** — architect, 2026-08-31. A derived
+  initial collides the day *Morning* meets *Mid-shift*, and a collision in a
+  rota cell is two shifts that look identical on paper.
+* **N3's *two facts, not one event*** — correctly deferred to **deliverable 2**:
+  whether `shift.changed` carries the cover's identity, or the printed line is
+  composed from two correlated events.
