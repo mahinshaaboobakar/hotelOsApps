@@ -48,7 +48,7 @@ through domain-owned read views, and touches no other application's tables.
 
 ---
 
-## 2 · The domain, six aggregates
+## 2 · The domain, nine aggregates
 
 Field lists below are the design's proposal; types are indicative, and the
 **canonical contract is the proto** in `shared/protos` (ADR 0026 — there is no
@@ -91,7 +91,7 @@ current_room_id     Master Data ref, nullable — a DERIVED PROJECTION of the
                     derived projection")
 arrival_date        date, as the source gave it            R12
 departure_date      date, as the source gave it            R12
-arrival_at          Timestamp value object (see §2.7)      R12·R13·R14
+arrival_at          Timestamp value object (see §2.8)      R12·R13·R14
 departure_at        Timestamp value object
 lifecycle           Booked | InHouse | Departed | Cancelled | NoShow   §3
 completeness        a set of what is missing — see below   R6·R9·S11
@@ -198,7 +198,7 @@ dies with the stay.
 ```text
 stay_id
 rate_code · rate_name
-amount            Money (§2.7)                              R19
+amount            Money (§2.8)                              R19
 guarantee_code · guarantee_description
 on_hold · reserves_inventory · is_default   R18's flags
 deposit_offset_from_booking     interval                    R18
@@ -217,7 +217,36 @@ night-audit posting — GUEST-Q6 puts all of it in Finance's later round, and
 records the accepted consequence: a standalone property cannot settle a guest
 in v1.
 
-### 2.7 · Two value objects the whole schema depends on
+### 2.7 · `StayRequest`, `StayNote`, `Registration` — the rest of the desk
+
+```text
+StayRequest
+  request_id · stay_id
+  text · logged_by · logged_at
+  handed_off    bool — announced for another application to act on
+                S18: not every request becomes work
+
+StayNote
+  note_id · stay_id · text · author · at        this stay only
+
+Registration
+  stay_id · grc_no
+  document_refs   the platform's media/asset references, never blobs here
+  signed_at · captured_by
+```
+
+**A request is GuestOps's, and the work is not.** *"What needs doing"* is
+Jobs' domain (APPS-Q1), so raising a job from the stay page **records the
+request and announces it** — Jobs creates the job, assigns it and owns its
+status. GuestOps stores no job id, no assignee and no job state; the boundary
+is the constitution's, not a preference.
+
+`Registration`'s contents are deliberately a short list plus references:
+scenario-record §15 (g) is open, and what an Indian property must legally
+capture for domestic and foreign guests is the owner's knowledge. The shape
+holds; the field list grows when (g) is answered.
+
+### 2.8 · Two value objects the whole schema depends on
 
 ```text
 Money      amount_minor  int64      never a float, never a string   R19
@@ -562,6 +591,44 @@ Three rules that come with them:
 `vip_status` stays out (ADR 0089 §CTX-Q3, deferred): no authoritative
 definition of VIP exists, and this round does not invent one.
 
+### 8.1 · What GuestOps asks *of* Context — and what does not exist yet
+
+The three views above are what this domain **answers**. The stay page also
+**asks**, and this is the direction the design cannot satisfy today.
+
+```text
+the stay page needs                        from        exists?
+────────────────────────────────────────────────────────────────
+jobs raised from this stay                 Jobs        NO
+  — the mockup's "Requests & jobs" tab
+servicing across this stay, per night      Room Care   NO
+  — the mockup's "Servicing" tab
+the room's readiness before check-in       Room Care   NO
+  — scenario-record §15 (e), carried as configuration
+```
+
+**The rule is not in doubt; the resolver is.** *"Context over joins"* — an
+application never reads another's tables, and a cross-domain relationship is
+obtained through the Context Service. Both panels are therefore Context
+questions, and Context v1 ships room, rooms, staff, asset and property
+summary and nothing else (ADR 0089 §"The v1 scope this fixes"). There is no
+*stay → jobs* and no *stay → servicing* resolver, and the contributing
+domains — Jobs, Room Care — would each have to own a read view the way §8
+has GuestOps own three.
+
+Three consequences the design accepts rather than works around:
+
+* **Nothing is stored here.** GuestOps never keeps a job id, a job status, a
+  cleaning record or a room's readiness. When the resolver arrives, the panels
+  light up; until then they are absent, and no data has to be migrated.
+* **Absence is normal, not degraded.** Jobs and Room Care are *installable*.
+  A property without Jobs still has a guest complaining about the air
+  conditioning, so the **request** is GuestOps's own record always, and only
+  the raising and the status are conditional (the mockup draws both states).
+* **This is reported, not designed around** — §14, finding 4. Inventing a
+  direct read into Jobs' schema to make a tab work would break the one rule
+  the whole platform's modularity rests on.
+
 ---
 
 ## 9 · Permissions
@@ -635,9 +702,16 @@ service suite, a connection goes in E2E); an absent database **fails** the run
 
 | | Ships | Unblocks |
 |---|---|---|
-| **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the four lists · standalone writes · the state machine · `stay.*` facts · the three views | a standalone property can run its front desk; **Context's guest chain turns on** |
+| **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the bookings list · the four day lists · the stay's overview and activity · standalone writes · cancel · the state machine · `stay.*` facts · the three views | a standalone property can run its front desk; **Context's guest chain turns on** |
 | **2 · The PMS mode** | the deferred queue drains · overrides · disagreements · silent confirmation · candidate links · the staleness banner | the Hub's backlog stops accumulating; Oracle properties go live |
 | **3 · The rest of the desk** | commercial terms · registration · requests · notes · preferences · the group page's full behaviour | *"every other guest operation"* (GUEST-Q1) is complete |
+| **4 · The neighbours** | the *stay → jobs* and *stay → servicing* panels | **blocked on finding 4** — two contributing-domain read views and their Context RPCs, owned by Jobs' and Room Care's rounds |
+
+**The stay's activity view is slice 1, and it is assembled rather than
+stored**: GuestOps's own rows come from its event stream, and another
+application's rows are resolved live. That is why slice 4 can arrive later
+without the page being rebuilt — an absent resolver contributes no rows, and
+nothing is orphaned when an application is uninstalled.
 
 Slice 1 is strictly first, and the reason is not sequencing convenience:
 **slice 2's disagreement rules are meaningless without a book to disagree
@@ -702,6 +776,28 @@ references outright. The design proposes the latter and does not assume it.
 excluded it from v1. The chapter's head note now marks three superseded parts;
 this is a fourth, smaller one, and it is only a documentation reconciliation.
 **Reported.**
+
+**4 · The stay page needs two Context resolvers that do not exist** — *stay →
+jobs* and *stay → servicing* (§8.1). The owner asked for both panels and both
+are right: a front desk is asked *"has anyone been in my room?"* and *"is
+someone coming about the AC?"*, and the answers live in Room Care and Jobs.
+The platform rule is settled — Context answers cross-domain questions, and an
+application never reads another's tables — so what is missing is **two
+contributing-domain read views and their Context RPCs**, which are those
+applications' rounds and not this one's. Named here so the mockup's two
+cross-application tabs are read as *drawn, not built*. **A question for the
+register.**
+
+**5 · "Payment information" and GUEST-Q6 meet on one screen.** The owner asked
+for payment information on the stay; GUEST-Q6 ruled the folio out of v1 the
+same day. The mockup's frame 7 draws the line rather than choosing a side:
+band one is the **commercial terms**, which are ruled in and buildable; band
+two is **deposit received, charges posted, balance, settlement and invoice**,
+which are not. Band two has *two different gaps behind it* and they need
+different answers — in a PMS-connected property a balance needs the connector
+to fetch and carry it (a capability ADR 0128 §4's inbound v1 contract excludes),
+and in a standalone property it needs Finance. **Reported with a question, in
+chat, rather than resolved by widening a ruling that is one day old.**
 
 ---
 

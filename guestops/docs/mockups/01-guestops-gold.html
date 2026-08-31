@@ -6,7 +6,7 @@
     --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
     --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
     --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;--grad:linear-gradient(120deg,#7dd3fc,#818cf8 55%,#c084fc);
-    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--pms:#7dd3fc;--ovr:#c084fc;
+    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--pms:#7dd3fc;--ovr:#c084fc;--other:#34d399;
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box;margin:0}
@@ -37,7 +37,9 @@
   .hsub{color:var(--faint);font-size:12px;margin-top:2px}
   .grow{margin-left:auto}
   .btn2{display:flex;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:11px;padding:8px 15px;font-size:12.5px;color:var(--dim);white-space:nowrap}
+  .btn2.dis{opacity:.4}
   .create{display:flex;gap:8px;align-items:center;background:var(--grad);color:#0a0c12;font-weight:600;padding:8px 18px;border-radius:11px;font-size:13px;box-shadow:0 6px 18px rgba(129,140,248,.35);white-space:nowrap}
+  .danger{display:flex;gap:8px;align-items:center;border:1px solid rgba(248,113,113,.45);color:var(--bad);border-radius:11px;padding:8px 15px;font-size:12.5px;white-space:nowrap}
   .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
   .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
   .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:rgba(255,255,255,.06);color:var(--dim)}
@@ -49,9 +51,10 @@
   .stat span{color:var(--faint);font-size:11.5px}
   .stat.on{box-shadow:inset 0 0 0 1.5px rgba(129,140,248,.5)}
   /* tabs */
-  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:2px}
-  .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border-bottom:2px solid transparent}
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border-bottom:2px solid transparent;white-space:nowrap}
   .tab.on{color:var(--text);border-bottom-color:var(--indigo);font-weight:600}
+  .tab.gone{opacity:.38}
   .tab .n{color:var(--faint);font-weight:400;margin-left:5px;font-size:11px}
   /* chips */
   .sh{display:inline-flex;gap:6px;align-items:center;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:500;white-space:nowrap;border:1px solid transparent}
@@ -59,10 +62,12 @@
   .sh.pms{background:rgba(125,211,252,.13);color:var(--pms)}.sh.pms i{background:var(--pms)}
   .sh.ovr{background:rgba(192,132,252,.15);color:var(--ovr)}.sh.ovr i{background:var(--ovr)}
   .sh.dis{background:rgba(251,191,36,.14);color:var(--warn)}.sh.dis i{background:var(--warn)}
+  .sh.oth{background:rgba(52,211,153,.12);color:var(--other)}.sh.oth i{background:var(--other)}
   .sh.miss{color:var(--faint);border-color:var(--line);border-style:dashed}
   .sh.wi{background:rgba(52,211,153,.12);color:var(--ok)}
   .sh.unk{background:rgba(248,113,113,.10);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
   .lock{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 5px;letter-spacing:.04em}
+  .lock.no{color:var(--bad);border-color:rgba(248,113,113,.35)}
   /* table */
   .tbl{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
   .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;border-bottom:1px solid var(--line)}
@@ -73,6 +78,7 @@
   .tr .nm b{font-weight:600}
   .tr .nm span{font-size:11px;color:var(--faint)}
   .tr.sel{background:rgba(129,140,248,.07);box-shadow:inset 2.5px 0 0 var(--indigo)}
+  .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
   .un{color:var(--faint);font-style:italic}
   .link{color:var(--indigo)}
   /* banner */
@@ -80,19 +86,24 @@
   .ban.stale{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.3);color:var(--warn)}
   .ban.dis{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.35)}
   .ban.info{background:rgba(125,211,252,.06);border-color:rgba(125,211,252,.25);color:var(--cyan)}
+  .ban.gone{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.3);color:var(--bad)}
   .ban b{color:var(--text)}
   .ban .grow{margin-left:auto;display:flex;gap:8px}
   .mini{border:1px solid var(--line2);border-radius:9px;padding:6px 12px;font-size:12px;color:var(--text);white-space:nowrap}
   .mini.pri{background:rgba(129,140,248,.18);border-color:rgba(129,140,248,.5)}
+  .mini.bad{border-color:rgba(248,113,113,.45);color:var(--bad)}
   /* two column */
   .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
+  .cols.even{grid-template-columns:1fr 1fr}
   .card{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .card.ghost{background:rgba(255,255,255,.015);border-style:dashed}
   .ch{padding:11px 15px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:flex;align-items:center;gap:8px}
   .ch .grow{margin-left:auto;text-transform:none;letter-spacing:0;font-size:11.5px}
   .cb{padding:13px 15px;display:flex;flex-direction:column;gap:11px}
   .fr{display:flex;align-items:flex-start;gap:10px;font-size:12.5px}
   .fr .k{color:var(--faint);width:118px;flex:none;font-size:12px}
   .fr .v{color:var(--text);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .fr.big .v b{font-size:15px}
   /* timeline */
   .tl{display:flex;flex-direction:column;gap:0}
   .te{display:grid;grid-template-columns:58px 16px 1fr;gap:0;font-size:12.5px}
@@ -101,11 +112,30 @@
   .te .g i{width:7px;height:7px;border-radius:50%;background:var(--faint);margin-top:12px}
   .te .g u{flex:1;width:1px;background:var(--line2)}
   .te.pms .g i{background:var(--pms)}.te.ovr .g i{background:var(--ovr)}.te.dis .g i{background:var(--warn)}
+  .te.oth .g i{background:var(--other)}
   .te .d{padding:7px 0 7px 12px;display:flex;flex-direction:column;gap:3px}
   .te .d span{color:var(--faint);font-size:11.5px}
-  /* sheet */
+  /* activity rows */
+  .act{display:grid;grid-template-columns:118px 118px 1fr;border-bottom:1px solid var(--line);font-size:12.5px}
+  .act:last-child{border-bottom:none}
+  .act>div{padding:10px 14px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+  .act.hd>div{background:rgba(10,12,18,.32);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:8px 14px}
+  .act .w{flex-direction:column;align-items:flex-start;gap:3px}
+  .act .w span{color:var(--faint);font-size:11.5px}
+  .act .tm{color:var(--faint);font-size:11.5px;flex-direction:column;align-items:flex-start;gap:1px}
+  /* nights strip */
+  .nights{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--glass)}
+  .ng{border-right:1px solid var(--line);padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-height:104px}
+  .ng:last-child{border-right:none}
+  .ng .dt{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .ng .dt b{color:var(--dim);font-weight:600}
+  .ng .st{font-size:12px;display:flex;flex-direction:column;gap:5px}
+  .ng.now{box-shadow:inset 0 0 0 1.5px rgba(129,140,248,.45)}
+  /* dialog */
   .scrim{position:absolute;inset:0;background:rgba(4,5,10,.55);display:flex;align-items:flex-start;justify-content:flex-end}
+  .scrim.mid{align-items:center;justify-content:center}
   .sheet{width:440px;height:100%;background:#0d1018;border-left:1px solid var(--line2);display:flex;flex-direction:column;box-shadow:-30px 0 70px rgba(0,0,0,.5)}
+  .dlg{width:520px;background:#0d1018;border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
   .sh_h{padding:18px 20px 12px;border-bottom:1px solid var(--line)}
   .sh_h b{font-size:15.5px;font-weight:600}
   .sh_h span{display:block;color:var(--faint);font-size:11.5px;margin-top:3px}
@@ -114,6 +144,7 @@
   .fld label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
   .inp{border:1px solid var(--line2);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);background:rgba(255,255,255,.02);display:flex;align-items:center;gap:8px}
   .inp.ph{color:var(--faint)}
+  .inp.tall{min-height:64px;align-items:flex-start}
   .inp .grow{margin-left:auto;color:var(--faint);font-size:11.5px}
   .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .sh_f{margin-top:auto;padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
@@ -122,8 +153,10 @@
   .hint b{color:var(--dim);font-weight:500}
   /* empty */
   .empty{margin:auto;text-align:center;padding:60px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:480px}
+  .empty.sm{padding:26px 20px;gap:10px}
   .empty .ic{width:52px;height:52px;border-radius:16px;border:1px solid var(--line2);background:rgba(255,255,255,.03);display:grid;place-items:center;font-size:20px;color:var(--faint)}
   .empty b{font-size:16px}
+  .empty.sm b{font-size:13.5px}
   .empty p{color:var(--faint);font-size:12.5px;line-height:1.7}
   /* caveat */
   .caveat{max-width:1220px;margin:0 auto;border:1px dashed rgba(248,113,113,.45);border-radius:14px;padding:12px 16px;background:rgba(248,113,113,.05);color:var(--dim);font-size:12.5px;line-height:1.7}
@@ -132,13 +165,18 @@
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   .note{background:rgba(255,255,255,.02);border:1px dashed var(--line2);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--dim);line-height:1.7}
   .note b{color:var(--text)}
+  .note.no{border-color:rgba(248,113,113,.35);background:rgba(248,113,113,.04)}
+  .note.no b{color:var(--bad)}
+  .sub{max-width:1220px;margin:14px auto 0;color:var(--faint);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
 </style>
 </head><body>
 
-<div class="lead"><b>GuestOps — the gold design, for the owner's approval.</b> The reservation book: bookings are groups, the <b>room-stay</b> is the anchor, and every operation happens to a stay. Four marks carry the whole application — <span class="sh pms"><i></i>from Opera</span> for a fact the PMS wrote, <span class="sh ovr"><i></i>override</span> for a staff write on a PMS-managed stay, <span class="sh dis"><i></i>disagrees</span> where the two differ, and <span class="sh miss">missing</span> for what a record honestly lacks. Frames are the desktop window at 1220 wide; rail, sheet, dialog and confirmation rule are the platform's (ADR 0106), unchanged. Every frame cites the scenario it draws — <b>S<i>n</i></b> from <code>01-the-front-desk-scenarios.md</code>.</div>
+<div class="lead"><b>GuestOps — the gold design, for the owner's approval.</b> The reservation book: bookings are groups, the <b>room-stay</b> is the anchor, and every operation happens to a stay. Four marks carry the whole application — <span class="sh pms"><i></i>from Opera</span> for a fact the PMS wrote, <span class="sh ovr"><i></i>override</span> for a staff write on a PMS-managed stay, <span class="sh dis"><i></i>disagrees</span> where the two differ, and <span class="sh miss">missing</span> for what a record honestly lacks. A fifth, <span class="sh oth"><i></i>another app</span>, marks anything on these screens that GuestOps does not own and reads through the Context Service. Frames are the desktop window at 1220 wide; rail, sheet, dialog and confirmation rule are the platform's (ADR 0106), unchanged. Every frame cites the scenario it draws — <b>S<i>n</i></b> from <code>01-the-front-desk-scenarios.md</code>.</div>
+
+<div class="sub">The day</div>
 
 <!-- 1 · Today, standalone -->
-<h1 style="margin-top:18px">1 · <b>Today</b> — the front desk day, in a property with no PMS. Arrivals, in house, departures, and the honest list; the day is the <b>business day</b>, not midnight to midnight</h1>
+<h1 style="margin-top:12px">1 · <b>Today</b> — the front desk day, in a property with no PMS. Arrivals, in house, departures, and the honest list; the day is the <b>business day</b>, not midnight to midnight</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -202,8 +240,88 @@
 </div>
 <div class="cap"><b>Reads at 7 a.m.</b> Four lists, one primary action, no filters to configure. <b>The day is the property's business day</b> (ADR 0128 §6) — a guest walking in at 02:30 belongs to yesterday's arrivals, which is what the night auditor expects and what a calendar-date list gets wrong every night (S10). <b>Missing is drawn as missing</b>: a dashed chip for what the record honestly lacks — no room, party unnamed, no ID — never a blank that reads as data (S11, R25). <b>Day use</b> is a stay whose arrival and departure fall on one business day, and it is not filtered out by any list built on "departure after arrival" (S20).</div>
 
-<!-- 2 · The stay page, PMS-connected, override + disagreement -->
-<h1>2 · <b>The stay</b> — PMS-connected, with an override standing and Opera disagreeing. The one truth the desk sees is the override; the disagreement is a mark on it, never a second answer</h1>
+<!-- 2 · Bookings list -->
+<h1>2 · <b>Bookings</b> — the list. Everything the property has ever booked, searched the way a receptionist searches: a name, a phone, or the confirmation number a guest reads off their email</h1>
+<div class="win">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Bookings</div><div class="hsub">218 with a stay in the next 30 days</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Walk-in</div>
+      <div class="create">＋ New booking</div>
+    </div>
+    <div class="body">
+      <div style="display:flex;gap:10px">
+        <div class="inp" style="flex:2">🔍 <span style="color:var(--faint)">Name, phone, email, confirmation number…</span></div>
+        <div class="inp" style="flex:1">Arriving · next 30 days <span class="grow">▾</span></div>
+        <div class="inp" style="flex:1">Any status <span class="grow">▾</span></div>
+        <div class="inp" style="flex:1">Any source <span class="grow">▾</span></div>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Guest</div><div>Booking</div><div>Rooms</div><div>Dates</div><div>Status</div><div></div></div>
+        <div class="tr list">
+          <div class="nm"><b>Rajesh Pillai</b><span>+91 98470 •••• 12</span></div>
+          <div>BK-4471<span class="hint" style="margin-left:6px">84119377</span></div>
+          <div>1 of 3 known</div><div>31 Aug → 2 Sep</div><div><span class="pill ok">In house</span></div>
+          <div><span class="sh pms"><i></i>Opera</span><span class="sh dis"><i></i>disagrees</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Meera Krishnan</b><span>meera.k@•••••.com</span></div>
+          <div>BK-4482</div><div>1</div><div>31 Aug → 1 Sep</div><div><span class="pill ok">In house</span></div>
+          <div><span class="sh pms"><i></i>Opera</span><span class="sh ovr"><i></i>override</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Joseph Mathew</b><span>+91 98950 •••• 20</span></div>
+          <div><span class="un">created here</span></div><div>1</div><div>31 Aug → 1 Sep</div><div><span class="pill ok">In house</span></div>
+          <div><span class="sh wi">walk-in</span><span class="sh unk">Opera doesn't know</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Anand Varma</b><span>+91 90480 •••• 77</span></div>
+          <div>BK-4455</div><div>1</div><div>30 Aug → 2 Sep</div><div><span class="pill ok">In house</span></div>
+          <div><span class="sh dis"><i></i>Opera says cancelled</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Fatima Sheikh</b><span>+971 50 ••• 4412</span></div>
+          <div>BK-4506</div><div>2</div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div>
+          <div><span class="sh pms"><i></i>Opera</span><span class="sh miss">no rooms assigned</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Vikram Nair</b><span>+91 98860 •••• 05</span></div>
+          <div>BK-4390</div><div>1</div><div>24 Aug → 27 Aug</div><div><span class="pill neu">Departed</span></div>
+          <div><span class="sh pms"><i></i>Opera</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Priya Ramesh</b><span>priya.r@•••••.com</span></div>
+          <div>BK-4372</div><div>1</div><div>22 Aug → 24 Aug</div><div><span class="pill bad2">Cancelled</span></div>
+          <div><span class="sh pms"><i></i>Opera</span><span class="hint">penalty applied</span></div>
+        </div>
+        <div class="tr list">
+          <div class="nm"><b>Thomas George</b><span>+91 94470 •••• 31</span></div>
+          <div>BK-4361</div><div>1</div><div>19 Aug → 20 Aug</div><div><span class="pill bad2">No-show</span></div>
+          <div><span class="sh pms"><i></i>Opera</span></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="mini">Load more</div>
+        <div class="hint">8 of 218 · the list pages forward only, on a cursor — never a page number that shifts while you read it</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The list is where a guest at the counter is found</b>, so the search covers what a guest can actually say: their name, the number they booked with, or the confirmation number Opera gave them. <b>A booking's row shows its stays, not a room</b> — BK-4471 says <i>1 of 3 known</i> and BK-4506 says <i>2</i>, because a booking is a group and the room is a fact about a stay inside it (GUEST-Q2). <b>Cancelled and no-show rows stay in the list</b>: a cancelled reservation exists, its penalty may be chargeable, and a no-show is reportable — neither is a deletion (S25, S27, ADR 0062). <b>Every row carries its provenance</b>: from Opera, created here, overridden, disagreeing. <b>Cursor paging</b>, per the platform's API standard — a page number would move under the reader as new bookings arrive.</div>
+
+<div class="sub">One stay, in depth — the same guest across six tabs</div>
+
+<!-- 3 · The stay · overview -->
+<h1 style="margin-top:12px">3 · <b>The stay · Overview</b> — PMS-connected, with an override standing and Opera disagreeing. The one truth the desk sees is the override; the disagreement is a mark on it, never a second answer</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -219,8 +337,17 @@
       <div class="grow"></div>
       <div class="btn2">Move room</div>
       <div class="btn2">Check out</div>
+      <div class="danger">Cancel…</div>
     </div>
     <div class="body">
+      <div class="tabs">
+        <div class="tab on">Overview</div>
+        <div class="tab">Activity<span class="n">14</span></div>
+        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
+        <div class="tab">Servicing<span class="n">4 nights</span></div>
+        <div class="tab">Payment</div>
+        <div class="tab">Documents</div>
+      </div>
       <div class="ban dis">
         <div><b>Opera disagrees about the room.</b> You have 214 · Opera says 208 — recorded 15:30, not applied.<br>
           <span style="color:var(--faint)">Your entry stands everywhere until someone decides: override by <b style="color:var(--dim)">Anitha Menon</b> at 14:10, when Opera said <b style="color:var(--dim)">due in, no room</b>.</span></div>
@@ -232,21 +359,20 @@
           <div class="cb">
             <div class="fr"><div class="k">Room</div><div class="v"><b>214</b> · Deluxe King <span class="sh ovr"><i></i>yours</span> <span class="sh dis"><i></i>Opera: 208</span></div></div>
             <div class="fr"><div class="k">Arrival</div><div class="v">31 Aug <b>14:10</b> <span class="lock">OBSERVED</span> <span class="sh ovr"><i></i>override</span></div></div>
-            <div class="fr"><div class="k">Departure</div><div class="v">2 Sep <b>11:00</b> <span class="lock">DERIVED FROM PROPERTY CLOCK</span></div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">4 Sep <b>11:00</b> <span class="lock">DERIVED FROM PROPERTY CLOCK</span></div></div>
             <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King <span class="lock">FROM OPERA</span></div></div>
-            <div class="fr"><div class="k">Rate</div><div class="v">₹ 8 400.00 INR <span class="lock">GROSS</span> <span class="lock">FROM OPERA</span></div></div>
-            <div class="fr"><div class="k">Cancellation</div><div class="v">1 night if within 48 h of arrival → <b>Sat 30 Aug 14:00</b> <span class="lock">COMPUTED FROM OFFSET</span></div></div>
-            <div class="fr"><div class="k">Party</div><div class="v">Rajesh Pillai <span class="pill neu">primary</span> · Lakshmi Pillai</div></div>
+            <div class="fr"><div class="k">Party</div><div class="v">Rajesh Pillai <span class="pill neu">primary</span> · Lakshmi Pillai <span class="link">＋ add</span></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <span class="lock">MOBILE · PRIMARY</span> · rajesh.p@•••••.com</div></div>
             <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/08/1147 · ID captured <span class="pill ok">complete</span></div></div>
-            <div class="fr"><div class="k">Requests</div><div class="v">Late checkout asked · <span class="link">hand to Jobs</span></div></div>
-            <div class="fr"><div class="k">Notes</div><div class="v"><span class="un">Prefers a high floor away from the lift</span> <span class="lock">GUEST PREFERENCE</span></div></div>
+            <div class="fr"><div class="k">Preferences</div><div class="v"><span class="un">High floor, away from the lift</span> <span class="lock">GUEST · CARRIES TO NEXT STAY</span></div></div>
+            <div class="fr"><div class="k">Note</div><div class="v"><span class="un">Anniversary — cake sent 31 Aug</span> <span class="lock">THIS STAY ONLY</span></div></div>
           </div>
         </div>
         <div class="card">
-          <div class="ch">What happened, in order</div>
+          <div class="ch">What happened, in order <div class="grow"><span class="link">Full activity →</span></div></div>
           <div class="cb">
             <div class="tl">
-              <div class="te pms"><div class="t">28 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked in Opera<span>reservation 84119377 · 2 nights · Deluxe King</span></div></div>
+              <div class="te pms"><div class="t">28 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked in Opera<span>reservation 84119377 · 4 nights · Deluxe King</span></div></div>
               <div class="te ovr"><div class="t">14:10</div><div class="g"><i></i><u></u></div><div class="d">Assigned 214 · checked in <span>by Anitha Menon — <b style="color:var(--ovr)">override</b>, Opera was unreachable</span></div></div>
               <div class="te dis"><div class="t">15:30</div><div class="g"><i></i><u></u></div><div class="d">Opera reports room 208 <span>differs from yours — recorded, not applied</span></div></div>
               <div class="te"><div class="t">now</div><div class="g"><i></i></div><div class="d">Awaiting a decision<span>Room Care, Context and the board all read <b style="color:var(--dim)">214</b></span></div></div>
@@ -258,10 +384,342 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>S33 and S35, drawn as one screen.</b> The rule the whole PMS mode rests on: <b>one truth leaves the application</b> — the standing override is what the board shows, what Room Care hears and what Context resolves; the disagreement is a flag on that answer, never a second answer (GUEST-Q3). A recorded override is a person looking at the guest; the inbound fact is automation and possibly stale. <b>Clearing is the stay's write permission</b> — the same permission that made the override — with two named values and both kept in history; there is no separate permission and no supervisor escalation, because that would re-introduce what the ruling refused. <b>Read-from-PMS versus staff-editable is a mark, not a lock</b>: <span class="lock">FROM OPERA</span> says who established the value, and staff may still write it — PMS-connected has never meant read-only (GUEST-Q1, amended). Every timestamp carries its basis — <span class="lock">OBSERVED</span> is the desk, <span class="lock">DERIVED FROM PROPERTY CLOCK</span> is a date plus the property's check-out time (R12, R13, S22).</div>
+<div class="cap"><b>S33 and S35, drawn as one screen.</b> The rule the whole PMS mode rests on: <b>one truth leaves the application</b> — the standing override is what the board shows, what Room Care hears and what Context resolves; the disagreement is a flag on that answer, never a second answer (GUEST-Q3). <b>Clearing is the stay's write permission</b> — the same permission that made the override — with two named values and both kept in history; no separate permission, no supervisor escalation. <b>Read-from-PMS versus staff-editable is a mark, not a lock</b>: <span class="lock">FROM OPERA</span> says who established the value, and staff may still write it — PMS-connected has never meant read-only (GUEST-Q1, amended). Every timestamp carries its basis (R12, R13, S22). <b>A preference carries to the next stay; a note dies with this one</b> (S19) — the same distinction the schema draws, made visible where it is entered.</div>
 
-<!-- 3 · The group -->
-<h1>3 · <b>The group</b> — an incomplete booking drawn honestly. Opera said three rooms and has sent one; the other two are <b>not</b> rows, not placeholders, and not counted</h1>
+<!-- 4 · Activity -->
+<h1>4 · <b>The stay · Activity</b> — everything that has happened to this booking, with who said it. The desk's answer to "why does it say that?"</h1>
+<div class="win">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Export</div>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <div class="tab">Overview</div>
+        <div class="tab on">Activity<span class="n">14</span></div>
+        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
+        <div class="tab">Servicing<span class="n">4 nights</span></div>
+        <div class="tab">Payment</div>
+        <div class="tab">Documents</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="mini pri">Everything</div><div class="mini">Ours</div><div class="mini">Opera</div><div class="mini">Other apps</div>
+        <div class="hint" style="margin-left:auto">Newest last · times are the property's</div>
+      </div>
+      <div class="tbl">
+        <div class="act hd"><div>When</div><div>Who</div><div>What</div></div>
+        <div class="act"><div class="tm"><b>28 Aug</b><span>09:14</span></div><div><span class="sh pms"><i></i>Opera</span></div>
+          <div class="w">Booked — 4 nights, Deluxe King, ₹ 8 400.00 per night<span>reservation 84119377 · business day 28 Aug · arrived via the Integration Hub</span></div></div>
+        <div class="act"><div class="tm"><b>29 Aug</b><span>17:02</span></div><div><span class="sh pms"><i></i>Opera</span></div>
+          <div class="w">Amended — departure moved from 2 Sep to 4 Sep<span>the fetched state decided this, not the source's event type</span></div></div>
+        <div class="act"><div class="tm"><b>30 Aug</b><span>21:40</span></div><div><span class="sh oth"><i></i>Room Care</span></div>
+          <div class="w">Room 214 inspected and released<span>read through the Context Service · GuestOps stores none of this</span></div></div>
+        <div class="act"><div class="tm"><b>31 Aug</b><span>14:10</span></div><div><span class="sh ovr"><i></i>Anitha M.</span></div>
+          <div class="w">Assigned room 214<span>override — Opera held no assignment at that moment</span></div></div>
+        <div class="act"><div class="tm"><b>31 Aug</b><span>14:10</span></div><div><span class="sh ovr"><i></i>Anitha M.</span></div>
+          <div class="w">Checked in<span>override · arrival time observed, not derived</span></div></div>
+        <div class="act"><div class="tm"><b>31 Aug</b><span>14:12</span></div><div><span class="sh ovr"><i></i>Anitha M.</span></div>
+          <div class="w">Registration captured — GRC 2026/08/1147<span>ID scanned · signature on file</span></div></div>
+        <div class="act"><div class="tm"><b>31 Aug</b><span>14:35</span></div><div><span class="sh ovr"><i></i>Anitha M.</span></div>
+          <div class="w">Request logged — "AC not cooling"<span>raised as a job in Jobs at 14:40</span></div></div>
+        <div class="act"><div class="tm"><b>31 Aug</b><span>15:06</span></div><div><span class="sh oth"><i></i>Jobs</span></div>
+          <div class="w">JOB-8821 assigned to Engineering — in progress<span>read through the Context Service</span></div></div>
+        <div class="act" style="background:rgba(251,191,36,.05)"><div class="tm"><b>31 Aug</b><span>15:30</span></div><div><span class="sh dis"><i></i>Opera</span></div>
+          <div class="w">Reported room 208 — <b>differs from ours (214)</b><span>recorded as a disagreement · not applied · your entry stands</span></div></div>
+        <div class="act"><div class="tm"><b>1 Sep</b><span>10:20</span></div><div><span class="sh oth"><i></i>Room Care</span></div>
+          <div class="w">Stayover service completed by Suma T.<span>read through the Context Service</span></div></div>
+      </div>
+      <div class="note"><b>Three sources, one list, and the difference is never hidden.</b> <span class="sh pms"><i></i>Opera</span> is a fact the PMS wrote. <span class="sh ovr"><i></i>a person</span> is one of ours, named. <span class="sh oth"><i></i>another app</span> is Room Care's or Jobs' own record, <b>read through the Context Service and stored nowhere here</b> — if that application is uninstalled tomorrow, its rows simply stop appearing, and nothing in this stay's history is orphaned.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>This is the screen that answers a complaint.</b> Why does it say 214? Who moved the departure? Was the guest's ID taken? An activity list that showed only GuestOps's own facts would answer none of the questions a duty manager actually asks at 9 p.m., because half the story belongs to Opera, Room Care and Jobs. <b>What makes it safe is that nothing is copied</b>: GuestOps's rows come from its own event stream, and the other applications' rows are resolved live (the constitution's "context over joins" — an application never reads another's tables). <b>The disagreement is a row like any other</b>, in place and in time, rather than a banner that vanishes when it is cleared — clearing adds a row, it never removes one.</div>
+
+<!-- 5 · Requests and jobs -->
+<h1>5 · <b>The stay · Requests &amp; jobs</b> — the front desk raises work from the guest's stay, when Jobs is installed. GuestOps records the request; Jobs owns the work</h1>
+<div class="win">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
+      <div class="grow"></div>
+      <div class="create">＋ Raise a job</div>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <div class="tab">Overview</div>
+        <div class="tab">Activity<span class="n">14</span></div>
+        <div class="tab on">Requests &amp; jobs<span class="n">2</span></div>
+        <div class="tab">Servicing<span class="n">4 nights</span></div>
+        <div class="tab">Payment</div>
+        <div class="tab">Documents</div>
+      </div>
+      <div class="cols even">
+        <div class="card">
+          <div class="ch">Guest requests <div class="grow">GuestOps owns these</div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">14:35</div><div class="v">AC not cooling <span class="pill warn">raised as JOB-8821</span></div></div>
+            <div class="fr"><div class="k">16:02</div><div class="v">Late checkout on 4 Sep <span class="pill neu">no job needed</span></div></div>
+            <div class="hint">A request is a fact about the guest's stay and lives here whether or not any work follows from it. <b>Not every request is a job</b> — a late checkout is answered at the desk.</div>
+            <div class="mini">＋ Log a request</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">Jobs from this stay <div class="grow"><span class="sh oth"><i></i>Jobs · via Context</span></div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">JOB-8821</div><div class="v">AC not cooling · room 214 <span class="pill warn">In progress</span></div></div>
+            <div class="fr"><div class="k">Assigned</div><div class="v">Engineering · Ramesh K. <span class="hint">since 15:06</span></div></div>
+            <div class="fr"><div class="k">Raised by</div><div class="v">Anitha Menon, from this stay</div></div>
+            <div class="note" style="padding:10px 12px"><b>This panel is Jobs' data, not ours.</b> GuestOps published the request; Jobs created the job and carries the stay reference on it. What you see is resolved live — no job state is stored in GuestOps, and no call is made into Jobs.</div>
+          </div>
+        </div>
+      </div>
+      <div class="scrim">
+        <div class="sheet">
+          <div class="sh_h"><b>Raise a job</b><span>From Rajesh Pillai's stay · room 214 · in house until 4 Sep</span></div>
+          <div class="sh_b">
+            <div class="fld"><label>What is wrong</label><div class="inp">AC not cooling</div></div>
+            <div class="row2">
+              <div class="fld"><label>Kind</label><div class="inp">Engineering <span class="grow">▾</span></div></div>
+              <div class="fld"><label>Priority</label><div class="inp">Guest in house — urgent <span class="grow">▾</span></div></div>
+            </div>
+            <div class="fld"><label>Where</label><div class="inp">Room 214 <span class="grow">from the stay</span></div>
+              <div class="hint">The room comes from the stay's current assignment. <b>If the guest moves room, the job follows the room it was raised against</b> — Jobs is told, and decides.</div></div>
+            <div class="fld"><label>Detail</label><div class="inp tall ph">Guest reports the room is not cooling since check-in. Guest is in the room this evening.</div></div>
+            <div class="note" style="padding:10px 12px">Creating this <b>records a request on the stay and announces it</b>. Jobs picks it up and owns everything after that — assignment, status, completion. GuestOps never assigns anyone.</div>
+          </div>
+          <div class="sh_f"><div class="hint">Visible to Engineering immediately.</div><div class="grow"></div><div class="mini">Cancel</div><div class="mini pri">Raise job</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>S18, and the boundary it rests on.</b> <i>"What needs doing"</i> is Jobs' domain (APPS-Q1); GuestOps owns the guest's <b>request</b> and hands it over. The button is in GuestOps because the desk is standing in front of the guest — but what it does is record a request and announce it, and <b>Jobs creates the job</b>. GuestOps never calls Jobs, never stores a job's status, and never assigns a person: applications communicate through events and the Context Service, never by reaching into each other (the constitution). <b>The job carries the stay reference</b>, which is what lets this panel exist at all — Context resolves <i>stay → jobs</i> from Jobs' own read view.</div>
+
+<!-- 5b · Jobs not installed -->
+<h1 style="margin-top:26px">5b · <b>The same tab, with Jobs not installed.</b> The request is still recorded. What disappears is the raising, not the guest's complaint</h1>
+<div class="win" style="min-height:380px">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
+      <div class="grow"></div>
+      <div class="btn2 dis">＋ Raise a job</div>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <div class="tab">Overview</div><div class="tab">Activity<span class="n">12</span></div>
+        <div class="tab on">Requests<span class="n">2</span></div>
+        <div class="tab gone">Servicing</div><div class="tab">Payment</div><div class="tab">Documents</div>
+      </div>
+      <div class="cols even">
+        <div class="card">
+          <div class="ch">Guest requests</div>
+          <div class="cb">
+            <div class="fr"><div class="k">14:35</div><div class="v">AC not cooling <span class="pill neu">logged</span></div></div>
+            <div class="fr"><div class="k">16:02</div><div class="v">Late checkout on 4 Sep <span class="pill neu">logged</span></div></div>
+            <div class="mini">＋ Log a request</div>
+          </div>
+        </div>
+        <div class="card ghost">
+          <div class="empty sm"><div class="ic">＋</div><b>Jobs is not installed</b>
+            <p>Requests are recorded here and worked however this property works today. Install <b style="color:var(--dim)">Jobs</b> from Software Center to raise and track work from a guest's stay.</p></div>
+        </div>
+      </div>
+      <div class="note"><b>The tab is renamed, not emptied.</b> With Jobs absent the section is <i>Requests</i>; with Jobs present it is <i>Requests &amp; jobs</i>. <b>Servicing</b> is dimmed the same way when Room Care is absent. Nothing about the guest's stay depends on another application being installed.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Every cross-application panel on these screens has this second state, and it is the one that gets forgotten.</b> An installable platform means the property that has not bought Jobs still has a guest complaining about the air conditioning — so the request is GuestOps's own record, always, and only the raising and the status are conditional. <b>The invitation names the application and where it comes from</b>, because Software Center is how it arrives (ADR 0106 §4's guided hierarchy, as Workforce's empty states use it).</div>
+
+<!-- 6 · Servicing -->
+<h1>6 · <b>The stay · Servicing</b> — a four-night stay is cleaned four times, and the desk needs to know what happened in the room while the guest was in it</h1>
+<div class="win">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">2 Sep</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">31 Aug → 4 Sep · four nights · in house</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Ask for service</div>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <div class="tab">Overview</div><div class="tab">Activity<span class="n">18</span></div>
+        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
+        <div class="tab on">Servicing<span class="n">4 nights</span></div>
+        <div class="tab">Payment</div><div class="tab">Documents</div>
+      </div>
+      <div class="ban info"><div><b>All of this is Room Care's.</b> GuestOps shows it because the desk is asked about it — it is read through the Context Service and stored nowhere here.</div></div>
+      <div class="nights">
+        <div class="ng"><div class="dt">Sun <b>31 Aug</b> · arrival</div>
+          <div class="st"><span class="sh oth"><i></i>Prepared before arrival</span><span class="hint">Inspected 21:40 the night before · the room sat vacant, so it was freshened rather than fully cleaned</span></div></div>
+        <div class="ng"><div class="dt">Mon <b>1 Sep</b></div>
+          <div class="st"><span class="sh oth"><i></i>Serviced 10:20</span><span class="hint">Suma T. · stayover service</span></div></div>
+        <div class="ng"><div class="dt">Tue <b>2 Sep</b> · today</div>
+          <div class="st"><span class="pill warn">Not serviced</span><span class="hint">Do-not-disturb at 09:50 and 13:15 · guest declined</span><span class="link">Ask again this evening</span></div></div>
+        <div class="ng now"><div class="dt">Wed <b>3 Sep</b></div>
+          <div class="st"><span class="pill neu">Planned</span><span class="hint">Linen change due — third night</span></div></div>
+        <div class="ng"><div class="dt">Thu <b>4 Sep</b> · departure</div>
+          <div class="st"><span class="pill neu">Planned after 11:00</span><span class="hint">Nobody arrives into 214 that night, so it is planned as a strip rather than a turnaround</span></div></div>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">Why a day can be blank</div>
+          <div class="cb">
+            <div class="note" style="padding:10px 12px"><b>Cleaning is policy, not a consequence.</b> Not every hotel services every room every day; a declined day is a real outcome, and a room nobody arrives into tonight may be cleaned tomorrow. Room Care decides all of it — this tab reports, and asserts nothing.</div>
+            <div class="hint">A one-night stay shows two rows and is rarely opened. This tab earns its place on the long stays, which is where the desk gets asked <i>"has anyone been in my room?"</i></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What the desk can do here</div>
+          <div class="cb">
+            <div class="fr"><div class="k">Ask for service</div><div class="v">records the guest's request and hands it on</div></div>
+            <div class="fr"><div class="k">Decline recorded</div><div class="v">by Room Care, not by GuestOps</div></div>
+            <div class="fr"><div class="k">Not available</div><div class="v"><span class="lock no">ASSIGNING AN ATTENDANT</span></div></div>
+            <div class="hint">Asking is a request, exactly like S18's. Who cleans, in what order, and to what standard is Room Care's — and if Room Care is not installed this tab does not exist.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The owner's case: a stay longer than two days is serviced during it, and the front desk is asked about it.</b> Three facts from the PMS study are visible here and each one is why the strip is drawn per night rather than as a status. A room that sat empty before arrival is <b>freshened, not turned around</b>; a room whose guest is due out and into which nobody arrives tonight is <b>stripped rather than made ready</b> — and that decision needs to know <i>when the room is next sold</i>, which no current status can tell you (R3). And a declined day is neither clean nor dirty; it is <b>declined</b>, and a design with one room status per day would have to lie about it (R1). <b>GuestOps owns none of it.</b> It announces occupancy and departure; Room Care decides what work that becomes (APPS-Q1, S21).</div>
+
+<!-- 7 · Payment -->
+<h1>7 · <b>The stay · Payment</b> — what the booking is worth, what was promised, and what the platform cannot yet tell you</h1>
+<div class="caveat"><b>Read the second band before approving this frame.</b> GUEST-Q6 (2026-08-31) ruled that v1 carries the stay's <b>commercial terms</b> and that the <b>folio</b> — posting, payments, settlement, invoicing — is Finance's later round. The first band below is v1 and is buildable today. <b>The second band is not ruled and nothing is built behind it:</b> a balance in a PMS-connected property needs the connector to fetch and carry it, which the inbound v1 contract does not include (ADR 0128 §4), and in a standalone property it needs Finance. It is drawn because you asked for payment information — and reported as a finding, not proposed as a plan.</div>
+<div class="win" style="margin-top:12px">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · four nights</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Open in Opera</div>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <div class="tab">Overview</div><div class="tab">Activity<span class="n">14</span></div>
+        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
+        <div class="tab">Servicing<span class="n">4 nights</span></div>
+        <div class="tab on">Payment</div><div class="tab">Documents</div>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The terms <div class="grow"><span class="pill ok">in v1</span></div></div>
+          <div class="cb">
+            <div class="fr big"><div class="k">Rate</div><div class="v"><b>₹ 8 400.00</b> INR per night <span class="lock">GROSS — TAX INCLUDED</span> <span class="lock">FROM OPERA</span></div></div>
+            <div class="fr big"><div class="k">Four nights</div><div class="v"><b>₹ 33 600.00</b> INR <span class="lock">GROSS</span></div></div>
+            <div class="fr"><div class="k">Rate plan</div><div class="v">BAR-FLEX · Best Available, flexible</div></div>
+            <div class="fr"><div class="k">Guarantee</div><div class="v">Credit card <span class="pill neu">holds inventory</span> <span class="pill neu">on hold</span></div></div>
+            <div class="fr"><div class="k">Deposit policy</div><div class="v">30% · due <b>7 days after booking</b> → 4 Sep <span class="lock">COMPUTED FROM OFFSET</span></div></div>
+            <div class="fr"><div class="k">Cancellation</div><div class="v">1 night if within <b>48 h of arrival</b>, drop 18:00 → <b>Sat 30 Aug 14:00</b> <span class="pill warn">deadline passed</span></div></div>
+            <div class="fr"><div class="k">Penalty if cancelled</div><div class="v"><b>₹ 8 400.00</b> INR <span class="lock">GROSS</span> <span class="lock">1 NIGHT</span></div></div>
+            <div class="note" style="padding:10px 12px"><b>The deadlines are computed, never stored.</b> The record holds "48 hours before arrival"; move the arrival and the deadline moves with it. A stored deadline silently stops matching its reservation, and that is a chargeable error.</div>
+          </div>
+        </div>
+        <div class="card ghost">
+          <div class="ch" style="color:var(--bad)">The folio <div class="grow"><span class="pill bad2">not ruled · nothing built</span></div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">Deposit received</div><div class="v"><span class="lock no">NEEDS FINANCE OR A CONNECTOR CAPABILITY</span></div></div>
+            <div class="fr"><div class="k">Room &amp; tax posted</div><div class="v"><span class="lock no">NOT AVAILABLE</span></div></div>
+            <div class="fr"><div class="k">Extras</div><div class="v"><span class="lock no">NOT AVAILABLE</span></div></div>
+            <div class="fr"><div class="k">Balance due</div><div class="v"><span class="lock no">NOT AVAILABLE</span></div></div>
+            <div class="fr"><div class="k">Settle · invoice</div><div class="v"><span class="lock no">FINANCE, A LATER ROUND</span></div></div>
+            <div class="note no" style="padding:10px 12px"><b>Two different gaps, and they need two different answers.</b> In a <b>PMS-connected</b> property the folio lives in Opera and the desk settles there — showing it here needs the connector to carry a balance, a capability v1's inbound contract does not include. In a <b>standalone</b> property there is no Opera, so settlement happens nowhere in v1 — a consequence accepted knowingly with GUEST-Q6, and the reason the first deployments are PMS-connected.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>What is real on this screen is the part that would otherwise be lost.</b> Opera sends a guarantee with codes and flags, a deposit deadline as an <b>offset from the booking date</b>, a cancellation deadline as an <b>offset from arrival</b> plus a drop time, and an amount with a basis, a night count and a currency (R18). The system this replaces kept two pre-formatted human strings and discarded the structure. <b>Every amount here carries three things</b> — value, currency, and whether tax is included (R19) — because the same reference wrote Oracle's <i>before-tax</i> figure and another vendor's <i>gross</i> figure into one column, and nothing anywhere recorded which. <b>"Open in Opera" is a link, not an integration</b>: it takes the user to the system that holds the folio, and asserts nothing about what is in it.</div>
+
+<!-- 8 · Cancel -->
+<h1>8 · <b>Cancel</b> — one stay, or every stay in the booking. There is no such thing as cancelling a group, and the confirmation says what will actually happen</h1>
+<div class="win" style="min-height:600px">
+  <div class="rail">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <div class="ri">Today<span class="cnt">31 Aug</span></div>
+    <div class="ri on">Bookings<span class="cnt">218</span></div>
+    <div class="ri">Guests<span class="cnt">1 904</span></div>
+    <div class="ri">Attention<span class="cnt att">3</span></div>
+    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="ht">Fatima Sheikh · BK-4506</div><div class="hsub">Two stays · 3 Sep → 7 Sep · <span class="sh pms" style="display:inline-flex"><i></i>Opera manages this booking</span></div></div>
+      <div class="grow"></div>
+      <div class="danger">Cancel…</div>
+    </div>
+    <div class="body">
+      <div class="tbl">
+        <div class="tr list hd"><div>Guest</div><div>Stay</div><div>Room type</div><div>Dates</div><div>Status</div><div></div></div>
+        <div class="tr list sel"><div class="nm"><b>Fatima Sheikh</b></div><div>01J9M…22B1</div><div>Executive Suite</div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div></div></div>
+        <div class="tr list"><div class="nm"><b class="un">Not yet named</b></div><div>01J9M…22B2</div><div>Deluxe King</div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div><span class="sh miss">party unnamed</span></div></div>
+      </div>
+      <div class="scrim mid">
+        <div class="dlg">
+          <div class="sh_h"><b>Cancel this booking?</b><span>BK-4506 · Fatima Sheikh · two stays, 3 – 7 September</span></div>
+          <div class="sh_b">
+            <div class="note" style="padding:11px 13px"><b>This cancels two stays, one at a time.</b> A booking is a group and every operation happens to a stay — so this records two cancellations, and either can be reinstated separately afterwards.</div>
+            <div class="fr"><div class="k">Executive Suite</div><div class="v">3 – 7 Sep · <b>penalty ₹ 12 000.00</b> <span class="lock">GROSS · 1 NIGHT</span></div></div>
+            <div class="fr"><div class="k">Deluxe King</div><div class="v">3 – 7 Sep · <b>penalty ₹ 8 400.00</b> <span class="lock">GROSS · 1 NIGHT</span></div></div>
+            <div class="fr"><div class="k">Why a penalty</div><div class="v">cancelling within 48 h of arrival, per the booking's terms</div></div>
+            <div class="fr"><div class="k">Afterwards</div><div class="v">both rooms return to inventory for 3 – 7 September</div></div>
+            <div class="ban gone" style="margin-top:2px"><div><b>Opera will not be told.</b> This records the cancellation in HotelOS only — it does not reach the PMS, and Opera will keep showing this booking as live until somebody cancels it there too.</div></div>
+            <div class="fld"><label>Reason</label><div class="inp">Guest cancelled — flight changed <span class="grow">▾</span></div></div>
+            <div class="hint"><b>The penalty is calculated and recorded, not charged.</b> Charging is Finance's, a later round.</div>
+          </div>
+          <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><div class="mini">Keep the booking</div><div class="mini bad">Cancel both stays</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The confirmation names the object, the consequence, and the limit</b> — the platform's confirmation rule (ADR 0106 §3), and here the limit is the one that matters most: <b>nothing GuestOps records reaches the PMS in v1</b> (<code>CONN-Q5</code>, ADR 0128 §4). A cancellation screen that stayed silent about that would let a receptionist believe the room had been released in Opera, and the room would be sold twice. <b>Cancelling a booking is n cancellations of stays</b>, said out loud, because that is what the model does and because either stay can be reinstated on its own (GUEST-Q2, S23). <b>The penalty is computed from the stored offset at the moment it is shown</b> (R18), and it is <b>recorded, never charged</b> (GUEST-Q6). A cancelled stay is not a deleted stay — it stays in the list, with its reason and its penalty (S25, ADR 0062).</div>
+
+<div class="sub">The rest of the desk</div>
+
+<!-- 9 · The group -->
+<h1 style="margin-top:12px">9 · <b>The group</b> — an incomplete booking drawn honestly. Opera said three rooms and has sent one; the other two are <b>not</b> rows, not placeholders, and not counted</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -275,7 +733,7 @@
     <div class="head">
       <div><div class="ht">Booking BK-4471</div><div class="hsub">Group 84119377 · from Opera · booked 28 Aug</div></div>
       <div class="grow"></div>
-      <div class="btn2">Guest folio<span style="color:var(--faint)"> · in Opera</span></div>
+      <div class="danger">Cancel…</div>
     </div>
     <div class="body">
       <div class="ban info"><div><b>1 of 3 rooms known.</b> Opera says this booking is for three rooms and has sent one. The other two have not arrived — they may arrive in minutes, tomorrow, or never.</div></div>
@@ -283,7 +741,7 @@
         <div class="tr hd"><div>Guest</div><div>Room type</div><div>Room</div><div>Dates</div><div>Status</div><div></div></div>
         <div class="tr sel">
           <div class="nm"><b>Rajesh Pillai</b><span>party of 2</span></div>
-          <div>Deluxe King</div><div>214</div><div>31 Aug → 2 Sep</div><div><span class="pill ok">In house</span></div>
+          <div>Deluxe King</div><div>214</div><div>31 Aug → 4 Sep</div><div><span class="pill ok">In house</span></div>
           <div><span class="sh ovr"><i></i>override</span><span class="sh dis"><i></i>disagrees</span></div>
         </div>
       </div>
@@ -299,10 +757,10 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>S30, and it is the frame that will be wrong first if it is drawn dishonestly.</b> The reference met this exact source shape — <code>noOfRooms: 3</code> with a payload describing one room — and answered it by minting sibling identifiers by string concatenation that always produced <code>-1</code> (R9). Drawing two grey placeholder rows is the same mistake in a nicer font: it invents stays the source never sent, and every count downstream inherits them. <b>The honest form is a sentence and a number.</b> <b>The multi-property leg is sayable, not queryable</b> (S4, S32): the group identifier is enough to tell the desk the booking continues, and nothing about the other legs is fetched or drawn — each property's GuestOps holds only its own stays (GUEST-Q2's edge-first rider).</div>
+<div class="cap"><b>S30, and it is the frame that will be wrong first if it is drawn dishonestly.</b> The reference met this exact source shape — <code>noOfRooms: 3</code> with a payload describing one room — and answered it by minting sibling identifiers by string concatenation that always produced <code>-1</code> (R9). Drawing two grey placeholder rows is the same mistake in a nicer font: it invents stays the source never sent, and every count downstream inherits them. <b>The honest form is a sentence and a number.</b> <b>The multi-property leg is sayable, not queryable</b> (S4, S32).</div>
 
-<!-- 4 · Walk-in -->
-<h1>4 · <b>Walk-in</b> — standalone. Booking and arrival are the same moment, so it is one action; the walk-in flag is recorded when the stay is created or it is unrecoverable</h1>
+<!-- 10 · Walk-in -->
+<h1>10 · <b>Walk-in</b> — standalone. Booking and arrival are the same moment, so it is one action; the walk-in flag is recorded when the stay is created or it is unrecoverable</h1>
 <div class="win" style="min-height:560px">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -340,10 +798,10 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>S13.</b> One action, because booking and arrival are one moment — a two-step "create, then check in" would produce a stay in <i>Booked</i> that nobody ever leaves. <b>Check-in requires a room</b>, which is why the room field sits in this sheet and not behind a later step (S8, the one hard gate the assignment ruling creates). In a <b>PMS-connected</b> property this same sheet is available and the resulting stay is marked <span class="sh unk">Opera doesn't know</span> — GUEST-Q5, and frame 6 shows what happens when Opera later sends its own version of it.</div>
+<div class="cap"><b>S13.</b> One action, because booking and arrival are one moment — a two-step "create, then check in" would produce a stay in <i>Booked</i> that nobody ever leaves. <b>Check-in requires a room</b>, which is why the room field sits in this sheet and not behind a later step (S8, the one hard gate the assignment ruling creates). In a <b>PMS-connected</b> property this same sheet is available and the resulting stay is marked <span class="sh unk">Opera doesn't know</span> — GUEST-Q5, and frame 12 shows what happens when Opera later sends its own version of it.</div>
 
-<!-- 5 · PMS-connected board, feed silent -->
-<h1>5 · <b>Today, PMS-connected — with the feed silent since 09:00.</b> The same screen, the same rules: there is no second mode, and nothing here gates a write</h1>
+<!-- 11 · Today PMS-connected -->
+<h1>11 · <b>Today, PMS-connected — with the feed silent since 09:00.</b> The same screen, the same rules: there is no second mode, and nothing here gates a write</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -372,7 +830,7 @@
         <div class="tr hd"><div>Guest</div><div>Booking</div><div>Room type</div><div>Room</div><div>Nights</div><div></div></div>
         <div class="tr">
           <div class="nm"><b>Rajesh Pillai</b><span>+91 98470 •••• 12</span></div>
-          <div>BK-4471 · 1 of 3</div><div>Deluxe King</div><div>214</div><div>31 Aug → 2 Sep</div>
+          <div>BK-4471 · 1 of 3</div><div>Deluxe King</div><div>214</div><div>31 Aug → 4 Sep</div>
           <div><span class="sh ovr"><i></i>override</span><span class="sh dis"><i></i>disagrees</span></div>
         </div>
         <div class="tr">
@@ -395,10 +853,10 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>S36 and GUEST-Q4 — the fork was removed, not chosen.</b> The property is PMS-writes-first at all times, so an override means one thing in every condition and the screen always says the same true thing: <i>your action stands</i>. A mode switch keyed on connector health would flip the desk's meaning mid-shift on a false trigger — and connector health is exactly the signal R27 proved unreliable, since a connector can be authenticated, polling and green while check-ins specifically have stopped. <b>The outage is a staleness banner, per capability, and it gates nothing</b>: bookings still arrive while check-ins do not, and the banner says so. <b>Three marks, three different facts</b>: <span class="sh wi">walk-in</span> is how the guest arrived, <span class="sh unk">Opera doesn't know</span> is who knows about them, <span class="sh pms"><i></i>from Opera</span> is who established the value. One flag for all three would lose the walk-in ratio.</div>
+<div class="cap"><b>S36 and GUEST-Q4 — the fork was removed, not chosen.</b> The property is PMS-writes-first at all times, so an override means one thing in every condition and the screen always says the same true thing: <i>your action stands</i>. A mode switch keyed on connector health would flip the desk's meaning mid-shift on a false trigger — and connector health is exactly the signal R27 proved unreliable, since a connector can be authenticated, polling and green while check-ins specifically have stopped. <b>The outage is a staleness banner, per capability, and it gates nothing.</b> <b>Three marks, three different facts</b>: <span class="sh wi">walk-in</span> is how the guest arrived, <span class="sh unk">Opera doesn't know</span> is who knows about them, <span class="sh pms"><i></i>from Opera</span> is who established the value.</div>
 
-<!-- 6 · Attention -->
-<h1>6 · <b>Attention</b> — the honest list. Not a defect log: every row is an ordinary condition of running a hotel against a PMS feed</h1>
+<!-- 12 · Attention -->
+<h1>12 · <b>Attention</b> — the honest list. Not a defect log: every row is an ordinary condition of running a hotel against a PMS feed</h1>
 <div class="win">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -447,8 +905,8 @@
 </div>
 <div class="cap"><b>Four rows, four rulings.</b> The candidate link is <b>staff-confirmed and never automatic</b> (GUEST-Q5) — the reference joined stays by matching <code>(companyId, siteId, surname, firstName, arrivalDate)</code> against its own private copy, and a wrong match silently merges two guests' histories, which is worse than a duplicate. Names may <i>rank</i> the list and may never <i>link</i> it; if you answer "two different stays", you get two stays and a double-booked room, <b>because that is then the truth</b>. The outage batch is <b>one row, not fourteen</b> (GUEST-Q4). The cancelled-in-house row is the state machine's single rule doing its job: a fact whose lifecycle rank is below the stay's is recorded as a contradiction and not applied — the same one rule that lets a check-out arrive first (R7, S12, S26).</div>
 
-<!-- 7 · First run -->
-<h1>7 · <b>First run</b> — a PMS-connected property on install day. The book is not empty, and the screen says why</h1>
+<!-- 13 · First run -->
+<h1>13 · <b>First run</b> — a PMS-connected property on install day. The book is not empty, and the screen says why</h1>
 <div class="win" style="min-height:420px">
   <div class="rail">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
@@ -471,34 +929,6 @@
 </div>
 <div class="cap"><b>GuestOps's first day is not an empty book.</b> The Integration Hub has been normalising reservation and guest facts since the connector shipped and holding them <i>deferred</i> — with their business date and provenance — precisely because this domain did not exist to own them (ADR 0128; connector brief §12). Installing this application is what turns that queue on, and the replay is idempotent by construction: a fact that has already been applied changes nothing and publishes nothing. <b>The empty state that would be wrong here is the usual one</b> — "no reservations yet, create your first booking" — on a property with two thousand of them waiting.</div>
 
-<!-- 8 · caveated frame -->
-<h1>8 · <b>Drawn with its caveat</b> — the balance the desk would like to see at check-out, which nothing in the platform can supply today</h1>
-<div class="caveat"><b>NOT RULED — this frame draws a capability that does not exist.</b> GUEST-Q6 puts the folio in Finance's later round, so GuestOps never computes a balance. Showing <i>Opera's</i> balance instead needs the connector to fetch and carry it — a capability no connector declares today, and one the v1 inbound contract (ADR 0128 §4) does not include. It is drawn because the owner asked for the frame; it is <b>reported as a finding</b>, not proposed as a plan, and the design chapter builds nothing behind it.</div>
-<div class="win dimwin" style="margin-top:12px;min-height:300px">
-  <div class="rail">
-    <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">2</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
-  </div>
-  <div class="main">
-    <div class="head"><div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Checking out · stay 01J9K…7F3A</div></div><div class="grow"></div><div class="btn2">Check out</div></div>
-    <div class="body">
-      <div class="card"><div class="ch">Balance <div class="grow"><span class="sh miss">would come from Opera</span></div></div>
-        <div class="cb">
-          <div class="fr"><div class="k">Room &amp; tax</div><div class="v">₹ 16 800.00 <span class="lock">NOT AVAILABLE</span></div></div>
-          <div class="fr"><div class="k">Extras</div><div class="v">₹ 2 340.00 <span class="lock">NOT AVAILABLE</span></div></div>
-          <div class="fr"><div class="k">Balance due</div><div class="v"><b>₹ 19 140.00</b> <span class="lock">NOT AVAILABLE</span></div></div>
-          <div class="note" style="padding:10px 12px">Settlement happens in Opera. In a standalone property it happens nowhere in v1 — <b>a consequence accepted knowingly with GUEST-Q6</b>, which is why the first deployments are PMS-connected.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="cap"><b>Why this frame exists at all.</b> A gold mockup that quietly omitted the balance would leave the owner approving a check-out screen that a receptionist cannot actually finish, and the omission would be discovered in the build. Drawing it with the caveat attached is the same treatment the connector round gave <code>CONN-Q9</code>: the frame is shown, the gap is named, and <b>nothing is built behind it</b> until someone rules. What <i>is</i> in v1 is the stay's <b>commercial terms</b> — the rate, the guarantee, the cancellation penalty as an <b>offset</b> rather than a resolved deadline (R18), and every amount with its currency and its tax basis (R19) — which is frame 2's panel, and is the part that would otherwise be lost the day it arrives from Opera.</div>
-
-<div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What this mockup does not draw.</b> No folio posting, payment or invoice (GUEST-Q6 — Finance's). No guest merge, no person-graph, no "same guest, third stay" panel — that sentence is Guest360's answer surfaced here, and Guest360 does not exist yet (G360-Q1). No write-back to Opera anywhere: nothing on any screen reaches the PMS in v1 (<code>CONN-Q5</code>). No room state — Room Care owns clean and ready; these screens announce occupancy and assert nothing about cleaning (S21). No mode switch, because there is no second mode (GUEST-Q4). <b>Every frame above traces to a scenario</b>, and frame 8 is the only one drawing something unruled — deliberately, and marked.</div>
+<div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What this mockup does not draw, and why.</b> <b>No folio posting, payment or invoice</b> — GUEST-Q6 puts them in Finance's later round; frame 7's second band shows exactly where the line falls and is reported as a finding rather than proposed. <b>No guest merge, no person-graph, no "same guest, third stay" panel</b> — that sentence is Guest360's answer surfaced here, and Guest360 does not exist yet (G360-Q1). <b>No write-back to Opera anywhere</b>: nothing on any screen reaches the PMS in v1 (<code>CONN-Q5</code>), and frame 8's cancellation dialog says so out loud rather than leaving it to be discovered. <b>No room state and no cleaning decisions</b> — Room Care owns clean, ready and who cleans; frame 6 reports its record and asserts nothing (APPS-Q1, S21). <b>No job assignment</b> — Jobs owns work; frame 5 hands over a request and stops. <b>No mode switch</b>, because there is no second mode (GUEST-Q4). <b>Every frame traces to a scenario</b>; the two cross-application tabs (5, 6) and frame 7's second band are the only places drawing something the platform cannot do today, and each is marked where it is drawn.</div>
 
 </body></html>
