@@ -1,12 +1,13 @@
 # 01 · The front desk scenarios — what GuestOps must be able to do
 
 **Status:** scenario record, 2026-08-31 — accepted by the owner, then amended
-the same day to carry three rulings: the **GUEST-Q2 addendum** (a stay's
-anchor is the room *type*; the room number is an assignment required at
-check-in), **GUEST-Q3** (while a disagreement stands, the standing override is
-the one answer that leaves the application) and **GUEST-Q4** (there is no
-second mode — PMS-writes-first always; a matching fact confirms silently).
-Stream FF,
+the same day to carry four rulings: the **GUEST-Q2 addendum** (a stay's anchor
+is the room *type*; the room number is an assignment required at check-in),
+**GUEST-Q3** (while a disagreement stands, the standing override is the one
+answer that leaves the application), **GUEST-Q4** (there is no second mode —
+PMS-writes-first always; a matching fact confirms silently) and **GUEST-Q5**
+(staff may create a PMS-unknown stay; the join is a staff-confirmed link,
+never a match). Stream FF,
 deliverable 1 of the GuestOps round — brief
 `docs/working/45-the-guestops-round.md` §3.1, **in the platform repository**.
 **Authority.** There is **no chapter for GuestOps**. Chapter 26 states the
@@ -116,9 +117,10 @@ In house     stays currently occupying a room, with today's departures
              separated from tomorrow's
 Departures   stays due out on the business day, and those already gone
 Attention    the honest list — disagreements, incomplete groups, stays with
-             a PMS fact we could not apply, stays the PMS has never seen.
-             A returning feed's differences group as ONE OUTAGE BATCH,
-             never as twenty rows (GUEST-Q4)
+             a PMS fact we could not apply, PMS-unknown stays with an
+             unconfirmed candidate link (GUEST-Q5). A returning feed's
+             differences group as ONE OUTAGE BATCH, never as twenty
+             rows (GUEST-Q4)
 ```
 
 Above the four, when the feed has gone quiet, a **staleness banner** rather
@@ -193,20 +195,43 @@ identifier alone, and must never be shown a fabricated onward leg. Whether it
 can be told anything *more* than that is Federation's question (ADR 0115,
 parked), not this round's.
 
-### S5 · A booking created here while a PMS is connected — **OPEN**
+### S5 · A booking created here while a PMS is connected — *ruled*
 **SITUATION.** The PMS is the property's book, and the desk creates a
 reservation in GuestOps anyway — a walk-in at 23:00, a phone booking while
 the PMS is being upgraded, a manager who prefers our screen.
 
 **PMS-CONNECTED.** GUEST-Q1's amendment lets staff **override** a stay. A
-booking the PMS has never heard of is not an override of anything: it is a
-stay that exists only here, that write-back cannot deliver (`CONN-Q5`), and
-that the PMS's night audit will never reconcile.
+booking the PMS has never heard of is not an override of anything: there is no
+PMS value to stand against, no disagreement to flag and no confirmation to
+arrive.
 
-**EXPRESSIBLE.** If it is allowed, a stay must be able to say *"the PMS does
-not know about me"*, and the day a matching PMS fact arrives it must be
-possible to recognise it as the same stay rather than a second one.
-**`OPEN` — §15 (a).**
+**EXPRESSIBLE. GUEST-Q5 (2026-08-31): staff may create it**, and the first
+half of that was already the owner's — GUEST-Q1's own words, *"all guest
+operations are done here by staff"*. The stay carries one honest mark:
+
+```text
+PMS-unknown     a PERMANENT, VALID state — not a pending one.
+                Write-back is deferred (CONN-Q5), so some stays will
+                simply never be known to the PMS
+```
+
+**And the join, when the PMS does eventually send its own version:**
+
+```text
+candidate test   same room + OVERLAPPING DATES
+name similarity  may RANK candidates · may never LINK them
+the link         STAFF-CONFIRMED, never automatic
+same             one stay · the PMS identifiers mapped on (ADR 0016)
+different        two stays, honestly — a double-booked room is then
+                 the truth, not an artefact
+unconfirmed      sits on Attention, like any disagreement
+```
+
+**Why the link is never automatic.** The reference solved exactly this by
+correlating on `(companyId, siteId, surname, firstName, arrivalDate)` — entity
+resolution by name, inside the connector, against its private copy (the Oracle
+connector design §3.1). A fuzzy match here would rebuild that, and a wrong
+match silently merges two guests' stays.
 
 ### S6 · A booking with commercial terms attached *(R18, R19)*
 **SITUATION.** The booking is guaranteed by a card, has a deposit due seven
@@ -341,11 +366,18 @@ was never observed is never invented** (R25). Not `OPEN`; assigned.
 walk-in — the hotelier reference carries exactly such a flag (brief §3.1).
 
 **PMS-CONNECTED.** The desk normally raises it in the PMS and it arrives
-through the Hub. Raising it in GuestOps instead is **S5**.
+through the Hub. **It may also be raised here** (S5, GUEST-Q5) — marked
+PMS-unknown, joined later by a staff-confirmed link if the PMS sends its own
+version. This is the walk-in at 11:00 during S36's outage: the PMS is
+unreachable, and refusing the stay would leave a room physically occupied
+while Room Care plans to clean it as vacant and Context answers *room → no
+stay* for a guest asleep in it.
 
 **EXPRESSIBLE.** A stay whose booking and arrival are the same moment, marked
 as such — the walk-in ratio is a number every hotel reports on, and it is
-unrecoverable if the flag is not recorded when the stay is created.
+unrecoverable if the flag is not recorded when the stay is created. The
+walk-in flag and the PMS-unknown mark are **two different facts**: one is how
+the guest arrived, the other is who knows about them.
 
 ---
 
@@ -650,9 +682,9 @@ is *values that differ*. The desk put the guest in 214 and Opera later says
 214 — that is agreement arriving late, not work. The twenty reconciliations
 this scenario feared become the two that are real.
 
-*(Whether the desk can create a stay at all during the outage — the walk-in at
-11:00 with the PMS unreachable — is `OPEN` at §15 (a), and is the one question
-this ruling leaves standing.)*
+*(The walk-in at 11:00 with the PMS unreachable is answered by **GUEST-Q5**:
+the desk creates it here, marked PMS-unknown, and a staff-confirmed link joins
+it to the PMS's version if one ever arrives — S5, S13.)*
 
 ---
 
@@ -763,15 +795,15 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
-**Three are ruled** and are struck through below rather than deleted, so the
-scenarios that cite them still resolve. **Four remain open**, and two of
-them — (a) and (f) — are load-bearing for the design: they decide the schema's
-shape and the write paths. (e) and (g) are carried as property configuration
-and as a records list, and block nothing.
+**Four are ruled** and are struck through below rather than deleted, so the
+scenarios that cite them still resolve. **Three remain open**, and one — (f),
+whether money is in v1 — is load-bearing: it decides how much of the schema
+exists at all. (e) and (g) are carried as property configuration and as a
+records list, and block nothing.
 
 | | Subject | Why it cannot be settled here |
 |---|---|---|
-| **(a)** | May staff create a stay the PMS has never seen? (S5, S13) | Write-back is out of scope, so such a stay never reaches the PMS and its night audit never reconciles it. GUEST-Q1 permits *overrides* of PMS-managed stays; creating one is not an override of anything |
+| ~~**(a)**~~ | ~~May staff create a stay the PMS has never seen?~~ (S5, S13) | **RULED — GUEST-Q5, 2026-08-31: yes** — GUEST-Q1's *"all guest operations are done here by staff"* already granted it. The stay carries **PMS-unknown**, a permanent valid state rather than a pending one. The join to a later PMS version is a **staff-confirmed link, never an automatic match**: candidates are *same room + overlapping dates*, name similarity may rank and may never link, and an unconfirmed candidate sits on Attention |
 | ~~**(b)**~~ | ~~Is a room-stay valid **without a room**?~~ (S8) | **RULED — GUEST-Q2 addendum, 2026-08-31: yes.** The anchor's *"one room"* is one room **type**; the room number is an **assignment**, absent at booking, changeable through the stay, and **required at check-in**. Carried in §1's vocabulary and S8; the letter is kept rather than re-lettered so every citation above still resolves |
 | ~~**(c)**~~ | ~~On a standing disagreement, which value do the board, Room Care and Context see — and who clears it?~~ (S35) | **RULED — GUEST-Q3, 2026-08-31.** The standing **override** is the answer everywhere while the disagreement stands; the disagreement is a flag on the one truth, never a second answer. Clearing belongs to the stay's **write permission**, choosing *keep ours* or *take the PMS's*, recorded with both values kept. Clearing to the PMS's side emits the same correction event a room move does. The S11 gate note is ratified in the same row |
 | ~~**(d)**~~ | ~~When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns?~~ (S36) | **RULED — GUEST-Q4, 2026-08-31: there is no second mode.** PMS-writes-first at all times; a matching inbound fact settles an override **silently as confirmed**, so only differing values are a disagreement; the outage shows as per-capability **staleness**, not as a mode; the backlog lands in event order and groups as one outage batch. The S26 boundary is ratified in the same row |
@@ -786,11 +818,12 @@ and as a records list, and block nothing.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven subjects are listed in §15; three —
-  (b) the roomless stay, (c) the standing disagreement and (d) the silent feed
-  — were ruled on 2026-08-31 and are carried in §1, §3, S8, S11, S34, S35 and
-  S36. The other four are not resolved above, and none is anticipated. S26
-  records where GUEST-Q3 deliberately does **not** reach.
+* **No answer to an open question.** Seven subjects are listed in §15; four —
+  (b) the roomless stay, (c) the standing disagreement, (d) the silent feed and
+  (a) the PMS-unknown stay — were ruled on 2026-08-31 and are carried in §1,
+  §3, S5, S8, S11, S13, S34, S35 and S36. The other three are not resolved
+  above, and none is anticipated. S26 records where GUEST-Q3 deliberately does
+  **not** reach.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.
