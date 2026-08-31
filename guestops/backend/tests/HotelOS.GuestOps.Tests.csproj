@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    GuestOps's own tests.
+
+    ADR 0025: tests live in their own package, and no language is an exception.
+    ADR 0054 splits the two suites — these own **behavioural** coverage, with a
+    recording authorizer and a recording appender, which is what makes them
+    exhaustive and fast and what makes them blind to every layer they do not
+    stand up. The boundary classes belong to the platform's E2E suite.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.GuestOps.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\HotelOS.GuestOps.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,286 @@
+syntax = "proto3";
+
+// GuestOps — the reservation book, as it crosses a wire.
+//
+// # This is the application's contract, not the platform's
+//
+// `shared/protos/` is the canonical language for *platform* contracts. An
+// installable application's service definition is the application's and travels
+// in its `.hopkg` payload — the same split the `hello-hotel` fixture states.
+//
+// # What is deliberately absent
+//
+// **No folio** — no charge, payment, settlement, invoice or night-audit
+// posting. GUEST-Q6 puts them in Finance's later round, and records the
+// accepted consequence: a standalone property cannot settle a guest in v1.
+//
+// **No person graph** — no `person_id`, no merge, no suggested link. G360-Q1
+// gives Guest360 the graph over these records; a merge there re-points the
+// person and rewrites no stay, which is exactly why nothing here names one.
+//
+// **No `DUE_OUT` lifecycle value.** In house with a departure of today is two
+// fields, and `CONN-Q11` ruled that composing beats a second vocabulary for one
+// axis.
+//
+// **No room state.** Clean, ready, inspected and who cleans are Room Care's.
+// This application announces occupancy and asserts nothing about cleaning.
+package hotelos.guestops.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "HotelOS.GuestOps.Contracts.V1";
+
+// -----------------------------------------------------------------------------
+// Shared shapes
+// -----------------------------------------------------------------------------
+
+// Whether an amount includes tax — R19.
+enum TaxBasis {
+  // The source did not say. A value, not a gap to fill in.
+  TAX_BASIS_UNSPECIFIED = 0;
+  TAX_BASIS_NET = 1;
+  TAX_BASIS_GROSS = 2;
+}
+
+// An amount, with everything needed to know what it means.
+//
+// Three things or it is not an amount. The system this replaces carried a float
+// beside a currency that was always null, and wrote one vendor's before-tax
+// figure and another's gross into the same column.
+message Money {
+  int64 minor_units = 1;
+  string currency = 2;
+  TaxBasis tax_basis = 3;
+}
+
+// How a timestamp came to be known — R12, R13, R14.
+enum TimeBasis {
+  TIME_BASIS_UNSPECIFIED = 0;
+
+  // Someone saw it happen.
+  TIME_BASIS_OBSERVED = 1;
+
+  // The source's expectation — a scheduled time, not an observed one.
+  TIME_BASIS_EXPECTED = 2;
+
+  // A source date plus the property's clock, in the property's IANA zone.
+  TIME_BASIS_DERIVED = 3;
+}
+
+// A moment, and how it is known.
+//
+// An arrival-time report built from expectations measures the reservation
+// rather than the guest, and the two differ by hours.
+message StayTime {
+  google.protobuf.Timestamp at = 1;
+  TimeBasis basis = 2;
+}
+
+// Where a room-stay has reached.
+//
+// Seven values, two of them pre-confirmation — GUEST-Q9. A waitlisted booking
+// is a first-class reservation state in every major PMS and the desk must see it
+// as one.
+enum StayLifecycle {
+  STAY_LIFECYCLE_UNSPECIFIED = 0;
+
+  // A queue position. Holds no room — which is the whole point of a waitlist,
+  // and why counting one against inventory would make a full hotel look
+  // oversold.
+  STAY_LIFECYCLE_WAITLISTED = 1;
+
+  // Taken, awaiting confirmation.
+  STAY_LIFECYCLE_PENDING = 2;
+
+  STAY_LIFECYCLE_BOOKED = 3;
+  STAY_LIFECYCLE_IN_HOUSE = 4;
+  STAY_LIFECYCLE_DEPARTED = 5;
+
+  // Business facts, not the platform's lifecycle: ADR 0062's `active` /
+  // `deleted_at` answer whether a record exists, and a cancelled reservation
+  // exists — with its time, its reason and its penalty.
+  STAY_LIFECYCLE_CANCELLED = 6;
+  STAY_LIFECYCLE_NO_SHOW = 7;
+}
+
+// One identifier as a source knows an entity — R10, `CONN-Q8`.
+//
+// Several, not one: an OHIP reservation arrives with a list of {id, type} pairs.
+// *There is not "the reservation id."*
+message ExternalRef {
+  string integration_id = 1;
+  string identifier_kind = 2;
+  string external_id = 3;
+}
+
+// Why a field is missing — R25.
+//
+// Three sentences one "incomplete" flag collapses, and they differ in whether
+// anyone is alerted, whether a connector needs fixing, and whether replay helps.
+enum AbsenceReason {
+  ABSENCE_REASON_UNSPECIFIED = 0;
+  ABSENCE_REASON_NOT_SUPPLIED = 1;
+  ABSENCE_REASON_NOT_AVAILABLE_FROM_SOURCE = 2;
+  ABSENCE_REASON_UNREADABLE = 3;
+}
+
+// A field this stay does not have, and why.
+message Absence {
+  string field = 1;
+  AbsenceReason reason = 2;
+
+  // What arrived, when the reason is UNREADABLE — so an unrecognised value
+  // names itself instead of being guessed at years later.
+  string raw_value = 3;
+}
+
+// -----------------------------------------------------------------------------
+// The stay
+// -----------------------------------------------------------------------------
+
+// The room a stay occupies, over time.
+//
+// A row rather than a value, because a room change is its own fact (R8) and a
+// move needs *both* rooms: Room Care flips two axes and Jobs may have work open
+// against one of them.
+message Assignment {
+  string id = 1;
+  string room_id = 2;
+  google.protobuf.Timestamp assigned_at = 3;
+  google.protobuf.Timestamp released_at = 4;
+
+  // initial · move · upgrade · correction. An upgrade is an assignment
+  // (GUEST-Q8): a better room on unchanged terms leaves the sale as booked.
+  string reason = 5;
+}
+
+// One member of the party.
+message StayGuest {
+  string guest_id = 1;
+  string name = 2;
+
+  // Whether the source marked this guest primary.
+  //
+  // **Optional, and the presence matters**: absent means the source said
+  // nothing, false means it said no. OHIP produces reservations where *nobody*
+  // is marked primary, and the reference hard-failed on exactly that.
+  optional bool is_primary = 3;
+}
+
+// What the stay was sold on — GUEST-Q6.
+//
+// Offsets, never resolved deadlines: an offset from arrival survives the
+// arrival moving and a stored deadline does not, and one that silently stops
+// matching its reservation is a chargeable error (R18).
+message CommercialTerms {
+  string rate_code = 1;
+  string rate_name = 2;
+  Money amount = 3;
+
+  string guarantee_code = 4;
+  string guarantee_description = 5;
+  bool on_hold = 6;
+
+  // Whether this booking holds a room — the source's own answer to the question
+  // availability asks.
+  bool reserves_inventory = 7;
+
+  int32 deposit_offset_days_from_booking = 10;
+  int32 cancel_offset_days_from_arrival = 11;
+  string cancel_drop_time = 12;
+
+  Money penalty_amount = 20;
+
+  // Some sources state the penalty in nights. Carried rather than converted: it
+  // cannot become money without a rate the record does not have.
+  int32 penalty_nights = 21;
+
+  // The deadline, computed from the offset at the moment of reading. Never
+  // stored — R18.
+  google.protobuf.Timestamp cancellation_deadline = 30;
+}
+
+// A room-stay — the anchor.
+//
+// GUEST-Q2: a booking is the group and this is the anchor. One property, one
+// room *type*, one date range, its own party. The room number is an assignment,
+// absent at booking and required at check-in.
+message RoomStay {
+  string id = 1;
+  string booking_id = 2;
+  string property_id = 3;
+
+  // The room type sold — Master Data's id, and what the stay is anchored on.
+  string room_type_id = 4;
+
+  // The current assignment's room, resolved by the service. Empty until one is
+  // made; a create or move message has nowhere to put it.
+  string current_room_id = 5;
+
+  StayLifecycle lifecycle = 6;
+  StayTime arrival_at = 7;
+  StayTime departure_at = 8;
+
+  // The business day this stay's arrival belongs to. ISO-8601 date, attached
+  // and never computed here — ADR 0128 §6.
+  string business_date = 9;
+
+  // How the guest arrived, and who knows about them. Two facts, two fields: a
+  // walk-in entered in the PMS is not PMS-unknown.
+  bool walk_in = 10;
+  bool pms_unknown = 11;
+
+  repeated Assignment assignments = 20;
+  repeated StayGuest party = 21;
+  repeated Absence absences = 22;
+  repeated ExternalRef external_refs = 23;
+
+  CommercialTerms terms = 30;
+
+  int64 version = 40;
+}
+
+// The group — what the guest thinks they made.
+//
+// Deliberately thin: identity, the expectation, and nothing operational. Every
+// operation happens to a stay.
+message Booking {
+  string id = 1;
+  string property_id = 2;
+
+  // How many stays the source says this booking has — R9. Zero means unstated,
+  // which is a different thing from "one".
+  int32 expected_stay_count = 3;
+
+  // Whether the *source* says it has sent the whole group — carried, not
+  // computed. Our own count against the stays held answers a different
+  // question: how much of what was promised has arrived.
+  optional bool is_complete = 4;
+
+  repeated ExternalRef external_refs = 5;
+  repeated RoomStay stays = 6;
+}
+
+// -----------------------------------------------------------------------------
+// Availability — GUEST-Q7
+// -----------------------------------------------------------------------------
+
+// What is sellable of one room type on one date.
+//
+// **An answer computed, never a table someone feeds.** The rooms are Master
+// Data's, out-of-order is EngineeringOps's and arrives as an event, and what
+// this application adds is its own two things: the stays it holds, and
+// stop-sell.
+message TypeAvailability {
+  string room_type_id = 1;
+  string business_date = 2;
+
+  int32 total_rooms = 3;
+  int32 held_by_stays = 4;
+  int32 out_of_order = 5;
+  int32 stop_sold = 6;
+
+  // What is left. Conservative when the out-of-order projection lags — which is
+  // the line between an event-derived read model and duplicated master data.
+  int32 free = 7;
+}

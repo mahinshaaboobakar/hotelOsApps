@@ -1,0 +1,163 @@
+syntax = "proto3";
+
+// The facts GuestOps publishes.
+//
+// # Business facts, never process events
+//
+// ADR 0016 Part 2. Not `sync.completed`, not `stay.saved` — what happened in
+// the hotel. The mechanism goes in the payload where an auditor needs it.
+//
+// # The application names `domain.action`; the Kernel builds the subject
+//
+// `property.<property_id>.<domain>.<action>.v<version>` is the Kernel's to
+// construct, so nothing here is a NATS subject and no GuestOps code writes one.
+// The three domains this application publishes into — `stay`, `reservation`,
+// `guest` — are claimed by the platform's GUEST stream, so none of these
+// dead-letters.
+//
+// # Two things deliberately absent
+//
+// **No `disagreement.*`.** A disagreement is a fact about our records, not
+// about the hotel. Clearing one to the PMS's side emits the same correction a
+// room move does, so consumers need no special case — and there is nothing for
+// them to do with the standing state.
+//
+// **No group-level cancellation.** GUEST-Q2: every operation happens to a stay,
+// so cancelling a booking is *n* `stay.cancelled` facts and no consumer ever
+// has to expand a group.
+package hotelos.guestops.v1;
+
+import "google/protobuf/timestamp.proto";
+import "hotelos/guestops/v1/dto.proto";
+
+option csharp_namespace = "HotelOS.GuestOps.Contracts.V1";
+
+// `reservation.created` — the group exists.
+message ReservationCreated {
+  string booking_id = 1;
+  string property_id = 2;
+  int32 expected_stay_count = 3;
+  repeated ExternalRef external_refs = 4;
+  string origin = 5;  // staff · pms
+}
+
+// `reservation.expectation_changed` — R9's "three expected" became "four".
+message ReservationExpectationChanged {
+  string booking_id = 1;
+  int32 expected_stay_count = 2;
+}
+
+// `stay.created` — a room-stay exists, with its type, dates and party.
+message StayCreated {
+  string stay_id = 1;
+  string booking_id = 2;
+  string property_id = 3;
+  string room_type_id = 4;
+  StayLifecycle lifecycle = 5;
+  StayTime arrival_at = 6;
+  StayTime departure_at = 7;
+  string business_date = 8;
+  bool walk_in = 9;
+  bool pms_unknown = 10;
+}
+
+// `stay.amended` — dates, party or terms changed.
+//
+// **Never the room.** Folding a move into an amendment publishes something
+// whose consumers cannot tell whether a room was vacated (R8), which is what
+// the system this replaces did when it commented out the branch that
+// distinguished them.
+message StayAmended {
+  string stay_id = 1;
+  string property_id = 2;
+  StayTime arrival_at = 3;
+  StayTime departure_at = 4;
+  int64 version = 5;
+}
+
+// `stay.assigned` — the stay's first room.
+message StayAssigned {
+  string stay_id = 1;
+  string property_id = 2;
+  string room_id = 3;
+}
+
+// `stay.room_changed` — the assignment moved.
+//
+// Its own fact, and the ruled name. Consumers: Room Care (both rooms' axes
+// flip), Jobs and EngineeringOps (open work on either room), Guest360
+// (history), and this application's own registration.
+//
+// Also what a disagreement cleared to the PMS's side emits, deliberately: the
+// correction is a fact consumers already know how to handle.
+message StayRoomChanged {
+  string stay_id = 1;
+  string property_id = 2;
+  string from_room_id = 3;
+  string to_room_id = 4;
+  string reason = 5;  // move · upgrade · correction
+}
+
+// `stay.arrived` — the guest is in the room.
+message StayArrived {
+  string stay_id = 1;
+  string property_id = 2;
+  string room_id = 3;
+  StayTime arrival_at = 4;
+  string business_date = 5;
+}
+
+// `stay.departed` — the guest has left.
+//
+// Room Care decides for itself whether this becomes a cleaning task: cleaning
+// is policy-driven, and a checked-out room becoming work is a hotel policy
+// rather than an automatic consequence (APPS-Q1).
+message StayDeparted {
+  string stay_id = 1;
+  string property_id = 2;
+  string room_id = 3;
+  StayTime departure_at = 4;
+  string business_date = 5;
+}
+
+// `stay.cancelled` — the room returns to inventory.
+//
+// The penalty is computed and recorded, never charged: charging is Finance's.
+message StayCancelled {
+  string stay_id = 1;
+  string property_id = 2;
+  string reason = 3;
+  Money penalty = 4;
+}
+
+// `stay.no_show` — nobody arrived, and the day rolled.
+//
+// A business fact, not a lifecycle verb — chargeable and reportable, and
+// distinguishable from a cancellation for both reasons.
+message StayNoShow {
+  string stay_id = 1;
+  string property_id = 2;
+  string business_date = 3;
+}
+
+// `stay.corrected` — a staff correction moved the lifecycle backwards.
+//
+// The guest checked out in error at 07:00 who is still asleep in the room
+// (S24). Inbound facts are monotonic; people are not, and pretending otherwise
+// would make the erroneous check-out permanent.
+message StayCorrected {
+  string stay_id = 1;
+  string property_id = 2;
+  StayLifecycle from = 3;
+  StayLifecycle to = 4;
+  string reason = 5;
+}
+
+// `guest.created` / `guest.updated` — a guest identity record.
+//
+// Guest360 builds its person-graph over these and rewrites none of them.
+message GuestRecorded {
+  string guest_id = 1;
+  string property_id = 2;
+  string name = 3;
+}

@@ -1,0 +1,259 @@
+syntax = "proto3";
+
+// GuestOps Service — the front desk's surface.
+//
+// # Called directly, authorized by the Kernel
+//
+// The same shape every platform service uses: the caller discovers this service
+// and calls it over gRPC; this service asks the Kernel to authorize every RPC.
+// The Kernel decides and this service enforces — there is no OpenFGA client
+// here and no cached decision.
+//
+// # Two modes, one surface
+//
+// GUEST-Q1: in a PMS-connected property the booking, check-in and check-out
+// arrive through the Integration Hub, and **staff may still call every RPC
+// here** — a write on a PMS-managed stay is recorded as an override. There is
+// no second set of methods and no mode flag on a request: GUEST-Q4 removed the
+// second mode rather than choosing a branch, so the surface is the same in both
+// and only the meaning of a write differs.
+//
+// # What has no RPC, and why
+//
+// **No group operations.** No `CheckInBooking`, no `CancelBooking` — GUEST-Q2:
+// every operation happens to a room-stay. Cancelling a booking is *n* calls to
+// `CancelStay`, which is what the model does and what lets either stay be
+// reinstated on its own.
+//
+// **No `SetBusinessDate`.** The boundary is Property Registration's
+// configuration and the date is the Context Service's derivation — ADR 0128 §6,
+// derived and stored by nobody.
+//
+// **No merge.** The person-graph is Guest360's (G360-Q1).
+//
+// **No folio.** GUEST-Q6 — Finance's later round.
+package hotelos.guestops.v1;
+
+import "hotelos/common/v1/common.proto";
+import "hotelos/guestops/v1/dto.proto";
+
+option csharp_namespace = "HotelOS.GuestOps.Contracts.V1";
+
+service GuestOpsService {
+  // --- the book ----------------------------------------------------------
+
+  rpc CreateBooking (CreateBookingRequest) returns (Booking);
+  rpc GetStay       (GetStayRequest)       returns (RoomStay);
+  rpc ListStays     (ListStaysRequest)     returns (ListStaysResponse);
+
+  // --- the stay's life ---------------------------------------------------
+
+  // Give the stay a room, or move it to another.
+  //
+  // One RPC rather than two, because they are one operation on the model: the
+  // open assignment closes and a new one opens. What differs is the `reason`,
+  // and what the service publishes — `stay.assigned` for the first,
+  // `stay.room_changed` for every later one (R8).
+  rpc AssignRoom (AssignRoomRequest) returns (RoomStay);
+
+  // Check in. **Refuses a stay with no room** — the one hard gate in this
+  // application, and it is our own fact rather than a neighbour's (S8).
+  //
+  // It does *not* refuse a room Room Care has not released: an absent or
+  // dissenting neighbour loses its capability, never this flow (APPS-Q2).
+  rpc CheckIn (CheckInRequest) returns (RoomStay);
+
+  rpc CheckOut (CheckOutRequest) returns (RoomStay);
+
+  // Cancel one stay. The penalty is computed from the stored offset and
+  // recorded; charging is Finance's.
+  rpc CancelStay (CancelStayRequest) returns (RoomStay);
+
+  // Record a no-show — a business fact, never a lifecycle verb.
+  rpc RecordNoShow (RecordNoShowRequest) returns (RoomStay);
+
+  // Move a stay's lifecycle backwards, deliberately and recorded.
+  //
+  // The guest checked out in error at 07:00 and still asleep in the room. The
+  // one exception to the monotonic rule inbound facts obey, and it exists
+  // because people are not monotonic.
+  rpc CorrectStay (CorrectStayRequest) returns (RoomStay);
+
+  // --- availability — GUEST-Q7 -------------------------------------------
+
+  // What is sellable, computed from the stays this application holds plus the
+  // facts it already hears. Never a stored table.
+  rpc GetAvailability (GetAvailabilityRequest) returns (GetAvailabilityResponse);
+}
+
+// -----------------------------------------------------------------------------
+// Requests
+// -----------------------------------------------------------------------------
+
+// One stay to create, inside a booking.
+//
+// **No `room_id`.** A stay is anchored on the room *type*; the room is an
+// assignment made later, and a create message that carried one would let a
+// client express a stay whose assignment history began before the stay did.
+message NewStay {
+  string room_type_id = 1;
+
+  // ISO-8601 dates. The service derives the timestamps from the property's
+  // configured clock, in the property's zone, and marks them derived.
+  string arrival_date = 2;
+  string departure_date = 3;
+
+  int32 adults = 4;
+  int32 children = 5;
+
+  // May be empty — *"not yet named"* is a valid party and is never filled with
+  // a placeholder (R25).
+  repeated NewGuest guests = 6;
+
+  // How the guest arrived. Distinct from the source channel below.
+  bool walk_in = 10;
+
+  CommercialTerms terms = 20;
+}
+
+message NewGuest {
+  string name_as_given = 1;
+  string name_given = 2;
+  string name_family = 3;
+
+  // At most one of each kind is expected, and none is valid: a stay with no
+  // contact detail is a real stay, and refusing it would lose one.
+  string phone = 4;
+  string email = 5;
+
+  optional bool is_primary = 6;
+}
+
+message CreateBookingRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  repeated NewStay stays = 2;
+
+  // GUEST-Q7's kept set, as the desk knows it.
+  string channel = 10;
+  string travel_agent = 11;
+  string market_code = 12;
+  string meal_plan = 13;
+
+  // How many stays this booking is expected to have, where that is known to be
+  // more than the caller is sending — R9's incomplete group, expressible from
+  // the desk as well as from a PMS.
+  int32 expected_stay_count = 20;
+}
+
+message GetStayRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+}
+
+// The four lists the front desk works from.
+enum StayView {
+  STAY_VIEW_UNSPECIFIED = 0;
+
+  // Due in on the business day.
+  STAY_VIEW_ARRIVALS = 1;
+
+  // Occupying a room now.
+  STAY_VIEW_IN_HOUSE = 2;
+
+  // Due out on the business day, and those already gone.
+  STAY_VIEW_DEPARTURES = 3;
+
+  // Disagreements, incomplete groups, unconfirmed candidate links, held facts.
+  //
+  // Not a defect log: every member is an ordinary condition of running a hotel
+  // against a PMS feed.
+  STAY_VIEW_ATTENTION = 4;
+}
+
+message ListStaysRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  StayView view = 2;
+
+  // The business day to list. Empty means today's, which the service asks the
+  // Context Service for — it never computes one.
+  string business_date = 3;
+
+  hotelos.common.v1.PageRequest page = 10;
+}
+
+message ListStaysResponse {
+  repeated RoomStay stays = 1;
+  hotelos.common.v1.PageResponse page = 2;
+  hotelos.common.v1.ResponseMeta meta = 3;
+}
+
+message AssignRoomRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  string room_id = 3;
+
+  // initial · move · upgrade · correction. An upgrade is an assignment: a
+  // better room on unchanged terms leaves the booked type alone.
+  string reason = 4;
+
+  // The conflict check **warns and never forbids** — GUEST-Q5 made a
+  // double-booked room a possible truth, so a hard block would put a ruled
+  // outcome out of reach. This is the caller saying they saw the warning.
+  bool accept_conflict = 5;
+
+  int64 version = 10;
+}
+
+message CheckInRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  int64 version = 3;
+}
+
+message CheckOutRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  int64 version = 3;
+}
+
+message CancelStayRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  string reason = 3;
+  int64 version = 4;
+}
+
+message RecordNoShowRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  int64 version = 3;
+}
+
+message CorrectStayRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  StayLifecycle to = 3;
+
+  // Required. A correction that moves a stay backwards without a reason is
+  // indistinguishable from a mistake six months later.
+  string reason = 4;
+
+  int64 version = 5;
+}
+
+message GetAvailabilityRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  // ISO-8601 dates, inclusive.
+  string from_date = 2;
+  string to_date = 3;
+
+  // Empty means every type the property has.
+  repeated string room_type_ids = 4;
+}
+
+message GetAvailabilityResponse {
+  repeated TypeAvailability availability = 1;
+  hotelos.common.v1.ResponseMeta meta = 2;
+}

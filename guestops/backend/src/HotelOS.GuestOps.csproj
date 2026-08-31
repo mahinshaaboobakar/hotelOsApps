@@ -1,0 +1,148 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    GuestOps — the reservation book, as an installable application.
+
+    # It is a package, not a platform service
+
+    ADR 0122: an installable application is developed in its own repository,
+    without the platform's core code, and binds to HotelOS at exactly one point
+    — the signed `.hopkg` install. So this project lives in `HotelOsApps/`, and
+    what it may depend on is the platform's **contracts and SDK**, never its
+    services.
+
+    # How the platform is reached, and why it is a relative path today
+
+    `HotelOsApps/README.md`, on ADR 0122's addendum: *"a sibling-path reference
+    to the platform checkout, or a copied `shared/protos` — until an
+    SDK-publishing round makes them proper artifacts."* This takes the first
+    option, so there is exactly one copy of `HotelOS.Platform` and of every
+    platform proto on the machine, and a contract change breaks the build here
+    the same day it lands there.
+
+    The alternative — copying `shared/protos` into this repository — is a second
+    copy of the wire contract that drifts silently, which is the failure the
+    no-duplicated-shared-code rule exists to prevent.
+
+    # Its own contract is its own
+
+    `guestops.proto` and its siblings are under `src/protos/` and travel in the
+    payload. `shared/protos/` is the canonical language for *platform*
+    contracts; an installable application's service definition is the
+    application's — the same split the `hello-hotel` fixture states.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.GuestOps</RootNamespace>
+    <!--
+      Fixed, because the manifest names it: install step 6 runs
+      `dotnet backend/<runtime.assembly> migrate`, and a drift between the two
+      fails the install with a file-not-found that reads like a broken package.
+    -->
+    <AssemblyName>HotelOS.GuestOps</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <!-- `TreatWarningsAsErrors` IS the lint — CLAUDE.md §"Verify". -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!--
+      ADR 0057, matched deliberately rather than inherited.
+
+      The platform repository carries these two settings in a root
+      `Directory.Build.props` so a project cannot opt out by being new. **This
+      repository has no such file**, so a packaged application starts outside
+      that gate — and the gate is the point: generating the documentation file
+      is what makes the compiler resolve every `<see cref>`, and CS1574 could
+      not fire without it. Four references to a deleted type once survived a
+      build reporting zero warnings.
+
+      `CS1591` — *missing XML comment for a public member* — stays suppressed,
+      for ADR 0057's own reason: step 4 is *classify the undocumented public
+      API*, and turning it on first produces a hundred one-line restatements of
+      member names. The broken-reference diagnostics are not suppressed, and
+      those are the ones the ADR was written after.
+    -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- ADR 0090 §Q23: the platform chains the ASP.NET runtime. -->
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+    <PlatformProtos>$(PlatformRoot)\shared\protos</PlatformProtos>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      This application's own contract, in its own payload.
+
+      `AdditionalImportDirs` puts the platform's proto tree on protoc's include
+      path **without generating from it**. That distinction is load-bearing:
+      `hotelos/common/v1/common.proto` is already compiled into
+      `HotelOS.Platform`, and generating it again here would put two
+      `HotelOS.Contracts.Common.V1.RequestContext` types in two assemblies that
+      are both referenced — an ambiguity error at every use site, and a wire
+      type that is equal to itself only by accident.
+
+      So: imported for the compiler, taken from the SDK for the runtime. One
+      definition, one generated type.
+    -->
+    <Protobuf Include="protos\hotelos\guestops\v1\dto.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="protos\hotelos\guestops\v1\events.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="protos\hotelos\guestops\v1\service.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The normalised fact the Integration Hub produces — ADR 0128. This
+      application is its owning domain (`CONN-Q2(b)`), so it consumes
+      `RoomStayFact` rather than redeclaring it, and no service in the platform
+      generates it into an assembly this one references.
+    -->
+    <Protobuf Include="$(PlatformProtos)\hotelos\integration\v1\dto.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
+
+    <!--
+      The Context Service, as a client. This application asks it two questions
+      and computes neither answer: which business day it is (ADR 0128 §6,
+      `HUB-Q1`), and the property's configured clock hours, which Core
+      Administration establishes (ADR 0052).
+    -->
+    <Protobuf Include="$(PlatformProtos)\hotelos\context\v1\dto.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="$(PlatformProtos)\hotelos\context\v1\service.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The SDK. Identifier generation, the domain failure vocabulary and its
+      status mapping, the request scope and envelope mapping, the Kernel
+      authorization call, the transactional event append and the schema
+      migration all live here and are **not reimplemented** — CLAUDE.md
+      §"No duplicated shared code". An installed application is no exception:
+      two event appenders drift, and one of them stops writing the queue row.
+    -->
+    <ProjectReference Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform\HotelOS.Platform.csproj" />
+  </ItemGroup>
+
+</Project>
