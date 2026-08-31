@@ -32,11 +32,10 @@ C  scope            things the design found while drawing, each with a
 
 **Groups A and C are closed** — every owner question this round raised has
 been answered: six as **GUEST-Q7** and the upgrade boundary as **GUEST-Q8 (b)**,
-all on 2026-08-31. **B1, B2 and B3 are closed too** — B2 by GUEST-Q8 (a),
-minting is the mapping; B1 by a correction to `CLAUDE.md` itself; B3 by a
-fourth item in Chapter 26's head note. What remains is **B4–B6**: three items
-of the platform's own record, going to the planner and the architect **one at
-a time**.
+all on 2026-08-31. **B1–B4 are closed too** — B2 by GUEST-Q8 (a), minting is
+the mapping; B1 by a correction to `CLAUDE.md` itself; B3 by a fourth item in
+Chapter 26's head note; B4 by `CTX-Q4`, which rules how Context's surface
+grows. What remains is **B5 and B6**, both asked on 2026-08-31.
 
 The rows are kept rather than deleted because the *reasoning* behind a ruling
 is the part that stops it being re-litigated in six months.
@@ -206,6 +205,28 @@ Jobs' and Room Care's rounds. Slice 4 of the design is blocked on them.
 costs a panel and never a flow. That is worth stating where the work is
 scheduled, because a resolver commissioned as *"the check-in readiness check"*
 would be built as a gate.
+
+**CLOSED — `CTX-Q4`, 2026-08-31.**
+
+> **Context's surface grows routinely. ADR 0089's v1 list was the set that
+> satisfied its principle on the day it was written, never a closed
+> enumeration — and the principle is the gate: a resolver exists for an entity
+> with a real owner and a read contract.**
+
+```text
+a new resolver = ONE DELIVERY by the contributing domain's round
+                 the read view · the Context RPC · its stated constraint
+```
+
+So no ADR amendment is needed per resolver, and **no round produces a view
+that then waits for somebody to notice it needs an RPC**. Jobs' and Room Care's
+rounds **inherit these three as scoped work**.
+
+**And the constraint is recorded in the register, not only here** — the three
+stay resolvers are **display-only**, named explicitly so that a readiness
+resolver can never be built as a gate by an author who never read A1. That was
+the half of this finding most likely to be lost, because it had to survive
+months and a different team.
 
 ### B6 · An automatic guest filing is an outbound connector, and v1's connector contract is inbound-only
 

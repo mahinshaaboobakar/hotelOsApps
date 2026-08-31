@@ -922,6 +922,24 @@ Three consequences the design accepts rather than works around:
   direct read into Jobs' schema to make a tab work would break the one rule
   the whole platform's modularity rests on.
 
+**How the resolvers arrive — `CTX-Q4`, ruled 2026-08-31.** Context's surface
+**grows routinely**; ADR 0089's v1 list was the set that satisfied its
+principle on the day it was written, never a closed enumeration, and the
+**principle is the gate**: a resolver exists for an entity with a real owner
+and a read contract.
+
+```text
+one delivery, by the CONTRIBUTING DOMAIN's round
+  the read view  ·  the Context RPC  ·  its stated constraint
+```
+
+So **Jobs' and Room Care's rounds inherit these three as scoped work**, and
+each arrives whole rather than as a view that waits for somebody to notice it
+needs an RPC. **The constraint that travels with all three is A1's:
+display-only** — recorded in the register rather than only here, so a
+readiness resolver can never be built as a gate by an author who never read
+this page.
+
 ---
 
 ## 10 · Permissions
@@ -1003,7 +1021,7 @@ service suite, a connection goes in E2E); an absent database **fails** the run
 | **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the bookings list · the four day lists · the stay's overview and activity · standalone writes · cancel · the state machine · `stay.*` facts · the three views — **plus GUEST-Q7's four: availability and stop-sell (§5), the room-level conflict check, the day roll (§3.3), and the kept source set (§2.6b)** | a standalone property can run its front desk **and know what it has left to sell**; **Context's guest chain turns on** |
 | **2 · The PMS mode** | the deferred queue drains · overrides · disagreements · silent confirmation · candidate links · the staleness banner | the Hub's backlog stops accumulating; Oracle properties go live |
 | **3 · The rest of the desk** | commercial terms · registration · requests · notes · preferences · the group page's full behaviour | *"every other guest operation"* (GUEST-Q1) is complete |
-| **4 · The neighbours** | the *stay → jobs* and *stay → servicing* panels | **blocked on finding 4, ratified 2026-08-31 as "drawn, not built"** — two contributing-domain read views and their Context RPCs, owned by Jobs' and Room Care's rounds |
+| **4 · The neighbours** | the *stay → jobs*, *stay → servicing* and *stay → readiness* panels | **not ours to schedule — `CTX-Q4`, 2026-08-31.** Each resolver is one delivery by its contributing domain's round (view + RPC + constraint); **Jobs' and Room Care's rounds inherit the three as scoped work.** This slice is the panels lighting up, and needs no code here beyond rendering |
 
 **Slice 1 grew on 2026-08-31 and it grew deliberately.** GUEST-Q7 put both
 modes fully in v1, which makes availability slice-1 work rather than a later
@@ -1102,8 +1120,15 @@ The platform rule is settled — Context answers cross-domain questions, and an
 application never reads another's tables — so what is missing is **two
 contributing-domain read views and their Context RPCs**, which are those
 applications' rounds and not this one's. Named here so the mockup's two
-cross-application tabs are read as *drawn, not built*. **A question for the
-register.**
+cross-application tabs are read as *drawn, not built*.
+
+**CLOSED — `CTX-Q4`, 2026-08-31.** Context's surface grows routinely and the
+**principle is the gate**, not v1's list; each resolver arrives as **one
+delivery** — read view, RPC and stated constraint — from the contributing
+domain's round, and Jobs' and Room Care's rounds inherit these three as scoped
+work. **A1's display-only constraint is recorded in the register with them**,
+so a readiness resolver cannot be built as a gate by an author who never read
+this design (§9.1).
 
 **5 · "Payment information" and GUEST-Q6 — closed, 2026-08-31.** The owner
 asked for payment information on the stay; GUEST-Q6 had ruled the folio out of
