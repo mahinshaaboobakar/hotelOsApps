@@ -38,12 +38,14 @@ B3 by a fourth item in Chapter 26's head note; B4 by `CTX-Q4`, which rules how
 Context's surface grows; B5 as `APPS-Q2`, binding on every application round;
 B6 on `CONN-Q5`'s row, where the outbound round will read it.
 
-> **Nothing on this page is open.** Two items are *placed elsewhere and
-> pending there*, neither blocking this round: `APPS-Q2`'s final **home** is a
-> planner placement question (the rule binds meanwhile), and the **platform
-> print surface** gets its register row when this application reaches wiring,
-> by the owner's direction — flagged in the design's gate table so it cannot
-> be forgotten at that moment.
+> **Nothing on this page is open, and nothing of this round's waits anywhere
+> but the owner's screen.** One item is *placed elsewhere and pending there*,
+> blocking nothing: `APPS-Q2`'s final **home** is a planner placement question,
+> and the rule binds meanwhile. The **platform print surface** was raised as
+> **`SHELL-Q23`** on 2026-08-31 — earlier than this round planned, because
+> Workforce's rota sheet seconded the registration card and **two applications
+> needing it made it a platform question rather than one app's
+> inconvenience**.
 
 **Why the closed rows are kept.** Six of the twelve C items were ruled within
 a day, and every A and B row here records *the reasoning*, not just the
@@ -442,6 +444,11 @@ plainly a platform capability rather than GuestOps's own, and it is named here
 because a front-desk application that cannot produce the card the guest signs
 is not deployable in an Indian hotel.
 
+**Raised as `SHELL-Q23`, 2026-08-31** — sooner than this round intended,
+because **Workforce's rota sheet seconded it**. One application needing to
+print reads as that application's inconvenience; two reads as a missing
+platform capability, which is what it is.
+
 ### C9 · Company, travel agent and "who is paying"
 **Recommendation: next version — with one field kept now.**
 
@@ -494,7 +501,7 @@ is here at all.
 | C2 | the day roll and no-show in standalone | **RULED — GUEST-Q7: slice 1.** It **flags** unarrived stays and marks nothing; §3.3 |
 | C3 | booking source / market segment | **RULED — GUEST-Q7, and widened:** keep **every significant field** the PMS sends — source, travel agent, market code, meal plan, guest counts — named as a kept set, with the rest retained as `source_detail` rather than discarded. §2.6b |
 | C6 | who may see a full phone number | **RULED — GUEST-Q7, as standard practice:** masked by default, one-click reveal on the stay's write permission, **the reveal recorded**. §2.5 |
-| C8 | the registration card printed | **RULED — GUEST-Q7: the button stands.** The platform has no print surface; **its register row is raised when this reaches wiring**, not now |
+| C8 | the registration card printed | **RULED — GUEST-Q7: the button stands**, and the platform gap is now **`SHELL-Q23`** (raised 2026-08-31, seconded by Workforce's rota sheet), carrying this round's reason: *a front desk that cannot produce the card the guest signs is not deployable* |
 | C5 | pseudo rooms are unmappable | **v1** — a boundary check, no feature |
 | C7 | reinstate a cancelled stay | **v1** — small |
 | C11 | *"three stays on this record"* | **v1** — narrower than Guest360, no overlap |
