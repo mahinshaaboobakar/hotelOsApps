@@ -54,6 +54,7 @@ public sealed class StayLifecycleService(
 
         var now = clock.GetUtcNow();
 
+        var wasHeld = stay.Lifecycle;
         stay.Lifecycle = StayLifecycle.InHouse;
         stay.ArrivalAt = StayTime.Observed(now);
 
@@ -64,6 +65,7 @@ public sealed class StayLifecycleService(
         await ClearAbsenceAsync(stayId, AbsentFields.ArrivalTime, cancellationToken);
 
         Bump(stay, scope);
+        await RecordOverrideAsync(scope, stay, wasHeld, cancellationToken);
 
         events.Append(scope, "stay.arrived", "stay", stay.Id, stay.Version, new
         {
@@ -93,10 +95,12 @@ public sealed class StayLifecycleService(
 
         var now = clock.GetUtcNow();
 
+        var wasHeld = stay.Lifecycle;
         stay.Lifecycle = StayLifecycle.Departed;
         stay.DepartureAt = StayTime.Observed(now);
 
         Bump(stay, scope);
+        await RecordOverrideAsync(scope, stay, wasHeld, cancellationToken);
 
         events.Append(scope, "stay.departed", "stay", stay.Id, stay.Version, new
         {
@@ -146,8 +150,10 @@ public sealed class StayLifecycleService(
 
         var terms = await db.Terms.FirstOrDefaultAsync(t => t.StayId == stayId, cancellationToken);
 
+        var wasHeld = stay.Lifecycle;
         stay.Lifecycle = StayLifecycle.Cancelled;
         Bump(stay, scope);
+        await RecordOverrideAsync(scope, stay, wasHeld, cancellationToken);
 
         events.Append(scope, "stay.cancelled", "stay", stay.Id, stay.Version, new
         {
@@ -180,8 +186,10 @@ public sealed class StayLifecycleService(
                 "only a stay that never arrived can be a no-show");
         }
 
+        var wasHeld = stay.Lifecycle;
         stay.Lifecycle = StayLifecycle.NoShow;
         Bump(stay, scope);
+        await RecordOverrideAsync(scope, stay, wasHeld, cancellationToken);
 
         events.Append(scope, "stay.no_show", "stay", stay.Id, stay.Version, new
         {
@@ -227,6 +235,7 @@ public sealed class StayLifecycleService(
 
         stay.Lifecycle = to;
         Bump(stay, scope);
+        await RecordOverrideAsync(scope, stay, from, cancellationToken);
 
         events.Append(scope, "stay.corrected", "stay", stay.Id, stay.Version, new
         {
@@ -239,6 +248,76 @@ public sealed class StayLifecycleService(
 
         await db.SaveChangesAsync(cancellationToken);
         return stay;
+    }
+
+    /// <summary>
+    /// Record that a person wrote a stay the PMS owns — GUEST-Q1's amendment.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>PMS-connected is PMS-writes-first, staff-may-override — never
+    /// read-only.</b> So a staff write is not refused and not silently applied:
+    /// it is applied <i>and recorded as an override</i>, with who, when, and
+    /// <b>what the PMS said at that moment</b>. That last one is what makes the
+    /// override explicable months later, and it is not recoverable afterwards —
+    /// the desk acted on what it could see.
+    /// </para>
+    /// <para>
+    /// <b>The test is whether the PMS knows this stay</b>, not whether a
+    /// connector is configured. A stay created here and never seen by the PMS
+    /// has nothing to override; one the PMS sent does. GUEST-Q4 removed the
+    /// second mode, so there is no property-level flag consulted anywhere.
+    /// </para>
+    /// <para>
+    /// One row per aspect: a second override on the lifecycle while the first
+    /// still stands is the same override continuing, not a new one, and two
+    /// rows would make the Attention list count one stay twice.
+    /// </para>
+    /// </remarks>
+    /// <param name="scope">The caller who wrote.</param>
+    /// <param name="stay">The stay, already changed.</param>
+    /// <param name="pmsValue">What the stay held before the write.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    private async Task RecordOverrideAsync(
+        RequestScope scope,
+        RoomStay stay,
+        StayLifecycle pmsValue,
+        CancellationToken cancellationToken)
+    {
+        if (stay.PmsUnknown)
+        {
+            return;
+        }
+
+        var standing = await db.Disagreements.AnyAsync(
+            d => d.StayId == stay.Id
+                 && d.Aspect == DisagreementAspect.Lifecycle
+                 && (d.State == DisagreementState.Overridden
+                     || d.State == DisagreementState.Standing),
+            cancellationToken);
+
+        if (standing)
+        {
+            return;
+        }
+
+        db.Disagreements.Add(new StayDisagreement
+        {
+            Id = Uuid7.NewUuid7(),
+            StayId = stay.Id,
+            Aspect = DisagreementAspect.Lifecycle,
+
+            // Two values, and both are needed: what the desk wrote, and what
+            // the PMS last told us — the value the desk was looking at when it
+            // decided to override.
+            OurValue = stay.Lifecycle.ToString(),
+            PmsValueAtOverride = pmsValue.ToString(),
+
+            OverrideActor = scope.UserId,
+            OverrideAt = clock.GetUtcNow(),
+            RaisedAt = clock.GetUtcNow(),
+            State = DisagreementState.Overridden,
+        });
     }
 
     private async Task<RoomStay> RequireWritableAsync(

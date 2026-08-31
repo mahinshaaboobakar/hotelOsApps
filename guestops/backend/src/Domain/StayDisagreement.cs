@@ -17,11 +17,32 @@ public enum DisagreementAspect
     Dates = 3,
 }
 
-/// <summary>Where a disagreement has got to.</summary>
+/// <summary>Where an override, and then a disagreement, has got to.</summary>
+/// <remarks>
+/// The sequence is one row's life, not two records: a staff write on a
+/// PMS-managed stay is recorded the moment it happens, and what the PMS later
+/// says decides which way it goes.
+/// </remarks>
 public enum DisagreementState
 {
+    /// <summary>
+    /// A staff write stands, and no inbound fact has spoken since.
+    /// </summary>
+    /// <remarks>
+    /// The ordinary state of an override — GUEST-Q1's amendment. Recorded at
+    /// the moment of the write with who, when, and what the PMS said then,
+    /// because that last one is not recoverable afterwards and is what makes
+    /// the override explicable months later.
+    /// </remarks>
+    Overridden = 1,
+
     /// <summary>The two sources differ and nobody has decided.</summary>
-    Standing = 1,
+    /// <remarks>
+    /// The disagreement proper. While it stands, <b>the override is still the
+    /// answer everywhere</b> — the flag rides on that one truth rather than
+    /// becoming a second one (GUEST-Q3).
+    /// </remarks>
+    Standing = 2,
 
     /// <summary>
     /// A later fact matched what we held. Settled silently — GUEST-Q4.
@@ -31,13 +52,13 @@ public enum DisagreementState
     /// a design that flagged every late confirmation would bury the two real
     /// reconciliations in twenty.
     /// </remarks>
-    Confirmed = 2,
+    Confirmed = 3,
 
     /// <summary>A person kept ours.</summary>
-    ClearedOurs = 3,
+    ClearedOurs = 4,
 
     /// <summary>A person took the PMS's, and the correction was published.</summary>
-    ClearedPms = 4,
+    ClearedPms = 5,
 }
 
 /// <summary>
@@ -113,8 +134,13 @@ public class StayDisagreement
 /// <summary>Where a proposed join has got to.</summary>
 public enum CandidateState
 {
+    /// <summary>Raised, and waiting for a person.</summary>
     Proposed = 1,
+
+    /// <summary>The same stay. The held fact applies to the local one.</summary>
     Confirmed = 2,
+
+    /// <summary>Two different stays — and a double-booked room, honestly.</summary>
     Rejected = 3,
 }
 

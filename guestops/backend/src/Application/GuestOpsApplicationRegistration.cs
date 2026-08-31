@@ -1,6 +1,8 @@
 using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
+using HotelOS.GuestOps.Application.Inbound;
+using HotelOS.GuestOps.Application.Reconciliation;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Infrastructure.ReadModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,14 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<StayLifecycleService>();
         services.AddScoped<StayAssignmentService>();
         services.AddScoped<AvailabilityService>();
+
+        // The inbound half — the Hub's deferred facts, and the two flows a
+        // person resolves. The transport that delivers them is not here: no
+        // .NET subscription surface exists yet, so these are driven by a
+        // recorded fact until that lands.
+        services.AddScoped<StayMatcher>();
+        services.AddScoped<InboundFactService>();
+        services.AddScoped<ReconciliationService>();
 
         return services;
     }

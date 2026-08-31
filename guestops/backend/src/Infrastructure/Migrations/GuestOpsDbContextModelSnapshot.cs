@@ -18,7 +18,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("reservations")
+                .HasDefaultSchema("guestops")
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
@@ -64,7 +64,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("RoomId", "ReleasedAt")
                         .HasDatabaseName("ix_assignments_room_id_released_at");
 
-                    b.ToTable("assignments", "reservations");
+                    b.ToTable("assignments", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.Booking", b =>
@@ -109,7 +109,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("PropertyId")
                         .HasDatabaseName("ix_bookings_property_id");
 
-                    b.ToTable("bookings", "reservations");
+                    b.ToTable("bookings", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.BookingExternalRef", b =>
@@ -151,7 +151,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("uq_booking_external_refs__identity");
 
-                    b.ToTable("booking_external_refs", "reservations");
+                    b.ToTable("booking_external_refs", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.CommercialTerms", b =>
@@ -216,7 +216,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasKey("StayId")
                         .HasName("pk_commercial_terms");
 
-                    b.ToTable("commercial_terms", "reservations");
+                    b.ToTable("commercial_terms", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.ContactPoint", b =>
@@ -271,7 +271,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("Kind", "ValueIndex")
                         .HasDatabaseName("ix_contact_points__blind_index");
 
-                    b.ToTable("contact_points", "reservations");
+                    b.ToTable("contact_points", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.GuestIdentity", b =>
@@ -325,7 +325,54 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("PropertyId")
                         .HasDatabaseName("ix_guests_property_id");
 
-                    b.ToTable("guests", "reservations");
+                    b.ToTable("guests", "guestops");
+                });
+
+            modelBuilder.Entity("HotelOS.GuestOps.Domain.HeldFact", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("IntegrationId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("integration_id");
+
+                    b.Property<int>("Lifecycle")
+                        .HasColumnType("integer")
+                        .HasColumnName("lifecycle");
+
+                    b.Property<string>("Payload")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("payload");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("property_id");
+
+                    b.Property<int>("Reason")
+                        .HasColumnType("integer")
+                        .HasColumnName("reason");
+
+                    b.Property<DateTimeOffset>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<DateTimeOffset?>("ResolvedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("resolved_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_held_facts");
+
+                    b.HasIndex("PropertyId", "ResolvedAt")
+                        .HasDatabaseName("ix_held_facts_property_id_resolved_at");
+
+                    b.ToTable("held_facts", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.Registration", b =>
@@ -496,7 +543,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("StayId1")
                         .HasDatabaseName("ix_registrations_stay_id1");
 
-                    b.ToTable("registrations", "reservations");
+                    b.ToTable("registrations", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.RoomOutOfOrder", b =>
@@ -532,7 +579,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("PropertyId", "FromDate", "ToDate")
                         .HasDatabaseName("ix_rooms_out_of_order_property_id_from_date_to_date");
 
-                    b.ToTable("rooms_out_of_order", "reservations");
+                    b.ToTable("rooms_out_of_order", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.RoomStay", b =>
@@ -613,7 +660,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("PropertyId", "RoomTypeId")
                         .HasDatabaseName("ix_room_stays_property_id_room_type_id");
 
-                    b.ToTable("room_stays", "reservations");
+                    b.ToTable("room_stays", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayAbsence", b =>
@@ -653,7 +700,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("uq_stay_absences__field");
 
-                    b.ToTable("stay_absences", "reservations");
+                    b.ToTable("stay_absences", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayDisagreement", b =>
@@ -718,7 +765,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("StayId", "State")
                         .HasDatabaseName("ix_stay_disagreements_stay_id_state");
 
-                    b.ToTable("stay_disagreements", "reservations");
+                    b.ToTable("stay_disagreements", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayExternalRef", b =>
@@ -760,7 +807,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("uq_stay_external_refs__identity");
 
-                    b.ToTable("stay_external_refs", "reservations");
+                    b.ToTable("stay_external_refs", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayGuest", b =>
@@ -791,7 +838,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("GuestId")
                         .HasDatabaseName("ix_stay_guests_guest_id");
 
-                    b.ToTable("stay_guests", "reservations");
+                    b.ToTable("stay_guests", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayLinkCandidate", b =>
@@ -835,7 +882,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("LocalStayId", "State")
                         .HasDatabaseName("ix_stay_link_candidates_local_stay_id_state");
 
-                    b.ToTable("stay_link_candidates", "reservations");
+                    b.ToTable("stay_link_candidates", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayNote", b =>
@@ -869,7 +916,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("StayId")
                         .HasDatabaseName("ix_stay_notes_stay_id");
 
-                    b.ToTable("stay_notes", "reservations");
+                    b.ToTable("stay_notes", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayReporting", b =>
@@ -918,7 +965,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("State", "RequiredBy")
                         .HasDatabaseName("ix_stay_reporting_state_required_by");
 
-                    b.ToTable("stay_reporting", "reservations");
+                    b.ToTable("stay_reporting", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StayRequest", b =>
@@ -969,7 +1016,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("StayId")
                         .HasDatabaseName("ix_stay_requests_stay_id");
 
-                    b.ToTable("stay_requests", "reservations");
+                    b.ToTable("stay_requests", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StaySource", b =>
@@ -1012,7 +1059,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("Channel")
                         .HasDatabaseName("ix_stay_sources_channel");
 
-                    b.ToTable("stay_sources", "reservations");
+                    b.ToTable("stay_sources", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StaySourceDetail", b =>
@@ -1050,7 +1097,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("StayId")
                         .HasDatabaseName("ix_stay_source_detail_stay_id");
 
-                    b.ToTable("stay_source_detail", "reservations");
+                    b.ToTable("stay_source_detail", "guestops");
                 });
 
             modelBuilder.Entity("HotelOS.GuestOps.Domain.StopSell", b =>
@@ -1095,7 +1142,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     b.HasIndex("PropertyId", "RoomTypeId", "FromDate", "ToDate")
                         .HasDatabaseName("ix_stop_sells_property_id_room_type_id_from_date_to_date");
 
-                    b.ToTable("stop_sells", "reservations", t =>
+                    b.ToTable("stop_sells", "guestops", t =>
                         {
                             t.HasCheckConstraint("ck_stop_sells__range", "to_date >= from_date");
                         });
@@ -1294,7 +1341,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
                             b1.HasKey("CommercialTermsStayId");
 
-                            b1.ToTable("commercial_terms", "reservations");
+                            b1.ToTable("commercial_terms", "guestops");
 
                             b1.WithOwner()
                                 .HasForeignKey("CommercialTermsStayId")
@@ -1323,7 +1370,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
                             b1.HasKey("CommercialTermsStayId");
 
-                            b1.ToTable("commercial_terms", "reservations");
+                            b1.ToTable("commercial_terms", "guestops");
 
                             b1.WithOwner()
                                 .HasForeignKey("CommercialTermsStayId")
@@ -1386,7 +1433,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
                             b1.HasKey("RoomStayId");
 
-                            b1.ToTable("room_stays", "reservations");
+                            b1.ToTable("room_stays", "guestops");
 
                             b1.WithOwner()
                                 .HasForeignKey("RoomStayId")
@@ -1409,7 +1456,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
                             b1.HasKey("RoomStayId");
 
-                            b1.ToTable("room_stays", "reservations");
+                            b1.ToTable("room_stays", "guestops");
 
                             b1.WithOwner()
                                 .HasForeignKey("RoomStayId")

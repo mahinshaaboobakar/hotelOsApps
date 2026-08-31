@@ -12,11 +12,11 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "reservations");
+                name: "guestops");
 
             migrationBuilder.CreateTable(
                 name: "bookings",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -35,7 +35,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "guests",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -54,8 +54,27 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "held_facts",
+                schema: "guestops",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    property_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    integration_id = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    payload = table.Column<string>(type: "text", nullable: false),
+                    lifecycle = table.Column<int>(type: "integer", nullable: false),
+                    reason = table.Column<int>(type: "integer", nullable: false),
+                    received_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    resolved_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_held_facts", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "rooms_out_of_order",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     room_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -72,7 +91,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stop_sells",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -92,7 +111,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "booking_external_refs",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -107,7 +126,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_booking_external_refs_bookings_booking_id",
                         column: x => x.booking_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "bookings",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -115,7 +134,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "room_stays",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -143,7 +162,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_room_stays_bookings_booking_id",
                         column: x => x.booking_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "bookings",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
@@ -151,7 +170,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "contact_points",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -170,7 +189,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_contact_points_guests_guest_id",
                         column: x => x.guest_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "guests",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -178,7 +197,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "assignments",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -195,7 +214,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_assignments_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -203,7 +222,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "commercial_terms",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     stay_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -232,7 +251,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_commercial_terms_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -240,7 +259,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "registrations",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     stay_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -283,7 +302,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_registrations_stays_stay_id1",
                         column: x => x.stay_id1,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -291,7 +310,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_absences",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -307,7 +326,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_absences_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -315,7 +334,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_disagreements",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -337,7 +356,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_disagreements_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -345,7 +364,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_external_refs",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -360,7 +379,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_external_refs_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -368,7 +387,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_guests",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     stay_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -383,14 +402,14 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_guests_guests_guest_id",
                         column: x => x.guest_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "guests",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "fk_stay_guests_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -398,7 +417,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_link_candidates",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -416,7 +435,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_link_candidates_room_stays_local_stay_id",
                         column: x => x.local_stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -424,7 +443,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_notes",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -439,7 +458,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_notes_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -447,7 +466,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_reporting",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     stay_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -465,7 +484,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_reporting_room_stays_stay_id1",
                         column: x => x.stay_id1,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -473,7 +492,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_requests",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -491,7 +510,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_requests_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -499,7 +518,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_sources",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     stay_id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -516,7 +535,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_sources_room_stays_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -524,7 +543,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateTable(
                 name: "stay_source_detail",
-                schema: "reservations",
+                schema: "guestops",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
@@ -539,7 +558,7 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     table.ForeignKey(
                         name: "fk_stay_source_detail_stay_sources_stay_id",
                         column: x => x.stay_id,
-                        principalSchema: "reservations",
+                        principalSchema: "guestops",
                         principalTable: "stay_sources",
                         principalColumn: "stay_id",
                         onDelete: ReferentialAction.Cascade);
@@ -547,62 +566,68 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "ix_assignments_room_id_released_at",
-                schema: "reservations",
+                schema: "guestops",
                 table: "assignments",
                 columns: new[] { "room_id", "released_at" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_assignments_stay_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "assignments",
                 column: "stay_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_booking_external_refs_booking_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "booking_external_refs",
                 column: "booking_id");
 
             migrationBuilder.CreateIndex(
                 name: "uq_booking_external_refs__identity",
-                schema: "reservations",
+                schema: "guestops",
                 table: "booking_external_refs",
                 columns: new[] { "integration_id", "identifier_kind", "external_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_bookings_property_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "bookings",
                 column: "property_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_contact_points__blind_index",
-                schema: "reservations",
+                schema: "guestops",
                 table: "contact_points",
                 columns: new[] { "kind", "value_index" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_contact_points_guest_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "contact_points",
                 column: "guest_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_guests_property_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "guests",
                 column: "property_id");
 
             migrationBuilder.CreateIndex(
+                name: "ix_held_facts_property_id_resolved_at",
+                schema: "guestops",
+                table: "held_facts",
+                columns: new[] { "property_id", "resolved_at" });
+
+            migrationBuilder.CreateIndex(
                 name: "ix_registrations_stay_id1",
-                schema: "reservations",
+                schema: "guestops",
                 table: "registrations",
                 column: "stay_id1");
 
             migrationBuilder.CreateIndex(
                 name: "uq_registrations__card_number",
-                schema: "reservations",
+                schema: "guestops",
                 table: "registrations",
                 column: "card_number",
                 unique: true,
@@ -610,105 +635,105 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "ix_room_stays_booking_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "room_stays",
                 column: "booking_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_room_stays_current_room_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "room_stays",
                 column: "current_room_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_room_stays_property_id_business_date",
-                schema: "reservations",
+                schema: "guestops",
                 table: "room_stays",
                 columns: new[] { "property_id", "business_date" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_room_stays_property_id_lifecycle",
-                schema: "reservations",
+                schema: "guestops",
                 table: "room_stays",
                 columns: new[] { "property_id", "lifecycle" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_room_stays_property_id_room_type_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "room_stays",
                 columns: new[] { "property_id", "room_type_id" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_rooms_out_of_order_property_id_from_date_to_date",
-                schema: "reservations",
+                schema: "guestops",
                 table: "rooms_out_of_order",
                 columns: new[] { "property_id", "from_date", "to_date" });
 
             migrationBuilder.CreateIndex(
                 name: "uq_stay_absences__field",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_absences",
                 columns: new[] { "stay_id", "field" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_disagreements_stay_id_state",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_disagreements",
                 columns: new[] { "stay_id", "state" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_external_refs_stay_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_external_refs",
                 column: "stay_id");
 
             migrationBuilder.CreateIndex(
                 name: "uq_stay_external_refs__identity",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_external_refs",
                 columns: new[] { "integration_id", "identifier_kind", "external_id" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_guests_guest_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_guests",
                 column: "guest_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_link_candidates_local_stay_id_state",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_link_candidates",
                 columns: new[] { "local_stay_id", "state" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_notes_stay_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_notes",
                 column: "stay_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_reporting_state_required_by",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_reporting",
                 columns: new[] { "state", "required_by" });
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_reporting_stay_id1",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_reporting",
                 column: "stay_id1");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_requests_stay_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_requests",
                 column: "stay_id");
 
             migrationBuilder.CreateIndex(
                 name: "uq_stay_requests__correlation",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_requests",
                 column: "correlation_id",
                 unique: true,
@@ -716,19 +741,19 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_source_detail_stay_id",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_source_detail",
                 column: "stay_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stay_sources_channel",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stay_sources",
                 column: "channel");
 
             migrationBuilder.CreateIndex(
                 name: "ix_stop_sells_property_id_room_type_id_from_date_to_date",
-                schema: "reservations",
+                schema: "guestops",
                 table: "stop_sells",
                 columns: new[] { "property_id", "room_type_id", "from_date", "to_date" });
         }
@@ -738,83 +763,87 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "assignments",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "booking_external_refs",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "commercial_terms",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "contact_points",
-                schema: "reservations");
+                schema: "guestops");
+
+            migrationBuilder.DropTable(
+                name: "held_facts",
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "registrations",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "rooms_out_of_order",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_absences",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_disagreements",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_external_refs",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_guests",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_link_candidates",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_notes",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_reporting",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_requests",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_source_detail",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stop_sells",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "guests",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "stay_sources",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "room_stays",
-                schema: "reservations");
+                schema: "guestops");
 
             migrationBuilder.DropTable(
                 name: "bookings",
-                schema: "reservations");
+                schema: "guestops");
         }
     }
 }

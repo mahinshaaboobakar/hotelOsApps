@@ -314,8 +314,17 @@ the architect; nothing outside `guestops/` touched.**
 
 ## 2 · The schema I would build
 
-`reservations`, per CLAUDE.md's canonical list. **As designed in `02-…` §2**,
+`guestops`, per CLAUDE.md's canonical list. **As designed in `02-…` §2**,
 with §1.5's eight proposals unresolved and therefore **not** incorporated.
+
+> **Corrected 2026-08-31.** This page and `02-…` §2 both said `reservations`,
+> and both cited CLAUDE.md for it. CLAUDE.md says `guestops`; so does
+> `03-schemas.sql`, which names the error outright — *"`guestops`, `roomcare`
+> and `jobs` — never `reservations`, `housekeeping` or …"* — and `02-roles.sql`
+> provisions `hotelos_owner_guestops` and nothing by the other name. The
+> implementation carried the wrong name for one afternoon and could never have
+> migrated; it is `guestops` in code, and the citation that licensed the mistake
+> is the point worth keeping. `APPS-Q3` covers schemas too.
 
 ```text
 booking                 group identity · expectation · origin
@@ -381,7 +390,7 @@ guestops/backend/
                      CommercialTerms · the state machine + R7's one rule
     Application/     book · assign · move · check in · check out · cancel
                      no-show · correct · clear · availability · the day roll
-    Infrastructure/  EF Core · the reservations schema · the three read
+    Infrastructure/  EF Core · the guestops schema · the three read
                      views (four, if §1.2's is taken) · the blind index
     Grpc/            one file per subject; the composition root holds none
     Events/          publish our facts; consume the Hub's and out-of-order

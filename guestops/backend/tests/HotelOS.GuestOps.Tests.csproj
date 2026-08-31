@@ -8,6 +8,14 @@
     recording authorizer and a recording appender, which is what makes them
     exhaustive and fast and what makes them blind to every layer they do not
     stand up. The boundary classes belong to the platform's E2E suite.
+
+    **PostgreSQL, not the in-memory provider.** This suite ran in-memory for
+    exactly as long as it took to run it: `AddPlatformEventStore()` maps
+    `StoredEvent.Payload` as a `JsonDocument`, which no provider but Npgsql can
+    map, so model building threw on the first `DbSet` access. Excluding the
+    event store from the model under test would have made the suite green
+    against a model this service does not ship — so it takes a scratch database
+    like every other suite here, through the platform's shared harness.
   -->
 
   <PropertyGroup>
@@ -18,17 +26,20 @@
     <IsPackable>false</IsPackable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- The documentation gate is inherited from the repository root. -->
+    <!-- The platform is a sibling checkout, as the service project has it. -->
+    <PlatformRoot>$(MSBuildThisFileDirectory)..\..\..\..\HosPilotOS</PlatformRoot>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\src\HotelOS.GuestOps.csproj" />
+    <ProjectReference
+      Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
   </ItemGroup>
 
 </Project>

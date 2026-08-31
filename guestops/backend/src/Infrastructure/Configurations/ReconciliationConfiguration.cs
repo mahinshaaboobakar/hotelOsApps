@@ -41,6 +41,23 @@ public class StayLinkCandidateConfiguration : IEntityTypeConfiguration<StayLinkC
     }
 }
 
+/// <summary>A fact received and deliberately not applied — GUEST-Q5.</summary>
+public class HeldFactConfiguration : IEntityTypeConfiguration<HeldFact>
+{
+    public void Configure(EntityTypeBuilder<HeldFact> builder)
+    {
+        builder.ToTable("held_facts");
+        builder.HasKey(f => f.Id);
+
+        builder.Property(f => f.IntegrationId).HasMaxLength(64).IsRequired();
+        builder.Property(f => f.Payload).IsRequired();
+
+        // Unresolved first: the Attention list reads them, and a property that
+        // has run for a year has far more resolved rows than open ones.
+        builder.HasIndex(f => new { f.PropertyId, f.ResolvedAt });
+    }
+}
+
 /// <summary>The seller's control — GUEST-Q7.</summary>
 public class StopSellConfiguration : IEntityTypeConfiguration<StopSell>
 {

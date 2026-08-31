@@ -9,11 +9,16 @@ namespace HotelOS.GuestOps.Infrastructure;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>The schema is <c>reservations</c></b> — CLAUDE.md's canonical list names
-/// it, and it is the domain ADR 0089 §CTX-Q2 assigned to this application. It
-/// is not named after the application's display name for the same reason the
-/// permission registry is not: the domain outlives whatever the product calls
-/// its screens.
+/// <b>The schema is <c>guestops</c></b> — CLAUDE.md's canonical list names it,
+/// <c>03-schemas.sql</c> creates it, and <c>02-roles.sql</c> provisions
+/// <c>hotelos_owner_guestops</c> for it.
+/// </para>
+/// <para>
+/// <b>Never <c>reservations</c>.</b> `APPS-Q3` makes the current application
+/// name the name in code, and the provisioning script says so in as many words:
+/// *"`guestops`, `roomcare` and `jobs` — never `reservations`, `housekeeping`
+/// or ..."*. This context said `reservations` for one afternoon; nothing
+/// provisions an owner role by that name, so it could never have migrated.
 /// </para>
 /// <para>
 /// <b>It writes here and reads Master Data.</b> An installed application holds
@@ -32,7 +37,7 @@ namespace HotelOS.GuestOps.Infrastructure;
 public class GuestOpsDbContext(DbContextOptions<GuestOpsDbContext> options) : DbContext(options)
 {
     /// <summary>The schema this application owns — ADR 0029.</summary>
-    public const string Schema = "reservations";
+    public const string Schema = "guestops";
 
     public DbSet<Booking> Bookings => Set<Booking>();
 
@@ -61,6 +66,8 @@ public class GuestOpsDbContext(DbContextOptions<GuestOpsDbContext> options) : Db
     public DbSet<StayDisagreement> Disagreements => Set<StayDisagreement>();
 
     public DbSet<StayLinkCandidate> LinkCandidates => Set<StayLinkCandidate>();
+
+    public DbSet<HeldFact> HeldFacts => Set<HeldFact>();
 
     public DbSet<StopSell> StopSells => Set<StopSell>();
 

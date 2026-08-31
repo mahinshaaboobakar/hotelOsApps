@@ -42,7 +42,7 @@ and guest identity** — the domain ADR 0089 §CTX-Q2 named and left unbuilt, an
 the one the Integration Hub's deferred queue has been filling for. It is the
 book in a property with no PMS, and the PMS's counterpart in a property with
 one: the same data model either way, differing only in **who writes the stay's
-lifecycle** (GUEST-Q1). It owns the `reservations` schema, publishes
+lifecycle** (GUEST-Q1). It owns the `guestops` schema, publishes
 `reservation.*` and `stay.*` facts, serves the Context Service's guest chain
 through domain-owned read views, and touches no other application's tables.
 
