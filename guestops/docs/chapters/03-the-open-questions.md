@@ -32,10 +32,11 @@ C  scope            things the design found while drawing, each with a
 
 **Groups A and C are closed** — every owner question this round raised has
 been answered: six as **GUEST-Q7** and the upgrade boundary as **GUEST-Q8 (b)**,
-all on 2026-08-31. **B1 and B2 are closed too** — B2 by GUEST-Q8 (a), minting
-is the mapping; B1 by a correction to `CLAUDE.md` itself. What remains is
-**B3–B6**: four items of the platform's own record, going to the planner and
-the architect **one at a time**.
+all on 2026-08-31. **B1, B2 and B3 are closed too** — B2 by GUEST-Q8 (a),
+minting is the mapping; B1 by a correction to `CLAUDE.md` itself; B3 by a
+fourth item in Chapter 26's head note. What remains is **B4–B6**: three items
+of the platform's own record, going to the planner and the architect **one at
+a time**.
 
 The rows are kept rather than deleted because the *reasoning* behind a ruling
 is the part that stops it being re-litigated in six months.
@@ -168,8 +169,20 @@ encoding its restriction.
 ### B3 · Chapter 26's `GuestContext` still carries `vip_status`
 
 ADR 0089 §CTX-Q3 excluded it from v1 — *"unknown business definition → bool →
-becomes architecture"*. The chapter's head note now marks three superseded
-parts; this is a fourth, smaller one. **A documentation reconciliation.**
+becomes architecture"*. A deferred field and an undefined one look identical
+in a code block, and `GuestContext` is the one model in that chapter an
+AI-runtime author would reach for directly.
+
+**CLOSED — 2026-08-31.** Chapter 26's head note carries a fourth item marking
+`vip_status` **deferred, not decided**, with CTX-Q3's reasoning quoted so a
+reader learns *why* the bool is a trap rather than only that it is one.
+
+**And what it defers to is now the plan of record.** ADR 0089 assigns VIP's
+definition to *this* domain, so it is defined in a **later GuestOps round**,
+from the owner's answer to *what makes a guest VIP at your hotels* — loyalty
+tier, spend, a manager's flag, a corporate account. **Asked when there is a
+round to build it in; never answered speculatively.** It is not in this
+round's design and is not proposed for one.
 
 ### B4 · Two Context resolvers the stay page needs, and whose rounds they are
 

@@ -1083,10 +1083,16 @@ entities resolve through ADR 0016 (Core's, unchanged); an operational entity's
 typed identifiers ride the fact and are recorded by the domain that mints the
 id, in the same transaction.
 
-**3 · Chapter 26's `GuestContext` includes `vip_status`.** ADR 0089 §CTX-Q3
-excluded it from v1. The chapter's head note now marks three superseded parts;
-this is a fourth, smaller one, and it is only a documentation reconciliation.
-**Reported.**
+**3 · Chapter 26's `GuestContext` includes `vip_status`. CLOSED —
+2026-08-31**: the chapter's head note now carries a fourth item marking it
+**deferred, not decided**, with CTX-Q3's reasoning quoted.
+
+**And VIP's definition is parked here deliberately.** ADR 0089 assigns it to
+this domain, so it belongs to a **later GuestOps round** and is defined from
+the owner's answer to *what makes a guest VIP at this hotel* — loyalty, spend,
+a manager's flag, a corporate account. This design does not carry it, does not
+propose it, and does not guess it: a `bool` whose meaning nobody has fixed is
+the exact shape CTX-Q3 exists to prevent.
 
 **4 · The stay page needs two Context resolvers that do not exist** — *stay →
 jobs* and *stay → servicing* (§8.1). The owner asked for both panels and both
