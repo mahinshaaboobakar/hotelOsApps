@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Oracle Connector — Operational Surfaces</title>
+<style>
+  :root{
+    --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
+    --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
+    --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;--grad:linear-gradient(120deg,#7dd3fc,#818cf8 55%,#c084fc);
+    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--defer:#a78bfa;
+    --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}::-webkit-scrollbar-button{display:none}
+  body{background:#04050a;color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
+  h1{font-size:16px;font-weight:600;max-width:1220px;margin:38px auto 12px;color:var(--dim);text-wrap:balance}
+  h1 b{color:var(--text)}
+  h2.sec{max-width:1220px;margin:46px auto 4px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--faint)}
+  h2.sec span{color:var(--indigo)}
+  .cap{max-width:1220px;margin:10px auto 0;color:var(--dim);font-size:12.5px;line-height:1.7}
+  .cap b{color:var(--text)}
+  .win{max-width:1220px;margin:0 auto;border-radius:18px;position:relative;overflow:hidden;
+       background:radial-gradient(900px 420px at 10% 118%, rgba(79,70,229,.28), transparent 60%),radial-gradient(700px 360px at 94% 106%, rgba(8,145,178,.20), transparent 55%),var(--bg);
+       border:1px solid var(--line2);box-shadow:var(--shadow);display:grid;grid-template-columns:240px 1fr}
+  .rail{border-right:1px solid var(--line);padding:20px 12px;background:rgba(10,12,18,.35);display:flex;flex-direction:column;gap:1px}
+  .app{display:flex;gap:11px;align-items:center;font-weight:600;font-size:14.5px;padding:0 10px 18px}
+  .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(120deg,rgba(125,211,252,.25),rgba(192,132,252,.25));border:1px solid var(--line2);display:grid;place-items:center;font-size:12px}
+  .ri{display:flex;gap:11px;align-items:center;padding:8px 12px;border-radius:10px;color:var(--dim);font-size:13.5px}
+  .ri.on{background:linear-gradient(90deg,rgba(129,140,248,.18),rgba(129,140,248,.05));color:var(--text);box-shadow:inset 2.5px 0 0 var(--indigo)}
+  .ri .cnt{margin-left:auto;font-size:11px;color:var(--faint)}
+  .ri .cnt.hot{color:var(--warn)}
+  .ri.sub2{font-size:12.5px;padding-left:26px;color:var(--faint)}
+  .ri.sub2.on{color:var(--text)}
+  .me{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);line-height:1.5}
+  .me b{display:block;color:var(--dim);font-weight:500}
+  .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+  .head{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
+  .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .hsub{color:var(--faint);font-size:12px;margin-top:2px}
+  .crumb{color:var(--faint);font-size:12px}
+  .crumb b{color:var(--dim);font-weight:500}
+  .grow{margin-left:auto}
+  .btn2{display:flex;gap:8px;align-items:center;border:1px solid var(--line2);border-radius:11px;padding:8px 15px;font-size:12.5px;color:var(--dim)}
+  .create{display:flex;gap:8px;align-items:center;background:var(--grad);color:#0a0c12;font-weight:600;padding:8px 18px;border-radius:11px;font-size:13px;box-shadow:0 6px 18px rgba(129,140,248,.35)}
+  .sel{display:flex;gap:9px;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--line);border-radius:11px;padding:7px 13px;font-size:12.5px;color:var(--text);min-width:150px}
+  .sel span{color:var(--faint)}
+  .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
+  .ok{background:rgba(52,211,153,.12);color:var(--ok)}
+  .warn{background:rgba(251,191,36,.12);color:var(--warn)}
+  .bad2{background:rgba(248,113,113,.12);color:var(--bad)}
+  .neu{background:rgba(255,255,255,.06);color:var(--dim)}
+  .def{background:rgba(167,139,250,.14);color:var(--defer)}
+  .body{padding:0 26px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+  .strip{display:flex;gap:10px}
+  .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:11px 14px}
+  .stat b{display:block;font-size:15px;font-weight:600}
+  .stat span{color:var(--faint);font-size:11.5px}
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .cardh{padding:12px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;background:rgba(10,12,18,.3)}
+  .cardh b{font-size:13.5px;font-weight:600}
+  .cardh small{color:var(--faint);font-size:11.5px}
+  .row{display:grid;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+  .row:last-child{border-bottom:none}
+  .row .nm{color:var(--text);font-weight:500}
+  .row .sub{color:var(--faint);font-size:11.5px;margin-top:2px}
+  .mono{font-family:"Cascadia Mono",Consolas,monospace;font-size:11.5px;color:var(--dim)}
+  .mono.t{color:var(--text)}
+  .hdr{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;background:rgba(10,12,18,.3)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .note{background:rgba(129,140,248,.07);border:1px solid rgba(129,140,248,.22);border-radius:11px;padding:10px 13px;font-size:12px;color:var(--dim);line-height:1.6}
+  .note b{color:var(--text)}
+  .note.stop{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.25)}
+  .note.hold{background:rgba(167,139,250,.06);border-color:rgba(167,139,250,.28)}
+  .note.fix{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.26)}
+  .tag{display:inline-flex;gap:6px;align-items:center;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+  .tag.later{background:rgba(167,139,250,.16);color:var(--defer);border:1px solid rgba(167,139,250,.35)}
+  .tag.obs{background:rgba(125,211,252,.14);color:var(--cyan);border:1px solid rgba(125,211,252,.32)}
+  /* drain bars */
+  .bars{display:flex;align-items:flex-end;gap:5px;height:96px;padding:12px 16px}
+  .bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(180deg,rgba(129,140,248,.75),rgba(129,140,248,.25));position:relative}
+  .bar.empty{background:rgba(255,255,255,.06)}
+  .bar.miss{background:repeating-linear-gradient(45deg,rgba(248,113,113,.35),rgba(248,113,113,.35) 4px,transparent 4px,transparent 8px)}
+  .bl{display:flex;gap:5px;padding:0 16px 12px;font-size:10px;color:var(--faint)}
+  .bl div{flex:1;text-align:center}
+  /* token timeline */
+  .tl{padding:14px 16px}
+  .track{height:10px;border-radius:5px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+  .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,rgba(52,211,153,.7),rgba(251,191,36,.7));border-radius:5px}
+  .marks{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint);margin-top:7px}
+  /* four-axis room grid */
+  .axes{display:grid;grid-template-columns:78px 1fr 1fr 1fr 1.5fr 1fr;font-size:12px}
+  .axes>div{padding:9px 11px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);display:flex;align-items:center;gap:6px;min-height:42px}
+  .axes>div:nth-child(6n){border-right:none}
+  .axes .ah{background:rgba(10,12,18,.3);color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;min-height:0;padding:8px 11px}
+  .ax{padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
+  .ax.vac{background:rgba(125,211,252,.13);color:var(--cyan)}
+  .ax.occ{background:rgba(129,140,248,.16);color:var(--indigo)}
+  .ax.di{background:rgba(251,191,36,.13);color:var(--warn)}
+  .ax.cl{background:rgba(52,211,153,.12);color:var(--ok)}
+  .ax.ip{background:rgba(52,211,153,.18);color:var(--ok)}
+  .ax.oo{background:rgba(248,113,113,.13);color:var(--bad)}
+  .ax.pk{background:rgba(192,132,252,.14);color:var(--violet)}
+  .ax.na{color:var(--faint);border:1px dashed var(--line2)}
+  .drv{padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:700;letter-spacing:.04em;background:rgba(192,132,252,.14);color:var(--violet);border:1px solid rgba(192,132,252,.3)}
+  .drv.none{background:transparent;color:var(--faint);border:1px solid var(--line);font-weight:500}
+  /* pair join */
+  .pair{display:grid;grid-template-columns:1fr 44px 1fr;gap:0;align-items:stretch}
+  .half{background:rgba(10,12,18,.42);border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:12px;line-height:1.5}
+  .half b{display:block;color:var(--text);font-size:12.5px;margin-bottom:3px}
+  .half.miss{border-style:dashed;color:var(--faint)}
+  .join{display:grid;place-items:center;color:var(--faint);font-size:16px}
+  /* trace */
+  .trace{display:flex;flex-direction:column}
+  .tr{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:11px 16px;border-bottom:1px solid var(--line);font-size:12.5px}
+  .tr:last-child{border-bottom:none}
+  .tr .tn{color:var(--text);font-weight:600}
+  .tr .tn small{display:block;color:var(--faint);font-weight:400;font-size:11px;margin-top:2px}
+  .flows{max-width:1220px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .flow{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:15px 17px}
+  .ft{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin-bottom:3px}
+  .fn{font-size:14px;font-weight:600;margin-bottom:12px}
+  .fn span{float:right;font-size:11px;color:var(--faint);font-weight:400}
+  .rail2{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+  .fs{flex:1;min-width:132px;background:rgba(10,12,18,.42);border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:12px;color:var(--dim);line-height:1.45}
+  .fs b{display:block;color:var(--text);font-size:12.5px;font-weight:600;margin-bottom:2px}
+  .fs small{display:block;color:var(--faint);font-size:11px;margin-top:4px;line-height:1.4}
+  .fs.good{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.22)}
+  .fs.stop{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.24)}
+  .arr{align-self:center;color:var(--faint);font-size:15px}
+  .not{max-width:1220px;margin:34px auto 10px;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.22);border-radius:13px;padding:14px 17px;font-size:12.5px;color:var(--dim);line-height:1.7}
+  .not b{color:var(--text)}
+  .intro{max-width:1220px;margin:0 auto 26px;color:var(--dim);font-size:13px;line-height:1.75}
+  .intro b{color:var(--text)}
+  .intro code{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--cyan)}
+  .sheet{background:rgba(10,12,18,.55);border:1px solid var(--line);border-radius:12px;padding:14px 16px;font-family:"Cascadia Mono",Consolas,monospace;font-size:11.5px;line-height:1.85;color:var(--dim);white-space:pre-wrap}
+  .sheet b{color:var(--text);font-weight:600}
+  .sheet .k{color:var(--cyan)}
+  .sheet .w{color:var(--warn)}
+</style></head><body>
+
+<h1 style="margin-top:0">Oracle connector — <b>operational surfaces</b></h1>
+<div class="intro">
+  <code>pms-oracle/docs/mockups/01-oracle-connector.html</code> · 2026-08-31 · Stream DD. The companion to
+  <code>docs/chapters/03-the-oracle-connector-design.md</code>, and the second half of the owner's gate.<br><br>
+  <b>What this is not.</b> Not a second copy of the platform frames. <code>docs/working/42-the-connector-round.html</code> already draws installing,
+  configuring and observing <i>any</i> connector. This page draws only what is <b>Oracle's</b> — the five things a support engineer needs when
+  somebody says “housekeeping never heard about 402”, and the one artefact a hotel's OPERA operator has to be handed.<br><br>
+  <b>Where these render.</b> Five of the six sit in <b>Operations Center → Integrations</b> as connector-specific detail — ADR 0073, operators
+  observe. The setup sheet is an administrator's artefact and comes from <b>Software Center's Integration Manager</b> (18A:559, ADR 0091), behind
+  the <i>Copy setup sheet</i> button the platform mockup's frame 4 already shows.<br><br>
+  <b>And the open mechanism, again.</b> “OHIP queue depth” and “join backlog” are Oracle's concepts, not the platform's. Whether the Hub renders
+  them generically from <b>declared per-integration diagnostics</b>, or the connector ships a <code>ui.module</code> with its own views, is
+  <code>CONN-Q9</code>'s observational half — the same open question as the configuration form. <b>These frames draw the content, not the
+  mechanism</b>, and each carries the tag <span class="tag obs">content, not mechanism</span> where it matters.
+</div>
+
+<h2 class="sec">Operations Center · <span>oracle-cloud — the pulled integration</span></h2>
+
+<h1 style="margin-top:14px">1 · <b>The business-event queue</b>. The one source in this package that is destroyed by reading it, so its drain is the thing to watch</h1>
+<div class="win" style="height:640px">
+  <div class="rail">
+    <div class="app"><div class="mark">◈</div>Operations Center</div>
+    <div class="ri">Overview</div><div class="ri">Services</div>
+    <div class="ri on">Integrations <span class="cnt hot">1</span></div>
+    <div class="ri sub2 on">oracle-cloud</div>
+    <div class="ri sub2">oracle-onpremise</div>
+    <div class="ri sub2">oracle-web</div>
+    <div class="ri">Events</div><div class="ri">Logs</div><div class="ri">Diagnostics</div>
+    <div class="me"><b>Kochi Beach Resort</b>Operations</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integrations</b> · Oracle PMS</div><div class="ht">oracle-cloud · business-event queue</div><div class="hsub">OHIP · hotel KOCHI01 · polled</div></div>
+      <div class="grow"></div>
+      <div class="sel"><span>Window</span> Last 24 h ▾</div>
+    </div>
+    <div class="body">
+      <div class="strip">
+        <div class="stat"><b>2 min ago</b><span>Last drain · 3 pages · 41 notifications</span></div>
+        <div class="stat"><b><span class="pill ok">Empty at close</span></b><span>the queue answered empty — nothing left behind</span></div>
+        <div class="stat"><b>41 / 41</b><span>Stored before the next page was requested</span></div>
+        <div class="stat"><b>0</b><span>Notifications drained but not stored <span style="color:var(--ok)">— must stay 0</span></span></div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>Drains, last 24 hours</b><small>height is notifications taken · hatched is a drain that failed mid-way</small></div>
+        <div class="bars">
+          <div class="bar" style="height:34%"></div><div class="bar empty" style="height:6%"></div>
+          <div class="bar" style="height:22%"></div><div class="bar empty" style="height:6%"></div>
+          <div class="bar" style="height:71%"></div><div class="bar" style="height:88%"></div>
+          <div class="bar" style="height:94%"></div><div class="bar" style="height:62%"></div>
+          <div class="bar miss" style="height:48%"></div>
+          <div class="bar" style="height:79%"></div><div class="bar" style="height:41%"></div>
+          <div class="bar empty" style="height:6%"></div><div class="bar" style="height:29%"></div>
+          <div class="bar" style="height:37%"></div>
+        </div>
+        <div class="bl"><div>00</div><div>03</div><div>06</div><div>09</div><div>12</div><div>14:00</div><div>14:15</div><div>14:30</div><div>14:45</div><div>15:00</div><div>15:15</div><div>18</div><div>21</div><div>now</div></div>
+      </div>
+
+      <div class="note"><b>The shape is the schedule.</b> Every three hours, tightening to every fifteen minutes between 14:00 and 16:00 — the
+        check-in window, in the property's own time zone. The tall bars are that window; the short flat ones are a poll that found the queue empty.</div>
+
+      <div class="card">
+        <div class="cardh"><b>The drain at 14:45</b><span class="pill warn">failed mid-way</span><small>page 2 of 3 · transport error</small></div>
+        <div class="row hdr" style="grid-template-columns:.6fr 1fr 1fr 2fr"><div>Page</div><div>Taken</div><div>Stored</div><div>Outcome</div></div>
+        <div class="row" style="grid-template-columns:.6fr 1fr 1fr 2fr"><div class="mono t">1</div><div>20</div><div>20</div><div><span class="pill ok">committed</span> then page 2 requested</div></div>
+        <div class="row" style="grid-template-columns:.6fr 1fr 1fr 2fr"><div class="mono t">2</div><div>0</div><div>0</div><div><span class="pill bad2">connection reset</span> — nothing taken, nothing lost</div></div>
+        <div class="row" style="grid-template-columns:.6fr 1fr 1fr 2fr"><div class="mono t">3</div><div>—</div><div>—</div><div>not requested; the drain ended and retried at 15:00</div></div>
+        <div style="padding:12px 16px"><div class="note fix"><b>This is the failure the design exists to survive.</b> Page 1's twenty notifications
+          were committed before page 2 was asked for, so the interruption cost nothing. Had the order been reversed — request, then store — those
+          twenty would have been gone from OHIP and never here, with no way to ask again. <span class="mono">Drained but not stored</span> is the
+          counter that must stay at zero, and it is on the strip above for that reason.</div></div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>Notifications, and what each became</b><small>a business event carries an id and a primary key — never the record</small></div>
+        <div class="row hdr" style="grid-template-columns:1fr .9fr 1fr 1.4fr"><div>Module · action</div><div>Primary key</div><div>Read-back</div><div>Then</div></div>
+        <div class="row" style="grid-template-columns:1fr .9fr 1fr 1.4fr"><div><div class="nm">Reservation</div><div class="sub mono">UPDATE RESERVATION</div></div><div class="mono t">R-88214</div><div><span class="pill ok">fetched</span></div><div>status <span class="mono">InHouse</span> → check-in fact</div></div>
+        <div class="row" style="grid-template-columns:1fr .9fr 1fr 1.4fr"><div><div class="nm">Reservation</div><div class="sub mono">UPDATE RESERVATION</div></div><div class="mono t">R-88190</div><div><span class="pill ok">fetched</span></div><div>status <span class="mono">Reserved</span> → booking amendment</div></div>
+        <div class="row" style="grid-template-columns:1fr .9fr 1fr 1.4fr"><div><div class="nm">Reservation</div><div class="sub mono">UPDATE RESERVATION</div></div><div class="mono t">R-88203</div><div><span class="pill bad2">404 at OHIP</span></div><div><span class="pill warn">rejected</span> — notification kept, record unavailable</div></div>
+        <div class="row" style="grid-template-columns:1fr .9fr 1fr 1.4fr"><div><div class="nm">Profile</div><div class="sub mono">UPDATE PROFILE</div></div><div class="mono t">P-4412</div><div><span class="pill neu">not fetched</span></div><div>module not in this integration's scope</div></div>
+      </div>
+
+      <div class="note stop"><b>Three <span class="mono">UPDATE RESERVATION</span> events, three different things.</b> A check-in, an amendment, and
+        one whose record OHIP would not return. The action type says nothing about which — <b>the fetched state decides the fact</b>, which is why
+        the read-back column exists and why a failed read-back is a visible outcome rather than a silently skipped event.</div>
+    </div>
+  </div>
+</div>
+
+<h1>2 · <b>Authentication</b>. The token's own expiry governs the refresh — the reference guessed with a constant, and switched the guess off</h1>
+<div class="win" style="height:560px">
+  <div class="rail">
+    <div class="app"><div class="mark">◈</div>Operations Center</div>
+    <div class="ri">Overview</div><div class="ri">Services</div>
+    <div class="ri on">Integrations</div>
+    <div class="ri sub2 on">oracle-cloud</div>
+    <div class="ri sub2">oracle-onpremise</div><div class="ri sub2">oracle-web</div>
+    <div class="ri">Events</div><div class="ri">Logs</div><div class="ri">Diagnostics</div>
+    <div class="me"><b>Kochi Beach Resort</b>Operations</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integrations</b> · Oracle PMS</div><div class="ht">oracle-cloud · authentication</div><div class="hsub">OAuth2 · credential held by the Token Vault</div></div>
+      <div class="grow"></div>
+      <div class="sel"><span>State</span> Connected ▾</div>
+    </div>
+    <div class="body">
+      <div class="card">
+        <div class="cardh"><b>Current token</b><span class="pill ok">Connected</span><small>issued 14:02 · expires 15:02 · refresh scheduled 14:53</small></div>
+        <div class="tl">
+          <div class="track"><div class="fill" style="width:63%"></div></div>
+          <div class="marks"><div>issued 14:02</div><div>now 14:40</div><div>refresh 14:53</div><div>expires 15:02</div></div>
+        </div>
+        <div class="row" style="grid-template-columns:1fr 1.4fr"><div class="nm">Lifetime</div><div><span class="mono t">expires_in = 3600</span> — read from the token response, not assumed</div></div>
+        <div class="row" style="grid-template-columns:1fr 1.4fr"><div class="nm">Refresh at</div><div>85% of lifetime, or on a 401 — whichever comes first</div></div>
+        <div class="row" style="grid-template-columns:1fr 1.4fr"><div class="nm">Grant</div><div>password grant, per property <span class="sub">OHIP issues no refresh token for this flow</span></div></div>
+        <div class="row" style="grid-template-columns:1fr 1.4fr"><div class="nm">Credential source</div><div>Token Vault <span class="sub">read at runtime; never in the package, never displayed</span></div></div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>Lifecycle</b><small>diagram 28 — the Hub's state machine, not the connector's</small></div>
+        <div class="row hdr" style="grid-template-columns:1fr 1fr 2fr"><div>At</div><div>Transition</div><div></div></div>
+        <div class="row" style="grid-template-columns:1fr 1fr 2fr"><div class="mono t">14:02</div><div>Refreshing → Connected</div><div>refreshed on schedule</div></div>
+        <div class="row" style="grid-template-columns:1fr 1fr 2fr"><div class="mono t">11:03</div><div>Refreshing → Connected</div><div>refreshed on schedule</div></div>
+        <div class="row" style="grid-template-columns:1fr 1fr 2fr"><div class="mono t">08:14</div><div><span style="color:var(--warn)">Refreshing → Failed</span></div><div>OHIP returned 503 · retried with backoff</div></div>
+        <div class="row" style="grid-template-columns:1fr 1fr 2fr"><div class="mono t">08:16</div><div>Failed → Authenticating → Connected</div><div>recovered on the second attempt</div></div>
+      </div>
+
+      <div class="note fix"><b>Two things drawn here that the reference did not have.</b> The refresh is scheduled from the token's own
+        <span class="mono">expires_in</span> rather than a hardcoded 45-minute threshold — and the sweep is a Hub facility with a visible state
+        history, rather than a <span class="mono">@Scheduled</span> annotation that had been commented out in two different providers. A token
+        approaching expiry with no refresh recorded is a health signal on this screen; there it was silence.</div>
+    </div>
+  </div>
+</div>
+
+<h2 class="sec">Operations Center · <span>oracle-onpremise — the pushed integration</span></h2>
+
+<h1 style="margin-top:14px">3 · <b>The join backlog</b>. This PMS delivers one check-in as two partial messages, and neither is a fact on its own</h1>
+<div class="win" style="height:660px">
+  <div class="rail">
+    <div class="app"><div class="mark">◈</div>Operations Center</div>
+    <div class="ri">Overview</div><div class="ri">Services</div>
+    <div class="ri on">Integrations <span class="cnt hot">1</span></div>
+    <div class="ri sub2">oracle-cloud</div>
+    <div class="ri sub2 on">oracle-onpremise</div>
+    <div class="ri sub2">oracle-web</div>
+    <div class="ri">Events</div><div class="ri">Logs</div><div class="ri">Diagnostics</div>
+    <div class="me"><b>Kochi Beach Resort</b>Operations</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integrations</b> · Oracle PMS</div><div class="ht">oracle-onpremise · pending joins</div><div class="hsub">a check-in arrives as two messages that must be paired</div></div>
+      <div class="grow"></div>
+      <div class="sel"><span>Older than</span> 5 min ▾</div>
+    </div>
+    <div class="body">
+      <div class="strip">
+        <div class="stat"><b>36</b><span>Joined in the last hour · median 1.4 s apart</span></div>
+        <div class="stat"><b style="color:var(--warn)">2</b><span>Waiting longer than 5 minutes</span></div>
+        <div class="stat"><b>0</b><span>Expired unpaired <span style="color:var(--ok)">— none today</span></span></div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>How the pairing works</b><small>the join key is what this PMS gives us, and no more</small></div>
+        <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+          <div class="pair">
+            <div class="half"><b>“Checked In”</b>carries the contact details<br><span class="mono">phone1 · phone2 · email · departureDate</span></div>
+            <div class="join">⇄</div>
+            <div class="half"><b>“CHECKED IN”</b>carries the room<br><span class="mono">room · reservationId</span></div>
+          </div>
+          <div class="note"><b>Two casings, two messages.</b> Not one status written inconsistently — two feeds carrying different fields, joined on
+            <span class="mono">(property, surname, firstName, arrivalDate)</span>. Until both have arrived there is a stay we know the room of, or
+            the phone number of, and never both.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>Waiting</b><span class="pill warn">2</span><small>held in the inbox, not lost — a partial stay is never published</small></div>
+        <div class="row hdr" style="grid-template-columns:1.3fr 1fr 1.3fr 1fr"><div>Guest · arrival</div><div>Have</div><div>Missing</div><div>Waiting</div></div>
+        <div class="row" style="grid-template-columns:1.3fr 1fr 1.3fr 1fr">
+          <div><div class="nm">RAJAN, Meera</div><div class="sub">arrival 2026-08-31</div></div>
+          <div><span class="pill ok">room 402</span></div>
+          <div><span class="pill warn">contact details</span><div class="sub">the “Checked In” half never arrived</div></div>
+          <div><b style="color:var(--warn)">11 min</b></div>
+        </div>
+        <div class="row" style="grid-template-columns:1.3fr 1fr 1.3fr 1fr">
+          <div><div class="nm">D'SOUZA, Alan</div><div class="sub">arrival 2026-08-31</div></div>
+          <div><span class="pill ok">contact details</span></div>
+          <div><span class="pill warn">room</span><div class="sub">the “CHECKED IN” half never arrived</div></div>
+          <div><b style="color:var(--warn)">6 min</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardh"><b>Joined recently</b></div>
+        <div class="row" style="grid-template-columns:1.3fr 1fr 1fr 1.3fr"><div><div class="nm">THOMAS, Priya</div><div class="sub">arrival 2026-08-31</div></div><div class="mono t">room 318</div><div>1.2 s apart</div><div><span class="pill ok">published</span> check-in fact</div></div>
+        <div class="row" style="grid-template-columns:1.3fr 1fr 1fr 1.3fr"><div><div class="nm">KHAN, Imran</div><div class="sub">arrival 2026-08-31</div></div><div class="mono t">room 205</div><div>0.9 s apart</div><div><span class="pill ok">published</span> check-in fact</div></div>
+      </div>
+
+      <div class="note stop"><b>Why a screen and not a log line.</b> “Housekeeping never heard about 402” is answered here in one look: the room half
+        arrived, the contact half did not, and the stay is eleven minutes old. Nothing was dropped and nothing was invented — the reference's two
+        options in the same situation were to guess a value or discard the record, and it did both on different flavours.</div>
+      <div class="note hold"><b><span class="tag obs">content, not mechanism</span> A pending-join queue is Oracle's shape.</b> Whether the Hub
+        renders it from a declared per-integration diagnostic, or the connector ships the view, is <code>CONN-Q9</code>'s observational half.</div>
+    </div>
+  </div>
+</div>
+
+<h2 class="sec">Operations Center · <span>what Oracle says about a room</span></h2>
+
+<h1 style="margin-top:14px">4 · <b>Four axes, not one status</b>. Occupancy and cleanliness are independent, and two operational states need all four plus a fifth field</h1>
+<div class="win" style="height:640px">
+  <div class="rail">
+    <div class="app"><div class="mark">◈</div>Operations Center</div>
+    <div class="ri">Overview</div><div class="ri">Services</div>
+    <div class="ri on">Integrations</div>
+    <div class="ri sub2">oracle-cloud</div><div class="ri sub2">oracle-onpremise</div><div class="ri sub2 on">oracle-web</div>
+    <div class="ri">Events</div><div class="ri">Logs</div><div class="ri">Diagnostics</div>
+    <div class="me"><b>Kochi Beach Resort</b>Operations</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integrations</b> · Oracle PMS</div><div class="ht">Room state, as Oracle sends it</div><div class="hsub">last push 19 s ago · business date 2026-08-31</div></div>
+      <div class="grow"></div>
+      <div class="sel"><span>Floor</span> All ▾</div>
+    </div>
+    <div class="body">
+      <div class="card">
+        <div class="axes">
+          <div class="ah">Room</div><div class="ah">Front office</div><div class="ah">Housekeeping</div><div class="ah">HK dept</div><div class="ah">Reservation status list</div><div class="ah">Derived</div>
+
+          <div class="mono t">318</div>
+          <div><span class="ax occ">OCC</span></div>
+          <div><span class="ax di">DI</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax occ">Arrived</span></div>
+          <div><span class="drv none">nothing</span></div>
+
+          <div class="mono t">402</div>
+          <div><span class="ax vac">VAC</span></div>
+          <div><span class="ax cl">CL</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax vac">Arrival</span></div>
+          <div><span class="drv">VACANT_REFRESH</span></div>
+
+          <div class="mono t">205</div>
+          <div><span class="ax occ">OCC</span></div>
+          <div><span class="ax di">DI</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax occ">Due Out</span></div>
+          <div><span class="drv">STRIP_LINEN</span></div>
+
+          <div class="mono t">206</div>
+          <div><span class="ax occ">OCC</span></div>
+          <div><span class="ax di">DI</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax occ">Due Out</span></div>
+          <div><span class="drv none">nothing<div class="sub" style="margin:0">next sold tonight</div></span></div>
+
+          <div class="mono t">417</div>
+          <div><span class="ax vac">VAC</span></div>
+          <div><span class="ax ip">IP</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax na">NotReserved · Departed · StayOver</span></div>
+          <div><span class="drv none">nothing</span></div>
+
+          <div class="mono t">511</div>
+          <div><span class="ax vac">VAC</span></div>
+          <div><span class="ax pk">"" → PICK_UP</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax na">NotReserved</span></div>
+          <div><span class="drv none">nothing</span></div>
+
+          <div class="mono t">903</div>
+          <div><span class="ax vac">VAC</span></div>
+          <div><span class="ax oo">OO</span></div>
+          <div><span class="ax na">—</span></div>
+          <div><span class="ax na">NotReserved</span></div>
+          <div><span class="drv none">nothing</span></div>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <div class="cardh"><b>Why 205 and 206 differ</b></div>
+          <div style="padding:12px 16px;font-size:12.5px;color:var(--dim);line-height:1.65">
+            Identical on all four axes — occupied, dirty, due out. <b style="color:var(--text)">205 is next sold in three days; 206 is sold again
+            tonight.</b> Strip the linen in 205; make 206 up for the next guest.<br><br>
+            The deciding field is <span class="mono">nextBlockedAt</span> — <b style="color:var(--text)">when the room is next sold</b> — which
+            exists only in the PMS's inventory and can be derived from no current status. Requirement R3.
+          </div>
+        </div>
+        <div class="card">
+          <div class="cardh"><b>Three rows that would have been lost</b></div>
+          <div class="row" style="grid-template-columns:.6fr 1fr"><div class="mono t">417</div><div>a <b>list</b> of three stays touching one room today — departed, staying over, arriving <span class="sub">a single-valued status cannot say this (R2)</span></div></div>
+          <div class="row" style="grid-template-columns:.6fr 1fr"><div class="mono t">511</div><div>housekeeping status is the <b>empty string</b>, which means <b>pick-up</b> — not “unknown” <span class="sub">R5, as amended</span></div></div>
+          <div class="row" style="grid-template-columns:.6fr 1fr"><div class="mono t">903</div><div>out of order — <b>vacant and unusable at once</b>, which one collapsed status cannot express <span class="sub">R1</span></div></div>
+        </div>
+      </div>
+
+      <div class="note"><b>The HK-department column is empty on purpose.</b> The web flavour does not send it; the cloud flavour does. An axis a
+        source does not supply is drawn absent rather than filled with a default — this screen shows what Oracle said, not what we assumed.</div>
+      <div class="note fix"><b>Pseudo rooms are not here.</b> House and group accounts arrive room-shaped and are excluded before this view — they
+        are not physical rooms, and mapping one to a canonical room would be a permanent error (R4). They appear in the platform mockup's
+        unmappable queue, where an operator marks them.</div>
+    </div>
+  </div>
+</div>
+
+<h1>5 · <b>One fact, end to end</b>. The support surface: what arrived, what each stage did to it, and what was published</h1>
+<div class="win" style="height:640px">
+  <div class="rail">
+    <div class="app"><div class="mark">◈</div>Operations Center</div>
+    <div class="ri">Overview</div><div class="ri">Services</div>
+    <div class="ri on">Integrations</div>
+    <div class="ri sub2 on">oracle-cloud</div><div class="ri sub2">oracle-onpremise</div><div class="ri sub2">oracle-web</div>
+    <div class="ri">Events</div><div class="ri">Logs</div><div class="ri">Diagnostics</div>
+    <div class="me"><b>Kochi Beach Resort</b>Operations</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integrations</b> · oracle-cloud · inbox</div><div class="ht">Inbox record 8f21c4</div><div class="hsub">received 14:41:07 · business date 2026-08-31</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Raw payload</div>
+      <div class="btn2">Replay this record</div>
+    </div>
+    <div class="body">
+      <div class="card">
+        <div class="cardh"><b>The pipeline, for this one record</b></div>
+        <div class="trace">
+          <div class="tr"><div class="tn">Received<small>14:41:07.412</small></div><div>2 118 bytes stored, then acknowledged. <span class="mono">notification 4471-8821 · primary key R-88214</span></div></div>
+          <div class="tr"><div class="tn">Read back<small>14:41:07.930</small></div><div><span class="mono">GET rsv/v1/hotels/KOCHI01/reservations/R-88214</span> → 6 044 bytes, stored against the notification</div></div>
+          <div class="tr"><div class="tn">Validate<small>14:41:08.004</small></div><div><span class="pill ok">passed</span> well-formed for <span class="mono">oracle-cloud</span>; required fields present</div></div>
+          <div class="tr"><div class="tn">Deduplicate<small>14:41:08.011</small></div><div><span class="pill ok">first seen</span> keyed on the OHIP business-event id <span class="sub">this integration promises a stable event id; the push flavours do not, and use a content digest</span></div></div>
+          <div class="tr"><div class="tn">Enrich<small>14:41:08.052</small></div><div>PMS room <span class="mono t">402</span> → <span class="mono t">masterdata.room_id 7c1e…</span><br><span class="mono">operating_day(2026-08-31T14:41+05:30, boundary 04:00)</span> → <span class="mono t">business_date 2026-08-31</span></div></div>
+          <div class="tr"><div class="tn">Normalise<small>14:41:08.078</small></div><div>anchored to the <b>room-stay</b> · booking group <span class="mono t">R-88214</span>, 1 of 1 known<br>status <span class="mono">InHouse</span> → check-in · <span class="mono">occurred_at</span> from <b>expected</b> arrival, flagged as expected not observed<br>amount <span class="mono t">18 400.00 INR, net of tax</span></div></div>
+          <div class="tr"><div class="tn">Publish<small>14:41:08.106</small></div><div><span class="pill ok">committed</span> fact and inbox state in one transaction → Event Store<br><span class="mono">source = oracle-cloud</span> <span class="sub">asserted by the Hub, validated by the Kernel against the registered set</span></div></div>
+          <div class="tr"><div class="tn">Relayed<small>14:41:08.(«)</small></div><div>Kernel Event Publisher → NATS → consumed by Housekeeping</div></div>
+        </div>
+      </div>
+
+      <div class="note fix"><b>Three things this trace makes checkable rather than assumed.</b> The timestamp is marked <b>expected, not
+        observed</b> — OHIP gave an expected arrival time for a stay already in house, and a report built on it measures the reservation rather
+        than the guest. The amount carries <b>net of tax</b>, because Oracle sends <span class="mono">amountBeforeTax</span> and another vendor
+        sends gross into the same field. And <span class="mono">business_date</span> shows the <b>input and the boundary</b>, not just the answer.</div>
+      <div class="note"><b>Replay runs from line one.</b> The stored bytes, not the PMS — which for this integration is the only option, since the
+        queue that delivered the notification no longer holds it.</div>
+    </div>
+  </div>
+</div>
+
+<h2 class="sec">Software Center · <span>the artefact the hotel's operator is handed</span></h2>
+
+<h1 style="margin-top:14px">6 · <b>The setup sheet</b>. Someone at the hotel has to configure OPERA to talk to us, and this is what they get</h1>
+<div class="win" style="height:600px">
+  <div class="rail">
+    <div class="app"><div class="mark">◎</div>Software Center</div>
+    <div class="ri">Discover</div><div class="ri">Installed <span class="cnt">7</span></div>
+    <div class="ri on">Integration Manager <span class="cnt">3</span></div>
+    <div class="ri sub2 on">oracle-onpremise</div>
+    <div class="ri">Updates</div><div class="ri">Activity</div>
+    <div class="me"><b>Kochi Beach Resort</b>Administrator</div>
+  </div>
+  <div class="main">
+    <div class="head">
+      <div><div class="crumb"><b>Integration Manager</b> · Oracle PMS · oracle-onpremise</div><div class="ht">Setup sheet</div><div class="hsub">for the hotel's OPERA administrator or its vendor</div></div>
+      <div class="grow"></div>
+      <div class="btn2">Print</div>
+      <div class="create">Copy to clipboard</div>
+    </div>
+    <div class="body">
+      <div class="sheet"><b>HotelOS — Oracle OPERA on-premise integration</b>
+Property   Kochi Beach Resort
+Issued     2026-08-31 14:40 by Administrator
+
+<b>1 · Where to post</b>
+   URL      <span class="k">https://192.168.31.208:15157/ingress/oracle-onpremise/kochi-beach</span>
+   Method   POST · Content-Type: application/json
+   TLS      the property CA certificate, fingerprint <span class="k">A4:1F:…:9C</span>
+            <span class="w">the agent must trust this CA; it is not a public certificate</span>
+
+<b>2 · How to authenticate</b> — both are required
+   Header   <span class="k">X-HotelOS-Secret: ••••••••••••••••••••</span>
+            <span class="w">shown once, here, now. It is not retrievable afterwards — regenerate if lost.</span>
+   Source   your agent must call from <span class="k">192.168.31.40</span> or <span class="k">192.168.31.41</span>
+
+<b>3 · What to send</b> — one message per room, per change
+   ReservationId  Surname  FirstName  ArrivalDate  DepartureDate
+   RoomNo  RoomType  Status  PaxAdults  PaxKids  Phone1  Phone2  Email
+   NoOfRooms  MealPlan  MarketCode  Amount  Source  TravelAgent
+   PropertyCode  UniquePersonId
+
+<b>4 · Status values we accept</b>
+   Due In · DUE IN · OT · Checked In · CHECKED IN · CHECKED OUT
+   CANCELLED · DUE OUT · PENDING · WAITLIST
+   <span class="w">Anything else is rejected and named back to us — it is not
+   silently ignored. Tell us before you add a value.</span>
+
+<b>5 · What you will get back</b>
+   202  accepted — we have stored it durably
+   401  authentication failed — nothing was stored
+   400  malformed — nothing was stored, and the reason is in the body
+   <span class="w">A 202 means stored, not processed. Do not treat a later
+   problem as a delivery failure; do not re-send on a timeout —
+   re-sending is safe, we de-duplicate, but it is not needed.</span>
+
+<b>6 · If a check-in arrives as two messages</b>
+   Send both. We pair "Checked In" (contact details) with
+   "CHECKED IN" (room) on surname, first name and arrival date.
+   <span class="w">A stay is not published until both halves arrive.</span></div>
+
+      <div class="note"><b>The secret is shown once, on this sheet.</b> It is written to the Token Vault when the integration is saved and is never
+        displayed again — this sheet is the only moment it is legible, which is why the sheet is generated on demand rather than stored.</div>
+      <div class="note fix"><b>Section 5 exists because of a defect in the reference.</b> Its downstream treated a read timeout as success, because
+        it had no way to know whether a slow call had landed. Telling the sender plainly that <b>202 means stored</b>, that re-sending is safe, and
+        that we de-duplicate, removes the guess at the other end of the wire rather than only at ours.</div>
+      <div class="note hold"><b><span class="tag obs">content, not mechanism</span></b> Whether this sheet is rendered by Software Center from the
+        connector's declaration or by a connector-supplied view is <code>CONN-Q9</code>. Its <i>content</i> is the connector's either way — only
+        <code>pms-oracle</code> knows that this PMS sends two half-messages for one check-in.</div>
+    </div>
+  </div>
+</div>
+
+<h1>Flow — <b>“housekeeping never heard about 402”</b>, answered with these screens</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">the support path</div>
+    <div class="fn">Four looks, and the answer is the third <span>why these six frames exist</span></div>
+    <div class="rail2">
+      <div class="fs"><b>Frame 7, platform</b>is the integration healthy?<small>green — authenticated, receiving</small></div><div class="arr">→</div>
+      <div class="fs"><b>Frame 1, here</b>did a drain fail?<small>14:45 failed mid-way, cost nothing</small></div><div class="arr">→</div>
+      <div class="fs good"><b>Frame 3, here</b>is it waiting to pair?<small><b>yes — room half arrived, contact half did not, 11 min</b></small></div><div class="arr">→</div>
+      <div class="fs"><b>Frame 6, here</b>tell the hotel's agent<small>the sheet already says send both</small></div>
+    </div>
+    <div class="branch" style="margin-top:9px">
+      <div class="fs stop"><b>What the same question cost in the reference.</b> The record had been deleted from the live collection and moved to a
+        history collection with the string <span class="mono">NO VALID DATA FOUND TO MERGE</span>. Answering this took reading Java to find out
+        what that string meant — and the answer was in a Mongo query built from a surname</div>
+    </div>
+  </div>
+</div>
+
+<div class="not">
+  <b>Deliberately not drawn.</b><br><br>
+  <b>Anything the platform mockup already draws</b> — install, configure, credentials, health, the inbox pipeline, the unmappable queue, replay.
+  This page is only what is Oracle's; <code>docs/working/42-the-connector-round.html</code> is the rest.<br>
+  <b>Write-back surfaces</b> — the housekeeping status push OHIP would accept is a later capability (ADR 0128 §4, <code>CONN-Q5</code>), so there
+  is no screen for it here and no disabled control pretending there might be.<br>
+  <b>Guarantee, deposit and cancellation terms</b> — OHIP supplies them (R18) and their owning domain does not exist yet, so they are carried on
+  the fact and have no operational surface until Reservations/GuestOps ships.<br>
+  <b>The cloud flavour's setup sheet</b> — there is nothing to hand anyone: we dial out, and the credential is entered on our side.<br>
+  <b>Who renders any of this</b> — <code>CONN-Q9</code>, tagged on the three frames where it bites.<br><br>
+  <b>Light theme:</b> the same tokens per ADR 0106, drawn once the dark frames are approved.
+</div>
+</body></html>
