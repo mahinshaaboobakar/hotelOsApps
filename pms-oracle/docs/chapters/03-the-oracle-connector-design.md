@@ -267,9 +267,12 @@ bytes, never published. `integration` is the registered connector identifier
 > **REFUSED.** The Enrich stage has no path that emits a canonical field it did
 > not resolve; the outcome is `unmappable`, which is a visible operator queue
 > rather than a silent pass-through.
-> **Open:** `CONN-Q8` — OHIP gives several typed identifiers per entity, and
-> until the mapping key gains an identifier kind the Hub maps one kind per
-> entity type, declared by the connector. §4.
+> **And the key now fits OHIP exactly** — `CONN-Q8`, ruled 2026-08-31
+> (ADR 0128 §8, amending ADR 0016): the identity is
+> `(entity_type, identifier_kind, external_id)` with the kind
+> connector-declared, so **all** of a reservation's typed identifiers map, each
+> under its own kind. The one-kind-per-entity restriction this page carried
+> while the question was open is withdrawn.
 
 ### 2.4 · `permitAll()` — every inbound endpoint unauthenticated
 
@@ -450,21 +453,42 @@ it only lists wins.
 Named here so nobody has to infer them, and so the owner's gate is written
 down rather than remembered.
 
+### Closed since this page was written — both 2026-08-31, both the planner
+
+| | Ruling | What it changed here |
+|---|---|---|
+| **`CONN-Q9` — who renders configuration** | **(b)**: a connector ships a **signed `ui.module`**, and Software Center hosts it inside Integration Management (ADR 0128 §7). Ruled over a generic form engine deliberately — a declarative schema able to express secrets, allow-lists, two-tier schedules and connection tests *"quickly becomes a second programming language"*. A clarification of ADR 0092's intended use; no second package mechanism | The mockup's frames needed **no redrawing** — bound 1 of ten requires the HotelOS design system, so the form was already drawn where and how it will be built. `pms-oracle` now knows it carries a `ui.module`, which §5 had said was waiting on this |
+| **`CONN-Q8` — the mapping key** | **As proposed**: `(entity_type, identifier_kind, external_id)`, property-scoped, bijective within the three-part key, kinds **connector-declared**. ADR 0016 carries the amendment | §2.3's one-kind restriction is **withdrawn**. All of OHIP's typed identifiers map, each under its own kind. Nothing had been built on the restriction |
+
+**The ten bounds on connector UI**, which this connector is reviewed against:
+the HotelOS design system · a sandboxed module boundary · only declared
+connector capabilities · never receives raw secret material back · no direct
+PostgreSQL, OpenFGA, filesystem secrets or NATS · never creates authorization
+tuples · never bypasses the Integration Hub · platform APIs/gRPC for
+configuration and actions · signature verified before installation · versioned
+with the package.
+
+Three are rules this design already rests on, arriving at a new surface: *never
+receives secrets back* is §2.5's Token Vault; *no direct database and never
+bypasses the Hub* are why the connector has no schema (§2.7) and why its only
+outlet is the inbox (§2.2); *never creates tuples* is ADR 0092 rule 2.
+
+### Still open
+
 | | State | What it blocks |
 |---|---|---|
-| **`CONN-Q9` — who renders configuration?** | **Open.** ADR 0128 is silent on connector UI; ADR 0092's manifest allows `ui.module` and calls its absence "headless". The design and the mockup assume headless — Software Center's Integration Manager renders the form from declared configuration — but ADR 0092's configuration block is `key / type / default / scope`, which cannot express a Vault-written secret, a source allow-list, a two-tier polling schedule, or a *Test connection* action. Either that schema grows or a connector ships its own module | **The configuration surface, and therefore the start of code** |
 | **The Reservations/GuestOps domain** | **Ruled and unbuilt** — `CONN-Q2(b)`, ADR 0089. Reservation and guest facts normalise and are held as **deferred**, with their business date and provenance, and replay into the domain the day it ships | Nothing in this connector. Which facts publish is Hub configuration, not connector code |
-| **The two listener rows** | **Proposed, not taken.** `integration` 15156 and `integration-ingress` 15157 continue the `1515x` family below 49152 (ADR 0104). `packages/property-facing` is Stream CC's table | The ingress endpoint in frame 4 of the mockup — the port shown there is the proposal, not a decision |
-| **`CONN-Q8` — the mapping key's identifier kind** | **Open** (an amendment to accepted ADR 0016). Until ruled, the Hub maps **one identifier kind per entity type**, declared by the connector as its primary; the others ride on the fact as external references and are not mapped | Nothing now; a v1 restriction with a name |
+| **The two listener rows** | **Proposed, not taken.** `integration` 15156 and `integration-ingress` 15157 continue the `1515x` family below 49152 (ADR 0104). `packages/property-facing` is Stream CC's table | The ingress endpoint in frame 6 of the mockup — the port shown there is the proposal, not a decision |
 | **The business date's storage home** | **Reported back to the planner** — ADR 0128 §6. The substance is ruled (derived, not stored; attached at normalisation; the connector never computes it) and this design commits to the substance | Nothing now |
 | **Inbound webhooks from a cloud PMS** | The property ingress is reachable on the property LAN; a cloud PMS's webhook comes from the public internet. ADR 0115's Edge Gateway is the shape that would answer it | Nothing for Oracle — the cloud flavour is polled and the two on-site flavours are LAN pushes. It is the **first cloud-PMS connector's** blocker |
 
 ### The gate, written down
 
 > **Code starts when the owner has read this page and
-> `docs/mockups/01-oracle-connector.html`, and `CONN-Q9` is ruled.**
+> `docs/mockups/01-oracle-connector.html`.**
 
-The mockup follows this page. `CONN-Q9` is the planner's.
+`CONN-Q9` was the gate's second item and is ruled. **The owner's reads are the
+one item left.**
 
 ---
 
@@ -472,9 +496,11 @@ The mockup follows this page. `CONN-Q9` is the planner's.
 
 * **No Hub design.** That is §7–§20 of the platform brief; this is the
   connector's half.
-* **No code, and no file tree for one.** The proposed service tree is the
-  platform brief's §19; `pms-oracle`'s own layout waits on `CONN-Q9`, because
-  whether the package carries a UI module changes it.
+* **No code, and no file tree for one.** The Hub's service tree is the platform
+  brief's §19. `pms-oracle`'s own layout was waiting on `CONN-Q9` and no longer
+  is — the package carries **manifest · backend · `ui.module`** — but the tree
+  itself is the first act of building, not of designing, and it is not drawn
+  here.
 * **No claim that the reference was badly built.** §3.3 says where the
   comparison does not flatter us, and §0 says why the question is not "is ours
   nicer".

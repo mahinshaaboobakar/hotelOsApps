@@ -256,9 +256,25 @@ merely which kind of entity. Two ids of one reservation, mapped under one
 `entity_type`, collide on a constraint that is doing exactly its job.
 
 This is a refinement of an accepted ADR, and therefore a **finding to report,
-not a change to make**. **Registered as `CONN-Q8`** (architect, 2026-08-30) —
-an amendment to ADR 0016: the mapping key gains the identifier kind. This page
+not a change to make**. Registered as `CONN-Q8` (architect, 2026-08-30) — an
+amendment to ADR 0016: the mapping key gains the identifier kind. This page
 holds its evidence; the ruling is the planner's.
+
+**Ruled as proposed — planner, 2026-08-31** (ADR 0128 §8; ADR 0016 carries the
+amendment). The mapping identity becomes
+`(entity_type, identifier_kind, external_id)`, property-scoped and **bijective
+within the three-part key**, with `identifier_kind` **connector-declared** —
+the external system defines what its identifiers mean, and HotelOS needs no
+universal vocabulary of them. The invariant:
+
+> **Within a property and identifier kind, an external identifier maps to
+> exactly one canonical HotelOS entity.**
+
+So every one of OHIP's typed identifiers maps, each under its own kind, rather
+than one being nominated primary while the rest ride along unmapped. What the
+kinds *are* for Oracle is still unknown from the reference — see §9, where the
+`type` values are parsed and never read — and they are the connector's to
+declare rather than the platform's to guess.
 
 ### R11 · Guest identity inside a reservation is a search, and every step of it can fail
 *(42b G-C12 · study §5.4)*
