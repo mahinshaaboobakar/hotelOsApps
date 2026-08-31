@@ -233,6 +233,55 @@ The second is the same shape as this page's other findings: **a platform
 mechanism enumerating what applications there are**, when the whole point of a
 package is that the platform does not know. Recorded rather than resolved.
 
+### Ruled 2026-08-31 — option 1, with its objection dissolved
+
+> **The harness provisions the role and schema to the installer's convention —
+> derived, not invented.** *"A role no property has"* applies only to a role you
+> mint; a role you derive is the installer's, and drift between the two is caught
+> where ADR 0054 puts connections — the install-chain E2E.
+
+Built as `InstallerConvention`, reproducing
+`packages/database.rs:180-256` in its order with the names from
+`kernel-core/src/package/naming.rs:45-48`. The precedent named in the ruling is
+`tests/mtls_fixtures/mod.rs:181`, which recreates an installer-owned artifact to
+specification for the same reason.
+
+**Option 2 was refused on this stream's own argument**: a fixed platform
+enumeration growing one line per future application is `PKG-Q39`'s shape again.
+
+**Two adjustments the run forced, both credential rather than convention:**
+
+* `hotelos_test` holds `CREATEDB` and **not** `CREATEROLE` — established by
+  being refused *"42501: permission denied to create role"*. The installer runs
+  step 4 as a provisioner that holds it; on a developer's cluster the equivalent
+  authority is the superuser. **What** gets created is the installer's; **who**
+  runs it is whoever holds the authority on the cluster at hand. Widening
+  `hotelos_test` was the alternative and is a larger change than this needs.
+* `hotelos_event_appender` did not exist on this cluster — it is **cluster
+  bootstrap** (`02-roles.sql:254-263`), not installer output, and this cluster
+  predates `AUTHZ-Q23`. Its own idempotent block is reproduced verbatim, minus
+  the `GRANT … TO hotelos_provisioner` that is the platform's. `make
+  db-bootstrap` is the proper remedy and could not be run here — the Docker CLI
+  is unresponsive in this environment while PostgreSQL itself answers fine.
+
+**`AUTHZ-Q23` is already implemented on the platform side** — `database.rs:246`
+grants `hotelos_event_appender` to the application role at install, beside the
+Master Data read window, *"because they are the two grants an application holds
+on somebody else's schema"*. **F6 is closed**, and this fixture inherits it.
+
+### The suite is green — 15 passed, 0 failed, 0 skipped
+
+**Two failures on the way there were the tests' own**, and one is worth keeping:
+
+* `List_excludes_ended_postings_unless_asked` ended a posting **in the future**
+  and expected it to disappear. The service was right and the test was wrong —
+  *ended* means the window has closed, not that somebody has typed a closing
+  date. Rewritten to a window in the past, and the distinction is now a comment.
+* `A_refused_permission_stops_the_write` asserted no Front Office posting
+  existed — reading every sibling test's rows out of a shared fixture. Scoped to
+  its own staff id: an assertion that reads other tests' rows is one that fails
+  when somebody adds a test.
+
 ## APPS-Q3 · three schemas still carry old application names
 
 **Reported, not fixed** — colleague files, per the standing order. Found by the

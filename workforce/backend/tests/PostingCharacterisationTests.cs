@@ -261,14 +261,19 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var staff = Uuid7.NewUuid7();
 
-        var posting = await service.CreateAsync(scope, Command(staff), default);
+        // Started and ended in the past. An end date in the *future* leaves the
+        // posting in force until it arrives — which is the service being right
+        // and was this test being wrong: "ended" means the window has closed,
+        // not that somebody has typed a closing date.
+        var posting = await service.CreateAsync(
+            scope, Command(staff, from: new DateOnly(2026, 1, 1)), default);
         await service.EndAsync(
             scope,
             new EndPostingCommand
             {
                 Id = posting.Id,
                 ExpectedVersion = posting.Version,
-                EffectiveTo = new DateOnly(2026, 9, 2),
+                EffectiveTo = new DateOnly(2026, 6, 30),
             },
             default);
 
@@ -295,15 +300,21 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     public async Task A_refused_permission_stops_the_write()
     {
         var (service, authorizer, _) = Build();
+        var staff = Uuid7.NewUuid7();
         authorizer.Deny.Add("posting.manage");
 
         await Assert.ThrowsAsync<PermissionDeniedException>(
-            () => service.CreateAsync(fixture.Scope(), Command(Uuid7.NewUuid7()), default));
+            () => service.CreateAsync(fixture.Scope(), Command(staff), default));
 
         // And nothing was written. The authorization is at the top of the method
         // for exactly this reason.
+        //
+        // Scoped to this test's own staff id, not to the department: the fixture
+        // is shared, so every sibling test's Front Office posting is in this
+        // table too. An assertion that reads other tests' rows is an assertion
+        // that fails when somebody adds a test.
         await using var db = fixture.Context();
-        Assert.Empty(await db.Postings.Where(p => p.DepartmentCode == "FO").ToListAsync());
+        Assert.Empty(await db.Postings.Where(p => p.StaffId == staff).ToListAsync());
     }
 
     private static CreatePostingCommand Command(

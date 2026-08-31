@@ -33,14 +33,47 @@ public sealed class WorkforceFixture : IAsyncLifetime
 {
     /// <summary>The role this application's runtime connects as.</summary>
     /// <remarks>
-    /// The development test role, because an installed application's own role is
-    /// created by the installer and does not exist on a developer's cluster —
-    /// which is itself recorded as a finding (chapter 03, <c>AUTHZ-Q23</c>'s
-    /// neighbourhood). What this suite characterises is the service's behaviour,
-    /// not the grant model, and standing up a role the installer owns would be
-    /// testing the installer.
+    /// <c>hotelos_app_workforce</c> — <b>the installer's own name</b>, derived
+    /// from <c>naming.rs:45-48</c> rather than chosen here. The suite provisions
+    /// it to the installer's convention (see <see cref="InstallerConvention"/>),
+    /// because a role invented for the tests would be a role no property has.
     /// </remarks>
-    private const string ApplicationRole = "hotelos_test";
+    private const string ApplicationRole = InstallerConvention.AppRole;
+
+    /// <summary>The provisioner, which is also the harness's admin role.</summary>
+    /// <remarks>
+    /// Declared in the spec so the fixture can reach the scratch database as the
+    /// role that creates the schema — the installer's step 4 runs as the
+    /// provisioner, not as the application.
+    /// </remarks>
+    private const string ProvisionerRole = "hotelos_test";
+
+    /// <summary>The development cluster's provisioner-equivalent.</summary>
+    /// <remarks>
+    /// <para>
+    /// The installer runs step 4 as a dedicated provisioner role holding
+    /// <c>CREATEROLE</c> — <c>02-roles.sql</c> grants it. A developer's cluster
+    /// has no such role: <c>hotelos_test</c> holds <c>CREATEDB</c> and not
+    /// <c>CREATEROLE</c>, which this suite established by being refused
+    /// <i>"42501: permission denied to create role"</i>.
+    /// </para>
+    /// <para>
+    /// So the <b>credential</b> differs and the <b>convention</b> does not. What
+    /// gets created, in what order, with which grants, is
+    /// <see cref="InstallerConvention"/>'s and therefore the installer's; who
+    /// runs it is whoever holds the authority on the cluster at hand. Widening
+    /// <c>hotelos_test</c> instead would hand every suite on the machine the
+    /// ability to mint roles, which is a larger change than this needs.
+    /// </para>
+    /// </remarks>
+    private static string ProvisionerConnection(string database) =>
+        $"Host={Host};Port={Port};Database={database};Username=postgres;Password=devroot";
+
+    private static string Host => ScratchDatabase.Target.Split(':')[0];
+
+    private static string Port => ScratchDatabase.Target.Split(':')[1];
+
+    private readonly string _password = $"wf{Guid.NewGuid():N}"[..24];
 
     private ScratchDatabase? _database;
 
@@ -69,10 +102,19 @@ public sealed class WorkforceFixture : IAsyncLifetime
 
     private async Task PrepareAsync()
     {
+        // The cluster roles first: they are cluster-scoped, so they must exist
+        // before the scratch database can grant either of them CONNECT.
+        await InstallerConvention.EnsureRolesAsync(
+            ProvisionerConnection("postgres"), _password);
+
         _database = await ScratchDatabase.CreateAsync(
             new ScratchDatabaseSpec(
                 NamePrefix: "hotelos_workforce_test",
-                Roles: new Dictionary<string, string> { [ApplicationRole] = "devtest" }));
+                Roles: new Dictionary<string, string>
+                {
+                    [ApplicationRole] = _password,
+                    [ProvisionerRole] = "devtest",
+                }));
 
         if (_database is null)
         {
@@ -83,7 +125,13 @@ public sealed class WorkforceFixture : IAsyncLifetime
                 + "passes without a database reports success having executed nothing.");
         }
 
-        await _database.CreateSchemaAsync(WorkforceDbContext.Schema);
+        // Not `ScratchDatabase.CreateSchemaAsync`: that creates the schema
+        // `AUTHORIZATION hotelos_owner_<schema>` and assumes the role already
+        // exists, which is true for a platform service and false for an
+        // installed application. This runs the installer's step 4 instead —
+        // F7, ruled 2026-08-31.
+        await InstallerConvention.ProvisionSchemaAsync(
+            ProvisionerConnection(_database.Name), _database.Name);
 
         // The application's own migration, applied exactly as `migrate` applies
         // it — not `EnsureCreated`. A schema built from the model rather than
@@ -92,14 +140,11 @@ public sealed class WorkforceFixture : IAsyncLifetime
         await using var migrator = Context(_database.MigratorConnectionFor(WorkforceDbContext.Schema));
         await migrator.Database.MigrateAsync();
 
-        // Let the application role reach what the migration just made. The
-        // harness grants CONNECT and deliberately nothing else — what a role may
-        // reach is the service's safety case rather than the harness's.
-        await _database.AsOwnerAsync(
-            WorkforceDbContext.Schema,
-            $"GRANT USAGE ON SCHEMA {WorkforceDbContext.Schema} TO {ApplicationRole}; "
-            + "GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA "
-            + $"{WorkforceDbContext.Schema} TO {ApplicationRole};");
+        // No grant pass here. Step 4's `ALTER DEFAULT PRIVILEGES FOR ROLE
+        // <owner>` already covers everything the migration goes on to create,
+        // which is the whole reason the installer runs it before step 6 rather
+        // than after — and reproducing that ordering is the point of deriving
+        // the convention instead of improvising one.
 
         PropertyId = Uuid7.NewUuid7();
     }
