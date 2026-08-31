@@ -442,7 +442,7 @@ and a signature, and **nothing in the platform prints anything** — there is no
 print surface in any chapter, ADR or mockup in this repository. This is
 plainly a platform capability rather than GuestOps's own, and it is named here
 because a front-desk application that cannot produce the card the guest signs
-is not deployable in an Indian hotel.
+is not deployable — in any market this product is sold into.
 
 **Raised as `SHELL-Q23`, 2026-08-31** — sooner than this round intended,
 because **Workforce's rota sheet seconded it**. One application needing to

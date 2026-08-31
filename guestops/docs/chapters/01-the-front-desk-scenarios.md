@@ -527,10 +527,17 @@ next time. The person is Guest360's (G360-Q1). GuestOps holds the stay-scoped
 note; the durable preference belongs with the guest identity record and is
 surfaced by whatever owns the person-graph.
 
-### S19b · The guest is a foreign national, and somebody has to be told
-**SITUATION.** A guest checks in on a passport. The property has an obligation
-to report the stay to an authority — and a property in another country, or a
-property that does not take foreign guests, has no such obligation at all.
+### S19b · The guest is from outside, and somebody has to be told
+**SITUATION.** A guest checks in on a passport that is not of the property's
+own country. The property has an obligation to report the stay to an
+authority — and a property elsewhere, or one whose jurisdiction does not ask,
+has no such obligation at all.
+
+**"From outside" is never a fixed meaning.** The property sets its **home
+country**, and a guest is from outside when their nationality is not it. The
+same build serves a hotel in Kochi treating an Emirati guest this way and a
+hotel in Dubai treating an Indian guest this way — **no country is written
+into the product**, and neither is any authority, deadline or ID list.
 
 **STANDALONE and PMS-CONNECTED.** Both. The obligation follows the property
 and the guest, never the PMS.
@@ -541,7 +548,8 @@ a fourth must not be assumed:
 
 ```text
 the policy        per property: is reporting required, for whom
-                  (foreign nationals · everyone), and by when
+                  (guests from outside the home country · everyone),
+                  and by when
 the flag          this stay needs reporting, and has not been
 the record        it was filed — when, by whom, with what reference
 NOT assumed       that HotelOS submits it. See below

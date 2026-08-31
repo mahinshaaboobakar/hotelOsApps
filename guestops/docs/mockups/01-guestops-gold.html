@@ -1034,7 +1034,7 @@
             <div class="fld"><label>Vehicle</label><div class="inp ph">optional at this property</div></div>
           </div>
           <div class="card" style="background:rgba(125,211,252,.05);border-color:rgba(125,211,252,.28)">
-            <div class="ch" style="color:var(--cyan)">Foreign national <div class="grow">shown because the nationality is not India</div></div>
+            <div class="ch" style="color:var(--cyan)">Guest from outside <div class="grow">shown because UAE is not this property's home country</div></div>
             <div class="cb">
               <div class="row2">
                 <div class="fld"><label>Passport issue · expiry</label><div class="inp">02 Feb 2021 · 01 Feb 2031</div></div>
@@ -1052,7 +1052,7 @@
           </div>
           <div class="fld"><label>Documents</label><div class="inp">Passport page · visa page <span class="grow">2 scanned</span></div></div>
           <div class="fld"><label>Signature</label><div class="inp ph">Captured on the pad, or printed and scanned</div></div>
-          <div class="note" style="padding:10px 12px"><b>The block above appears because of the nationality, not because of a country's law written into the product.</b> Which fields are required — here, and for domestic guests — is this property's setting.</div>
+          <div class="note" style="padding:10px 12px"><b>The block above appears because this guest's nationality is not the property's own.</b> The property sets its home country and both field lists — so a hotel in Kochi treats an Emirati guest this way, and a hotel in Dubai treats an Indian guest this way, from the same product with no country written into it.</div>
         </div>
         <div class="sh_f"><div class="hint">Filing due 1 Sep (24 h after arrival).</div><div class="grow"></div><div class="mini">Cancel</div><div class="mini pri">Save and check in</div></div>
       </div>
@@ -1089,8 +1089,8 @@
         <div class="card">
           <div class="ch">Guest reporting <div class="grow"><span class="pill ok">on</span></div></div>
           <div class="cb">
-            <div class="fr"><div class="k">Applies to</div><div class="v">Foreign nationals only <span class="lock">OR EVERYONE</span></div></div>
-            <div class="fr"><div class="k">Authority</div><div class="v">Kerala Police — Form C portal</div></div>
+            <div class="fr"><div class="k">Applies to</div><div class="v">Guests from outside the home country <span class="lock">OR EVERY GUEST</span></div></div>
+            <div class="fr"><div class="k">Authority</div><div class="v">Kerala Police — the property names its own</div></div>
             <div class="fr"><div class="k">Due</div><div class="v"><b>24 hours</b> after arrival <span class="lock">AN OFFSET, NOT A DATE</span></div></div>
             <div class="fr"><div class="k">Who may file</div><div class="v">Front Office Manager · Duty Manager <span class="lock">reporting.file</span></div></div>
             <div class="fr"><div class="k">How it is sent</div><div class="v"><span class="lock no">BY A PERSON, ON THE AUTHORITY'S PORTAL</span></div></div>
@@ -1114,15 +1114,16 @@
         <div class="cb">
           <div class="cols even">
             <div style="display:flex;flex-direction:column;gap:11px">
+              <div class="fr"><div class="k">Home country</div><div class="v"><b>India</b> <span class="lock">DECIDES WHO IS "FROM OUTSIDE"</span></div></div>
               <div class="fr"><div class="k">GRC series</div><div class="v">2026/08/•••• · resets yearly · next 1153</div></div>
-              <div class="fr"><div class="k">Accepted IDs</div><div class="v">Aadhaar · PAN · Driving licence · Voter ID · Passport</div></div>
+              <div class="fr"><div class="k">Accepted IDs</div><div class="v">the property's own list <span class="lock">SEEDED FOR ITS COUNTRY</span></div></div>
               <div class="fr"><div class="k">Signature</div><div class="v">Required · pad or scan</div></div>
               <div class="fr"><div class="k">Print at check-in</div><div class="v">Yes <span class="lock">PLATFORM PRINT SURFACE — SEE §C8</span></div></div>
             </div>
             <div style="display:flex;flex-direction:column;gap:11px">
-              <div class="fr"><div class="k">Required · domestic</div><div class="v">name · address · ID type &amp; number · purpose</div></div>
-              <div class="fr"><div class="k">Required · foreign</div><div class="v">the above <b>+</b> passport, visa, arrival in country, port</div></div>
-              <div class="hint">Two required sets, because the same hotel collects different things from a weekend guest and a business visitor. Everything not required stays on the card as optional — it is never removed from the record.</div>
+              <div class="fr"><div class="k">Required · home country</div><div class="v">name · address · ID type &amp; number · purpose</div></div>
+              <div class="fr"><div class="k">Required · from outside</div><div class="v">the above <b>+</b> passport, visa, arrival in country, port</div></div>
+              <div class="hint">Two required sets, and <b>the property decides both</b> — which is what lets one product serve a hotel in Kochi and a hotel in Dubai without a country written into it. Everything not required stays on the card as optional; it is never removed from the record.</div>
             </div>
           </div>
         </div>

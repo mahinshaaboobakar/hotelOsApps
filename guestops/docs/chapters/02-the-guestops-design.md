@@ -300,14 +300,16 @@ Registration
   stay_id · grc_no                      the property's own series
   name_as_on_id · date_of_birth · nationality
   address_line · city · state · country · postcode
-  id_type       aadhaar | pan | driving_licence | voter_id | passport
+  id_type       the PROPERTY's configured list, seeded for its country —
+                never a fixed enum in the product (§2.8)
   id_number · id_issuer · id_expiry
   arriving_from · proceeding_to · purpose_of_visit
   vehicle_number                        optional; many properties record it
   document_refs the platform's media/asset references, never blobs here
   signature_ref · signed_at · captured_by
 
-Registration · the foreign-national block          filled only when it applies
+Registration · the from-outside block   shown when the guest's nationality
+                                        is not the property's HOME COUNTRY
   passport_number · passport_issue · passport_expiry · passport_place
   visa_type · visa_number · visa_issue · visa_expiry
   arrived_in_country_on · port_of_arrival
@@ -362,12 +364,24 @@ An application is a bundle — *UI + backend + schema + migrations + permissions
 it is not Master Data's: none of it describes what a property *is*.
 
 ```text
-registration    the required-field set, domestic and foreign, separately
-                accepted id types · signature required · print on check-in
+registration    home_country   ← decides who counts as "from outside"
+                the required-field set, TWICE: home-country guests and
+                guests from outside, set separately
+                accepted id types — the property's list, seeded for its
+                country, never a fixed enum in the product
+                signature required · print on check-in
                 the grc_no series: prefix, reset rule, next number
-reporting       required? · who it applies to (foreign nationals | everyone)
+reporting       required? · who it applies to (from outside | every guest)
                 the authority's name · the deadline, as an offset from arrival
 ```
+
+**Nothing here names a country, and that is a hard rule.** This application is
+sold into India and the GCC and will be sold further; a hotel in Kochi and a
+hotel in Dubai must run the same build, each treating the other's nationals as
+guests from outside. So *"foreign"* is never a fixed meaning in the product —
+it is **nationality ≠ `home_country`**, and every list that would otherwise
+encode one country's practice (accepted ID types, the required sets, the
+authority, the deadline) is the property's to set.
 
 The deadline is an **offset**, for R18's reason: *"within 24 hours of arrival"*
 survives the arrival moving, and a stored date does not.
@@ -378,10 +392,10 @@ request and announces it** — Jobs creates the job, assigns it and owns its
 status. GuestOps stores no job id, no assignee and no job state; the boundary
 is the constitution's, not a preference.
 
-`Registration`'s contents are deliberately a short list plus references:
-scenario-record §15 (g) is open, and what an Indian property must legally
-capture for domestic and foreign guests is the owner's knowledge. The shape
-holds; the field list grows when (g) is answered.
+`Registration`'s field list is the design's proposal and **the property
+decides which of them are required** — twice over, for home-country guests and
+for guests from outside (§2.8). What a jurisdiction demands differs by country
+and by property, so the product proposes a shape and never a legal minimum.
 
 ### 2.9 · Two value objects the whole schema depends on
 
