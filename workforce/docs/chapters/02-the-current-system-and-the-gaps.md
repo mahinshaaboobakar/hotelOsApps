@@ -228,7 +228,7 @@ architect; a subject is written up when its answer lands.
 | # | Subject | State |
 |---|---|---|
 | 3.1 | **Rostering** — shift templates, rotation patterns, week planning, copy-last-week | **answered 2026-08-31** ↓ |
-| 3.2 | Attendance — check-in/out, late/absent, who is *actually* here versus posted | **asked 2026-08-31** — awaiting the owner |
+| 3.2 | Attendance — check-in/out, late/absent, who is *actually* here versus posted | **answered in part 2026-08-31** ↓ — the sources are answered, the semantics are not |
 | 3.3 | Leave — types, balances, requests and approval, who covers | not yet asked |
 | 3.4 | Swaps and covers — staff-initiated exchange, the approval chain | not yet asked |
 | 3.5 | Overtime and hours — caps, alerts, **the payroll boundary** | not yet asked |
@@ -358,6 +358,169 @@ architect ratifies it as a `WF-Q4` closure rather than this study asserting one.
 
 ---
 
+### 3.2 · Attendance — three sources, one fact, and only one of them is v1 code
+
+**The owner's answer, 2026-08-31**, relayed through the architect:
+
+> *"Yes we track attendance — each hotel has a different mechanism. Some have
+> fingerprint/face machines, so we need to integrate with their system (needs a
+> mapping of user ↔ machine id). Some use our mobile client — login marks
+> check-in and check-out. Some have HR mark it manually in Workforce."*
+
+**Chapter 01 §8's first refusal does not survive.** *"No attendance / punch
+clock, no biometric integration"* was written without asking, and the hotel
+tracks attendance in every property — the variable is only *how*. That is the
+finding §2.4 predicted this walk would produce, and it is worth being precise
+about what it overturns: the refusal of **attendance as a fact** is wrong; the
+refusal of **a punch-clock implementation inside this application** turns out to
+be right, for a reason chapter 01 never gave.
+
+#### The rows
+
+| # | Feature | Verdict | Why |
+|---|---|---|---|
+| A1 | Attendance is tracked, in every property | **GAP** — proposed **IN v1** | Chapter 01 §8 refuses it outright. The answer overturns the refusal |
+| A2 | The **source is per-property configuration**, of three kinds — device · mobile · manual | **GAP** — proposed **IN v1** (the configuration and the model); the device and mobile *sources* are not v1 code | *"Each hotel has a different mechanism"* is a configuration statement, not a feature list. One property runs on a face reader, the next on a clipboard |
+| A3 | **Manual marking** — HR or the duty manager records it in Workforce | **GAP** — proposed **IN v1** | The always-available floor: it needs no device, no connector, no mobile client and no parked platform work, so **any hotel can run on it from day one**. It is also the fallback every other source needs on the day the machine is down |
+| A4 | **Fingerprint / face device** integration | **GAP** — proposed **OUT of v1 as code, IN as model** · and **DIVERGES** on shape | Not a Workforce feature. *"No hardcoded integrations"* (CLAUDE.md) sends it through the Integration Hub as a `kind: connector` package — below |
+| A5 | **Mobile client** login marks check-in and check-out | **GAP** — proposed **OUT of v1** | Lands on parked ground — ADR 0115 §1D — below |
+| A6 | The **staff ↔ machine-user-id mapping** | **COVERED** by mechanism, with two measured implementation facts | ADR 0016 as amended by `CONN-Q8`. The pattern exists; two things about it are not what the ruling assumes — below |
+| A7 | One attendance fact, **source-agnostic, carrying its provenance** | **GAP** — proposed **IN v1**, and the load-bearing one | A punch, a mobile login and an HR click are the same fact arriving three ways. If the model is not source-agnostic on day one, the third source is a schema change |
+
+#### A7 is the row the other six depend on
+
+Only one of the three sources is buildable now. That is precisely why the
+**model** must carry all three from the first migration:
+
+```text
+AttendanceRecord    staff_id · date · in / out · the shift it answers to
+                    source      device | mobile | manual
+                    provenance  which device, which connector, which
+                                person clicked it, and when it arrived
+```
+
+A property that starts on manual marking and later installs a face reader must
+not need a migration, and an auditor asking *"how do we know he was here"* must
+get a different answer for a fingerprint than for a supervisor's click. **The
+provenance is not metadata — it is the difference between evidence and an
+assertion**, and a system that flattens the three into one boolean has thrown
+that away permanently.
+
+#### The device is a connector, not a feature — and the fit is exact
+
+CLAUDE.md's non-negotiable: *"No hardcoded integrations. All integrations must
+use the Integration Hub."* A biometric terminal is an external system, so it
+enters exactly as a PMS does — and the connector round has already ruled every
+piece it needs:
+
+| | |
+|---|---|
+| **ADR 0128 §2** (`CONN-Q1`) | a signed `.hopkg`, **`kind: connector`**, standard Software Center lifecycle, installed into the Hub. No credentials or certificates in the package — permission *requests*, approved by the administrator. **A brand is not the unit**: distinct transport/credential/capability combinations are distinct integrations, which is exactly right for a device estate where ZKTeco and Matrix share nothing but a purpose |
+| **ADR 0128 §3** (`CONN-Q4`) | ingress is the Hub's **Property Integration Ingress**, applying **connector-declared** webhook authentication — *"shared secret, signature, allow-list — declared, never assumed"*. That is the architect's *per-device auth declared by the connector*, already ruled |
+| **ADR 0128 §5** (`CONN-Q7`) | the Hub owns the durable inbox, dedupe, retry and checkpoints; **a connector never implements a queue**. Load-bearing here: a terminal that was offline overnight replays a batch in the morning, and the same punch must not become two |
+| **ADR 0128 §4** (`CONN-Q5`) | v1 is **inbound-only** — and a punch is inbound. Attendance needs nothing from the deferred write-back half |
+
+**And the ordering is already ruled, one domain over.** ADR 0128's consequences
+close with the reservations gate: *"the Hub publishes `reservation.*` only when
+the Reservations/GuestOps domain exists to own them."* Attendance is the same
+gate with a different domain in it — **the Hub can publish an attendance fact
+only when Workforce exists to own it.** So a device connector cannot precede
+this application; it follows it. Recorded because it makes the sequencing a
+consequence of a standing ruling rather than a scheduling preference.
+
+#### The mapping is the external-identifier pattern, and two facts about it are measured
+
+The architect is right that this is *the same mechanism, no new invention*.
+ADR 0016 as amended by `CONN-Q8` (ADR 0128 §8) gives the identity
+**`(entity_type, identifier_kind, external_id)`**, property-scoped, bijective
+within the three-part key — here `staff` · `machine_user_id` · the device's own
+user id, with `identifier_kind` **connector-declared**. Property scoping is not
+incidental: two hotels' terminals both number their first enrolled employee `1`,
+which is ADR 0016's Opera room "101" worked example wearing different hardware.
+
+Two things measured in the repository on 2026-08-31, so the plan does not assume
+a mechanism that is only partly there:
+
+1. **`identifier_kind` is ruled and not yet built.**
+   `services/masterdata-service/src/Domain/Assets.cs:255-266` — `ExternalMapping`
+   carries `EntityType`, `EntityId`, `Integration`, `ExternalId` and **no kind
+   column**. `CONN-Q8` was ruled on 2026-08-31 and its migration is the
+   connector round's, not Workforce's. Workforce **consumes** the mapping; it
+   does not own it, and must not race ahead and add the column.
+2. **`staff` is expressible but undocumented.** `external_mappings.entity_type`
+   has **no check constraint** (`media.owner_type` does — and that one already
+   lists `staff`), so nothing rejects it. But the property's own documentation
+   at `Assets.cs:257` enumerates *"`room`, `room_type`, `department`,
+   `vendor`"* — staff is absent, which is how the next reader concludes it does
+   not belong.
+
+**Where the mapping lives is less open than it looks.** ADR 0063's rejected
+table already refused moving `ExternalMapping` to the Integration Hub — *"the
+mapping is an identity correspondence; the Hub owns the communication. It does
+not move because integrations read it"* — and ADR 0016's header records that
+0063 reinforced it. So the **table's home is ruled**: Master Data. What is
+genuinely open is narrower and is a question, not a placement: **who writes the
+row, and on which screen.**
+
+#### The mobile source lands on parked ground
+
+ADR 0115 §1D: *"The mobile client is an external client of the Edge/API
+boundary, never a special Kernel application"* — the contract is frozen, the
+framework choice deliberately left open. And the ADR's status line:
+**implementation PARKED by owner direction, 2026-08-28**, with the unparking
+trigger a corporate-live-data redesign question, and the gateway and tunnel work
+standing on `FED-Q1` (§1E and its consequences).
+
+So mobile attendance is not a small addition waiting for a spare afternoon; it
+is behind a parked pillar. It is designed as a **future source of the same
+fact** — which A7 already makes free — **drawn with its caveat and never as v1
+scope**, on the `GUEST-Q6` precedent where a deferred capability was drawn
+dashed rather than promised or hidden.
+
+#### The delta against the gold mockup — an absence, not a divergence
+
+Attendance appears in **none of the seven frames**. There is no
+posted-versus-present view, no mark-attendance control, no late or absent
+indication anywhere in the drawn surface — which is consistent, because
+chapter 01 §8 refused the subject and the mockup was drawn from chapter 01.
+
+That is now a hole rather than a boundary. **Deliverable 3 either gains a
+surface or the owner rules attendance out**, and which of those it is depends
+on the residue below. Nothing has been drawn on speculation.
+
+#### What subject 2 has not answered — carried, not assumed
+
+The answer is thorough on **where the fact comes from** and silent on **what it
+means and who looks at it**. Three of the four things asked are still open, and
+they are recorded here rather than guessed:
+
+* what happens when someone is **late** or **absent** — a mark against the
+  rostered shift, a separate log, or nothing recorded at all;
+* whether **"who is actually here right now"** needs a screen — the duty
+  manager's 7 a.m. posted-versus-present view — or whether the rota is enough;
+* whether an attendance fact that **contradicts the rota** (present on an
+  unrostered day; absent on a rostered one) is a thing the system must
+  reconcile, or simply two records that coexist.
+
+These are asked next, as the remainder of subject 2, before the walk moves on.
+
+#### Questions this subject raises
+
+4. **Does an attendance terminal speak HTTP at all?** ADR 0128 §3 rules ingress
+   as **HTTPS** terminating at the Property Integration Ingress — written for a
+   PMS. Attendance devices vary by vendor between an HTTP push-to-URL mode and
+   a proprietary TCP/SDK protocol on the LAN. If a common device cannot speak
+   HTTP, the connector contract needs a transport §3 does not name. **This is a
+   platform question, not Workforce's** — raised here because this application
+   is the first consumer that would meet it.
+5. **Who writes the staff ↔ device mapping, and on which surface?** The table's
+   home is ruled (Master Data, ADR 0063). The writer is not: Core
+   Administration's Staff page, Workforce's People page, or the connector's own
+   configuration UI (ADR 0128 §7 gave connectors one). It touches a Master Data
+   row on behalf of a device, which is why it is not obviously any of the three.
+
+---
+
 ## 4 · The verdict table
 
 Written when §3 is complete. It is §3's rows, sorted by verdict, and it is what
@@ -373,3 +536,5 @@ ground them.
 | §3.1 | What a colour chip says — a short code alongside the name, or colour plus legend |
 | §3.1 | Whether `Week-off` is a shift or a leave type |
 | §3.1 | How an edited shift definition treats rotas already worked |
+| §3.2 | Whether an attendance terminal speaks HTTP at all — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
+| §3.2 | Who writes the staff ↔ device mapping, and on which surface — the table's home is ruled, the writer is not |
