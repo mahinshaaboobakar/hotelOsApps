@@ -705,7 +705,12 @@ service suite, a connection goes in E2E); an absent database **fails** the run
 | **1 · The book** | Booking · RoomStay · Assignment · party · guest identity · the bookings list · the four day lists · the stay's overview and activity · standalone writes · cancel · the state machine · `stay.*` facts · the three views | a standalone property can run its front desk; **Context's guest chain turns on** |
 | **2 · The PMS mode** | the deferred queue drains · overrides · disagreements · silent confirmation · candidate links · the staleness banner | the Hub's backlog stops accumulating; Oracle properties go live |
 | **3 · The rest of the desk** | commercial terms · registration · requests · notes · preferences · the group page's full behaviour | *"every other guest operation"* (GUEST-Q1) is complete |
-| **4 · The neighbours** | the *stay → jobs* and *stay → servicing* panels | **blocked on finding 4** — two contributing-domain read views and their Context RPCs, owned by Jobs' and Room Care's rounds |
+| **4 · The neighbours** | the *stay → jobs* and *stay → servicing* panels | **blocked on finding 4, ratified 2026-08-31 as "drawn, not built"** — two contributing-domain read views and their Context RPCs, owned by Jobs' and Room Care's rounds |
+
+**Two v1 items this table does not yet carry, because they are not ruled:**
+the **room-level double-booking guard** and the **standalone day roll**
+(`03-the-open-questions.md` §C1a, §C2). Both are recommended for slice 1 and
+neither is built on a recommendation.
 
 **The stay's activity view is slice 1, and it is assembled rather than
 stored**: GuestOps's own rows come from its event stream, and another
@@ -788,16 +793,19 @@ applications' rounds and not this one's. Named here so the mockup's two
 cross-application tabs are read as *drawn, not built*. **A question for the
 register.**
 
-**5 · "Payment information" and GUEST-Q6 meet on one screen.** The owner asked
-for payment information on the stay; GUEST-Q6 ruled the folio out of v1 the
-same day. The mockup's frame 7 draws the line rather than choosing a side:
-band one is the **commercial terms**, which are ruled in and buildable; band
-two is **deposit received, charges posted, balance, settlement and invoice**,
-which are not. Band two has *two different gaps behind it* and they need
-different answers — in a PMS-connected property a balance needs the connector
-to fetch and carry it (a capability ADR 0128 §4's inbound v1 contract excludes),
-and in a standalone property it needs Finance. **Reported with a question, in
-chat, rather than resolved by widening a ruling that is one day old.**
+**5 · "Payment information" and GUEST-Q6 — closed, 2026-08-31.** The owner
+asked for payment information on the stay; GUEST-Q6 had ruled the folio out of
+v1 the same day, and the mockup's frame 7 drew the line rather than choosing a
+side. **Ruled: GUEST-Q6 is not widened.** The stay page ships **band one
+only** — the commercial terms — with band two dashed and, in a connected
+property, an **"Open in Opera" link**: *a link is honest where a number would
+be a promise.* The **connector balance-fetch is recorded as a candidate
+capability for the connector's second round** (it is a read, but v1's inbound
+contract excludes it), and the standalone folio stays Finance's.
+
+**Findings still open are carried in `03-the-open-questions.md`**, together
+with twelve scope items this round found while drawing — availability being
+the largest, and named rather than assumed.
 
 ---
 

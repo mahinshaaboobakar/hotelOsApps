@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>GuestOps Flows</title>
+<style>
+  :root{
+    --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
+    --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
+    --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;
+    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--pms:#7dd3fc;--ovr:#c084fc;--other:#34d399;
+    --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}::-webkit-scrollbar-button{display:none}
+  body{background:#04050a;color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
+  h1{font-size:16px;font-weight:600;max-width:1220px;margin:38px auto 12px;color:var(--dim);text-wrap:balance}
+  h1 b{color:var(--text)}
+  .cap{max-width:1220px;margin:10px auto 0;color:var(--dim);font-size:12.5px;line-height:1.7}
+  .cap b{color:var(--text)}
+  .intro{max-width:1220px;margin:0 auto 26px;color:var(--dim);font-size:13px;line-height:1.75}
+  .intro b{color:var(--text)}
+  code{font-family:"Cascadia Mono",Consolas,monospace;font-size:12px;color:var(--cyan)}
+  .flows{max-width:1220px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+  .flow{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:15px 17px}
+  .ft{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin-bottom:3px}
+  .fn{font-size:14px;font-weight:600;margin-bottom:12px}
+  .fn span{float:right;font-size:11px;color:var(--faint);font-weight:400}
+  .rail2{display:flex;align-items:stretch;gap:8px;flex-wrap:wrap}
+  .fs{flex:1;min-width:140px;background:rgba(10,12,18,.42);border:1px solid var(--line);border-radius:11px;padding:10px 12px;font-size:12px;color:var(--dim);line-height:1.45}
+  .fs b{display:block;color:var(--text);font-size:12.5px;font-weight:600;margin-bottom:2px}
+  .fs small{display:block;color:var(--faint);font-size:11px;margin-top:4px;line-height:1.4}
+  .fs.good{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.22)}
+  .fs.stop{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.24)}
+  .fs.warn{background:rgba(251,191,36,.06);border-color:rgba(251,191,36,.26)}
+  .fs.ovr{background:rgba(192,132,252,.07);border-color:rgba(192,132,252,.26)}
+  .fs.pms{background:rgba(125,211,252,.06);border-color:rgba(125,211,252,.24)}
+  .fs.oth{background:rgba(52,211,153,.05);border-color:rgba(52,211,153,.18)}
+  .arr{align-self:center;color:var(--faint);font-size:15px}
+  .branch{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+  .not{max-width:1220px;margin:34px auto 10px;background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.22);border-radius:13px;padding:14px 17px;font-size:12.5px;color:var(--dim);line-height:1.7}
+  .not b{color:var(--text)}
+  /* state machine */
+  .sm{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:20px 18px;max-width:1220px;margin:0 auto;display:flex;flex-direction:column;gap:0;align-items:center}
+  .lane{display:flex;align-items:center;gap:0;flex-wrap:nowrap}
+  .st{border:1px solid var(--line2);border-radius:12px;padding:10px 18px;font-size:13px;font-weight:600;background:rgba(10,12,18,.5);white-space:nowrap;text-align:center}
+  .st small{display:block;font-size:10.5px;font-weight:400;color:var(--faint);letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+  .st.book{border-color:rgba(129,140,248,.45)}
+  .st.in{border-color:rgba(52,211,153,.45)}
+  .st.out{border-color:rgba(255,255,255,.25)}
+  .st.term{border-color:rgba(248,113,113,.35);color:var(--dim)}
+  .ln{height:1px;background:var(--line2);flex:1;min-width:44px;position:relative}
+  .ln span{position:absolute;top:-19px;left:50%;transform:translateX(-50%);font-size:10.5px;color:var(--faint);white-space:nowrap;background:#131722;padding:0 7px;border-radius:5px}
+  .ln.back{background:repeating-linear-gradient(90deg,var(--ovr) 0 5px,transparent 5px 10px)}
+  .ln.back span{color:var(--ovr)}
+  .vgap{height:22px;width:1px;background:var(--line2);margin:0 auto}
+  .terms{display:flex;gap:14px;margin-top:6px}
+  /* rule box */
+  .rule{max-width:1220px;margin:0 auto;border:1px solid rgba(129,140,248,.4);background:rgba(129,140,248,.07);border-radius:14px;padding:15px 18px;font-size:13.5px;line-height:1.7}
+  .rule b{color:var(--text)}
+  .rule .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--indigo);margin-bottom:6px}
+  /* table */
+  .tbl{max-width:1220px;margin:0 auto;background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .tr{display:grid;grid-template-columns:1.1fr .5fr 1.5fr;border-bottom:1px solid var(--line)}
+  .tr:last-child{border-bottom:none}
+  .tr>div{padding:11px 14px;font-size:12.5px;display:flex;align-items:flex-start;gap:7px;color:var(--dim)}
+  .tr.hd>div{background:rgba(10,12,18,.32);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:8px 14px}
+  .tr b{color:var(--text)}
+  .tr .rk{justify-content:center;font-weight:600;color:var(--text)}
+  .mono{font-family:"Cascadia Mono",Consolas,monospace;font-size:11.5px;color:var(--cyan)}
+  .pill{padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600;white-space:nowrap}
+  .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
+  .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:rgba(255,255,255,.06);color:var(--dim)}
+  .sub{max-width:1220px;margin:34px auto 0;color:var(--faint);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+</style></head><body>
+
+<h1 style="margin-top:0">GuestOps — <b>the design's flows, drawn</b></h1>
+<div class="intro">The companion to <code>01-guestops-gold.html</code>. That page is what a person sees; this one is <b>what happens</b> — the stay's state machine and its single rule for facts that arrive out of order, both write paths, the Integration Hub's deferred queue draining in, a room move reaching every consumer, and the five failure paths that a hotel produces every week. Everything here traces to a scenario (<b>S<i>n</i></b>), a PMS requirement (<b>R<i>n</i></b>) or an owner ruling (<b>GUEST-Q1…Q6</b>). Nothing is drawn that the design does not build, except where it says so.</div>
+
+<div class="sub">The stay</div>
+
+<h1>1 · <b>The state machine.</b> Five states, one backwards arrow, and it is a person — never an inbound fact</h1>
+<div class="sm">
+  <div class="lane">
+    <div class="st book">Booked<small>rank 0</small></div>
+    <div class="ln"><span>check-in</span></div>
+    <div class="st in">In house<small>rank 1</small></div>
+    <div class="ln"><span>check-out</span></div>
+    <div class="st out">Departed<small>rank 2</small></div>
+  </div>
+  <div class="vgap"></div>
+  <div class="lane">
+    <div class="st term">Cancelled<small>terminal, from Booked</small></div>
+    <div style="width:34px"></div>
+    <div class="st term">No-show<small>terminal, from Booked</small></div>
+    <div style="width:34px"></div>
+    <div class="lane"><div class="ln back" style="min-width:120px"><span>staff correction only</span></div><div class="st in" style="opacity:.55">any earlier state</div></div>
+  </div>
+</div>
+<div class="cap"><b>Cancelled and No-show are business facts, not lifecycle states in the platform's sense.</b> ADR 0062's <code>active</code> / <code>deleted_at</code> answer whether a record exists, and a cancelled reservation exists — it keeps its cancellation time, its reason and its penalty, and it stays in the bookings list (S25, S27). The verbs are <code>Cancel</code> and <code>RecordNoShow</code>, in that ADR's own idiom. <b>The dashed arrow is the only way backwards</b>, it takes the stay's write permission, and it is recorded as a correction — the guest who was checked out in error at 07:00 and is still asleep in the room (S24). Inbound facts are monotonic; people are not.</div>
+
+<h1>2 · <b>R7's one rule.</b> The reference answered this condition three times and removed none of them. This is the whole answer</h1>
+<div class="rule">
+  <div class="lbl">the rule, written once</div>
+  <b>An inbound fact is applied only if its lifecycle rank is greater than or equal to the rank the stay already holds. A fact of lower rank is not applied: it is recorded as a contradiction on the stay. An antecedent that never arrived is recorded as <i>not observed</i> and is never synthesised.</b>
+</div>
+<div class="tbl" style="margin-top:12px">
+  <div class="tr hd"><div>What arrives</div><div>Rank</div><div>What the rule does</div></div>
+  <div class="tr">
+    <div><b>check-out</b>, for a stay never seen<br><span class="mono">S12 · R7</span></div><div class="rk">2 ≥ —</div>
+    <div>the stay is created directly in <b>Departed</b>. <code>arrival_at</code> is absent and <code>completeness</code> carries <span class="mono">no_arrival_time</span>. <b>Nothing is invented</b> (R25)</div>
+  </div>
+  <div class="tr">
+    <div><b>check-in</b>, after Departed<br><span class="mono">the late antecedent</span></div><div class="rk">1 &lt; 2</div>
+    <div>not applied to the lifecycle. It <i>fills</i> <code>arrival_at</code> if that was unknown, and is recorded. The guest does not un-leave</div>
+  </div>
+  <div class="tr">
+    <div><b>cancelled</b>, for an in-house stay<br><span class="mono">S26</span></div><div class="rk">0 &lt; 1</div>
+    <div>a <b>recorded contradiction</b> — Attention, and the guest stays served. Cleared by the stay's write permission, the same mechanism as a disagreement</div>
+  </div>
+  <div class="tr">
+    <div><b>the same fact twice</b><br><span class="mono">replay · §7</span></div><div class="rk">= </div>
+    <div>idempotent. Same rank, same values → nothing changes and <b>nothing is published</b></div>
+  </div>
+  <div class="tr">
+    <div><b>a room number</b>, minutes after a check-in that had none<br><span class="mono">S11 · R6</span></div><div class="rk">= </div>
+    <div>the lifecycle does not move; the assignment is filled and <span class="mono">no_assignment</span> leaves <code>completeness</code></div>
+  </div>
+</div>
+<div class="cap"><b>Why one rule and not three mechanisms.</b> The system this replaces met out-of-order arrival and answered it with per-flavour <code>forceCheckIn</code> flags, <code>directCheckout</code> fallbacks marked <i>"Todo remove after data flow is ok"</i>, and a commented-out replay that would have <b>injected a check-in that never happened</b> — all live at once, with the decision record being the comments themselves (R7). The cost was not complexity; it was that nobody could say which path a given stay had taken. <b>A single comparison on lifecycle rank answers every row above</b>, and the rows are consequences rather than cases.</div>
+
+<div class="sub">Who writes</div>
+
+<h1>3 · <b>The two write paths.</b> One rule in every condition — because GUEST-Q4 removed the second mode rather than choosing a branch</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">PMS-connected · the ordinary path</div>
+    <div class="fn">The PMS writes the lifecycle, and it arrives as a fact <span>GUEST-Q1</span></div>
+    <div class="rail2">
+      <div class="fs pms"><b>Opera</b>guest checked in at the PMS terminal</div><div class="arr">→</div>
+      <div class="fs"><b>Integration Hub</b>inbox · validate · dedupe · enrich · normalise<small>business_date attached here — GuestOps never computes it</small></div><div class="arr">→</div>
+      <div class="fs"><b>GuestOps</b>rule of §2 applied<small>rank 1 ≥ rank 0 → applied</small></div><div class="arr">→</div>
+      <div class="fs good"><b>stay.arrived</b>published<small>Room Care · EngineeringOps · Guest360</small></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">PMS-connected · the desk acts first</div>
+    <div class="fn">A staff write on a PMS-managed stay is an <b>override</b>, and is recorded as one <span>GUEST-Q1 amended · S33</span></div>
+    <div class="rail2">
+      <div class="fs ovr"><b>Anitha, 14:10</b>assigns 214 and checks the guest in<small>Opera unreachable · guest at the desk</small></div><div class="arr">→</div>
+      <div class="fs ovr"><b>Recorded as an override</b>who · when · <b>what the PMS said at that moment</b></div><div class="arr">→</div>
+      <div class="fs good"><b>stay.arrived</b>published immediately<small>the desk's action is the platform's truth</small></div><div class="arr">→</div>
+      <div class="fs"><b>Opera catches up</b>see flow 4</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">standalone</div>
+    <div class="fn">There is no PMS, so the same write is simply the record <span>GUEST-Q1</span></div>
+    <div class="rail2">
+      <div class="fs"><b>Anitha, 14:10</b>assigns 214 and checks the guest in</div><div class="arr">→</div>
+      <div class="fs"><b>Applied</b>no override, because there is nothing to override</div><div class="arr">→</div>
+      <div class="fs good"><b>stay.arrived</b>published<small>identical event, identical consumers</small></div>
+    </div>
+    <div class="branch">
+      <div class="fs" style="flex:1 1 100%"><b>The difference is who may write, never what is stored.</b> Both paths land in the same schema and publish the same fact. The permissions are identical too — <b>the mode is not an authorization boundary</b>; what changes is only whether the write is marked as an override.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>There is no third path for "the connector is down".</b> GUEST-Q4: PMS-writes-first at all times, so an override means one thing in every condition and the screen always says the same true thing — <i>your action stands</i>. A mode switch keyed on connector health would flip the desk's meaning mid-shift on a false trigger, and connector health is exactly the signal R27 proved unreliable: a connector can be authenticated, polling and green while <b>check-ins specifically</b> have stopped arriving. The outage surfaces as a per-capability <b>staleness banner</b> that gates nothing.</div>
+
+<h1>4 · <b>Opera catches up.</b> Two outcomes, and the quiet one is what keeps the mechanism from being decorative</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">the values agree</div>
+    <div class="fn">Settled <b>silently</b> as confirmed — agreement arriving late is not work <span>GUEST-Q4 (2) · S34</span></div>
+    <div class="rail2">
+      <div class="fs ovr"><b>Standing override</b>room 506, by the desk at 11:20</div><div class="arr">→</div>
+      <div class="fs pms"><b>Opera, 15:44</b>says room 506</div><div class="arr">→</div>
+      <div class="fs good"><b>Confirmed</b>recorded · <b>surfaces nothing</b><small>no banner, no Attention row, no event</small></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">the values differ</div>
+    <div class="fn">A <b>disagreement</b> — recorded, never a silent overwrite; one truth still leaves the application <span>GUEST-Q3 · S35</span></div>
+    <div class="rail2">
+      <div class="fs ovr"><b>Standing override</b>room 214, by the desk at 14:10</div><div class="arr">→</div>
+      <div class="fs pms"><b>Opera, 15:30</b>says room 208</div><div class="arr">→</div>
+      <div class="fs warn"><b>Disagreement raised</b>both values kept<small>Attention · a mark on the stay</small></div><div class="arr">→</div>
+      <div class="fs good"><b>Everyone still reads 214</b>board · Room Care · Context<small>the override is the answer while it stands</small></div>
+    </div>
+    <div class="branch">
+      <div class="fs ovr"><b>Cleared: keep ours</b>the override stands, the disagreement closes<small>recorded: who, when, which side</small></div>
+      <div class="fs pms"><b>Cleared: take the PMS's</b>the stay moves to 208 and <b>publishes the same correction a room move does</b><small>Room Care re-plans from the event stream — no special case anywhere</small></div>
+      <div class="fs" style="flex:1 1 100%"><b>Either way it takes the stay's write permission</b> — the same permission that made the override. Author-only fails across shifts; supervisor-only escalates a routine reconciliation. There is no <code>disagreement.clear</code> permission (GUEST-Q3).</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>A disagreement is values that differ, and nothing else.</b> That single definition is what turns S36's feared twenty reconciliations into the two that are real: when a six-hour outage ends and fourteen facts arrive at once, thirteen of them match what the desk already recorded and settle without anybody seeing them. <b>No <code>disagreement.*</code> event is published</b> — a disagreement is a fact about our records, not about the hotel, and ADR 0016 Part 2 says we publish the fact and not the process. The <b>correction</b> is the business fact, and it is a fact consumers already know how to handle.</div>
+
+<div class="sub">Arriving</div>
+
+<h1>5 · <b>The deferred queue drains in.</b> GuestOps's first day is not an empty book — the Hub has been holding this since the connector shipped</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">install day</div>
+    <div class="fn">2 314 reservations, held <b>deferred</b> because their owning domain did not exist <span>ADR 0128 · connector brief §12–§14</span></div>
+    <div class="rail2">
+      <div class="fs pms"><b>12 Aug</b>Opera connector configured<small>facts normalise from that day</small></div><div class="arr">→</div>
+      <div class="fs warn"><b>Hub inbox</b>outcome: <b>deferred</b><small>not rejected · not unmappable · not superseded — <b>valid, but nobody owns it</b></small></div><div class="arr">→</div>
+      <div class="fs"><b>GuestOps installs</b>the Hub's configuration flips the reservation family to published<small>an operator action — the connector is untouched</small></div><div class="arr">→</div>
+      <div class="fs good"><b>Replay, in event order</b>arrivals, moves, departures alike</div>
+    </div>
+    <div class="branch">
+      <div class="fs"><b>Out-of-order history lands correctly</b><small>§2's rank rule does the sorting — the Hub does not have to</small></div>
+      <div class="fs"><b>Idempotent by construction</b><small>consumers dedupe on <code>event_id</code> and discard a stale <code>entity_version</code>; a re-applied fact publishes nothing</small></div>
+      <div class="fs"><b><code>business_date</code> arrives attached</b><small>from <code>operating_day(occurred_at, boundary)</code> — GuestOps never computes it</small></div>
+      <div class="fs stop"><b>Superseded facts replay to nothing</b><small>re-applying a stale state is the reason the Hub's four outcomes are four and not one</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The empty state that would be wrong here is the usual one.</b> "No reservations yet — create your first booking", on a property with two thousand of them waiting in the inbox. The Hub took the honest option when this domain did not exist: normalise, store, and publish <b>nothing</b> — because the alternative was publishing onto a subject with no owner, where a dead letter is the best outcome and a silent drop the likely one.</div>
+
+<h1>6 · <b>A stay the PMS has never seen.</b> Created here, joined later — by a person, never by a matcher</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">GUEST-Q5 · S5 · S13</div>
+    <div class="fn">The walk-in at 11:00 with Opera unreachable <span>the join is staff-confirmed</span></div>
+    <div class="rail2">
+      <div class="fs"><b>Desk creates the stay</b>room 308 · tonight · walk-in<small>marked <b>PMS-unknown</b> — a permanent valid state, not a pending one</small></div><div class="arr">→</div>
+      <div class="fs good"><b>Room 308 is occupied</b>to Room Care, to Context, to everyone<small>refusing this would leave the platform wrong about the building</small></div><div class="arr">→</div>
+      <div class="fs pms"><b>Opera, 15:05</b>sends its own version of the same night</div><div class="arr">→</div>
+      <div class="fs warn"><b>Candidate raised</b>same room + overlapping dates<small>the fact is <b>held</b> — no second stay is created, and nothing is published</small></div>
+    </div>
+    <div class="branch">
+      <div class="fs good"><b>"Same stay"</b>the held fact applies to the local stay; Opera's identifiers map onto it<small>one stay, one history, one room</small></div>
+      <div class="fs"><b>"Two different stays"</b>the held fact creates its own stay<small>the room is now double-booked — <b>because that is then the truth</b></small></div>
+      <div class="fs stop"><b>Never automatic.</b> Name similarity may <b>rank</b> the candidates and may never <b>link</b> them<small>the reference joined stays on <code>(companyId, siteId, surname, firstName, arrivalDate)</code> against its private copy — a wrong match silently merges two guests' histories</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Holding the fact rather than publishing a stay we intend to merge is an implementation choice, and it is marked as one</b> — the ruling gives the two outcomes, not the mechanism. The alternative would announce a stay to every consumer and then withdraw it, and there is no honest event for that. While the candidate is undecided, further facts for that Opera reservation queue behind it and apply wherever the decision sends them.</div>
+
+<div class="sub">One fact, all the way out</div>
+
+<h1>7 · <b>A room move, end to end.</b> R8's lesson: this is its own fact, and consumers must be able to tell that a room was vacated</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">S14 · the ruled event name</div>
+    <div class="fn">01:00, the air conditioning fails and the guest is moved from 214 to 511 <span><code>stay.room_changed</code></span></div>
+    <div class="rail2">
+      <div class="fs"><b>The desk moves the guest</b>a new Assignment opens; the old one closes<small>the assignment is a row, not a value — both rooms survive the move</small></div><div class="arr">→</div>
+      <div class="fs good"><b>stay.room_changed</b>from 214 · to 511 · one fact<small>appended in the same transaction as the change</small></div>
+    </div>
+    <div class="branch">
+      <div class="fs oth"><b>Room Care</b>both rooms' axes flip<small>214 becomes vacant and dirty; 511 becomes occupied</small></div>
+      <div class="fs oth"><b>Jobs · EngineeringOps</b>open work on either room<small>the AC job was raised against 214 and stays there — Jobs decides</small></div>
+      <div class="fs oth"><b>Guest360</b>the person's history<small>where they actually stayed, not where they were booked</small></div>
+      <div class="fs"><b>GuestOps itself</b>registration and the folio reference<small>the registration card names a room</small></div>
+      <div class="fs stop"><b>Not in v1</b>door locks · phone re-routing · POS room posting<small>future connector capabilities — no screen pretends otherwise</small></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">the same shape, three other times</div>
+    <div class="fn">Everything that changes a room emits this one fact <span>one name, one handler</span></div>
+    <div class="rail2">
+      <div class="fs"><b>An upgrade at the desk</b>a better room, same stay</div>
+      <div class="fs"><b>A correction</b>the wrong room was recorded</div>
+      <div class="fs pms"><b>A disagreement cleared to Opera's side</b>214 → 208<small>GUEST-Q3 (3) — deliberately the same event</small></div>
+      <div class="fs stop"><b>An amendment is NOT this</b>a corrected surname, a rate change, a departure moved<small>folding them together publishes something whose consumers cannot tell whether a room was vacated (R8)</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The reference had four verbs downstream — check-in, check-out, change, update — and the branch that distinguished a change from an update was commented out</b> (R8). Everything then arrived as an update, and housekeeping could not tell a vacated room from a corrected phone number. The design's answer is not more verbs: it is that <b>the room lives in its own row</b>, so a move is structurally a different operation from an amendment and cannot accidentally be published as one.</div>
+
+<div class="sub">When it goes wrong</div>
+
+<h1>8 · <b>The five failure paths</b>, each ending somewhere a person can act — never in a log nobody reads</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">1 · the disagreement</div>
+    <div class="fn">Opera says 208, the desk says 214 <span>S35 · GUEST-Q3</span></div>
+    <div class="rail2">
+      <div class="fs warn"><b>Recorded, not applied</b></div><div class="arr">→</div>
+      <div class="fs"><b>Attention</b>grouped as one outage batch if it came with others</div><div class="arr">→</div>
+      <div class="fs good"><b>Cleared by a person</b>keep ours · take theirs — both kept in history</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">2 · the incomplete group</div>
+    <div class="fn">"noOfRooms: 3", one room sent, two never arrive <span>S30 · R9</span></div>
+    <div class="rail2">
+      <div class="fs"><b>1 of 3 known</b>said in words</div><div class="arr">→</div>
+      <div class="fs stop"><b>No sibling stays are minted</b><small>the reference concatenated a per-room id that always produced <code>-1</code></small></div><div class="arr">→</div>
+      <div class="fs"><b>Counts towards nothing</b>not occupancy, not arrivals</div><div class="arr">→</div>
+      <div class="fs good"><b>Attention, ageing</b>so nobody discovers it at the desk on arrival day</div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">3 · the no-show</div>
+    <div class="fn">Nobody arrived, and the day has rolled <span>S27</span></div>
+    <div class="rail2">
+      <div class="fs pms"><b>PMS-connected</b>the night audit marks it and it arrives as a fact</div><div class="arr">→</div>
+      <div class="fs"><b>Business fact, not a lifecycle verb</b><code>RecordNoShow</code> — chargeable and reportable<small>and distinguishable from a cancellation, for both reasons</small></div><div class="arr">→</div>
+      <div class="fs warn"><b>Standalone: who marks it?</b><small>there is no night-audit owner in the platform — the property's day roll flags unarrived stays <b>for staff</b>, and nothing marks itself</small></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">4 · cancelled after check-in</div>
+    <div class="fn">Opera cancels a stay that is in house <span>S26 · R7's family</span></div>
+    <div class="rail2">
+      <div class="fs stop"><b>Rank 0 &lt; rank 1</b>not applied</div><div class="arr">→</div>
+      <div class="fs"><b>A recorded contradiction</b>the guest stays served, the room stays occupied</div><div class="arr">→</div>
+      <div class="fs good"><b>Attention</b>cleared by the same mechanism as a disagreement<small>GUEST-Q3 is <b>not</b> stretched to cover it — one source contradicting itself has no second party</small></div>
+    </div>
+  </div>
+  <div class="flow">
+    <div class="ft">5 · the feed goes quiet</div>
+    <div class="fn">Check-ins stop at 09:00 while every connector-level signal stays green <span>S36 · R27</span></div>
+    <div class="rail2">
+      <div class="fs warn"><b>Per-capability staleness</b>"PMS feed silent since 09:00 — your entries stand"<small>bookings still arriving; check-ins are not</small></div><div class="arr">→</div>
+      <div class="fs"><b>Nothing is gated</b>the desk works exactly as before</div><div class="arr">→</div>
+      <div class="fs"><b>The Hub queues durably</b>offline queue · retry · nothing lost</div><div class="arr">→</div>
+      <div class="fs good"><b>On return: 14 facts</b>13 confirm silently, 1 differs<small>one Attention row, not fourteen</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Every one of these ends at a person, and that is the design decision.</b> The system this replaces had a single untyped <code>dumbReason</code> string holding both <i>"a human must look"</i> (<code>NO RESERVATION ID</code>) and <i>"correctly superseded, keep for audit"</i> (<code>CHECKOUT SUCCESS</code>) — so nobody could tell which rows needed attention, and in practice none of them got it (R26). The four outcomes the Hub types its failures into, and the Attention list here, are the same idea at two layers: <b>a failure that cannot be told apart from a routine outcome is a failure nobody will ever work.</b></div>
+
+<div class="sub">Leaving</div>
+
+<h1>9 · <b>Cancel, and the sentence that must not be omitted</b></h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">S25 · GUEST-Q2 · GUEST-Q6</div>
+    <div class="fn">A two-room booking is cancelled two days before arrival <span>two cancellations, not one</span></div>
+    <div class="rail2">
+      <div class="fs"><b>The booking has two stays</b>so this is <b>two</b> cancellations<small>every operation happens to a stay — either can be reinstated on its own</small></div><div class="arr">→</div>
+      <div class="fs"><b>Penalty computed</b>from the stored <b>offset</b>, at the moment it is shown<small>"48 h before arrival" survives the arrival moving; a stored deadline does not (R18)</small></div><div class="arr">→</div>
+      <div class="fs warn"><b>Recorded, never charged</b>the folio is Finance's (GUEST-Q6)</div><div class="arr">→</div>
+      <div class="fs good"><b>Rooms return to inventory</b>and <code>stay.cancelled</code> is published</div>
+    </div>
+    <div class="branch">
+      <div class="fs stop" style="flex:1 1 100%"><b>"Opera will not be told."</b> Nothing GuestOps records reaches the PMS in v1 (<code>CONN-Q5</code>, ADR 0128 §4). A cancellation dialog that stayed silent about that would let a receptionist believe the room had been released in Opera — and the room would be sold twice. It is the one sentence on that screen that cannot be cut for tidiness.</div>
+    </div>
+  </div>
+</div>
+
+<h1>10 · <b>A guest request becomes work</b> — and the boundary it crosses, when the neighbour is installed</h1>
+<div class="flows">
+  <div class="flow">
+    <div class="ft">S18 · APPS-Q1</div>
+    <div class="fn">"The AC is not cooling", said at the desk <span>GuestOps records; Jobs owns the work</span></div>
+    <div class="rail2">
+      <div class="fs"><b>Request logged on the stay</b>GuestOps's own record — always, installed or not</div><div class="arr">→</div>
+      <div class="fs good"><b>Announced</b>with the stay and its current room<small>GuestOps never calls Jobs</small></div><div class="arr">→</div>
+      <div class="fs oth"><b>Jobs creates JOB-8821</b>assigns, prioritises, tracks, closes<small>carrying the stay reference</small></div><div class="arr">→</div>
+      <div class="fs warn"><b>Status shown back — blocked</b><small>needs a <i>stay → jobs</i> Context resolver that does not exist</small></div>
+    </div>
+    <div class="branch">
+      <div class="fs"><b>Jobs not installed</b>the tab is <i>Requests</i>, the complaint is still recorded<small>an installable platform means the property that has not bought Jobs still has a guest complaining</small></div>
+      <div class="fs"><b>Servicing across the stay</b>the same shape, from Room Care<small>and the same missing resolver</small></div>
+      <div class="fs stop"><b>What was refused</b>reading Jobs' or Room Care's tables directly<small>it would work today and break the rule the platform's modularity rests on</small></div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Both cross-application panels are drawn and not built</b> — ratified, and slice 4 of the design is explicitly blocked on it. What is missing is not a decision but two <b>contributing-domain read views</b> and their Context RPCs, which belong to Jobs' and Room Care's own rounds, exactly as this application owns the three views that answer <i>phone → guest → reservation → room</i>. Until they exist the panels are absent, no data has to be migrated when they arrive, and nothing in a stay's history is orphaned when an application is uninstalled.</div>
+
+<div class="not">
+  <b>Deliberately not drawn.</b><br><br>
+  <b>The folio.</b> Posting, payments, settlement, invoicing and the night-audit posting are Finance's later round (GUEST-Q6). The stay's <b>commercial terms</b> are in v1 and are drawn in the gold mockup's frame 7; the balance beside them is dashed, and the <b>connector balance-fetch is recorded as a candidate capability for the connector's second round</b> — it is a read, but v1's inbound contract excludes it.<br>
+  <b>Guest merge.</b> The person-graph, suggested links and merges are Guest360's (G360-Q1). GuestOps holds <code>guest_id</code>; a merge re-points the person and rewrites no stay, which is exactly why no <code>person_id</code> is stored here.<br>
+  <b>Write-back of any kind.</b> Not a check-in, not a room assignment, not a guest detail (<code>CONN-Q5</code>).<br>
+  <b>Availability and inventory.</b> Nothing here answers <i>"do we have a Deluxe King on 3 September?"</i> — see the round's open-questions page; it is the largest gap the design knows about, and it is named rather than quietly assumed.<br>
+  <b>Room state.</b> Clean, ready, inspected and who cleans are Room Care's; these flows announce occupancy and departure and assert nothing about what work that becomes (APPS-Q1).<br>
+  <b>Authorization tuples.</b> ADR 0061's materialisation is unbuilt platform-wide; v1 needs no stay-level object, so it is named rather than depended on.
+</div>
+
+</body></html>
