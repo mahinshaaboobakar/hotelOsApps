@@ -145,6 +145,64 @@ public sealed class OnSiteNormaliserTests
     }
 
     /// <summary>
+    /// GUEST-Q2's addendum: the room type is the anchor, the room number an
+    /// assignment. Both are on the wire for Enrich to resolve.
+    /// </summary>
+    [Fact]
+    public void the_room_type_is_carried_as_the_anchor()
+    {
+        var push = Booking() with { RoomType = "DLX" };
+
+        Assert.Equal("DLX", FactFrom(Kochi(), push).RoomTypeId);
+    }
+
+    [Fact]
+    public void the_party_is_carried_with_its_name_and_contacts()
+    {
+        var guest = Assert.Single(FactFrom(Kochi(), Booking()).Guests);
+
+        Assert.Equal("Meera", guest.Name.Given);
+        Assert.Equal("RAJAN", guest.Name.Family);
+
+        Assert.Contains(guest.Contacts, c =>
+            c.Kind == ContactPoint.Types.Kind.Phone && c.Value == "+91 98470 11111");
+        Assert.Contains(guest.Contacts, c =>
+            c.Kind == ContactPoint.Types.Kind.Email && c.Value == "meera@example.com");
+    }
+
+    /// <summary>
+    /// The agent never marks a primary, so the connector does not answer for
+    /// it. Absent says the source said nothing; true would be this connector
+    /// inventing an answer.
+    /// </summary>
+    [Fact]
+    public void the_on_site_agent_marks_no_primary_so_the_flag_stays_absent()
+    {
+        var guest = Assert.Single(FactFrom(Kochi(), Booking()).Guests);
+
+        Assert.False(guest.HasIsPrimary);
+        Assert.All(guest.Contacts, c => Assert.False(c.HasIsPrimary));
+    }
+
+    /// <summary>
+    /// A message naming nobody and carrying no contact detail has no party —
+    /// and the absences on the header still say what is missing.
+    /// </summary>
+    [Fact]
+    public void a_message_with_no_party_carries_none()
+    {
+        var push = Booking() with
+        {
+            Surname = null, FirstName = null, Phone1 = null, Phone2 = null, Email = null,
+        };
+
+        var fact = FactFrom(Kochi(), push);
+
+        Assert.Empty(fact.Guests);
+        Assert.Contains(fact.Header.Absences, a => a.Field == "guest.phone");
+    }
+
+    /// <summary>
     /// R25. The reference dropped such a stay on one flavour and invented an
     /// email address for it on another. Recording the absence makes both
     /// unnecessary.

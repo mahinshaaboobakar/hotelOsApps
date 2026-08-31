@@ -63,18 +63,65 @@ public sealed record OhipRoomStay(
     OhipExpectedTimes? ExpectedTimes,
     OhipTotal? Total);
 
+/// <summary>One of a profile's names, with the type OHIP assigned it.</summary>
+/// <param name="GivenName">The given name.</param>
+/// <param name="Surname">The family name.</param>
+/// <param name="NameType">
+/// OHIP's classification — the reference looked for <c>"Primary"</c> and
+/// hard-failed when no entry carried it.
+/// </param>
+public sealed record OhipPersonName(string? GivenName, string? Surname, string? NameType);
+
+/// <summary>A telephone number, with OHIP's two classifications of it.</summary>
+/// <param name="PhoneNumber">The number.</param>
+/// <param name="PhoneTechType">What kind of line — R11's typed choice.</param>
+/// <param name="PhoneUseType">What it is used for.</param>
+/// <param name="PrimaryInd">Whether OHIP marked it primary.</param>
+public sealed record OhipTelephone(
+    string? PhoneNumber,
+    string? PhoneTechType,
+    string? PhoneUseType,
+    bool PrimaryInd);
+
+/// <summary>An email address.</summary>
+/// <param name="EmailAddress">The address.</param>
+/// <param name="Type">OHIP's classification.</param>
+/// <param name="PrimaryInd">Whether OHIP marked it primary.</param>
+public sealed record OhipEmail(string? EmailAddress, string? Type, bool PrimaryInd);
+
+/// <summary>A guest profile as OHIP carries it inside a reservation.</summary>
+/// <param name="ProfileIdList">The profile's own typed identifiers.</param>
+/// <param name="PersonNames">Every name on the profile, each typed.</param>
+/// <param name="Telephones">Every telephone, each typed and flagged.</param>
+/// <param name="Emails">Every email, each typed and flagged.</param>
+public sealed record OhipProfile(
+    IReadOnlyList<OhipIdentifier> ProfileIdList,
+    IReadOnlyList<OhipPersonName> PersonNames,
+    IReadOnlyList<OhipTelephone> Telephones,
+    IReadOnlyList<OhipEmail> Emails);
+
+/// <summary>One guest on a reservation.</summary>
+/// <param name="Primary">Whether OHIP marked this the primary guest.</param>
+/// <param name="Profile">The profile behind them.</param>
+/// <remarks>
+/// R11's shape: reaching a guest's name takes four filters — the primary guest,
+/// then the name typed <c>Primary</c>, then the address, telephone and email
+/// each flagged <c>primaryInd</c>. <b>Every one of those can be false
+/// everywhere</b>, and the reference threw on the first two.
+/// </remarks>
+public sealed record OhipReservationGuest(bool Primary, OhipProfile? Profile);
+
 /// <summary>
 /// An OHIP reservation, as fetched after a business event named its key.
 /// </summary>
 /// <remarks>
 /// <para>
-/// Only the portion this connector consumes. OHIP's document is larger — it
-/// carries a <c>reservationGuests</c> sub-tree with names, addresses,
-/// telephones and emails, each behind a <c>primary</c> flag (R11).
-/// <b>That sub-tree is deliberately not modelled here yet</b>, because the
-/// platform's normalised-fact contract has nowhere to put it: modelling a
-/// shape nothing can carry would be dead code that looks like capability.
-/// Reported as a contract finding rather than invented around.
+/// Only the portion this connector consumes. The <c>reservationGuests</c>
+/// sub-tree is here as of 2026-08-31: the contract gained a guest party once
+/// the finding was ruled, so the shape has somewhere to go. Addresses remain
+/// unmodelled — the contract carries phone and email contact points and no
+/// postal address, and modelling one would be the dead code this comment
+/// previously described.
 /// </para>
 /// <para>
 /// Dates arrive as dates and times as <c>yyyy-MM-dd HH:mm:ss.S</c> — a
@@ -89,9 +136,11 @@ public sealed record OhipRoomStay(
 /// The hotel's operating day on which the reservation was created.
 /// </param>
 /// <param name="LastModifyDateTime">When OHIP last changed it.</param>
+/// <param name="ReservationGuests">The party, each with a profile.</param>
 public sealed record OhipReservation(
     IReadOnlyList<OhipIdentifier> ReservationIdList,
     string? ReservationStatus,
     OhipRoomStay? RoomStay,
     string? CreateBusinessDate,
-    string? LastModifyDateTime);
+    string? LastModifyDateTime,
+    IReadOnlyList<OhipReservationGuest> ReservationGuests);

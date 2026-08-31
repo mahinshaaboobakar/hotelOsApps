@@ -133,6 +133,19 @@ public sealed class OnSiteNormaliser
             ExternalId = push.ReservationId,
         });
 
+        // The room type is the anchor and the room number an assignment
+        // (GUEST-Q2's addendum), so both are forwarded for Enrich to resolve.
+        if (!string.IsNullOrWhiteSpace(push.RoomType))
+        {
+            fact.RoomTypeId = push.RoomType;
+        }
+
+        var guest = BuildGuest(push);
+        if (guest is not null)
+        {
+            fact.Guests.Add(guest);
+        }
+
         var amount = AmountReading.Read(push.Amount, _settings.Currency, _settings.AmountTaxBasis);
         if (amount is not null)
         {
@@ -158,6 +171,81 @@ public sealed class OnSiteNormaliser
         }
 
         return fact;
+    }
+
+    /// <summary>
+    /// The party this message describes, or <c>null</c> when it names nobody.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The on-site agent sends one guest per message and never marks a primary,
+    /// so <c>is_primary</c> is <b>left absent rather than set true</b>. Absent
+    /// says the source said nothing; <c>true</c> would be this connector
+    /// answering a question the PMS never asked, and GuestOps distinguishes the
+    /// two deliberately.
+    /// </para>
+    /// <para>
+    /// The name is split because the agent splits it — <c>Surname</c> and
+    /// <c>FirstName</c> are separate fields on the wire — and
+    /// <c>as_given</c> stays empty because there is no unsplit form to carry.
+    /// </para>
+    /// </remarks>
+    private static StayGuest? BuildGuest(OnSitePush push)
+    {
+        var hasName = !string.IsNullOrWhiteSpace(push.Surname)
+            || !string.IsNullOrWhiteSpace(push.FirstName);
+
+        var contacts = Contacts(push);
+
+        if (!hasName && contacts.Count == 0)
+        {
+            return null;
+        }
+
+        var guest = new StayGuest();
+
+        if (hasName)
+        {
+            guest.Name = new GuestName
+            {
+                Given = push.FirstName ?? string.Empty,
+                Family = push.Surname ?? string.Empty,
+            };
+        }
+
+        guest.Contacts.Add(contacts);
+
+        return guest;
+    }
+
+    private static List<ContactPoint> Contacts(OnSitePush push)
+    {
+        var contacts = new List<ContactPoint>();
+
+        // Phone1 before Phone2, which is the order the agent means them in —
+        // but neither is marked primary, because the agent does not say.
+        foreach (var number in new[] { push.Phone1, push.Phone2 })
+        {
+            if (!string.IsNullOrWhiteSpace(number))
+            {
+                contacts.Add(new ContactPoint
+                {
+                    Kind = ContactPoint.Types.Kind.Phone,
+                    Value = number,
+                });
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(push.Email))
+        {
+            contacts.Add(new ContactPoint
+            {
+                Kind = ContactPoint.Types.Kind.Email,
+                Value = push.Email,
+            });
+        }
+
+        return contacts;
     }
 
     private FactHeader BuildHeader(OnSitePush push)

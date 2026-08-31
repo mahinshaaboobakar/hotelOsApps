@@ -91,6 +91,13 @@ public sealed class CloudNormaliser
 
         fact.ExternalRefs.Add(refs);
 
+        if (!string.IsNullOrWhiteSpace(stay.CurrentRoomInfo?.RoomType))
+        {
+            fact.RoomTypeId = stay.CurrentRoomInfo.RoomType;
+        }
+
+        fact.Guests.Add(BuildParty(reservation.ReservationGuests));
+
         var amount = ReadAmount(stay.Total);
         if (amount is not null)
         {
@@ -98,6 +105,131 @@ public sealed class CloudNormaliser
         }
 
         return new NormalisationOutcome.Normalised(fact);
+    }
+
+    /// <summary>
+    /// The whole party, each guest as OHIP described them — R11.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Every guest is forwarded, not only the primary.</b> The reference took
+    /// the primary and threw away the rest, and threw an exception outright when
+    /// none was marked. Here the party travels whole and the owning domain
+    /// decides what to do with it.
+    /// </para>
+    /// <para>
+    /// <b>"Nobody is marked primary" is preserved as a state.</b> If OHIP flags
+    /// nobody, <c>is_primary</c> is left absent on every guest rather than set
+    /// false — absent says the source said nothing, false says it said no, and
+    /// GuestOps' own nullable column exists to tell them apart.
+    /// </para>
+    /// </remarks>
+    private static List<StayGuest> BuildParty(IReadOnlyList<OhipReservationGuest> guests)
+    {
+        var anyMarked = guests.Any(g => g.Primary);
+
+        return guests.Select(g => BuildGuest(g, anyMarked)).ToList();
+    }
+
+    private static StayGuest BuildGuest(OhipReservationGuest source, bool anyMarkedPrimary)
+    {
+        var guest = new StayGuest();
+
+        if (anyMarkedPrimary)
+        {
+            guest.IsPrimary = source.Primary;
+        }
+
+        var profile = source.Profile;
+        if (profile is null)
+        {
+            return guest;
+        }
+
+        guest.ExternalRefs.Add(profile.ProfileIdList
+            .Where(i => !string.IsNullOrWhiteSpace(i.Id) && !string.IsNullOrWhiteSpace(i.Type))
+            .Select(i => new ExternalRef { IdentifierKind = i.Type, ExternalId = i.Id }));
+
+        var name = ChooseName(profile.PersonNames);
+        if (name is not null)
+        {
+            guest.Name = name;
+        }
+
+        guest.Contacts.Add(Contacts(profile));
+
+        return guest;
+    }
+
+    /// <summary>
+    /// The name typed <c>Primary</c>, or the first one there is.
+    /// </summary>
+    /// <remarks>
+    /// The reference threw when no name was typed <c>Primary</c>, discarding a
+    /// reservation over a classification. A profile that has a name but no
+    /// typed one still has a name.
+    /// </remarks>
+    private static GuestName? ChooseName(IReadOnlyList<OhipPersonName> names)
+    {
+        var chosen = names.FirstOrDefault(n => n.NameType == "Primary")
+            ?? names.FirstOrDefault(n =>
+                !string.IsNullOrWhiteSpace(n.GivenName) || !string.IsNullOrWhiteSpace(n.Surname));
+
+        return chosen is null
+            ? null
+            : new GuestName
+            {
+                Given = chosen.GivenName ?? string.Empty,
+                Family = chosen.Surname ?? string.Empty,
+            };
+    }
+
+    /// <summary>
+    /// Every telephone and email, each with the two classifications OHIP gives
+    /// it and its primary flag — R11's "typed choice among several".
+    /// </summary>
+    private static List<ContactPoint> Contacts(OhipProfile profile)
+    {
+        var contacts = new List<ContactPoint>();
+
+        var anyPhoneMarked = profile.Telephones.Any(t => t.PrimaryInd);
+        foreach (var phone in profile.Telephones.Where(t => !string.IsNullOrWhiteSpace(t.PhoneNumber)))
+        {
+            var contact = new ContactPoint
+            {
+                Kind = ContactPoint.Types.Kind.Phone,
+                Value = phone.PhoneNumber,
+                TechType = phone.PhoneTechType ?? string.Empty,
+                UseType = phone.PhoneUseType ?? string.Empty,
+            };
+
+            if (anyPhoneMarked)
+            {
+                contact.IsPrimary = phone.PrimaryInd;
+            }
+
+            contacts.Add(contact);
+        }
+
+        var anyEmailMarked = profile.Emails.Any(e => e.PrimaryInd);
+        foreach (var email in profile.Emails.Where(e => !string.IsNullOrWhiteSpace(e.EmailAddress)))
+        {
+            var contact = new ContactPoint
+            {
+                Kind = ContactPoint.Types.Kind.Email,
+                Value = email.EmailAddress,
+                UseType = email.Type ?? string.Empty,
+            };
+
+            if (anyEmailMarked)
+            {
+                contact.IsPrimary = email.PrimaryInd;
+            }
+
+            contacts.Add(contact);
+        }
+
+        return contacts;
     }
 
     /// <summary>

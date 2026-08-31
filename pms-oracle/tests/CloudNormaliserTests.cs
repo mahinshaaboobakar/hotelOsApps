@@ -34,7 +34,22 @@ public sealed class CloudNormaliserTests
                 ExpectedDeparture: "2026-09-02 10:45:00.0"),
             Total: new OhipTotal(18400.00m)),
         CreateBusinessDate: "2026-08-30",
-        LastModifyDateTime: "2026-08-31 09:12:04.0");
+        LastModifyDateTime: "2026-08-31 09:12:04.0",
+        ReservationGuests: [Guest(primary: true)]);
+
+    private static OhipReservationGuest Guest(
+        bool primary,
+        string? nameType = "Primary",
+        bool phonePrimary = true) =>
+        new(primary, new OhipProfile(
+            ProfileIdList: [new OhipIdentifier("P-4412", "Profile")],
+            PersonNames: [new OhipPersonName("Meera", "Rajan", nameType)],
+            Telephones:
+            [
+                new OhipTelephone("+91 98470 11111", "MOBILE", "HOME", phonePrimary),
+                new OhipTelephone("+91 48420 22222", "LANDLINE", "WORK", false),
+            ],
+            Emails: [new OhipEmail("meera@example.com", "PERSONAL", true)]));
 
     private static RoomStayFact FactFrom(OhipReservation reservation) =>
         Assert.IsType<NormalisationOutcome.Normalised>(Kochi().Normalise(reservation)).Fact;
@@ -210,6 +225,131 @@ public sealed class CloudNormaliserTests
 
         Assert.Equal(RejectionReason.UnknownStatus, rejected.Reason);
         Assert.Equal("Waitlisted", rejected.RawValue);
+    }
+
+    /// <summary>
+    /// GUEST-Q2's addendum: the stay is anchored on the room type, and both
+    /// flavours send the PMS's own code for Enrich to resolve.
+    /// </summary>
+    [Fact]
+    public void the_room_type_is_carried_as_the_anchor()
+    {
+        Assert.Equal("DLX", FactFrom(Reservation("Reserved")).RoomTypeId);
+    }
+
+    [Fact]
+    public void the_party_is_carried_with_its_names_and_typed_contacts()
+    {
+        var guest = Assert.Single(FactFrom(Reservation("Reserved")).Guests);
+
+        Assert.Equal("Meera", guest.Name.Given);
+        Assert.Equal("Rajan", guest.Name.Family);
+
+        var mobile = Assert.Single(guest.Contacts, c => c.Value == "+91 98470 11111");
+        Assert.Equal(ContactPoint.Types.Kind.Phone, mobile.Kind);
+        Assert.Equal("MOBILE", mobile.TechType);
+        Assert.Equal("HOME", mobile.UseType);
+        Assert.True(mobile.IsPrimary);
+
+        var email = Assert.Single(guest.Contacts, c => c.Kind == ContactPoint.Types.Kind.Email);
+        Assert.Equal("meera@example.com", email.Value);
+    }
+
+    /// <summary>
+    /// The guest's own identifiers are forwarded like the reservation's —
+    /// GUEST-Q8(a), guests being the same class as stays.
+    /// </summary>
+    [Fact]
+    public void the_guest_profile_identifier_is_forwarded_with_its_kind()
+    {
+        var guest = Assert.Single(FactFrom(Reservation("Reserved")).Guests);
+
+        var reference = Assert.Single(guest.ExternalRefs);
+        Assert.Equal("Profile", reference.IdentifierKind);
+        Assert.Equal("P-4412", reference.ExternalId);
+    }
+
+    /// <summary>
+    /// R11's hardest case, and the one the reference threw an exception on:
+    /// OHIP produces reservations where nobody is marked primary. Absent says
+    /// the source said nothing; false would say it said no.
+    /// </summary>
+    [Fact]
+    public void when_nobody_is_marked_primary_the_flag_is_absent_rather_than_false()
+    {
+        var reservation = Reservation("Reserved") with
+        {
+            ReservationGuests = [Guest(primary: false), Guest(primary: false)],
+        };
+
+        var fact = FactFrom(reservation);
+
+        Assert.Equal(2, fact.Guests.Count);
+        Assert.All(fact.Guests, g => Assert.False(g.HasIsPrimary));
+    }
+
+    [Fact]
+    public void when_somebody_is_marked_primary_every_guest_carries_the_answer()
+    {
+        var reservation = Reservation("Reserved") with
+        {
+            ReservationGuests = [Guest(primary: true), Guest(primary: false)],
+        };
+
+        var fact = FactFrom(reservation);
+
+        Assert.All(fact.Guests, g => Assert.True(g.HasIsPrimary));
+        Assert.True(fact.Guests[0].IsPrimary);
+        Assert.False(fact.Guests[1].IsPrimary);
+    }
+
+    /// <summary>
+    /// The whole party travels, not only the primary — the reference kept one
+    /// guest and discarded the rest.
+    /// </summary>
+    [Fact]
+    public void every_guest_in_the_party_is_carried()
+    {
+        var reservation = Reservation("Reserved") with
+        {
+            ReservationGuests = [Guest(primary: true), Guest(primary: false), Guest(primary: false)],
+        };
+
+        Assert.Equal(3, FactFrom(reservation).Guests.Count);
+    }
+
+    /// <summary>
+    /// A profile with a name but no <c>Primary</c> type still has a name. The
+    /// reference discarded the reservation over the classification.
+    /// </summary>
+    [Fact]
+    public void a_name_without_the_primary_type_is_still_used()
+    {
+        var reservation = Reservation("Reserved") with
+        {
+            ReservationGuests = [Guest(primary: true, nameType: "Alternate")],
+        };
+
+        var guest = Assert.Single(FactFrom(reservation).Guests);
+        Assert.Equal("Meera", guest.Name.Given);
+    }
+
+    /// <summary>
+    /// The same tri-state applies one level down: a phone list with nothing
+    /// flagged says nothing, rather than saying no.
+    /// </summary>
+    [Fact]
+    public void when_no_phone_is_flagged_primary_the_contacts_say_nothing()
+    {
+        var reservation = Reservation("Reserved") with
+        {
+            ReservationGuests = [Guest(primary: true, phonePrimary: false)],
+        };
+
+        var guest = Assert.Single(FactFrom(reservation).Guests);
+        var phones = guest.Contacts.Where(c => c.Kind == ContactPoint.Types.Kind.Phone);
+
+        Assert.All(phones, p => Assert.False(p.HasIsPrimary));
     }
 
     /// <summary>
