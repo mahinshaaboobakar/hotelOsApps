@@ -255,7 +255,7 @@ architect; a subject is written up when its answer lands.
 | 3.6 | Skills and certifications — expiry, the compliance view | **ruled 2026-08-31** ↓ — architect, owner shown |
 | 3.7 | The MOD duty in daily operation | not yet asked |
 | 3.8 | Departments and zones in practice — how postings map to Room Care's *"who cleans zone 3 today"* | not yet asked |
-| 3.9 | Notifications — how staff actually learn their roster | not yet asked |
+| 3.9 | Notifications — how staff actually learn their roster | **ruled 2026-08-31** ↓ — architect; v1 is the printed week |
 
 ---
 
@@ -1014,6 +1014,191 @@ existed.
 
 ---
 
+### 3.9 · Notifications — the printed week, and events published for an app that does not exist yet
+
+**Ruled by the architect, 2026-08-31** — `ARCHITECT` throughout. Relayed as
+*"subject 6"*; against the brief's §2 seed list it is item **9**, and it closes
+subjects 1–6 of that list.
+
+> **v1 is the printed week, done properly.**
+
+| # | The ruling | Verdict |
+|---|---|---|
+| N1 | A **print-ready per-department rota view**, built for a **monochrome photocopier** | **GAP** — `ARCHITECT` — proposed **IN v1** |
+| N2 | A shift carries **name + colour + short code** — three attributes on one entity. **Short code in the cell, legend row beneath** | **GAP** — `ARCHITECT` — and it closes §3.1's question 1 |
+| N3 | Mid-week changes keep a **change list for the week** — *"Tue: Rajan N→M, covered by Anita"* — **a record, not a memory** | **GAP** — `ARCHITECT` — proposed **IN v1** |
+| N4 | The **staff app is next-version**, by the owner's ruling | `OWNER` — consistent with §3.2's A5 |
+| N5 | The design's job now is to **publish the events** — `shift.assigned`, `shift.changed`, `leave.approved` — *as if the app existed*, so that when it arrives it subscribes and notifies **with zero changes here** | **GAP** — `ARCHITECT` — proposed **IN v1**, with a platform prerequisite: see N5 below |
+| N6 | Printing itself is **`SHELL-Q23`** — the shell owns the print dialog, an application hands it a print-ready view. **No improvised printer code** | **COVERED** by a registered question — cite the row, build nothing |
+
+#### N2 closes §3.1's question 1, and by the argument the question named
+
+§3.1 asked what a colour chip says, once shift names are free-form: a short code
+alongside the name, or colour alone with a legend. The question recorded the
+consequence that would decide it — *"which also decides whether the rota can be
+printed or photocopied"* — and that is exactly what decided it. A monochrome
+photocopy destroys colour and keeps glyphs, so **the cell must carry text that
+survives losing every colour in the design.**
+
+The answer takes both halves rather than choosing: **colour for the screen,
+short code for the cell, legend beneath for the page.** One week reads at a
+glance in the office and still reads after a photocopier has thrown the colour
+away.
+
+**This amends §3.1's proposed aggregate**, which is deliberately left as it was
+written so the trail survives:
+
+```text
+§3.1 proposed   ShiftDefinition   name · start–end · colour · active
+N2 amends it    ShiftDefinition   name · short code · start–end · colour · active
+```
+
+The short code is **the property's**, typed when the shift is created — not
+derived from the name. A derived initial collides the moment a property creates
+*Morning* and *Mid-shift*, and a collision in a rota cell is two different
+shifts that look identical on the page.
+
+#### N3's change list should be the event stream rendered, not a second record
+
+*"A record, not a memory"* is the requirement. The design question it opens is
+whether the week's change list is **its own stored list** or **a projection of
+the events N5 already publishes** — and the platform's own rule points hard at
+the second: a stored list that is written alongside the events can disagree with
+them, and CLAUDE.md's *"a denormalised column that is allowed to disagree with
+its source is a defect with a delivery date"* is the same failure one level up.
+
+**Proposed:** the change list is `shift.changed` for that week and department,
+rendered. Nothing is stored twice, and the printed sheet and the audit trail
+cannot drift apart because they are the same fact.
+
+One payload consequence, stated because it is easy to miss until the sheet is
+built: *"Tue: Rajan N→M, **covered by Anita**"* is **two** facts — a change to
+one person's shift and an assignment to another's. Either `shift.changed`
+carries the cover's identity, or the line is composed from two events that must
+be correlated. Deliverable 2 decides which; the study records that the sentence
+in the ruling is not one event.
+
+#### N5 — publishing the events is right, and it has a platform prerequisite nobody has met
+
+The pattern is exactly right: **the event is the integration point, and it costs
+nothing to publish it now.** An application that publishes its facts properly is
+one a future consumer attaches to without a change — which is what N4 and N5
+together buy, and it is the constitution's event-first architecture doing its
+job.
+
+**Measured 2026-08-31, and this is the finding: nothing would carry those
+events today.**
+
+* `services/kernel/crates/kernel/src/events/subjects.rs:25-35` — `publish_subject`
+  validates the *shape* (`domain.action`) and nothing else. **Nothing rejects
+  `shift.assigned`.**
+* `services/kernel/crates/kernel/src/events/streams.rs:64-185` — the stream
+  `SPECIFICATION` routes by domain segment, and it claims **no `shift`, no
+  `leave` and no `duty` domain.** Chapter 01 §4's `user.posted` /
+  `user.posting_ended` are fine — `property.*.user.>` is claimed by
+  `OPERATIONAL` — but the three subjects this ruling names are not.
+* So an unrouted subject is **acked, matches nothing, and dead-letters
+  silently.** That is not a deduction: `streams.rs:85-90` records it happening
+  already —
+
+  > *"Added when Master Data grew staff, vendors, media and external mappings:
+  > they were published for a release with no stream claiming their subjects,
+  > so every one acked, matched nothing and dead-lettered — the exact failure
+  > ADR 0006 exists to prevent."*
+
+* And `services/kernel/crates/kernel/tests/jetstream.rs:288-320` shows the
+  platform's own remedy: subjects belonging to **unbuilt** applications —
+  `room.zone_changed`, `workorder.created`, `housekeeping.task.assigned` — are
+  named in advance *"because the stream filters must already cover them"*.
+  **Workforce's are not among them.**
+
+**So N5 is adopted with its prerequisite named**: the stream specification must
+claim Workforce's domains before Workforce publishes, or the events are lost in
+exactly the way the platform has already been burned by once. Publishing into a
+stream nobody has claimed is worse than not publishing — it looks like it worked.
+
+`OPERATIONAL` is the natural home on ADR 0006's *route by meaning* rule, beside
+`staff.>` and `user.>`: a shift is the property's people and its shape. That is a
+**recommendation, not a decision** — the streams are the Kernel's.
+
+#### And this is the second thing a packaged application cannot do for itself
+
+`streams.rs` is in the **Kernel**, in the platform repository. Workforce is an
+installable application in another repository, binding through the contracts and
+the SDK (`HotelOsApps/README.md`). **It cannot add its own domain to the stream
+specification**, and nothing in ADR 0092's package contract or ADR 0122 says how
+an installed application's event domains reach the Kernel's routing.
+
+That is the same shape as §3.5's file-save question and it is a separate
+question: how does a **packaged application declare its event subjects** — in
+the manifest, materialised at install as the application object already is
+(ADR 0116 §5)? Or does the platform ship a stream for application domains?
+**Nobody has ruled it**, and Workforce is the first installable application to
+need it. Registered.
+
+#### `SHELL-Q23` — cited, not improvised, and one correction to offer
+
+The row exists and already names this round:
+
+> **`SHELL-Q23`** — *"No print surface exists anywhere in the platform, and two
+> applications now need one."* FF (GuestOps: the registration card) and **GG
+> (Workforce: the weekly rota sheet, monochrome-photocopier-grade)**, both
+> 2026-08-31. Open — the shell's question. The architect's reading: an
+> application module hands the shell a print-ready view (its own HTML, print CSS
+> its problem) and **the shell owns the OS print dialog via the webview**; no
+> per-app printer code, no PDF library until a real need names one.
+
+**Nothing is improvised here.** N1 produces a print-ready view — HTML and print
+CSS, which is this application's problem — and the dialog is the shell's.
+
+**One correction to offer the architect**, because the register is the shared
+record: the row cites *"Workforce study §3.6"*. §3.6 is skills and
+certifications, and its certification register *is* a printed sheet, so the
+citation is not wrong — but **the weekly rota sheet the row describes is
+§3.9**, this section. Suggest the row cite both.
+
+#### This narrows §3.5's export question rather than closing it
+
+Three surfaces wanted a way to get paper or a file out of the platform. They are
+not one question, and `SHELL-Q23` answers only part:
+
+```text
+GuestOps registration card    print   →  SHELL-Q23
+Workforce rota sheet          print   →  SHELL-Q23
+Workforce certification reg.  either  →  SHELL-Q23 if printed
+Workforce month-end payroll   FILE    →  still open
+```
+
+The month-end sheet is *taken by payroll software*, so it is a **file**, not a
+page — and a file-save available to a packaged frontend module is a different
+capability from a print dialog. §3.5's question survives, **narrowed to the
+payroll export**, and the register row should say so rather than being closed by
+`SHELL-Q23`.
+
+#### The delta against the gold mockup
+
+Frame 2 is a screen. **A print view is a different artifact**, not a print
+stylesheet bolted to it: no rail, no header controls, no hover, the whole
+department on one page, a legend row, and the week's change list beneath.
+Deliverable 3 gains it as a **new frame** — the third new surface this walk has
+produced, after §3.3's property-policy screen and §3.5's reporting view.
+
+And the chip in frame 2 changes twice over: §3.1 said it must render from data
+rather than three hardcoded classes, and N2 now says what it renders — **the
+short code**, with the legend below the grid on both the screen and the page.
+
+#### What this subject did not settle
+
+* **How staff receive the printed sheet.** *"Printed"* answers the medium and
+  not the distribution — pinned on the department noticeboard, handed out,
+  or both. It probably needs no system support at all, which is why it is
+  recorded here rather than raised as a question.
+* **WhatsApp**, which the brief's seed list named, was not mentioned in the
+  ruling and is not proposed. It would be a Communication Platform capability
+  (ADR 0115 §1C) and that pillar is parked with the rest.
+
+---
+
 ## 4 · The verdict table
 
 Written when §3 is complete. It is §3's rows, sorted by verdict, and it is what
@@ -1026,7 +1211,7 @@ ground them.
 
 | From | Question |
 |---|---|
-| §3.1 | What a colour chip says — a short code alongside the name, or colour plus legend |
+| §3.1 | ~~What a colour chip says~~ — **CLOSED by §3.9's N2**: name + colour + short code, short code in the cell, legend beneath. Decided by the monochrome-photocopy consequence the question itself named. Kept, not deleted, so the trail survives |
 | §3.1 | Whether `Week-off` is a shift or a leave type |
 | §3.1 | How an edited shift definition treats rotas already worked |
 | §3.2 | Whether an attendance terminal speaks HTTP at all — ADR 0128 §3's ingress is HTTPS, written for a PMS. **A platform question**, met first by this application |
@@ -1034,6 +1219,7 @@ ground them.
 | §3.3 | Is `Week-off` a shift or a leave type — §3.1's question with the owner's four-item list added to the evidence |
 | §3.3 | Whose is the property holiday calendar — Core Administration's or Workforce's. Recommendation: Core, on the `FiscalYearStartMonth` precedent |
 | §3.3 | Does working a holiday or a week-off credit comp-off automatically, or only by HR adjustment |
-| §3.5 · §3.6 | **What the application SDK exposes to a packaged frontend module.** The file-save mechanism exists and is module-local to Core Administration; three surfaces now want it — the month-end sheet, the certification register and `GUEST-Q7`'s registration card. **A platform question**, belonging with `APPS-Q1`'s prerequisites |
+| §3.5 · §3.6 | **What the application SDK exposes to a packaged frontend module — narrowed by §3.9 to the *file* half.** `SHELL-Q23` answers print; the **month-end payroll export is a file** payroll software takes, and a file-save available to a packaged module is a different capability from a print dialog. The mechanism exists and is module-local to Core Administration. **A platform question**, belonging with `APPS-Q1`'s prerequisites |
+| §3.9 | **How does a packaged application declare its event subjects?** `streams.rs` is the Kernel's and claims no `shift`, `leave` or `duty` domain; an unrouted subject dead-letters silently, which `streams.rs:85-90` records having already happened once. Manifest-declared and materialised at install, as the application object already is — or a stream for application domains? **Nobody has ruled it**, and this is the first installable application to need it |
 | §3.5 | Is overtime alerted during the week, or only on the month-end sheet — the difference between a report and a control |
 | §3.6 | **Which precedent does *warn, never forbid* stand on?** The double-booked room is **refused** (`GUEST-Q7`), not warned. Proposed reading: the platform refuses the physically impossible and warns on a judgment — offered, not decided |
