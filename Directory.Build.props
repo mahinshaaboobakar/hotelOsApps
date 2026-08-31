@@ -1,0 +1,30 @@
+<Project>
+
+  <!--
+    Repository-wide .NET build settings — ADR 0057, extended to the
+    application repository (architect, 2026-08-31, on Stream FF's finding:
+    "HotelOsApps has no root Directory.Build.props, so a packaged app
+    starts outside the gate that makes CS1574 fire").
+
+    Same substance as the platform repository's file, for the same reason:
+    zero warnings means nothing while the compiler is not checking, and a
+    project cannot opt out by being new. A packaged application is not a
+    lesser citizen of the documentation gate.
+
+    Projects that set these locally before this file existed (GuestOps)
+    may drop the duplicates at their next touch.
+  -->
+
+  <PropertyGroup>
+    <!-- Makes the compiler resolve every <see cref>/<paramref>; the XML
+         file is a by-product, the resolution is the point. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <!-- CS1591 (missing XML comment) stays a warning-not-error until the
+         public-API classification step, exactly as on the platform side.
+         The broken-reference diagnostics (CS1574/1580/1581/1584) are NOT
+         suppressed — they are the ones ADR 0057 was written after. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+</Project>
