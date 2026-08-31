@@ -375,6 +375,18 @@ the failure with the widest blast radius on the page: it is silent, it is
 plausible, and it moves every derived time by a fixed offset that looks like
 correct data.
 
+**Amended 2026-08-31 from the cross-vendor survey (`docs/working/42c` §2).**
+A UTC **offset is not a time zone, and must not satisfy this requirement.**
+Cloudbeds supplies `propertyZoneOffset` — an offset — rather than an IANA zone
+(`cloudbeds/models/PropertyBasic.java:41`,
+`cloudbeds/repositories/mysql/PropertyBasicRepository.java:25`). An offset
+cannot express daylight saving, so a stored offset is wrong for half the year
+in any property that observes it, and it is wrong in exactly the way this
+requirement exists to prevent: silently, and while still looking like correct
+configuration. The model must require an IANA zone; where a source can supply
+only an offset, that is a connector-level gap to be recorded and resolved
+against the property's configured zone — never accepted in its place.
+
 ### R17 · The business date is a distinct field, and its owner is unruled
 *(42b G-C11f, and 42b G-A4 → `CONN-Q6`)*
 
@@ -445,9 +457,25 @@ model, and must never appear without its currency. The reference's
 `totalAmount` is a `float` with a `currency` that is always null — an amount
 whose meaning cannot be recovered.
 
-Note also that the cloud amount is explicitly **before tax**
-(`amountBeforeTax`), which the normalised shape did not record. Whether an
-amount includes tax is part of what the amount *is*.
+**And the tax basis travels with the amount — amended 2026-08-31 from the
+cross-vendor survey (`docs/working/42c` §2).** The cloud amount is explicitly
+**before tax** (`amountBeforeTax`, `cloud/dto/mongo/Reservation.java:102`).
+Apaleo's is explicitly **gross** — `totalGrossAmount`
+(`apaleo/models/ReservationDetailed.java:70`, read at
+`apaleo/services/ApaleoReservationServiceApaleo.java:289`). **Both were written
+into the same downstream `totalAmount` field**, so the reference's stored
+revenue means a different thing depending on which connector produced the row,
+and nothing anywhere records which.
+
+That is silent revenue corruption: the figures reconcile against nothing, and
+no later reader can tell a net row from a gross one. **An amount carries three
+things or it is not an amount** — the value, its currency, and whether tax is
+included. A model that carries two of the three has an amount whose meaning
+cannot be recovered, which is the same defect as the null `currency` above,
+one level less obvious.
+
+(Apaleo also truncates with `.intValue()` at `:289`, discarding the minor units
+it had been given — a fourth way to lose the meaning of a number.)
 
 ---
 
