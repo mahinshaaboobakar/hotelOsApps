@@ -60,11 +60,28 @@ ever a primary key.
 ```text
 booking_id          UUIDv7
 property_id         the property holding these legs — Master Data ref
-group_ref           the group identifier, carried from day one (GUEST-Q2)
 expected_stay_count int?   R9 — "noOfRooms: 3" with one room sent (S3, S30)
+is_complete         bool?  the SOURCE's assertion, not our arithmetic
 origin              staff | pms
 created_at
+
+booking_external_ref
+  booking_id · integration_id · identifier_kind · external_id
 ```
+
+**`group_ref` is retired — GUEST-Q9 (M5), adopting the wire.** A booking has
+several typed identifiers for the same reason a stay does (R10), and
+`GUEST-Q8`'s *minting is the mapping* applies unchanged: the group gets our
+UUIDv7 and its source identifiers are recorded beside it, in the same
+transaction. A single scalar could hold only one of them and would silently
+pick a winner.
+
+**`is_complete` is carried, not computed.** `BookingGroup.is_complete`
+(`dto.proto:462`) is the source telling us whether it has sent the whole group
+— *"a source that says this group is complete knows something we cannot
+compute"*. Our own `expected_stay_count` versus the stays we hold answers a
+different question: *how much of what was promised has arrived*. Both are kept
+because S30 needs both sentences.
 
 **The group is deliberately thin.** GUEST-Q2 rules that *every operation
 happens to a stay, never to the group*, so `Booking` carries identity, the
@@ -74,9 +91,10 @@ expectation unstated"* are different, and collapsing them loses S30's whole
 point.
 
 **A group that spans properties is not modelled here** (S4, S32). This
-installation holds its own legs; `group_ref` is what makes the onward legs
-*sayable* without being queryable, and no cross-installation read exists
-(GUEST-Q2's edge-first rider).
+installation holds its own legs; the booking's **source identifiers** are what
+make the onward legs *sayable* without being queryable — the same reference
+the other property's PMS knows the group by — and no cross-installation read
+exists (GUEST-Q2's edge-first rider).
 
 ### 2.2 · `RoomStay` — the anchor
 
@@ -89,12 +107,11 @@ current_room_id     Master Data ref, nullable — a DERIVED PROJECTION of the
                     open Assignment row; the service resolves it and the API
                     has nowhere to put it (CLAUDE.md §"Clients never write a
                     derived projection")
-arrival_date        date, as the source gave it            R12
-departure_date      date, as the source gave it            R12
 arrival_at          Timestamp value object (see §2.9)      R12·R13·R14
 departure_at        Timestamp value object
-lifecycle           Booked | InHouse | Departed | Cancelled | NoShow   §3
-completeness        a set of what is missing — see below   R6·R9·S11
+lifecycle           Waitlisted | Pending | Booked | InHouse |
+                    Departed | Cancelled | NoShow          §3
+absences            rows of {field, reason, raw_value}     R6·R9·R25·S11
 walk_in             bool — how the guest arrived           S13
 pms_unknown         bool — who knows about them (GUEST-Q5) S5
 business_date       the property's operating day this stay's arrival
@@ -108,17 +125,30 @@ knows about them. A walk-in entered in the PMS is not PMS-unknown; a phone
 booking taken here during an upgrade is PMS-unknown and not a walk-in. One
 flag would lose the walk-in ratio, which every hotel reports on.
 
-**`completeness` is a separate axis from `lifecycle`, and this is R1's lesson
-applied to the stay.** R1 is about a room's four independent statuses; the
-same mistake is available here — *"checked in, room not yet reported"* (R6,
-S11) is not a lifecycle state, it is a complete lifecycle with an incomplete
-record. Collapsing them produces a status vocabulary that grows one value per
-kind of missing field, and the discarded axis cannot be recovered.
+**Absence is a separate axis from `lifecycle`, and this is R1's lesson applied
+to the stay.** R1 is about a room's four independent statuses; the same mistake
+is available here — *"checked in, room not yet reported"* (R6, S11) is not a
+lifecycle state, it is a complete lifecycle with an incomplete record.
+Collapsing them produces a status vocabulary that grows one value per kind of
+missing field, and the discarded axis cannot be recovered.
+
+**The shape is the wire's — GUEST-Q9 (M7), adopting `Absence`
+(`dto.proto:325`):**
 
 ```text
-completeness ⊆ { no_assignment, party_unnamed, no_arrival_time,
-                 no_contact, terms_unknown }
+absence   field       "assignment" · "guest.phone" · "terms"
+          reason      not_supplied | not_available_from_source | unreadable
+          raw_value   what arrived, when the reason is unreadable
 ```
+
+The closed set this design had — `no_assignment`, `party_unnamed`, … —
+collapsed three different sentences into one flag. *The source sent nothing*,
+*this integration cannot send it at all*, and *it arrived and we could not read
+it* differ in whether anyone should be alerted, whether a connector needs
+fixing, and whether replay would help — which is R26's rejected-versus-
+superseded distinction losing its neighbour. **And `raw_value` is the field
+that lets a vocabulary grow deliberately**: an unrecognised status names itself
+instead of being guessed at years later.
 
 ### 2.3 · `Assignment` — the room, over time
 
@@ -423,6 +453,23 @@ carries its *expected* arrival as the only time available. An arrival-time
 report that cannot tell them apart measures the reservation rather than the
 guest (R13, S22).
 
+**The two source-date columns are dropped — GUEST-Q9 (M6), and this is the
+specification DD asked for.** This design had stored `arrival_date` beside
+`arrival_at`: two columns free to disagree, with no rule saying which wins —
+the defect it warns about everywhere else. **GuestOps needs no separate date
+field on the wire**, on one condition:
+
+> **A `TIME_BASIS_DERIVED` timestamp must be constructed in the property's
+> IANA zone, so that its own date component *is* the date the source gave.**
+
+That is what makes the date exactly recoverable rather than approximately
+recoverable, and R16 already requires the zone — *an offset cannot express
+daylight saving, so a stored offset is wrong for half the year*. Built in UTC
+or from an offset, a derived timestamp near midnight carries the **wrong date**
+and R12's whole distinction is lost silently, in the way that looks like
+correct data. `arrival_date` is therefore a projection of `arrival_at`,
+computed and never stored.
+
 ---
 
 ## 3 · The stay state machine, and R7's one rule
@@ -430,22 +477,43 @@ guest (R13, S22).
 ### 3.1 · The states
 
 ```text
-                 ┌──────────► Cancelled        (terminal)
-                 │
-   Booked ───────┼──────────► NoShow           (terminal)
-      │          │
-      │          └──────────► InHouse ────────► Departed
-      │                          ▲                  │
-      └──────────────────────────┴──────────────────┘
-                     staff correction only (S24)
+  Waitlisted ┐
+  Pending    ┘──► Booked ──────► InHouse ────────► Departed
+      │             │              ▲                   │
+      │             └──► NoShow    └───────────────────┘
+      └──────────────┴──► Cancelled    staff correction only (S24)
 ```
+
+**Waitlisted and Pending are pre-confirmation states — GUEST-Q9 (M1).** They
+are `StayLifecycle`'s values 7 and 8 (`dto.proto:186-187`), they are real
+on-site Oracle statuses (R5's vocabulary), and **waitlist is a first-class
+reservation state in every major PMS: the desk must see a waitlisted booking
+as waitlisted.** Both outcomes this design had been unable to avoid are
+refused — mapping one to `Booked` shows a confirmed booking that is not one,
+and rejecting it loses a real record (R25's first failure).
 
 Lifecycle rank, which is the only ordering the rule needs:
 
 ```text
-Booked 0   <   InHouse 1   <   Departed 2
-Cancelled and NoShow are terminal exits from Booked
+Waitlisted 0 · Pending 0   <   Booked 1   <   InHouse 2   <   Departed 3
+Cancelled and NoShow are terminal exits from any pre-arrival state
 ```
+
+**Two states share rank 0, and the rule needs one added sentence.** A fact of
+*equal* rank and a *different* state is applied — a waitlist clearing to
+pending is a lateral move inside pre-confirmation, and it is real. A fact of
+equal rank and the *same* state with the same values is the idempotent case
+(§3.2). Nothing else changes: a check-in arriving for a stay we hold as
+`Waitlisted` is rank 2 over rank 0, so it applies, and **the intermediate
+`Booked` is never invented** — the confirmation happened somewhere we did not
+see, and R25 forbids fabricating it.
+
+**`DUE_OUT` is deliberately not a state.** `dto.proto:184` carries it and this
+model composes it — `InHouse` plus a `departure_date` of today — because
+`CONN-Q11` ruled exactly this one level up: *a room-level duplicate of
+`StayLifecycle` would be two vocabularies for one axis*. Adding a sixth
+lifecycle value for a fact two existing fields already state would be that
+mistake, one level down. **Upheld by GUEST-Q9.**
 
 `Cancelled` and `NoShow` are **business facts about the stay**, not ADR 0062
 lifecycle states: `active` / `deleted_at` say whether a record exists, and a
@@ -469,6 +537,8 @@ replay that would have injected a check-in that never happened — reduce to it:
 | `checked_in` arriving after `Departed` | rank 1 < 2 → not applied to the lifecycle; it *fills* `arrival_at` if that is unknown, and is recorded |
 | `cancelled` for an in-house stay (S26) | rank below `InHouse` → **a recorded contradiction**, and the guest stays served |
 | the same fact twice (replay, §8) | equal rank, same values → idempotent; nothing changes and nothing is published |
+| **a waitlist clearing to pending** | equal rank, **different state** → applied. A lateral move inside pre-confirmation is real, and rank cannot order two states that neither precedes (GUEST-Q9) |
+| **a check-in for a stay we hold as `Waitlisted`** | rank 2 over rank 0 → applied. `Booked` is **not** inserted: the confirmation happened where we could not see it, and inventing it is R25's fabrication |
 
 **The one deliberate exception, named:** a **staff correction** may move the
 lifecycle backwards (S24 — checked out in error at 07:00 and still asleep in
@@ -663,6 +733,30 @@ inventory owner.
       − stop-sell
 ```
 
+### 5.2a · Which lifecycle states hold inventory — a consequence of GUEST-Q9
+
+*"Stays holding that type"* was unambiguous with five states and is not with
+seven, so it is written down rather than left to whoever writes the query:
+
+```text
+holds a room      Booked · InHouse · Pending
+holds nothing     Waitlisted · Cancelled · NoShow · Departed
+```
+
+**`Waitlisted` holds nothing, and that is the whole point of a waitlist** — the
+hotel is full, and the booking is a queue position rather than a room. Counting
+one against inventory would make a full hotel look oversold and hide the free
+room that comes back on a cancellation.
+
+**`Pending` holds one, on the conservative reading**, because under-selling by
+one room is recoverable at the desk and over-selling is not — the same
+principle §5.1 states for a lagging projection. The source can settle it
+properly: R18's guarantee carries a **`reserveInventory`** flag, which is
+precisely *"does this booking hold a room"* asked by the system that knows.
+That flag is part of M2's commercial-terms block, so **when DD's fact grows,
+`Pending` reads the flag instead of the default** — recorded here so the
+refinement is not re-derived.
+
 **The conflict check warns; it does not forbid.** GUEST-Q5 ruled that a
 double-booked room can be *the truth* — when staff answer *"two different
 stays"* to a candidate link, the second stay is real and the room is genuinely
@@ -711,7 +805,8 @@ name changes when the capability changes, never because an implementation
 moved.
 
 ```text
-reservation.created        the group exists: group_ref, expected count, origin
+reservation.created        the group exists: booking_id, its source
+                           identifiers, expected count, is_complete, origin
 reservation.expectation_changed   R9 — "three expected" became "four"
 
 stay.created               booked · room type · dates · group · party
@@ -763,7 +858,7 @@ stay carries typed external references:
 
 ```text
 StayExternalRef
-  stay_id · integration_id · id_kind · external_id
+  stay_id · integration_id · identifier_kind · external_id
 ```
 
 **`CONN-Q8` was ruled on 2026-08-31 and its v1 restriction is withdrawn** —
@@ -772,7 +867,7 @@ only one kind per entity type. *(Corrected 2026-08-31 on Stream DD's sweep,
 which found this paragraph one day stale.)*
 
 **Nothing here changed as a result**, and that is the point worth keeping:
-`id_kind` was modelled while the restriction was still in force, precisely so
+`identifier_kind` was modelled while the restriction was still in force, so
 that the ruling would cost no remodelling. A design that had encoded the
 restriction — one external reference per stay, with the kind implied — would
 be migrating today.
@@ -814,7 +909,7 @@ A crash between minting the stay and recording what it came from would leave a
 stay nothing could ever match again, and the next inbound fact would create a
 duplicate.
 
-**This is the second time the defensive `id_kind` bet paid.** `CONN-Q8`'s
+**This is the second time the defensive identifier-kind bet paid.** `CONN-Q8`'s
 ruling cost no remodelling, and this one is prose rather than a migration —
 because the references were modelled as a typed set from the start instead of
 as one column that assumed a single kind.
@@ -870,7 +965,7 @@ v_guest_contact_index     guest_id · property_id · kind · value_index
                           the blind index — exact match, no plaintext
                           → phone → guest                              §2.5
 
-v_stay_current            stay_id · property_id · booking_id · group_ref
+v_stay_current            stay_id · property_id · booking_id
                           guest_id(s) · room_id · room_type_id
                           arrival · departure · lifecycle
                           → guest → reservation → room
@@ -879,7 +974,23 @@ v_stay_current            stay_id · property_id · booking_id · group_ref
 v_stay_room_reference     room_id · open_stay_count
                           → ADR 0062's deletion-reference check:
                             a room with an open stay is not deletable
+
+v_stay_room_day           property_id · room_id · business_date
+                          stay_id · relation
+                          → arriving | staying_over | departing
+                          → CONN-Q11's composition. Approved GUEST-Q9
 ```
+
+**The fourth view exists because `CONN-Q11` named this domain as the source.**
+The room fact deliberately cannot say whether an in-house entry is an arrival
+or a stayover — *"arrival-ness is a stay-level truth the stay facts already
+carry with their dates"* — so a consumer composes it from stays through
+Context. `v_stay_current` answers *which stays are current* and cannot answer
+*which stays touch **this room** on **this business date***, which is the
+date-ranged question the composition actually asks. It is derived entirely from
+stays this application already holds, and its shape is R2's: **several stays
+touch one room on one day** — one departed this morning, one is staying over,
+one arrives this afternoon.
 
 Three rules that come with them:
 

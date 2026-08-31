@@ -7,21 +7,30 @@ something specific.
 `CONN-Q11`, `SHELL-Q23`, `WF-Q7`, `WF-Q8`, `PKG-Q39`, and DD's
 `shared/protos/hotelos/integration/v1/dto.proto` (469 lines, the normalised
 fact).
-**Rule for §1:** every mismatch is reported with its evidence, and **every
-resolution is marked as a proposal**. Nothing in the model is changed to match
-the wire, or the wire to match the model, by this page.
+**Rule for §1:** every mismatch was reported with its evidence, and every
+resolution was marked a proposal. **All nine were ruled the same day as
+`GUEST-Q9` / `GUEST-Q10`**, and §1 now records the ruling beside each — what
+was applied to this design, what DD applies to the wire, and the two findings
+that were mine to fix.
 
 ---
 
 ## 0 · The result in one paragraph
 
-**Nine mismatches, two of them against my own artifacts, and one clean pass.**
-The clean pass is `PKG-Q39`: every subject GuestOps plans to publish routes to
-the `GUEST` stream, and none dead-letters. The two against my own work are a
-mockup asserting data that cannot arrive over the wire (frame 7's `FROM OPERA`
-marks on the guarantee), and an `Export` button that needs the half of
-`SHELL-Q23` that is still open. The rest are genuine contract differences
-between `dto.proto` and this design, and none of them is resolved here.
+**Nine mismatches, two of them against my own artifacts, and one clean pass —
+all closed.** The clean pass is `PKG-Q39`: every subject GuestOps plans to
+publish routes to the `GUEST` stream, and none dead-letters. `GUEST-Q9` then
+ruled every difference: **the fact grows rather than this scope shrinking**
+(M2, M3), **waitlist and pending become real states here** (M1), and the rest
+was a joint sweep in which each side adopted what the other had right. The two
+findings against my own work are mine to fix.
+
+```text
+applied to this design      M1 · M5 · M6 · M7 · M8 · the fourth view
+DD applies to the wire      M2 · M3 · M4 · M6's zone condition
+mine to fix in the mockup   frame 4's Export · frame 7 (stands once M2 lands)
+off this stream             B1's fifteen further places → GUEST-Q10
+```
 
 ---
 
@@ -69,7 +78,7 @@ are current"*. The composition CONN-Q11 points at needs *"which stays touch
 staying over, departing. That is a date-ranged question, and `v_stay_current`
 cannot answer it.
 
-**Proposed, not applied:** a fourth domain-owned view.
+**APPROVED — `GUEST-Q9`.** A fourth domain-owned view, added to design §9.
 
 ```text
 v_stay_room_day    property_id · room_id · business_date
@@ -94,8 +103,9 @@ carries an **`Export`** button. That is a file-save, which is the half of
 without a caveat**. Two controls in the same mockup needed the same treatment
 and only one got it.
 
-**Proposed, not applied:** the `Export` control carries the same caveat as the
-balance until the file-save half is ruled, or comes out of the frame.
+**RULED — mine to fix, and fixed:** the `Export` control now carries the same
+caveat the balance got. Two controls needed the same treatment and only one had
+it.
 
 ### 1.4 · `WF-Q7` and `WF-Q8` — no impact, and one line worth adopting
 
@@ -115,7 +125,7 @@ a CLOCK-DEPENDENT value      never stored — it goes stale on its own
   who is MOD now · the current business date · availability
 a PROJECTION of sibling      may be stored — it changes only when its
 columns in the same row      source row changes, in the same transaction
-  current_room_id · completeness
+  current_room_id · arrival_date from arrival_at
 ```
 
 This design already sits on the right side of both. `RoomStay.business_date` is
@@ -124,7 +134,8 @@ the rolling current date, which stays derived (ADR 0128 §6).
 
 ### 1.5 · The wire contract — six differences
 
-Field-for-field against `dto.proto`. **None is resolved here.**
+Field-for-field against `dto.proto`. **All six ruled as `GUEST-Q9`**, each
+recorded beside its finding.
 
 #### M1 · Three lifecycle values the model cannot hold — *the significant one*
 
@@ -146,11 +157,18 @@ design §3.1         Booked · InHouse · Departed · Cancelled · NoShow
   booking that is not one, or reject it and lose a real record (R25's first
   failure).
 
-**Proposed, not applied:** these are *pre-confirmation* states rather than
-lifecycle states — a stay that is not yet a booking. Either the model gains a
-rank below `Booked`, or the Hub declines to publish them as room-stays. **This
-is a contract question for DD and the architect together, and this page picks
-neither.**
+**RULED — `GUEST-Q9`: they join the state machine as pre-confirmation
+states**, at rank 0 below `Booked`. *Waitlist is a first-class reservation
+state in every major PMS — the desk must see a waitlisted booking as
+waitlisted.* Both named bad outcomes are refused. Applied in design §3.1, with
+two consequences worked out there rather than left implicit: **two states share
+a rank**, so a same-rank move to a *different* state is applied while the
+identical fact stays idempotent; and **`Waitlisted` holds no inventory**
+(§5.2a), because a waitlist is a queue position rather than a room and counting
+one would make a full hotel look oversold.
+
+**`DUE_OUT` upheld as argued** — composed, not a sixth value, `CONN-Q11` one
+level up.
 
 #### M2 · Commercial terms cannot arrive over the wire
 
@@ -167,10 +185,10 @@ cannot be carried at all.
 beside it. **In a PMS-connected property those three rows can only ever be
 staff-entered** — the screen asserts a provenance the wire cannot deliver.
 
-**Proposed, not applied:** either `RoomStayFact` gains a `CommercialTerms`
-message carrying R18's offsets, or `GUEST-Q6`'s v1 terms are understood as
-**staff-maintained even in connected properties**, and frame 7's marks are
-corrected. The first is a contract change; the second is a scope correction.
+**RULED — `GUEST-Q9`: the fact grows, this scope does not shrink.**
+`GUEST-Q6` ruled the substance and DD materialises it on the wire — a
+commercial-terms block per R18. **Frame 7 therefore stands as drawn**, and its
+`FROM OPERA` marks become true when the block lands. Design §2.6 is unchanged.
 
 #### M3 · `GUEST-Q7`'s kept source set is not on the wire
 
@@ -190,9 +208,11 @@ PMS-sourced stays.
 the fields the contract has not modelled. `Absence` (`dto.proto:325`) records
 what is *missing*; nothing records what arrived and was not mapped.
 
-**Proposed, not applied:** the four named fields join `RoomStayFact`, and a
-`repeated SourceDetail {key, value}` carries the remainder — the retention
-half of R25, which the contract otherwise has only the discard half of.
+**RULED — `GUEST-Q9`: the fact grows.** The kept set joins `RoomStayFact` and
+`source_detail` travels with it, so `GUEST-Q7` is honoured for PMS-sourced
+stays as it already is for staff-created ones. Design §2.6b is unchanged —
+and the contract gains the **retention** half of R25, having had only the
+discard half.
 
 #### M4 · `walk_in` cannot arrive
 
@@ -201,8 +221,9 @@ indistinguishable from a booking made three weeks earlier, and S13's rule is
 that the flag is unrecoverable if not set when the stay is created. Staff-
 created walk-ins are unaffected.
 
-**Proposed, not applied:** a `bool walk_in` on the fact, or acceptance that the
-ratio is measurable only for staff-created stays.
+**RULED — `GUEST-Q9`: the wire gains it.** A walk-in is something the source
+can state, so it is stated rather than inferred. S13's rule holds on both
+paths — the flag is set when the stay is created or it is unrecoverable.
 
 #### M5 · The booking group's identity is modelled twice, differently
 
@@ -217,10 +238,10 @@ group has several typed identifiers for the same reason a stay does (R10), and
 UUIDv7 and a set of typed references. Separately, the wire **carries**
 `is_complete` where §2.1 derives incompleteness from `expected_stay_count`.
 
-**Proposed, not applied:** `Booking` gains `BookingExternalRef` rows on
-§2.1's shape, `group_ref` is retired, and `is_complete` is consumed as the
-source's assertion rather than re-derived — a source that says *"this group is
-complete"* knows something we cannot compute.
+**RULED — `GUEST-Q9`: this design adopts what the wire has right.** Applied in
+§2.1 — `booking_external_ref` rows, `group_ref` retired, and `is_complete`
+carried as the source's assertion beside our own `expected_stay_count`, because
+the two answer different questions and S30 needs both.
 
 #### M6 · Two date fields the wire does not have
 
@@ -231,9 +252,12 @@ complete"* knows something we cannot compute.
 Storing both invites exactly the defect this design warns about elsewhere: two
 columns that may disagree, with no rule saying which wins.
 
-**Proposed, not applied:** keep `arrival_at`/`departure_at` with their basis,
-and derive the date. `TIME_BASIS_DERIVED` already records that a date plus the
-property clock produced it, which is what R12 asked for.
+**RULED — `GUEST-Q9`: applied, with a condition specified back to DD.** The
+two source-date columns are dropped and the date is a projection of the
+timestamp — **provided a `TIME_BASIS_DERIVED` timestamp is constructed in the
+property's IANA zone**, so its own date component *is* the source's date. Built
+in UTC or from an offset it carries the wrong date near midnight and R12's
+distinction is lost silently (R16). Design §2.9 carries the condition.
 
 #### M7 · `completeness` is poorer than `Absence`
 
@@ -248,13 +272,15 @@ supply it*, and *it arrived and was unreadable* — and carries the raw value in
 the last case. This design's closed set collapses all three, which is R26's
 distinction (*rejected* versus *superseded*) losing a neighbour.
 
-**Proposed, not applied:** `completeness` becomes rows of
-`{field, reason, raw_value}` rather than a set of flags.
+**RULED — `GUEST-Q9`: `completeness` adopts `Absence`'s triple.** Applied in
+§2.2. The closed set collapsed three sentences that differ in whether anyone
+is alerted, whether a connector needs fixing, and whether replay helps.
 
 #### M8 · `id_kind` versus `identifier_kind`
 
-`dto.proto:53` names it `identifier_kind`; design §7 names it `id_kind`. Same
-concept, `CONN-Q8`'s. **Proposed, not applied:** adopt the contract's spelling.
+`dto.proto:53` names it `identifier_kind`; this design had `id_kind`. Same
+concept, `CONN-Q8`'s. **RULED — `GUEST-Q9`: one spelling, the contract's.**
+Applied throughout §2.1 and §7.
 
 ### 1.6 · B1's correction did not reach as far as I reported it
 
@@ -373,9 +399,13 @@ characterisation suite; an absent database **fails** the run (ADR 0053).
 2. **`APPS-Q1`'s two prerequisites have a plan of record** — the registry-driven
    shell, and the application-caller authorization round. Without the second,
    this service cannot call the Kernel or Context as itself.
-3. §1.5's contract questions are answered — **M1 blocks the state machine** and
-   M2/M3 block the schema's commercial half. M4–M8 can be built either way and
-   would be rework if guessed.
+3. **DD's proto change lands** — M2's commercial-terms block, M3's kept set and
+   `source_detail`, M4's `walk_in`, and M6's zone condition on a derived
+   timestamp. §2.6, §2.6b and §2.2 are written to receive them; building the
+   readers before the fields exist is the one thing here that would be rework.
 4. The architect says start.
+
+**What is no longer waiting:** M1 unblocked the state machine, and M5–M8 are
+applied. Nothing in §2 is now written against an unanswered question.
 
 **Nothing on this page is a decision.** Where it proposes, it says so.

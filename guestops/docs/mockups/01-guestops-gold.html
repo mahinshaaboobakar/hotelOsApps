@@ -294,6 +294,11 @@
           <div><span class="sh pms"><i></i>Opera</span><span class="sh miss">no rooms assigned</span></div>
         </div>
         <div class="tr list">
+          <div class="nm"><b>Aisha Rahman</b><span>+91 97440 •••• 63</span></div>
+          <div>BK-4511</div><div>1</div><div>24 Dec → 27 Dec</div><div><span class="pill warn">Waitlisted</span></div>
+          <div><span class="sh pms"><i></i>Opera</span><span class="hint">holds no room</span></div>
+        </div>
+        <div class="tr list">
           <div class="nm"><b>Vikram Nair</b><span>+91 98860 •••• 05</span></div>
           <div>BK-4390</div><div>1</div><div>24 Aug → 27 Aug</div><div><span class="pill neu">Departed</span></div>
           <div><span class="sh pms"><i></i>Opera</span></div>
@@ -316,7 +321,7 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>The list is where a guest at the counter is found</b>, so the search covers what a guest can actually say: their name, the number they booked with, or the confirmation number Opera gave them. <b>A booking's row shows its stays, not a room</b> — BK-4471 says <i>1 of 3 known</i> and BK-4506 says <i>2</i>, because a booking is a group and the room is a fact about a stay inside it (GUEST-Q2). <b>Cancelled and no-show rows stay in the list</b>: a cancelled reservation exists, its penalty may be chargeable, and a no-show is reportable — neither is a deletion (S25, S27, ADR 0062). <b>Every row carries its provenance</b>: from Opera, created here, overridden, disagreeing. <b>Cursor paging</b>, per the platform's API standard — a page number would move under the reader as new bookings arrive.</div>
+<div class="cap"><b>The list is where a guest at the counter is found</b>, so the search covers what a guest can actually say: their name, the number they booked with, or the confirmation number Opera gave them. <b>A booking's row shows its stays, not a room</b> — BK-4471 says <i>1 of 3 known</i> and BK-4506 says <i>2</i>, because a booking is a group and the room is a fact about a stay inside it (GUEST-Q2). <b>Cancelled and no-show rows stay in the list</b>: a cancelled reservation exists, its penalty may be chargeable, and a no-show is reportable — neither is a deletion (S25, S27, ADR 0062). <b>Waitlisted is shown as waitlisted</b> (GUEST-Q9): a first-class state in every major PMS, and the desk must be able to see it as one rather than as a confirmed booking. It <b>holds no room</b> — a waitlist is a queue position, so counting it against inventory would make a full hotel look oversold and hide the room a cancellation gives back. <b>Every row carries its provenance</b>: from Opera, created here, overridden, disagreeing. <b>Cursor paging</b>, per the platform's API standard — a page number would move under the reader as new bookings arrive.</div>
 
 <div class="sub">One stay, in depth — the same guest across six tabs</div>
 
@@ -401,7 +406,7 @@
     <div class="head">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
-      <div class="btn2">Export</div>
+      <div class="btn2 dis">Export <span class="lock no">NEEDS SHELL-Q23'S FILE-SAVE HALF</span></div>
     </div>
     <div class="body">
       <div class="tabs">
@@ -443,7 +448,7 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>This is the screen that answers a complaint.</b> Why does it say 214? Who moved the departure? Was the guest's ID taken? An activity list that showed only GuestOps's own facts would answer none of the questions a duty manager actually asks at 9 p.m., because half the story belongs to Opera, Room Care and Jobs. <b>What makes it safe is that nothing is copied</b>: GuestOps's rows come from its own event stream, and the other applications' rows are resolved live (the constitution's "context over joins" — an application never reads another's tables). <b>The disagreement is a row like any other</b>, in place and in time, rather than a banner that vanishes when it is cleared — clearing adds a row, it never removes one.</div>
+<div class="cap"><b>This is the screen that answers a complaint.</b> Why does it say 214? Who moved the departure? Was the guest's ID taken? An activity list that showed only GuestOps's own facts would answer none of the questions a duty manager actually asks at 9 p.m., because half the story belongs to Opera, Room Care and Jobs. <b>What makes it safe is that nothing is copied</b>: GuestOps's rows come from its own event stream, and the other applications' rows are resolved live (the constitution's "context over joins" — an application never reads another's tables). <b>The disagreement is a row like any other</b>, in place and in time, rather than a banner that vanishes when it is cleared — clearing adds a row, it never removes one. <b>Export is dimmed, and that is a correction to this frame</b> (2026-08-31): handing a file to the user is the half of <code>SHELL-Q23</code> still open — a print dialog and a file-save are different shell capabilities — and this control had been drawn without the caveat the balance in frame 7 carries. Two controls, one gap, and only one of them was marked.</div>
 
 <!-- 5 · Requests and jobs -->
 <h1>5 · <b>The stay · Requests &amp; jobs</b> — the front desk raises work from the guest's stay, when Jobs is installed. GuestOps records the request; Jobs owns the work</h1>

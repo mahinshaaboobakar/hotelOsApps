@@ -190,6 +190,34 @@ to sell this type on these dates"* is a commercial decision belonging to
 whoever runs the book; *"this room cannot be used"* is EngineeringOps's, and
 they are different sentences.
 
+### S1c · The hotel is full and the guest wants the date anyway
+**SITUATION.** Christmas week is sold out. The caller asks to be told if
+anything frees up. Somewhere else, a booking is taken but not yet confirmed —
+awaiting a deposit, or a corporate approval.
+
+**STANDALONE and PMS-CONNECTED.** Both. Oracle's on-site flavours send both
+states on the wire (R5's vocabulary: *"PENDING · WAITLIST"*).
+
+**EXPRESSIBLE.** Ruled by the architect, 2026-08-31 (GUEST-Q9): **waitlisted
+and pending are first-class states**, sitting *before* a booking rather than
+inside it.
+
+```text
+Waitlisted   a queue position. HOLDS NO ROOM
+Pending      awaiting confirmation. Holds a room, unless the source's
+             own guarantee terms say it does not
+```
+
+**The desk must see a waitlisted booking as waitlisted.** The two ways this
+design could previously have handled it were both refused: showing it as
+`Booked` puts a confirmed booking on the board that nobody confirmed, and
+refusing the fact loses a real record (R25's first failure).
+
+**And the availability consequence is the one to keep.** A waitlist exists
+*because* the hotel is full, so counting it against inventory would make a full
+hotel look oversold — and would hide the room that a cancellation gives back,
+which is the exact moment the waitlist is for.
+
 ### S2 · A booking of several rooms, made at once
 **SITUATION.** Three rooms, same dates, one payer, one of the three guests
 named and the other two *"colleagues, names to follow"*.
