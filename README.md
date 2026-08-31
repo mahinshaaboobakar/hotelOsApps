@@ -75,3 +75,4 @@ this repository         each connector — its PMS study, its design, its
 |---|---|---|
 | `workforce/` | application | in design — chapter `workforce/docs/chapters/01-the-workforce-application.md` · gold mockup `workforce/docs/mockups/01-workforce-gold.html` (awaiting owner approval) |
 | `pms-oracle/` | connector (working name — `CONN-Q1` and the owner's "which PMS first" decide the final one) | in study — Stream DD; the reference study lands as `pms-oracle/docs/chapters/01-the-oracle-pms-reference-study.md` |
+| `guestops/` | application — the Reservations domain of ADR 0089 / Chapter 26 (`APPS-Q1`'s name table) | in design — Stream FF; the scenario record lands as `guestops/docs/chapters/01-the-front-desk-scenarios.md`. **No reference backend exists for this app** (owner, 2026-08-31); the round is built from the PMS study's reservation facts, the chapters and the owner's scenarios |
