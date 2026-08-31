@@ -72,6 +72,22 @@ OPEN       the answer raises something nobody has ruled. It becomes a
            WF-Qn in §5 and is not resolved here
 ```
 
+**An owner fact and a standard-practice default are never the same row.** Where
+the owner answers *"I don't know exactly"*, the standing instruction applies —
+*where a modern standard exists, rule it, don't ask* — and the shape is designed
+rather than re-asked. Those rows are marked **`DEFAULT`** and carry three
+properties the owner's facts do not:
+
+```text
+OWNER     the owner said it. It is a fact and the design conforms to it
+DEFAULT   standard practice, designed by the stream because the owner has
+          no answer to give. Not an owner fact, never cited as one, and
+          VETOABLE AT THE MOCKUP READ — the point at which it is seen
+```
+
+A `DEFAULT` that is never seen is a decision made by silence, which is why each
+one below names the screen it becomes visible on.
+
 **A `GAP` is not a commitment and a proposal is not a scope decision.** The
 brief is explicit: *scope proposals are proposals; the owner rules v1.* A row
 marked `proposed IN v1` means Stream GG would build it and has said why — it
@@ -229,7 +245,7 @@ architect; a subject is written up when its answer lands.
 |---|---|---|
 | 3.1 | **Rostering** — shift templates, rotation patterns, week planning, copy-last-week | **answered 2026-08-31** ↓ |
 | 3.2 | Attendance — check-in/out, late/absent, who is *actually* here versus posted | **answered in part 2026-08-31** ↓ — the sources are answered, the semantics are not |
-| 3.3 | Leave — types, balances, requests and approval, who covers | not yet asked |
+| 3.3 | Leave — types, balances, requests and approval, who covers | **answered 2026-08-31** ↓ — types and policy are owner facts; balances, approval and covers are standard-practice defaults |
 | 3.4 | Swaps and covers — staff-initiated exchange, the approval chain | not yet asked |
 | 3.5 | Overtime and hours — caps, alerts, **the payroll boundary** | not yet asked |
 | 3.6 | Skills and certifications — expiry, the compliance view | not yet asked |
@@ -518,6 +534,182 @@ These are asked next, as the remainder of subject 2, before the walk moves on.
    Administration's Staff page, Workforce's People page, or the connector's own
    configuration UI (ADR 0128 §7 gave connectors one). It touches a Master Data
    row on behalf of a device, which is why it is not obviously any of the three.
+
+---
+
+### 3.3 · Leave — four types the owner named, a per-property policy, and three things designed rather than asked
+
+**The owner's answer, 2026-08-31**, relayed through the architect:
+
+> *"Casual, sick, earned, comp-off — all. Based on property they have leave
+> policy — monthly 2 and yearly holidays."*
+>
+> On balances, approval and covers: *"I don't know exactly."*
+
+This subject divides in two, and the division is the point. §3.3a is what the
+owner knows; §3.3b is what nobody was going to learn by asking again.
+
+#### 3.3a · The owner's facts
+
+| # | Feature | Verdict | Why |
+|---|---|---|---|
+| L1 | Four leave types: **Casual · Sick · Earned · Comp-off** | **COVERED** — `OWNER` | Chapter 01 §3 seeds exactly these. Confirmed rather than changed |
+| L2 | **Week-off was not among them** | **OPEN** — `OWNER`, by omission | Chapter 01 seeds *five*: the owner's four **plus Week-off**. Asked to name the types, the owner named four. Evidence, not a ruling — see below |
+| L3 | The leave policy is **per-property configuration** | **GAP** — `OWNER` — proposed **IN v1** | Chapter 01 has a property-configured *type list* and no *policy*. A policy is the rule that generates the balance, and it is a different object from the list of names |
+| L4 | Accrual — **"monthly 2"**, a rate rather than an annual grant | **GAP** — `OWNER` — proposed **IN v1** | Chapter 01 §3 says *"a simple per-type annual allowance and a running count — no accrual engine in v1"*. An allowance and a monthly rate are not the same model — below |
+| L5 | The property's **yearly holidays** | **GAP** — `OWNER` — proposed **IN v1**, placement open | Nothing in the platform has a holiday calendar. Measured 2026-08-31: no `holiday` concept exists in any service, proto or desktop module. Whose it is, is a real placement question — below |
+
+#### L2 · The owner named four types, and Week-off was not one of them
+
+§3.1's open question 2 asked whether `Week-off` is a shift or a leave type,
+because chapter 01 seeds it as a leave type while the rota's assign popover
+offers it as a shift. Asked to name the leave types, the owner named **four**,
+and Week-off was not among them.
+
+**That is evidence and it is not a ruling** — an omission in a spoken list is
+not the same as a refusal, and the question stays open until it is put
+directly. But it now has a direction, and it agrees with §3.1's answer:
+*"create the shifts you use"* makes a weekly off-day a shift the property
+creates — a non-working one — far more naturally than it makes it a leave type
+with a balance. The mockup already draws `Off` chips in the rota grid, which is
+what a non-working shift looks like.
+
+Recorded so the question is asked once, with both halves of the evidence, rather
+than resolved quietly here.
+
+#### L4 · The second refusal on §2.4's list, and it survives in a narrower form
+
+Chapter 01 §8 refuses *"no accrual engine"*, and §3 implements that as *"a
+simple per-type annual allowance and a running count"*. The owner's *"monthly
+2"* is an **accrual rate**, so the annual-allowance model is wrong — a balance
+that appears in full on 1 January is not the balance a property running 2-per-
+month has in March.
+
+But the refusal does not fall the way §3.2's did. **A rate is not an engine.**
+What the owner described is one number per type per property, applied monthly.
+What chapter 01 was right to refuse is the rest of the accrual machinery that
+usually arrives with it, and none of it appeared in the answer:
+
+```text
+required by the answer      a per-type accrual rate, applied per period
+still refused, unasked-for  carry-forward and its caps · encashment ·
+                            pro-rata accrual on joining or leaving ·
+                            expiry and lapse · tenure-based slabs ·
+                            statutory leave-register reporting
+```
+
+So: **the model gains a rate; the engine stays refused.** Proposed that way, and
+stated in these terms so that the first request for carry-forward meets a
+recorded boundary rather than a gap.
+
+#### L5 · The holiday calendar is a new object, and where it belongs is a genuine question
+
+No holiday concept exists anywhere in the platform today. Two readings of where
+it goes, and the platform has a written test for exactly this.
+
+`Property` already carries `CheckInTime`, `CheckOutTime` and
+`FiscalYearStartMonth`, and `services/masterdata-service/src/Domain/Tenancy.cs:80-95`
+records *why* in the source, in the same words the study needs:
+
+> *"Housekeeping plans its whole day around these two values and does not own
+> them — ADR 0052. **Being used by an application does not make an attribute
+> owned by it; what decides is who establishes the value**, and Core
+> Administration configures the operating day."*
+
+Read that way, a property's declared holidays are the same class as its
+operating day and its fiscal year: the **property** declares them, Workforce
+merely plans around them — Core's. Read the other way, a holiday list exists
+only to decide who works and who is paid for not working, which is capability
+and assignment, and ADR 0063 sends that to Workforce.
+
+**The stream's recommendation is Core**, on the `FiscalYearStartMonth`
+precedent — a property observes Diwali whether or not Workforce is installed,
+and ADR 0051's uninstall test is passed by that sentence. It is a
+**recommendation and not a decision**: it puts a new column on a Master Data
+entity, which is precisely the move ADR 0051 says is *"the single most likely
+way this boundary erodes"*, so it is raised as a question rather than taken.
+
+The **leave policy itself is not in question** — an accrual rate is established
+by Workforce and has no meaning without it. Only the calendar is arguable.
+
+#### 3.3b · The standard shape — designed, not asked
+
+The owner has no answer on balances, approval and covers. Per the standing
+instruction, these are ruled to standard practice rather than re-asked. **Every
+row here is a `DEFAULT`**: not an owner fact, never to be cited as one, and
+**vetoable at the mockup read** — the column names the frame each becomes
+visible on, because a default nobody sees is a decision made by silence.
+
+| # | The shape | Seen on | Why this is the standard |
+|---|---|---|---|
+| L6 | **Balances accrue per the property's policy and count down on approval** | frame 3 (the request sheet's balance) · frame 4 (the approver's queue) | The balance is a ledger, not a counter: accrual credits it, an approval debits it. Debiting on *request* would let an unapproved request hide capacity from everyone else |
+| L7 | **A cancelled approved leave credits the balance back** | frame 3 | The symmetry L6 implies. Chapter 01's `LeaveRequest` already has a `Cancelled` state, and a debit with no matching credit turns a cancellation into a silent forfeit |
+| L8 | **The approver is the department head, resolved from Workforce's own postings** | frame 4 | The thesis, applied: this app is the source ADR 0116 §6 reads, so it is the one component that can answer *"whose head"* without asking anything else. The same posting writes `department#manager` (chapter 01 §4), so the approver and the authorization hook are one fact rather than two that can disagree |
+| L9 | **A cover is a manual reassignment on the rota against the vacated slot** | frame 2 | Not a workflow engine, not a broadcast, not a bidding round. Somebody decides and assigns, which is what frame 2's cell click already does |
+| L10 | **The vacated slot is surfaced as a gap on the rota** | frame 2 | The leave is already drawn struck; what is missing is that it *reads* as needing action. A gap the manager can see beats a notification nobody opens |
+| L11 | **Balances are HR-adjustable** | a People/balances surface — **undrawn** | The manual floor, exactly as §3.2's manual attendance is: every accrual rule meets a case it did not anticipate, and a system with no manual correction gets corrected in a spreadsheet instead. The adjustment is a recorded, attributed entry, never a silent overwrite of a number |
+
+#### Three things the standard shape leaves genuinely open
+
+Stating a default is not the same as having answered everything it touches. Three
+edges are **not** settled by the shape above, and none is invented here:
+
+* **L6 against `WF-Q5`.** Chapter 01 §7 recommends *warn-and-allow* when a
+  balance is exhausted — *"hotels override reality daily"*. Warn-and-allow plus
+  count-down-on-approval means **a balance can go negative**, deliberately. That
+  is coherent, and it has to be *drawn* coherently: a negative balance must read
+  as an approved overdraw rather than as a bug. Frame 3's and frame 4's balance
+  chip must survive a minus sign.
+* **Chapter 01 says "reporting manager or department head".** §3 names both as
+  approvers, with no precedence, and the `Posting` carries a reporting manager
+  as well as the head. L8 names the head. Deliverable 2 must turn the *or* into
+  a rule — head always, or reporting manager when set and the head otherwise —
+  because two possible approvers with no order is two queues.
+* **Who approves the department head's own leave.** The head resolved from
+  postings cannot approve themselves, and nothing in chapter 01 says who does.
+  A real hotel answers *the GM*, which is `general_manager` — one of ADR 0114
+  §5's two unwritten Workforce-era hooks. Named here, not decided.
+
+#### What "a gap on the rota" means is one design choice, not two
+
+L10 says the vacated slot reads as needing action. That is **a per-person mark
+on a drawn cell** — the shift that had a person in it now has none.
+
+It is deliberately **not** a computed staffing shortfall, which would need
+something nobody has mentioned in three subjects: a **required headcount per
+shift per department**. That is a demand model, and it is the doorway to
+coverage rules, minimum-staffing alerts and eventually the shift-bidding
+chapter 01 §8 refuses. The cheap thing and the expensive thing look identical
+in a sentence and differ by a whole subsystem, so the study names which one it
+proposed.
+
+#### The delta against the gold mockup — frames 3 and 4
+
+| | What the frames draw | Against this subject |
+|---|---|---|
+| Frame 3 · the request | three fields — type, dates, note — with the balance on the sheet | **Agrees.** The balance shown where the decision is made is L6's own argument |
+| Frame 4 · the approvals queue | Approve / Decline with a note, the team's calendar for those dates beside it | **Agrees**, and L8 adds *who* is looking at this queue — resolved from postings rather than configured |
+| Both | the balance as a plain positive number | **Incomplete.** `WF-Q5` plus L6 permits a negative, and neither frame has been drawn against one |
+| Nowhere | the accrual rate, the holiday calendar, HR balance adjustment | **Absent.** L3, L4, L5 and L11 have no surface in any of the seven frames — a property-policy screen does not exist yet |
+
+**Neither frame is wrong; both are incomplete.** Listed for deliverable 3, with
+the property-policy surface as new work rather than a revision.
+
+#### Questions this subject raises
+
+6. **Is `Week-off` a shift or a leave type?** Already open from §3.1 as question
+   2 — L2 adds the owner's own four-item list to the evidence, and the answer
+   now looks like *shift*. Asked once, with both halves.
+7. **Whose is the property holiday calendar — Core Administration's or
+   Workforce's?** The `FiscalYearStartMonth` precedent and ADR 0051's uninstall
+   test point at Core; the recommendation is Core; the decision is not the
+   stream's, because it adds a column to a Master Data entity.
+8. **Does working a holiday or a week-off generate comp-off automatically?**
+   Comp-off is one of the owner's four types, and a comp-off balance has to come
+   from somewhere — either an HR adjustment (L11 already covers it) or a rule
+   that credits the balance when someone is rostered on a non-working day. The
+   second is an accrual rule of a different kind from L4's, and it is the one
+   thing that would pull the rota and the balance ledger together.
 
 ---
 
