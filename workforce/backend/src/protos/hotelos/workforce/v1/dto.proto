@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+// Workforce — who is posted where, as it crosses a wire.
+//
+// # This is the application's contract, not the platform's
+//
+// `shared/protos/` is the canonical language for *platform* contracts. An
+// installable application's service definition is the application's and travels
+// in its `.hopkg` payload — the same split GuestOps and the `hello-hotel`
+// fixture state.
+//
+// # What is deliberately absent from slice 1
+//
+// **No shift, leave, swap, duty, attendance or capability message.** They are
+// designed (chapter 01 §3) and they are later slices. Slice 1 is postings,
+// strictly first, because the `department#posted` writer is what the rest of
+// the platform is waiting for — ADR 0116 §6.
+//
+// **No staff identity.** Name, employee number, contact and photograph are
+// Master Data's and are read from there. A `PostingView` carries `staff_id` and
+// nothing about the person, so this application can never become a second place
+// somebody's name is stored — CLAUDE.md §"No duplicated master data".
+//
+// **No `user_id`.** The identity link lives on `masterdata.staff.user_id` and is
+// resolved when a posting is announced (see `events.proto`). Carrying it here
+// would be a copy of a Master Data field that can go stale.
+
+package hotelos.workforce.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "HotelOS.Workforce.Contracts.V1";
+
+// A person's posting: where they work, as what, and from when.
+//
+// The fields ADR 0052 sent here from `StaffPropertyAssignment` — the role, the
+// primary flag and the effective dating — plus the two relationships ADR 0063
+// §Q5 moved out of Master Data (the department and the reporting line), plus
+// the zone `WF-Q7` placed here.
+message PostingView {
+  string id          = 1;
+  string property_id = 2;
+
+  // Master Data's staff id. The person, never a copy of them.
+  string staff_id = 3;
+
+  // The department's **canon code** — ADR 0119: the code is the identity, it is
+  // immutable, and a property activates codes rather than creating them. Not a
+  // UUID: a UUID identical in every installation would be one primary key
+  // shared by every property in a group.
+  string department_code = 4;
+
+  // What they do there. Free text: a job role is the hotel's own vocabulary,
+  // and the canon governs departments rather than titles.
+  string job_role = 5;
+
+  // The one posting that answers "where does this person work?" when something
+  // needs a single answer. `WF-Q3`: multiple postings are structural, and the
+  // UI keeps one primary plus additional.
+  bool is_primary = 6;
+
+  // This person heads the department — ADR 0063's table puts *Department →
+  // current head Staff* here rather than on `masterdata.departments`.
+  bool is_department_head = 7;
+
+  // The zone this posting covers, or empty — `WF-Q7`. Optional because most
+  // postings have none: a receptionist is posted to Front Office and to no area.
+  //
+  // It is on the posting rather than in a standalone staff↔zone link **because
+  // the posting carries the department that gives the zone its meaning**.
+  // "Anita has zone 3" is an incomplete fact; "Anita has zone 3 as Housekeeping"
+  // is complete, and putting the zone here makes the incomplete one
+  // inexpressible.
+  string zone_id = 8;
+
+  // Who they answer to — a `staff_id`, not a `user_id`. Most staff have no
+  // login, and a reporting line is about people rather than accounts.
+  string reporting_manager_staff_id = 9;
+
+  // The posting's window. `effective_to` empty means it is open.
+  //
+  // Ending a posting is not deleting it: a rota worked last March was worked
+  // under the posting that was in force then, and the record has to be able to
+  // say so.
+  string effective_from = 10;  // ISO date, the property's own day
+  string effective_to   = 11;
+
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+  int64 version = 14;
+}

@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+// What Workforce announces.
+//
+// # The routing that carries these exists
+//
+// `PKG-Q39`: an application's event domains are manifest-declared and
+// materialised at installation — *package declares, Kernel materialises, Event
+// Router routes* — and until that lands the Kernel's pre-named set carries them.
+// Verified 2026-08-31 in the platform tree: `streams.rs` routes
+// `property.*.shift.>`, `property.*.leave.>`, `property.*.duty.>` **and**
+// `property.*.attendance.>` into OPERATIONAL.
+//
+// **Four domains, not three.** `attendance` cannot ride inside `shift.>`,
+// because `WF-Q10` keeps an attendance record that answers no shift at all —
+// somebody present on an unrostered day. Swaps deliberately add no fifth: they
+// are `shift.swap_*`, because a swap is a fact about a shift.
+//
+// An unrouted subject is **acked, matches nothing, and dead-letters silently** —
+// which looks exactly like working. That is why the routing was confirmed before
+// this file named a subject.
+//
+// # Slice 1 announces on the `user` aggregate, deliberately
+//
+// Chapter 01 §4 and AUTHZ-Q7's shape: a posting's announcement is about the
+// **user**, because what consumes it is the Kernel's authorization registration,
+// and the tuple it materialises is `department:{id}#posted@user:{uid}`.
+// `property.*.user.>` has been routed since Master Data grew staff.
+//
+// The posting's *own* lifecycle is not an event in slice 1: nothing consumes it
+// yet, and a subject published for no reader is a vocabulary somebody has to
+// keep supporting. Later slices add `shift.*`, `leave.*`, `duty.*` and
+// `attendance.*` as their consumers appear.
+
+package hotelos.workforce.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "HotelOS.Workforce.Contracts.V1";
+
+// `user.posted` — this user now works in this department.
+//
+// # It is emitted only for a person who can sign in
+//
+// `masterdata.staff.user_id` is nullable and *"that nullability is the whole
+// point"* — most room attendants have no login and never will. A posting for
+// such a person is a complete, correct posting that announces **nothing**: there
+// is no principal for a tuple to grant anything to, so writing one would be
+// inventing an account.
+//
+// This is not a gap. A department folder grant means something only for somebody
+// who can open a folder.
+message UserPosted {
+  // Identity's user id, resolved from Master Data at announcement time.
+  string user_id = 1;
+
+  // The department's canon code — ADR 0119.
+  string department_code = 2;
+
+  // Which posting said so, so a consumer can correlate a later end.
+  string posting_id = 3;
+
+  string property_id = 4;
+
+  google.protobuf.Timestamp occurred_at = 5;
+}
+
+// `user.posting_ended` — this user no longer works in this department.
+//
+// Emitted when a posting's window closes. The **posting row survives**: a rota
+// worked last March was worked under it, and deleting the record to revoke
+// access would take the history with it.
+message UserPostingEnded {
+  string user_id         = 1;
+  string department_code = 2;
+  string posting_id      = 3;
+  string property_id     = 4;
+
+  google.protobuf.Timestamp occurred_at = 5;
+}

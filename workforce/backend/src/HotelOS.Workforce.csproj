@@ -1,0 +1,119 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Workforce — who is posted where, as an installable application.
+
+    # It is a package, not a platform service
+
+    ADR 0122: an installable application is developed in its own repository,
+    without the platform's core code, and binds to HotelOS at exactly one point
+    — the signed `.hopkg` install. So this project lives in `HotelOsApps/`, and
+    what it may depend on is the platform's **contracts and SDK**, never its
+    services.
+
+    # How the platform is reached, and why it is a relative path today
+
+    `HotelOsApps/README.md`, on ADR 0122's addendum: *"a sibling-path reference
+    to the platform checkout, or a copied `shared/protos` — until an
+    SDK-publishing round makes them proper artifacts."* This takes the first
+    option, as GuestOps does, so there is one copy of `HotelOS.Platform` and of
+    every platform proto on the machine, and a contract change breaks the build
+    here the same day it lands there.
+
+    # Master Data is read, not embedded
+
+    CLAUDE.md's non-negotiable list: *"Applications may read master data."* This
+    application resolves a staff member's identity link and a zone through Master
+    Data's own gRPC surface, generated **Client**-side only. It writes nothing
+    there and holds no copy of a staff row — `masterdata.rooms` and its siblings
+    stay the single representation, which is the whole of the
+    no-duplicated-master-data rule.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Workforce</RootNamespace>
+    <!--
+      Fixed, because the manifest names it: install step 6 runs
+      `dotnet backend/<runtime.assembly> migrate`, and a drift between the two
+      fails the install with a file-not-found that reads like a broken package.
+    -->
+    <AssemblyName>HotelOS.Workforce</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <!-- `TreatWarningsAsErrors` IS the lint — CLAUDE.md §"Verify". -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- ADR 0090 §Q23: the platform chains the ASP.NET runtime. -->
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+    <PlatformProtos>$(PlatformRoot)\shared\protos</PlatformProtos>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!--
+      This application's own contract, in its own payload.
+
+      `AdditionalImportDirs` puts the platform's proto tree on protoc's include
+      path **without generating from it**: `hotelos/common/v1/common.proto` is
+      already compiled into `HotelOS.Platform`, and generating it again here
+      would put two `RequestContext` types in two referenced assemblies — an
+      ambiguity at every use site, and a wire type equal to itself only by
+      accident.
+    -->
+    <Protobuf Include="protos\hotelos\workforce\v1\dto.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="protos\hotelos\workforce\v1\events.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="protos\hotelos\workforce\v1\service.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Master Data's surface, **Client only**.
+
+      Workforce calls `GetStaff` to learn whether a person has an identity link
+      (`staff.user_id`, nullable) and `ListZones` to validate a zone. Generating
+      the server stub here would be an invitation to implement one, which is the
+      boundary this application must not cross.
+    -->
+    <Protobuf Include="$(PlatformProtos)\hotelos\masterdata\v1\dto.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="$(PlatformProtos)\hotelos\masterdata\v1\service.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      The SDK. Identifier generation, the domain failure vocabulary and its
+      status mapping, the request scope and envelope mapping, the Kernel
+      authorization call, the transactional event append and the schema
+      migration all live here and are **not reimplemented** — CLAUDE.md
+      §"No duplicated shared code". Two event appenders drift, and one of them
+      stops writing the queue row.
+    -->
+    <ProjectReference Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform\HotelOS.Platform.csproj" />
+  </ItemGroup>
+
+</Project>
