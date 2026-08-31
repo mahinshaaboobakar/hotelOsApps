@@ -66,7 +66,7 @@ public sealed class RoomStateNormaliserTests
     [Fact]
     public void an_axis_the_source_does_not_send_stays_unspecified()
     {
-        Assert.Equal(RoomCondition.Unspecified, StateFrom(Push()).HousekeepingStatus);
+        Assert.Equal(RoomCondition.Unspecified, StateFrom(Push()).RoomCareStatus);
     }
 
     /// <summary>
@@ -81,10 +81,10 @@ public sealed class RoomStateNormaliserTests
 
         var state = StateFrom(push);
 
-        Assert.Equal(3, state.ReservationStatuses.Count);
+        Assert.Equal(3, state.StayStatuses.Count);
         Assert.Equal(
             new[] { StayLifecycle.CheckedOut, StayLifecycle.CheckedIn, StayLifecycle.Booked },
-            state.ReservationStatuses);
+            state.StayStatuses);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public sealed class RoomStateNormaliserTests
     [InlineData("NotReserved")]
     public void a_room_nobody_is_staying_in_has_an_empty_stay_list(string status)
     {
-        Assert.Empty(StateFrom(Push() with { ReservationStatus = status }).ReservationStatuses);
+        Assert.Empty(StateFrom(Push() with { ReservationStatus = status }).StayStatuses);
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public sealed class RoomStateNormaliserTests
 
         Assert.Equal(
             new[] { StayLifecycle.CheckedOut, StayLifecycle.Booked },
-            state.ReservationStatuses);
+            state.StayStatuses);
     }
 
     /// <summary>
@@ -137,7 +137,7 @@ public sealed class RoomStateNormaliserTests
 
         Assert.Equal(soldTonight.Occupancy, notSold.Occupancy);
         Assert.Equal(soldTonight.Condition, notSold.Condition);
-        Assert.Equal(soldTonight.ReservationStatuses, notSold.ReservationStatuses);
+        Assert.Equal(soldTonight.StayStatuses, notSold.StayStatuses);
 
         Assert.NotNull(soldTonight.NextSoldAt);
         Assert.Null(notSold.NextSoldAt);

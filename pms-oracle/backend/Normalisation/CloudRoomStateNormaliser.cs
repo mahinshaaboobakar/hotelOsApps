@@ -88,13 +88,18 @@ public sealed class CloudRoomStateNormaliser
 
         state.Condition = condition.Value;
 
+        // OHIP's own field name on the left, the platform's on the right —
+        // `APPS-Q3`. The vendor calls it `housekeepingStatus` and the rejection
+        // reason quotes that, because an operator reading it is looking at
+        // Oracle's payload; HotelOS calls the department Room Care, and no
+        // vendor's vocabulary reaches a platform contract.
         var department = ReadCondition(housekeeping.HousekeepingStatus, "housekeepingStatus");
         if (department.Rejected is not null)
         {
             return department.Rejected;
         }
 
-        state.HousekeepingStatus = department.Value;
+        state.RoomCareStatus = department.Value;
 
         var stays = ReadStays(housekeeping.ReservationStatusList);
         if (stays.Rejected is not null)
@@ -102,7 +107,7 @@ public sealed class CloudRoomStateNormaliser
             return stays.Rejected;
         }
 
-        state.ReservationStatuses.Add(stays.Lifecycles);
+        state.StayStatuses.Add(stays.Lifecycles);
 
         return Normalised(state);
     }

@@ -43,8 +43,8 @@ public sealed class CloudRoomStateNormaliserTests
 
         Assert.Equal(Occupancy.Occupied, state.Occupancy);
         Assert.Equal(RoomCondition.Dirty, state.Condition);
-        Assert.Equal(RoomCondition.Inspected, state.HousekeepingStatus);
-        Assert.Equal([StayLifecycle.CheckedIn], state.ReservationStatuses);
+        Assert.Equal(RoomCondition.Inspected, state.RoomCareStatus);
+        Assert.Equal([StayLifecycle.CheckedIn], state.StayStatuses);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public sealed class CloudRoomStateNormaliserTests
     [Fact]
     public void an_absent_department_status_stays_unspecified()
     {
-        Assert.Equal(RoomCondition.Unspecified, StateFrom(Room(department: null)).HousekeepingStatus);
+        Assert.Equal(RoomCondition.Unspecified, StateFrom(Room(department: null)).RoomCareStatus);
     }
 
     /// <summary>
@@ -105,7 +105,7 @@ public sealed class CloudRoomStateNormaliserTests
 
         Assert.Equal(
             new[] { StayLifecycle.CheckedOut, StayLifecycle.CheckedIn, StayLifecycle.CheckedIn },
-            state.ReservationStatuses);
+            state.StayStatuses);
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public sealed class CloudRoomStateNormaliserTests
         Assert.Single(state.ExternalRefs);
         Assert.Equal(Occupancy.Unspecified, state.Occupancy);
         Assert.Equal(RoomCondition.Unspecified, state.Condition);
-        Assert.Empty(state.ReservationStatuses);
+        Assert.Empty(state.StayStatuses);
     }
 
     [Fact]

@@ -94,7 +94,7 @@ public sealed class RoomStateNormaliser
             return stays.Rejected;
         }
 
-        state.ReservationStatuses.Add(stays.Lifecycles);
+        state.StayStatuses.Add(stays.Lifecycles);
 
         var nextSold = ReadNextBlocked(push.NextBlocked);
         if (nextSold is not null)
