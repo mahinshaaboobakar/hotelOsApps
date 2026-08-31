@@ -1,8 +1,10 @@
 # 01 · The front desk scenarios — what GuestOps must be able to do
 
 **Status:** scenario record, 2026-08-31 — accepted by the owner, then amended
-the same day to carry the **GUEST-Q2 addendum** (a stay's anchor is the room
-*type*; the room number is an assignment required at check-in). Stream FF,
+the same day to carry two rulings: the **GUEST-Q2 addendum** (a stay's anchor
+is the room *type*; the room number is an assignment required at check-in) and
+**GUEST-Q3** (while a disagreement stands, the standing override is the one
+answer that leaves the application). Stream FF,
 deliverable 1 of the GuestOps round — brief
 `docs/working/45-the-guestops-round.md` §3.1, **in the platform repository**.
 **Authority.** There is **no chapter for GuestOps**. Chapter 26 states the
@@ -299,7 +301,8 @@ check-in is complete only when both have arrived (R6).
 displayed honestly: *"checked in, room not yet reported"*. The desk sees the
 gap rather than a blank that looks like data.
 
-**And the check-in gate of S8 does not apply here.** That gate is on the
+**And the check-in gate of S8 does not apply here** — ratified with GUEST-Q3,
+2026-08-31. That gate is on the
 *operation staff perform* — GuestOps will not let a receptionist check a guest
 into no room. An inbound PMS fact is not that operation: it is a report of
 something that already happened elsewhere, and refusing it would drop a real
@@ -485,8 +488,15 @@ family), and a night audit lagging produces exactly this shape.
 **EXPRESSIBLE.** The application must be able to hold *"the PMS says
 cancelled, the room is occupied"* as a **stated contradiction**, with the
 guest still served, rather than picking one side and discarding the other.
-This is a disagreement (§10) whose two sides are the PMS and the observed
-world rather than the PMS and a staff override.
+
+**GUEST-Q3 does not decide this one, and is not stretched to.** Its precedence
+rule is override-versus-PMS, and where the desk performed the check-in this
+*is* an override (S33) and GUEST-Q3 governs. But where the check-in itself
+arrived from the PMS and the same PMS later cancels it, there is no override
+and no second party: it is one source contradicting itself, which is R7's
+out-of-order family. **That belongs to the design's one rule for out-of-order
+facts** (S12), not to a precedence question. Recorded here so the design does
+not reach for GUEST-Q3 and find it does not fit.
 
 ### S27 · No-show
 **SITUATION.** Nobody arrived. At night audit the stay is marked a no-show.
@@ -562,15 +572,38 @@ the stay is ordinary again. That there *was* an override survives — it is how
 anybody later explains a check-in time that differs by an hour (S22's
 expected-versus-actual, again).
 
-### S35 · The PMS catches up and disagrees — **OPEN**
+### S35 · The PMS catches up and disagrees — *ruled*
 **SITUATION.** The desk checked the guest into 214. The PMS later says the
 guest is in 208.
 
-**EXPRESSIBLE.** GUEST-Q1 rules this a **recorded disagreement, never a silent
-overwrite**. What the record does not say is which value the arrivals board,
-Room Care and the Context Service are told about while the disagreement
-stands, or who may clear it. Two rooms cannot both be occupied by one guest in
-Room Care's world. **`OPEN` — §15 (c).**
+**EXPRESSIBLE.** GUEST-Q1 ruled this a **recorded disagreement, never a silent
+overwrite** — what it keeps. **GUEST-Q3 (2026-08-31) rules what it says**, in
+three parts:
+
+```text
+1  while the disagreement stands, the standing OVERRIDE is the answer
+   — on the board, to every application, and through Context.
+   One truth leaves the application; the disagreement is a FLAG on it,
+   never a second answer
+2  clearing belongs to the stay's WRITE permission — the same permission
+   that makes an override — choosing "keep ours" or "take the PMS's",
+   recorded (who · when · which side), both values kept in history
+3  clearing to the PMS's side emits the same correction event a room move
+   does, so Room Care re-plans from the event stream as always
+```
+
+The reasoning is recorded with the ruling and is worth keeping, because it is
+the rule that decides every future case of its shape: **a recorded override is
+a person looking at the guest; the inbound fact is automation, possibly
+stale** — and if the PMS silently won, GUEST-Q1's *"staff can override"* would
+be a suggestion. Author-only clearing fails across shifts; supervisor-only
+escalates a routine reconciliation.
+
+**What this settles for the consumers.** Room Care is never told the guest is
+in two rooms — it hears 214, and hears a correction if the desk later takes
+the PMS's side. Context resolves *guest → reservation → room* to 214. The
+receptionist sees 214 with a disagreement mark, and clearing it is a two-value
+choice, not free text.
 
 ### S36 · The connector is down for six hours — **OPEN**
 **SITUATION.** The PMS feed stops at 09:00. Nobody notices until the arrivals
@@ -693,16 +726,17 @@ are claimed here — `GUEST-Q3…` are claimed in the platform register by the
 architect before use (brief §3.4) — and no scenario above is resolved by
 anticipating an answer.
 
-**One is ruled** and is struck through below rather than deleted, so the
-scenarios that cite it still resolve. **Six remain open**, and four of them —
-(a), (c), (d), (f) — are load-bearing for the design: they decide the schema's
-shape, the write paths and what the Context Service is told.
+**Two are ruled** and are struck through below rather than deleted, so the
+scenarios that cite them still resolve. **Five remain open**, and three of
+them — (a), (d), (f) — are load-bearing for the design: they decide the
+schema's shape and the write paths. (e) and (g) are carried as property
+configuration and as a records list, and block nothing.
 
 | | Subject | Why it cannot be settled here |
 |---|---|---|
 | **(a)** | May staff create a stay the PMS has never seen? (S5, S13) | Write-back is out of scope, so such a stay never reaches the PMS and its night audit never reconciles it. GUEST-Q1 permits *overrides* of PMS-managed stays; creating one is not an override of anything |
 | ~~**(b)**~~ | ~~Is a room-stay valid **without a room**?~~ (S8) | **RULED — GUEST-Q2 addendum, 2026-08-31: yes.** The anchor's *"one room"* is one room **type**; the room number is an **assignment**, absent at booking, changeable through the stay, and **required at check-in**. Carried in §1's vocabulary and S8; the letter is kept rather than re-lettered so every citation above still resolves |
-| **(c)** | On a standing disagreement, which value do the board, Room Care and Context see — and who clears it? (S35) | GUEST-Q1 rules the disagreement recorded, not overwritten, and stops there. Two rooms cannot both be occupied by one guest downstream |
+| ~~**(c)**~~ | ~~On a standing disagreement, which value do the board, Room Care and Context see — and who clears it?~~ (S35) | **RULED — GUEST-Q3, 2026-08-31.** The standing **override** is the answer everywhere while the disagreement stands; the disagreement is a flag on the one truth, never a second answer. Clearing belongs to the stay's **write permission**, choosing *keep ours* or *take the PMS's*, recorded with both values kept. Clearing to the PMS's side emits the same correction event a room move does. The S11 gate note is ratified in the same row |
 | **(d)** | When the connector is down, is the property still PMS-writes-first, or its own book until the feed returns? (S36) | Changes what reconciliation means afterwards, and what the desk is told at the time |
 | **(e)** | Does GuestOps refuse a check-in into a room Room Care has not released? (S9) | Cleaning is policy-driven (APPS-Q1), and Room Care is installable — it may be absent entirely |
 | **(f)** | Is the folio — charges, deposits, guarantee and cancellation terms — in GuestOps v1? (S6, S25) | The source carries the structure (R18, R19) and the brief names a folio as a room-move consumer, but no ruling scopes money into this application |
@@ -715,9 +749,11 @@ shape, the write paths and what the Context Service is told.
 * **No model.** No fields, no types, no schema, no proto, no state names, no
   event subjects. That is `02-the-guestops-design.md`.
 * **No merge logic.** The person-graph is Guest360's round (G360-Q1).
-* **No answer to an open question.** Seven subjects are listed in §15; one —
-  (b), the roomless stay — was ruled on 2026-08-31 and is carried in §1 and
-  S8. The other six are not resolved above, and none is anticipated.
+* **No answer to an open question.** Seven subjects are listed in §15; two —
+  (b) the roomless stay and (c) the standing disagreement — were ruled on
+  2026-08-31 and are carried in §1, S8, S11 and S35. The other five are not
+  resolved above, and none is anticipated. S26 records where GUEST-Q3
+  deliberately does **not** reach.
 * **No screens.** The gold mockup and the flows are deliverable 3, and they
   are drawn from *this* page's scenarios — a frame that draws a capability no
   scenario here describes is a finding, not a plan.
