@@ -1,0 +1,126 @@
+/**
+ * The Team Rota — a department's week.
+ *
+ * Composes the header, the duty ribbon and the grid, and owns none of their
+ * drawing. What it does own is the screen's own rules: the counts, the overtime
+ * warning, and saying when it is not looking at the property's own data.
+ */
+
+import { el } from "../../chrome/element";
+import { ROSTER_READ } from "../../chrome/permissions";
+import { load, recordedWeek, type Week } from "../../roster";
+import type { HostApi } from "@hotelos/sdk";
+import { grid } from "./grid";
+import { ribbon } from "./ribbon";
+
+/**
+ * Draw the rota into `main`.
+ *
+ * @param host the bridge
+ * @param main the screen's container
+ * @param fixture the week to fall back to — the harness varies it
+ */
+export async function rota(host: HostApi, main: HTMLElement, fixture: Week = recordedWeek):
+  Promise<void> {
+  const got = await load(host, ROSTER_READ, "week", fixture);
+  const week = got.value;
+
+  const body = el("div", "body");
+  const view = el("div", "rota");
+
+  view.append(ribbon(week.duty), grid(week.days, week.people, () => {}));
+  body.append(view);
+
+  if (week.overtime.length > 0) {
+    body.append(overtime(week));
+  }
+
+  if (!got.live) {
+    body.append(standIn(got.because));
+  }
+
+  main.replaceChildren(header(week), body);
+}
+
+/**
+ * The header, and its counts.
+ *
+ * **Every number is derived from the week itself** — the FF precedent: a header
+ * that carried its own totals would eventually disagree with the grid beneath
+ * it, and the header is the one a manager reads first.
+ */
+function header(week: Week): HTMLElement {
+  const head = el("div", "head");
+  const title = el("div");
+
+  const shifts = week.people.reduce(
+    (total, person) => total + person.week.filter((cell) => cell.shift !== null).length, 0);
+  const away = week.people.filter(
+    (person) => person.week.some((cell) => cell.leave !== null)).length;
+  const gaps = week.people.reduce(
+    (total, person) => total + person.week.filter((cell) => cell.gap).length, 0);
+
+  title.append(
+    el("div", "ht", "Team Rota"),
+    el("div", "hsub",
+      `${week.people.length} people · ${shifts} shifts · ${away} on leave · ${gaps} slot uncovered`),
+  );
+
+  const picker = el("div", "sel");
+  picker.append(el("span", undefined, week.department), el("i", undefined, "▾"));
+
+  const grow = el("div", "grow");
+  const week_ = el("div", "btn", `‹ ${week.label}  Week ›`);
+  const copy = el("div", "btn", "⧉ Copy last week");
+  const swap = el("div", "btn", "⇄ Swap");
+  const print = el("div", "btn", "⎙ Print");
+  const assign = el("div", "btn go", "＋ Assign shift");
+
+  head.append(title, picker, grow, week_, copy, swap, print, assign);
+  return head;
+}
+
+/**
+ * The overtime warning — `WF-Q14`, warn and never block.
+ *
+ * It carries **the number**, because *"Vishnu is over"* tells a manager nothing
+ * they can act on and *"60.0 against 48"* tells them how much to move. Nothing
+ * on this screen is disabled by it.
+ */
+function overtime(week: Week): HTMLElement {
+  const panel = el("div", "panel");
+  const note = el("div", "note");
+
+  note.append(el("b", undefined, "Overtime — planned, not worked. "));
+
+  for (const warning of week.overtime) {
+    note.append(el("span", undefined,
+      `${warning.who} is planned ${warning.planned} hours against ${warning.threshold}. `));
+  }
+
+  note.append(el("span", undefined,
+    "The rota still takes the assignment — a manager covering a sick shift decides."));
+
+  panel.append(note);
+  return panel;
+}
+
+/**
+ * What this screen says when it is not showing the property's own data.
+ *
+ * ADR 0124: a surface fails in place and names what it awaits. A person must be
+ * able to tell whether they are looking at their hotel.
+ */
+function standIn(because: string | null): HTMLElement {
+  const panel = el("div", "panel");
+  const note = el("div", "note");
+
+  note.append(
+    el("b", undefined, "Showing the approved example week. "),
+    el("span", undefined,
+      because ?? "The desktop has no Workforce client yet, so this rota is a stand-in."),
+  );
+
+  panel.append(note);
+  return panel;
+}

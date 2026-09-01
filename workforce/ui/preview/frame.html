@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Workforce module realm</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The base rules the real realm writes into a module's document —
+   * apps/desktop/src/shell/module-host/realm.ts, `rootStyle`, as it stands
+   * AFTER SHELL-Q33. Reproduced so the capture shows what a module inherits
+   * rather than what this page felt like giving it.
+   *
+   * Note what changed there and is therefore reproduced here: the root carries
+   * `background: var(--color-surface)` so the iframe canvas never falls to UA
+   * white, `color` is `--color-ink` and not the unpublished `--color-text`, and
+   * the scrollbar is `--color-ink-faint` rather than the unpublished
+   * `--color-scrollbar`. A harness copied from an older module would inject the
+   * pre-ruling names and photograph a realm that no longer exists.
+   */
+  :root { background: var(--color-surface); color: var(--color-ink); }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
+</style>
+</head><body><script type="module" src="./frame.js"></script></body></html>

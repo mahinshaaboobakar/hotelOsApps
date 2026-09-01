@@ -1,0 +1,35 @@
+/*
+ * Exactly what the host injects into a module realm — no more.
+ *
+ * # Why exactly, and not the shell's whole palette
+ *
+ * `apps/desktop/src/shell/module-host/tokens.ts` reads **`TOKEN_NAMES` and
+ * nothing else** from the shell's root and hands those across. Fourteen names
+ * reach a module; every other variable in `styles.css` stops at the realm
+ * boundary.
+ *
+ * A harness that injected more would show colours no property will ever get —
+ * the inverse of auditing against fallbacks, and a worse error, because the
+ * capture would look *better* than the product rather than worse.
+ *
+ * The values are the shell's own, read from `apps/desktop/src/styles.css`
+ * (the default dark block). Not invented, and not the module's fallbacks: this
+ * harness exists to show what the module looks like when the platform styles
+ * it.
+ */
+:root {
+  --color-surface: #0b0d14;
+  --color-surface-raised: #11141f;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-ink: #e8ebf4;
+  --color-ink-muted: #8b93a7;
+  --color-ink-faint: #5a6172;
+  --color-ink-on-accent: #0b0d14;
+  --color-brand: #818cf8;
+  --color-ok: #34d399;
+  --color-warn: #fbbf24;
+  --color-bad: #f87171;
+  --radius-panel: 1rem;
+  --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
