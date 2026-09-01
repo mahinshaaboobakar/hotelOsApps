@@ -6,6 +6,7 @@ using HotelOS.Workforce.Application.Attendance;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
+using HotelOS.Workforce.Application.Periods;
 using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Swaps;
 using HotelOS.Workforce.Application.Shifts;
@@ -143,6 +144,7 @@ builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddScoped<DayComparison>();
 builder.Services.AddScoped<PostingAnnouncer>();
 builder.Services.AddScoped<StaffChangeConsumer>();
+builder.Services.AddScoped<PeriodService>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package

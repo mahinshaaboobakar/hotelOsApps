@@ -335,6 +335,54 @@ aggregate and say why — is a package-contract question, and it is the fourth
 finding in the same family: **a convention that exists for platform services
 and stops at the package boundary.**
 
+## F9 · `holidays worked` cannot be computed — there is no holiday calendar
+
+**Chapter 01 §3.7 lists seven figures for `WorkforcePeriod`. Slice 6 produces
+six.** The seventh is *holidays worked*, and it is blocked on a capability that
+does not exist.
+
+Measured 2026-09-01, across the whole platform:
+
+```text
+masterdata Domain/        no Holiday entity, no calendar, no column
+masterdata protos         no holiday message, no field
+services/ (all)           two matches, both unrelated strings in test files
+```
+
+**`WF-Q16` already ruled where it belongs**: the administrator establishes the
+property's holidays in Core Administration exactly as they establish
+`check_in_time`, and this application *reads* them. That ruling is right and is
+not in question — what is missing is the thing it rules on.
+
+### Why it is not built here
+
+An installable application creating a holiday calendar would put a Core
+Administration concern in a package, which is the boundary ADR 0051 exists for.
+It would also be the third form of the same mistake this round has already named
+twice:
+
+```text
+shift pattern       a taxonomy invented before a consumer exists
+languages           a second table invented for symmetry
+holiday calendar    a Core Administration entity invented by its reader
+```
+
+And the failure mode is worse than the other two, because a holiday calendar
+**looks** like application data until somebody asks which application owns it.
+The moment Room Care or Jobs needs the same list, a second one appears.
+
+### What slice 6 does instead
+
+`WorkforcePeriod` carries the six figures it can produce and **does not carry a
+zero for the seventh**. A field reporting `0` would be indistinguishable from a
+property whose staff worked no holidays, and payroll would have no way to know
+the number was never computed — the same silence ADR 0053 ends for an absent
+database, one domain over.
+
+**The unblocking condition is named**: when Core Administration establishes a
+property holiday calendar, this figure is a count over days already in the
+comparison, and it needs nothing else from this application.
+
 ## APPS-Q3 · three schemas still carry old application names
 
 **Reported, not fixed** — colleague files, per the standing order. Found by the
