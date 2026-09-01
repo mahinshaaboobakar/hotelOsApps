@@ -22,6 +22,14 @@ export interface ScheduleDay {
 
   /** True where this person also holds the duty that day. */
   duty: boolean;
+
+  /**
+   * The tail of a duty that began the day before, at reduced weight.
+   *
+   * A duty running 20:00→08:00 belongs to two dates, so the second one shows
+   * where it ends — otherwise the grid says the duty stopped at midnight.
+   */
+  tail?: string;
 }
 
 /** The month. */
@@ -66,17 +74,19 @@ export const recordedSchedule: Schedule = {
     work(4, "A", "ok"), work(5, "A", "ok"), work(6, "A", "ok"),
     work(7, "Casual", "leave"), work(8, "Casual", "leave"),
     work(9, "M", "brand"), work(10, "OFF", "neutral"),
-    work(11, "M", "brand"), work(12, "M", "brand"), work(13, "M", "brand"),
-    work(14, "M", "brand"), work(15, "A", "ok"), work(16, "A", "ok"),
+    work(11, "M", "brand"), work(12, "SB", "warn"), work(13, "M", "brand"),
+    work(14, "M", "brand"), work(15, "M", "brand"), work(16, "A", "ok"),
     work(17, "OFF", "neutral"),
-    work(18, "M", "brand"), work(19, "M", "brand"), work(20, "M", "brand"),
-    work(21, "M", "brand"), work(22, "M", "brand"), work(23, "OFF", "neutral"),
+    work(18, "A", "ok"), work(19, "A", "ok"), work(20, "A", "ok"),
+    work(21, "A", "ok"), work(22, "M", "brand"), work(23, "OFF", "neutral"),
     work(24, "M", "brand"),
-    work(25, "M", "brand"), work(26, "M", "brand"), work(27, "A", "ok"),
-    // The one day this person also holds the duty. Drawn as a marker ON the
-    // shift, because MOD is a duty a person holds while working their own
-    // posting — WF-Q1, never a replacement for it.
+    work(25, "M", "brand"), work(26, "M", "brand"), work(27, "M", "brand"),
+    // The duty crosses midnight, so it is drawn on BOTH dates — the badge names
+    // its span here, and the 29th carries the tail. A duty running 20:00→08:00
+    // genuinely belongs to two dates (WF-Q8), and a month grid that showed it on
+    // one would be the per-day shape the ruling refused.
     { date: 28, mark: "M", tone: "brand", duty: true },
-    work(29, "M", "brand"), work(30, "OFF", "neutral"), work(31, "M", "brand"),
+    { date: 29, mark: "OFF", tone: "neutral", duty: false, tail: "…08:00" },
+    work(30, "A", "ok"), work(31, "A", "ok"),
   ],
-};
+};;

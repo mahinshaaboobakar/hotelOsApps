@@ -109,5 +109,10 @@ function cell(day: ScheduleDay): HTMLElement {
     box.append(el("i", "cduty", "★"));
   }
 
+  // Where a duty ran past midnight, the next day carries its end.
+  if (day.tail !== undefined) {
+    box.append(el("i", "ctail", day.tail));
+  }
+
   return box;
 }

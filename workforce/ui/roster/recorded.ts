@@ -24,7 +24,12 @@ const MORNING: Shift = { id: "s-m", code: "M", name: "Morning", tone: "brand", h
 const AFTERNOON: Shift = { id: "s-a", code: "A", name: "Afternoon", tone: "ok", hours: "15:00–23:00" };
 const NIGHT: Shift = { id: "s-n", code: "N", name: "Night", tone: "warn", hours: "23:00–07:00" };
 const OFF: Shift = { id: "s-off", code: "OFF", name: "Week-off", tone: "neutral", hours: null };
-const STANDBY: Shift = { id: "s-sb", code: "SB", name: "Standby", tone: "neutral", hours: "on call" };
+const SPLIT: Shift = {
+  id: "s-sb", code: "SB", name: "Split — Banquet", tone: "warn", hours: "10–14, 18–22",
+};
+const GENERAL: Shift = {
+  id: "s-g", code: "G", name: "General", tone: "ok", hours: "09:00 – 18:00",
+};
 
 /** A day with a shift and nothing else true of it. */
 function on(shift: Shift): Week["people"][number]["week"][number] {
@@ -79,7 +84,7 @@ export const recordedWeek: Week = {
     {
       id: "p-joseph", name: "Joseph Kurian", initials: "JK", role: "Bell captain",
       zone: "Zone 1", head: false,
-      week: [on(OFF), on(MORNING), on(STANDBY), on(AFTERNOON), on(AFTERNOON), on(MORNING), on(MORNING)],
+      week: [on(OFF), on(MORNING), on(SPLIT), on(AFTERNOON), on(AFTERNOON), on(MORNING), on(MORNING)],
     },
     {
       id: "p-rani", name: "Rani Rajan", initials: "RR", role: "Guest relations",
@@ -97,7 +102,10 @@ export const recordedWeek: Week = {
     },
   ],
 
-  catalogue: [MORNING, AFTERNOON, NIGHT, OFF, STANDBY],
+    // The property's six, as frames 8 and 9 list them. The printed week's legend
+  // is rendered from this, so a catalogue missing an entry prints a sheet whose
+  // legend cannot explain one of its own cells.
+  catalogue: [MORNING, AFTERNOON, NIGHT, SPLIT, GENERAL, OFF],
 
   // Empty in the approved frame, and kept as a field rather than omitted: the
   // warning is a real state of this screen and the harness shows it in a pane

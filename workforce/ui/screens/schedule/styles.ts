@@ -28,5 +28,6 @@ export const SCHEDULE_CSS = `
           color:var(--color-bad,#f87171)}
 .cduty{position:absolute;top:6px;right:7px;font-style:normal;font-size:11px;
        color:var(--color-warn,#fbbf24)}
-.sel .av{width:20px;height:20px;font-size:9px}
+.ctail{position:absolute;top:6px;right:7px;font-style:normal;font-size:10px;
+       color:var(--color-ink-faint,#5a6172)}
 `;

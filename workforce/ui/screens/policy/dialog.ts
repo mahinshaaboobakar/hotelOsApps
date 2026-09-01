@@ -21,7 +21,7 @@ import { el } from "../../chrome/element";
  * @returns the overlay
  */
 export function newShift(close: () => void): HTMLElement {
-  const overlay = el("div", "over");
+  const overlay = el("div", "scrim");
   const dialog = el("div", "dlg");
 
   const head = el("div");

@@ -92,6 +92,10 @@ const CHROME = `
      border:1px solid var(--color-line,rgb(255 255 255/.07));
      border-radius:9px;padding:5px 11px;font-size:12.5px;min-width:150px}
 .sel i{color:var(--color-ink-faint,#5a6172);font-style:normal}
+/* A picker may carry an avatar. The rule lives here because the picker does:
+   a screen restyling shared chrome changes it for every other screen, and the
+   next one to put an avatar in a picker would inherit a size nobody chose. */
+.sel .av{width:20px;height:20px;font-size:9px}
 
 .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;
       width:fit-content;white-space:nowrap}

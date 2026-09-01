@@ -13,8 +13,14 @@ export const LEAVE_CSS = `
      border-radius:var(--radius-panel,1rem);padding:12px 14px}
 .bal b{font-size:20px;font-weight:600;letter-spacing:-.02em}
 /* A negative balance is a fact, not a failure — WF-Q5. It is coloured as a
-   warning rather than a refusal, because somebody already approved it. */
-.bal.over b{color:var(--color-warn,#fbbf24)}
+   warning rather than a refusal, because somebody already approved it.
+
+   Named "negative" and not "over": every screen's rules land in ONE stylesheet,
+   so a class name is module-wide. ".bal.over" collided with the dialog's
+   full-screen scrim, and the Earned card became an overlay that dimmed the
+   whole screen — visible in a capture, invisible everywhere else.
+   (And no backticks in here: this CSS lives in a template literal.) */
+.bal.negative b{color:var(--color-warn,#fbbf24)}
 .bal div{font-size:12px;color:var(--color-ink-muted,#8b93a7);margin-top:2px}
 .bal s{text-decoration:none;display:block;font-size:11px;
        color:var(--color-ink-faint,#5a6172);margin-top:3px}

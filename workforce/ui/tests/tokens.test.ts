@@ -117,6 +117,35 @@ describe("the module's token references", () => {
     }
   });
 
+  it("gives no class name to two screens", () => {
+    // **Found by a capture, and only by a capture.** Every screen's rules are
+    // composed into ONE stylesheet, so a class name is module-wide. `.over` was
+    // the leave balance's "overdrawn" modifier and the shift dialog's
+    // full-screen scrim at the same time, and the Earned card became an overlay
+    // that dimmed the entire screen. Nothing else could see it: the classes are
+    // strings, the tokens were all published, and the suite renders no layout.
+    const owners = new Map<string, string[]>();
+
+    for (const file of stylesheets()) {
+      const css = readFileSync(join(root, file), "utf8");
+
+      // Only the modifier classes a screen invents — the shared chrome is
+      // allowed to be referenced everywhere, which is what it is for.
+      for (const match of css.matchAll(/^\.([a-z][a-z0-9-]*)(?:[.\s{,:])/gmu)) {
+        const name = match[1];
+        if (name === undefined) continue;
+
+        owners.set(name, [...(owners.get(name) ?? []), file]);
+      }
+    }
+
+    const shared = [...owners.entries()]
+      .filter(([, files]) => new Set(files).size > 1)
+      .map(([name, files]) => `${name}: ${[...new Set(files)].join(" + ")}`);
+
+    expect(shared).toEqual([]);
+  });
+
   it("spells the radius the module may actually use", () => {
     // `--radius-panel` is the ONLY published radius. `--r-md` is a real shell
     // variable and stops at the realm boundary, so a module asking for it never

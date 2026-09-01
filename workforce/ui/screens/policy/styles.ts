@@ -9,7 +9,7 @@ export const POLICY_CSS = `
        border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:600;
        background:var(--color-surface-raised,#11141f)}
 
-.over{position:absolute;inset:0;display:grid;place-items:center;padding:24px;
+.scrim{position:absolute;inset:0;display:grid;place-items:center;padding:24px;
       background:color-mix(in srgb, var(--color-surface) 72%, transparent)}
 .dlg{width:min(560px,100%);max-height:100%;overflow:auto;display:flex;
      flex-direction:column;gap:14px;padding:20px;

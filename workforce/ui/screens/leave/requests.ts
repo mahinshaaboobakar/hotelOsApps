@@ -23,7 +23,7 @@ export function balances(balances_: readonly Balance[]): HTMLElement {
     // Negative is a state this card must render, not clamp. WF-Q5: hotels
     // override reality daily, and an approved overdraw is that decision on the
     // screen rather than hidden behind a floor of zero.
-    const card = el("div", balance.days < 0 ? "bal over" : "bal");
+    const card = el("div", balance.days < 0 ? "bal negative" : "bal");
 
     card.append(
       el("b", undefined, balance.of === null
