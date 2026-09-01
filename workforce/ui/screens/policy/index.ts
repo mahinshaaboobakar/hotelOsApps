@@ -19,10 +19,17 @@ import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { standIn } from "../../chrome/standin";
 import { load } from "../../roster";
+import { newShift } from "./dialog";
 import { recordedPolicy, type CatalogueRow, type LeaveRow, type Policy } from "../../roster/policy";
 
 /** Draw the screen. */
-export async function policy(host: HostApi, main: HTMLElement): Promise<void> {
+export async function policy(
+  host: HostApi,
+  main: HTMLElement,
+  dialog = false,
+  close: () => void = () => {},
+  open: () => void = () => {},
+): Promise<void> {
   const got = await load(host, ROSTER_READ, "policy", recordedPolicy);
   const config = got.value;
 
@@ -33,17 +40,25 @@ export async function policy(host: HostApi, main: HTMLElement): Promise<void> {
     body.append(standIn("policy", got.because));
   }
 
-  main.replaceChildren(header(config), body);
+  main.replaceChildren(header(config, open), body);
+
+  // Drawn over the screen it belongs to, not on a page of its own: a shift is
+  // created from the catalogue it joins, and the list behind it is the context
+  // that makes the short code's uniqueness visible.
+  if (dialog) main.append(newShift(close));
 }
 
-function header(config: Policy): HTMLElement {
+function header(config: Policy, open: () => void): HTMLElement {
   const head = el("div", "head");
   const title = el("div");
 
   title.append(el("div", "ht", "Workforce policy"), el("div", "hsub", config.property));
 
   const grow = el("div", "grow");
-  head.append(title, grow, el("div", "btn go", "Save changes"));
+  const add = el("div", "btn", "＋ New shift");
+  add.addEventListener("click", open);
+
+  head.append(title, grow, add, el("div", "btn go", "Save changes"));
   return head;
 }
 

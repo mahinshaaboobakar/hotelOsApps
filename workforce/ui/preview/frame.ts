@@ -18,6 +18,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { activate } from "../module";
 import { recordedOvertime, recordedWeek } from "../roster";
+import { recordedFirstRun, recordedPeople } from "../roster/people";
 
 const params = new URLSearchParams(location.search);
 
@@ -37,6 +38,16 @@ function host(granted: readonly string[]): HostApi {
 
     call(capability: string, method: string): Promise<unknown> {
       if (method === "week") return Promise.resolve(week);
+
+      // The first run is a data state, not a screen: the same People screen,
+      // answered with a property that has posted nobody.
+      if (method === "people") {
+        return Promise.resolve(
+          params.get("state") === "first-run" ? recordedFirstRun : recordedPeople);
+      }
+
+      // Everything else falls through to the module's own recorded facts, which
+      // is the fallback path pane 12 exists to show.
       return Promise.reject(new Error(`unhandled ${capability}/${method}`));
     },
 
@@ -71,7 +82,16 @@ function click(selector: string, text: string): void {
  */
 function drive(): void {
   const screen = params.get("screen");
-  if (screen !== null && screen !== "rota") click(".ri", screen);
+  if (screen !== null && screen !== "Team Rota") click(".ri", screen);
+
+  const tab = params.get("tab");
+  if (tab !== null) click(".tab", tab);
+
+  // The two states the rail cannot reach are opened the way a person opens
+  // them — by clicking the button the approved frame draws.
+  const open = params.get("open");
+  if (open === "print") click(".btn", "Print");
+  if (open === "shift") click(".btn", "New shift");
 
   requestAnimationFrame(() =>
     requestAnimationFrame(() =>

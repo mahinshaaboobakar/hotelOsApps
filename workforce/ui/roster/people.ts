@@ -78,3 +78,13 @@ export const recordedPeople: People = {
     },
   ],
 };
+
+/**
+ * A property that has posted nobody — the first run.
+ *
+ * The empty state names **the consequence**, not the button: until a posting
+ * exists, `department#posted` resolves to nobody and every department-scoped
+ * document grant in My Hotel is dormant. Saying so is honest, and it is also
+ * the strongest argument for doing it first.
+ */
+export const recordedFirstRun: People = { postings: [] };

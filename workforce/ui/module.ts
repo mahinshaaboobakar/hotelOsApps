@@ -37,6 +37,8 @@ import { LEAVE_CSS } from "./screens/leave/styles";
 import { people } from "./screens/people";
 import { PEOPLE_CSS } from "./screens/people/styles";
 import { policy } from "./screens/policy";
+import { printed } from "./screens/printed";
+import { PRINTED_CSS } from "./screens/printed/styles";
 import { POLICY_CSS } from "./screens/policy/styles";
 import { reports } from "./screens/reports";
 import { REPORTS_CSS } from "./screens/reports/styles";
@@ -50,8 +52,17 @@ interface Place {
   /** Which tab, for the one screen that has them. */
   tab: string;
 
+  /** Whether the screen's dialog is open. */
+  dialog: boolean;
+
   /** Change the tab and redraw. */
   go: (tab: string) => void;
+
+  /** Close whatever is open over the screen. */
+  close: () => void;
+
+  /** Open a state the rail cannot reach — the dialog, or the printed sheet. */
+  open: (what: string) => void;
 }
 
 /**
@@ -69,7 +80,10 @@ const SCREENS: readonly {
   draw: (host: HostApi, main: HTMLElement, place: Place) => void;
 }[] = [
   { label: "Staff Schedule", glyph: "◫", draw: (h, m) => void schedule(h, m) },
-  { label: "Team Rota", glyph: "▦", draw: (h, m) => void rota(h, m) },
+  {
+    label: "Team Rota", glyph: "▦",
+    draw: (h, m, place) => void rota(h, m, () => place.open("print")),
+  },
   {
     label: "Leave & Requests", glyph: "◷",
     draw: (h, m, place) => void leave(h, m, place.tab, place.go),
@@ -78,7 +92,11 @@ const SCREENS: readonly {
   { label: "Duty Register", glyph: "★", draw: (h, m) => void duty(h, m) },
   { label: "People", glyph: "◎", draw: (h, m) => void people(h, m) },
   { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
-  { label: "Policy", glyph: "⚙", draw: (h, m) => void policy(h, m) },
+  {
+    label: "Policy", glyph: "⚙",
+    draw: (h, m, place) =>
+      void policy(h, m, place.dialog, place.close, () => place.open("shift")),
+  },
 ];
 
 /** Who is signed in, drawn at the rail's foot. */
@@ -103,11 +121,12 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // the type-check nor the suite can see it.
   const style = stylesheet([
     ROTA_CSS, LEAVE_CSS, ATTENDANCE_CSS, DUTY_CSS,
-    PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS,
+    PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS, PRINTED_CSS,
   ]);
 
   let current = "Team Rota";
   let tab = "Requests";
+  let dialog = false;
 
   function show(next: string): void {
     if (root === null) return;
@@ -123,7 +142,32 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     frame.append(rail(items(), current, OPERATOR, show), main);
     root.replaceChildren(style, frame);
 
-    screen.draw(host, main, { tab, go: (chosen) => { tab = chosen; show(current); } });
+    screen.draw(host, main, {
+      tab,
+      dialog,
+      go: (chosen) => { tab = chosen; show(current); },
+      close: () => { dialog = false; show(current); },
+      open,
+    });
+  }
+
+  /**
+   * Open a dialog, or the printed sheet, from outside the rail.
+   *
+   * The printed week is **not a screen**: it replaces the module's chrome
+   * entirely, because it is a different artifact rather than a view of one.
+   */
+  function open(what: string): void {
+    if (root === null) return;
+
+    if (what === "print") {
+      root.replaceChildren(style);
+      void printed(host, root);
+      return;
+    }
+
+    dialog = true;
+    show(current);
   }
 
   return {

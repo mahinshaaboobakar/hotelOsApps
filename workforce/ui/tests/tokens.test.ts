@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { TOKEN_NAMES } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
@@ -27,14 +27,48 @@ import { describe, expect, it } from "vitest";
  * platform does not own, and no type-check or capture would say so.
  */
 describe("the module's token references", () => {
-  const files = ["../chrome/styles.ts", "../screens/rota/styles.ts"];
+  /**
+   * The module's root.
+   *
+   * `process.cwd()` rather than `import.meta.url`: under this environment the
+   * global `URL` is happy-dom's, and `fileURLToPath` refuses what it returns.
+   * Vitest fixes the working directory at the package root, which is the one
+   * thing here that is stable in both a run and a watch.
+   */
+  const root = process.cwd();
+
+  /**
+   * Every stylesheet in the module, **discovered rather than listed**.
+   *
+   * This guard shipped with two filenames written into it and was still passing
+   * six stylesheets later — covering a quarter of the module while reporting
+   * green. A guard with a hand-maintained list is a guard that stops covering
+   * whatever nobody remembered to add, which is the failure it exists to
+   * prevent, one level up.
+   */
+  function stylesheets(): string[] {
+    // Derived from a file this module certainly has, because that is the only
+    // resolution form that survives here: under happy-dom the global `URL` is
+    // the DOM's, and a bare `new URL("..", …)` does not reach `fileURLToPath`.
+    const found = ["chrome/styles.ts"];
+
+    for (const screen of readdirSync(join(root, "screens"), { withFileTypes: true })) {
+      if (!screen.isDirectory()) continue;
+
+      if (readdirSync(join(root, "screens", screen.name)).includes("styles.ts")) {
+        found.push(`screens/${screen.name}/styles.ts`);
+      }
+    }
+
+    return found;
+  }
 
   /** Every `var(--name` this module writes, derived from the source itself. */
   function referenced(): Set<string> {
     const names = new Set<string>();
 
-    for (const file of files) {
-      const source = readFileSync(fileURLToPath(new URL(file, import.meta.url)), "utf8");
+    for (const file of stylesheets()) {
+      const source = readFileSync(join(root, file), "utf8");
 
       for (const match of source.matchAll(/var\(--([a-z0-9-]+)/g)) {
         const name = match[1];
@@ -55,10 +89,10 @@ describe("the module's token references", () => {
     expect(unpublished).toEqual([]);
   });
 
-  it("derives the set from the stylesheets rather than listing it", () => {
-    // The guard is only worth having if a rule added tomorrow is covered the day
-    // it is written. If this ever reads zero the enumeration has broken and the
-    // test above would pass vacuously.
+  it("discovers every stylesheet, so a new screen is covered the day it is written", () => {
+    // Both halves matter. If the file list ever shrinks the first test passes
+    // vacuously, and if the reference set empties it passes vacuously too.
+    expect(stylesheets().length).toBeGreaterThanOrEqual(8);
     expect(referenced().size).toBeGreaterThan(8);
   });
 

@@ -23,7 +23,10 @@ export async function people(host: HostApi, main: HTMLElement): Promise<void> {
   const board = got.value;
 
   const body = el("div", "body");
-  body.append(table(board.postings), ownership());
+
+  // Nobody posted is a real state with its own screen, not an empty table.
+  body.append(board.postings.length === 0 ? firstRun() : table(board.postings));
+  body.append(ownership());
 
   main.replaceChildren(header(board), body);
 }
@@ -39,8 +42,9 @@ function header(board: People): HTMLElement {
 
   title.append(
     el("div", "ht", "People"),
-    el("div", "hsub",
-      `${board.postings.length} posted · ${here} in Front Office · ${expiring} certifications expiring`),
+    el("div", "hsub", board.postings.length === 0
+      ? "Nobody is posted yet"
+      : `${board.postings.length} posted · ${here} in Front Office · ${expiring} certifications expiring`),
   );
 
   const picker = el("div", "sel");
@@ -97,6 +101,33 @@ function row(posting: Posting): HTMLElement {
   );
 
   return item;
+}
+
+/**
+ * The first run — what a property sees before anybody is posted.
+ *
+ * **It names the consequence rather than the button.** A posting is not
+ * paperwork: until one exists, the rota, leave, the duty register and
+ * attendance have nobody to be about, and `department#posted` resolves to
+ * nobody so every department-scoped document grant in My Hotel is dormant.
+ */
+function firstRun(): HTMLElement {
+  const panel = el("div", "first");
+
+  panel.append(
+    el("div", "fmark", "◎"),
+    el("div", "ft", "Post your first staff member"),
+    el("div", "note",
+      "A posting says where a person works and as what. Everything else in "
+      + "Workforce is built on it — the rota, leave, the duty roster and "
+      + "attendance all need somebody posted first."),
+    el("div", "note",
+      "It also opens the department folders in My Hotel: until a property has "
+      + "postings, department-based document access has nobody to resolve to."),
+    el("div", "btn go", "＋ Post a staff member"),
+  );
+
+  return panel;
 }
 
 /** What this screen owns, and what it does not. */

@@ -12,22 +12,53 @@
          font: 13px/1.5 system-ui, sans-serif; }
   h2 { margin: 0 0 8px; padding: 0 18px; font-size: 11px; font-weight: 600;
        letter-spacing: .09em; text-transform: uppercase; color: var(--color-ink-faint); }
-  iframe { display: block; width: 1220px; height: 620px; border: 0;
+  iframe { display: block; width: 1220px; height: 660px; border: 0;
            margin: 0 18px 28px; border-radius: 14px;
            background: var(--color-surface);
            border: 1px solid var(--color-line); }
-  iframe.short { height: 330px; }
+  iframe.tall { height: 760px; }
+  iframe.short { height: 400px; }
 </style>
 </head><body>
-  <h2>1 · Team Rota — the week, the chips, the duty ribbon</h2>
-  <iframe id="f1" src="./frame.html?screen=rota"></iframe>
+  <h2>1 · Staff Schedule — one person's month</h2>
+  <iframe src="./frame.html?screen=Staff%20Schedule"></iframe>
 
-  <h2>2 · Team Rota — planned past the threshold, warned and not blocked</h2>
-  <iframe id="f2" src="./frame.html?screen=rota&amp;state=overtime"></iframe>
+  <h2>2 · Team Rota — the chip is data, the ribbon is a timeline, the zone is visible</h2>
+  <iframe src="./frame.html?screen=Team%20Rota"></iframe>
 
-  <h2>3 · A screen the design draws and this slice does not build</h2>
-  <iframe id="f3" class="short" src="./frame.html?screen=Reports"></iframe>
+  <h2>2b · Team Rota — planned past the threshold, warned and not blocked</h2>
+  <iframe src="./frame.html?screen=Team%20Rota&amp;state=overtime"></iframe>
 
-  <h2>4 · Nothing granted — the stand-in the module must admit to</h2>
-  <iframe id="f4" class="short" src="./frame.html?screen=rota&amp;granted=none"></iframe>
+  <h2>3 · Leave — my requests, and a balance that survives a minus sign</h2>
+  <iframe src="./frame.html?screen=Leave%20%26%20Requests"></iframe>
+
+  <h2>4 · Approvals — one queue, two kinds</h2>
+  <iframe src="./frame.html?screen=Leave%20%26%20Requests&amp;tab=Approvals"></iframe>
+
+  <h2>5 · Duty Register — spans, two bands, and an uncovered night</h2>
+  <iframe src="./frame.html?screen=Duty%20Register"></iframe>
+
+  <h2>6 · People — postings, and the zone that completes one</h2>
+  <iframe src="./frame.html?screen=People"></iframe>
+
+  <h2>7 · Attendance — posted against present, as a union</h2>
+  <iframe src="./frame.html?screen=Attendance"></iframe>
+
+  <h2>8 · Policy — four rulings, and the one thing it cannot change</h2>
+  <iframe class="tall" src="./frame.html?screen=Policy"></iframe>
+
+  <h2>9 · Creating a shift — the page the catalogue rests on</h2>
+  <iframe class="tall" src="./frame.html?screen=Policy&amp;open=shift"></iframe>
+
+  <h2>10 · Reports — the month-end summary, handed over</h2>
+  <iframe src="./frame.html?screen=Reports"></iframe>
+
+  <h2>11 · The printed week — a different artifact, for a photocopier</h2>
+  <iframe class="tall" src="./frame.html?screen=Team%20Rota&amp;open=print"></iframe>
+
+  <h2>12 · First run — the empty state names the consequence</h2>
+  <iframe class="short" src="./frame.html?screen=People&amp;state=first-run"></iframe>
+
+  <h2>13 · Nothing granted — the stand-in the module must admit to</h2>
+  <iframe class="short" src="./frame.html?screen=Team%20Rota&amp;granted=none"></iframe>
 </body></html>

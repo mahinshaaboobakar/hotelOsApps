@@ -21,8 +21,12 @@ import { ribbon } from "./ribbon";
  * @param main the screen's container
  * @param fixture the week to fall back to — the harness varies it
  */
-export async function rota(host: HostApi, main: HTMLElement, fixture: Week = recordedWeek):
-  Promise<void> {
+export async function rota(
+  host: HostApi,
+  main: HTMLElement,
+  print: () => void = () => {},
+  fixture: Week = recordedWeek,
+): Promise<void> {
   const got = await load(host, ROSTER_READ, "week", fixture);
   const week = got.value;
 
@@ -40,7 +44,7 @@ export async function rota(host: HostApi, main: HTMLElement, fixture: Week = rec
     body.append(standIn("week", got.because));
   }
 
-  main.replaceChildren(header(week), body);
+  main.replaceChildren(header(week, print), body);
 }
 
 /**
@@ -50,7 +54,7 @@ export async function rota(host: HostApi, main: HTMLElement, fixture: Week = rec
  * that carried its own totals would eventually disagree with the grid beneath
  * it, and the header is the one a manager reads first.
  */
-function header(week: Week): HTMLElement {
+function header(week: Week, print: () => void): HTMLElement {
   const head = el("div", "head");
   const title = el("div");
 
@@ -74,10 +78,11 @@ function header(week: Week): HTMLElement {
   const week_ = el("div", "btn", `‹ ${week.label}  Week ›`);
   const copy = el("div", "btn", "⧉ Copy last week");
   const swap = el("div", "btn", "⇄ Swap");
-  const print = el("div", "btn", "⎙ Print");
+  const printBtn = el("div", "btn", "⎙ Print");
+  printBtn.addEventListener("click", print);
   const assign = el("div", "btn go", "＋ Assign shift");
 
-  head.append(title, picker, grow, week_, copy, swap, print, assign);
+  head.append(title, picker, grow, week_, copy, swap, printBtn, assign);
   return head;
 }
 
