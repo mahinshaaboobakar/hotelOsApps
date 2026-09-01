@@ -78,24 +78,22 @@
     When the SDK ships as an artifact this ItemGroup becomes a PackageReference
     and the assumption goes with it.
 
-    `GrpcServices="None"`: the connector reads and writes these messages. It
-    serves no gRPC of its own, and the Hub's service surface does not exist yet.
+    # The protos are no longer compiled here
+
+    They arrive through `HotelOS.Connector`, the connector SDK approved
+    2026-09-01 — the package carrying the seams this connector implements *and*
+    the `dto.proto` those seams speak in. Compiling `dto.proto` here as well
+    would put `HotelOS.Contracts.Integration.V1` in two assemblies, which is
+    the CS0433 the Hub hit the moment both were referenced.
+
+    So this connector references exactly one platform thing: the SDK. That is
+    the bound the SDK's own charter states — "a connector references it and the
+    protos, nothing else" — with the protos reaching it through the SDK rather
+    than beside it.
   -->
   <ItemGroup>
-    <Protobuf Include="..\..\..\HosPilotOS\shared\protos\hotelos\integration\v1\dto.proto"
-              ProtoRoot="..\..\..\HosPilotOS\shared\protos"
-              GrpcServices="None" />
-    <Protobuf Include="..\..\..\HosPilotOS\shared\protos\hotelos\common\v1\common.proto"
-              ProtoRoot="..\..\..\HosPilotOS\shared\protos"
-              GrpcServices="None" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.29.3" />
-    <PackageReference Include="Grpc.Tools" Version="2.71.0">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <ProjectReference
+      Include="..\..\..\HosPilotOS\packages\sdk-dotnet\HotelOS.Connector\HotelOS.Connector.csproj" />
   </ItemGroup>
 
 </Project>
