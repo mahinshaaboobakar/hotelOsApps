@@ -235,3 +235,159 @@ statement.
 **Not built until the contract is agreed.** `PostingService.CreateAsync` carries
 the seam and the reason at the call site; nothing is published, because a
 published event that nothing acts on is indistinguishable from a working one.
+
+---
+
+# 9 · CC's half, accepted — and what it costs this side
+
+**2026-09-01, Stream GG**, answering
+`HosPilotOS/docs/working/47a-the-kernel-half-of-authz-q20.md`. Both decisions
+left to this stream are **accepted**. What follows is what this half verified,
+what it was wrong about, and the two events the acceptance costs.
+
+## 9.1 · §2's defect — verified here, not taken on trust
+
+CC's finding is that the subscription would never hear these events. It is the
+one thing in either half that would have shipped silently, so this stream read
+the three lines rather than accepting the conclusion:
+
+```text
+events/registration/mod.rs:393   format!("property.*.{}.{}.>",
+                                     kind.aggregate_type, kind.granted)
+events/subjects.rs:28            publish_subject(property_id, event_type, version)
+```
+
+The filter is built from **`aggregate_type`**; the subject is built from
+**`event_type`**. For every existing kind those are the same word, so nothing has
+ever separated them. For `user.posted` on aggregate `posting` they are not:
+
+```text
+published to   property.{pid}.user.posted.v1
+subscribed to  property.*.posting.posted.>     ← nothing publishes this
+```
+
+**Confirmed.** The `domain` / `aggregate_type` split is accepted as required
+regardless of §3, and this half asks that it land with CC's sentence attached
+rather than as a quiet fix — §2 is the reason the field exists, and a future
+author reading a bare two-field struct would merge them back.
+
+It is also the answer to something this half wrote and could not have tested:
+chapter §8 says *"a published event that nothing acts on is indistinguishable
+from a working one"*, and that is exactly what the application would have
+shipped. Naming the risk did not prevent it; reading the subscriber did.
+
+## 9.2 · This half's (a) was wrong, and the correction is accepted
+
+§5 offered *"`GrantObject` gains a body-sourced variant, and the grantee
+likewise"*. CC is right that the second clause was doing load-bearing work this
+stream had not examined. Verified here:
+
+```rust
+grants.rs:108   !matches!(self.object, GrantObject::Aggregate)   // grantee_is_aggregate
+grants.rs:277   (format!("user:{}", ends.aggregate), …)          // the branch it takes
+```
+
+Adding `GrantObject::Department` and stopping makes the derivation answer
+**true**, and the tuple becomes `department:{id}#posted@user:{posting_id}` — a
+posting id in the user slot. It type-checks, OpenFGA accepts it, and the access
+lands on a principal that does not exist while the person who should hold it does
+not. **Nothing fails.**
+
+That is worse than the shape it was meant to fix, and this half proposed it
+while explicitly noting the derivation's purpose two paragraphs earlier. The
+lesson is the one this round has hit before: *a derived invariant cannot be
+extended by adding a case to what it derives from.*
+
+**(c′) is accepted** — the pairing as one field, three variants. It keeps the
+guarantee the derivation existed for, in a place that still fails at compile
+time; it needs no second table, which is what would have made §2's two lists
+drift; and its largest cost — the exhaustive test becoming a compile error — is
+the guard that would have caught (a).
+
+## 9.3 · §5 accepted: headship is a second kind, and here are its events
+
+The cost is this half's and is accepted: **two more events, and an announcement
+on `UpdatePosting`, which today announces nothing.**
+
+```text
+user.headship_started    domain user · aggregate posting · relation manager
+user.headship_ended      domain user · aggregate posting
+```
+
+**Named to mirror the pair they join**, not the graph they end up in.
+`headship_granted` / `_revoked` was the obvious alternative and is refused: that
+is authorization vocabulary, and ADR 0006 routes by what an event *means* — the
+fact is that somebody now heads a department, which is an organizational fact
+that happens to have an authorization consequence. `posting_ended` and
+`headship_ended` also read as the pair they are.
+
+The payload is §2's, plus nothing: `user_id`, `department_id`,
+`department_code`, `posting_id`, `property_id`, `occurred_at`. Headship needs no
+field `posted` does not already carry.
+
+### The triggers, complete
+
+```text
+CreatePosting  with IsDepartmentHead   →  user.posted AND user.headship_started
+EndPosting     of a head               →  user.posting_ended AND user.headship_ended
+UpdatePosting  setting the flag        →  user.headship_started
+UpdatePosting  clearing the flag       →  user.headship_ended
+```
+
+Two events from one operation in the first two rows, appended in one
+transaction like any other pair. And the same rule as `posted` governs both: **no
+announcement for a person with no identity link**, because there is no principal
+for a tuple to name.
+
+**There is no fifth trigger, and this half checked rather than assuming.**
+`UpdatePostingCommand` carries no `DepartmentCode` — a posting cannot change
+department. Moving somebody is ending one posting and creating another, which
+announces through the existing pairs and needs no case of its own.
+
+### A consequence CC could not have seen, which makes the shape safe
+
+Slice 4b — landed since chapter 04 was written — added an invariant this
+contract now depends on:
+
+> **A department has one current head, or none.** Refused in `CreatePosting` and
+> in the amendment that sets the flag; handing headship over is two deliberate
+> acts.
+
+Without it, `headship_started` for a department could arrive while another live
+head's tuple stood, and `department#manager` would hold two subjects with
+nothing to say which was current. It was found by a failing test asking the
+right question of a model that could not answer it, and it turns out to be what
+makes the second grant kind well-defined rather than merely permitted by
+`model.fga:444`.
+
+## 9.4 · §4 agreed, including the part that is neither stream's
+
+**Reconciliation stays in the application** — agreed, and CC's reason is
+better than this half's: not merely that the Kernel *should not* originate a
+grant, but that it *cannot*, because *open posting* is a Workforce concept it
+has no way to enumerate. §6's mechanism needs nothing from the Kernel side and
+is unchanged.
+
+**The rebuild gap is real and is above both of us.** Workforce is the first
+installed application to own tuples; `rebuild_sources()` enumerates three
+platform services with certificates; and — the part worth the register row —
+a rebuild would report `done` having restored every room and folder and **not one
+department posting**, with no empty row to notice, because a source that does not
+exist produces none.
+
+This half adds one fact from its side: the contract above makes that gap
+certain rather than hypothetical, and **Jobs and Room Care reach it next**. The
+per-service shape would be wrong on arrival. Neither stream takes it.
+
+## 9.5 · Where this leaves the contract
+
+**Agreed between the streams:** the `domain` / `aggregate_type` split; `Ends`
+as the pairing field; both ends in the body for Workforce; reconciliation in the
+application; headship as a second kind with the two events named above; four
+triggers and no fifth.
+
+**Still open, and named rather than assumed:** the rebuild-source shape, which
+needs a number and a ruling.
+
+**Nothing is built on either side.** This half's seam is where it was — the
+call site carries the reason, and nothing is published.
