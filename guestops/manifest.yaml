@@ -192,6 +192,13 @@ ui:
   # alone.
   module: guestops
 
+# Placeholders. `hopkg sign` hashes the payload and writes the real map — a
+# digest map maintained by hand goes stale on the next build and gets "fixed"
+# by pasting whatever the failure printed.
+#
+# `ui/module.js`, not `module.ts`: the realm inlines this file as a module
+# script, so what ships is the **bundle**, self-contained. The first draft of
+# this manifest named the TypeScript source, which no runtime can load.
 files:
   "backend/HotelOS.GuestOps.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-  "ui/module.ts": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

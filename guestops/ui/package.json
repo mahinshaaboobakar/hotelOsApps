@@ -8,7 +8,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
+    "package": "esbuild main.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=../.build/pkg/ui/module.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
+    "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
