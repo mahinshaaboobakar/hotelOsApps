@@ -18,9 +18,12 @@
  * that will never arrive, and the shipped bundle connects without the harness
  * having to pretend to be a host at import time.
  *
- * **This is worth knowing before writing the second package**: `hello-hotel`,
- * the only shipped example of the contract, exports `activate` and never calls
- * `connectToHost`. Copying it produces a module that loads and does nothing.
+ * The fixture takes the other road, and its note says why: `hello-hotel`'s
+ * `ui/module.js` implements the handshake **by hand** from `protocol.ts`, so it
+ * is a second independent implementation of the wire and an assumption living
+ * only in the SDK fails there instead of shipping. It has no build step
+ * (`PKG-Q42`). A real package has one, so it bundles the SDK and calls
+ * `connectToHost` — which is this file.
  */
 
 import { connectToHost } from "@hotelos/sdk";
