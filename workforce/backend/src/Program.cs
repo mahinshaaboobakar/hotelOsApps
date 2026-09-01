@@ -2,6 +2,7 @@ using HotelOS.Contracts.MasterData.V1;
 using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Attendance;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
@@ -138,6 +139,8 @@ builder.Services.AddScoped<LeaveService>();
 builder.Services.AddScoped<LeaveTypeService>();
 builder.Services.AddScoped<SwapProposalService>();
 builder.Services.AddScoped<ApproverResolver>();
+builder.Services.AddScoped<AttendanceService>();
+builder.Services.AddScoped<DayComparison>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package
