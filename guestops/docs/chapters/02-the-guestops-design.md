@@ -820,6 +820,10 @@ stay.no_show
 stay.corrected             a staff correction that moved the lifecycle
                            backwards, or cleared a disagreement to the
                            PMS's side (§3.2, §4.2)
+stay.request_raised        the desk handed a guest request to whoever does
+                           the work — GUEST-Q11, ruled 2026-09-01. Carries a
+                           correlation id; the reply is EVT-Q3's correlated
+                           event, never a call back                       S18
 
 guest.created              a guest identity record now exists
 guest.updated              name or contact points changed
@@ -834,6 +838,7 @@ guest.updated              name or contact points changed
 | `stay.departed` | Room Care — which **decides for itself** whether that becomes a task; cleaning is policy-driven and a checked-out room becoming a task is a hotel policy, never an automatic consequence (APPS-Q1, S21) |
 | `stay.cancelled` · `stay.no_show` | the room returns to inventory; Guest360; analytics |
 | `guest.*` | Guest360 — the person-graph is built over these, and rewrites none of them |
+| `stay.request_raised` | Jobs — which **decides for itself** whether the request becomes a job, creates it, assigns it and owns its status. It replies with a fact carrying the same correlation id plus the job's identifier, and GuestOps stores that on consumption. An uninstalled Jobs means *"no job yet"*, never a hang (APPS-Q2) |
 
 **Two things GuestOps does not publish**, and each removal is deliberate:
 no `disagreement.*` (§4.2), and **no group-level cancellation** — GUEST-Q2

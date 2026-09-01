@@ -175,10 +175,9 @@ message GuestRecorded {
 // once — an absent Jobs would hang the desk rather than leaving a request that
 // has not yet become work.
 //
-// SUBJECT NOT RATIFIED. `stay.request_raised` follows section 6's `stay.*`
-// grammar, but section 6 names no request subject and no ruling has fixed one.
-// It is a cross-application contract, so it carries no authority until ruled
-// and is reported as a finding rather than treated as settled.
+// The subject is ruled — GUEST-Q11, 2026-09-01. It sits in the `stay.*` family
+// because the fact is about a stay, and the reply is EVT-Q3's pattern verbatim.
+// Jobs consumes this as ruled ground.
 message StayRequestRaised {
   string request_id = 1;
   string stay_id = 2;

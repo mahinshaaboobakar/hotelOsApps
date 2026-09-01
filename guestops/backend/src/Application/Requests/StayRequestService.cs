@@ -82,9 +82,9 @@ public sealed class StayRequestService(
 
         if (handOff)
         {
-            // SUBJECT NOT RATIFIED — see events.proto. `stay.request_raised`
-            // follows section 6's `stay.*` grammar, but section 6 names no
-            // request subject and nothing has ruled one. Reported as a finding.
+            // The subject is GUEST-Q11's, ruled 2026-09-01: the fact is about
+            // a stay, so it joins the `stay.*` family, and the reply is
+            // EVT-Q3's correlated event rather than a call back.
             events.Append(
                 scope,
                 "stay.request_raised",
