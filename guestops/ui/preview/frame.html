@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>GuestOps module realm</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The base rules the real realm writes into a module's document
+   * (apps/desktop/src/shell/module-host/realm.ts, rootStyle). Reproduced so
+   * the capture shows what a module inherits rather than what this page felt
+   * like giving it — including the transparent body, which is why the shell's
+   * surface shows through behind the module's own panels.
+   */
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-sans, system-ui, sans-serif);
+         color: var(--color-text, inherit); background: transparent; }
+  * { scrollbar-width: thin;
+      scrollbar-color: var(--color-scrollbar, rgba(120,120,120,.4)) transparent; }
+</style>
+</head><body><script type="module" src="./frame.js"></script></body></html>

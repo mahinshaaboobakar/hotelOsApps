@@ -1,0 +1,37 @@
+/*
+ * The shell's own token values, copied from apps/desktop/src/styles.css.
+ *
+ * NOT invented, and not the module's fallbacks: this harness exists to show
+ * what the module looks like when the platform styles it, and a harness that
+ * made up colours would verify the fallbacks instead of the design.
+ *
+ * The default (dark) block. `--radius-panel` is real; `--r-md` is the shell's
+ * radius name — it deliberately avoids `--radius-md`, which would redefine
+ * Tailwind's `rounded-md` for 48 call sites (styles.css:26).
+ */
+:root {
+  --color-surface-sunken: #07090f;
+  --color-surface: #0b0d14;
+  --color-surface-raised: #11141f;
+  --color-surface-overlay: #161a28;
+  --color-line: rgb(255 255 255 / 0.07);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-scroll-thumb: rgb(255 255 255 / 0.28);
+  --color-scroll-thumb-strong: rgb(255 255 255 / 0.45);
+  --color-ink: #e8ebf4;
+  --color-ink-muted: #8b93a7;
+  --color-ink-faint: #5a6172;
+  --color-ink-on-accent: #0b0d14;
+  --color-ok: #34d399;
+  --color-warn: #fbbf24;
+  --color-bad: #f87171;
+  --color-ok-soft: rgb(52 211 153 / 0.12);
+  --color-warn-soft: rgb(251 191 36 / 0.12);
+  --color-bad-soft: rgb(248 113 113 / 0.12);
+  --color-brand: #818cf8;
+  --color-brand-strong: #6366f1;
+  --radius-panel: 1rem;
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+}

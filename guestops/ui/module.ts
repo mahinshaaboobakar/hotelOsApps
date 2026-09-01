@@ -46,6 +46,12 @@ import { today } from "./screens/today";
 export const activate: Activate = (host: HostApi): HostedModule => {
   let root: HTMLElement | null = null;
 
+  // Held, not appended once. `show` replaces the root's children on every
+  // screen change, so a stylesheet appended at mount is deleted by the first
+  // render — the module then draws itself as an unstyled column, and neither
+  // the type-check nor the suite can see it. It is re-attached with each frame.
+  const style = stylesheet();
+
   /**
    * Draw one screen.
    *
@@ -67,7 +73,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     main.className = "main";
     frame.append(main);
 
-    root.replaceChildren(frame);
+    root.replaceChildren(style, frame);
 
     if (screen === "Stay" && chosen !== null) {
       void stay(host, chosen, main, () => show("Today", null));
@@ -93,7 +99,6 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   return {
     mount(element) {
       root = element;
-      root.append(stylesheet());
       show("Today", null);
     },
 

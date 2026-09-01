@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>gold frame</title></head>
+<body style="margin:0">
+<script>
+/*
+ * Isolate one frame of the approved gold mockup, so it can be captured beside
+ * the built screen at the same width.
+ *
+ * It renders the mockup's OWN markup and its OWN stylesheet, untouched: the
+ * audit compares the approved design against the build, so a wrapper that
+ * restyled either side would be comparing the wrapper.
+ */
+(async () => {
+  const source = await (await fetch("/docs/mockups/01-guestops-gold.html")).text();
+  const parsed = new DOMParser().parseFromString(source, "text/html");
+
+  for (const style of parsed.querySelectorAll("style")) {
+    document.head.append(style.cloneNode(true));
+  }
+
+  const index = Number(new URLSearchParams(location.search).get("n") ?? "0");
+  const wins = parsed.querySelectorAll(".win");
+  const win = wins[index];
+
+  if (win === undefined) {
+    document.body.textContent = `no frame ${index}; the mockup has ${wins.length}`;
+  } else {
+    // The heading above it names the frame, and the audit needs to quote it.
+    let heading = win.previousElementSibling;
+    while (heading !== null && heading.tagName !== "H1") heading = heading.previousElementSibling;
+    if (heading !== null) document.body.append(heading.cloneNode(true));
+    document.body.append(win.cloneNode(true));
+  }
+
+  document.documentElement.setAttribute("data-ready", "true");
+})();
+</script>
+</body></html>

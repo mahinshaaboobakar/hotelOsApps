@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>GuestOps — preview harness</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The harness's own chrome only. Each pane is a real iframe — the shape the
+   * module gets in production — so nothing this page styles reaches inside it.
+   */
+  body { margin: 0; padding: 18px 0 8px; background: var(--color-surface-sunken);
+         color: var(--color-ink);
+         font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; }
+  h2 { margin: 0 0 8px; padding: 0 18px; font-size: 11px; font-weight: 600;
+       letter-spacing: .09em; text-transform: uppercase; color: var(--color-ink-faint); }
+  iframe { display: block; width: 1220px; height: 760px; border: 0;
+           margin: 0 18px 28px; border-radius: 14px;
+           background: var(--color-surface);
+           border: 1px solid var(--color-line); }
+  iframe.short { height: 300px; }
+</style>
+</head><body>
+  <h2>1 · Today — PMS-connected, all four marks</h2>
+  <iframe id="f1" src="./frame.html?screen=today"></iframe>
+
+  <h2>2 · Attention — a disagreement and a candidate</h2>
+  <iframe id="f2" src="./frame.html?screen=attention"></iframe>
+
+  <h2>3 · The stay page — a stay carrying an override</h2>
+  <iframe id="f3" src="./frame.html?screen=stay"></iframe>
+
+  <h2>4 · Nothing granted — the fallback the module must admit to</h2>
+  <iframe id="f4" class="short" src="./frame.html?screen=today&amp;granted=none"></iframe>
+</body></html>
