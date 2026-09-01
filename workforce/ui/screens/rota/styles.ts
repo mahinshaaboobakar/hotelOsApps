@@ -79,6 +79,8 @@ export const ROTA_CSS = `
 .pk{display:flex;gap:10px;align-items:center;padding:7px 9px;border-radius:8px;
     font-size:12.5px;cursor:pointer}
 .pk:hover{background:var(--color-surface,#0b0d14)}
+.pk.on{background:color-mix(in srgb, var(--color-brand) 10%, transparent);
+       box-shadow:inset 0 0 0 1px var(--color-brand,#818cf8)}
 .pk s{text-decoration:none;margin-left:auto;font-size:11.5px;
       color:var(--color-ink-faint,#5a6172)}
 .pk .code{min-width:34px;text-align:center;border-radius:6px;padding:2px 6px;

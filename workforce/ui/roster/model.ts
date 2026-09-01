@@ -123,6 +123,17 @@ export interface Week {
   /** The week's label, as the header shows it. */
   label: string;
 
+  /**
+   * The month the week sits in, spelled as a person reads it.
+   *
+   * Stated rather than sliced off the label: the grid's day headings are short
+   * by design ("Thu 27"), and the picker needs the month ("Thu 27 Aug") because
+   * it is naming one particular day rather than heading a column. Deriving it
+   * from a display string is the kind of thing that survives until a label is
+   * reworded.
+   */
+  month: string;
+
   /** Seven day headings, Monday first. */
   days: readonly string[];
 

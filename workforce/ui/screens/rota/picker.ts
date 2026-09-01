@@ -17,40 +17,51 @@
  */
 
 import { el } from "../../chrome/element";
-import type { Person, Shift } from "../../roster";
+import type { Person, Shift, Week } from "../../roster";
 
 /**
  * Build the picker.
  *
  * @param person whose cell it is
- * @param day the day's heading
- * @param catalogue the property's shifts
+ * @param day which day of the week, zero-based from Monday
+ * @param week the week it belongs to — its department, month and catalogue
  * @param close called when it is dismissed
  * @returns the popover
  */
 export function picker(
   person: Person,
-  day: string,
-  catalogue: readonly Shift[],
+  day: number,
+  week: Week,
   close: () => void,
 ): HTMLElement {
   const scrim = el("div", "scrim");
   const pop = el("div", "pick");
 
+  // The day, with its month: this names one particular day, and a column
+  // heading's "Thu 27" is not a date somebody can act on.
+  const heading = `${week.days[day] ?? ""} ${week.month}`.trim();
+
+  // The DEPARTMENT, not the job role. The rota is a department's, and what makes
+  // a zone mean anything is the department beside it — WF-Q7's whole argument,
+  // in the one place a manager is about to change the posting's day.
+  const where = person.zone === null
+    ? week.department
+    : `${week.department} · ${person.zone}`;
+
   const head = el("div");
   head.append(
-    el("div", "ht", `${person.name} · ${day}`),
+    el("div", "ht", `${person.name} · ${heading}`),
     // "one shift per day" is the model's rule, said where somebody might
     // otherwise try to add a second: a split shift is ONE catalogue entry with
     // two spans, not two assignments.
-    el("div", "hsub",
-      `${person.zone === null ? person.role : `${person.role} · ${person.zone}`}`
-      + " · one shift per day"),
+    el("div", "hsub", `${where} · one shift per day`),
   );
 
+  const current = person.week[day]?.shift?.id ?? null;
+
   const list = el("div", "picks");
-  for (const shift of catalogue) {
-    list.append(option(shift));
+  for (const shift of week.catalogue) {
+    list.append(option(shift, shift.id === current));
   }
 
   const custom = el("div", "custom");
@@ -72,9 +83,15 @@ export function picker(
   return scrim;
 }
 
-/** One catalogue entry, as the picker offers it. */
-function option(shift: Shift): HTMLElement {
-  const row = el("div", "pk");
+/**
+ * One catalogue entry, as the picker offers it.
+ *
+ * The one already in the cell is marked. A picker that offered six identical
+ * choices would make a manager check the grid behind it to see what they were
+ * changing from.
+ */
+function option(shift: Shift, current: boolean): HTMLElement {
+  const row = el("div", current ? "pk on" : "pk");
 
   row.append(
     el("b", `code ${shift.tone}`, shift.code),

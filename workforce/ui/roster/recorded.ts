@@ -44,6 +44,7 @@ function away(leave: string): Week["people"][number]["week"][number] {
 export const recordedWeek: Week = {
   department: "Front Office",
   label: "24 – 30 Aug",
+  month: "Aug",
   days: ["Mon 24", "Tue 25", "Wed 26", "Thu 27", "Fri 28", "Sat 29", "Sun 30"],
 
   // The ribbon is a timeline, not seven day cells — a duty running 20:00→08:00

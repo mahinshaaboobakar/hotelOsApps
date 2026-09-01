@@ -58,10 +58,9 @@ export async function rota(
   // choice legible — which shift the person has either side of this day.
   if (pick !== null) {
     const person = week.people.find((candidate) => candidate.id === pick.person);
-    const day = week.days[pick.day];
 
-    if (person !== undefined && day !== undefined) {
-      main.append(picker(person, day, week.catalogue, closePick));
+    if (person !== undefined) {
+      main.append(picker(person, pick.day, week, closePick));
     }
   }
 }
