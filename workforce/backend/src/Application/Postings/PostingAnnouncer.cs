@@ -68,14 +68,16 @@ public class PostingAnnouncer(IEventAppender events, IStaffDirectory directory)
             PostingAnnouncements.Aggregate,
             posting.Id,
             posting.Version,
-            new PostingAnnouncement(
-                UserId: user,
-                StaffId: posting.StaffId,
-                DepartmentId: department,
-                DepartmentCode: posting.DepartmentCode,
-                PostingId: posting.Id,
-                PropertyId: posting.PropertyId,
-                OccurredAt: occurredAt));
+            new PostingAnnouncement
+            {
+                UserId = user,
+                StaffId = posting.StaffId,
+                DepartmentId = department,
+                DepartmentCode = posting.DepartmentCode,
+                PostingId = posting.Id,
+                PropertyId = posting.PropertyId,
+                OccurredAt = occurredAt,
+            });
 
         return true;
     }

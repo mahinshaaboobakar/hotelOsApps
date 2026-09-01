@@ -1,31 +1,64 @@
-using HotelOS.Platform;
-using HotelOS.Workforce.Domain;
+using System.Text.Json.Serialization;
 
 namespace HotelOS.Workforce.Application.Postings;
 
 /// <summary>What every posting announcement carries.</summary>
-/// <param name="UserId">Identity's, resolved from <c>masterdata.staff.user_id</c>.</param>
-/// <param name="StaffId">Master Data's person — for a consumer that is not the graph.</param>
-/// <param name="DepartmentId">The department ROW id, which is what the tuple addresses.</param>
-/// <param name="DepartmentCode">The canon code — ADR 0119, what reports group on.</param>
-/// <param name="PostingId">So a consumer can correlate an end with its start.</param>
-/// <param name="PropertyId">The tenancy boundary.</param>
-/// <param name="OccurredAt">When.</param>
 /// <remarks>
+/// <para>
 /// <b>Both department identifiers, deliberately</b> — chapter 04 §2. The id is
 /// what <c>department:{uuid}</c> needs; the code is what the fact <i>means</i> and
 /// what survives a database being rebuilt. Carrying only the id makes the
 /// announcement unreadable to a human debugging it; carrying only the code makes
 /// it unusable to the consumer that must write a tuple.
+/// </para>
+/// <para>
+/// <b>Every wire name is stated, never left to a convention.</b>
+/// <c>EventAppender</c> calls <c>JsonSerializer.SerializeToDocument</c> with no
+/// options, so a property named <c>UserId</c> reaches the store as
+/// <c>"UserId"</c> — while the Kernel reads <c>uuid(body, "user_id")</c>
+/// (<c>plan.rs:248</c>). It would find nothing, no tuple would be written, and
+/// the event would be stored, relayed and acknowledged exactly as though it had
+/// worked. <b>That is CC's §2 failure arriving through a different door</b>, and
+/// the Knowledge Service's <c>FolderAccessGranted</c> carries these same
+/// attributes against the same hazard.
+/// </para>
 /// </remarks>
-public sealed record PostingAnnouncement(
-    Guid UserId,
-    Guid StaffId,
-    Guid DepartmentId,
-    string DepartmentCode,
-    Guid PostingId,
-    Guid PropertyId,
-    DateTimeOffset OccurredAt);
+public sealed record PostingAnnouncement
+{
+    /// <summary>Identity's user — the principal the tuple names.</summary>
+    /// <remarks>
+    /// <b>In the body, never the envelope.</b> The envelope names whoever made
+    /// the decision, who is a different person in every case that matters:
+    /// reading it there would post the supervisor, and would look correct in
+    /// every test where the two happen to be the same account.
+    /// </remarks>
+    [JsonPropertyName("user_id")]
+    public required Guid UserId { get; init; }
+
+    /// <summary>Master Data's person — for a consumer that is not the graph.</summary>
+    [JsonPropertyName("staff_id")]
+    public required Guid StaffId { get; init; }
+
+    /// <summary>The department ROW id, which is what the tuple addresses.</summary>
+    [JsonPropertyName("department_id")]
+    public required Guid DepartmentId { get; init; }
+
+    /// <summary>The canon code — ADR 0119, what reports group on.</summary>
+    [JsonPropertyName("department_code")]
+    public required string DepartmentCode { get; init; }
+
+    /// <summary>So a consumer can correlate an end with its start.</summary>
+    [JsonPropertyName("posting_id")]
+    public required Guid PostingId { get; init; }
+
+    /// <summary>The tenancy boundary.</summary>
+    [JsonPropertyName("property_id")]
+    public required Guid PropertyId { get; init; }
+
+    /// <summary>When.</summary>
+    [JsonPropertyName("occurred_at")]
+    public required DateTimeOffset OccurredAt { get; init; }
+}
 
 /// <summary>
 /// The four events this application announces about postings.
