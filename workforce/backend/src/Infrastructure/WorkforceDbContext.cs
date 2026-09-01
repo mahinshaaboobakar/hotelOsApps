@@ -44,6 +44,15 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
     /// <summary>What people here can do, dated or not.</summary>
     public DbSet<Capability> Capabilities => Set<Capability>();
 
+    /// <summary>The shifts this property offers.</summary>
+    public DbSet<ShiftCatalogueEntry> ShiftCatalogue => Set<ShiftCatalogueEntry>();
+
+    /// <summary>The hours each of them has had, over time.</summary>
+    public DbSet<ShiftHours> ShiftHours => Set<ShiftHours>();
+
+    /// <summary>The Manager on Duty register.</summary>
+    public DbSet<DutyAssignment> Duties => Set<DutyAssignment>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -152,6 +161,93 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
             capability.HasIndex(c => new { c.PropertyId, c.ValidUntil })
                 .HasFilter("valid_until IS NOT NULL")
                 .HasDatabaseName("ix_capabilities__property_expiry");
+        });
+
+        modelBuilder.Entity<ShiftCatalogueEntry>(entry =>
+        {
+            entry.ToTable("shift_catalogue", table =>
+                table.HasCheckConstraint(
+                    "ck_shift_catalogue__code_present",
+                    "length(btrim(short_code)) > 0"));
+
+            entry.HasKey(e => e.Id);
+
+            entry.Property(e => e.Name).HasMaxLength(120).IsRequired();
+            entry.Property(e => e.ShortCode).HasMaxLength(8).IsRequired();
+            entry.Property(e => e.Colour).HasMaxLength(32).IsRequired();
+            entry.Property(e => e.Version).IsConcurrencyToken();
+
+            // Two live shifts sharing a code would be two shifts that look
+            // identical in a rota cell and on paper — the failure the
+            // typed-not-derived rule exists to prevent, reached by a different
+            // route. Filtered on `active`, so a retired code can be reused.
+            entry.HasIndex(e => new { e.PropertyId, e.ShortCode })
+                .IsUnique()
+                .HasFilter("active")
+                .HasDatabaseName("uq_shift_catalogue__property_code");
+        });
+
+        modelBuilder.Entity<ShiftHours>(hours =>
+        {
+            hours.ToTable("shift_hours", table =>
+            {
+                // A window that ends before it starts cannot be true. The
+                // *times* within a day may run backwards — that is a night
+                // shift — but the effective window may not.
+                table.HasCheckConstraint(
+                    "ck_shift_hours__window_ordered",
+                    "effective_to IS NULL OR effective_to >= effective_from");
+
+                // Both stated or neither: neither is an off shift, and one is a
+                // half-written one.
+                table.HasCheckConstraint(
+                    "ck_shift_hours__span_complete",
+                    "(starts_at IS NULL) = (ends_at IS NULL)");
+
+                table.HasCheckConstraint(
+                    "ck_shift_hours__second_span_complete",
+                    "(second_starts_at IS NULL) = (second_ends_at IS NULL)");
+
+                // No second span without a first.
+                table.HasCheckConstraint(
+                    "ck_shift_hours__second_needs_first",
+                    "second_starts_at IS NULL OR starts_at IS NOT NULL");
+            });
+
+            hours.HasKey(h => h.Id);
+
+            // One open revision per shift: the series has a single current set
+            // of hours, and `Reschedule` closes the previous one in the same
+            // transaction as it adds the next.
+            hours.HasIndex(h => h.CatalogueEntryId)
+                .IsUnique()
+                .HasFilter("effective_to IS NULL")
+                .HasDatabaseName("uq_shift_hours__one_open_revision");
+
+            // Resolving what was worked on a date — the query WF-Q15 exists for.
+            hours.HasIndex(h => new { h.CatalogueEntryId, h.EffectiveFrom })
+                .HasDatabaseName("ix_shift_hours__entry_from");
+        });
+
+        modelBuilder.Entity<DutyAssignment>(duty =>
+        {
+            duty.ToTable("duties", table =>
+                table.HasCheckConstraint(
+                    "ck_duties__span_ordered",
+                    "ends_at > starts_at"));
+
+            duty.HasKey(d => d.Id);
+
+            duty.Property(d => d.DutyType).HasMaxLength(32).IsRequired();
+            duty.Property(d => d.HandoverNote).HasMaxLength(2000).IsRequired();
+            duty.Property(d => d.Version).IsConcurrencyToken();
+
+            // "Who is MOD now" and the week strip both scan a property's spans
+            // by time. **Not a unique index** — two duties overlapping is
+            // refused in the service, where two spans can be compared; an index
+            // cannot express an overlap, which is exactly what WF-Q8 changed.
+            duty.HasIndex(d => new { d.PropertyId, d.StartsAt })
+                .HasDatabaseName("ix_duties__property_start");
         });
     }
 }

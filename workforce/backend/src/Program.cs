@@ -3,6 +3,8 @@ using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Capabilities;
+using HotelOS.Workforce.Application.Duties;
+using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Grpc;
 using HotelOS.Workforce.Infrastructure;
@@ -124,6 +126,8 @@ builder.Services
 builder.Services.AddScoped<IStaffDirectory, MasterDataStaffDirectory>();
 builder.Services.AddScoped<PostingService>();
 builder.Services.AddScoped<CapabilityService>();
+builder.Services.AddScoped<ShiftCatalogueService>();
+builder.Services.AddScoped<DutyService>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package
