@@ -198,22 +198,11 @@ public class RotaService(
         var first = await LoadAsync(scope, command.FirstAssignmentId, cancellationToken);
         var second = await LoadAsync(scope, command.SecondAssignmentId, cancellationToken);
 
-        // What is exchanged is the *shift*, not the day or the person: the two
-        // cells keep their owners and dates and trade what is worked in them.
-        // Exchanging the people instead would move a shift to a day that person
-        // may already be rostered on.
-        (first.CatalogueEntryId, second.CatalogueEntryId) =
-            (second.CatalogueEntryId, first.CatalogueEntryId);
-        (first.OverrideStartsAt, second.OverrideStartsAt) =
-            (second.OverrideStartsAt, first.OverrideStartsAt);
-        (first.OverrideEndsAt, second.OverrideEndsAt) =
-            (second.OverrideEndsAt, first.OverrideEndsAt);
-
-        var now = clock.GetUtcNow();
-        first.UpdatedAt = now;
-        first.Version += 1;
-        second.UpdatedAt = now;
-        second.Version += 1;
+        // The same exchange an approved staff proposal performs — one
+        // implementation, so a manager's rearrangement and an approved swap
+        // cannot produce different rotas. What moves is the shift; the owner and
+        // the day do not.
+        ShiftExchange.Apply(first, second, clock.GetUtcNow());
 
         // One SaveChanges, one transaction: both cells change or neither does.
         // A half-applied swap leaves one person covering two shifts and the

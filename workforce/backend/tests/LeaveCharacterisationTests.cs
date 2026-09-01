@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
+using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Domain;
@@ -455,7 +456,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var db = fixture.Context();
 
         return (
-            new LeaveService(db, authorizer, TimeProvider.System),
+            new LeaveService(db, authorizer, new ApproverResolver(db), TimeProvider.System),
             new LeaveTypeService(db, authorizer, directory, TimeProvider.System),
             directory,
             new PostingService(db, authorizer, directory, TimeProvider.System));

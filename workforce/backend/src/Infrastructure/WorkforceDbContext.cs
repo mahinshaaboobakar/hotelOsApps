@@ -68,6 +68,9 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
     /// <summary>Somebody asking to be away.</summary>
     public DbSet<LeaveRequest> LeaveRequests => Set<LeaveRequest>();
 
+    /// <summary>Staff asking to exchange shifts with a colleague.</summary>
+    public DbSet<SwapProposal> SwapProposals => Set<SwapProposal>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -405,6 +408,28 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
 
             request.HasIndex(r => new { r.PropertyId, r.StaffId, r.From })
                 .HasDatabaseName("ix_leave_requests__property_staff_from");
+        });
+
+        modelBuilder.Entity<SwapProposal>(proposal =>
+        {
+            proposal.ToTable("swap_proposals", table =>
+                table.HasCheckConstraint(
+                    "ck_swap_proposals__two_people",
+                    "proposer_staff_id <> colleague_staff_id"));
+
+            proposal.HasKey(p => p.Id);
+
+            proposal.Property(p => p.Note).HasMaxLength(1000).IsRequired();
+            proposal.Property(p => p.DecisionNote).HasMaxLength(1000).IsRequired();
+            proposal.Property(p => p.Version).IsConcurrencyToken();
+
+            // "What needs me" — one query serving the colleague and the approver,
+            // because in a small hotel they are the same person as often as not.
+            proposal.HasIndex(p => new { p.PropertyId, p.State, p.ColleagueStaffId })
+                .HasDatabaseName("ix_swap_proposals__property_state_colleague");
+
+            proposal.HasIndex(p => new { p.PropertyId, p.State, p.ApproverStaffId })
+                .HasDatabaseName("ix_swap_proposals__property_state_approver");
         });
     }
 }

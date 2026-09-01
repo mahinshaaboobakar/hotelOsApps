@@ -65,6 +65,11 @@ public class PostingService(
 
         await RefuseOverlapAsync(scope.PropertyId, command, code, cancellationToken);
 
+        if (command.IsDepartmentHead)
+        {
+            await RefuseSecondHeadAsync(scope.PropertyId, code, null, cancellationToken);
+        }
+
         var now = clock.GetUtcNow();
         var posting = new Posting
         {
@@ -143,6 +148,12 @@ public class PostingService(
 
         if (command.IsDepartmentHead is { } head)
         {
+            if (head && !posting.IsDepartmentHead)
+            {
+                await RefuseSecondHeadAsync(
+                    scope.PropertyId, posting.DepartmentCode, posting.Id, cancellationToken);
+            }
+
             // Chapter 01 §4 says a department-head posting writes
             // `department#manager`. Nothing writes it yet, for the same reason
             // the posting announcement does not — the mechanism is unbuilt on
@@ -276,6 +287,46 @@ public class PostingService(
         {
             throw new InvalidRequestException(
                 $"this person already holds an overlapping posting in {code}");
+        }
+    }
+
+    /// <summary>A department has one current head, or none.</summary>
+    /// <remarks>
+    /// <para>
+    /// ADR 0063's table names <i>Department → <b>current</b> head Staff</i>, and
+    /// two live heads is the same corrupt shape the MOD register refuses: a
+    /// question with two answers. The approver resolution reads this flag, so a
+    /// second head would put a request in whichever queue the database happened
+    /// to return first.
+    /// </para>
+    /// <para>
+    /// <b>Refused, not warned</b> — <c>WF-Q16</c>. Handing headship over is
+    /// clearing the flag on one posting and setting it on the other, which is
+    /// two deliberate acts rather than one ambiguous state.
+    /// </para>
+    /// <para>
+    /// Found by a test, not by reasoning: a suite that created several heads in
+    /// one department got whichever the query returned, and the assertion that
+    /// failed was asking the right question of a model that could not answer it.
+    /// </para>
+    /// </remarks>
+    private async Task RefuseSecondHeadAsync(
+        Guid propertyId, string code, Guid? excluding, CancellationToken cancellationToken)
+    {
+        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+
+        var taken = await db.Postings.AnyAsync(
+            p => p.PropertyId == propertyId
+                 && p.DepartmentCode == code
+                 && p.IsDepartmentHead
+                 && (p.EffectiveTo == null || p.EffectiveTo >= today)
+                 && (excluding == null || p.Id != excluding),
+            cancellationToken);
+
+        if (taken)
+        {
+            throw new InvalidRequestException(
+                $"{code} already has a department head — end or amend that posting first");
         }
     }
 

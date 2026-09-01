@@ -27,6 +27,7 @@ namespace HotelOS.Workforce.Application.Leave;
 public class LeaveService(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
+    ApproverResolver approvers,
     TimeProvider clock)
 {
     /// <summary>Raise a request, for oneself or on somebody's behalf.</summary>
@@ -64,7 +65,11 @@ public class LeaveService(
             // Resolved now rather than at decision time: a request that changed
             // hands because a posting moved while it waited is one nobody is
             // accountable for.
-            ApproverStaffId = await ResolveApproverAsync(scope, command.StaffId, cancellationToken),
+            ApproverStaffId = await approvers.ResolveAsync(
+                scope.PropertyId,
+                command.StaffId,
+                DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime),
+                cancellationToken),
 
             CreatedAt = now,
             UpdatedAt = now,
@@ -246,52 +251,6 @@ public class LeaveService(
                         && r.State == LeaveRequestState.Requested)
             .OrderBy(r => r.From)
             .ToListAsync(cancellationToken);
-    }
-
-    /// <summary>Who decides this person's leave.</summary>
-    /// <remarks>
-    /// <b>One rule, one queue.</b> Chapter 01 said <i>"the reporting manager or
-    /// department head"</i> with no precedence, which is two queues; ruled
-    /// 2026-08-31: the reporting manager when the posting names one, the
-    /// department head otherwise. A department head's own leave goes to the
-    /// general manager — <c>null</c> here, because that hook is unwritten
-    /// (ADR 0114 §5) and inventing a holder for it would be worse than an
-    /// unassigned queue somebody can see.
-    /// </remarks>
-    private async Task<Guid?> ResolveApproverAsync(
-        RequestScope scope, Guid staffId, CancellationToken cancellationToken)
-    {
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
-
-        var posting = await db.Postings
-            .Where(p => p.PropertyId == scope.PropertyId
-                        && p.StaffId == staffId
-                        && p.EffectiveFrom <= today
-                        && (p.EffectiveTo == null || p.EffectiveTo >= today))
-            .OrderByDescending(p => p.IsPrimary)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (posting is null)
-        {
-            return null;
-        }
-
-        if (posting.ReportingManagerStaffId is { } manager)
-        {
-            return manager;
-        }
-
-        // The department head, found the same way every other question about a
-        // department is answered here — through a posting.
-        var head = await db.Postings
-            .Where(p => p.PropertyId == scope.PropertyId
-                        && p.DepartmentCode == posting.DepartmentCode
-                        && p.IsDepartmentHead
-                        && p.StaffId != staffId
-                        && (p.EffectiveTo == null || p.EffectiveTo >= today))
-            .FirstOrDefaultAsync(cancellationToken);
-
-        return head?.StaffId;
     }
 
     private void Post(

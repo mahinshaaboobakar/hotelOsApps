@@ -6,6 +6,7 @@ using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Rota;
+using HotelOS.Workforce.Application.Swaps;
 using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Grpc;
@@ -135,6 +136,8 @@ builder.Services.AddScoped<OvertimeCheck>();
 builder.Services.AddScoped<PolicyService>();
 builder.Services.AddScoped<LeaveService>();
 builder.Services.AddScoped<LeaveTypeService>();
+builder.Services.AddScoped<SwapProposalService>();
+builder.Services.AddScoped<ApproverResolver>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package
