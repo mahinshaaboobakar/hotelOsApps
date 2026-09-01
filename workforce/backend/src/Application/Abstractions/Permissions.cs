@@ -70,7 +70,7 @@ public static class Permissions
     // one resource.
 
     /// <summary>Build and change the rota — slice 3.</summary>
-    public const string ShiftDefine = "shift.define";
+    public const string RosterPlan = "roster.plan";
     /// <summary>Raise a leave request, including on somebody's behalf — slice 4.</summary>
     public const string LeaveRequest = "leave.request";
     /// <summary>Decide a leave request — slice 4.</summary>

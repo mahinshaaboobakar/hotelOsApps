@@ -71,7 +71,7 @@ resources:
 # this file were swept together:
 #
 #     posting.manage      →  posting.assign
-#     shift.manage        →  shift.define
+#     shift.manage        →  roster.plan
 #     capability.manage   →  capability.record
 #     policy.manage       →  roster.configure
 #     workforce.read      →  roster.read
@@ -92,7 +92,7 @@ resources:
 permissions:
   - id: posting.assign
     reason: "Post people to departments, set headship and reporting lines, and end a posting"
-  - id: shift.define
+  - id: roster.plan
     reason: "Fill the rota, copy a week forward, and exchange two people's shifts"
   - id: leave.request
     reason: "Raise a leave request, for oneself or on somebody's behalf, and withdraw one"

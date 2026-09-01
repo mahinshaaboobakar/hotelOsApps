@@ -441,11 +441,18 @@ and were renamed; the other seven stand as proposed.
 
 ```text
 posting.manage      →  posting.assign
-shift.manage        →  shift.define
+shift.manage        →  roster.plan
 capability.manage   →  capability.record
 policy.manage       →  roster.configure
 workforce.read      →  roster.read
 ```
+
+**A sixth correction, 2026-09-01**: `shift.define` became **`roster.plan`** —
+and the manifest's own words decided it. Its reason line reads *"fill the rota,
+copy a week forward, and exchange two people's shifts"*, which is **planning a
+roster**, not defining a shift. A name and its own description disagreeing is
+the cheapest defect there is to find and the easiest to walk past; the
+description was right.
 
 **`roster` was the answer, and it was hiding in `APPS-Q3`.** This application
 proposed `workforce.configure` and flagged it as still naming the application —

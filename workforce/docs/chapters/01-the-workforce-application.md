@@ -411,7 +411,7 @@ asks for.
 * **Permissions** (ADR 0007 naming, one per capability):
 
 ```text
-posting.assign · shift.define · duty.assign
+posting.assign · roster.plan · duty.assign
 leave.request (every member) · leave.approve
 swap.propose (every member) · swap.approve
 attendance.record · attendance.amend
