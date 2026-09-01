@@ -7,6 +7,7 @@
  */
 
 import { el } from "../../chrome/element";
+import { legend } from "../../chrome/legend";
 import { standIn } from "../../chrome/standin";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load, recordedWeek, type Week } from "../../roster";
@@ -41,7 +42,7 @@ export async function rota(
     ribbon(week.duty),
     grid(week.days, week.people, (person, day) => onPick(person.id, day)),
   );
-  body.append(view);
+  body.append(view, legend(week.catalogue, "edit a shift → effective forward only"));
 
   if (week.overtime.length > 0) {
     body.append(overtime(week));

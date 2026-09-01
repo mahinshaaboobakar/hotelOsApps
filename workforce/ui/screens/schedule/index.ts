@@ -13,8 +13,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { legend } from "../../chrome/legend";
 import { standIn } from "../../chrome/standin";
-import { load } from "../../roster";
+import { load, recordedWeek } from "../../roster";
 import { recordedSchedule, type Schedule, type ScheduleDay } from "../../roster/schedule";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
@@ -25,7 +26,7 @@ export async function schedule(host: HostApi, main: HTMLElement): Promise<void> 
   const month = got.value;
 
   const body = el("div", "body");
-  body.append(figures(month), calendar(month));
+  body.append(figures(month), calendar(month), legend(recordedWeek.catalogue));
 
   if (!got.live) {
     body.append(standIn("month", got.because));

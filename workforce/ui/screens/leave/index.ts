@@ -69,9 +69,13 @@ function header(board: LeaveBoard, open: () => void): HTMLElement {
 
   const pending = board.requests.filter((row) => row.state === "Requested").length;
 
+  const swaps = board.waiting.filter((item) => item.kind === "Swap").length;
+
   title.append(
     el("div", "ht", "Leave & Requests"),
-    el("div", "hsub", `Requests · ${pending} pending`),
+    el("div", "hsub",
+      `${board.waiting.length} waiting · ${board.waiting.length - swaps} leave · ${swaps} swap`
+      + ` · ${pending} of mine pending`),
   );
 
   const grow = el("div", "grow");

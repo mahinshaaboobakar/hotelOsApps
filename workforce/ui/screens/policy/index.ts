@@ -65,14 +65,14 @@ function header(config: Policy, open: () => void): HTMLElement {
 /** The catalogue, and the sentence that makes editing it safe. */
 function shifts(rows: readonly CatalogueRow[]): HTMLElement {
   const section = el("div", "sect");
-  const columns = "1.4fr 110px 150px 1fr";
+  const columns = "1.4fr 100px 140px 1fr 140px";
 
   section.append(el("div", "stitle", "Shifts — the property's own catalogue"));
 
   const list = el("div", "rows");
   const head = el("div", "row hd");
   head.style.gridTemplateColumns = columns;
-  for (const label of ["Shift", "Short code", "Times", "Colour & kind"]) {
+  for (const label of ["Shift", "Short code", "Times", "Colour & kind", "In use"]) {
     head.append(el("div", undefined, label));
   }
   list.append(head);
@@ -85,6 +85,9 @@ function shifts(rows: readonly CatalogueRow[]): HTMLElement {
       el("div", "code", row.code),
       el("div", "dim", row.times),
       el("div", "dim", `${row.colour} · ${row.kind}`),
+      // Why retiring a shift is not deleting it: these assignments still name it,
+      // and a rota worked under it has to stay readable.
+      el("div", "dim", row.inUse),
     );
     list.append(item);
   }
