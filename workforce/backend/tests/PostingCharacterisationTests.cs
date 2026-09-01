@@ -37,7 +37,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         Assert.Null(posting.EffectiveTo);
 
         Assert.Equal(
-            ("posting.manage", "property", scope.PropertyId),
+            ("posting.assign", "property", scope.PropertyId),
             Assert.Single(authorizer.Checks));
     }
 
@@ -293,7 +293,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
 
         await service.ListAsync(fixture.Scope(), new ListPostingsQuery(), default);
 
-        Assert.Equal("workforce.read", Assert.Single(authorizer.Checks).Permission);
+        Assert.Equal("roster.read", Assert.Single(authorizer.Checks).Permission);
     }
 
     [Fact]
@@ -301,7 +301,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, authorizer, _, _) = Build();
         var staff = Uuid7.NewUuid7();
-        authorizer.Deny.Add("posting.manage");
+        authorizer.Deny.Add("posting.assign");
 
         await Assert.ThrowsAsync<PermissionDeniedException>(
             () => service.CreateAsync(fixture.Scope(), Command(staff), default));

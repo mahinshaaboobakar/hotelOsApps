@@ -434,64 +434,47 @@ night shift requires a fire warden — and inventing that vocabulary is the
 taxonomy problem again. What the register can honestly say is *this person's
 certification has lapsed*; the manager knows what the shift needs.
 
-## F11 · Workforce's twelve permissions are not in the registry, and five cannot be
+## F11 · The permission spellings — ruled, and swept
 
-**The manifest is written and the package does not install**, because install
-resolves every permission id against
-`infrastructure/openfga/permissions.yaml` and **none of the twelve is there**
-— measured 2026-09-01. That is the blocker GuestOps met and had closed by a
-ruling; this one is open.
-
-### Five collide with the registry's own rules, which this application may not overrule
-
-The registry states both rules in its header:
+**Ruled 2026-09-01.** Five of the twelve broke the registry's own header rules
+and were renamed; the other seven stand as proposed.
 
 ```text
-`write`, `manage` and `edit` are BANNED     posting.manage   shift.manage
-   "manage says nothing about blast radius"  capability.manage  policy.manage
-
-a permission never names the service or       workforce.read
-application that implements it                — the rule that sent
-                                              guestops.configure → desk.configure
+posting.manage      →  posting.assign
+shift.manage        →  shift.define
+capability.manage   →  capability.record
+policy.manage       →  roster.configure
+workforce.read      →  roster.read
 ```
 
-**Seven are already well-formed** and need only registry rows: `leave.request`,
-`leave.approve`, `duty.assign`, `swap.propose`, `swap.approve`,
-`attendance.record`, `attendance.amend`.
+**`roster` was the answer, and it was hiding in `APPS-Q3`.** This application
+proposed `workforce.configure` and flagged it as still naming the application —
+the one part it could not settle. The ruling found the noun the rename had
+already freed: **`APPS-Q3` renamed the *application* away from Roster while
+keeping the function vocabulary**, so `roster` was available as a *resource* in
+exactly the way `desk` was for GuestOps. Renaming the app is what made the word
+usable, which is the opposite of what a rename usually costs.
 
-### Proposed spellings — proposals, not decisions
+### The sweep
 
-A permission name is a **stable platform contract**, and an application does not
-mint one for itself. These are offered the way GuestOps' four were, for the
-architect to rule:
+Not the occurrence, the class — and the constants made a miss a compile error:
 
 ```text
-posting.manage      →  posting.assign        posts a person to a department
-                                              and ends the posting
-capability.manage   →  capability.record     records skills, languages and
-                                              certifications
-shift.manage        →  shift.roster          fills the rota — the verb the
-                                              domain already uses
-policy.manage       →  workforce.configure   splits: the catalogue and leave
-                    →  shift.define          types are policy; defining a shift
-                                              is its own capability
-workforce.read      →  roster.read           `roster` is the thing being read,
-                                              not the application that serves it
+src/    12 files   Permissions.cs constants, and every call site through them
+tests/   5 files   the literals, which are the independent check
+manifest.yaml      the twelve ids, and the comment block above them
 ```
 
-**`workforce.configure` is proposed knowing it names the application**, and is
-flagged rather than hidden: `desk.configure` was GuestOps' answer to the same
-problem, and Workforce has no equivalent noun — *the desk* is a place, and this
-application configures a property's working rules rather than a place. It may be
-that `policy.configure` is the answer, or that the capability splits further.
-**That is the part this application cannot settle.**
+The tests keep **literals** deliberately: a test asserting on the same constant
+the code under test uses is a tautology, so the spelling is written out where a
+rename has to be made twice or the suite fails.
 
-### Until it is ruled
+### Still outstanding
 
-The manifest carries **the spellings the code requests today**, so it describes
-the software that exists rather than software somebody intends, and the block
-above it says so in the file. A manifest quietly written to proposed names would
-be a package that matches no running service.
+**None of the twelve has a row in `infrastructure/openfga/permissions.yaml`.**
+The spellings are now correct and the rows are not written, so install still
+cannot resolve them — the last thing between this manifest and an installable
+package.
 
 ## APPS-Q3 · three schemas still carry old application names
 

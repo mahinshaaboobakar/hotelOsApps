@@ -287,7 +287,7 @@ public class DutyCharacterisationTests(WorkforceFixture fixture)
         await service.HolderAtAsync(fixture.Scope(), friday, default);
 
         Assert.Equal(
-            ["duty.assign", "workforce.read"],
+            ["duty.assign", "roster.read"],
             authorizer.Checks.Select(check => check.Permission));
     }
 

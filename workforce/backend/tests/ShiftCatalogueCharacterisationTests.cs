@@ -278,7 +278,7 @@ public class ShiftCatalogueCharacterisationTests(WorkforceFixture fixture)
             Create("Perm", "PRM", new TimeOnly(8, 0), new TimeOnly(16, 0), March),
             default);
 
-        Assert.Equal("policy.manage", Assert.Single(authorizer.Checks).Permission);
+        Assert.Equal("roster.configure", Assert.Single(authorizer.Checks).Permission);
     }
 
     private static ShiftHoursCommand Hours(TimeOnly starts, TimeOnly ends) =>

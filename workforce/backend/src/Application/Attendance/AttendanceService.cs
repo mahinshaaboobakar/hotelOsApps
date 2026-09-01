@@ -154,7 +154,7 @@ public class AttendanceService(
         RequestScope scope, AttendanceQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var records = db.Attendance.Where(
             r => r.PropertyId == scope.PropertyId
@@ -182,7 +182,7 @@ public class AttendanceService(
         RequestScope scope, DateOnly businessDate, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.Attendance
             .Where(r => r.PropertyId == scope.PropertyId

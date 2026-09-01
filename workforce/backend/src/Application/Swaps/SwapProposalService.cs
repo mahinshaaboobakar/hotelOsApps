@@ -221,7 +221,7 @@ public class SwapProposalService(
         RequestScope scope, Guid staffId, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.SwapProposals
             .Where(p => p.PropertyId == scope.PropertyId

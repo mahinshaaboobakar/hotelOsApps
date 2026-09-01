@@ -40,7 +40,7 @@ public class LeaveTypeService(
     public async Task<int> SeedAsync(RequestScope scope, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var country = await directory.FindPropertyCountryAsync(scope.PropertyId, cancellationToken);
         var template = LeaveTemplates.For(country);
@@ -85,7 +85,7 @@ public class LeaveTypeService(
         RequestScope scope, SetLeaveTypeCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var code = Require(command.Code, "code").ToUpperInvariant();
         var name = Require(command.Name, "name");
@@ -154,7 +154,7 @@ public class LeaveTypeService(
         RequestScope scope, Guid id, long expectedVersion, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var type = await db.LeaveTypes.FirstOrDefaultAsync(
             t => t.Id == id && t.PropertyId == scope.PropertyId, cancellationToken)
@@ -178,7 +178,7 @@ public class LeaveTypeService(
         RequestScope scope, bool includeRetired, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var types = db.LeaveTypes.Where(t => t.PropertyId == scope.PropertyId);
 

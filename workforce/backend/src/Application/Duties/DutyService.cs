@@ -140,7 +140,7 @@ public class DutyService(
         RequestScope scope, DateTimeOffset instant, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.Duties
             .Where(d => d.PropertyId == scope.PropertyId
@@ -159,7 +159,7 @@ public class DutyService(
         RequestScope scope, DateTimeOffset instant, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.Duties
             .Where(d => d.PropertyId == scope.PropertyId && d.StartsAt > instant)
@@ -175,7 +175,7 @@ public class DutyService(
         CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         // Overlapping, not contained: a duty that began before the window and
         // runs into it is on the strip, which is the whole reason the strip is a

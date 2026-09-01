@@ -46,7 +46,7 @@ public class PeriodService(
         RequestScope scope, AttendanceQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         // The composed call checks the same permission on the same object. Two
         // checks rather than one, and deliberately not worked around: the entry

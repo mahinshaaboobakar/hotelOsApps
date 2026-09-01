@@ -63,7 +63,7 @@ public class OvertimeCheck(
         RequestScope scope, RotaQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var policy = await db.Policies.FirstOrDefaultAsync(
             p => p.PropertyId == scope.PropertyId, cancellationToken);

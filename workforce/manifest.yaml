@@ -64,31 +64,35 @@ resources:
 # administrator reads on the install screen, and a property may decline any of
 # them: a declined permission costs its capability, never the application.
 #
-# ── BLOCKED, and stated rather than worked around ──────────────────────────
+# ── Five were renamed by ruling, and seven stand ─────────────────────
 #
-# **None of the twelve is in `infrastructure/openfga/permissions.yaml`**,
-# measured 2026-09-01. Install resolves every id against that registry, so this
-# package does not install today. That is the same blocker GuestOps met and had
-# closed by a ruling; this one is open.
+# `infrastructure/openfga/permissions.yaml` states two rules in its header, and
+# five of these ids broke them. **Ruled 2026-09-01** — the code, the tests and
+# this file were swept together:
 #
-# **And five collide with the registry's own naming rules**, which are stated in
-# its header and are not this application's to overrule:
+#     posting.manage      →  posting.assign
+#     shift.manage        →  shift.define
+#     capability.manage   →  capability.record
+#     policy.manage       →  roster.configure
+#     workforce.read      →  roster.read
 #
-#   * `manage` is **banned outright** — *"`write`, `manage` and `edit` are
-#     banned… `manage` says nothing about blast radius"*. Four ids use it.
-#   * a permission **never names the service or application** that implements
-#     it — the rule that sent `guestops.configure` to `desk.configure`.
-#     `workforce.read` names this application as a resource.
+# `manage` is **banned outright** — it says nothing about blast radius, and it is
+# what forced service prefixes in the first place. And a permission never names
+# the application implementing it, which is what `workforce.read` did.
 #
-# The spellings below are what the code requests **today**, so this manifest
-# describes the software that exists rather than software somebody intends. The
-# renames are proposed in `docs/chapters/03-the-code-round-findings.md` and are
-# the architect's to rule — a permission name is a stable platform contract, and
-# an application does not mint one for itself.
+# **`roster` is this application's noun**, and it was available because APPS-Q3
+# renamed the *application* away from Roster while keeping the function
+# vocabulary. Renaming the app is what freed the word to be a resource — the
+# precise equivalent of GuestOps' *desk*.
+#
+# **Still outstanding**: none of the twelve has a row in the registry yet, so
+# install cannot resolve them. The spellings are now correct; the rows are not
+# written. That is the last thing between this manifest and an installable
+# package.
 permissions:
-  - id: posting.manage
+  - id: posting.assign
     reason: "Post people to departments, set headship and reporting lines, and end a posting"
-  - id: shift.manage
+  - id: shift.define
     reason: "Fill the rota, copy a week forward, and exchange two people's shifts"
   - id: leave.request
     reason: "Raise a leave request, for oneself or on somebody's behalf, and withdraw one"
@@ -104,11 +108,11 @@ permissions:
     reason: "Record who turned up, when they arrived and when they left"
   - id: attendance.amend
     reason: "Correct an attendance record somebody may already have been paid against"
-  - id: capability.manage
+  - id: capability.record
     reason: "Record skills, languages and certifications, and their expiry dates"
-  - id: policy.manage
+  - id: roster.configure
     reason: "Configure the shift catalogue, the leave types and the overtime threshold"
-  - id: workforce.read
+  - id: roster.read
     reason: "See the rota, the duty register, balances, attendance and the month's numbers"
 
 events:
@@ -149,7 +153,7 @@ events:
 
 # Nothing. **Workforce's settings are application data, not platform
 # configuration** — the shift catalogue, the leave types and the overtime
-# threshold live in this application's own schema behind `policy.manage`,
+# threshold live in this application's own schema behind `roster.configure`,
 # because a property edits them on a screen and they carry history, versions and
 # effective dating that a configuration key cannot express.
 #

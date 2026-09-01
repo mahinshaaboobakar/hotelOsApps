@@ -34,7 +34,7 @@ public class CapabilityService(
         RequestScope scope, RecordCapabilityCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.CapabilityManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.CapabilityRecord, "property", scope.PropertyId, cancellationToken);
 
         var name = command.Name?.Trim() ?? string.Empty;
 
@@ -84,7 +84,7 @@ public class CapabilityService(
         RequestScope scope, AmendCapabilityCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.CapabilityManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.CapabilityRecord, "property", scope.PropertyId, cancellationToken);
 
         var capability = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(capability, command.ExpectedVersion);
@@ -121,7 +121,7 @@ public class CapabilityService(
         RequestScope scope, RemoveCapabilityCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.CapabilityManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.CapabilityRecord, "property", scope.PropertyId, cancellationToken);
 
         var capability = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(capability, command.ExpectedVersion);
@@ -138,7 +138,7 @@ public class CapabilityService(
         RequestScope scope, ListCapabilitiesQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var capabilities = db.Capabilities.Where(c => c.PropertyId == scope.PropertyId);
 
@@ -168,7 +168,7 @@ public class CapabilityService(
         RequestScope scope, AttentionQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var today = Today();
         var horizon = today.AddDays(60);
@@ -213,7 +213,7 @@ public class CapabilityService(
         RequestScope scope, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.Capabilities
             .Where(c => c.PropertyId == scope.PropertyId && c.ValidUntil != null)

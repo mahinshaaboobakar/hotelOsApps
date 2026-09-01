@@ -227,7 +227,7 @@ public class LeaveService(
         RequestScope scope, Guid staffId, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var sums = await db.LeaveLedger
             .Where(e => e.PropertyId == scope.PropertyId && e.StaffId == staffId)
@@ -243,7 +243,7 @@ public class LeaveService(
         RequestScope scope, Guid approverStaffId, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.LeaveRequests
             .Where(r => r.PropertyId == scope.PropertyId

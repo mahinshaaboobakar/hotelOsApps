@@ -287,7 +287,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         await service.RegisterAsync(fixture.Scope(), default);
 
         Assert.Equal(
-            ["capability.manage", "workforce.read"],
+            ["capability.record", "roster.read"],
             authorizer.Checks.Select(check => check.Permission));
     }
 

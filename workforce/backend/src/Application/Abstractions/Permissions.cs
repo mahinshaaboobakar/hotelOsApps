@@ -12,9 +12,23 @@ namespace HotelOS.Workforce.Application.Abstractions;
 /// </para>
 /// <para>
 /// <b>Named for the resource and the business action, never for this
-/// application</b> — ADR 0007. <c>posting.manage</c>, not
-/// <c>workforce.posting.manage</c>: a posting exists regardless of which package
+/// application</b> — ADR 0007. <c>posting.assign</c>, not
+/// <c>workforce.posting.assign</c>: a posting exists regardless of which package
 /// owns the code, and if postings ever moved these names would not change.
+/// </para>
+/// <para>
+/// <b>Two rules from the registry's own header, and five of these were renamed
+/// to satisfy them</b> — ruled 2026-09-01. <c>write</c>, <c>manage</c> and
+/// <c>edit</c> are <b>banned</b>: they say nothing about blast radius, and they
+/// are what forced service prefixes in the first place. And a permission
+/// <b>never names the application</b> that implements it — the rule that sent
+/// <c>guestops.configure</c> to <c>desk.configure</c>.
+/// </para>
+/// <para>
+/// <b><c>roster</c> is this application's noun</b>, and it was available because
+/// <c>APPS-Q3</c> renamed the <i>application</i> away from Roster while keeping
+/// the function vocabulary. Renaming the app is what freed the word to be a
+/// resource — the precise equivalent of GuestOps' <i>desk</i>.
 /// </para>
 /// <para>
 /// <b>An installed application declares permission <i>requests</i>, never
@@ -34,7 +48,7 @@ public static class Permissions
     /// convention: whoever may post a person may un-post them, and splitting
     /// them would let an administrator create postings nobody could ever end.
     /// </remarks>
-    public const string PostingManage = "posting.manage";
+    public const string PostingAssign = "posting.assign";
 
     /// <summary>Read the workforce surface — postings, and later the rota.</summary>
     /// <remarks>
@@ -43,7 +57,7 @@ public static class Permissions
     /// posted, and a posting list shows who is on shift. Splitting the read
     /// would produce a half-rendered screen whose blanks nobody could explain.
     /// </remarks>
-    public const string WorkforceRead = "workforce.read";
+    public const string RosterRead = "roster.read";
 
     // --- later slices, named here so the vocabulary is decided once ---------
     //
@@ -56,7 +70,7 @@ public static class Permissions
     // one resource.
 
     /// <summary>Build and change the rota — slice 3.</summary>
-    public const string ShiftManage = "shift.manage";
+    public const string ShiftDefine = "shift.define";
     /// <summary>Raise a leave request, including on somebody's behalf — slice 4.</summary>
     public const string LeaveRequest = "leave.request";
     /// <summary>Decide a leave request — slice 4.</summary>
@@ -72,9 +86,9 @@ public static class Permissions
     /// <summary>Correct a recorded attendance fact — slice 5, and separate from recording it because amending somebody else's record is a different authority.</summary>
     public const string AttendanceAmend = "attendance.amend";
     /// <summary>The property's shift catalogue, leave policy and overtime threshold — slice 3.</summary>
-    public const string PolicyManage = "policy.manage";
+    public const string RosterConfigure = "roster.configure";
     /// <summary>Skills, languages and certification expiry — slice 2.</summary>
-    public const string CapabilityManage = "capability.manage";
+    public const string CapabilityRecord = "capability.record";
 
     // No `department.grant_access`, and there never will be.
     //

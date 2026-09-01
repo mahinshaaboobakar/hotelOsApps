@@ -40,7 +40,7 @@ public class PostingService(
         RequestScope scope, CreatePostingCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PostingManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.PostingAssign, "property", scope.PropertyId, cancellationToken);
 
         var code = Normalise(command.DepartmentCode);
         var role = command.JobRole?.Trim() ?? string.Empty;
@@ -105,7 +105,7 @@ public class PostingService(
         RequestScope scope, UpdatePostingCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PostingManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.PostingAssign, "property", scope.PropertyId, cancellationToken);
 
         var posting = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(posting, command.ExpectedVersion);
@@ -162,7 +162,7 @@ public class PostingService(
         RequestScope scope, EndPostingCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PostingManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.PostingAssign, "property", scope.PropertyId, cancellationToken);
 
         var posting = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(posting, command.ExpectedVersion);
@@ -196,7 +196,7 @@ public class PostingService(
         RequestScope scope, Guid id, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await LoadAsync(scope, id, cancellationToken);
     }
@@ -206,7 +206,7 @@ public class PostingService(
         RequestScope scope, ListPostingsQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var postings = db.Postings.Where(p => p.PropertyId == scope.PropertyId);
 

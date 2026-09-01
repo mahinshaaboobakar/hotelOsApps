@@ -33,7 +33,7 @@ public class ShiftCatalogueService(
         RequestScope scope, CreateShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var name = Require(command.Name, "name");
         var shortCode = Require(command.ShortCode, "short_code");
@@ -73,7 +73,7 @@ public class ShiftCatalogueService(
         RequestScope scope, RenameShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var entry = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(entry, command.ExpectedVersion);
@@ -113,7 +113,7 @@ public class ShiftCatalogueService(
         RequestScope scope, RescheduleShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var entry = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(entry, command.ExpectedVersion);
@@ -156,7 +156,7 @@ public class ShiftCatalogueService(
         RequestScope scope, RetireShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         var entry = await LoadAsync(scope, command.Id, cancellationToken);
         RequireVersion(entry, command.ExpectedVersion);
@@ -178,7 +178,7 @@ public class ShiftCatalogueService(
         RequestScope scope, bool includeRetired, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var entries = db.ShiftCatalogue.Where(e => e.PropertyId == scope.PropertyId);
 
@@ -209,7 +209,7 @@ public class ShiftCatalogueService(
         CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.ShiftHours
             .Where(h => h.PropertyId == scope.PropertyId
@@ -224,7 +224,7 @@ public class ShiftCatalogueService(
         RequestScope scope, Guid catalogueEntryId, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.ShiftHours
             .Where(h => h.PropertyId == scope.PropertyId && h.CatalogueEntryId == catalogueEntryId)

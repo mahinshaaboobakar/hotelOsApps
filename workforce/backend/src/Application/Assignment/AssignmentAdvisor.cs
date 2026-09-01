@@ -63,7 +63,7 @@ public class AssignmentAdvisor(
         CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var code = departmentCode.Trim().ToUpperInvariant();
         var advice = new List<Advice>();

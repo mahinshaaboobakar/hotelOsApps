@@ -25,7 +25,7 @@ public class PolicyService(
         RequestScope scope, SetOvertimeThresholdCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.PolicyManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
         Refuse(command.DailyHours, "daily_hours", 24m);
         Refuse(command.WeeklyHours, "weekly_hours", 24m * 7m);
@@ -69,7 +69,7 @@ public class PolicyService(
         RequestScope scope, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         return await db.Policies.FirstOrDefaultAsync(
             p => p.PropertyId == scope.PropertyId, cancellationToken);

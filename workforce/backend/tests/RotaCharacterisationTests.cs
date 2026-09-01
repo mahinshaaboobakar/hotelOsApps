@@ -389,7 +389,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         await rota.AssignAsync(
             scope, Assign(Uuid7.NewUuid7(), Monday(), morning), default);
 
-        Assert.Equal("shift.manage", Assert.Single(authorizer.Checks).Permission);
+        Assert.Equal("shift.define", Assert.Single(authorizer.Checks).Permission);
     }
 
     private static AssignShiftCommand Assign(Guid staff, DateOnly date, Guid entry) =>

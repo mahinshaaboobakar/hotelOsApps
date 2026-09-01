@@ -411,14 +411,25 @@ asks for.
 * **Permissions** (ADR 0007 naming, one per capability):
 
 ```text
-posting.manage · shift.manage · duty.assign
+posting.assign · shift.define · duty.assign
 leave.request (every member) · leave.approve
 swap.propose (every member) · swap.approve
 attendance.record · attendance.amend
-policy.manage      the property's leave policy, OT threshold, catalogue
-capability.manage  skills and certifications
-workforce.read     the read surface
+roster.configure   the property's leave policy, OT threshold, catalogue
+capability.record  skills and certifications
+roster.read        the read surface
 ```
+
+**Five of these were renamed on 2026-09-01**, and the reason is worth keeping
+because it is a rule the next application will meet: the permission registry
+**bans `write`, `manage` and `edit`** — they say nothing about blast radius, and
+they are what forced service prefixes in the first place — and a permission
+**never names the application** that implements it.
+
+`roster` is this application's resource noun, and it was available because
+**`APPS-Q3` renamed the *application* away from Roster while keeping the
+function vocabulary**. Renaming the app is what freed the word — the precise
+equivalent of GuestOps' `desk`.
 
 ## 5 · Where this application refuses, and where it warns
 

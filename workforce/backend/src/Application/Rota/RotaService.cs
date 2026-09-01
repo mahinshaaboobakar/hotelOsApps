@@ -33,7 +33,7 @@ public class RotaService(
         RequestScope scope, AssignShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.ShiftManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.ShiftDefine, "property", scope.PropertyId, cancellationToken);
 
         var code = Normalise(command.DepartmentCode);
 
@@ -90,7 +90,7 @@ public class RotaService(
         RequestScope scope, ClearShiftCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.ShiftManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.ShiftDefine, "property", scope.PropertyId, cancellationToken);
 
         var assignment = await FindAsync(
             scope.PropertyId, command.StaffId, command.Date, cancellationToken);
@@ -113,7 +113,7 @@ public class RotaService(
         RequestScope scope, CopyWeekCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.ShiftManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.ShiftDefine, "property", scope.PropertyId, cancellationToken);
 
         var offset = command.To.DayNumber - command.From.DayNumber;
 
@@ -188,7 +188,7 @@ public class RotaService(
         RequestScope scope, SwapShiftsCommand command, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.ShiftManage, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.ShiftDefine, "property", scope.PropertyId, cancellationToken);
 
         if (command.FirstAssignmentId == command.SecondAssignmentId)
         {
@@ -215,7 +215,7 @@ public class RotaService(
         RequestScope scope, RotaQuery query, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.WorkforceRead, "property", scope.PropertyId, cancellationToken);
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
         var cells = db.ShiftAssignments.Where(
             a => a.PropertyId == scope.PropertyId
