@@ -459,6 +459,8 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
             new LeaveService(db, authorizer, new ApproverResolver(db), TimeProvider.System),
             new LeaveTypeService(db, authorizer, directory, TimeProvider.System),
             directory,
-            new PostingService(db, authorizer, directory, new RecordingEventAppender(), TimeProvider.System));
+            new PostingService(
+                db, authorizer, directory,
+                new PostingAnnouncer(new RecordingEventAppender(), directory), TimeProvider.System));
     }
 }

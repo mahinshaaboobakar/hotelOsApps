@@ -32,7 +32,7 @@ public class PostingService(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
     IStaffDirectory directory,
-    IEventAppender events,
+    PostingAnnouncer announcer,
     TimeProvider clock)
 {
     /// <summary>Post a person to a department.</summary>
@@ -89,32 +89,12 @@ public class PostingService(
             Version = 1,
         };
 
-        // The identity link is resolved here, and deliberately not stored:
-        // `masterdata.staff.user_id` is Master Data's and a copy of it can only
-        // go stale. Null is the ordinary answer — most staff have no login, and
-        // a posting for such a person is complete, correct, and announces
-        // nothing: there is no principal for a tuple to name.
-        var userId = await directory.FindUserIdAsync(
-            scope.PropertyId, command.StaffId, cancellationToken);
-
         db.Postings.Add(posting);
 
-        // Appended in the caller's transaction, never sent — the event and its
-        // publish_state row commit with the posting or not at all. A gRPC call
-        // could not join this transaction, and a crash in the gap would keep the
-        // posting and lose its authorization silently.
-        Announce(scope, posting, departmentId, userId, PostingAnnouncements.Posted, now);
-
-        if (posting.IsDepartmentHead)
-        {
-            // Two events from one operation. Headship is its own grant kind —
-            // `department#manager` — so it is its own announcement, and folding
-            // it into `user.posted` would have widened every kind in the Kernel's
-            // table to serve one.
-            Announce(
-                scope, posting, departmentId, userId,
-                PostingAnnouncements.HeadshipStarted, now);
-        }
+        // Appended in this transaction, never sent — the events and their
+        // publish_state rows commit with the posting or not at all. Two events
+        // when the posting carries headship, because that is its own grant kind.
+        await announcer.AnnounceStartedAsync(scope, posting, now, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return posting;
@@ -200,31 +180,12 @@ public class PostingService(
         posting.UpdatedAt = clock.GetUtcNow();
         posting.Version += 1;
 
-        // Both directions land together or neither does — ADR 0087's addendum
-        // records what a one-directional writer produced: *"a posting revoked
-        // left its tuple standing, so somebody removed from a property stayed
-        // reachable there"*, the direction ADR 0061's invariant forbids.
-        var userId = await directory.FindUserIdAsync(
-            scope.PropertyId, posting.StaffId, cancellationToken);
-
-        var departmentId = await directory.FindDepartmentIdAsync(
-            scope.PropertyId, posting.DepartmentCode, cancellationToken);
-
-        Announce(
-            scope, posting, departmentId, userId,
-            PostingAnnouncements.PostingEnded, posting.UpdatedAt);
-
-        if (posting.IsDepartmentHead)
-        {
-            // The second trigger's pair: `posting_ended` withdraws `#posted`,
-            // `headship_ended` withdraws `#manager`. Two relations, two tuples,
-            // two announcements — and the flag stays on the row, because the
-            // posting records that this person headed the department while it
-            // ran.
-            Announce(
-                scope, posting, departmentId, userId,
-                PostingAnnouncements.HeadshipEnded, posting.UpdatedAt);
-        }
+        // `posting_ended` withdraws `#posted`; `headship_ended` withdraws
+        // `#manager` when the posting carried it. The flag stays on the row —
+        // the posting records that this person headed the department while it
+        // ran.
+        await announcer.AnnounceEndedAsync(
+            scope, posting, posting.UpdatedAt, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return posting;
@@ -307,79 +268,20 @@ public class PostingService(
         }
     }
 
-    /// <summary>Announce one posting fact, if there is a principal to name.</summary>
-    /// <remarks>
-    /// <para>
-    /// <b>Every gate is here, once.</b> No announcement without an identity link
-    /// — most of the workforce has no account, and a posting for such a person is
-    /// complete and announces nothing, because there is no principal for a tuple
-    /// to grant anything to. No announcement without the department's canonical
-    /// id either: the id is what <c>department:{uuid}</c> addresses, and a
-    /// consumer cannot write a tuple from a code alone.
-    /// </para>
-    /// <para>
-    /// It appends; it never sends. The event and its <c>publish_state</c> row are
-    /// written into the caller's transaction, and the Kernel's Event Publisher
-    /// relays afterwards.
-    /// </para>
-    /// </remarks>
-    private void Announce(
-        RequestScope scope,
-        Posting posting,
-        Guid? departmentId,
-        Guid? userId,
-        string eventType,
-        DateTimeOffset occurredAt)
-    {
-        if (userId is not { } user || departmentId is not { } department)
-        {
-            return;
-        }
-
-        events.Append(
-            scope,
-            eventType,
-            PostingAnnouncements.Aggregate,
-            posting.Id,
-            posting.Version,
-            new PostingAnnouncement(
-                UserId: user,
-                StaffId: posting.StaffId,
-                DepartmentId: department,
-                DepartmentCode: posting.DepartmentCode,
-                PostingId: posting.Id,
-                PropertyId: posting.PropertyId,
-                OccurredAt: occurredAt));
-    }
-
     /// <summary>Announce headship starting or ending, resolving what it needs.</summary>
     /// <remarks>
     /// Its own method because <c>UpdateAsync</c> reaches it without having
     /// resolved either identifier — unlike create and end, which already hold
     /// both.
     /// </remarks>
-    private async Task AnnounceHeadshipAsync(
-        RequestScope scope, Posting posting, bool started, CancellationToken cancellationToken)
-    {
-        var userId = await directory.FindUserIdAsync(
-            scope.PropertyId, posting.StaffId, cancellationToken);
-
-        if (userId is null)
-        {
-            return;
-        }
-
-        var departmentId = await directory.FindDepartmentIdAsync(
-            scope.PropertyId, posting.DepartmentCode, cancellationToken);
-
-        Announce(
+    private Task AnnounceHeadshipAsync(
+        RequestScope scope, Posting posting, bool started, CancellationToken cancellationToken) =>
+        announcer.AnnounceAsync(
             scope,
             posting,
-            departmentId,
-            userId,
             started ? PostingAnnouncements.HeadshipStarted : PostingAnnouncements.HeadshipEnded,
-            clock.GetUtcNow());
-    }
+            clock.GetUtcNow(),
+            cancellationToken);
 
     /// <summary>A department has one current head, or none.</summary>
     /// <remarks>

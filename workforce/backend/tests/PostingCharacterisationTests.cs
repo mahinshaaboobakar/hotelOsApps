@@ -518,7 +518,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
 
         return (
             new PostingService(
-                fixture.Context(), authorizer, directory, events, TimeProvider.System),
+                fixture.Context(), authorizer, directory,
+                new PostingAnnouncer(events, directory), TimeProvider.System),
             authorizer,
             directory,
             events);

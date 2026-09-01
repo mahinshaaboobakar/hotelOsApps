@@ -141,6 +141,8 @@ builder.Services.AddScoped<SwapProposalService>();
 builder.Services.AddScoped<ApproverResolver>();
 builder.Services.AddScoped<AttendanceService>();
 builder.Services.AddScoped<DayComparison>();
+builder.Services.AddScoped<PostingAnnouncer>();
+builder.Services.AddScoped<StaffChangeConsumer>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package

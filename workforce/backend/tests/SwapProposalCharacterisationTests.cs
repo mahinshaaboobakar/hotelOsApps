@@ -286,7 +286,9 @@ public class SwapProposalCharacterisationTests(WorkforceFixture fixture)
 
         var shifts = new ShiftCatalogueService(db, authorizer, clock);
         var rota = new RotaService(db, authorizer, clock);
-        var postings = new PostingService(db, authorizer, directory, new RecordingEventAppender(), clock);
+        var postings = new PostingService(
+            db, authorizer, directory,
+            new PostingAnnouncer(new RecordingEventAppender(), directory), clock);
         var swaps = new SwapProposalService(db, authorizer, new ApproverResolver(db), clock);
 
         var scope = fixture.Scope();
