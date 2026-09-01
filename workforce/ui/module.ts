@@ -27,6 +27,16 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 import { el } from "./chrome/element";
 import { rail, type Operator, type RailItem } from "./chrome/rail";
 import { stylesheet } from "./chrome/styles";
+import { attendance } from "./screens/attendance";
+import { ATTENDANCE_CSS } from "./screens/attendance/styles";
+import { duty } from "./screens/duty";
+import { DUTY_CSS } from "./screens/duty/styles";
+import { leave } from "./screens/leave";
+import { people } from "./screens/people";
+import { PEOPLE_CSS } from "./screens/people/styles";
+import { reports } from "./screens/reports";
+import { REPORTS_CSS } from "./screens/reports/styles";
+import { LEAVE_CSS } from "./screens/leave/styles";
 import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
 
@@ -62,9 +72,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // screen change, so a stylesheet appended at mount is deleted by the first
   // render — the module then draws itself as an unstyled column, and neither
   // the type-check nor the suite can see it.
-  const style = stylesheet([ROTA_CSS]);
+  const style = stylesheet([ROTA_CSS, LEAVE_CSS, ATTENDANCE_CSS, DUTY_CSS, PEOPLE_CSS, REPORTS_CSS]);
 
   let screen = "Team Rota";
+  let tab = "Requests";
 
   function show(next: string): void {
     if (root === null) return;
@@ -78,6 +89,31 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 
     if (screen === "Team Rota") {
       void rota(host, main);
+      return;
+    }
+
+    if (screen === "People") {
+      void people(host, main);
+      return;
+    }
+
+    if (screen === "Reports") {
+      void reports(host, main);
+      return;
+    }
+
+    if (screen === "Attendance") {
+      void attendance(host, main);
+      return;
+    }
+
+    if (screen === "Duty Register") {
+      void duty(host, main);
+      return;
+    }
+
+    if (screen === "Leave & Requests") {
+      void leave(host, main, tab, (next) => { tab = next; show(screen); });
       return;
     }
 
