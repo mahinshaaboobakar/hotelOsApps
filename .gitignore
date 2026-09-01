@@ -29,3 +29,13 @@
 # ---------- editors ----------
 .idea/
 .vscode/
+
+# ---------- built modules ----------
+# A packaged UI bundle is built at packaging time and never committed. The
+# pipeline builds it fresh, `carry_ui` copies the output, and `hopkg` signs
+# what it finds — so a committed copy is one that goes stale against its own
+# source and gets trusted anyway. The fixture in the platform repository
+# (hello-hotel) is the deliberate exception: it is hand-written, has no build
+# step at all (PKG-Q42), and is a source file rather than an artifact.
+*/ui/module.js
+.build/
