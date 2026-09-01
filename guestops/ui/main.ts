@@ -28,7 +28,7 @@
 
 import { connectToHost } from "@hotelos/sdk";
 
-import { activate } from "./module";
+import { activate } from "./application";
 
 // Fire and forget: the promise resolves when the host has handshaken and the
 // module is mounted, and there is nobody here to hand it to. A rejection is

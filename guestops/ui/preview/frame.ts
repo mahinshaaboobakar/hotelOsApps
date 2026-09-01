@@ -21,7 +21,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { activate } from "../module";
+import { activate } from "../application";
 import { recordedAttention, recordedStay, recordedToday } from "../book";
 
 /**

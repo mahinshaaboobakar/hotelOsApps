@@ -12,7 +12,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { activate } from "../module";
+import { activate } from "../application";
 import { recordedAttention, recordedStay, recordedToday } from "../book";
 import type { HostApi } from "@hotelos/sdk";
 

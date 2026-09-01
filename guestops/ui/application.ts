@@ -30,6 +30,15 @@
  * stay is reached *from* the day and belongs to it — so the way back is the way
  * in, which is how the approved design navigates.
  *
+ * # Why this is `application.ts` and not `module.ts`
+ *
+ * The artifact this package ships is `ui/module.js`, and a source file called
+ * `module.ts` beside it makes `from "./module"` **ambiguous**: both vitest and
+ * esbuild resolve the extensionless import to the built `.js`. The bundle then
+ * gets built from itself and every test loses `activate` — which is exactly
+ * what happened the first time the build wrote its output here. The artifact
+ * owns that name; the source takes another.
+ *
  * # This file composes and holds no screen
  *
  * ADR 0042. The three screens are directories of their own; what they share is

@@ -1,14 +1,14 @@
 {
   "name": "@hotelos-apps/guestops-ui",
   "version": "0.1.0",
-  "description": "GuestOps's packaged desktop module \u2014 the reservation book.",
+  "description": "GuestOps's packaged desktop module — the reservation book.",
   "type": "module",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "package": "esbuild main.ts --bundle --format=esm --platform=browser --target=es2022 --outfile=../.build/pkg/ui/module.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
+    "build": "esbuild main.ts --bundle --format=esm --platform=browser --target=es2022 --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts --outfile=module.js && node ../../scripts/verify-module.mjs module.js",
+    "test": "npm run build && vitest run",
     "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts"
   },
   "devDependencies": {
