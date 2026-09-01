@@ -161,3 +161,29 @@ message GuestRecorded {
   string property_id = 2;
   string name = 3;
 }
+
+// `stay.request_raised` — the desk handed a guest request to whoever does work.
+//
+// GuestOps owns the request; Jobs owns the work (APPS-Q1). This announces what
+// was asked and for which stay and room; Jobs decides whether it becomes a job,
+// creates it, assigns it and owns its status. No job id, assignee or job state
+// is carried back on this message — the reply is a separate fact.
+//
+// `correlation_id` is EVT-Q3's mechanism: the reply arrives as an event
+// carrying this id plus the job it created, and GuestOps stores that on
+// consumption. A blocking call would break the events-only rule and APPS-Q2 at
+// once — an absent Jobs would hang the desk rather than leaving a request that
+// has not yet become work.
+//
+// SUBJECT NOT RATIFIED. `stay.request_raised` follows section 6's `stay.*`
+// grammar, but section 6 names no request subject and no ruling has fixed one.
+// It is a cross-application contract, so it carries no authority until ruled
+// and is reported as a finding rather than treated as settled.
+message StayRequestRaised {
+  string request_id = 1;
+  string stay_id = 2;
+  string property_id = 3;
+  string room_id = 4;  // empty when the stay has no room yet
+  string text = 5;
+  string correlation_id = 6;
+}

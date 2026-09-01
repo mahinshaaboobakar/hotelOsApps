@@ -3,6 +3,10 @@ using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Inbound;
 using HotelOS.GuestOps.Application.Reconciliation;
+using HotelOS.GuestOps.Application.Registrations;
+using HotelOS.GuestOps.Application.Reporting;
+using HotelOS.GuestOps.Application.Requests;
+using HotelOS.GuestOps.Application.Settings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Infrastructure.ReadModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +39,13 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<StayMatcher>();
         services.AddScoped<InboundFactService>();
         services.AddScoped<ReconciliationService>();
+
+        // The desk's own records — the card, the filing obligation it creates,
+        // guest requests and notes, over this application's configuration.
+        services.AddScoped<SettingsService>();
+        services.AddScoped<RegistrationService>();
+        services.AddScoped<ReportingService>();
+        services.AddScoped<StayRequestService>();
 
         return services;
     }

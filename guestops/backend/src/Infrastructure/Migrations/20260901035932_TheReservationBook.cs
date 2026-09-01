@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -87,6 +88,32 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_rooms_out_of_order", x => x.room_id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "settings",
+                schema: "guestops",
+                columns: table => new
+                {
+                    property_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    home_country = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    required_for_home_country = table.Column<List<string>>(type: "text[]", nullable: false),
+                    required_for_visitors = table.Column<List<string>>(type: "text[]", nullable: false),
+                    accepted_id_types = table.Column<List<string>>(type: "text[]", nullable: false),
+                    signature_required = table.Column<bool>(type: "boolean", nullable: false),
+                    print_on_check_in = table.Column<bool>(type: "boolean", nullable: false),
+                    card_number_prefix = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    next_card_number = table.Column<long>(type: "bigint", nullable: false),
+                    reporting_required = table.Column<bool>(type: "boolean", nullable: false),
+                    reporting_applies_to = table.Column<int>(type: "integer", nullable: false),
+                    reporting_authority = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    reporting_due_hours = table.Column<int>(type: "integer", nullable: false),
+                    version = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_settings", x => x.property_id);
+                    table.CheckConstraint("ck_settings__due_hours", "reporting_due_hours > 0");
                 });
 
             migrationBuilder.CreateTable(
@@ -293,15 +320,14 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     document_refs = table.Column<string>(type: "character varying(2000)", maxLength: 2000, nullable: true),
                     signature_ref = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     signed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    captured_by = table.Column<Guid>(type: "uuid", nullable: true),
-                    stay_id1 = table.Column<Guid>(type: "uuid", nullable: false)
+                    captured_by = table.Column<Guid>(type: "uuid", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_registrations", x => x.stay_id);
                     table.ForeignKey(
-                        name: "fk_registrations_stays_stay_id1",
-                        column: x => x.stay_id1,
+                        name: "fk_registrations_stays_stay_id",
+                        column: x => x.stay_id,
                         principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
@@ -475,15 +501,14 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                     filed_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     filed_by = table.Column<Guid>(type: "uuid", nullable: true),
                     authority = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    reference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    stay_id1 = table.Column<Guid>(type: "uuid", nullable: false)
+                    reference = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_stay_reporting", x => x.stay_id);
                     table.ForeignKey(
-                        name: "fk_stay_reporting_room_stays_stay_id1",
-                        column: x => x.stay_id1,
+                        name: "fk_stay_reporting_room_stays_stay_id",
+                        column: x => x.stay_id,
                         principalSchema: "guestops",
                         principalTable: "room_stays",
                         principalColumn: "id",
@@ -620,12 +645,6 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                 columns: new[] { "property_id", "resolved_at" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_registrations_stay_id1",
-                schema: "guestops",
-                table: "registrations",
-                column: "stay_id1");
-
-            migrationBuilder.CreateIndex(
                 name: "uq_registrations__card_number",
                 schema: "guestops",
                 table: "registrations",
@@ -720,12 +739,6 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
                 columns: new[] { "state", "required_by" });
 
             migrationBuilder.CreateIndex(
-                name: "ix_stay_reporting_stay_id1",
-                schema: "guestops",
-                table: "stay_reporting",
-                column: "stay_id1");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_stay_requests_stay_id",
                 schema: "guestops",
                 table: "stay_requests",
@@ -787,6 +800,10 @@ namespace HotelOS.GuestOps.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "rooms_out_of_order",
+                schema: "guestops");
+
+            migrationBuilder.DropTable(
+                name: "settings",
                 schema: "guestops");
 
             migrationBuilder.DropTable(

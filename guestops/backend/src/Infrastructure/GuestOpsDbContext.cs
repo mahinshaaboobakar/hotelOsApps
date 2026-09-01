@@ -81,6 +81,9 @@ public class GuestOpsDbContext(DbContextOptions<GuestOpsDbContext> options) : Db
 
     public DbSet<StayNote> Notes => Set<StayNote>();
 
+    /// <summary>This application's own configuration, one row per property.</summary>
+    public DbSet<GuestOpsSettings> Settings => Set<GuestOpsSettings>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
