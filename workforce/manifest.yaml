@@ -1,0 +1,233 @@
+# Workforce — postings, the rota, leave, attendance and the numbers, as an
+# installable HotelOS application.
+#
+# Every field comes from ADR 0092's table and the manifest type the Kernel
+# actually parses (`packages/hotelos-package/src/manifest.rs`), which is
+# `deny_unknown_fields` — a key it does not know refuses the whole package. The
+# GuestOps manifest is the sibling this follows.
+#
+# **This is the platform's first `authorization: grants` declaration.** See the
+# block at the end: two kinds, both ratified under `AUTHZ-Q20`, and their
+# arrival is what retires the Kernel's labelled interim constants.
+#
+# `files:` is a placeholder. The packager fills it after the payload is
+# published; a digest map written by hand goes stale on the next build and gets
+# "fixed" by pasting whatever the failure printed.
+
+manifest_version: 1
+id: workforce
+name: "Workforce"
+version: 0.1.0
+publisher: hotelos
+category: operations
+description: >-
+  Who works here, when they work, who is off, who turned up — and the numbers a
+  payroll consumes.
+
+platform:
+  min_version: "0.1.0"
+  # Exclusive: claims every 0.x and promises nothing about 1.0.
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+runtime:
+  kind: dotnet-service
+  # Install step 6 runs `dotnet backend/<this> migrate`, so it must equal the
+  # csproj's AssemblyName exactly.
+  assembly: HotelOS.Workforce.dll
+  # AUTHZ-Q17: the principal is the certificate subject and the capability key,
+  # deliberately not derived from `id`.
+  principal: workforce
+
+database:
+  # ADR 0092 addendum §Q15: declared **and** constrained — install refuses a
+  # schema that is not the one `id` derives. It is `workforce` and never
+  # `roster`: APPS-Q3 makes the current application name the name in code, and
+  # the four event domains already conform.
+  schema: workforce
+
+resources:
+  # Requests, not rights — rule 3. Property policy decides what is granted, and
+  # a request above the ceiling is clamped rather than refused.
+  #
+  # Four connections: the rota screen's reads, a supervisor entering the
+  # morning's attendance, the month-end period query and the migrate verb are
+  # four concurrent users on the first working day of a month.
+  memory: "512Mi"
+  cpu: "0.5"
+  db_connections: 4
+  event_rate: 100
+
+# The twelve permissions this application asks an administrator to approve.
+#
+# **Requests, never rights** — ADR 0092 rule 2. Each carries the reason an
+# administrator reads on the install screen, and a property may decline any of
+# them: a declined permission costs its capability, never the application.
+#
+# ── BLOCKED, and stated rather than worked around ──────────────────────────
+#
+# **None of the twelve is in `infrastructure/openfga/permissions.yaml`**,
+# measured 2026-09-01. Install resolves every id against that registry, so this
+# package does not install today. That is the same blocker GuestOps met and had
+# closed by a ruling; this one is open.
+#
+# **And five collide with the registry's own naming rules**, which are stated in
+# its header and are not this application's to overrule:
+#
+#   * `manage` is **banned outright** — *"`write`, `manage` and `edit` are
+#     banned… `manage` says nothing about blast radius"*. Four ids use it.
+#   * a permission **never names the service or application** that implements
+#     it — the rule that sent `guestops.configure` to `desk.configure`.
+#     `workforce.read` names this application as a resource.
+#
+# The spellings below are what the code requests **today**, so this manifest
+# describes the software that exists rather than software somebody intends. The
+# renames are proposed in `docs/chapters/03-the-code-round-findings.md` and are
+# the architect's to rule — a permission name is a stable platform contract, and
+# an application does not mint one for itself.
+permissions:
+  - id: posting.manage
+    reason: "Post people to departments, set headship and reporting lines, and end a posting"
+  - id: shift.manage
+    reason: "Fill the rota, copy a week forward, and exchange two people's shifts"
+  - id: leave.request
+    reason: "Raise a leave request, for oneself or on somebody's behalf, and withdraw one"
+  - id: leave.approve
+    reason: "Approve or decline leave, and correct a balance with a recorded reason"
+  - id: duty.assign
+    reason: "Put a manager on duty over a span, amend it, and take it off the register"
+  - id: swap.propose
+    reason: "Propose a shift exchange with a colleague, accept one, or decline it"
+  - id: swap.approve
+    reason: "Approve a swap the two people have already agreed"
+  - id: attendance.record
+    reason: "Record who turned up, when they arrived and when they left"
+  - id: attendance.amend
+    reason: "Correct an attendance record somebody may already have been paid against"
+  - id: capability.manage
+    reason: "Record skills, languages and certifications, and their expiry dates"
+  - id: policy.manage
+    reason: "Configure the shift catalogue, the leave types and the overtime threshold"
+  - id: workforce.read
+    reason: "See the rota, the duty register, balances, attendance and the month's numbers"
+
+events:
+  # ADR 0093's addendum makes `publishes` load-bearing: `PublishEvent` from an
+  # application is allowed only for a subject listed here, so this is the
+  # application's own ceiling rather than documentation of one.
+  #
+  # **Four events, all on the `user` domain, and that is deliberate** — the
+  # ratified `AUTHZ-Q20` contract. The fact is about a person, so ADR 0006 routes
+  # it beside `user.assigned` where consumers already listen; the record that
+  # establishes it is a posting, which is what supplies the aggregate and the
+  # version. The domain and the aggregate differ on purpose, and the Kernel's
+  # `GrantKind` names them separately for exactly this reason.
+  #
+  # **What is NOT here, and honestly:** `shift`, `leave`, `duty` and
+  # `attendance` are pre-named in the Kernel's stream routing for this
+  # application (`PKG-Q39`, four domains), and **nothing publishes them yet**.
+  # The rota, leave, duty and attendance slices shipped without event
+  # publication — it was in no slice — so declaring subjects here would claim a
+  # ceiling the code never reaches. They are declared when they are published.
+  publishes:
+    - user.posted
+    - user.posting_ended
+    - user.headship_started
+    - user.headship_ended
+
+  # Master Data's staff facts, which this application reconciles against its own
+  # postings — chapter 04 §6.
+  #
+  # **Nothing delivers these yet** — `EVT-Q4`: there is no .NET subscription
+  # surface for an installed application, so `StaffChangeConsumer` is methods a
+  # subscription will call, driven by recorded facts and tested today. Declared
+  # rather than omitted: the day a consumer host exists, the subjects it may
+  # hear are the ones written here.
+  subscribes:
+    - staff.updated
+    - staff.exited
+
+# Nothing. **Workforce's settings are application data, not platform
+# configuration** — the shift catalogue, the leave types and the overtime
+# threshold live in this application's own schema behind `policy.manage`,
+# because a property edits them on a screen and they carry history, versions and
+# effective dating that a configuration key cannot express.
+#
+# The split is worth stating because it is easy to get backwards: a
+# configuration key is a value the platform holds for an application; a policy
+# row is a record the application owns. An overtime threshold with an optimistic
+# concurrency token is the second thing.
+configuration: []
+
+# No package dependencies. Jobs and Room Care are neighbours this application is
+# better with and works without — APPS-Q2: an absent neighbour loses its
+# capability, never the flow. Declaring one would turn "Jobs not installed" into
+# "Workforce will not install".
+dependencies: []
+
+ui:
+  # The module-registry id, which ADR 0092 §Q15 requires to equal `id`.
+  module: workforce
+
+# What this application may establish in the authorization graph — `AUTHZ-Q25`,
+# schema `packages/hotelos-package/src/authorization.rs`.
+#
+# **A declaration, not a request** — the ADR 0092 rule-2 family, beside event
+# domains and secret paths. The Kernel decides admissibility: a relation outside
+# the Grantable Relations Registry is refused at install, and what is admitted is
+# shown to an administrator for approval.
+#
+# **Both kinds are ratified** — `AUTHZ-Q20`, jointly designed with the Kernel
+# stream and ratified 2026-09-01 — and both are already implemented on both
+# sides. This block is what lets the Kernel learn them from the package instead
+# of from the two constants it currently carries labelled as an interim.
+#
+# `both_in_body` is the shape that had not existed before this application:
+# **Workforce owns neither end.** The aggregate is a posting, which appears in no
+# tuple at all — it is there to carry a version — while the user and the
+# department both arrive in the body. Jobs and Room Care are behind it in the
+# same position, which is why the shape is named rather than special-cased.
+authorization:
+  grants:
+    # A person gained, or lost, a place in a department.
+    #
+    # This is what finally writes `department#posted`, which `model.fga` has
+    # read since the knowledge round — `folder#viewer: … or posted from
+    # department …` — and which has had no writer until now.
+    - domain: user
+      aggregate: posting
+      # The **action**, not the event type: the Kernel derives the action from
+      # the subject's last segment, so `user.posted` here would key the lookup
+      # on `(posting, "user.posted")` and find nothing. Same silent class as the
+      # two the contract round already cost — no tuple, and an event stored,
+      # relayed and acknowledged as though it had worked.
+      granted: posted
+      revoked: posting_ended
+      ends: both_in_body
+      body_object: department
+      relation: posted
+
+    # Who heads a department — the same record, a different fact.
+    #
+    # **Two kinds rather than one**, because `find` keys on
+    # `(aggregate, action)`: a second relation on `user.posted` would need the
+    # Kernel's table widened to several tuples per kind to serve one row. It
+    # would also tie headship to the posting's lifecycle, and headship changes
+    # without a posting starting or finishing — the third of its four triggers.
+    #
+    # **One head at a time is this application's invariant, not the Kernel's.**
+    # Workforce refuses a second open headship in a department; without that,
+    # `headship_started` could arrive over a standing head and
+    # `department#manager` would hold two subjects with nothing to say which is
+    # current.
+    - domain: user
+      aggregate: posting
+      granted: headship_started
+      revoked: headship_ended
+      ends: both_in_body
+      body_object: department
+      relation: manager
+
+files:
+  "backend/HotelOS.Workforce.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.ts": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
