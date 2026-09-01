@@ -84,6 +84,29 @@ service GuestOpsService {
   // What is sellable, computed from the stays this application holds plus the
   // facts it already hears. Never a stored table.
   rpc GetAvailability (GetAvailabilityRequest) returns (GetAvailabilityResponse);
+
+  // --- the desk's own records -------------------------------------------
+  //
+  // Section 2.7. The card is an upsert rather than a create-then-update: it is
+  // filled in over the length of a check-in — a name, then a document, then a
+  // signature — so a create would make the desk's second keystroke an error.
+  rpc CaptureRegistration (CaptureRegistrationRequest) returns (CapturedCard);
+  rpc GetRegistration     (GetRegistrationRequest)     returns (CapturedCard);
+
+  // Recording that a person filed with an authority. HotelOS submits nothing:
+  // sending guest data outward is a connector's job, and this records the
+  // receipt that is the property's evidence it complied.
+  rpc RecordFiling      (RecordFilingRequest)      returns (StayReporting);
+  rpc ListOutstandingFilings (ListOutstandingFilingsRequest)
+      returns (ListOutstandingFilingsResponse);
+
+  // GuestOps owns the request; Jobs owns the work.
+  rpc LogRequest (LogRequestRequest) returns (StayRequest);
+  rpc AddNote    (AddNoteRequest)    returns (StayNote);
+
+  // This application's own configuration.
+  rpc GetSettings  (GetSettingsRequest)  returns (GuestOpsSettings);
+  rpc SaveSettings (SaveSettingsRequest) returns (GuestOpsSettings);
 }
 
 // -----------------------------------------------------------------------------
@@ -256,4 +279,216 @@ message GetAvailabilityRequest {
 message GetAvailabilityResponse {
   repeated TypeAvailability availability = 1;
   hotelos.common.v1.ResponseMeta meta = 2;
+}
+
+// --- the desk's own records -----------------------------------------------
+
+// The card as captured so far.
+//
+// Every field is optional and none is validated for presence here: what a card
+// must carry is the PROPERTY's configuration, not the product's opinion. A
+// required-ness baked into this message would be one jurisdiction's practice
+// compiled into every property's build.
+//
+// What is deliberately absent is what a client may not set — the card number is
+// minted from the property's series, the capturing user is the authenticated
+// caller, and the signing moment is the server's clock. The message having
+// nowhere to put them is stronger than validating them away.
+message RegistrationEdit {
+  string name_as_on_id = 1;
+  string date_of_birth = 2;  // ISO-8601 date
+  string nationality = 3;    // ISO 3166-1 alpha-2 — decides the visitor block
+  string address_line = 4;
+  string city = 5;
+  string state = 6;
+  string country = 7;
+  string postal_code = 8;
+  string id_type = 9;        // one of the property's configured types
+  string id_number = 10;
+  string id_issuer = 11;
+  string id_expiry = 12;
+  string arriving_from = 13;
+  string proceeding_to = 14;
+  string purpose_of_visit = 15;
+  string vehicle_number = 16;
+
+  // Filled when the guest's nationality is not the property's home country.
+  string passport_number = 17;
+  string passport_issue = 18;
+  string passport_expiry = 19;
+  string passport_place = 20;
+  string visa_type = 21;
+  string visa_number = 22;
+  string visa_issue = 23;
+  string visa_expiry = 24;
+  string arrived_in_country_on = 25;
+  string port_of_arrival = 26;
+
+  // The platform's media references. Never blobs on this wire.
+  string document_refs = 27;
+  string signature_ref = 28;
+
+  // Whether this capture completes the signature. The moment is the server's:
+  // a client-supplied signing time on a legal-ish record is a value nobody can
+  // corroborate.
+  bool signed = 29;
+}
+
+// A stored card, and what it still lacks.
+message CapturedCard {
+  string stay_id = 1;
+  string card_number = 2;
+  RegistrationEdit card = 3;
+  string signed_at = 4;
+  string captured_by = 5;
+
+  // Required field names carrying no value. Reported so a screen can prompt —
+  // never a refusal, because an incomplete card must not turn a guest away.
+  repeated string missing = 6;
+
+  hotelos.common.v1.ResponseMeta meta = 7;
+}
+
+message CaptureRegistrationRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  RegistrationEdit card = 3;
+}
+
+message GetRegistrationRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+}
+
+// Where a stay's filing obligation has got to.
+message StayReporting {
+  string stay_id = 1;
+
+  // Computed from the property's offset, never stored and reused — R18.
+  // Empty when the arrival is unknown: an absence is not invented.
+  string required_by = 2;
+
+  string state = 3;  // needed · filed · not_required
+  string filed_at = 4;
+  string filed_by = 5;
+  string authority = 6;
+
+  // The authority's receipt — part of the record, not a log line.
+  string reference = 7;
+
+  hotelos.common.v1.ResponseMeta meta = 8;
+}
+
+message RecordFilingRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  string authority = 3;
+  string reference = 4;
+}
+
+message ListOutstandingFilingsRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  // The day to judge overdue against. ISO-8601.
+  string as_of = 2;
+}
+
+message ListOutstandingFilingsResponse {
+  repeated StayReporting filings = 1;
+  hotelos.common.v1.ResponseMeta meta = 2;
+}
+
+// Something the guest asked for.
+message StayRequest {
+  string id = 1;
+  string stay_id = 2;
+  string text = 3;
+  string logged_by = 4;
+  string logged_at = 5;
+  bool handed_off = 6;
+
+  // The job Jobs created, learned from its reply — EVT-Q3. Empty means no job
+  // yet, which is also what an uninstalled Jobs looks like (APPS-Q2).
+  string job_id = 7;
+
+  hotelos.common.v1.ResponseMeta meta = 8;
+}
+
+message LogRequestRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  string text = 3;
+
+  // Whether to announce it for another application to act on. Not every
+  // request becomes work — a late checkout is answered at the desk.
+  bool hand_off = 4;
+}
+
+// A remark about this stay, which dies with it.
+message StayNote {
+  string id = 1;
+  string stay_id = 2;
+  string text = 3;
+  string author = 4;
+  string at = 5;
+  hotelos.common.v1.ResponseMeta meta = 6;
+}
+
+message AddNoteRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string stay_id = 2;
+  string text = 3;
+}
+
+// This application's own configuration, per property.
+//
+// Nothing here names a country: "from outside" is nationality != home_country,
+// so a hotel in Kochi and a hotel in Dubai run the same build.
+message GuestOpsSettings {
+  string property_id = 1;
+  string home_country = 2;
+
+  // Two sets, not one set plus a rule: a property that asks a passport of
+  // everyone and one that asks it of visitors only are both ordinary.
+  repeated string required_for_home_country = 3;
+  repeated string required_for_visitors = 4;
+
+  repeated string accepted_id_types = 5;
+  bool signature_required = 6;
+  bool print_on_check_in = 7;
+  string card_number_prefix = 8;
+
+  bool reporting_required = 9;
+  string reporting_applies_to = 10;  // from_outside · every_guest
+  string reporting_authority = 11;
+
+  // The deadline as hours after arrival — an offset survives the arrival
+  // moving, and a stored date does not (R18).
+  int32 reporting_due_hours = 12;
+
+  int64 version = 13;
+  hotelos.common.v1.ResponseMeta meta = 14;
+}
+
+message GetSettingsRequest {
+  hotelos.common.v1.RequestContext context = 1;
+}
+
+// The next card number is deliberately absent: a property that could set the
+// counter backwards would issue one number twice, and two guests signing one
+// number is the records defect the unique index exists to prevent.
+message SaveSettingsRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string home_country = 2;
+  repeated string required_for_home_country = 3;
+  repeated string required_for_visitors = 4;
+  repeated string accepted_id_types = 5;
+  bool signature_required = 6;
+  bool print_on_check_in = 7;
+  string card_number_prefix = 8;
+  bool reporting_required = 9;
+  string reporting_applies_to = 10;
+  string reporting_authority = 11;
+  int32 reporting_due_hours = 12;
+  int64 version = 13;
 }

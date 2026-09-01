@@ -1,6 +1,10 @@
 using Google.Protobuf.WellKnownTypes;
 using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
+using HotelOS.GuestOps.Application.Registrations;
+using HotelOS.GuestOps.Application.Reporting;
+using HotelOS.GuestOps.Application.Requests;
+using HotelOS.GuestOps.Application.Settings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Contracts.V1;
 using HotelOS.Platform;
@@ -31,13 +35,21 @@ namespace HotelOS.GuestOps.Grpc;
 ///   <item><term>Stays</term><description><see cref="StayLifecycleService"/></description></item>
 ///   <item><term>Assignment</term><description><see cref="StayAssignmentService"/></description></item>
 ///   <item><term>Availability</term><description><see cref="AvailabilityService"/></description></item>
+///   <item><term>Registration</term><description><see cref="RegistrationService"/></description></item>
+///   <item><term>Reporting</term><description><see cref="ReportingService"/></description></item>
+///   <item><term>Requests</term><description><see cref="StayRequestService"/></description></item>
+///   <item><term>Settings</term><description><see cref="SettingsService"/></description></item>
 /// </list>
 /// </remarks>
 public partial class GuestOpsGrpcService(
     BookingService bookings,
     StayLifecycleService lifecycle,
     StayAssignmentService assignment,
-    AvailabilityService availability) : GuestOpsService.GuestOpsServiceBase
+    AvailabilityService availability,
+    RegistrationService registrations,
+    ReportingService reporting,
+    StayRequestService requests,
+    SettingsService settings) : GuestOpsService.GuestOpsServiceBase
 {
     // --- parsing ----------------------------------------------------------
 
@@ -63,6 +75,30 @@ public partial class GuestOpsGrpcService(
     private static string Or(Guid? id) => id?.ToString() ?? string.Empty;
 
     private static string ToIso(DateOnly? date) => date?.ToString("yyyy-MM-dd") ?? string.Empty;
+
+    /// <summary>An instant on the wire, or absent.</summary>
+    private static string ToIso(DateTimeOffset? at) => at?.ToString("O") ?? string.Empty;
+
+    /// <summary>An optional ISO date from the wire — empty means absent.</summary>
+    /// <remarks>
+    /// Never defaulted. An unparseable date on a registration card is refused
+    /// rather than guessed: a wrong passport expiry is worse than a blank one.
+    /// </remarks>
+    private static DateOnly? OptionalDate(string value, string field)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return null;
+        }
+
+        return DateOnly.TryParse(value, out var parsed)
+            ? parsed
+            : throw new InvalidRequestException($"{field} must be an ISO-8601 date");
+    }
+
+    /// <summary>Proto3 has no null: absent is the empty string.</summary>
+    private static string? OrNull(string value)
+        => string.IsNullOrWhiteSpace(value) ? null : value;
 
     /// <summary>A moment and its basis, together — never one without the other.</summary>
     private static Contracts.V1.StayTime ToProto(Domain.StayTime time)
