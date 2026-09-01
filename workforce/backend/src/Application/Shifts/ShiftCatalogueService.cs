@@ -272,12 +272,29 @@ public class ShiftCatalogueService(
                 "a shift states both a start and an end, or neither — neither makes it an off shift");
         }
 
+        // A shift that ends where it starts is zero hours long — WF-Q17. It is
+        // not a midnight-crossing round-the-clock shift, and it is not something
+        // a property can have meant, so the catalogue never carries one and the
+        // rota never has to ask.
+        if (hours.StartsAt is { } from && hours.EndsAt is { } to && from == to)
+        {
+            throw new InvalidRequestException(
+                "a shift cannot end at the moment it starts — that is zero hours long");
+        }
+
         var secondStated = hours.SecondStartsAt is not null || hours.SecondEndsAt is not null;
 
         if (secondStated && (hours.SecondStartsAt is null || hours.SecondEndsAt is null))
         {
             throw new InvalidRequestException(
                 "a split shift's second span states both a start and an end");
+        }
+
+        if (hours.SecondStartsAt is { } secondFrom && hours.SecondEndsAt is { } secondTo
+            && secondFrom == secondTo)
+        {
+            throw new InvalidRequestException(
+                "a split shift's second span cannot end at the moment it starts");
         }
 
         if (secondStated && !firstStated)

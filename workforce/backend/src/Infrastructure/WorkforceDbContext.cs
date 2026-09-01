@@ -218,6 +218,17 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
                 table.HasCheckConstraint(
                     "ck_shift_hours__second_needs_first",
                     "second_starts_at IS NULL OR starts_at IS NOT NULL");
+
+                // Zero-length is refused here as well as in the service —
+                // WF-Q17. A span that ends where it starts is not a
+                // round-the-clock shift, and no writer may introduce one.
+                table.HasCheckConstraint(
+                    "ck_shift_hours__span_not_empty",
+                    "starts_at IS NULL OR starts_at <> ends_at");
+
+                table.HasCheckConstraint(
+                    "ck_shift_hours__second_span_not_empty",
+                    "second_starts_at IS NULL OR second_starts_at <> second_ends_at");
             });
 
             hours.HasKey(h => h.Id);

@@ -20,10 +20,18 @@ public static class WorkedHours
 {
     /// <summary>The length of one span, in hours.</summary>
     /// <remarks>
-    /// <b>An end earlier than the start crosses midnight</b> — <i>Night</i> is
-    /// 23:00 → 07:00, which is eight hours and not minus sixteen. That is the
-    /// single most likely arithmetic mistake in a rota, and it is made once
-    /// here rather than at every call site.
+    /// <b>An end strictly earlier than the start crosses midnight</b> —
+    /// <i>Night</i> is 23:00 → 07:00, which is eight hours and not minus sixteen.
+    /// That is the single most likely arithmetic mistake in a rota, and it is
+    /// made once here rather than at every call site.
+    /// <para>
+    /// <b>Equal instants are zero, not twenty-four</b> — <c>WF-Q17</c>, ruled
+    /// 2026-09-01. The same arithmetic serves attendance in slice 5, where an
+    /// identical clock-in and clock-out is <i>zero worked</i> and twenty-four
+    /// would put a day's pay behind a typo. The catalogue refuses a zero-length
+    /// shift, so the rota never asks the ambiguous question — this is the
+    /// answer for the case that reaches it anyway.
+    /// </para>
     /// </remarks>
     /// <param name="starts">When it begins.</param>
     /// <param name="ends">When it ends.</param>
@@ -32,7 +40,7 @@ public static class WorkedHours
     {
         var minutes = (ends.ToTimeSpan() - starts.ToTimeSpan()).TotalMinutes;
 
-        if (minutes <= 0)
+        if (minutes < 0)
         {
             minutes += TimeSpan.FromDays(1).TotalMinutes;
         }

@@ -20,6 +20,16 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
 {
     private static int week = -1;
 
+    /// <summary>A short code no other test in this suite is using.</summary>
+    /// <remarks>
+    /// A counter, not <c>Random</c>. The catalogue refuses two live shifts
+    /// sharing a code, so a random suffix collides eventually — and it did: this
+    /// suite passed in isolation and failed in the full run, which is the worst
+    /// failure mode a test can have. Determinism here is not tidiness; it is the
+    /// difference between a suite you can believe and one you re-run.
+    /// </remarks>
+    private static int code = -1;
+
     /// <summary>A Monday nobody else in this suite is using.</summary>
     /// <remarks>
     /// Cells are unique per person and day, so unlike the duty register this
@@ -242,7 +252,10 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         // WorkedHours rather than at every call site.
         Assert.Equal(8m, WorkedHours.Of(new TimeOnly(23, 0), new TimeOnly(7, 0)));
         Assert.Equal(8m, WorkedHours.Of(new TimeOnly(7, 0), new TimeOnly(15, 0)));
-        Assert.Equal(24m, WorkedHours.Of(new TimeOnly(9, 0), new TimeOnly(9, 0)));
+        // WF-Q17: equal instants are ZERO, not twenty-four. The same arithmetic
+        // serves attendance, where an identical clock-in and clock-out is zero
+        // worked — and twenty-four would put a day's pay behind a typo.
+        Assert.Equal(0m, WorkedHours.Of(new TimeOnly(9, 0), new TimeOnly(9, 0)));
     }
 
     [Fact]
@@ -396,7 +409,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
             new CreateShiftCommand
             {
                 Name = $"Shift {code}",
-                ShortCode = $"{code}{Random.Shared.Next(100, 999)}",
+                ShortCode = $"{code}{Interlocked.Increment(ref RotaCharacterisationTests.code)}",
                 Colour = "cyan",
                 Hours = new ShiftHoursCommand
                 {
