@@ -58,8 +58,13 @@ function header(week: Week, print: () => void): HTMLElement {
   const head = el("div", "head");
   const title = el("div");
 
+  // **A week-off is not a shift** — `WF-Q12`: it is a rota marker, with no
+  // request, no balance and no hours. The backend's month-end applies the same
+  // rule to "days posted"; counting it here and not there would have made one
+  // screen disagree with the other about the same week.
   const shifts = week.people.reduce(
-    (total, person) => total + person.week.filter((cell) => cell.shift !== null).length, 0);
+    (total, person) =>
+      total + person.week.filter((cell) => cell.shift?.hours != null).length, 0);
   const away = week.people.filter(
     (person) => person.week.some((cell) => cell.leave !== null)).length;
   const gaps = week.people.reduce(

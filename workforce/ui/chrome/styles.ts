@@ -95,9 +95,9 @@ const CHROME = `
 
 .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;
       width:fit-content;white-space:nowrap}
-.pill.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent));color:var(--color-ok,#34d399)}
-.pill.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
-.pill.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent));color:var(--color-bad,#f87171)}
+.pill.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);color:var(--color-ok,#34d399)}
+.pill.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
+.pill.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent);color:var(--color-bad,#f87171)}
 .pill.neu{background:var(--color-surface-raised,#11141f);color:var(--color-ink-muted,#8b93a7)}
 
 .panel{background:var(--color-surface-raised,#11141f);

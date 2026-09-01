@@ -22,7 +22,7 @@ export const ROTA_CSS = `
     border:1px solid var(--color-line,rgb(255 255 255/.07))}
 .wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
 .wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
-       background:color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
+       background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
 .wr{font-size:11.5px;color:var(--color-ink-faint,#5a6172)}
 
 /* A chip is data: the colour and the code are the catalogue's, never derived. */
@@ -32,10 +32,10 @@ export const ROTA_CSS = `
       background:var(--color-surface-raised,#11141f);cursor:pointer}
 .chip b{font-size:12.5px;font-weight:600;letter-spacing:.02em}
 .chip i{font-style:normal;font-size:10.5px;color:var(--color-ink-faint,#5a6172)}
-.chip.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent));
+.chip.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
             border-color:var(--color-brand,#818cf8);color:var(--color-brand,#818cf8)}
-.chip.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent));color:var(--color-ok,#34d399)}
-.chip.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
+.chip.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);color:var(--color-ok,#34d399)}
+.chip.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
 .chip.neutral{color:var(--color-ink-faint,#5a6172)}
 
 /* The one-off span rides ON the chip — WF-Q17: a different fact, anchored to a
@@ -46,11 +46,11 @@ export const ROTA_CSS = `
 
 .away{border-radius:9px;min-height:44px;display:grid;place-items:center;
       font-size:11.5px;font-weight:600;
-      background:color-mix(in srgb, var(--color-bad) 13%, transparent));color:var(--color-bad,#f87171)}
+      background:color-mix(in srgb, var(--color-bad) 13%, transparent);color:var(--color-bad,#f87171)}
 .gap{border-radius:9px;min-height:44px;display:grid;place-items:center;
      font-size:11px;cursor:pointer;
      border:1px dashed var(--color-warn,#fbbf24);color:var(--color-warn,#fbbf24);
-     background:color-mix(in srgb, var(--color-warn) 13%, transparent))}
+     background:color-mix(in srgb, var(--color-warn) 13%, transparent)}
 .empty{border-radius:9px;min-height:44px;display:grid;place-items:center;
        font-size:14px;cursor:pointer;
        border:1px dashed var(--color-line-strong,rgb(255 255 255/.14));
@@ -66,7 +66,7 @@ export const ROTA_CSS = `
       border:1px solid var(--color-line,rgb(255 255 255/.07))}
 .bar{position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;gap:5px;
      align-items:center;padding:0 8px;font-size:11px;white-space:nowrap;overflow:hidden;
-     background:color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
+     background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
 .bar s{text-decoration:none;color:var(--color-ink-faint,#5a6172);font-size:10px}
 .bar.none{background:transparent;color:var(--color-ink-faint,#5a6172);
           border:1px dashed var(--color-line-strong,rgb(255 255 255/.14))}

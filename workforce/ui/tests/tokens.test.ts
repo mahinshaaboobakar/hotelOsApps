@@ -96,6 +96,27 @@ describe("the module's token references", () => {
     expect(referenced().size).toBeGreaterThan(8);
   });
 
+  it("closes every function it opens, so no declaration is silently dropped", () => {
+    // **Found by the capture, not by this suite.** A regex edit left
+    // `color-mix(…, transparent))` in ten declarations: CSS drops a malformed
+    // declaration and falls back to whatever rule is beneath it, so brand chips
+    // rendered as plain panels. `tsc` cannot see inside a template string, the
+    // token check above reads names and not syntax, and happy-dom computes no
+    // styles — the browser was the only thing that could tell.
+    for (const file of stylesheets()) {
+      const css = readFileSync(join(root, file), "utf8");
+
+      for (const declaration of css.split(/[;}]/)) {
+        const opened = (declaration.match(/\(/g) ?? []).length;
+        const closed = (declaration.match(/\)/g) ?? []).length;
+
+        expect(
+          { file, declaration: declaration.trim().slice(0, 70), opened, closed },
+        ).toSatisfy(() => opened === closed);
+      }
+    }
+  });
+
   it("spells the radius the module may actually use", () => {
     // `--radius-panel` is the ONLY published radius. `--r-md` is a real shell
     // variable and stops at the realm boundary, so a module asking for it never
