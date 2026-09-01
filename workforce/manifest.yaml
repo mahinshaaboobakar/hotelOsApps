@@ -85,10 +85,10 @@ resources:
 # vocabulary. Renaming the app is what freed the word to be a resource — the
 # precise equivalent of GuestOps' *desk*.
 #
-# **Still outstanding**: none of the twelve has a row in the registry yet, so
-# install cannot resolve them. The spellings are now correct; the rows are not
-# written. That is the last thing between this manifest and an installable
-# package.
+# **All twelve are registered** — `AUTHZ-Q26`, the Kernel stream's rows, landed
+# 2026-09-01 in `infrastructure/openfga/permissions.yaml` with a property-scoped
+# relation each. Install can resolve every one of them, so this manifest is
+# admissible; it was the last thing between the declaration and a package.
 permissions:
   - id: posting.assign
     reason: "Post people to departments, set headship and reporting lines, and end a posting"
@@ -234,4 +234,8 @@ authorization:
 
 files:
   "backend/HotelOS.Workforce.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
-  "ui/module.ts": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  # `module.js`, and never `module.ts`. The desktop's loader fixes the entry
+  # name — "a second place to say which file to execute is a second place to
+  # disagree" — and reads `ui/module.js` out of the signed inventory by that
+  # exact key. The bundle is what ships; the TypeScript stays in the repository.
+  "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
