@@ -85,8 +85,45 @@ export function swapCard(swap: SwapDetail): HTMLElement {
   const acts = el("div", "acts");
   acts.append(el("div", "btn", "Decline…"), el("div", "btn go", "Approve swap"));
 
-  card.append(title, steps, pair, note, atomic, acts);
+  card.append(title, steps, pair, preview(swap), note, atomic, acts);
   return card;
+}
+
+/**
+ * The day after the swap, before anybody agrees to it.
+ *
+ * **The two-cell atomic exchange, shown rather than described.** Approval writes
+ * both cells together, so what an approver needs is the shift the day ends up
+ * in — not a sentence promising it. A decision surface that described its own
+ * effect and did not draw it is the one somebody approves twice to see what
+ * happened.
+ */
+function preview(swap: SwapDetail): HTMLElement {
+  const box = el("div", "after");
+
+  const grid = el("div", "agrid");
+  for (const heading of [swap.when.split(" ").slice(-2).join(" "),
+    "Morning", "Afternoon", "Night", "Cover"]) {
+    grid.append(el("div", "rhd", heading));
+  }
+
+  // After: the proposer takes what the colleague held, and the reverse.
+  grid.append(el("div", "alab", "After the swap"));
+  grid.append(
+    el("div", "acell", swap.proposerShifts[1] === "M" ? swap.proposer.split(" ")[0] ?? "" : ""),
+    el("div", "acell", swap.colleagueShifts[1] === "A" ? swap.colleague.split(" ")[0] ?? "" : ""),
+    el("div", "acell", "Vishnu"),
+    el("div", "acell dim", "—"),
+  );
+
+  grid.append(el("div", "alab", "Also on duty"));
+  grid.append(
+    el("div", "acell", "Priya"), el("div", "acell", "Joseph"),
+    el("div", "acell dim", "—"), el("div", "acell dim", "—"),
+  );
+
+  box.append(grid);
+  return box;
 }
 
 /** One side of the exchange, before and after. */

@@ -70,4 +70,28 @@ export const ROTA_CSS = `
 .bar s{text-decoration:none;color:var(--color-ink-faint,#5a6172);font-size:10px}
 .bar.none{background:transparent;color:var(--color-ink-faint,#5a6172);
           border:1px dashed var(--color-line-strong,rgb(255 255 255/.14))}
+
+.pick{width:min(420px,100%);display:flex;flex-direction:column;gap:10px;padding:16px;
+      background:var(--color-surface-raised,#11141f);
+      border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
+      border-radius:var(--radius-panel,1rem)}
+.picks{display:flex;flex-direction:column;gap:2px}
+.pk{display:flex;gap:10px;align-items:center;padding:7px 9px;border-radius:8px;
+    font-size:12.5px;cursor:pointer}
+.pk:hover{background:var(--color-surface,#0b0d14)}
+.pk s{text-decoration:none;margin-left:auto;font-size:11.5px;
+      color:var(--color-ink-faint,#5a6172)}
+.pk .code{min-width:34px;text-align:center;border-radius:6px;padding:2px 6px;
+          font-size:11.5px;font-weight:600}
+.pk .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
+                color:var(--color-brand,#818cf8)}
+.pk .code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+             color:var(--color-ok,#34d399)}
+.pk .code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+               color:var(--color-warn,#fbbf24)}
+.pk .code.neutral{color:var(--color-ink-faint,#5a6172)}
+.custom{display:flex;gap:10px;align-items:baseline;padding:8px 9px;border-radius:8px;
+        cursor:pointer;border:1px dashed var(--color-line-strong,rgb(255 255 255/.14))}
+.custom b{font-size:12.5px;font-weight:600}
+.custom s{text-decoration:none;font-size:11.5px;color:var(--color-ink-faint,#5a6172)}
 `;

@@ -63,6 +63,12 @@ interface Place {
 
   /** Open a state the rail cannot reach — the dialog, or the printed sheet. */
   open: (what: string) => void;
+
+  /** Which rota cell is being filled, when one is. */
+  pick: { person: string; day: number } | null;
+
+  /** Open the picker on a cell. */
+  onPick: (person: string, day: number) => void;
 }
 
 /**
@@ -82,14 +88,20 @@ const SCREENS: readonly {
   { label: "Staff Schedule", glyph: "◫", draw: (h, m) => void schedule(h, m) },
   {
     label: "Team Rota", glyph: "▦",
-    draw: (h, m, place) => void rota(h, m, () => place.open("print")),
+    draw: (h, m, place) => void rota(
+      h, m, () => place.open("print"), undefined,
+      place.pick, place.onPick, place.close),
   },
   {
     label: "Leave & Requests", glyph: "◷",
-    draw: (h, m, place) => void leave(h, m, place.tab, place.go),
+    draw: (h, m, place) => void leave(
+      h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close),
   },
   { label: "Attendance", glyph: "◉", draw: (h, m) => void attendance(h, m) },
-  { label: "Duty Register", glyph: "★", draw: (h, m) => void duty(h, m) },
+  {
+    label: "Duty Register", glyph: "★",
+    draw: (h, m, place) => void duty(h, m, place.dialog, () => place.open("duty"), place.close),
+  },
   { label: "People", glyph: "◎", draw: (h, m) => void people(h, m) },
   { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
   {
@@ -127,6 +139,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let current = "Team Rota";
   let tab = "Requests";
   let dialog = false;
+  let pick: { person: string; day: number } | null = null;
 
   function show(next: string): void {
     if (root === null) return;
@@ -146,8 +159,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       tab,
       dialog,
       go: (chosen) => { tab = chosen; show(current); },
-      close: () => { dialog = false; show(current); },
+      close: () => { dialog = false; pick = null; show(current); },
       open,
+      pick,
+      onPick: (person, day) => { pick = { person, day }; show(current); },
     });
   }
 

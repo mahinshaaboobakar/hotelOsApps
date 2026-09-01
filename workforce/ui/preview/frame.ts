@@ -134,6 +134,12 @@ async function drive(): Promise<void> {
   const open = params.get("open");
   if (open === "print") { click(".btn", "Print"); await settle(); }
   if (open === "shift") { click(".btn", "New shift"); await settle(); }
+  if (open === "leave") { click(".btn", "Request leave"); await settle(); }
+  if (open === "duty") { click(".btn", "Assign duty"); await settle(); }
+
+  // The rota's picker opens on a cell rather than a button, so it is reached by
+  // clicking the cell a person would click.
+  if (open === "pick") { click(".chip", "M"); await settle(); }
 
   // **Timers, not `requestAnimationFrame`.** A capture harness is driven in a
   // tab that is frequently not the foreground one, and rAF does not fire there —

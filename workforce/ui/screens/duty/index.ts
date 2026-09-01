@@ -18,20 +18,29 @@ import type { HostApi } from "@hotelos/sdk";
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
+import { assignDuty } from "./dialog";
 import { recordedRegister, type Duty, type Register } from "../../roster/duty";
 
 /** Draw the screen. */
-export async function duty(host: HostApi, main: HTMLElement): Promise<void> {
+export async function duty(
+  host: HostApi,
+  main: HTMLElement,
+  dialog = false,
+  open: () => void = () => {},
+  close: () => void = () => {},
+): Promise<void> {
   const got = await load(host, ROSTER_READ, "register", recordedRegister);
   const register = got.value;
 
   const body = el("div", "body");
   body.append(nowNext(register), week(register), reading());
 
-  main.replaceChildren(header(register), body);
+  main.replaceChildren(header(register, open), body);
+
+  if (dialog) main.append(assignDuty(close));
 }
 
-function header(register: Register): HTMLElement {
+function header(register: Register, open: () => void): HTMLElement {
   const head = el("div", "head");
   const title = el("div");
 
@@ -46,8 +55,15 @@ function header(register: Register): HTMLElement {
   const grow = el("div", "grow");
   head.append(title, grow,
     el("div", "btn", `‹ ${register.week} ›`),
-    el("div", "btn go", "＋ Assign duty"));
+    assign(open));
   return head;
+}
+
+/** The button that opens the dialog. */
+function assign(open: () => void): HTMLElement {
+  const button = el("div", "btn go", "＋ Assign duty");
+  button.addEventListener("click", open);
+  return button;
 }
 
 /** The two lines a duty manager opens this screen for. */

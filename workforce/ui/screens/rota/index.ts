@@ -12,6 +12,7 @@ import { ROSTER_READ } from "../../chrome/permissions";
 import { load, recordedWeek, type Week } from "../../roster";
 import type { HostApi } from "@hotelos/sdk";
 import { grid } from "./grid";
+import { picker } from "./picker";
 import { ribbon } from "./ribbon";
 
 /**
@@ -26,6 +27,9 @@ export async function rota(
   main: HTMLElement,
   print: () => void = () => {},
   fixture: Week = recordedWeek,
+  pick: { person: string; day: number } | null = null,
+  onPick: (person: string, day: number) => void = () => {},
+  closePick: () => void = () => {},
 ): Promise<void> {
   const got = await load(host, ROSTER_READ, "week", fixture);
   const week = got.value;
@@ -33,7 +37,10 @@ export async function rota(
   const body = el("div", "body");
   const view = el("div", "rota");
 
-  view.append(ribbon(week.duty), grid(week.days, week.people, () => {}));
+  view.append(
+    ribbon(week.duty),
+    grid(week.days, week.people, (person, day) => onPick(person.id, day)),
+  );
   body.append(view);
 
   if (week.overtime.length > 0) {
@@ -45,6 +52,17 @@ export async function rota(
   }
 
   main.replaceChildren(header(week, print), body);
+
+  // Over the cell it belongs to, because the week behind it is what makes the
+  // choice legible — which shift the person has either side of this day.
+  if (pick !== null) {
+    const person = week.people.find((candidate) => candidate.id === pick.person);
+    const day = week.days[pick.day];
+
+    if (person !== undefined && day !== undefined) {
+      main.append(picker(person, day, week.catalogue, closePick));
+    }
+  }
 }
 
 /**
