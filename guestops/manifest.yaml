@@ -55,33 +55,31 @@ resources:
   db_connections: 4
   event_rate: 200
 
-# ---------------------------------------------------------------------------
-# BLOCKED — this block is correct and cannot install today.
+# The nine permissions this application asks an administrator to approve.
 #
-# ADR 0092 rule 2 refuses a permission id that is not in
-# `infrastructure/openfga/permissions.yaml`. That file holds 92 permissions and
-# **none of these nine**, so install refuses this package on the first one it
-# reads. They are declared anyway because omitting them would make the manifest
-# lie about what the application needs.
+# **Requests, never rights** — ADR 0092 rule 2. Each carries the reason an
+# administrator reads on the install screen, and a property may decline any of
+# them: a declined permission costs its capability, never the application.
 #
-# What remains is one thing, and it is an addition to a platform file: the nine
-# are simply absent. The registry's own note says permissions for an unbuilt
-# application belong there — *"`room.clean` and `room.inspect` have always been
-# here on the same footing — Housekeeping does not exist either"* — so somebody
-# adds them, and this manifest installs unchanged.
+# All nine are in `infrastructure/openfga/permissions.yaml` (registry 101,
+# raised from 92 for these), so install resolves every id. They were blocked on
+# two counts and both are closed:
 #
-# **The naming half is closed.** Four of these ids conflicted with the registry's
-# ban on generic verbs and on naming the implementing service, and one of the
-# four had been ruled by name in GUEST-Q3. Ruled 2026-09-01: the frozen document
-# governs the spelling, and no capability changed.
+#   * absent from the registry — added 2026-09-01 with their FGA relations
+#     and scoping;
+#   * four spellings conflicted with the registry's ban on generic verbs and on
+#     naming the implementing service, and one of the four had been ruled by
+#     name in GUEST-Q3. Ruled 2026-09-01, the frozen document governing the
+#     spelling, no capability changed:
 #
-#     stay.write          →  stay.override    names GUEST-Q3's own concept —
-#                                             the standing override — better
-#                                             than the ruled spelling did
-#     guest.write         →  guest.amend
-#     request.manage      →  request.handle
-#     guestops.configure  →  desk.configure   no application name as a resource
-# ---------------------------------------------------------------------------
+#         stay.write          →  stay.override    names GUEST-Q3's own concept
+#                                                 — the standing override —
+#                                                 better than the ruled
+#                                                 spelling did
+#         guest.write         →  guest.amend
+#         request.manage      →  request.handle
+#         guestops.configure  →  desk.configure   no application name as a
+#                                                 resource
 permissions:
   - id: reservation.read
     reason: "Show the day's arrivals, the stay page and the guest record"
