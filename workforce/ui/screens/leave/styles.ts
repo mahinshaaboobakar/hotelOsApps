@@ -49,7 +49,8 @@ export const LEAVE_CSS = `
 .side{display:flex;flex-direction:column;gap:4px}
 .side u{text-decoration:none;font-size:13px;font-weight:600}
 .side s{text-decoration:none;font-size:11.5px;color:var(--color-ink-faint,#5a6172)}
-.move{font-size:13px;font-weight:600;color:var(--color-brand,#818cf8)}
+.move{display:flex;gap:8px;align-items:center;font-size:12.5px;
+      color:var(--color-ink-muted,#8b93a7);margin-top:4px}
 .arrow{display:grid;place-items:center;font-size:16px;color:var(--color-ink-faint,#5a6172)}
 .acts{display:flex;gap:8px;justify-content:flex-end}
 

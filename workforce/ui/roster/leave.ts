@@ -58,6 +58,10 @@ export interface SwapDetail {
   proposer: string;
   colleague: string;
 
+  /** Each person's posting, because a swap is between two postings. */
+  proposerWhere: string;
+  colleagueWhere: string;
+
   /** The proposer's shift before and after. */
   proposerShifts: readonly [string, string];
 
@@ -124,6 +128,8 @@ export const recordedLeave: LeaveBoard = {
     when: "Thursday 27 August",
     proposer: "Anjali Menon",
     colleague: "Sneha Iyer",
+    proposerWhere: "Receptionist · Zone 3",
+    colleagueWhere: "Receptionist · Zone 2",
     proposerShifts: ["A", "M"],
     colleagueShifts: ["M", "A"],
     provenance:

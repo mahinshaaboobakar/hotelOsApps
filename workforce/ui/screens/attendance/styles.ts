@@ -13,4 +13,5 @@ export const ATTENDANCE_CSS = `
 .ag .src{text-decoration:none;font-size:10.5px;letter-spacing:.04em;
          text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin:0}
 .dim{color:var(--color-ink-muted,#8b93a7)}
+.postedcell{display:flex;gap:8px;align-items:center}
 `;

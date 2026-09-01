@@ -17,6 +17,7 @@
  */
 
 import { el } from "../../chrome/element";
+import { codeChip } from "../../chrome/code";
 import type { Person, Shift, Week } from "../../roster";
 
 /**
@@ -94,7 +95,7 @@ function option(shift: Shift, current: boolean): HTMLElement {
   const row = el("div", current ? "pk on" : "pk");
 
   row.append(
-    el("b", `code ${shift.tone}`, shift.code),
+    codeChip(shift.code, shift.tone),
     el("span", undefined, shift.name),
     el("s", undefined, shift.hours ?? "—"),
   );

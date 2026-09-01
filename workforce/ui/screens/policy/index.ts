@@ -17,10 +17,26 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { codeChip, colourDot } from "../../chrome/code";
 import { standIn } from "../../chrome/standin";
 import { load } from "../../roster";
 import { newShift } from "./dialog";
 import { recordedPolicy, type CatalogueRow, type LeaveRow, type Policy } from "../../roster/policy";
+
+/** One table cell holding an element rather than text. */
+function cell(child: HTMLElement, className?: string): HTMLElement {
+  const box = el("div", className);
+  box.append(child);
+  return box;
+}
+
+/** The published tone a property's colour name maps onto. */
+function swatch(colour: string): string {
+  if (colour === "Cyan" || colour === "Indigo" || colour === "Violet") return "brand";
+  if (colour === "Emerald") return "ok";
+  if (colour === "Amber") return "warn";
+  return "neutral";
+}
 
 /** Draw the screen. */
 export async function policy(
@@ -82,9 +98,9 @@ function shifts(rows: readonly CatalogueRow[]): HTMLElement {
     item.style.gridTemplateColumns = columns;
     item.append(
       el("b", undefined, row.name),
-      el("div", "code", row.code),
+      cell(codeChip(row.code, swatch(row.colour))),
       el("div", "dim", row.times),
-      el("div", "dim", `${row.colour} · ${row.kind}`),
+      cell(colourDot(`${row.colour} · ${row.kind}`, swatch(row.colour)), "dim"),
       // Why retiring a shift is not deleting it: these assignments still name it,
       // and a rota worked under it has to stay readable.
       el("div", "dim", row.inUse),

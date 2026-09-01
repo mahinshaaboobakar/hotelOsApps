@@ -12,6 +12,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { codeChip } from "../../chrome/code";
 import { standIn } from "../../chrome/standin";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
@@ -74,6 +75,34 @@ function mark(figure: string, label: string, tone: string): HTMLElement {
   return card;
 }
 
+/**
+ * What the rota planned, as the rota draws it.
+ *
+ * The chip and the time, not a string: this column is read against the rota
+ * beside it, and a code that looks different here than it does there makes a
+ * person check whether it is the same shift.
+ */
+function posted(value: string | null): HTMLElement {
+  const cell = el("div", "postedcell");
+
+  if (value === null) {
+    cell.append(el("span", "dim", "not rostered"));
+    return cell;
+  }
+
+  const [code = "", ...time] = value.split(" ");
+  cell.append(codeChip(code, tone(code)), el("span", "dim", time.join(" ")));
+  return cell;
+}
+
+/** The catalogue's tone for a code the row carries. */
+function tone(code: string): string {
+  if (code === "M") return "brand";
+  if (code === "A") return "ok";
+  if (code === "N") return "warn";
+  return "neutral";
+}
+
 /** The day's rows, planned beside actual. */
 function table(rows: readonly DayRow[]): HTMLElement {
   const list = el("div", "rows");
@@ -104,7 +133,7 @@ function table(rows: readonly DayRow[]): HTMLElement {
 
     item.append(
       who,
-      el("div", "dim", row.posted ?? "not rostered"),
+      posted(row.posted),
       el("div", undefined, row.in ?? "—"),
       el("div", undefined, row.out ?? (row.in === null ? "—" : "— still in")),
       against,

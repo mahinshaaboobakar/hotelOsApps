@@ -24,6 +24,12 @@ export const PRINTED_CSS = `
 .pmod{background:#f6f6f6;font-size:10px;font-weight:600;text-align:left}
 
 .plegend{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:10.5px}
+.pl{display:flex;gap:6px;align-items:baseline}
+.pl b{border:1px solid #111;border-radius:2px;padding:0 4px;font-weight:700;
+      min-width:22px;text-align:center}
+.pl s{text-decoration:none;color:#444}
+.pcl{margin:0;padding-left:18px}
+.pcl li{margin-bottom:2px}
 .pchanges{margin-top:14px;border-top:1px solid #999;padding-top:8px;font-size:10.5px}
 .pct{font-weight:700;margin-bottom:4px}
 `;

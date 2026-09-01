@@ -103,6 +103,11 @@ const CHROME = `
 .pill.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
 .pill.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent);color:var(--color-bad,#f87171)}
 .pill.neu{background:var(--color-surface-raised,#11141f);color:var(--color-ink-muted,#8b93a7)}
+/* The tone a standing assignment reads in — a zone on a posting. The neutral
+   tone takes its ground from the raised surface, so on a raised row it
+   disappears and reads as the plain text it was written to replace. */
+.pill.acc{background:color-mix(in srgb, var(--color-brand) 15%, transparent);
+          color:var(--color-brand,#818cf8)}
 
 .panel{background:var(--color-surface-raised,#11141f);
        border:1px solid var(--color-line,rgb(255 255 255/.07));
@@ -128,4 +133,25 @@ const CHROME = `
                    color:var(--color-warn,#fbbf24)}
 .legend .code.neutral{color:var(--color-ink-faint,#5a6172)}
 .lnote{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
+
+/* The short code, drawn once for every screen that shows one. */
+.code{display:inline-block;min-width:30px;text-align:center;border-radius:5px;
+      padding:2px 6px;font-size:11.5px;font-weight:600;letter-spacing:.02em}
+.code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
+            color:var(--color-brand,#818cf8)}
+.code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+         color:var(--color-ok,#34d399)}
+.code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+           color:var(--color-warn,#fbbf24)}
+.code.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent);
+          color:var(--color-bad,#f87171)}
+.code.neutral{background:var(--color-surface-raised,#11141f);
+              color:var(--color-ink-faint,#5a6172)}
+.swatch-row{display:inline-flex;gap:7px;align-items:center}
+.dot{width:8px;height:8px;border-radius:99px;display:inline-block;flex:0 0 auto}
+.dot.brand{background:var(--color-brand,#818cf8)}
+.dot.ok{background:var(--color-ok,#34d399)}
+.dot.warn{background:var(--color-warn,#fbbf24)}
+.dot.bad{background:var(--color-bad,#f87171)}
+.dot.neutral{background:var(--color-ink-faint,#5a6172)}
 `;

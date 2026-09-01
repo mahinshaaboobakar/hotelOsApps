@@ -18,10 +18,26 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { codeChip, colourDot } from "../../chrome/code";
 import { standIn } from "../../chrome/standin";
 import { load } from "../../roster";
 import { newShift } from "../policy/dialog";
 import { recordedPolicy, type CatalogueRow } from "../../roster/policy";
+
+/** One table cell holding an element rather than text. */
+function cell(child: HTMLElement, className?: string): HTMLElement {
+  const box = el("div", className);
+  box.append(child);
+  return box;
+}
+
+/** The published tone a property's colour name maps onto. */
+function swatch(colour: string): string {
+  if (colour === "Cyan" || colour === "Indigo" || colour === "Violet") return "brand";
+  if (colour === "Emerald") return "ok";
+  if (colour === "Amber") return "warn";
+  return "neutral";
+}
 
 const COLUMNS = "1.5fr 110px 160px 1fr 150px";
 
@@ -90,9 +106,9 @@ function table(rows: readonly CatalogueRow[]): HTMLElement {
 
     item.append(
       name,
-      el("div", "code", row.code),
+      cell(codeChip(row.code, swatch(row.colour))),
       el("div", "dim", row.times),
-      el("div", "dim", row.colour),
+      cell(colourDot(row.colour, swatch(row.colour)), "dim"),
       el("div", "dim", row.inUse),
     );
 

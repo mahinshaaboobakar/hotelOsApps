@@ -97,12 +97,30 @@ function legend(week: Week): HTMLElement {
   const box = el("div", "plegend");
 
   for (const shift of week.catalogue) {
-    box.append(el("div", undefined,
-      `${shift.code}  ${shift.name}${shift.hours === null ? "" : `  ${shift.hours}`}`));
+    box.append(entry(shift.code, shift.name, shift.hours));
   }
 
-  box.append(el("div", undefined, "—  Not assigned"));
+  box.append(entry("—", "Not assigned", null));
   return box;
+}
+
+/**
+ * One legend entry, its code boxed.
+ *
+ * A rule around the code, because this sheet is read after a photocopier has
+ * removed every colour: the box is what separates the code from the words beside
+ * it when both are the same black.
+ */
+function entry(code: string, name: string, hours: string | null): HTMLElement {
+  const item = el("div", "pl");
+
+  item.append(el("b", undefined, code), el("span", undefined, name));
+
+  if (hours !== null) {
+    item.append(el("s", undefined, hours));
+  }
+
+  return item;
 }
 
 /**
@@ -117,14 +135,17 @@ function changes(): HTMLElement {
 
   box.append(el("div", "pct", "Changes since this rota was issued"));
 
+  const list = el("ul", "pcl");
+
   for (const line of [
     "Tue 25 — R. Nair took MOD 20:00–08:00 in place of P. Thomas.",
     "Wed 26 — S. Iyer marked sick; her afternoon was covered by J. Kurian (split shift).",
     "Thu 27 — A. Menon and S. Iyer swapped (M ⇄ A), approved by P. Thomas.",
     "Sat 29 — no Manager on Duty assigned for 20:00–08:00.",
   ]) {
-    box.append(el("div", undefined, line));
+    list.append(el("li", undefined, line));
   }
 
+  box.append(list);
   return box;
 }

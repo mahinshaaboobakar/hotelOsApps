@@ -9,6 +9,7 @@
  * head otherwise. One rule, one queue.
  */
 
+import { codeChip } from "../../chrome/code";
 import { el } from "../../chrome/element";
 import type { SwapDetail, Waiting } from "../../roster/leave";
 
@@ -67,9 +68,9 @@ export function swapCard(swap: SwapDetail): HTMLElement {
 
   const pair = el("div", "pair");
   pair.append(
-    person(swap.proposer, swap.proposerShifts),
+    person(swap.proposer, swap.proposerWhere, swap.proposerShifts),
     el("div", "arrow", "⇄"),
-    person(swap.colleague, swap.colleagueShifts),
+    person(swap.colleague, swap.colleagueWhere, swap.colleagueShifts),
   );
 
   // Provenance on the card, never in an audit screen — WF-Q9(b). Who proposed
@@ -127,13 +128,32 @@ function preview(swap: SwapDetail): HTMLElement {
 }
 
 /** One side of the exchange, before and after. */
-function person(name: string, shifts: readonly [string, string]): HTMLElement {
+function person(
+  name: string,
+  where: string,
+  shifts: readonly [string, string],
+): HTMLElement {
   const side = el("div", "side");
+  const move = el("div", "move");
 
-  side.append(
-    el("u", undefined, name),
-    el("div", "move", `${shifts[0]} → ${shifts[1]}`),
+  // Chips, because the approver is about to compare these against the rota, and
+  // a code drawn differently in two places is a code somebody has to check.
+  move.append(
+    codeChip(shifts[0], tone(shifts[0])),
+    el("span", undefined, "→"),
+    codeChip(shifts[1], tone(shifts[1])),
   );
 
+  // The posting, not just the person: a swap exchanges two POSTINGS, and the
+  // zone is what says whether the exchange covers the same ground.
+  side.append(el("u", undefined, name), el("s", undefined, where), move);
   return side;
+}
+
+/** The catalogue's tone for a code this card shows. */
+function tone(code: string): string {
+  if (code === "M") return "brand";
+  if (code === "A") return "ok";
+  if (code === "N") return "warn";
+  return "neutral";
 }

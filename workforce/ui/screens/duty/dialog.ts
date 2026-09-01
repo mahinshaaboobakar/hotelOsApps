@@ -71,6 +71,7 @@ function who(): HTMLElement {
   for (const [initials, name, role, code] of [
     ["AM", "Anjali Menon", "Receptionist", "FO"],
     ["RN", "Rahul Nair", "Security officer", "SEC"],
+    ["VD", "Vishnu Das", "Night auditor", "FO"],
   ] as const) {
     const option = el("div", "pk");
     option.append(

@@ -94,7 +94,7 @@ function row(posting: Posting): HTMLElement {
   item.append(
     who,
     departments,
-    el("div", "dim", posting.zone ?? "—"),
+    zone(posting.zone),
     el("div", undefined, posting.role),
     el("div", "dim", posting.reportsTo),
     el("div", `pill ${posting.tone}`, posting.capability),
@@ -128,6 +128,18 @@ function firstRun(): HTMLElement {
   );
 
   return panel;
+}
+
+/**
+ * The zone, as a chip.
+ *
+ * It reads as an assignment rather than as a description, which is what it is:
+ * a standing arrangement on the posting, not an attribute of the person.
+ */
+function zone(value: string | null): HTMLElement {
+  const cell = el("div");
+  cell.append(value === null ? el("span", "dim", "—") : el("span", "pill acc", value));
+  return cell;
 }
 
 /** What this screen owns, and what it does not. */

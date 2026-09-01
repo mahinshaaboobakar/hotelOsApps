@@ -11,6 +11,7 @@
  */
 
 import { el } from "./element";
+import { codeChip } from "./code";
 import type { Shift } from "../roster";
 
 /**
@@ -29,7 +30,7 @@ export function legend(catalogue: readonly Shift[], note?: string): HTMLElement 
     const entry = el("div", "lent");
 
     entry.append(
-      el("b", `code ${shift.tone}`, shift.code),
+      codeChip(shift.code, shift.tone),
       el("span", undefined, shift.name),
       el("s", undefined, shift.hours ?? ""),
     );
