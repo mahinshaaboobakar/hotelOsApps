@@ -67,13 +67,20 @@ describe("the module's own stylesheet", () => {
     expect(root.querySelector("style")).not.toBeNull();
   });
 
-  /** SHELL-Q30: only names the shell publishes. `--radius-md` is not one. */
-  it("references no unpublished token name", async () => {
+  /**
+   * The token contract has its own guard now — `tokens.test.ts`.
+   *
+   * This assertion used to live here and **encoded a superseded contract**
+   * (ADR 0034): it asserted the stylesheet said `--r-md`, on the belief that
+   * `--r-md` was the published radius. It is not published either — the
+   * contract publishes `radius-panel` — so the test was pinning one unpublished
+   * name in place of another and passing while the module was styled by
+   * nobody. Replaced by a guard derived from `TOKEN_NAMES` rather than from a
+   * name somebody believed in.
+   */
+  it("reaches the stylesheet the token guard checks", async () => {
     const root = await mount();
-    const css = root.querySelector("style")?.textContent ?? "";
-
-    expect(css).not.toContain("--radius-md");
-    expect(css).toContain("--r-md");
+    expect(root.querySelector("style")?.textContent?.length ?? 0).toBeGreaterThan(2000);
   });
 });
 

@@ -5,16 +5,18 @@
 <link rel="stylesheet" href="./tokens.css">
 <style>
   /*
-   * The base rules the real realm writes into a module's document
-   * (apps/desktop/src/shell/module-host/realm.ts, rootStyle). Reproduced so
-   * the capture shows what a module inherits rather than what this page felt
-   * like giving it — including the transparent body, which is why the shell's
-   * surface shows through behind the module's own panels.
+   * The base rules the real realm writes into a module's document, mirrored
+   * from `apps/desktop/src/shell/module-host/realm.ts` (rootStyle) as it stands
+   * after SHELL-Q33: the ROOT paints, using published names, and the body is
+   * transparent so the root's paint shows through rather than offering a second
+   * opinion one rule below the one that has it.
+   *
+   * Mirrored rather than approximated, because a harness that painted its own
+   * background would hide exactly the defect that ruling closed.
    */
+  :root { background: var(--color-surface); color: var(--color-ink); }
   * { box-sizing: border-box; }
-  body { margin: 0; font-family: var(--font-sans, system-ui, sans-serif);
-         color: var(--color-text, inherit); background: transparent; }
-  * { scrollbar-width: thin;
-      scrollbar-color: var(--color-scrollbar, rgba(120,120,120,.4)) transparent; }
+  body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
 </style>
 </head><body><script type="module" src="./frame.js"></script></body></html>
