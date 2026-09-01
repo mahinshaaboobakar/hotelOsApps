@@ -383,6 +383,57 @@ database, one domain over.
 property holiday calendar, this figure is a count over days already in the
 comparison, and it needs nothing else from this application.
 
+## F10 · Slice 7's outward half is gated, and the chapter says so
+
+**Slice 7 named two things. One is built, and two are deliberately not** — and
+in both cases the instruction not to build them is already written down.
+
+### `shift pattern` — the chapter says establish its purpose first
+
+Chapter 01 §7, verbatim:
+
+> *"With the rotation engine refused (R7, the owner's own refusal), **`shift
+> pattern` has no consumer in v1** — it is inherited from ADR 0063 §Q5's
+> remainder list rather than asked for. It sits in slice 7, and what it is *for*
+> should be established before it is built."*
+
+Building it would be a taxonomy invented before a consumer exists — the mistake
+this round has now named four times, and the only one where **the chapter itself
+gave the instruction in advance**. Nothing is built and nothing is proposed.
+
+### The capability read-view — the consumer has not shipped and the route is unruled
+
+Two gates, either one sufficient:
+
+```text
+chapter 01 §7   "the assignment half exists to answer 'who can do X' for
+                 another application, so it SHIPS WHEN THAT APPLICATION CAN ASK"
+                 — Jobs has not shipped
+WF-Q6           routes the answer through the Context Service, and the register
+                 records Q2–Q6 as "architect calls at design ratification"
+                 — so the route is recorded, not ruled
+```
+
+**Designing a cross-service read-view without its consumer is how the shape comes
+out wrong**, and the shape would then be a published contract two applications
+depend on. `GetStaffContext` already exists on Context's surface, so the question
+when it is asked is whether Workforce's answer joins it or arrives as its own
+RPC — which is Context's call and the architect's, not this application's.
+
+### What slice 7 built instead
+
+**The inward half**, which has a consumer today — the rota screen — and invents
+nothing: `AssignmentAdvisor` reads the postings, the capability register, leave
+and the rota, and says what is worth knowing before a cell is filled. Every
+answer is a **warning**, and it is **not wired into `RotaService`**: a manager
+covering a sick shift at six in the morning is not helped by a validator.
+
+**It matches no required capability against a shift, and that is the same
+refusal.** No shift declares what it needs — nothing in the platform says a
+night shift requires a fire warden — and inventing that vocabulary is the
+taxonomy problem again. What the register can honestly say is *this person's
+certification has lapsed*; the manager knows what the shift needs.
+
 ## APPS-Q3 · three schemas still carry old application names
 
 **Reported, not fixed** — colleague files, per the standing order. Found by the
