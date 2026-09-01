@@ -56,28 +56,41 @@ function header(month: Schedule): HTMLElement {
   return head;
 }
 
-/** The four figures, each derived from the month itself. */
+/**
+ * The four figures — one strip, not four cards.
+ *
+ * The frame draws them as a single thin row of inline numbers with the balance
+ * pushed to the right, and the difference is not decoration: four cards the
+ * height of the month's first week push the grid down and make the month the
+ * second thing on the screen. The month is what this screen is.
+ */
 function figures(month: Schedule): HTMLElement {
-  const row = el("div", "figs");
+  const strip = el("div", "meta");
 
   const shifts = month.days.filter(
     (day) => day.tone !== null && day.tone !== "leave" && day.mark !== "OFF").length;
   const leaveDays = month.days.filter((day) => day.tone === "leave").length;
 
-  row.append(
+  strip.append(
     fig(String(shifts), "shifts"),
     fig(String(leaveDays), "days leave"),
-    fig("1", month.duty.replace("1 MOD duty · ", "MOD · ")),
-    fig(month.balance.split(" ")[0] ?? "", month.balance.split(" ").slice(1).join(" ")),
+    fig("1", month.duty),
   );
 
-  return row;
+  const balance = el("div", "mpush");
+  const [figure, ...rest] = month.balance.split(" ");
+  balance.append(el("i", undefined, `${figure} ${rest[0] ?? ""}`),
+    el("span", undefined, rest.slice(1).join(" ")));
+
+  strip.append(balance);
+  return strip;
 }
 
+/** One figure and its label, inline. */
 function fig(figure: string, label: string): HTMLElement {
-  const card = el("div", "fig");
-  card.append(el("b", undefined, figure), el("div", undefined, label));
-  return card;
+  const item = el("div", "mfig");
+  item.append(el("i", undefined, figure), el("span", undefined, label));
+  return item;
 }
 
 /** The month grid, Monday first. */

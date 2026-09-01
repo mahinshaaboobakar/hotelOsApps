@@ -1,11 +1,14 @@
 /** The Staff Schedule's own rules — the four figures and the month grid. */
 export const SCHEDULE_CSS = `
-.figs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.fig{background:var(--color-surface-raised,#11141f);
-     border:1px solid var(--color-line,rgb(255 255 255/.07));
-     border-radius:var(--radius-panel,1rem);padding:12px 14px}
-.fig b{font-size:20px;font-weight:600;letter-spacing:-.02em}
-.fig div{font-size:12px;color:var(--color-ink-muted,#8b93a7);margin-top:2px}
+.meta{display:flex;gap:22px;align-items:baseline;flex-wrap:wrap;
+      padding:9px 14px;border-radius:10px;font-size:12.5px;
+      color:var(--color-ink-muted,#8b93a7);
+      background:var(--color-surface-raised,#11141f);
+      border:1px solid var(--color-line,rgb(255 255 255/.07))}
+.mfig,.mpush{display:flex;gap:7px;align-items:baseline}
+.mpush{margin-left:auto}
+.meta i{font-style:normal;font-size:15px;font-weight:600;color:var(--color-ink,#e8ebf4);
+        letter-spacing:-.01em}
 
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .cday{min-height:62px;border-radius:10px;padding:6px 7px;position:relative;
