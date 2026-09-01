@@ -1,0 +1,196 @@
+# GuestOps — the reservation book, as an installable HotelOS application.
+#
+# Every field here comes from ADR 0092's table and the manifest type the Kernel
+# actually parses (`packages/hotelos-package/src/manifest.rs`). That type is
+# `deny_unknown_fields`, so a key it does not know refuses the whole package —
+# which is why one thing the round asked for is absent below and reported
+# instead of guessed at.
+#
+# `files:` is a placeholder. The packager fills it after the payload is
+# published; a digest map written by hand goes stale on the next build and gets
+# "fixed" by pasting whatever the failure printed.
+
+manifest_version: 1
+id: guestops
+name: "GuestOps"
+version: 0.1.0
+publisher: hotelos
+category: operations
+description: >-
+  The reservation book — bookings are groups, the room-stay is the anchor, and
+  every guest operation happens to a stay.
+
+platform:
+  min_version: "0.1.0"
+  # Exclusive: claims every 0.x and promises nothing about 1.0.
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+runtime:
+  kind: dotnet-service
+  # Install step 6 runs `dotnet backend/<this> migrate`, so it must equal the
+  # csproj's AssemblyName exactly.
+  assembly: HotelOS.GuestOps.dll
+  # AUTHZ-Q17: the principal is the certificate subject and the capability key,
+  # and is deliberately not derived from `id`. An identity spelled out of
+  # another identifier is ADR 0019's `master-data` mismatch waiting to recur.
+  principal: guestops
+
+database:
+  # ADR 0092 addendum §Q15: declared **and** constrained — install refuses a
+  # schema that is not the one `id` derives, so this line cannot silently point
+  # elsewhere. It is `guestops` and never `reservations`: APPS-Q3 covers
+  # schemas, and `03-schemas.sql` names the wrong spelling outright.
+  schema: guestops
+
+resources:
+  # Requests, not rights — rule 3. Property policy decides what is granted, and
+  # a request above the ceiling is clamped rather than refused.
+  #
+  # Four connections rather than three: the desk's reads, the Hub's inbound
+  # facts and the migrate verb are three concurrent users on a busy morning,
+  # and a pool of three makes the third wait on the first two.
+  memory: "512Mi"
+  cpu: "0.5"
+  db_connections: 4
+  event_rate: 200
+
+# ---------------------------------------------------------------------------
+# BLOCKED — this block is correct and cannot install today.
+#
+# ADR 0092 rule 2 refuses a permission id that is not in
+# `infrastructure/openfga/permissions.yaml`. That file holds 92 permissions and
+# **none of these nine**, so install refuses this package on the first one it
+# reads. They are declared anyway because omitting them would make the manifest
+# lie about what the application needs.
+#
+# Two separate problems, and the second is not mine to settle:
+#
+#   1. The nine are simply absent. The registry's own note says permissions for
+#      an unbuilt application belong there — *"`room.clean` and `room.inspect`
+#      have always been here on the same footing — Housekeeping does not exist
+#      either"* — so this is an addition somebody must make, in a platform file.
+#
+#   2. Four of them conflict with the registry's naming rule. Its header bans
+#      `write`, `manage` and `edit` by name — *"Name the operation instead"* —
+#      and forbids naming the implementing service. That makes `stay.write`,
+#      `guest.write`, `request.manage` and `guestops.configure` non-conforming.
+#      **`stay.write` is not a slip to correct here: GUEST-Q3 ruled it**, and
+#      ruled it against two named alternatives. A ruling and a governing
+#      document disagree, so it is reported and not resolved by choosing.
+# ---------------------------------------------------------------------------
+permissions:
+  - id: reservation.read
+    reason: "Show the day's arrivals, the stay page and the guest record"
+  - id: stay.create
+    reason: "Create a booking and its stays, and record a stay the PMS has not sent"
+  - id: stay.write
+    reason: "Check in, check out, cancel, record a no-show, and correct any of them"
+  - id: stay.assign
+    reason: "Give a stay its room, and move it to another"
+  - id: guest.write
+    reason: "Record who is staying, and how to reach them"
+  - id: registration.capture
+    reason: "Capture the registration card, its documents and its signature"
+  - id: reporting.file
+    reason: "Record that a guest filing was made with an authority, and its receipt"
+  - id: request.manage
+    reason: "Log what a guest asked for, and hand it to whoever does the work"
+  - id: guestops.configure
+    reason: "Set the required registration fields, the card series and the reporting policy"
+
+events:
+  # ADR 0093's addendum makes `publishes` load-bearing: `PublishEvent` from an
+  # application is allowed only for a subject listed here, so this list is the
+  # application's own ceiling rather than documentation of one.
+  #
+  # Three domains, and the split is GUEST-Q2's: a booking is a group and a
+  # room-stay is the anchor, so `reservation.*` carries only genuinely
+  # group-level facts and every operation on a guest is a `stay.*` fact.
+  # Cancelling a booking is n `stay.cancelled` facts, which is why no
+  # group-level cancellation appears.
+  publishes:
+    - reservation.created
+    - reservation.expectation_changed
+    - stay.created
+    - stay.amended
+    - stay.assigned
+    - stay.room_changed
+    - stay.arrived
+    - stay.departed
+    - stay.cancelled
+    - stay.no_show
+    - stay.corrected
+    # GUEST-Q11, ruled 2026-09-01. The desk handed a request to whoever does the
+    # work; the reply is EVT-Q3's correlated event, never a call back.
+    - stay.request_raised
+    - guest.created
+    - guest.updated
+
+  # The Hub's reservation facts, and Jobs' reply.
+  #
+  # **Nothing delivers these yet** — EVT-Q4: there is no .NET subscription
+  # surface, so both consumers are driven by a recorded fact and this list is a
+  # declaration of intent the platform cannot yet honour. Declared rather than
+  # omitted: the day a consumer host exists, the subjects it may hear are the
+  # ones written here, and a manifest that had stayed silent would have to be
+  # revised in the same breath.
+  subscribes:
+    - integration.reservation.fact
+    - job.created
+
+configuration:
+  # §2.8. Nothing here names a country, and that is the hard rule: "from
+  # outside" is nationality != home_country, so a hotel in Kochi and a hotel in
+  # Dubai run the same build. The required-field sets, the accepted document
+  # types, the authority and the deadline are all the property's.
+  - key: guestops.home_country
+    type: string
+    default: ""
+    scope: property
+  - key: guestops.registration.signature_required
+    type: boolean
+    default: true
+    scope: property
+  - key: guestops.registration.print_on_check_in
+    type: boolean
+    default: false
+    scope: property
+  - key: guestops.registration.card_prefix
+    type: string
+    default: "GRC-"
+    scope: property
+  - key: guestops.reporting.required
+    type: boolean
+    default: false
+    scope: property
+  - key: guestops.reporting.applies_to
+    type: string
+    default: "from_outside"
+    scope: property
+  - key: guestops.reporting.authority
+    type: string
+    default: ""
+    scope: property
+  # An offset, never a stored date — R18. "Within 24 hours of arrival" survives
+  # the arrival moving; a date does not, and fails in the direction that matters.
+  - key: guestops.reporting.due_hours
+    type: integer
+    default: 24
+    scope: property
+
+# No package dependencies. Jobs, Room Care and Finance are neighbours this
+# application is better with and works without — APPS-Q2: an absent neighbour
+# loses its capability, never the flow. Declaring one would turn "no job yet"
+# into "GuestOps will not install".
+dependencies: []
+
+ui:
+  # The module-registry id, which ADR 0092 §Q15 requires to equal `id` — the
+  # dock, the launcher and every persisted layout resolve an application by id
+  # alone.
+  module: guestops
+
+files:
+  "backend/HotelOS.GuestOps.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.ts": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
