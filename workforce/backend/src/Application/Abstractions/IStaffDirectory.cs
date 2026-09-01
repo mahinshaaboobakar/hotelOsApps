@@ -68,4 +68,21 @@ public interface IStaffDirectory
     /// </remarks>
     Task<Guid?> FindDepartmentIdAsync(
         Guid propertyId, string departmentCode, CancellationToken cancellationToken);
+
+    /// <summary>The property's country, or <c>null</c> when it has none configured.</summary>
+    /// <remarks>
+    /// <para>
+    /// What the leave-type seed template is keyed off — the country-seed ruling:
+    /// <b>a template chosen by the property's own setting, never a literal</b>.
+    /// The setting is <c>Property.Country</c>, which Master Data already carries
+    /// (<c>Tenancy.cs:63</c>) and which is nullable there.
+    /// </para>
+    /// <para>
+    /// Null is answered honestly rather than guessed. A property that has not
+    /// said where it is has not said which vocabulary it uses, and inferring a
+    /// region from a currency or a timezone would be the same country-in-the-
+    /// product mistake wearing a different field.
+    /// </para>
+    /// </remarks>
+    Task<string?> FindPropertyCountryAsync(Guid propertyId, CancellationToken cancellationToken);
 }

@@ -74,4 +74,21 @@ public class MasterDataStaffDirectory(
 
         return match is not null && Guid.TryParse(match.Id, out var id) ? id : null;
     }
+
+    /// <inheritdoc />
+    public async Task<string?> FindPropertyCountryAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+    {
+        var property = await masterData.GetPropertyAsync(
+            // No id on the request: the property *is* the scope, which is
+            // Master Data expressing that a property cannot be read from another
+            // property's context. The tenancy boundary is the request envelope.
+            new GetPropertyRequest
+            {
+                Context = RequestContextFactory.ForService("workforce", propertyId),
+            },
+            cancellationToken: cancellationToken);
+
+        return string.IsNullOrWhiteSpace(property.Country) ? null : property.Country;
+    }
 }

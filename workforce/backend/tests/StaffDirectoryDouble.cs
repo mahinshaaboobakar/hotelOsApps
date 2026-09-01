@@ -76,4 +76,16 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
 
         return Task.FromResult((Guid?)id);
     }
+
+    /// <summary>What the seed template will be keyed off. Null by default.</summary>
+    /// <remarks>
+    /// Null is the honest default: most tests do not care where the property is,
+    /// and the neutral template is what a property that has not said gets.
+    /// </remarks>
+    public string? Country { get; set; }
+
+    /// <inheritdoc />
+    public Task<string?> FindPropertyCountryAsync(
+        Guid propertyId, CancellationToken cancellationToken) =>
+        Task.FromResult(Country);
 }
