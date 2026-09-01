@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
 

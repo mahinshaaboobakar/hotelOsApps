@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Contracts.Integration.V1;
 
 namespace PmsOracle.Vocabularies;

@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using HotelOS.Contracts.Integration.V1;
