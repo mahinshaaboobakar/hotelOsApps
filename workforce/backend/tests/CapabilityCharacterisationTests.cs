@@ -328,6 +328,8 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
 
         return (
             new CapabilityService(db, authorizer, TimeProvider.System),
-            new PostingService(db, authorizer, new StaffDirectoryDouble(), TimeProvider.System));
+            new PostingService(
+                db, authorizer, new StaffDirectoryDouble(), new RecordingEventAppender(),
+                TimeProvider.System));
     }
 }

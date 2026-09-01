@@ -24,7 +24,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_records_the_posting_and_asks_for_posting_manage()
     {
-        var (service, authorizer, _) = Build();
+        var (service, authorizer, _, _) = Build();
         var scope = fixture.Scope();
         var staff = Uuid7.NewUuid7();
 
@@ -44,7 +44,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_normalises_the_department_code()
     {
-        var (service, _, directory) = Build();
+        var (service, _, directory, _) = Build();
 
         var posting = await service.CreateAsync(
             fixture.Scope(), Command(Uuid7.NewUuid7(), department: "  fo  "), default);
@@ -59,7 +59,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_refuses_a_department_the_property_has_not_activated()
     {
-        var (service, _, directory) = Build();
+        var (service, _, directory, _) = Build();
         directory.Unactivated.Add("CASINO");
 
         var refusal = await Assert.ThrowsAsync<InvalidRequestException>(
@@ -72,7 +72,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_refuses_an_overlapping_open_posting_in_the_same_department()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
         var staff = Uuid7.NewUuid7();
 
@@ -85,7 +85,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_allows_the_same_posting_again_after_the_first_has_ended()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
         var staff = Uuid7.NewUuid7();
 
@@ -112,7 +112,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_refuses_a_blank_job_role()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
 
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => service.CreateAsync(
@@ -122,7 +122,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Create_resolves_the_identity_link_and_tolerates_its_absence()
     {
-        var (service, _, directory) = Build();
+        var (service, _, directory, _) = Build();
         var staff = Uuid7.NewUuid7();
 
         await service.CreateAsync(fixture.Scope(), Command(staff), default);
@@ -137,7 +137,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task End_closes_the_window_and_keeps_the_row()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
         var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
@@ -163,7 +163,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task End_refuses_a_date_before_the_posting_started()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
         var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
@@ -185,7 +185,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Update_refuses_a_stale_version()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
         var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
@@ -205,7 +205,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Update_distinguishes_clearing_the_zone_from_leaving_it_alone()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
         var zone = Uuid7.NewUuid7();
 
@@ -243,7 +243,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task A_posting_at_another_property_is_not_found_rather_than_denied()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
 
         var posting = await service.CreateAsync(
             fixture.Scope(), Command(Uuid7.NewUuid7()), default);
@@ -257,7 +257,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task List_excludes_ended_postings_unless_asked()
     {
-        var (service, _, _) = Build();
+        var (service, _, _, _) = Build();
         var scope = fixture.Scope();
         var staff = Uuid7.NewUuid7();
 
@@ -289,7 +289,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task Reading_asks_for_workforce_read_rather_than_posting_manage()
     {
-        var (service, authorizer, _) = Build();
+        var (service, authorizer, _, _) = Build();
 
         await service.ListAsync(fixture.Scope(), new ListPostingsQuery(), default);
 
@@ -299,7 +299,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     [Fact]
     public async Task A_refused_permission_stops_the_write()
     {
-        var (service, authorizer, _) = Build();
+        var (service, authorizer, _, _) = Build();
         var staff = Uuid7.NewUuid7();
         authorizer.Deny.Add("posting.manage");
 
@@ -317,6 +317,18 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         Assert.Empty(await db.Postings.Where(p => p.StaffId == staff).ToListAsync());
     }
 
+    /// <summary>A department code no other test in this suite or its neighbours is using.</summary>
+    /// <remarks>
+    /// A department has <b>one</b> current head, so any test that makes one needs
+    /// a department of its own — the same isolation the swap suite needed, and
+    /// for the same reason. Found twice now by the invariant refusing a second
+    /// head that another suite had already created in ENG and SPA, which is the
+    /// rule working rather than the harness failing.
+    /// </remarks>
+    private static string OwnDepartment() => $"HD{Interlocked.Increment(ref headSlot)}";
+
+    private static int headSlot = -1;
+
     private static CreatePostingCommand Command(
         Guid staff, string department = "FO", string role = "Receptionist", DateOnly? from = null) =>
         new()
@@ -327,16 +339,188 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
             EffectiveFrom = from ?? September,
         };
 
-    private (PostingService Service, RecordingAuthorizer Authorizer, StaffDirectoryDouble Directory)
-        Build()
+    [Fact]
+    public async Task Posting_somebody_with_a_login_announces_user_posted()
+    {
+        var (service, _, directory, events) = Build();
+        var scope = fixture.Scope();
+        var staff = Uuid7.NewUuid7();
+        directory.WithLogin(staff, Uuid7.NewUuid7());
+
+        var posting = await service.CreateAsync(scope, Command(staff, "FO"), default);
+
+        var announced = Assert.Single(events.Events);
+
+        // The ratified AUTHZ-Q20 contract: domain `user`, aggregate `posting`.
+        // The fact is about a person; the record that establishes it is a
+        // posting, and it is the only row that can lend a version.
+        Assert.Equal("user.posted", announced.EventType);
+        Assert.Equal("posting", announced.AggregateType);
+        Assert.Equal(posting.Id, announced.AggregateId);
+        Assert.Equal(posting.Version, announced.EntityVersion);
+    }
+
+    [Fact]
+    public async Task The_payload_carries_both_department_identifiers()
+    {
+        var (service, _, directory, events) = Build();
+        var scope = fixture.Scope();
+        var staff = Uuid7.NewUuid7();
+        var user = Uuid7.NewUuid7();
+        directory.WithLogin(staff, user);
+
+        await service.CreateAsync(scope, Command(staff, "HK"), default);
+
+        var payload = Assert.IsType<PostingAnnouncement>(events.Events.Single().Payload);
+
+        // The id is what department:{uuid} addresses; the code is what the fact
+        // means and what survives a database being rebuilt. Only the id makes it
+        // unreadable to a human debugging it; only the code makes it unusable to
+        // the consumer that must write a tuple.
+        Assert.Equal(user, payload.UserId);
+        Assert.Equal("HK", payload.DepartmentCode);
+        Assert.NotEqual(Guid.Empty, payload.DepartmentId);
+        Assert.Equal(scope.PropertyId, payload.PropertyId);
+    }
+
+    [Fact]
+    public async Task A_posting_for_somebody_with_no_login_announces_nothing()
+    {
+        var (service, _, _, events) = Build();
+
+        await service.CreateAsync(fixture.Scope(), Command(Uuid7.NewUuid7(), "FO"), default);
+
+        // Most of the workforce has no account. The posting is complete and
+        // correct, and there is no principal for a tuple to name — writing one
+        // would be inventing an account.
+        Assert.Empty(events.Events);
+    }
+
+    [Fact]
+    public async Task Posting_a_department_head_announces_both_facts()
+    {
+        var (service, _, directory, events) = Build();
+        var staff = Uuid7.NewUuid7();
+        directory.WithLogin(staff, Uuid7.NewUuid7());
+
+        await service.CreateAsync(
+            fixture.Scope(), Command(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
+
+        // Two events from one operation. Headship is its own grant kind, so it is
+        // its own announcement — folding it into user.posted would have widened
+        // every kind in the Kernel's table to serve one.
+        Assert.Equal(["user.posted", "user.headship_started"], events.Types);
+    }
+
+    [Fact]
+    public async Task Ending_a_head_posting_withdraws_both()
+    {
+        var (service, _, directory, events) = Build();
+        var scope = fixture.Scope();
+        var staff = Uuid7.NewUuid7();
+        directory.WithLogin(staff, Uuid7.NewUuid7());
+
+        var posting = await service.CreateAsync(
+            scope, Command(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
+
+        await service.EndAsync(
+            scope,
+            new EndPostingCommand
+            {
+                Id = posting.Id,
+                ExpectedVersion = posting.Version,
+                EffectiveTo = posting.EffectiveFrom.AddDays(30),
+            },
+            default);
+
+        // posting_ended withdraws #posted, headship_ended withdraws #manager.
+        // Two relations, two tuples, two announcements — and both directions land
+        // together or neither does.
+        Assert.Equal(
+            ["user.posted", "user.headship_started", "user.posting_ended", "user.headship_ended"],
+            events.Types);
+    }
+
+    [Fact]
+    public async Task Granting_headship_on_an_amendment_announces_it_alone()
+    {
+        var (service, _, directory, events) = Build();
+        var scope = fixture.Scope();
+        var staff = Uuid7.NewUuid7();
+        directory.WithLogin(staff, Uuid7.NewUuid7());
+
+        var posting = await service.CreateAsync(scope, Command(staff, OwnDepartment()), default);
+
+        var promoted = await service.UpdateAsync(
+            scope,
+            new UpdatePostingCommand
+            {
+                Id = posting.Id,
+                ExpectedVersion = posting.Version,
+                IsDepartmentHead = true,
+            },
+            default);
+
+        // The third trigger. Headship changes without the posting starting or
+        // finishing, which is exactly why it is a second grant kind — and why
+        // UpdateAsync, which announced nothing until the contract landed,
+        // announces now.
+        Assert.Equal(["user.posted", "user.headship_started"], events.Types);
+
+        await service.UpdateAsync(
+            scope,
+            new UpdatePostingCommand
+            {
+                Id = promoted.Id,
+                ExpectedVersion = promoted.Version,
+                IsDepartmentHead = false,
+            },
+            default);
+
+        // And the fourth.
+        Assert.Equal("user.headship_ended", events.Types[^1]);
+    }
+
+    [Fact]
+    public async Task Amending_without_changing_headship_announces_nothing()
+    {
+        var (service, _, directory, events) = Build();
+        var scope = fixture.Scope();
+        var staff = Uuid7.NewUuid7();
+        directory.WithLogin(staff, Uuid7.NewUuid7());
+
+        var posting = await service.CreateAsync(scope, Command(staff, "FO"), default);
+
+        await service.UpdateAsync(
+            scope,
+            new UpdatePostingCommand
+            {
+                Id = posting.Id,
+                ExpectedVersion = posting.Version,
+                JobRole = "Senior Receptionist",
+                IsDepartmentHead = false,
+            },
+            default);
+
+        // Re-stating a flag at the value it already holds is not a change, and a
+        // headship_ended for somebody who was never head would delete a tuple
+        // that never existed — noise the Kernel would have to be tolerant of.
+        Assert.Equal(["user.posted"], events.Types);
+    }
+
+    private (PostingService Service, RecordingAuthorizer Authorizer, StaffDirectoryDouble Directory,
+        RecordingEventAppender Events) Build()
     {
         var authorizer = new RecordingAuthorizer();
         var directory = new StaffDirectoryDouble();
 
+        var events = new RecordingEventAppender();
+
         return (
             new PostingService(
-                fixture.Context(), authorizer, directory, TimeProvider.System),
+                fixture.Context(), authorizer, directory, events, TimeProvider.System),
             authorizer,
-            directory);
+            directory,
+            events);
     }
 }
