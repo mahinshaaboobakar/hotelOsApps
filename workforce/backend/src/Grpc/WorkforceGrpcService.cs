@@ -1,3 +1,4 @@
+using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Contracts.V1;
 
@@ -28,8 +29,11 @@ namespace HotelOS.Workforce.Grpc;
 /// CLAUDE.md §"No business logic in API routes".
 /// </para>
 /// </remarks>
-public partial class WorkforceGrpcService(PostingService postings)
+public partial class WorkforceGrpcService(
+    PostingService postings,
+    CapabilityService capabilities)
     : WorkforceService.WorkforceServiceBase
 {
     private readonly PostingService postings = postings;
+    private readonly CapabilityService capabilities = capabilities;
 }

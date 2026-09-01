@@ -10,11 +10,18 @@ syntax = "proto3";
 // cached decision. A cache in front of the revocation authority is how a
 // disabled user keeps working for another ten seconds.
 //
-// # Slice 1 only
+// # Slices 1 and 2
 //
-// Postings and their read surface. Shifts, leave, swaps, duty, attendance and
-// capability are designed (chapter 01 §3) and belong to later slices; adding
-// their RPCs now would ship a surface with nothing behind it.
+// Postings and their read surface, and capability with its compliance views.
+// Shifts, leave, swaps, duty and attendance are designed (chapter 01 §3) and
+// belong to later slices; adding their RPCs now would ship a surface with
+// nothing behind it.
+//
+// Capability is here **second** rather than last — re-sliced 2026-08-31, because
+// a fire-warden card expires whether or not Jobs has shipped, and queueing a
+// compliance obligation behind four slices of convenience was the wrong order.
+// It needs only slice 1: the Attention list's audience resolves from postings,
+// and nothing else in it depends on a rota, on leave or on attendance.
 //
 // # What has no RPC, and why
 //
@@ -46,6 +53,29 @@ service WorkforceService {
 
   rpc GetPosting   (GetPostingRequest)   returns (PostingView);
   rpc ListPostings (ListPostingsRequest) returns (ListPostingsResponse);
+
+  // --- slice 2 · capability and compliance ---------------------------------
+
+  rpc RecordCapability (RecordCapabilityRequest) returns (CapabilityView);
+  rpc AmendCapability  (AmendCapabilityRequest)  returns (CapabilityView);
+
+  // Remove a capability recorded in error. Not a renewal: renewing is amending
+  // the date on the capability somebody already holds.
+  rpc RemoveCapability (RemoveCapabilityRequest) returns (RemoveCapabilityResponse);
+
+  rpc ListCapabilities (ListCapabilitiesRequest) returns (ListCapabilitiesResponse);
+
+  // What is about to lapse, or has — the department head's and HR's list.
+  //
+  // A **query**, not a stored list and not a notification queue: the answer
+  // depends on today, so it is computed when asked. Nothing here is marked read
+  // or dismissed, because a certificate that has expired does not stop being
+  // expired when somebody looks at it.
+  rpc ListAttention (ListAttentionRequest) returns (ListCapabilitiesResponse);
+
+  // Every dated capability at this property, with holder and expiry — the sheet
+  // a safety inspector asks for.
+  rpc CertificationRegister (CertificationRegisterRequest) returns (ListCapabilitiesResponse);
 }
 
 message CreatePostingRequest {
@@ -124,4 +154,70 @@ message ListPostingsRequest {
 
 message ListPostingsResponse {
   repeated PostingView postings = 1;
+}
+
+message RecordCapabilityRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  string staff_id = 2;
+  string name     = 3;
+
+  // ISO date, or empty. Empty is an ability and is the ordinary case — the
+  // whole design is that typing a date is the only thing that makes this a
+  // certification.
+  string valid_until = 4;
+
+  string note = 5;
+}
+
+message AmendCapabilityRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  string id               = 2;
+  int64  expected_version = 3;
+
+  optional string name        = 4;
+  optional string note        = 5;
+
+  // Present and empty clears the expiry, turning a certification back into an
+  // ability. Absent leaves it alone. A plain string could not express the
+  // difference, and both are things somebody does.
+  optional string valid_until = 6;
+
+  // Deliberately absent: `staff_id`. A capability recorded against the wrong
+  // person is removed and recorded again, because moving it would silently
+  // transfer a certificate between two people in the register.
+}
+
+message RemoveCapabilityRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  string id               = 2;
+  int64  expected_version = 3;
+}
+
+message RemoveCapabilityResponse {}
+
+message ListCapabilitiesRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  // Empty means every person at this property.
+  string staff_id = 2;
+}
+
+message ListAttentionRequest {
+  hotelos.common.v1.RequestContext context = 1;
+
+  // Empty means the whole property. A department head passes their canon code
+  // and sees their own people — resolved through postings, which is the same
+  // resolution the leave approver uses.
+  string department_code = 2;
+}
+
+message CertificationRegisterRequest {
+  hotelos.common.v1.RequestContext context = 1;
+}
+
+message ListCapabilitiesResponse {
+  repeated CapabilityView capabilities = 1;
 }

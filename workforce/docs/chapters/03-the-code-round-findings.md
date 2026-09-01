@@ -282,6 +282,59 @@ on somebody else's schema"*. **F6 is closed**, and this fixture inherits it.
   its own staff id: an assertion that reads other tests' rows is one that fails
   when somebody adds a test.
 
+## F8 · There is no soft-delete convention for an installable application
+
+**Raised as a flag on slice 2's `Remove`** — *"the platform's blanket
+soft-delete interceptor means your Remove needs ADR 0045's `IHardDeleted`
+marker"* — and **the premise does not hold**, which is the finding.
+
+Measured 2026-09-01:
+
+```text
+IHardDeleted                     services/masterdata-service/src/Domain/MasterEntity.cs:122
+the interceptor that honours it  services/masterdata-service/src/Infrastructure/
+                                 MasterDataDbContext.cs:128-148  — an override of
+                                 that service's own SaveChangesAsync
+in packages/sdk-dotnet           nothing. No DeletedAt, no Active, no interceptor
+```
+
+**The soft-delete convention is Master Data's, not the platform's.** It is bound
+to `MasterEntity` — which carries `Active`, `DeletedAt` and `CreatedBy` — and
+implemented in that service's own `SaveChangesAsync`. An installable
+application's `DbContext` inherits none of it.
+
+So slice 2's `Remove` is already a hard delete, and not by an opt-out: **nothing
+was intercepting it.** The characterisation test
+`Removing_takes_the_row_and_reading_it_again_is_not_found` proves the row is
+gone. `IHardDeleted` cannot be applied here because it does not reach this
+repository at all, and adding a copy of the marker would be a copy of a
+Master Data concept with no interceptor to read it — decoration.
+
+### Which is right for `Capability`, and a gap for what comes next
+
+For this aggregate the outcome is the ruled one: `Remove` is for the row that
+should never have existed, an expired capability is **kept** because the
+register showing what lapsed is the point, and the operation is
+permission-gated (`capability.manage`) and version-checked.
+
+**The gap is that an installable application has no lifecycle convention at
+all.** ADR 0062 rules `active` + `deleted_at` with Deactivate/Reactivate — and
+it rules it for **master entities**. An application's operational records are
+outside it, so every application invents its own, and the ones this round has
+already designed will need one:
+
+```text
+LeaveRequest      has a Cancelled state — a lifecycle, invented per app
+AttendanceRecord  must never be silently deleted: it is evidence
+ShiftAssignment   deleting one loses what a rota was worked under
+```
+
+**Recorded, not resolved.** Whether the platform should offer one — an SDK
+base entity, an interceptor, or a stated rule that applications choose per
+aggregate and say why — is a package-contract question, and it is the fourth
+finding in the same family: **a convention that exists for platform services
+and stops at the package boundary.**
+
 ## APPS-Q3 · three schemas still carry old application names
 
 **Reported, not fixed** — colleague files, per the standing order. Found by the

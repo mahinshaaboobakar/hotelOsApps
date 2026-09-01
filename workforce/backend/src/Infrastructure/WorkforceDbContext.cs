@@ -41,6 +41,9 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
     /// <summary>Every posting this property holds, open or closed.</summary>
     public DbSet<Posting> Postings => Set<Posting>();
 
+    /// <summary>What people here can do, dated or not.</summary>
+    public DbSet<Capability> Capabilities => Set<Capability>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -119,6 +122,36 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
             // Overlapping open postings for one person and department *are*
             // wrong, and that is enforced in the service where the window can be
             // compared, not by an index that cannot express it.
+        });
+
+        modelBuilder.Entity<Capability>(capability =>
+        {
+            capability.ToTable("capabilities", table =>
+                table.HasCheckConstraint(
+                    "ck_capabilities__name_present",
+                    "length(btrim(name)) > 0"));
+
+            capability.HasKey(c => c.Id);
+
+            capability.Property(c => c.Name).HasMaxLength(200).IsRequired();
+            capability.Property(c => c.Note).HasMaxLength(1000).IsRequired();
+            capability.Property(c => c.Version).IsConcurrencyToken();
+
+            // One person cannot hold one capability twice — a second "fire
+            // warden" row is two expiry dates for one fact, and the register
+            // would show them as both current and lapsed. Unlike a posting, this
+            // *is* expressible as an index, because there is no window to
+            // compare: renewing amends the row rather than adding one.
+            capability.HasIndex(c => new { c.PropertyId, c.StaffId, c.Name })
+                .IsUnique()
+                .HasDatabaseName("uq_capabilities__property_staff_name");
+
+            // The Attention list and the register both scan by expiry within a
+            // property. Nulls are the majority — abilities — and both queries
+            // exclude them, so the index carries only the rows that lapse.
+            capability.HasIndex(c => new { c.PropertyId, c.ValidUntil })
+                .HasFilter("valid_until IS NOT NULL")
+                .HasDatabaseName("ix_capabilities__property_expiry");
         });
     }
 }

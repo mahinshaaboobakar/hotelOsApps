@@ -89,3 +89,54 @@ message PostingView {
   google.protobuf.Timestamp updated_at = 13;
   int64 version = 14;
 }
+
+// How close a capability is to lapsing.
+//
+// **Computed on every read, never stored.** The answer depends on the clock, and
+// a stored value that depends on the clock is wrong every day at midnight until
+// something rewrites it — the same reason the platform derives the current
+// business date rather than storing it.
+//
+// The three warning bands are the ruling's 60 / 30 / 7.
+enum ExpiryBand {
+  // Zero is the ordinary case on purpose: most capabilities are abilities, and
+  // a default that meant "warning" would put every unset field on a list.
+  EXPIRY_BAND_DOES_NOT_LAPSE = 0;
+  EXPIRY_BAND_VALID          = 1;
+  EXPIRY_BAND_WITHIN_60_DAYS = 2;
+  EXPIRY_BAND_WITHIN_30_DAYS = 3;
+  EXPIRY_BAND_WITHIN_7_DAYS  = 4;
+  EXPIRY_BAND_EXPIRED        = 5;
+}
+
+// Something a person can do, and — if it lapses — until when.
+//
+// One optional field carries both concepts: no `valid_until` is an **ability**
+// ("speaks Arabic"); a `valid_until` makes it a **certification** ("fire warden
+// — valid until 12 Mar 2027"). **The date is the discriminator**, so there is no
+// `kind` field for a reader to branch on and for the data to contradict.
+message CapabilityView {
+  string id          = 1;
+  string property_id = 2;
+
+  // Master Data's person. Nothing about them is carried here.
+  string staff_id = 3;
+
+  // What they can do. Free text: a hotel's capability vocabulary is its own,
+  // unlike the department canon, which is the industry's.
+  string name = 4;
+
+  // ISO date, or empty when it does not lapse.
+  string valid_until = 5;
+
+  // Where a certificate number or an issuer goes, for a hotel that wants one.
+  string note = 6;
+
+  // Derived from `valid_until` and the property's today — never stored, and
+  // never sent by a client.
+  ExpiryBand band = 7;
+
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+  int64 version = 10;
+}
