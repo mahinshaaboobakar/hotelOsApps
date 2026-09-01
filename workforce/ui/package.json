@@ -7,7 +7,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "build": "node ../../scripts/build-module.mjs .",
+    "test": "npm run build && vitest run",
     "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 /**
  * The package's entry point: join this module to the host that loaded it.
  *
- * # Why this is not `module.ts`
+ * # Why this is not the composition root
  *
  * `SHELL-Q32` requires `ui/module.js` to be **self-contained** — no import the
  * host must resolve — and ADR 0101 defect 22's sibling finding is that a bundle
@@ -9,28 +9,37 @@
  * no listener: the handshake reaches nobody and `hotelos.ready` can never post.
  * The shipped bundle therefore needs a top-level call, and this file is it.
  *
- * It is separate from `module.ts` because calling `connectToHost` at import
- * time is exactly wrong for every other consumer. The capture harness fakes the
- * host and activates the module itself; the test suite activates it with a
- * double. Both import `module.ts`, and neither wants a `message` listener
- * attached to their window as a side effect of importing a composition root.
+ * It is separate from `application.ts` because calling `connectToHost` at
+ * import time is exactly wrong for every other consumer. The capture harness
+ * fakes the host and activates the module itself; the test suite activates it
+ * with a double. Both import the composition root, and neither wants a
+ * `message` listener attached to their window as a side effect.
  *
  * ```text
- * module.ts   what this module IS      exports activate — imported by tests
- *                                      and the harness
- * main.ts     how it REACHES a host    the packaged entry, bundled to
- *                                      ui/module.js and nothing else
+ * application.ts   what this module IS    exports activate — imported by the
+ *                                         tests and the capture harness
+ * main.ts          how it REACHES a host  the packaged entry, bundled to
+ *                                         ui/module.js and nothing else
  * ```
  *
- * **The name is `scripts/build-module.mjs`'s, not this application's.** That
- * script bundles `main.ts` and refuses to leave a bundle on disk that does not
- * self-start; a second spelling here would be one application's entry point
- * called something the shared pipeline does not build.
+ * # Both names are the pipeline's, not this application's
+ *
+ * `scripts/build-module.mjs` bundles `main.ts` and writes `module.js` beside
+ * it, so a second spelling of the entry would be an application the shared
+ * pipeline does not build.
+ *
+ * The composition root is `application.ts` for the other half of the same
+ * reason, and it earned the rename the hard way: it was `module.ts`, and the
+ * moment a build ran, `module.js` sat next to it and won every `../module`
+ * import — Vite resolves `.js` first. Six tests failed with *"activate is not
+ * a function"*, because what they had imported was the packaged bundle, which
+ * exports nothing. A clean checkout passed and a built one did not. GuestOps
+ * was never exposed to it: its root has always been `application.ts`.
  */
 
 import { connectToHost } from "@hotelos/sdk";
 
-import activate from "./module";
+import activate from "./application";
 
 /**
  * A handshake that never completes is invisible from outside the realm.

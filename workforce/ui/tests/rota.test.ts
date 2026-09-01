@@ -1,7 +1,7 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { activate } from "../module";
+import { activate } from "../application";
 import { recordedOvertime, recordedWeek } from "../roster";
 
 /**
