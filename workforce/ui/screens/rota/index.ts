@@ -7,6 +7,7 @@
  */
 
 import { el } from "../../chrome/element";
+import { standIn } from "../../chrome/standin";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load, recordedWeek, type Week } from "../../roster";
 import type { HostApi } from "@hotelos/sdk";
@@ -36,7 +37,7 @@ export async function rota(host: HostApi, main: HTMLElement, fixture: Week = rec
   }
 
   if (!got.live) {
-    body.append(standIn(got.because));
+    body.append(standIn("week", got.because));
   }
 
   main.replaceChildren(header(week), body);
@@ -100,26 +101,6 @@ function overtime(week: Week): HTMLElement {
 
   note.append(el("span", undefined,
     "The rota still takes the assignment — a manager covering a sick shift decides."));
-
-  panel.append(note);
-  return panel;
-}
-
-/**
- * What this screen says when it is not showing the property's own data.
- *
- * ADR 0124: a surface fails in place and names what it awaits. A person must be
- * able to tell whether they are looking at their hotel.
- */
-function standIn(because: string | null): HTMLElement {
-  const panel = el("div", "panel");
-  const note = el("div", "note");
-
-  note.append(
-    el("b", undefined, "Showing the approved example week. "),
-    el("span", undefined,
-      because ?? "The desktop has no Workforce client yet, so this rota is a stand-in."),
-  );
 
   panel.append(note);
   return panel;

@@ -11,9 +11,9 @@
  *
  * # It is styled, never themed
  *
- * Every colour is a `var()` on the host's injected tokens, and only on names the
- * shell publishes (`SHELL-Q30`). An installed application looks like HotelOS
- * because the platform styles it, not because it renders the platform's
+ * Every colour is a `var()` on the host's injected tokens, and only on the
+ * fourteen names the shell publishes. An installed application looks like
+ * HotelOS because the platform styles it, not because it renders the platform's
  * components.
  *
  * # This file composes and holds no screen
@@ -25,6 +25,7 @@
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
+import { recordedLeave } from "./roster/leave";
 import { rail, type Operator, type RailItem } from "./chrome/rail";
 import { stylesheet } from "./chrome/styles";
 import { attendance } from "./screens/attendance";
@@ -32,24 +33,52 @@ import { ATTENDANCE_CSS } from "./screens/attendance/styles";
 import { duty } from "./screens/duty";
 import { DUTY_CSS } from "./screens/duty/styles";
 import { leave } from "./screens/leave";
+import { LEAVE_CSS } from "./screens/leave/styles";
 import { people } from "./screens/people";
 import { PEOPLE_CSS } from "./screens/people/styles";
+import { policy } from "./screens/policy";
+import { POLICY_CSS } from "./screens/policy/styles";
 import { reports } from "./screens/reports";
 import { REPORTS_CSS } from "./screens/reports/styles";
-import { LEAVE_CSS } from "./screens/leave/styles";
 import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
+import { schedule } from "./screens/schedule";
+import { SCHEDULE_CSS } from "./screens/schedule/styles";
 
-/** The eight destinations the approved frames draw, in their order. */
-const DESTINATIONS: readonly RailItem[] = [
-  { label: "Staff Schedule", glyph: "◫" },
-  { label: "Team Rota", glyph: "▦" },
-  { label: "Leave & Requests", glyph: "◷", count: "3" },
-  { label: "Attendance", glyph: "◉" },
-  { label: "Duty Register", glyph: "★" },
-  { label: "People", glyph: "◎" },
-  { label: "Reports", glyph: "▤" },
-  { label: "Policy", glyph: "⚙" },
+/** What a screen needs to draw itself. */
+interface Place {
+  /** Which tab, for the one screen that has them. */
+  tab: string;
+
+  /** Change the tab and redraw. */
+  go: (tab: string) => void;
+}
+
+/**
+ * Every destination, its glyph, and the screen it opens.
+ *
+ * **The rail is derived from this**, so a destination without a screen cannot
+ * be listed and a screen nothing reaches cannot be written. The alternative — a
+ * list of rail items beside a chain of `if`s — needs a fallback for the case
+ * the two disagree, and a fallback that quietly draws something else is the
+ * unreachable state this module just deleted, wearing a different hat.
+ */
+const SCREENS: readonly {
+  label: string;
+  glyph: string;
+  draw: (host: HostApi, main: HTMLElement, place: Place) => void;
+}[] = [
+  { label: "Staff Schedule", glyph: "◫", draw: (h, m) => void schedule(h, m) },
+  { label: "Team Rota", glyph: "▦", draw: (h, m) => void rota(h, m) },
+  {
+    label: "Leave & Requests", glyph: "◷",
+    draw: (h, m, place) => void leave(h, m, place.tab, place.go),
+  },
+  { label: "Attendance", glyph: "◉", draw: (h, m) => void attendance(h, m) },
+  { label: "Duty Register", glyph: "★", draw: (h, m) => void duty(h, m) },
+  { label: "People", glyph: "◎", draw: (h, m) => void people(h, m) },
+  { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
+  { label: "Policy", glyph: "⚙", draw: (h, m) => void policy(h, m) },
 ];
 
 /** Who is signed in, drawn at the rail's foot. */
@@ -72,58 +101,35 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // screen change, so a stylesheet appended at mount is deleted by the first
   // render — the module then draws itself as an unstyled column, and neither
   // the type-check nor the suite can see it.
-  const style = stylesheet([ROTA_CSS, LEAVE_CSS, ATTENDANCE_CSS, DUTY_CSS, PEOPLE_CSS, REPORTS_CSS]);
+  const style = stylesheet([
+    ROTA_CSS, LEAVE_CSS, ATTENDANCE_CSS, DUTY_CSS,
+    PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS,
+  ]);
 
-  let screen = "Team Rota";
+  let current = "Team Rota";
   let tab = "Requests";
 
   function show(next: string): void {
     if (root === null) return;
-    screen = next;
+
+    const screen = SCREENS.find((entry) => entry.label === next);
+    if (screen === undefined) return;
+
+    current = next;
 
     const frame = el("div", "wf");
     const main = el("div", "main");
 
-    frame.append(rail(DESTINATIONS, screen, OPERATOR, show), main);
+    frame.append(rail(items(), current, OPERATOR, show), main);
     root.replaceChildren(style, frame);
 
-    if (screen === "Team Rota") {
-      void rota(host, main);
-      return;
-    }
-
-    if (screen === "People") {
-      void people(host, main);
-      return;
-    }
-
-    if (screen === "Reports") {
-      void reports(host, main);
-      return;
-    }
-
-    if (screen === "Attendance") {
-      void attendance(host, main);
-      return;
-    }
-
-    if (screen === "Duty Register") {
-      void duty(host, main);
-      return;
-    }
-
-    if (screen === "Leave & Requests") {
-      void leave(host, main, tab, (next) => { tab = next; show(screen); });
-      return;
-    }
-
-    main.replaceChildren(unbuilt(screen));
+    screen.draw(host, main, { tab, go: (chosen) => { tab = chosen; show(current); } });
   }
 
   return {
     mount(element) {
       root = element;
-      show(screen);
+      show(current);
     },
 
     unmount() {
@@ -133,22 +139,18 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 };
 
 /**
- * A screen the approved design draws and this slice does not build.
+ * The rail's entries.
  *
- * ADR 0124: it fails **in place** and names what it awaits, rather than showing
- * a blank panel a person has to interpret.
+ * **The count is the queue's own length**, read from the same facts the screen
+ * draws — not a literal beside it. A rail carrying its own number would
+ * eventually disagree with the list it points at, and the rail is the one a
+ * person believes. When a client lands, both come through the seam and this
+ * stays true without being changed.
  */
-function unbuilt(screen: string): HTMLElement {
-  const head = el("div", "head");
-  const title = el("div");
-
-  title.append(
-    el("div", "ht", screen),
-    el("div", "hsub", "Drawn in the approved design; not built in this slice."),
-  );
-
-  head.append(title);
-  return head;
+function items(): readonly RailItem[] {
+  return SCREENS.map((screen) => screen.label === "Leave & Requests"
+    ? { label: screen.label, glyph: screen.glyph, count: String(recordedLeave.waiting.length) }
+    : { label: screen.label, glyph: screen.glyph });
 }
 
 export default activate;

@@ -108,19 +108,4 @@ describe("the Team Rota", () => {
     expect(asked).toBe(false);
   });
 
-  it("names an unbuilt screen instead of showing an empty one", async () => {
-    const root = await mount(host(recordedWeek));
-
-    // **This test retires with the last screen.** It failed the moment Reports
-    // was built, which is the assertion working: `unbuilt()` draws a state that
-    // stops existing, and when the twelfth frame lands both the function and
-    // this test are dead code rather than coverage.
-    const target = Array.from(root.querySelectorAll<HTMLElement>(".ri"))
-      .find((item) => item.textContent?.includes("Staff Schedule") === true);
-
-    target?.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(root.textContent ?? "").toContain("not built in this slice");
-  });
 });

@@ -12,6 +12,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { standIn } from "../../chrome/standin";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
 import { recordedDay, type Day, type DayRow } from "../../roster/attendance";
@@ -25,14 +26,7 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
   body.append(marks(day), table(day.rows));
 
   if (!got.live) {
-    const panel = el("div", "panel");
-    const note = el("div", "note");
-    note.append(
-      el("b", undefined, "Showing the approved example day. "),
-      el("span", undefined, "The desktop has no Workforce client yet."),
-    );
-    panel.append(note);
-    body.append(panel);
+    body.append(standIn("day", got.because));
   }
 
   main.replaceChildren(header(day), body);

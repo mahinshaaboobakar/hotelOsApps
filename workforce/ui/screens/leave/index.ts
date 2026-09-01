@@ -8,6 +8,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { standIn } from "../../chrome/standin";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
 import { recordedLeave, type LeaveBoard } from "../../roster/leave";
@@ -40,7 +41,7 @@ export async function leave(
   }
 
   if (!got.live) {
-    body.append(standIn());
+    body.append(standIn("example", got.because));
   }
 
   main.replaceChildren(header(board), tabs(board, tab, go), body);
@@ -80,18 +81,4 @@ function tabs(board: LeaveBoard, current: string, go: (tab: string) => void): HT
   }
 
   return row;
-}
-
-/** ADR 0124: it fails in place and names what it awaits. */
-function standIn(): HTMLElement {
-  const panel = el("div", "panel");
-  const note = el("div", "note");
-
-  note.append(
-    el("b", undefined, "Showing the approved example. "),
-    el("span", undefined, "The desktop has no Workforce client yet."),
-  );
-
-  panel.append(note);
-  return panel;
 }
