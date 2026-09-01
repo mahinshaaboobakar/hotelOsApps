@@ -109,7 +109,7 @@ function calendar(month: Schedule): HTMLElement {
 }
 
 function cell(day: ScheduleDay): HTMLElement {
-  const box = el("div", day.tone === null ? "cday out" : "cday");
+  const box = el("div", day.tone === null ? "cday out" : day.today === true ? "cday today" : "cday");
 
   box.append(el("s", undefined, day.date === null ? "" : String(day.date)));
 
@@ -117,15 +117,17 @@ function cell(day: ScheduleDay): HTMLElement {
     box.append(el("b", `cm ${day.tone}`, day.mark));
   }
 
-  // The duty rides on the day it is held, beside the shift rather than instead
-  // of it: MOD is property-wide and the person keeps their own posting.
-  if (day.duty) {
-    box.append(el("i", "cduty", "★"));
+  // The duty rides on the day it is held, BENEATH the shift rather than instead
+  // of it — MOD is property-wide and the person keeps their own posting — and it
+  // prints its span, because a duty crossing midnight is the one whose hours a
+  // person actually needs.
+  if (day.duty !== undefined) {
+    box.append(el("div", "cduty", day.duty));
   }
 
-  // Where a duty ran past midnight, the next day carries its end.
+  // The next day carries the tail, quieter: the duty ends there.
   if (day.tail !== undefined) {
-    box.append(el("i", "ctail", day.tail));
+    box.append(el("div", "cduty tail", day.tail));
   }
 
   return box;

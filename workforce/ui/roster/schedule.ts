@@ -20,8 +20,16 @@ export interface ScheduleDay {
   /** How it reads. */
   tone: "brand" | "ok" | "warn" | "neutral" | "leave" | null;
 
-  /** True where this person also holds the duty that day. */
-  duty: boolean;
+  /**
+   * The duty this person holds that day, as its span reads.
+   *
+   * The span, not a flag: the frame prints "MOD 20:00→08:00" in the cell,
+   * because a duty crossing midnight is the one a person needs the hours of.
+   */
+  duty?: string;
+
+  /** The day the register is being read on, drawn with an emphasised border. */
+  today?: boolean;
 
   /**
    * The tail of a duty that began the day before, at reduced weight.
@@ -50,12 +58,12 @@ export interface Schedule {
 
 /** A working day. */
 function work(date: number, mark: string, tone: ScheduleDay["tone"]): ScheduleDay {
-  return { date, mark, tone, duty: false };
+  return { date, mark, tone };
 }
 
 /** A blank cell from an adjacent month. */
 function blank(date: number): ScheduleDay {
-  return { date, mark: null, tone: null, duty: false };
+  return { date, mark: null, tone: null };
 }
 
 export const recordedSchedule: Schedule = {
@@ -85,8 +93,8 @@ export const recordedSchedule: Schedule = {
     // its span here, and the 29th carries the tail. A duty running 20:00→08:00
     // genuinely belongs to two dates (WF-Q8), and a month grid that showed it on
     // one would be the per-day shape the ruling refused.
-    { date: 28, mark: "M", tone: "brand", duty: true },
-    { date: 29, mark: "OFF", tone: "neutral", duty: false, tail: "…08:00" },
+    { date: 28, mark: "M", tone: "brand", duty: "MOD 20:00→08:00", today: true },
+    { date: 29, mark: "OFF", tone: "neutral", tail: "…08:00" },
     work(30, "A", "ok"), work(31, "A", "ok"),
   ],
 };;

@@ -89,6 +89,24 @@ const granted = params.get("granted") === "none"
 
 activate(host(granted)).mount(document.body);
 
+/**
+ * Click one person's cell on one day of the rota.
+ *
+ * @param person whose row
+ * @param day which column, zero-based from Monday
+ */
+function clickCell(person: string, day: number): void {
+  const rows = Array.from(document.querySelectorAll<HTMLElement>(".rgrid .who"));
+  const row = rows.find((node) => node.textContent?.includes(person) === true);
+  if (row === undefined) return;
+
+  // The grid is one flat list: a person cell followed by seven day cells, so a
+  // row's day is its own index plus the offset.
+  const cells = Array.from(row.parentElement?.children ?? []);
+  const start = cells.indexOf(row);
+  (cells[start + 1 + day] as HTMLElement | undefined)?.click();
+}
+
 /** Click the first element matching `selector` whose text contains `text`. */
 function click(selector: string, text: string): void {
   for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
@@ -138,8 +156,11 @@ async function drive(): Promise<void> {
   if (open === "duty") { click(".btn", "Assign duty"); await settle(); }
 
   // The rota's picker opens on a cell rather than a button, so it is reached by
-  // clicking the cell a person would click.
-  if (open === "pick") { click(".chip", "M"); await settle(); }
+  // clicking the cell a person would click — and it must be THE cell the frame
+  // draws it on. The first version clicked the first chip reading "M", which is
+  // Priya's Monday, so the capture showed a different person and a different day
+  // than the frame it was to be read beside.
+  if (open === "pick") { clickCell("Anjali Menon", 3); await settle(); }
 
   // **Timers, not `requestAnimationFrame`.** A capture harness is driven in a
   // tab that is frequently not the foreground one, and rAF does not fire there —

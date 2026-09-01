@@ -42,6 +42,7 @@ import { PRINTED_CSS } from "./screens/printed/styles";
 import { POLICY_CSS } from "./screens/policy/styles";
 import { reports } from "./screens/reports";
 import { REPORTS_CSS } from "./screens/reports/styles";
+import { shifts } from "./screens/shifts";
 import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
 import { schedule } from "./screens/schedule";
@@ -106,8 +107,7 @@ const SCREENS: readonly {
   { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
   {
     label: "Policy", glyph: "⚙",
-    draw: (h, m, place) =>
-      void policy(h, m, place.dialog, place.close, () => place.open("shift")),
+    draw: (h, m, place) => void policy(h, m, false, place.close, () => place.open("shift")),
   },
 ];
 
@@ -139,6 +139,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let current = "Team Rota";
   let tab = "Requests";
   let dialog = false;
+  let detail: string | null = null;
   let pick: { person: string; day: number } | null = null;
 
   function show(next: string): void {
@@ -155,11 +156,17 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     frame.append(rail(items(), current, OPERATOR, show), main);
     root.replaceChildren(style, frame);
 
+    if (detail === "Shifts") {
+      void shifts(host, main, dialog, () => open("shift"),
+        () => { dialog = false; detail = null; show(current); });
+      return;
+    }
+
     screen.draw(host, main, {
       tab,
       dialog,
       go: (chosen) => { tab = chosen; show(current); },
-      close: () => { dialog = false; pick = null; show(current); },
+      close: () => { dialog = false; detail = null; pick = null; show(current); },
       open,
       pick,
       onPick: (person, day) => { pick = { person, day }; show(current); },
@@ -174,6 +181,15 @@ export const activate: Activate = (host: HostApi): HostedModule => {
    */
   function open(what: string): void {
     if (root === null) return;
+
+    // Shifts is a place, not a dialog: the frame draws it as its own screen with
+    // the rail still on Policy, and the New shift dialog opens over it.
+    if (what === "shift") {
+      dialog = true;
+      detail = "Shifts";
+      show("Policy");
+      return;
+    }
 
     if (what === "print") {
       root.replaceChildren(style);

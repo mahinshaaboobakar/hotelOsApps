@@ -11,7 +11,7 @@ export const SCHEDULE_CSS = `
         letter-spacing:-.01em}
 
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cday{min-height:62px;border-radius:10px;padding:6px 7px;position:relative;
+.cday{min-height:78px;border-radius:10px;padding:6px 7px;position:relative;
       background:var(--color-surface-raised,#11141f);
       border:1px solid var(--color-line,rgb(255 255 255/.07))}
 /* A day from an adjacent month is present and quiet — removing it would shift
@@ -29,8 +29,10 @@ export const SCHEDULE_CSS = `
 .cm.neutral{color:var(--color-ink-faint,#5a6172)}
 .cm.leave{background:color-mix(in srgb, var(--color-bad) 13%, transparent);
           color:var(--color-bad,#f87171)}
-.cduty{position:absolute;top:6px;right:7px;font-style:normal;font-size:11px;
+.cday.today{border-color:var(--color-brand,#818cf8)}
+.cduty{margin-top:4px;font-size:9.5px;font-weight:600;letter-spacing:.01em;
+       border-radius:5px;padding:2px 5px;width:fit-content;
+       background:color-mix(in srgb, var(--color-warn) 15%, transparent);
        color:var(--color-warn,#fbbf24)}
-.ctail{position:absolute;top:6px;right:7px;font-style:normal;font-size:10px;
-       color:var(--color-ink-faint,#5a6172)}
+.cduty.tail{opacity:.55}
 `;
