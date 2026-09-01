@@ -52,7 +52,7 @@ public sealed class StayRequestService(
         CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.RequestManage, ResourceTypes.Stay, stayId, cancellationToken);
+            scope, Permissions.RequestHandle, ResourceTypes.Stay, stayId, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(text))
         {
@@ -168,7 +168,7 @@ public sealed class StayRequestService(
         RequestScope scope, Guid stayId, string text, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.RequestManage, ResourceTypes.Stay, stayId, cancellationToken);
+            scope, Permissions.RequestHandle, ResourceTypes.Stay, stayId, cancellationToken);
 
         if (string.IsNullOrWhiteSpace(text))
         {

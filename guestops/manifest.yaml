@@ -64,39 +64,42 @@ resources:
 # reads. They are declared anyway because omitting them would make the manifest
 # lie about what the application needs.
 #
-# Two separate problems, and the second is not mine to settle:
+# What remains is one thing, and it is an addition to a platform file: the nine
+# are simply absent. The registry's own note says permissions for an unbuilt
+# application belong there — *"`room.clean` and `room.inspect` have always been
+# here on the same footing — Housekeeping does not exist either"* — so somebody
+# adds them, and this manifest installs unchanged.
 #
-#   1. The nine are simply absent. The registry's own note says permissions for
-#      an unbuilt application belong there — *"`room.clean` and `room.inspect`
-#      have always been here on the same footing — Housekeeping does not exist
-#      either"* — so this is an addition somebody must make, in a platform file.
+# **The naming half is closed.** Four of these ids conflicted with the registry's
+# ban on generic verbs and on naming the implementing service, and one of the
+# four had been ruled by name in GUEST-Q3. Ruled 2026-09-01: the frozen document
+# governs the spelling, and no capability changed.
 #
-#   2. Four of them conflict with the registry's naming rule. Its header bans
-#      `write`, `manage` and `edit` by name — *"Name the operation instead"* —
-#      and forbids naming the implementing service. That makes `stay.write`,
-#      `guest.write`, `request.manage` and `guestops.configure` non-conforming.
-#      **`stay.write` is not a slip to correct here: GUEST-Q3 ruled it**, and
-#      ruled it against two named alternatives. A ruling and a governing
-#      document disagree, so it is reported and not resolved by choosing.
+#     stay.write          →  stay.override    names GUEST-Q3's own concept —
+#                                             the standing override — better
+#                                             than the ruled spelling did
+#     guest.write         →  guest.amend
+#     request.manage      →  request.handle
+#     guestops.configure  →  desk.configure   no application name as a resource
 # ---------------------------------------------------------------------------
 permissions:
   - id: reservation.read
     reason: "Show the day's arrivals, the stay page and the guest record"
   - id: stay.create
     reason: "Create a booking and its stays, and record a stay the PMS has not sent"
-  - id: stay.write
+  - id: stay.override
     reason: "Check in, check out, cancel, record a no-show, and correct any of them"
   - id: stay.assign
     reason: "Give a stay its room, and move it to another"
-  - id: guest.write
+  - id: guest.amend
     reason: "Record who is staying, and how to reach them"
   - id: registration.capture
     reason: "Capture the registration card, its documents and its signature"
   - id: reporting.file
     reason: "Record that a guest filing was made with an authority, and its receipt"
-  - id: request.manage
+  - id: request.handle
     reason: "Log what a guest asked for, and hand it to whoever does the work"
-  - id: guestops.configure
+  - id: desk.configure
     reason: "Set the required registration fields, the card series and the reporting policy"
 
 events:

@@ -16,7 +16,7 @@ namespace HotelOS.GuestOps.Application.Stays;
 /// the operation consumers must distinguish beside the one they must not.
 /// </para>
 /// <para>
-/// <b>Every write here is the same permission</b> — <c>stay.write</c>. In a
+/// <b>Every write here is the same permission</b> — <c>stay.override</c>. In a
 /// PMS-connected property it is also what records an override, and GUEST-Q3
 /// ruled that clearing a disagreement takes it too.
 /// </para>
@@ -324,7 +324,7 @@ public sealed class StayLifecycleService(
         RequestScope scope, Guid stayId, long version, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
-            scope, Permissions.StayWrite, ResourceTypes.Stay, stayId, cancellationToken);
+            scope, Permissions.StayOverride, ResourceTypes.Stay, stayId, cancellationToken);
 
         var stay = await db.Stays
             .FirstOrDefaultAsync(

@@ -38,17 +38,25 @@ public static class Permissions
     /// permission would re-introduce the escalation the ruling refused.
     /// </para>
     /// <para>
+    /// <b>The name is the concept.</b> It was <c>stay.write</c> until
+    /// 2026-09-01, when the Permission Registry's ban on generic verbs —
+    /// *"`write`, `manage` and `edit` are banned … name the operation
+    /// instead"* — was applied to it. `override` is what GUEST-Q3 actually
+    /// ruled: a staff write on a PMS-managed stay <i>is</i> the standing
+    /// override, and the old spelling said less than the ruling did.
+    /// </para>
+    /// <para>
     /// It is also what reveals a masked contact (GUEST-Q7): the permission that
     /// lets a person act on the stay is the one that lets them ring the guest.
     /// </para>
     /// </remarks>
-    public const string StayWrite = "stay.write";
+    public const string StayOverride = "stay.override";
 
     /// <summary>Assign a room, and move one.</summary>
     public const string StayAssign = "stay.assign";
 
     /// <summary>Guest identity records, contact points, preferences.</summary>
-    public const string GuestWrite = "guest.write";
+    public const string GuestAmend = "guest.amend";
 
     /// <summary>The registration card, its documents and its signature.</summary>
     public const string RegistrationCapture = "registration.capture";
@@ -63,10 +71,10 @@ public static class Permissions
     public const string ReportingFile = "reporting.file";
 
     /// <summary>Guest requests, and their hand-off to Jobs.</summary>
-    public const string RequestManage = "request.manage";
+    public const string RequestHandle = "request.handle";
 
     /// <summary>This application's own settings — the required fields, the series, the reporting policy.</summary>
-    public const string Configure = "guestops.configure";
+    public const string Configure = "desk.configure";
 }
 
 /// <summary>The object types authorization is asked about.</summary>

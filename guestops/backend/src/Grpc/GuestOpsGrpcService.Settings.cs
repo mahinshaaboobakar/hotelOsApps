@@ -11,7 +11,7 @@ namespace HotelOS.GuestOps.Grpc;
 /// <b>Reading and writing take different permissions.</b> A receptionist must
 /// see the form they have to fill in without being able to change what it
 /// demands, so the read asks for <c>reservation.read</c> and only the write asks
-/// for <c>guestops.configure</c>.
+/// for <c>desk.configure</c>.
 /// </remarks>
 public partial class GuestOpsGrpcService
 {

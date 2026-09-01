@@ -1091,19 +1091,19 @@ do:
 reservation.read        the four lists, the stay page, the group page
 stay.create             create a booking and its stays — standalone, and
                         the PMS-unknown stay in a connected property (GUEST-Q5)
-stay.write              the lifecycle: check in · check out · cancel ·
+stay.override              the lifecycle: check in · check out · cancel ·
                         no-show · correct. THE SAME PERMISSION makes an
                         override, clears a disagreement and resolves a
                         contradiction (GUEST-Q3 · §3.2)
 stay.assign             assign a room · move a room
-guest.write             identity records, contact points, preferences
+guest.amend             identity records, contact points, preferences
 registration.capture    the registration card, the documents, the signature
 reporting.file          recording that a guest filing was made (S19b) —
                         separate from capture, because it is an assertion
                         about an external obligation, not about our record
-guestops.configure      the application's own settings (§2.8): the required
+desk.configure      the application's own settings (§2.8): the required
                         fields, the grc series, the reporting policy
-request.manage          guest requests and their hand-off to Jobs
+request.handle          guest requests and their hand-off to Jobs
 ```
 
 **There is no `disagreement.clear`.** GUEST-Q3 ruled that clearing belongs to

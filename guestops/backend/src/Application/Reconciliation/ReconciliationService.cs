@@ -69,7 +69,7 @@ public sealed class ReconciliationService(
         }
 
         await authorizer.RequireAsync(
-            scope, Permissions.StayWrite, ResourceTypes.Stay, stay.Id, cancellationToken);
+            scope, Permissions.StayOverride, ResourceTypes.Stay, stay.Id, cancellationToken);
 
         if (row.State is DisagreementState.ClearedOurs or DisagreementState.ClearedPms)
         {
@@ -125,7 +125,7 @@ public sealed class ReconciliationService(
         }
 
         await authorizer.RequireAsync(
-            scope, Permissions.StayWrite, ResourceTypes.Stay, stay.Id, cancellationToken);
+            scope, Permissions.StayOverride, ResourceTypes.Stay, stay.Id, cancellationToken);
 
         if (candidate.State != CandidateState.Proposed)
         {

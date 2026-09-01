@@ -159,7 +159,7 @@ public class ReconciliationTests
         await harness.Reconciliation.ClearAsync(
             scope, row.Id, ClearSide.Ours, CancellationToken.None);
 
-        Assert.Equal(["stay.write"], harness.Authorizer.Permissions);
+        Assert.Equal(["stay.override"], harness.Authorizer.Permissions);
     }
 
     /// <summary>

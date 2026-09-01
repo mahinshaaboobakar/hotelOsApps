@@ -423,7 +423,7 @@ convention, with no rule behind it.
 
 A front desk plainly needs the number to call a guest about a late arrival. A
 thousand-guest history is a different thing. There is a permission vocabulary
-to hang this on (`guest.write`, `reservation.read`), and no ruling that says
+to hang this on (`guest.amend`, `reservation.read`), and no ruling that says
 whether reading a contact is one of them.
 
 ### C7 · Reinstating a cancelled stay
