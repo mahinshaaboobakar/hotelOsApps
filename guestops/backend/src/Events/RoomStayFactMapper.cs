@@ -78,6 +78,7 @@ public static class RoomStayFactMapper
             WalkIn: fact.WalkIn,
             Guests: [.. fact.Guests.Select(Guest)],
             Terms: Terms(fact),
+            Segment: Segment(fact),
             Absences: [.. header.Absences.Select(Absence)]);
     }
 
@@ -202,15 +203,11 @@ public static class RoomStayFactMapper
     /// not.
     /// </para>
     /// <para>
-    /// <b>The source's own vocabulary is not read here, and that is a gap worth
-    /// naming.</b> The wire carries <c>source</c>, <c>travel_agent</c>,
-    /// <c>market_code</c> and <c>meal_plan</c> — the segment every hotel reports
-    /// on — and this domain models them on <c>StaySource</c>, which
-    /// <see cref="InboundStayFact"/> does not carry. Dropping them silently
-    /// would lose four fields the wire kept *by decision*; carrying them onto
-    /// commercial terms, where they do not belong, would be worse. They need a
-    /// field on the inbound fact, which is a change to that record and its
-    /// rules, not to this mapper.
+    /// <b>The source's own vocabulary is not sold-on terms, and is read
+    /// elsewhere.</b> <c>source</c>, <c>travel_agent</c>, <c>market_code</c> and
+    /// <c>meal_plan</c> are <c>CommercialSegment</c> on the wire (CONN-Q12) and
+    /// <c>StaySource</c> in this domain — where the business came <i>from</i>,
+    /// not what the stay was sold <i>on</i>. <see cref="Segment"/> reads them.
     /// </para>
     /// <para>
     /// <b>The wire half of that is now done — <c>CONN-Q12</c>, Stream DD.</b>
@@ -250,6 +247,42 @@ public static class RoomStayFactMapper
             CancelDropTime = TimeOnly.TryParse(terms?.CancelDropTime, out var drop) ? drop : null,
             PenaltyAmount = Amount(terms?.PenaltyAmount),
         };
+    }
+
+    /// <summary>
+    /// Where the business came from, and how many people are in the party.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Carried verbatim.</b> Every value is the source's own code — the
+    /// segment every hotel reports on is only reportable if it survives the
+    /// journey unaltered, so nothing here is normalised to a vocabulary this
+    /// platform invented. Empty stays empty: the wire says "not sent", and
+    /// reading it as "none" would be this application inventing a fact.
+    /// </para>
+    /// <para>
+    /// <b>The party count travels with it</b> because it belongs to the same
+    /// record — <c>StaySource</c> holds both, and adults and children arriving
+    /// separately from the channel would be one entity assembled from two
+    /// places.
+    /// </para>
+    /// <para>
+    /// Always present, never null: a fact that sent no segment still counted a
+    /// party, and a null here would make "the source said nothing" and "the
+    /// source said zero adults" the same value.
+    /// </para>
+    /// </remarks>
+    private static InboundSegment Segment(Wire.RoomStayFact fact)
+    {
+        var segment = fact.CommercialSegment;
+
+        return new InboundSegment(
+            Channel: Text(segment?.Source),
+            TravelAgent: Text(segment?.TravelAgent),
+            MarketCode: Text(segment?.MarketCode),
+            MealPlan: Text(segment?.MealPlan),
+            Adults: fact.Adults,
+            Children: fact.Children);
     }
 
     /// <summary>Zero is proto3's absent, and a zero-day offset is a real value.</summary>

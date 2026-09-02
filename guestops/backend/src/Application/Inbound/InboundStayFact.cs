@@ -15,6 +15,45 @@ public sealed record InboundGuest(
     bool? IsPrimary);
 
 /// <summary>
+/// How the business came, as the source coded it — the commercial segment.
+/// </summary>
+/// <remarks>
+/// <para>
+/// <b>Every value is the source's own code, carried verbatim.</b> Nothing is
+/// normalised to a vocabulary this platform invented: <c>direct</c>, an OTA's
+/// name, a corporate account code and a meal plan are the PMS's spellings, and
+/// the segment every hotel reports on is only reportable if it survives the
+/// journey unaltered. <b>Empty means not sent</b>, never "none".
+/// </para>
+/// <para>
+/// <b>Deliberately not commercial terms.</b> Terms are what the stay was sold
+/// <i>on</i> — a rate, a guarantee, a cancellation offset. This is where the
+/// business came <i>from</i>, and folding the two would make a channel look
+/// like a price.
+/// </para>
+/// <para>
+/// <b>The travel agent is a reference, not a profile.</b> It is the source's
+/// identifier and nothing more; resolving it to a party is this domain's
+/// business, and it must never become a Master Data vendor on the strength of
+/// appearing here — ADR 0051's boundary, and a vendor's contract is
+/// Procurement's in any case.
+/// </para>
+/// </remarks>
+/// <param name="Channel">Direct · OTA · corporate · walk-in, or the source's code.</param>
+/// <param name="TravelAgent">The agent, as sent.</param>
+/// <param name="MarketCode">The segment every hotel reports on.</param>
+/// <param name="MealPlan">EP · CP · MAP · AP, or the source's code.</param>
+/// <param name="Adults">The party as the source counted it.</param>
+/// <param name="Children">The party as the source counted it.</param>
+public sealed record InboundSegment(
+    string? Channel,
+    string? TravelAgent,
+    string? MarketCode,
+    string? MealPlan,
+    int Adults,
+    int Children);
+
+/// <summary>
 /// A normalised room-stay fact, in this application's own terms.
 /// </summary>
 /// <remarks>
@@ -45,6 +84,7 @@ public sealed record InboundGuest(
 /// <param name="WalkIn">How the guest arrived.</param>
 /// <param name="Guests">The party, forwarded for this domain to resolve or create.</param>
 /// <param name="Terms">What it was sold on, where the source sent terms.</param>
+/// <param name="Segment">Where the business came from, and the party count.</param>
 /// <param name="Absences">What the source did not supply, and why.</param>
 public sealed record InboundStayFact(
     string IntegrationId,
@@ -62,6 +102,7 @@ public sealed record InboundStayFact(
     bool WalkIn,
     IReadOnlyList<InboundGuest> Guests,
     CommercialTerms? Terms,
+    InboundSegment Segment,
     IReadOnlyList<StayAbsence> Absences);
 
 /// <summary>What applying an inbound fact did.</summary>

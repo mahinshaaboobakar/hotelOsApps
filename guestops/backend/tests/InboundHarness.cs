@@ -107,6 +107,11 @@ public sealed class InboundHarness : IAsyncDisposable
             false,
             [new InboundGuest(guest, null, null, null, null, true)],
             null,
+
+            // A fact that sent no commercial segment still counted a party.
+            // The record is always present, so "the source said nothing" and
+            // "the source said zero adults" stay different values.
+            new InboundSegment(null, null, null, null, 1, 0),
             []);
     }
 

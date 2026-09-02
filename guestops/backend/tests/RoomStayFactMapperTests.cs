@@ -209,6 +209,58 @@ public class RoomStayFactMapperTests
         Assert.True(read.IsPrimary);
     }
 
+    /// <summary>
+    /// The commercial segment is carried verbatim — CONN-Q12.
+    /// </summary>
+    /// <remarks>
+    /// Every value is the source's own code. The segment every hotel reports on
+    /// is only reportable if it survives the journey unaltered, so this asserts
+    /// the spellings arrive unchanged rather than mapped to anything.
+    /// </remarks>
+    [Fact]
+    public void The_segment_arrives_in_the_sources_own_words()
+    {
+        var fact = Fact();
+        fact.CommercialSegment = new Wire.CommercialSegment
+        {
+            Source = "OTA",
+            TravelAgent = "TA-88213",
+            MarketCode = "CORP",
+            MealPlan = "MAP",
+        };
+        fact.Adults = 2;
+        fact.Children = 1;
+
+        var segment = RoomStayFactMapper.Read(fact).Segment;
+
+        Assert.Equal("OTA", segment.Channel);
+        Assert.Equal("TA-88213", segment.TravelAgent);
+        Assert.Equal("CORP", segment.MarketCode);
+        Assert.Equal("MAP", segment.MealPlan);
+        Assert.Equal(2, segment.Adults);
+        Assert.Equal(1, segment.Children);
+    }
+
+    /// <summary>
+    /// An unsent segment is unsent, and the party is still counted.
+    /// </summary>
+    /// <remarks>
+    /// Empty means "not sent", never "none" — reading it as a value would be
+    /// this application inventing a fact the source did not state. The record
+    /// is still present, because a stay always has a party count.
+    /// </remarks>
+    [Fact]
+    public void An_unsent_segment_is_absent_rather_than_none()
+    {
+        var segment = RoomStayFactMapper.Read(Fact()).Segment;
+
+        Assert.Null(segment.Channel);
+        Assert.Null(segment.TravelAgent);
+        Assert.Null(segment.MarketCode);
+        Assert.Null(segment.MealPlan);
+        Assert.Equal(0, segment.Adults);
+    }
+
     /// <summary>Money arrives with its currency and basis, or not at all — R19.</summary>
     [Fact]
     public void An_amount_without_a_currency_is_not_read_as_money()

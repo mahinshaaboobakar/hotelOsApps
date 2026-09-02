@@ -204,6 +204,27 @@ public sealed class InboundFactService(
             stay.Absences.Add(Absent(stay.Id, AbsentFields.ArrivalTime, now));
         }
 
+        // Where the business came from, kept the moment it arrives.
+        //
+        // **A fact not recorded when it arrives is unrecoverable** — the same
+        // argument the walk-in flag makes, applied to the rest of the row. A
+        // channel, an agent reference, a market code and a meal plan are what
+        // every hotel reports on, and no later call can reconstruct what the
+        // PMS said on the night it said it.
+        //
+        // Written even when the source sent no segment, because the party count
+        // is on the same record and a stay always has one.
+        db.Sources.Add(new StaySource
+        {
+            StayId = stay.Id,
+            Channel = fact.Segment.Channel,
+            TravelAgent = fact.Segment.TravelAgent,
+            MarketCode = fact.Segment.MarketCode,
+            MealPlan = fact.Segment.MealPlan,
+            Adults = fact.Segment.Adults,
+            Children = fact.Segment.Children,
+        });
+
         db.Stays.Add(stay);
 
         events.Append(scope, "stay.created", "stay", stay.Id, stay.Version, new
