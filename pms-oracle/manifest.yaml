@@ -92,6 +92,16 @@ permissions:
   - id: external_mapping.read
     reason: "Look up what this property's PMS calls a room, a reservation or a guest"
 
+  # The two the configuration form requests — `SHELL-Q34`. They are the BOUND,
+  # not the grant: a capability id is a permission id, the Kernel decides per
+  # user, and the bridge refuses an undeclared name structurally. So this pair
+  # says what the form may ever ask for; who may actually do it is not this
+  # file's to say.
+  - id: integration.read
+    reason: "Render this connector's stored configuration in its own form"
+  - id: integration.configure
+    reason: "Submit the endpoint, the hotel code and the OHIP credentials"
+
   # NOT requested: `external_mapping.update`.
   #
   # Creating a mapping is an operator action in Operations Center — design §14's
@@ -139,19 +149,15 @@ dependencies: []
 # Center hosts it inside Integration Management. That is the design, and
 # `docs/mockups/01-oracle-connector.html` draws it.
 #
-# It is not declared yet because the payload is not written. **The host now
-# exists** — Software Center's Integration Management renders a verified module
-# through `ModuleFrame`, and the two capabilities a form needs are granted per
-# user and serve real RPCs (`SHELL-Q34`; the Hub's configuration surface landed
-# in `4ad0bfd`). What remains is this package's own `ui/`.
-#
-# `kernel-core`'s `validate` refuses a declared `ui:` whose payload is absent,
-# which is why the block still waits: shipping a declaration with nothing behind
-# it is what hello-hotel called *"the same dishonesty pointing the other way"*
-# when it deleted its own.
-#
-# Architect sequencing ruling, 2026-08-31: backend now, `ui/` when the shell
-# phase lands. The block and the payload arrive together, in one change.
+# The block and the payload arrive together, as the architect sequenced on
+# 2026-08-31 — `ui/module.js` ships in this same change. `kernel-core`'s
+# `validate` refuses a declared `ui:` whose payload is absent, which is the
+# mechanism behind that sequencing rather than a convention beside it.
+ui:
+  # The module-registry id, which must equal `id:` above — ADR 0092 §Q15: a
+  # declared name must equal the thing it names, and the shell refuses a
+  # `ui.module` that does not.
+  module: pms-oracle
 
 files:
   # Placeholder. The packager publishes `backend/`, hashes every file and
@@ -159,3 +165,4 @@ files:
   # stale on the next build and then gets "fixed" by pasting whatever the
   # failure printed.
   "backend/PmsOracle.Connector.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
