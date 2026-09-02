@@ -53,10 +53,26 @@ export interface Configuration {
 export const SETTINGS: readonly Setting[] = [
   { name: "endpoint", label: "OHIP endpoint", hint: "https://ohip.example.com" },
   { name: "hotelCode", label: "Hotel code", hint: "This property, as OPERA names it" },
-  { name: "pollSeconds", label: "Poll interval (seconds)", hint: "30" },
+  { name: "clientId", label: "Client ID", hint: "hotelos_client" },
+  {
+    name: "pollSeconds",
+    label: "Poll interval (seconds)",
+
+    // **Three hours, not thirty seconds** — `CONN-Q12`. The frame draws
+    // "Every 3 hours" and this hint said 30, which is the same figure 360
+    // times over against a vendor API that rate-limits. A default nobody
+    // edits is the value most properties run, so it is the one that has to
+    // be right.
+    hint: "10800",
+  },
 ];
 
 export const SECRETS: readonly Secret[] = [
-  { name: "client-id", label: "Client ID" },
+  // `client-id` is NOT here — `CONN-Q12`. Frame 3 draws it in plain text
+  // (`hotelos_client`) and only the secret half masked, and that drawing is
+  // the vault split: masked is a Token Vault secret, plain is a setting.
+  // Held write-only, an administrator could see that *a* client id was
+  // configured and never which one, which is the thing they need when two
+  // properties are pointed at the wrong tenants.
   { name: "client-secret", label: "Client secret" },
 ];

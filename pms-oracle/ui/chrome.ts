@@ -18,6 +18,14 @@
  */
 import type { Secret, Setting } from "./configuration";
 
+/**
+ * What kind of thing the status line is saying.
+ *
+ * Two tones and no default: `info` for progress and success, `failed` for a
+ * refusal or an error. See [`panel`]'s `status`.
+ */
+export type Tone = "info" | "failed";
+
 const SHEET_ID = "oracle-styles";
 
 const CSS = `
@@ -40,6 +48,15 @@ const CSS = `
   .panel .subtitle,
   .panel .status { margin: 0; font-size: 12px; color: var(--color-ink-muted, inherit); }
 
+  /*
+   * **A failure must not read as a success.** The status line said "Saved."
+   * and "The configuration could not be saved." in identical muted ink, so an
+   * administrator who mistyped an endpoint and glanced away could not tell
+   * them apart. The color-bad token is published for exactly this — "a
+   * failure, a refusal, a destructive action" — and nothing was using it.
+   */
+  .panel .status[data-tone="failed"] { color: var(--color-bad, currentColor); }
+
   .panel .field { display: flex; flex-direction: column; gap: 4px; }
   .panel .label { font-size: 12px; color: var(--color-ink-muted, inherit); }
 
@@ -53,6 +70,16 @@ const CSS = `
   }
 
   .panel input:focus-visible { outline: 2px solid var(--color-brand, currentColor); }
+
+  /*
+   * The color-ink-faint token is published for "hints, placeholders,
+   * disabled text"
+   * and nothing was claiming it — so every placeholder rendered in the user
+   * agent's default grey. Close enough on this theme to pass the eye, which
+   * is exactly why it survived a capture and five green tests; it is the
+   * first theme change that would have found it.
+   */
+  .panel input::placeholder { color: var(--color-ink-faint, inherit); }
 
   .panel .save {
     align-self: flex-start;
@@ -135,14 +162,24 @@ export function panel(root: HTMLElement) {
   root.replaceChildren(surface);
 
   return {
-    status(text: string): void {
+    /**
+     * Say something, and say what kind of thing it is.
+     *
+     * **`tone` is required, and that is the fix.** With one status method and
+     * no tone, "Saved." and "The configuration could not be saved." rendered
+     * identically, and every caller got that outcome by default rather than by
+     * choosing it. Now a caller cannot report an outcome without classifying
+     * it — the rule lives in the signature instead of in a review comment.
+     */
+    status(text: string, tone: Tone): void {
       status.textContent = text;
+      status.dataset["tone"] = tone;
       if (status.parentElement === null) surface.appendChild(status);
     },
 
     saving(text: string): void {
       if (save !== undefined) save.disabled = true;
-      this.status(text);
+      this.status(text, "info");
     },
 
     saved(): void {
@@ -196,6 +233,7 @@ export function panel(root: HTMLElement) {
       // loading is a screen telling an operator the opposite of what it shows.
       // A caller with something to say says it after this returns.
       status.textContent = "";
+      status.dataset["tone"] = "info";
 
       surface.replaceChildren(form, status);
     },

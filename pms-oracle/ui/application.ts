@@ -73,7 +73,7 @@ export const activate: Activate = (host: HostApi): HostedModule => ({
     // Something is on screen before the first call resolves. A form that
     // renders nothing until the platform answers renders nothing at all when
     // the platform is slow, and an operator cannot tell that from a break.
-    surface.status("Loading configuration…");
+    surface.status("Loading configuration…", "info");
 
     void host
       .call(READ, "configuration")
@@ -83,6 +83,7 @@ export const activate: Activate = (host: HostApi): HostedModule => ({
         // shown an empty form that silently cannot do anything.
         surface.status(
           sentence(failure, "This connector's configuration could not be read."),
+          "failed",
         );
       });
   },
@@ -128,10 +129,10 @@ function save(
       // which is the only honest thing a form can show about a value it cannot
       // read — and it is what keeps a typed secret out of the DOM afterwards.
       draw(host, surface, answer as Configuration);
-      surface.status("Saved.");
+      surface.status("Saved.", "info");
     })
     .catch((failure: unknown) => {
       surface.saved();
-      surface.status(sentence(failure, "The configuration could not be saved."));
+      surface.status(sentence(failure, "The configuration could not be saved."), "failed");
     });
 }
