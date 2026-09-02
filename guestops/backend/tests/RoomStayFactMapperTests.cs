@@ -220,53 +220,6 @@ public class RoomStayFactMapperTests
     }
 
     /// <summary>
-    /// The platform's own round trip does <b>not</b> survive today — a defect
-    /// in the SDK, characterised here because this is where it lands.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Using the Hub's generated type as the payload is only correct if what
-    /// the appender writes is what the consumer host reads. It is not.
-    /// <c>EventAppender</c> serializes with
-    /// <c>PropertyNamingPolicy = SnakeCaseLower</c>; <c>EventConsumerHost</c>
-    /// calls <c>Payload.Deserialize(type)</c> with <b>no options</b>. A payload
-    /// whose properties carry explicit <c>[JsonPropertyName]</c> attributes is
-    /// unaffected — which is why <c>JobCreated</c> works — but a generated
-    /// protobuf type has none, so every field is written <c>room_type_id</c>
-    /// and looked for as <c>RoomTypeId</c>.
-    /// </para>
-    /// <para>
-    /// <b>This asserts the defect, not the desired behaviour</b>, so the suite
-    /// stays green and the loss is pinned rather than hidden. The day the SDK
-    /// passes matching options this test fails — and that failure is the signal
-    /// to delete it, not to adjust it. Reported to the platform; the fix is one
-    /// argument in <c>EventConsumerHost</c>.
-    /// </para>
-    /// <para>
-    /// <b>Nothing is silently wrong in the meantime.</b> A fact that arrives
-    /// unreadable has no header, and <see cref="RoomStayFactMapper.Read"/>
-    /// refuses it by name rather than applying an empty stay.
-    /// </para>
-    /// </remarks>
-    [Fact]
-    public void The_platforms_round_trip_loses_the_fact_until_the_sdk_passes_its_options()
-    {
-        var fact = Fact();
-
-        // Exactly what EventAppender does.
-        var written = JsonSerializer.SerializeToDocument(
-            fact,
-            new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower });
-
-        // Exactly what EventConsumerHost does — no options.
-        var read = written.RootElement.Deserialize<Wire.RoomStayFact>();
-
-        Assert.True(
-            read?.Header is null || read.Header.PropertyId != Property.ToString(),
-            "the SDK now round-trips the contract: delete this test and the note it carries");
-    }
-
-    /// <summary>
     /// With matching options it round-trips exactly, which is what makes
     /// reading the contract — rather than restating it — the right call.
     /// </summary>
