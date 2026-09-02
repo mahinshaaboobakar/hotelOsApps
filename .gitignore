@@ -39,3 +39,11 @@
 # step at all (PKG-Q42), and is a source file rather than an artifact.
 */ui/module.js
 .build/
+
+# ---------- node ----------
+# A package's `ui/` builds with npm, and the .NET-shaped list above never
+# anticipated one: this repository grew its first `node_modules/` when
+# pms-oracle gained a form (`CONN-Q9(b)`). Unqualified rather than
+# `pms-oracle/ui/`-specific, because the next package's UI will have one too
+# and a path-scoped rule is only ever found after it was needed.
+node_modules/
