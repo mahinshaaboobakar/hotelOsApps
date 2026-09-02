@@ -43,8 +43,8 @@ constitution's order, not a preference.
 
 | # | Section | State | Signed off |
 |---|---|---|---|
-| S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-02 |
-| S2 | Creating a job | **OPEN** | — |
+| S1 | The job itself — what a job *is* | **OPEN** — 6 ruled, S1-D5 and S1-D6 reopened | — |
+| S2 | Creating a job | not started | — |
 | S3 | Assigning it | not started | — |
 | S4 | Accept, start, pause, finish | not started | — |
 | S5 | **Escalation** | not started | — |
@@ -75,7 +75,8 @@ project.
 ---
 # S1 · The job itself — what a job *is*
 
-**State: SIGNED OFF — owner, 2026-09-02.**
+**State: OPEN.** Six decisions ruled. **S1-D5 and S1-D6 reopened by the
+owner, 2026-09-02** — see §S1.8.
 
 ## What it does
 
@@ -984,6 +985,116 @@ simply follow, so the reason is on the record:
 So: **one column, `property_id`. Not three.** Which is what the owner's
 instinct was reaching for — the reference's three levels are two more than
 anyone needs, and the third of them was never written at all.
+---
+
+## S1.8 · The owner's challenge — "this comes from the Java reference; you just enhanced it"
+
+**Owner, 2026-09-02, on S1-D5 and S1-D6.** The challenge is correct and it is
+taken here without qualification.
+
+### What was inherited, and what was actually derived
+
+| | Where it came from | Verdict |
+|---|---|---|
+| `location_id` on one tree | **the platform's Master Data**, whose own comment names Work Orders as the reason | derived from the platform, not from the reference |
+| one counter per property | the reference numbers per *company*; the owner changed it | the owner's |
+| the priority chain | the reference has a constant `5`; the flow layer exists nowhere in it | derived |
+| parent ▸ children, step numbers, a blocked clock | the reference cascades the wrong way | derived |
+| **the four intents** | **a narrowing of the reference's `workOrderType`** | **inherited shape, improved** |
+| **the service catalogue** | **`WOServicePreference`, split in two and tidied** | **inherited shape, improved** |
+
+The two the owner reopened are exactly the two that were **improvements to
+the reference's shape rather than answers to the question the reference was
+trying to answer.** And the field check that followed compared the *improved
+version* against other systems — which tests whether the polish is
+conventional, not whether the object should exist at all.
+
+### The first-principles read: the catalogue is four different things
+
+Asking *what is this list actually for* — once per intent — gives four
+answers that are not variants of one thing:
+
+```text
+DELIVER   a MENU of what the hotel offers
+          towel · water · extra pillow · turndown
+          wants  quantity · sometimes a price · a stock consequence
+          home   the offering / inventory model
+
+FIX       a SYMPTOM LIST — and a symptom belongs to A KIND OF EQUIPMENT
+          "not cooling" is a failure mode of an HVAC unit, not a
+          hotel-wide menu entry
+          wants  to hang off an asset type, with cause and remedy
+          home   the asset model. This is exactly what Maximo's
+                 failure-class hierarchy is, and it is per asset class
+                 for precisely this reason
+
+CHECK     a CHECKLIST DEFINITION — an ordered set of things to assess
+          wants  steps · pass or fail · evidence
+          home   a checklist object
+
+PREPARE   a STANDARD — what "ready" looks like for this kind of place
+          wants  steps, and a time it must be ready BY
+          home   also a checklist object
+```
+
+**This is stronger than the earlier "menu versus symptom list" split**, which
+noticed two of the four and then re-merged them under an `intent` field. That
+field was papering over the seam rather than naming it.
+
+### Why one list still ships, and what the claim becomes
+
+**Three of the four homes do not exist.** There is no inventory application,
+Maintenance is not built, and there is no checklist object. Four lists now
+would put three of them inside Jobs — the exact mistake the platform has
+ruled against twice: *a field does not live somewhere because its real owner
+has not shipped yet* (ADR 0051, ADR 0056).
+
+So the artefact is unchanged and **the claim about it is different**:
+
+> **The `intent` field is not a classifier. It is the seam the list will
+> split along.** `Fix` entries move to asset-type failure modes when
+> Maintenance ships; `Check` and `Prepare` move to the checklist object when
+> it exists; `Deliver` moves to the offering model when there is one. **A job
+> already raised survives the split**, because it stored the resolved values
+> — never a live pointer into a list that moved.
+
+That is the same "stamp, do not derive" rule as the job number, applied to
+the catalogue.
+
+### What cannot be answered from here
+
+**The four intents have never been tested against real hotel work.** They
+were derived from *"what does done mean"* — a sound test — and they land near
+ITIL. But the stream reached them from the reference and from other
+industries, and neither of those is this owner's operation.
+
+Four jobs the stream can already see do not fit cleanly:
+
+```text
+"wake-up call at 06:00"           an action at a moment; no artefact left
+"escort the guest to the villa"   a service performed; nothing delivered
+"guest left a watch"              custody and a record — not a repair,
+                                  not a delivery
+"move the guest to room 310"      as much a state change in the PMS as work
+```
+
+`Deliver` is being stretched to mean *"perform a service"*. That is the
+signal that the cut is in the wrong place, or that a fifth intent exists.
+
+**What settles this is data, not another framework.**
+
+> **The stream is asking the owner for the real work list — twenty to forty
+> job titles as they are actually raised at the properties today, in the
+> operators' own words.**
+
+The design is then tested against them in the open: each title placed, and
+every one that does not fit named. Either the cut holds, or it moves. That is
+the only honest way to answer *"is this better, or is it the Java concept
+wearing new words"* — and it is not something the stream can invent.
+
+**Until that list exists, S1-D5 and S1-D6 stay open and S1 is not signed
+off.**
+
 
 ## Decisions — round 1 close
 
@@ -993,16 +1104,20 @@ anyone needs, and the third of them was never written at all.
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **RULED** (owner, 2026-09-02). Checked against ITIL: four either way, `Change` dropped and `Prepare` added, both for stated reasons — §S1.5 |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **RULED by the stream on the owner's instruction** (2026-09-02) after the field check — §S1.6. Still needs an **architect** ruling, because it puts an object in Core Administration |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. Blocked on the owner's real work list — §S1.8 |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and the `intent` field was papering over that seam rather than naming it — §S1.8 |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
-**Sign-off:** **S1 SIGNED OFF — owner, 2026-09-02.** Every decision carries
-a ruling. Two items leave this section as requests to other teams and neither
-blocks: the missing place kinds and a property-code shape rule (Master Data),
-and the catalogue's home (an architect ruling, §S1.6). The HosPilot half of
-§S1.2 is deferred by the owner, not open.
+**Sign-off:** **NOT SIGNED OFF.**
+
+The stream marked this section signed off on 2026-09-02 and **the owner had
+not signed it.** That was the stream's error, recorded here rather than
+quietly corrected: a sign-off is the owner's act, and a page that records one
+that did not happen is worse than a page with an open section.
+
+Six decisions carry rulings — D1, D2, D3, D4, D7, D8. **D5 and D6 are
+reopened** on the owner's challenge; see §S1.8.
 
 ---
 
@@ -1638,7 +1753,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **1 of 10** |
+| Sections signed off | 0 of 10 |
 | Page locked | no |
 | Locked on | — |
 
