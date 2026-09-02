@@ -1,5 +1,6 @@
 using System.Text.Json;
 using HotelOS.Connector;
+using PmsOracle.Authentication;
 using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
 
@@ -32,7 +33,7 @@ namespace PmsOracle.Adapters;
 /// </para>
 /// </remarks>
 public sealed class OracleCloudAdapter(IntegrationSettings settings, IOhipQueue queue)
-    : IConnectorAdapter, IPollingConnector
+    : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
     /// <summary>A reservation as OHIP returns it.</summary>
     public const string ReservationPayload = "ohip-reservation";
@@ -57,16 +58,66 @@ public sealed class OracleCloudAdapter(IntegrationSettings settings, IOhipQueue 
 
     /// <inheritdoc />
     /// <remarks>
-    /// Thirty seconds — the queue is emptied by reading, so a long interval
-    /// makes a backlog rather than saving work, and a short one asks an empty
-    /// queue repeatedly. This connector's number, not the Hub's.
+    /// <para>
+    /// <b>Three hours — `CONN-Q12`, and this is the value that actually
+    /// polls.</b> It said thirty seconds, which is 360 times the interval frame
+    /// 3 draws, against a vendor API that rate-limits. The form's hint was
+    /// corrected first and that was only half the fix: a hint is a placeholder
+    /// and this is the number the loop runs on, so correcting the hint alone
+    /// would have left the load exactly where it was.
+    /// </para>
+    /// <para>
+    /// The old reasoning was sound and answered a different question: the queue
+    /// is emptied by reading, so a long interval makes a backlog rather than
+    /// saving work. That argues against hours *when there is traffic*, and
+    /// frame 3's answer is the tighter window around check-in rather than a
+    /// permanently short interval — which is step 4's two-tier schedule, read
+    /// from configuration rather than fixed here.
+    /// </para>
     /// </remarks>
-    public TimeSpan PollInterval => TimeSpan.FromSeconds(30);
+    public TimeSpan PollInterval => TimeSpan.FromHours(3);
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<PolledPayload>> DrainAsync(
         CancellationToken cancellationToken) =>
         await queue.DrainAsync(settings, cancellationToken);
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>
+    /// <b>Completeness, which is the failure that actually happens.</b> A
+    /// half-filled form is answered here, while somebody is still looking at
+    /// the screen, instead of as a 401 at the next poll with nobody watching.
+    /// The missing names come from <see cref="OhipCredentials.MissingFrom"/> —
+    /// the same list a credential read builds, so the test and the poll cannot
+    /// disagree about what is absent.
+    /// </para>
+    /// <para>
+    /// <b>Reachability is not answered, and saying so is the honest outcome.</b>
+    /// Reaching OHIP means a password grant, which means credential *values*,
+    /// and nothing in the Hub reads a connector credential back out of the
+    /// Token Vault — <c>IConnectorSecretWriter</c> has no read method by
+    /// design. Opening one as a side effect of a button is a decision with a
+    /// ruling owed, not an implementation detail. So a complete configuration
+    /// answers <c>NOT_SUPPORTED</c> with a sentence that says which half was
+    /// checked, rather than a green light that tested nothing.
+    /// </para>
+    /// </remarks>
+    public Task<ConnectionTest> TestAsync(
+        IReadOnlyDictionary<string, string> configuration,
+        IReadOnlyList<string> configuredSecrets,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+
+        var missing = OhipCredentials.MissingFrom(configuration, configuredSecrets);
+
+        return Task.FromResult(missing.Count > 0
+            ? ConnectionTest.Incomplete(missing)
+            : ConnectionTest.NotSupported(
+                "Every credential is set. Reaching OHIP to check them needs the "
+                + "polling transport, which is not built yet."));
+    }
 
     /// <inheritdoc />
     public PipelineResult Validate(byte[] payload, string payloadKind)

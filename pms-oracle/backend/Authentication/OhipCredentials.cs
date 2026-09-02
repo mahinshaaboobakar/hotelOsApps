@@ -123,11 +123,16 @@ public sealed record OhipCredentials
         ArgumentNullException.ThrowIfNull(settings);
         ArgumentNullException.ThrowIfNull(secrets);
 
-        var missing = SettingNames.Where(name => Blank(settings, name))
-            .Concat(SecretNames.Where(name => Blank(secrets, name)))
-            .ToArray();
+        // **Built by `MissingFrom`, not beside it.** The two answers must
+        // agree — a completeness test and a credential read disagreeing about
+        // what is absent would be a screen saying "ready" over a poll that
+        // 401s — and two implementations of one list is how they drift. So
+        // this reduces its values to the names that carry one, and asks the
+        // same question the test asks.
+        var configured = SecretNames.Where(name => !Blank(secrets, name)).ToArray();
+        var missing = MissingFrom(settings, configured);
 
-        return missing.Length > 0
+        return missing.Count > 0
             ? OhipCredentialReading.Incomplete(missing)
             : OhipCredentialReading.Of(new OhipCredentials
             {
@@ -140,6 +145,38 @@ public sealed record OhipCredentials
                 ClientSecret = secrets[ClientSecretSecret],
                 PmsPassword = secrets[PmsPasswordSecret],
             });
+    }
+
+    /// <summary>
+    /// Which names carry no value, judged from the settings and the *names* of
+    /// the stored credentials.
+    /// </summary>
+    /// <param name="settings">The stored settings map.</param>
+    /// <param name="configuredSecrets">
+    /// The credential names this property has stored — <b>names, never
+    /// values</b>, which is all a connection test is given.
+    /// </param>
+    /// <returns>The absent names, settings first, in the order drawn.</returns>
+    /// <remarks>
+    /// <b>The list <see cref="Read"/> builds</b> — it calls this rather than
+    /// repeating it, so a completeness answer and a credential read cannot
+    /// disagree about what is missing. The
+    /// difference is only what each is given: this one is answerable without a
+    /// single secret value, which is why <c>TestConnection</c> can use it
+    /// while nothing in the Hub reads a credential back out of the Vault.
+    /// </remarks>
+    public static IReadOnlyList<string> MissingFrom(
+        IReadOnlyDictionary<string, string> settings,
+        IReadOnlyCollection<string> configuredSecrets)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        ArgumentNullException.ThrowIfNull(configuredSecrets);
+
+        return
+        [
+            .. SettingNames.Where(name => Blank(settings, name)),
+            .. SecretNames.Where(name => !configuredSecrets.Contains(name)),
+        ];
     }
 
     private static bool Blank(IReadOnlyDictionary<string, string> from, string name) =>
