@@ -203,6 +203,12 @@ ui:
   # dock, the launcher and every persisted layout resolve an application by id
   # alone.
   module: guestops
+  # The dock icon — `SHELL-Q34`. An SVG in the package, listed below and
+  # therefore covered by the signature: the desktop verifies it against this
+  # inventory at every load, so an icon replaced on disk after install refuses
+  # the package rather than putting a picture somebody else chose on a screen
+  # an operator trusts.
+  icon: ui/icon.svg
 
 # Placeholders. `hopkg sign` hashes the payload and writes the real map — a
 # digest map maintained by hand goes stale on the next build and gets "fixed"
@@ -214,3 +220,4 @@ ui:
 files:
   "backend/HotelOS.GuestOps.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

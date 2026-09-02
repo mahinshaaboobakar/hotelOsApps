@@ -172,6 +172,12 @@ dependencies: []
 ui:
   # The module-registry id, which ADR 0092 §Q15 requires to equal `id`.
   module: workforce
+  # The dock icon — `SHELL-Q34`. An SVG in the package, listed below and
+  # therefore covered by the signature: the desktop verifies it against this
+  # inventory at every load, so an icon replaced on disk after install refuses
+  # the package rather than putting a picture somebody else chose on a screen
+  # an operator trusts.
+  icon: ui/icon.svg
 
 # What this application may establish in the authorization graph — `AUTHZ-Q25`,
 # schema `packages/hotelos-package/src/authorization.rs`.
@@ -239,3 +245,4 @@ files:
   # disagree" — and reads `ui/module.js` out of the signed inventory by that
   # exact key. The bundle is what ships; the TypeScript stays in the repository.
   "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

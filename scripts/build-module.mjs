@@ -115,6 +115,60 @@ function expectedFromHost(bundle) {
   return [...consumed].sort();
 }
 
+/**
+ * A declared `ui.icon` must exist in the package and be an SVG — `SHELL-Q34`.
+ *
+ * The desktop verifies the icon against the signed inventory at every load and
+ * refuses the whole package when it does not match. That is the right
+ * behaviour there and the wrong place to *discover* a missing file: by then it
+ * is signed, shipped and installed, and an administrator is reading a refusal
+ * about a package they cannot fix. Checked here, where the author is still
+ * holding it.
+ *
+ * The parse is deliberately shallow — it opens with `<svg` or an XML
+ * declaration. Anything deeper would be a second opinion about SVG validity
+ * beside the browser's, and the browser's is the one that decides.
+ */
+async function declaredIcon(app) {
+  let manifest;
+  try {
+    manifest = await readFile(resolve(app, "../manifest.yaml"), "utf8");
+  } catch {
+    return [];
+  }
+
+  const declared = /^\s*icon:\s*(\S+)\s*$/m.exec(manifest);
+  if (declared === null) return [];
+
+  const path = declared[1];
+  if (!path.startsWith("ui/")) {
+    return [`declares ui.icon "${path}", which is not inside ui/.`];
+  }
+
+  let svg;
+  try {
+    svg = await readFile(resolve(app, path.slice("ui/".length)), "utf8");
+  } catch {
+    return [`declares ui.icon "${path}", and there is no such file in the package.`];
+  }
+
+  const head = svg.trimStart();
+  if (!head.startsWith("<svg") && !head.startsWith("<?xml")) {
+    return [`declares ui.icon "${path}", which is not an SVG.`];
+  }
+
+  // A plain containment check, not a regex: the path comes from the manifest
+  // and would have to be escaped to be matched, which is a second thing to get
+  // right for no benefit.
+  if (!manifest.includes(`"${path}"`)) {
+    return [
+      `declares ui.icon "${path}" but does not list it in files:, so the signature would not cover it.`,
+    ];
+  }
+
+  return [];
+}
+
 /** Same-realm assumptions the sandbox makes impossible. */
 function realmAssumptions(bundle) {
   return ["window.parent", "window.top", "document.cookie", "document.domain"].filter((reach) =>
@@ -159,6 +213,8 @@ if (unpublished.length > 0) {
     `reads custom properties the platform does not publish, so they resolve to nothing: ${unpublished.map((n) => `--${n}`).join(", ")}.`,
   );
 }
+
+for (const problem of await declaredIcon(app)) failures.push(problem);
 
 const reached = realmAssumptions(bundle);
 if (reached.length > 0) {
