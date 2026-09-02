@@ -1484,62 +1484,211 @@ rather than assumed.
 
 ---
 
-## S1.13 · Before any redesign — the interview
+## S1.13 · The redesign, hotel domain first
 
-**Owner, 2026-09-02:** *"Still you are mirroring the concept from Java —
-redesign the whole concept of these. Ask questions for me, from the Java
-concepts, then design. Keeping the type and only changing string to enum is
-not the design I want."*
+**Owner, 2026-09-02:** *"Redesign it, based on our hotel domain. Take concepts
+from the reference."* An interview was offered instead and declined — the
+owner wants the design, not questions. Written here.
 
-**Accepted.** §S1.10 and §S1.11 changed the values inside the reference's
-shape and kept the shape. That is the third time this section has been
-polished rather than rethought, and the pattern is the stream designing
-before understanding what the Java concepts were *for*.
+### What the reference was reaching for — the concepts worth keeping
 
-So: **no design here.** Questions only, each grounded in something the Java
-system actually did, so the answers become the ground the redesign stands on.
-The answers are recorded against each question as they arrive.
+Strip the Java shape away and `workOrderType` + `WOServicePreference` were
+trying to do three things:
 
-### A · `workOrderType` — what was it actually for?
+```text
+1  let a non-expert raise work without knowing who does it
+2  get the work to the right department, with the right urgency
+3  make it countable afterwards
+```
 
-| | Question | Answer |
+Those three are kept. **Everything about how the reference did them is
+replaced.**
+
+### How a hotel actually thinks about work
+
+Not in "types". A hotel has **departments** — that structure already exists
+in Master Data and every operator knows it. Inside a department, a hotel has
+**issues** it deals with every day: the AC is not cooling, the guest wants a
+towel, the lift is stuck, room 214 needs a deep clean. And every issue is
+either **guest-facing** — a guest is waiting or affected — or **back of
+house**.
+
+That is the whole vocabulary an operator uses. The redesign uses it and
+nothing else.
+
+### The design
+
+```text
+JOB
+  where         location_id                              (settled, S1.1)
+  what          issue                                    <- replaces "service"
+  who does it   department        derived from the issue, overridable
+  for whom      guest (a stay)    optional. Present = guest-facing
+  how urgent    priority          from the flow           (settled, S1.4)
+  service failure?      glitch flag + recovery fields     <- replaces "COMPLAINT"
+  how it was resolved   resolution action                 <- NEW; the reference has nothing
+  where it came from    source    guest app · front desk · Room Care ·
+                                  Maintenance · schedule · sensor · integration
+```
+
+**There is no `type`.** Every job the reference typed is expressible:
+
+```text
+reference               here
+COMPLAINT               an issue + a guest + the glitch flag
+REQUEST                 an issue + a guest
+MAINTENANCE             an issue whose department is ENG
+a Room Care task        an issue whose department is HK, no guest
+an inspection           not a job — a CHECKLIST RUN that raises jobs (below)
+```
+
+### The issue list — the reference's "service list", rebuilt for a hotel
+
+**Organised by department, because that is how a hotel is organised.** Not a
+flat list of 300, not an abstract "category".
+
+```text
+ENGINEERING
+  AC              not cooling · noisy · leaking · not switching on
+  Lighting        bulb out · flickering · switch broken
+  Plumbing        tap dripping · no hot water · drain blocked · WC not flushing
+  Lift            stuck · noisy · not stopping level
+HOUSEKEEPING
+  Extra items     towel · pillow · blanket · toiletries       (guest-requestable)
+  Room condition  not cleaned · smell · stain · insects
+  Deep clean      after spill · after checkout · periodic
+FRONT OFFICE
+  Room move · Late checkout · Luggage · Wake-up call
+IN-ROOM DINING
+  Water · Tea/coffee · Ice · Order follow-up
+```
+
+Two levels: **issue → symptom**. "AC" is the issue; "not cooling" is the
+symptom. The symptom is what routes to the *right* engineer and what makes
+the fault history useful — "this unit has failed *not cooling* four times"
+is a sentence only a symptom level can produce.
+
+Each issue carries:
+
+```text
+department                who does it — the hotel's own structure
+guest-requestable         appears in the guest app, or staff-only
+standard resolution time  the hotel's own phrase — not "SLA"
+applies to                guest room · public area · asset type
+resolution actions        the closing vocabulary — see below
+aliases                   so "aircon", "a/c", "ac not working" all land here
+```
+
+### The concept the reference does not have: the resolution action
+
+The reference closes a job with a status and free text. **A hotel needs to
+know what fixed it.** Every issue carries its own short list of resolution
+actions, and closing picks one:
+
+```text
+AC · not cooling         filter cleaned · gas recharged · thermostat replaced ·
+                         unit replaced · no fault found · referred to vendor
+Plumbing · tap dripping  washer replaced · tap replaced · tightened
+Extra items · towel      delivered
+```
+
+This is where the value is, and the reference has none of it:
+
+* **"No fault found"** becomes visible and countable — the single most
+  useful number in engineering.
+* **"Referred to vendor"** is a resolution, not a dead end.
+* **Asset history becomes real** — an AC unit with *gas recharged* three
+  times this year is a unit that needs replacing, and nobody has to read
+  free text to know it.
+* **The closing is structured** — a technician taps one line instead of
+  typing, and a manager can report on it.
+
+The concept is HotSOS's *Issue × Location × Action* — the core model of the
+largest hotel work-order product — and it is the part worth taking.
+
+### The concept the reference mis-filed: the service failure
+
+The reference made `COMPLAINT` a **type**, which meant the same broken AC was
+a different kind of job depending on who noticed. **A complaint is not a kind
+of work. It is a fact about a guest.**
+
+So: any job with a guest attached may be marked a **service failure** (hotel
+word: a *glitch*). The flag brings its own fields:
+
+```text
+glitch             yes / no
+recovery owed      apology · upgrade · compensation · manager visit
+recovery done      by whom, when
+guest satisfied    yes / no / not asked
+```
+
+The **work** — fixing the AC — is the job. The **failure** — the guest was
+let down — is recorded on it and rolls up to guest-satisfaction reporting.
+One job, both facts, no type.
+
+### Inspections are not jobs — they raise jobs
+
+A supervisor inspecting ten rooms, an engineer's daily round, a fire-safety
+walk: these are **checklist runs**, and a failed line **raises a job**
+("214 · Lighting · bulb out"). The run is a small separate object. A one-off
+*"go and look at 214"* is just a job whose issue is *Inspect*.
+
+The reference typed inspections as jobs and gated its checklist feature on
+`type = MAINTENANCE`. Neither survives.
+
+### Worked example — one guest, one evening
+
+```text
+19:40  guest calls: "AC not working, and I need extra towels"
+
+  KOC-ENG-441   issue AC › not cooling · room 214 · guest Mr Rao (stay 8812)
+                department ENG · priority HIGH (occupied, complaint) · glitch: yes
+  KOC-HK-442    issue Extra items › towel · room 214 · guest Mr Rao
+                department HK · priority NORMAL
+                -> grouped with 441 (same guest, same room, 30-min window)
+
+20:05  HK delivers        442 resolved: delivered
+20:30  ENG resolves       441 resolved: gas recharged
+                          recovery: fruit platter sent · manager visited 20:45
+                          guest satisfied: yes
+
+Next morning:
+  ENG · AC · not cooling · gas recharged      <- asset 214-AC now has 3 this year
+  glitches 1 · recovered 1 · satisfied 1
+  HK guest requests 1 · average 25 min
+```
+
+No type was picked at any point. Every number a manager wants exists.
+
+### Against the reference, in one table
+
+| Reference concept | Here |
+|---|---|
+| `workOrderType` — Complaint / Request / Maintenance | **gone.** Department + guest link + glitch flag cover every use |
+| `service` — a flat string list, display name as key | **issue → symptom**, two levels, organised by department, UUID-keyed, aliases |
+| `category` | gone |
+| `source` | kept, closed list |
+| routing baked into the entry (assignee id, keyword map) | **department on the issue**; the person is resolved by S3's rules at assignment time |
+| priority + SLA on the entry | **standard resolution time** on the issue; priority from the flow (S1.4) |
+| status + free text on close | **resolution action** — structured, per issue, reportable |
+| complaint as a type | **glitch flag + recovery fields** on any guest-facing job |
+| inspection as a type; checklist gated on MAINTENANCE | **checklist run** — a small separate object that raises jobs |
+| `trackMode` | dropped from the issue; guest tracking is GuestOps' surface (S8) |
+
+**Added:** the symptom level · resolution actions · glitch and recovery ·
+checklist runs · guest-requestable per issue · aliases · applies-to.
+**Dropped:** type · category · assignee-on-the-entry · keyword routing ·
+trackMode.
+
+### What is the owner's to decide
+
+| | | Recommendation |
 |---|---|---|
-| **A1** | In daily operation, what did the type **change**? A different screen? A different person? A different SLA? A different report? Or, honestly, nothing — it was just a label? | |
-| **A2** | Who picked it — the front desk, the guest app, the supervisor? And did they pick it correctly, or was it often wrong? | |
-| **A3** | `MAINTENANCE` is a department, and departments were already a field. **What did engineering work need that the others did not** — checklists, parts, inspection, a different close? That need is the real requirement; the type was how it was expressed | |
-| **A4** | Was there ever a job that fit none of the three? What did people do with it? | |
-
-### B · `service` and `WOServicePreference` — what was the list for?
-
-| | Question | Answer |
-|---|---|---|
-| **B1** | Who owned the list — the hotel or Instio? How big was it at a real property — 20 entries, 100, 300? | |
-| **B2** | Was it **one list for guests and staff**, or did the guest app show a different list? | |
-| **B3** | Could the same entry — say "AC" — be raised as a complaint **and** a request **and** maintenance? Or did each service really belong to one type? *(This decides whether type and service are two things or one.)* | |
-| **B4** | The entry carried department + assignee + priority + SLA. **Was that the routing engine?** Did it work? When it failed, how — wrong person, nobody, wrong SLA? | |
-| **B5** | `keywords`, `keywordAssignee` and `sameForAllKeyword` — what was the real scenario they solved? *(The stream's guess: a free-text guest request matched to an entry, and "AC" routed to the AC technician rather than the general engineer. Correct?)* | |
-| **B6** | Did different properties in one company have different lists, and did group-level reporting suffer for it? | |
-| **B7** | `trackMode` — was this the guest-visible progress stages, per service? Did guests use it? | |
-
-### C · What hurt
-
-| | Question | Answer |
-|---|---|---|
-| **C1** | The biggest operational complaint about classification in the Java system — wrong person, wrong SLA, meaningless reports, staff not knowing what to pick, or something else? | |
-| **C2** | What did hotels ask for that it could not do? | |
-| **C3** | What did nobody use? | |
-
-### D · Where the redesign might go — so the owner can steer before it is drawn
-
-| | Question | Answer |
-|---|---|---|
-| **D1** | If a guest or a colleague could say *"the AC in 214 is dead"* and the system worked out the department, the urgency and the person on its own — **would you still want staff to classify anything by hand?** | |
-| **D2** | Do you think of *"what kind of job this is"* and *"what it is about"* as **two things or one**? When you designed them as two fields, was that deliberate or just how it fell out? | |
-| **D3** | Is there a classification you have seen in another product — hotel or otherwise — that you thought was **right**? | |
-
-**S1-D5 and S1-D6 stay open, in interview.** The redesign follows the
-answers.
-
+| **a** | Is the word **issue** right for both faults and requests? | it is the hotel-industry word (HotSOS); rename freely |
+| **b** | Is the issue list **group-wide with per-property activation**, as departments are? | yes — same reason, same ruling shape |
+| **c** | Does the **glitch / recovery** record live on the job, or in GuestOps with a link? | on the job for v1; GuestOps reads it |
+| **d** | Are **resolution actions** mandatory on close, or optional? | mandatory for ENG issues, optional for HK requests — set per issue |
+| **e** | Is a **checklist run** in the first release? | no — but a job must be raisable *from* one when it exists |
 
 ## Decisions — round 1 close
 
@@ -1549,8 +1698,8 @@ answers.
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **IN INTERVIEW — §S1.13.** §S1.10's enum was rejected by the owner as the reference's concept with new values. Questions A1–A4, B3, D1–D3 decide the redesign |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **IN INTERVIEW — §S1.13.** §S1.11 was rejected on the same ground. Questions B1–B7, C1–C3, D1–D3 decide the redesign |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **REDESIGNED — §S1.13. There is no type.** Department + guest link + glitch flag replace it; inspections become checklist runs that raise jobs |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **REDESIGNED — §S1.13.** An **issue → symptom** list organised by department, with **resolution actions** on close (HotSOS's model) — the concept the reference lacks entirely |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
