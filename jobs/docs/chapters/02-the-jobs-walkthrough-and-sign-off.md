@@ -294,6 +294,77 @@ all while three steps each sit just inside their limits.
    steps in the same order, to the same departments. This is where the value
    is operationally, and the reference has nothing like it.
 
+### Part 3 · When HosPilot plans the children — owner, 2026-09-02
+
+The owner's case: somebody tells the AI *"room 214 AC dead"*, and it should
+**create the parent, check whether a guest is in the room, and plan the
+children.**
+
+This is not a separate feature. It is the same parent-and-children model with
+a different author, and it settles two of the open questions above by
+requiring them.
+
+```text
+"room 214 ac dead"
+        │
+        ├─ resolve the place           Context → location L3, Room 214
+        ├─ is anyone staying there?    Context → occupied, checked out 11:00
+        ├─ pick the plan               a TEMPLATE: "AC not cooling"
+        └─ raise
+              PARENT   KOC-ENG-118   AC not cooling — Room 214   Emergency
+                ├─ step 1  diagnose the unit            ENG
+                ├─ step 1  offer the guest a room move  FO     ← only because occupied
+                └─ step 2  repair or replace            ENG
+```
+
+**Four rules this puts on the design:**
+
+1. **The AI uses the ordinary way in.** Same API, same validation, same
+   numbering, same permissions. There is no agent back door — an agent that
+   can create a job the normal rules would refuse is a hole, not a feature.
+2. **An agent-raised job says so.** `source` records HosPilot and the actor
+   is the agent's identity, so a report can always separate *"jobs we raised"*
+   from *"jobs the assistant raised"*, and a bad plan is traceable.
+3. **The occupancy check is Context's, never ours.** Jobs does not learn who
+   is in a room. And when GuestOps is not installed the check simply does not
+   answer — the job is still raised, without the room-move step. *Absent is
+   not blocking* (ADR 0116 §5).
+4. **The plan is a template.** *"AC not cooling"* is a named breakdown with
+   its steps, departments and step numbers. The agent chooses and fills a
+   template; it does not invent a work plan from nothing. That is what makes
+   the result reviewable — a supervisor can see *which* plan was used.
+
+**Two things this changes in the questions above.** Template support (g) was
+"later"; the AI case needs it, so it moves into the first release as a
+**model and a seeded set**, with the editing screens still able to come
+later. And a child being a **full job** (a) stops being a preference — the
+"offer the guest a room move" step belongs to Front Office and must land in
+Front Office's queue.
+
+**The open question, and it is the important one.** The platform's AI chain
+puts an **approval step in front of every AI write** (ADR 0130). So:
+
+> Does an AI-planned job wait for a person before it exists?
+
+The stream's recommendation, and it splits the two halves:
+
+```text
+the PARENT is created immediately        a dead AC at 02:00 must not wait
+                                         for someone to approve recording it
+
+the CHILD PLAN is proposed               the supervisor sees "HosPilot
+                                         suggests 3 steps", and accepts or
+                                         edits with one tap
+
+no answer within N minutes               the plan accepts itself, and says it
+                                         did — because at 02:00 nobody may be
+                                         looking, and doing nothing is worse
+                                         than doing the obvious thing
+```
+
+That needs the owner's ruling, and an architect's confirmation that it fits
+ADR 0130's approval-for-writes.
+
 ### Open for the owner
 
 | | Question | Recommendation |
@@ -306,15 +377,49 @@ all while three steps each sit just inside their limits.
 | f | Does the parent have **its own SLA**, separate from the children's? | yes — that is the guest's clock, and it is what the parent escalates on |
 | g | **Templates** — in the first release, or later? | later, but the model must allow them from day one |
 | h | Can a job be in a **group** and also be a **child**? | yes; they are independent relations, and neither affects the other |
-| i | The group's join window — 30 minutes, or shorter? | *open* |
-| j | Should a group cross departments and still go to one person, at properties that want that? | a property setting, off by default | 
+| i | The group's join window — 30 minutes, or shorter? | **RULED: the group stays** (owner, 2026-09-02). The window length is still open |
+| j | Should a group cross departments and still go to one person? | a property setting, **off** by default — see below |
+
+**(j) in plain terms.** A guest asks for water and a towel. Water is Food &
+Beverage; a towel is Housekeeping. Two departments.
+
+```text
+a large hotel      two people. The F&B runner carries water from one store,
+                   the housekeeping attendant carries linen from another.
+                   Sending one person to fetch both is not how it works
+
+a small hotel      one person walks to the room once. Sending two is silly
+or a villa resort
+```
+
+So the setting reads: *"may one person be handed a job from another
+department when they are going to that room anyway?"*
+
+```text
+OFF (default)   each job goes to its own department, always
+ON              whoever takes the first one gets both — but only if
+                they hold permission for both departments
+```
 ---
 
 ## S1.3 · The job number — the design
 
-**Ruled format:** `<PropertyCode>-<Dept>-<Number>`, with the number running
-property-wide rather than per department — so `KOC-HK-412` is followed by
-`KOC-ENG-413`.
+**Ruled format:** `<PropertyCode>-<Dept>-<Number>`. **One counter per
+property, shared by every department** — confirmed by the owner, 2026-09-02:
+*"if HK-01, then ENG-02, not ENG-01."*
+
+```text
+KOC-HK-01     towel to 214              Housekeeping
+KOC-ENG-02    AC not cooling, 214       Engineering      <- 02, not 01
+KOC-HK-03     turndown 305              Housekeeping
+KOC-FB-04     water to 214              Food & Beverage
+KOC-ENG-05    lift making a noise       Engineering
+```
+
+The department letters say **who it went to**; the number says **which job it
+is at this hotel**. One counter means that when somebody says *"job 4"*, there
+is exactly one job 4 — which is the whole reason not to give each department
+its own counter.
 
 **The property code already exists.** `masterdata.properties.Code` is there
 today — *"Operator-facing — `kochi-001`. Never used for routing."* **No Core
