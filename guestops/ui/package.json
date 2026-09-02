@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "esbuild main.ts --bundle --format=esm --platform=browser --target=es2022 --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts --outfile=module.js && node ../../scripts/verify-module.mjs module.js",
+    "build": "node ../../scripts/build-module.mjs",
     "test": "npm run build && vitest run",
     "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts"
   },
