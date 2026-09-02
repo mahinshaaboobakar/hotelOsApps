@@ -43,8 +43,8 @@ constitution's order, not a preference.
 
 | # | Section | State | Signed off |
 |---|---|---|---|
-| S1 | The job itself — what a job *is* | **OPEN** | — |
-| S2 | Creating a job | not started | — |
+| S1 | The job itself — what a job *is* | **round 1 discussed** — 4 ruled, 4 designs with the owner | — |
+| S2 | Creating a job | queued | — |
 | S3 | Assigning it | not started | — |
 | S4 | Accept, start, pause, finish | not started | — |
 | S5 | **Escalation** | not started | — |
@@ -73,10 +73,10 @@ escalation section. They are referenced by that id for the rest of the
 project.
 
 ---
-
 # S1 · The job itself — what a job *is*
 
-**State: OPEN**
+**State: ROUND 1 DISCUSSED — four decisions settled, four sent back for a
+design.** Owner, 2026-09-02.
 
 ## What it does
 
@@ -84,72 +84,418 @@ Somebody reports something — *"AC not working in 214"*. It becomes a record
 carrying: a **type** (Complaint / Request / Maintenance), a **service**
 ("AC"), a **location** ("214"), a description and photos, a **priority** 1–10,
 an **SLA** in minutes, a due date, a **department**, an **assignee**, and a
-**status**. Plus a **source** (where it came from: guest app, PMS, feedback,
-inspection, scheduled) and a **category**.
+**status**. Plus a **source** and a **category**.
 
 ## What's wrong
 
 **1 · Location and service are just text.** "214" is a string typed by
-whoever raised it. "AC" is a string that the system silently re-capitalises
-on save. Neither points at anything real. So *"how many jobs has room 214 had
-this year"* is a text search, and renaming a service orphans every job that
-used the old spelling. *(01 §F32, F2 of the data model.)*
+whoever raised it; "AC" is a string the system silently re-capitalises on
+save. Neither points at anything real, so *"how many jobs has room 214 had"*
+is a text search and a rename orphans history. *(01 §F32.)*
 
-**2 · The job number is one global counter.** Job 48,210 is the 48,210th job
-across every hotel in the system. It is also the public identifier in every
-URL. *(01 §2.4, F3.)*
+**2 · The job number is one global counter** across every hotel, and it is
+the public identifier in every URL. *(01 §2.4, F3.)*
 
-**3 · Priority is a bare number with no meaning, and the system invents it.**
-When nobody sets a priority, the code writes **5**. Everywhere it is shown,
-under 5 reads "Low", exactly 5 reads "Medium", over 5 reads "High". So
-*"nobody has assessed this"* and *"someone judged it medium"* become the same
-value, permanently — the distinction cannot be recovered afterwards.
-*(01 §F1.)*
+**3 · Priority is a bare number and the system invents it.** Unset becomes
+**5**, which displays as "Medium" — so *"nobody assessed this"* and *"someone
+judged it medium"* become the same value, permanently. *(01 §F1.)*
 
-**4 · The department is stored twice** — its id *and* its display name — and
-other code then builds things out of the display half. *(01 §F32.)*
+**4 · The department is stored twice** — id and display name — and other code
+builds things out of the display half. *(01 §F32.)*
 
-**5 · There are three ways to classify a job and no rule separating them.**
-`type` (Complaint / Request / Maintenance), `category` (free text), and
-`service` (free text). In practice all three are used interchangeably by
-different callers.
+**5 · Three overlapping ways to classify** — type, category, service — with
+no rule separating them.
 
-**6 · A third tenancy level that means nothing.** Every table carries
-company, site and *facility*. Facility is filtered on, indexed seven ways,
-and **never set by anything**. *(01 §F31.)*
+**6 · A third tenancy level that means nothing.** Company, site and
+*facility* on every table; facility is indexed seven ways and never set.
+*(01 §F31.)*
 
-## What I propose
+## Rulings — owner, 2026-09-02
 
-* A job points at a **real room or a real asset** from Master Data, never a
-  text location. Presentation ("Room 214, Second Floor, Main Block") is
-  resolved through the platform's Context service, not stored.
-* The job number is **per property** — *"Job 412"* means something to the
-  staff standing in that hotel. The internal identifier is a UUID nobody
-  reads.
-* Priority is a **short named list the hotel configures**, and **"not yet
-  triaged" is a real value** — so a supervisor can filter for exactly the
-  jobs nobody has judged yet.
-* Store the department **code** only. The name comes from Master Data, so a
-  rename cannot break anything.
-* Keep **one** classification axis plus a source. My recommendation: **type**
-  (what kind of work) and **service** (what it is about) — and drop
-  `category`.
-* No facility level. Organization and property only.
+| id | Decision | Ruling |
+|---|---|---|
+| **S1-D1** | What a job is *about* | **Sent back for a design** — room-or-asset is too narrow; public areas, pools and the rest are all subjects. See §S1.1 |
+| **S1-D2** | One subject per job | **RULED: one subject, one job.** And jobs **link to one another** — a guest asking for water then a towel produces two linked jobs, and the second inherits the first's handler. See §S1.2 |
+| **S1-D3** | Job number | **RULED: `<PropertyCode>-<Dept>-<Number>`**, the number shared across departments at the property. See §S1.3 |
+| **S1-D4** | Priority levels | **RULED: Emergency · High · Normal · Low, plus Not triaged.** How it is set automatically **sent back for a design** — see §S1.4 |
+| **S1-D5** | Job types | **Sent back for a design** — see §S1.5 |
+| **S1-D6** | Who owns the service list | **Sent back for a design** — see §S1.6 |
+| **S1-D7** | Drop `category` | **RULED: dropped.** |
+| **S1-D8** | Tenancy levels | **RULED (delegated to the stream): one scope column, `property_id`.** Organization and facility dropped. See §S1.7 — this is the one place the stream did not simply follow the owner's instinct, and the reason is on the record |
 
-## Decisions
+---
 
-| id | Decision | Recommendation | Ruling |
+## S1.1 · What a job is about — the design
+
+**The platform has already solved this, and it named Jobs while doing it.**
+
+`masterdata.locations` is **one tree** covering every place in a property.
+Buildings, floors and rooms are typed nodes with extension tables; corridors,
+lobbies, restaurants, pools, plant rooms, terraces and back-of-house are
+nodes and nothing more. `Location.cs`'s own remarks give the reason:
+
+> *"The alternative — locations holding only the places the other tables
+> cannot — puts a branch in every consumer: `if room: join rooms else: join
+> locations`. The Context Service, **Work Orders**, Inventory and the AI
+> Runtime would each carry it forever."*
+
+So the design is two fields, and no branch anywhere:
+
+```text
+job.location_id   REQUIRED    WHERE the work is
+                              a room · the pool · a corridor · the lobby
+                              · a plant room · a whole floor · a whole block
+                              — every one of them is a node in the same tree
+
+job.asset_id      OPTIONAL    WHAT the work is on, when it is a thing
+                              the lift · an air handler · a room's AC unit
+                              — and every asset already knows its own location
+```
+
+Four rules that follow:
+
+1. **`location_id` is always set.** There is no job without a place.
+2. **If `asset_id` is set, `location_id` is seeded from the asset's location
+   at creation and then stored on the job.** Not derived on read — assets are
+   moved, and the job happened where it happened.
+3. **A job may sit at any level of the tree.** *"Deep clean the whole second
+   floor"* is a job on the floor node. This is free, because it is one tree.
+4. **Nothing about the place is copied onto the job** — no room number, no
+   floor name. "Room 214 · Second Floor · Main Block" is resolved through
+   Context when the job is displayed.
+
+**Two things the owner needs to answer, and one is not ours to decide:**
+
+* The platform's place list today is: building · floor · room · corridor ·
+  lobby · restaurant · pool · plant_room · terrace · back_of_house. **It has
+  no gym, spa, salon, banquet hall, car park, garden, kids' club or laundry
+  room.** The list is deliberately cheap to extend — its own comment says
+  *"hotels invent places; a new type is a constraint edit"* — but it is
+  **Master Data's list, not ours**. Which places are missing for your
+  properties? That goes to the platform as a request.
+* Should a job be allowed at building level, or is floor the coarsest
+  sensible? (Recommendation: allow it; a generator room or a whole annexe
+  block is a real subject.)
+
+---
+
+## S1.2 · Linking jobs — the design
+
+Owner's case: *a guest asks for water, then a towel. The system connects the
+two, and if the first went to a person, the second goes to the same person.*
+
+**A group, not a parent and a child.** The reference used parent/child and
+made closing the parent close the children — which is wrong here: the towel
+arriving does not make the water a sub-task of it, and delivering the water
+does not deliver the towel.
+
+```text
+Job group  GRP-88
+   │
+   ├── Job KOC-HK-412   water        assigned → Ramesh      Done  09:12
+   └── Job KOC-HK-413   towel        assigned → Ramesh      Open
+```
+
+**How a job joins a group** — automatic, on a match key:
+
+```text
+same requester   +   same location   +   inside the join window
+                                          (default 30 minutes, per property)
+```
+
+If an open group matches, the new job joins it. If not, it starts its own
+group of one. Staff can also **link and unlink by hand**, and that is
+recorded.
+
+**What the group does:**
+
+* **It carries the handler.** A job joining a group is assigned to the
+  group's current handler — *if* that person is still on shift and the job's
+  department is theirs. Otherwise the job routes normally and the group
+  simply keeps the two visible together.
+* **It is one card on the runner's screen** — *"Room 214 — 2 items: water,
+  towel"* — so one trip is one trip.
+* **It does not merge the jobs.** Each keeps its own status, its own SLA and
+  its own completion. **Closing one closes nothing else.**
+
+**The question underneath it, and it matters:** water is In-Room Dining;
+a towel is Housekeeping. In a small hotel one runner does both; in a large
+one they are different people in different uniforms. So the handler is
+inherited **only when the department matches**, and *"one runner handles
+everything"* is a property setting for hotels where it is true.
+
+**Open for the owner:**
+
+* The join window — 30 minutes, or shorter?
+* Should the group span departments and assign to one person anyway, at
+  properties that want that?
+* Does the group need its own visible number, or is it enough that the two
+  jobs point at each other?
+
+---
+
+## S1.3 · The job number — the design
+
+**Ruled format:** `<PropertyCode>-<Dept>-<Number>`, with the number running
+property-wide rather than per department — so `KOC-HK-412` is followed by
+`KOC-ENG-413`.
+
+**The property code already exists.** `masterdata.properties.Code` is there
+today — *"Operator-facing — `kochi-001`. Never used for routing."* **No Core
+Administration change is needed.** The owner's concern about group-level
+reporting is exactly what it is for.
+
+Three rules:
+
+1. **The number is stamped when the job is created and never recomputed.** It
+   is a label, not a projection. If a property is later renamed or recoded,
+   old numbers keep the old prefix — which is correct: that job *was* raised
+   at `KOC`.
+2. **The department segment is the root canon code** — `HK`, `ENG`, `FB`,
+   `FO`, `SEC` — not the leaf. The canon has 45 codes and a hierarchy
+   (`PLUM` and `HVAC` sit under `ENG`; `LDY` and `PA` under `HK`). A number
+   built from leaves is unreadable and changes meaning when a job is
+   re-routed one level.
+3. **Rerouting a job does not renumber it.** A job that starts as `HK` and
+   turns out to be engineering keeps `KOC-HK-412` and *shows* Engineering as
+   its department. A number that changes is worse than one that is stale,
+   because people write them down.
+
+**Open for the owner:**
+
+* `Property.Code`'s own example is `kochi-001`, which would give
+  `kochi-001-HK-412`. Do you want a **short uppercase code** convention —
+  `KOC`, `GOA`, `BLR` — and if so is that a rule we ask Core Administration
+  to enforce, or just how you fill it in?
+* What happens to a job raised before its department is known — a guest
+  request that has not been routed yet? Options: hold the number until it is
+  routed, or stamp a neutral segment (`GEN`) and never change it. The stream
+  recommends **routing at creation always**, so the case does not arise —
+  which depends on S1.6's catalogue carrying a default department per
+  service.
+
+---
+
+## S1.4 · How priority is set automatically — the design
+
+Levels ruled: **Emergency · High · Normal · Low**, plus **Not triaged**.
+
+Priority is decided by four layers, **first match wins**, and every job
+records *which layer decided it* — so *"why is this Emergency?"* always has
+an answer.
+
+```text
+1  the person chose one          they picked it on the form        → use it
+2  a property rule matched       "complaint + occupied room"       → use it, name the rule
+3  the service's default         the catalogue says AC = High      → use it
+4  nothing matched               → NOT TRIAGED, and that is a real state
+                                   a supervisor can filter for it
+```
+
+**Layer 2 is the useful one.** A rule is *conditions → priority*, built from
+a **fixed, small set of conditions** — not a general expression language.
+(The reference shipped a general rules engine with conditions, operators and
+a join-by field; it has no callers, its validator returns `true` under a
+`TODO`, and it ignores the join-by. A closed condition set is what makes
+rules reviewable.)
+
+The conditions worth having:
+
+| Condition | Comes from | Note |
+|---|---|---|
+| job type | the job | Complaint / Request / Fault / Planned |
+| service | the job | AC · Plumbing · Towel · WiFi |
+| place kind | the location tree | guest room · public area · back of house |
+| **is the room occupied right now** | Context | **the single most valuable one in a hotel** |
+| is the guest a VIP | Context / GuestOps | if GuestOps is not installed the condition simply never matches — it never blocks the flow |
+| time of day / business day | the property's calendar | night rules differ |
+| asset criticality | Maintenance, when installed | same absence rule |
+
+Rules a hotel would actually write, in order:
+
+```text
+service is fire · lift-entrapment · gas · flood      →  EMERGENCY   always
+type = Complaint  AND  guest room  AND  occupied     →  HIGH
+   ... and service is AC or Plumbing                 →  EMERGENCY
+type = Request    AND  guest room  AND  occupied     →  NORMAL
+place is back of house                               →  LOW
+```
+
+Three rules about the rules:
+
+1. **A human override always wins and always sticks.** Nothing re-runs and
+   quietly undoes it. The override records who and why.
+2. **Priority does not drift upward as a deadline approaches.** That is
+   escalation's job, and mixing the two is precisely how the reference ended
+   up with an `ESCALATED` value in its *status* field. Priority says how
+   important this is; escalation says who to wake up.
+3. **A rule that depends on an absent application never fires and never
+   fails.** No GuestOps means no occupancy condition, which means the next
+   rule is tried. (ADR 0116 §5: *absent is not blocking*.)
+
+**Open for the owner:** is "occupied room" available to us? It depends on
+GuestOps or the PMS connector being installed. If a property runs Jobs alone,
+the occupancy condition is dead and the rule set has to work without it.
+
+---
+
+## S1.5 · Job types — the design
+
+**The test for what belongs here:** a type is not *where it came from* (that
+is `source`) and not *what it is about* (that is `service`). A type is
+**why the job exists and what "done" means**.
+
+Applying that test gives five, not three:
+
+| Type | Why it exists | "Done" means | Clock |
 |---|---|---|---|
-| **S1-D1** | A job references a Master Data room or asset, never a text location | yes | *open* |
-| **S1-D2** | May one job have more than one subject? (a corridor light between two rooms; a whole-wing job) | one subject in v1; a wing-level job attaches to the *area*, not to N rooms | *open* |
-| **S1-D3** | Job number scope and format | per property, e.g. `HK-412` or plain `412` | *open* |
-| **S1-D4** | Priority — how many levels, what names, and is "not triaged" a value? | 4 levels + not-triaged. Names for the owner to give | *open* |
-| **S1-D5** | Are the job types fixed (Complaint / Request / Maintenance) or hotel-configurable? | fixed set in v1 | *open* |
-| **S1-D6** | Who owns the **service** taxonomy (AC, WiFi, Cleaning) — Jobs, Core Administration, or Master Data? | needs a platform ruling; Room Care and Maintenance read it too | *open* |
-| **S1-D7** | Do we keep `category` as well as type and service? | drop it | *open* |
-| **S1-D8** | Do we keep a third tenancy level (facility / block / building)? | no — organization and property only | *open* |
+| **Complaint** | something is wrong **and someone is affected** | fixed **and the affected person told** | shortest |
+| **Request** | someone wants something brought or done | delivered | short |
+| **Fault** | something is broken and nobody has complained yet | repaired | medium |
+| **Planned** | scheduled or preventive work | performed and recorded | by its schedule |
+| **Inspection** | go and look; the output is a finding, not a fix | checklist completed | by its schedule |
 
-**Sign-off:** _pending_
+**Why Complaint and Fault are separate**, when the repair may be identical: a
+complaint is not finished when the tap stops dripping — it is finished when
+somebody tells the guest. That closing step exists on one and not the other,
+and hotels feel the difference sharply. Collapsing them is how a hotel ends
+up with fixed taps and angry guests.
+
+**Why "Maintenance" is not a type.** The reference has one, and it then needs
+a special case at the top of the escalation engine to exclude it, and another
+in the checklist validator to permit only it. That is the smell: "Maintenance"
+was doing the work of two types — unplanned **Fault** and scheduled
+**Planned** — which have different deadlines and different escalation.
+
+**What is deliberately not a type:**
+
+* **Incident** — an injury, a theft, a fire alarm. Different lifecycle,
+  different confidentiality, a legal record, and often no repair at all. An
+  incident *causes* jobs; it is not one. That belongs to Security.
+* **Guest / Staff** — that is `source`, and it is already a separate field.
+
+**Open for the owner:**
+
+* Is five the right set, and is **Fault** worth separating from **Complaint**
+  for your operation?
+* **Inspection**: the reference calls out to a separate checklist service for
+  this and the call is commented out. Is inspection Jobs' work, or a separate
+  application that raises Jobs when it finds something?
+* Is the type list fixed in the product, or may a hotel add one? (Strong
+  recommendation: **fixed** — every type needs behaviour written for it, and a
+  type nobody wrote behaviour for is a type that silently does nothing. That
+  is exactly what happened to `DEVICE` in the reference.)
+
+---
+
+## S1.6 · Who owns the service list — the design
+
+The list: *AC · Plumbing · WiFi · Towel · Water · Turndown · Lift · Laundry
+pickup …* — what a job can be **about**.
+
+**The reference's mistake, stated plainly:** its catalogue entry is *also*
+the routing policy. One document holds the service's name **and** its
+department, its default assignee, its SLA, its priority, its icon, its
+keywords and its tracking mode. So the vocabulary and the behaviour cannot be
+owned separately, and Room Care reading the vocabulary would inherit Jobs'
+behaviour.
+
+**The design: split the noun from the policy.**
+
+```text
+THE CATALOGUE — what can be asked for            shared, Core Administration
+    code · name · translations · icon
+    the department that owns it by default
+    whether a guest may request it
+    active / inactive
+
+THE ROUTING POLICY — what we do about it         Jobs' own, per property
+    default priority          default SLA
+    which escalation policy applies
+    the auto-assignment rule
+```
+
+**Why the split is the right cut.** The catalogue is a *vocabulary several
+applications must agree on*: GuestOps shows a guest a list to choose from,
+Room Care raises "turndown", Maintenance raises "AC service", Jobs raises
+"AC not cooling" — and a group's reports only add up if all four mean the
+same thing by "AC". The policy is Jobs' behaviour, and no other application
+should ever read it.
+
+**Answering the owner's question — same across properties, or per hotel?**
+The platform has already ruled this exact shape once, for departments (ADR
+0119 and ADR 0116 §4), and the same answer fits:
+
+```text
+the catalogue     organization-wide, seeded with the product
+                  each property ACTIVATES the ones it offers
+                  a property may RENAME for display; the code never moves
+                  → group reporting can never fragment
+
+the policy        per property, always
+                  Kochi's AC response time is not Goa's
+```
+
+That is the department canon's exact pattern, and it exists because a
+property-local list means two hotels invent two spellings of one thing and
+the group's report has two rows for the same service. The accepted cost is
+the same too: a hotel needing a service the catalogue lacks waits for it to
+be added centrally — which argues for shipping a **generous** list, exactly
+as the department canon did with 45 codes.
+
+**This needs an architect's ruling, because it puts a new object in Core
+Administration.** It is one of the questions this round sends up.
+
+**Open for the owner, and it decides how hard the ruling is:** are your
+properties' service lists genuinely the same today, or does each hotel run
+its own? If they already differ per hotel, activation-plus-rename has to
+absorb that, and we should see a real example of the difference before
+proposing it.
+
+---
+
+## S1.7 · Tenancy — why one column stays
+
+The owner's direction was to drop company, site and facility, because a
+property runs its own local database. **Facility and organization are
+dropped. `property_id` stays**, and this is the one place the stream did not
+simply follow, so the reason is on the record:
+
+* **The platform's own rule is one scope column, never none.** Every Master
+  Data table is either property-scoped or organization-scoped — *"exactly one
+  scope per master table… never both and never neither"*. `Property`'s own
+  documentation is blunter: *"Every operational row carries `property_id`,
+  every session is scoped to one, and a cross-property leak would be a
+  serious breach — so it gets more than one defence: repositories filter
+  explicitly, and Row Level Security backstops the query where someone
+  forgot."*
+* **The event bus needs it.** `EVT-Q4`'s ruling makes every subject
+  property-scoped — `property.{id}.…` — with the id learned from the Kernel
+  at registration. A job event with no property on the row cannot be
+  published on the right subject.
+* **Backup, restore and group reporting need it.** A property's data is
+  restored into, and rolled up by, a system that holds more than one
+  property. A row that cannot say which hotel it belongs to is a row that
+  cannot be restored safely.
+
+So: **one column, `property_id`. Not three.** Which is what the owner's
+instinct was reaching for — the reference's three levels are two more than
+anyone needs, and the third of them was never written at all.
+
+## Decisions — round 1 close
+
+| id | Decision | Ruling |
+|---|---|---|
+| **S1-D1** | A job carries `location_id` (any node in Master Data's one tree) and an optional `asset_id` | *design proposed — §S1.1 — awaiting owner* |
+| **S1-D2** | One subject per job; jobs link into a group; the handler is inherited within a department | *design proposed — §S1.2 — awaiting owner* |
+| **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
+| **S1-D4** | Emergency · High · Normal · Low · Not triaged | **RULED.** The automatic rule design is §S1.4 — awaiting owner |
+| **S1-D5** | Complaint · Request · Fault · Planned · Inspection | *design proposed — §S1.5 — awaiting owner* |
+| **S1-D6** | Catalogue in Core Administration, routing policy in Jobs | *design proposed — §S1.6 — needs an architect ruling* |
+| **S1-D7** | `category` dropped | **RULED** |
+| **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
+
+**Sign-off:** _not yet — four designs are with the owner._
 
 ---
 
