@@ -130,14 +130,26 @@ events:
 
   # The Hub's reservation facts, and Jobs' reply.
   #
-  # **Nothing delivers these yet** — EVT-Q4: there is no .NET subscription
-  # surface, so both consumers are driven by a recorded fact and this list is a
-  # declaration of intent the platform cannot yet honour. Declared rather than
-  # omitted: the day a consumer host exists, the subjects it may hear are the
-  # ones written here, and a manifest that had stayed silent would have to be
-  # revised in the same breath.
+  # **Delivered now** — EVT-Q4 built the consumer host, and this list is what it
+  # subscribes to: the Kernel reads it at install, refuses a subject no stream
+  # carries, and hands the admitted set to this application when it launches.
+  # The comment that stood here anticipated exactly that, and it was right that
+  # a manifest which had stayed silent would have needed revising in the same
+  # breath.
+  #
+  # `reservation.fact`, not `integration.reservation.fact` — ADR 0006, and the
+  # antipattern that ADR exists to kill: an event is named for what it *means*,
+  # never for the service that produced it (`user.archived`, never
+  # `identity.user.archived`). The Hub's authorship lives in the envelope's
+  # `source`, where provenance belongs. The prefixed name was also unroutable —
+  # no stream carries `integration.*` — so the name being wrong and the subject
+  # being undeliverable were the same defect.
+  #
+  # The two land on different streams — GUEST for the reservation fact, at a
+  # year, and MAINTENANCE for the job reply — which is ordinary rather than a
+  # problem: a consumer opens one durable per stream.
   subscribes:
-    - integration.reservation.fact
+    - reservation.fact
     - job.created
 
 configuration:
