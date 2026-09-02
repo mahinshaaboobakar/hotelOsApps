@@ -1767,6 +1767,82 @@ The recurrence is only as good as `asset_id`. So:
   recurrence works per location — weaker, still useful, and it tells
   Maintenance which assets to register.
 
+### The full flow, as data — owner's request, 2026-09-03
+
+One job, start to finish. Only the fields that matter for the concept.
+
+**0 · What exists before anyone calls — the catalogue**
+
+```json
+{ "issue":      { "id": "I-AC",  "code": "AC", "name": "AC", "department": "ENG",
+                  "applies_to": "asset_type:HVAC", "standard_minutes": 45 },
+  "symptoms":   [ { "id": "S-NC", "issue": "I-AC", "code": "NOT_COOLING", "name": "not cooling",
+                    "aliases": ["ac not working", "room hot", "aircon"] },
+                  { "id": "S-NZ", "issue": "I-AC", "code": "NOISY",       "name": "noisy" } ],
+  "resolutions":[ { "id": "R-FC", "issue": "I-AC", "symptom": "S-NC", "name": "filter cleaned" },
+                  { "id": "R-GR", "issue": "I-AC", "symptom": "S-NC", "name": "gas recharged" },
+                  { "id": "R-UR", "issue": "I-AC", "symptom": null,   "name": "unit replaced" },
+                  { "id": "R-NF", "issue": null,   "symptom": null,   "name": "no fault found" },
+                  { "id": "R-OT", "issue": null,   "symptom": null,   "name": "other" } ] }
+```
+
+**1 · 19:40 — the guest calls. Front desk types "ac not working 214".**
+The alias resolves it to AC › not cooling. Room 214 has one HVAC asset, so
+it attaches itself. Mr Rao is in the room, so it is guest-facing and the
+flow sets priority.
+
+```json
+{ "job_id": "…uuid…", "number": "KOC-ENG-441",
+  "location_id": "L-214", "asset_id": "A-214-AC",
+  "issue_id": "I-AC", "symptom_id": "S-NC",
+  "department": "ENG", "guest_stay_id": "STAY-8812", "source": "FRONT_DESK",
+  "priority": "HIGH", "priority_set_by": "flow:occupied+complaint",
+  "glitch": true,
+  "job_status": "NEW", "deleted_at": null,
+  "raised_at": "19:40" }
+```
+
+**2 · 19:42 → 20:05 — routed and worked.** Only `job_status` moves; each
+move is an event.
+
+```json
+{ "job_status": "ASSIGNED",    "assignee": "Suresh", "at": "19:42" }
+{ "job_status": "ACCEPTED",    "at": "19:44" }
+{ "job_status": "IN_PROGRESS", "at": "19:58" }
+```
+
+**3 · 20:30 — Suresh resolves.** The screen lists resolutions for AC,
+"not cooling" first, universals last, and a note box. He taps one and types.
+
+```json
+{ "job_status": "DONE",
+  "resolution_id": "R-GR", "resolution_note": "low gas, recharged. check again in a month",
+  "resolved_by": "Suresh", "resolved_at": "20:30",
+  "recovery": { "owed": "fruit platter", "done_by": "Duty Manager", "done_at": "20:45",
+                "guest_satisfied": true } }
+```
+
+**4 · 20:50 — the supervisor closes it.**
+
+```json
+{ "job_status": "CLOSED", "closed_by": "Priya", "closed_at": "20:50" }
+```
+
+**5 · Next morning — the report reads the ids, never the names.**
+
+```json
+{ "asset_id": "A-214-AC", "symptom_id": "S-NC", "resolution_id": "R-GR",
+  "count_12_months": 3 }
+```
+
+→ *"214-AC · not cooling · gas recharged · 3 times this year — replacement
+candidate."* If "AC" were renamed "Air Conditioning" tomorrow, this row is
+unchanged.
+
+**What was never on the job:** a type · a category · the word "AC" ·
+the word "gas recharged" · an SLA. All of those are looked up from the ids
+when displayed.
+
 ### Against the reference, in one table
 
 | Reference concept | Here |
