@@ -51,9 +51,16 @@ export interface Configuration {
 }
 
 export const SETTINGS: readonly Setting[] = [
-  { name: "endpoint", label: "OHIP endpoint", hint: "https://ohip.example.com" },
-  { name: "hotelCode", label: "Hotel code", hint: "This property, as OPERA names it" },
-  { name: "clientId", label: "Client ID", hint: "hotelos_client" },
+  // Frame 3's Connection card.
+  { name: "endpoint", label: "OHIP host", hint: "https://ohip.example.com" },
+  { name: "hotelCode", label: "Hotel id · property code", hint: "KOCHI01" },
+  { name: "externalSystemCode", label: "External system code", hint: "HOTELOS" },
+
+  // Frame 3's Authentication card, legible half. `clientId` and `pmsUsername`
+  // identify; they do not prove, and the frame draws them in plain text.
+  { name: "clientId", label: "Client id", hint: "hotelos_client" },
+  { name: "pmsUsername", label: "PMS username", hint: "hotelos_kochi" },
+
   {
     name: "pollSeconds",
     label: "Poll interval (seconds)",
@@ -68,11 +75,16 @@ export const SETTINGS: readonly Setting[] = [
 ];
 
 export const SECRETS: readonly Secret[] = [
-  // `client-id` is NOT here — `CONN-Q12`. Frame 3 draws it in plain text
-  // (`hotelos_client`) and only the secret half masked, and that drawing is
-  // the vault split: masked is a Token Vault secret, plain is a setting.
-  // Held write-only, an administrator could see that *a* client id was
-  // configured and never which one, which is the thing they need when two
-  // properties are pointed at the wrong tenants.
+  // Frame 3's masked fields, and the drawing IS the vault split — `CONN-Q12`:
+  // masked is a Token Vault secret, legible is a setting. That is why
+  // `clientId` sits above and `client-secret` sits here.
+  //
+  // **Three credentials, proving three different things.** The application key
+  // identifies the tenancy, the client pair proves the integration, and the
+  // PMS password authenticates the OPERA user whose permissions a poll runs
+  // under. A set carrying fewer would still look like OAuth and would be
+  // refused by the tenancy.
+  { name: "application-key", label: "Application key" },
+  { name: "pms-password", label: "PMS password" },
   { name: "client-secret", label: "Client secret" },
 ];
