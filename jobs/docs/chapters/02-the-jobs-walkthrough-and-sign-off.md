@@ -115,7 +115,7 @@ no rule separating them.
 | id | Decision | Ruling |
 |---|---|---|
 | **S1-D1** | What a job is *about* | **Sent back for a design** — room-or-asset is too narrow; public areas, pools and the rest are all subjects. See §S1.1 |
-| **S1-D2** | One subject per job | **RULED: one subject, one job.** And jobs **link to one another** — a guest asking for water then a towel produces two linked jobs, and the second inherits the first's handler. See §S1.2 |
+| **S1-D2** | One subject per job, and how jobs relate | **RULED: one subject, one job — and TWO relationships, not one.** A **group** for peers that go together (water, then a towel), and **parent ▸ children** for work made of steps, where the parent cannot close until every child does, children run parallel or sequential by step number, and each child is a full job with its own department, assignee and SLA. See §S1.2 |
 | **S1-D3** | Job number | **RULED: `<PropertyCode>-<Dept>-<Number>`**, the number shared across departments at the property. See §S1.3 |
 | **S1-D4** | Priority levels | **RULED: Emergency · High · Normal · Low, plus Not triaged.** How it is set automatically **sent back for a design** — see §S1.4 |
 | **S1-D5** | Job types | **Sent back for a design** — see §S1.5 |
@@ -179,59 +179,135 @@ Four rules that follow:
 
 ---
 
-## S1.2 · Linking jobs — the design
+## S1.2 · How jobs relate to each other — the design
 
-Owner's case: *a guest asks for water, then a towel. The system connects the
-two, and if the first went to a person, the second goes to the same person.*
-
-**A group, not a parent and a child.** The reference used parent/child and
-made closing the parent close the children — which is wrong here: the towel
-arriving does not make the water a sub-task of it, and delivering the water
-does not deliver the towel.
+Owner, 2026-09-02, in two parts. **There are two different relationships, and
+conflating them is what the reference did.**
 
 ```text
-Job group  GRP-88
+GROUP        these two happen to go together
+             water, then a towel, same room, same guest
+             peers · no dependency · closing one closes nothing
+
+PARENT ▸ CHILD    this work is MADE OF these steps
+             "make good the water leak in 214" is a plumbing fix, a
+             carpet dry, and an inspection of the ceiling below
+             a hierarchy · children can block each other
+             THE PARENT CANNOT CLOSE UNTIL EVERY CHILD IS CLOSED
+```
+
+The reference has only one relationship — "affiliation" — and it closes the
+children when the parent closes, which is the wrong direction for both cases.
+
+### Part 1 · The group
+
+A group, not a parent, for the water-and-towel case: delivering the water
+does not deliver the towel, and neither is a step of the other.
+
+```text
+Group
+ ├── KOC-HK-412   water    → Ramesh    Done 09:12
+ └── KOC-HK-413   towel    → Ramesh    Open
+```
+
+* **Joins automatically** on: same requester + same location + inside a
+  window (default 30 minutes, per property). Staff may link and unlink by
+  hand, and that is recorded.
+* **Carries the handler** — a job joining a group goes to the group's current
+  handler *if that person is on shift and the department matches*. Water is
+  In-Room Dining; a towel is Housekeeping. Where a property runs one runner
+  for everything, that is a property setting.
+* **One card on the runner's screen** — *"Room 214 — 2 items"* — so one trip
+  is one trip.
+* **Each job keeps its own status, SLA and completion. Closing one closes
+  nothing else.**
+
+### Part 2 · Parent and children
+
+Owner's requirement, verbatim: *a parent has N children · the parent cannot
+close until the children close · they may be parallel or sequential · we
+assign anyone or one person · the behaviour may differ for each.*
+
+**A child is a full job, not a checklist tick.** It has its own number, its
+own type, its own service, its own department, its own assignee, its own SLA
+and its own status. That is not decoration — a child that belongs to
+Engineering must appear in Engineering's queue exactly like any other job,
+be escalated on Engineering's policy, and be timed against Engineering's SLA.
+A lightweight sub-task cannot do any of that.
+
+```text
+PARENT   KOC-HK-500   "Room 214 — water leak, make good"      Waiting on children
    │
-   ├── Job KOC-HK-412   water        assigned → Ramesh      Done  09:12
-   └── Job KOC-HK-413   towel        assigned → Ramesh      Open
+   ├─ step 1   KOC-ENG-501   stop the leak              ENG   → Suresh    Done
+   ├─ step 1   KOC-HK-502    move guest belongings      HK    → Ramesh    Done
+   │                         ↑ same step number = run in PARALLEL
+   ├─ step 2   KOC-HK-503    dry and deep clean         HK    → Ramesh    In progress
+   │                         ↑ higher step = BLOCKED until step 1 is done
+   └─ step 3   KOC-ENG-504   inspect the ceiling below  ENG   → Suresh    Blocked
 ```
 
-**How a job joins a group** — automatic, on a match key:
+**Parallel and sequential, with one field.** Each child carries a **step
+number**. Same number = parallel. Higher number = waits for every lower
+number to finish. That is the whole mechanism; there is no dependency graph
+to draw and no cycle to detect.
+
+**A blocked child is a real state, and its clock has not started.** It is
+visible and it is assigned, but its SLA does not begin until it is released.
+Otherwise step 3's deadline burns down while step 1 is still being worked —
+which is how a system reports a breach against a person who was never able
+to start.
+
+**Closing.**
 
 ```text
-same requester   +   same location   +   inside the join window
-                                          (default 30 minutes, per property)
+parent is Done      when NO child is still open
+                    (a child that was cancelled does not hold the parent)
+parent is Closed    a person closes it — as for any job (see S4)
 ```
 
-If an open group matches, the new job joins it. If not, it starts its own
-group of one. Staff can also **link and unlink by hand**, and that is
-recorded.
+Closing never cascades downward. **Cancelling does** — cancelling a parent
+cancels its open children with the parent's reason, because the work is no
+longer wanted. That is the one direction where cascade is right, and it is
+the opposite of what the reference does.
 
-**What the group does:**
+**Assignment — three modes, chosen when the parent is broken down:**
 
-* **It carries the handler.** A job joining a group is assigned to the
-  group's current handler — *if* that person is still on shift and the job's
-  department is theirs. Otherwise the job routes normally and the group
-  simply keeps the two visible together.
-* **It is one card on the runner's screen** — *"Room 214 — 2 items: water,
-  towel"* — so one trip is one trip.
-* **It does not merge the jobs.** Each keeps its own status, its own SLA and
-  its own completion. **Closing one closes nothing else.**
+| Mode | Who gets the children | Use |
+|---|---|---|
+| **One handler** | every child to the same person | a small property, one runner |
+| **By department** | each child routes normally to its own department | the default, and what makes multi-trade work possible |
+| **Named per child** | the person breaking it down picks each | a supervisor who knows exactly who |
 
-**The question underneath it, and it matters:** water is In-Room Dining;
-a towel is Housekeeping. In a small hotel one runner does both; in a large
-one they are different people in different uniforms. So the handler is
-inherited **only when the department matches**, and *"one runner handles
-everything"* is a property setting for hotels where it is true.
+**Escalation — and this is the part that goes wrong if it is not decided
+now.** Children escalate on **their own** clocks, against their own
+department's policy. The parent escalates only on the **overall** deadline —
+because the guest is still waiting even while every individual step is inside
+its own SLA. **A parent's escalation names the child that is holding it up.**
+Without that split you either get five alerts for one problem, or no alert at
+all while three steps each sit just inside their limits.
 
-**Open for the owner:**
+### Where parents come from
 
-* The join window — 30 minutes, or shorter?
-* Should the group span departments and assign to one person anyway, at
-  properties that want that?
-* Does the group need its own visible number, or is it enough that the two
-  jobs point at each other?
+1. **By hand** — a supervisor looks at a job and says *"this needs three
+   trades"* and breaks it down.
+2. **From a template** — *"banquet hall changeover"* is always the same six
+   steps in the same order, to the same departments. This is where the value
+   is operationally, and the reference has nothing like it.
 
+### Open for the owner
+
+| | Question | Recommendation |
+|---|---|---|
+| a | Is a child a **full job** (own number, own queue, own escalation) or a lightweight sub-task? | full job — your "different behaviour for each" requires it |
+| b | **One level only**, or may a child have children? | one level. Grandchildren make the closure rule and the step ordering much harder to reason about, and nobody has asked for them |
+| c | When the last child finishes, does the parent **close by itself** or wait for a person? | it becomes **Done** by itself; a person **Closes** it |
+| d | Does **cancelling a parent** cancel its open children? | yes, with the reason carried down |
+| e | Reporting — does *"jobs completed today"* count parents, children, or both? | count **children** as work done and parents as coordination; show both, never add them together |
+| f | Does the parent have **its own SLA**, separate from the children's? | yes — that is the guest's clock, and it is what the parent escalates on |
+| g | **Templates** — in the first release, or later? | later, but the model must allow them from day one |
+| h | Can a job be in a **group** and also be a **child**? | yes; they are independent relations, and neither affects the other |
+| i | The group's join window — 30 minutes, or shorter? | *open* |
+| j | Should a group cross departments and still go to one person, at properties that want that? | a property setting, off by default | 
 ---
 
 ## S1.3 · The job number — the design
@@ -487,7 +563,7 @@ anyone needs, and the third of them was never written at all.
 | id | Decision | Ruling |
 |---|---|---|
 | **S1-D1** | A job carries `location_id` (any node in Master Data's one tree) and an optional `asset_id` | *design proposed — §S1.1 — awaiting owner* |
-| **S1-D2** | One subject per job; jobs link into a group; the handler is inherited within a department | *design proposed — §S1.2 — awaiting owner* |
+| **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged | **RULED.** The automatic rule design is §S1.4 — awaiting owner |
 | **S1-D5** | Complaint · Request · Fault · Planned · Inspection | *design proposed — §S1.5 — awaiting owner* |
