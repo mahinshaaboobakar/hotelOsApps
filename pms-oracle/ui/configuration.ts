@@ -84,17 +84,22 @@ export const SETTINGS: readonly Setting[] = [
   { name: "clientId", label: "Client id", hint: "hotelos_client" },
   { name: "pmsUsername", label: "PMS username", hint: "hotelos_kochi" },
 
-  {
-    name: "pollSeconds",
-    label: "Poll interval (seconds)",
-
-    // **Three hours, not thirty seconds** — `CONN-Q12`. The frame draws
-    // "Every 3 hours" and this hint said 30, which is the same figure 360
-    // times over against a vendor API that rate-limits. A default nobody
-    // edits is the value most properties run, so it is the one that has to
-    // be right.
-    hint: "10800",
-  },
+  // Frame 3's Polling card — two tiers, because arrivals cluster.
+  //
+  // **Three hours ordinarily and fifteen minutes around check-in.** The queue
+  // is emptied by reading, so a long interval makes a backlog rather than
+  // saving work — which argues for polling harder WHEN THERE IS TRAFFIC, not
+  // permanently. A single interval had to choose, and chose 30 seconds: 360
+  // times the frame's figure, spent on empty reads against an API that
+  // rate-limits.
+  //
+  // These hints are placeholders and govern nothing. The numbers that act are
+  // `OhipPollingSchedule`'s defaults, which is where this round learned to put
+  // them after correcting a hint and leaving the constant behind.
+  { name: "pollNormalSeconds", label: "Normal interval (seconds)", hint: "10800" },
+  { name: "pollTightSeconds", label: "Tighter interval (seconds)", hint: "900" },
+  { name: "pollTightFrom", label: "Tighter window from", hint: "14:00" },
+  { name: "pollTightUntil", label: "Tighter window until", hint: "16:00" },
 ];
 
 export const SECRETS: readonly Secret[] = [
@@ -110,4 +115,36 @@ export const SECRETS: readonly Secret[] = [
   { name: "application-key", label: "Application key" },
   { name: "pms-password", label: "PMS password" },
   { name: "client-secret", label: "Client secret" },
+];
+
+/** One subscription the property can turn on or off. */
+export interface Toggle {
+  readonly name: string;
+  readonly label: string;
+}
+
+/**
+ * Frame 3's Sync scope — what this integration sends us.
+ *
+ * Settings like any other, stored as `on` / `off`, because the Hub's map is
+ * opaque to it and a boolean would need a schema the platform deliberately
+ * does not have.
+ */
+export const TOGGLES: readonly Toggle[] = [
+  { name: "syncReservations", label: "Reservations & stays" },
+  { name: "syncRoomState", label: "Room & housekeeping state" },
+  { name: "syncGuestProfiles", label: "Guest profiles" },
+];
+
+/**
+ * What the frame draws as coming later, and why it is drawn at all.
+ *
+ * ADR 0128 §4 rules v1 inbound-only, so write-back does not exist. Frame 3
+ * draws the row anyway, dimmed and tagged — and that is the point: omitting it
+ * loses the signal that the capability exists and is coming, while drawing it
+ * as a control somebody can press would be a control that lies. Deferred
+ * honestly, never disabled and pretending.
+ */
+export const DEFERRED: readonly Toggle[] = [
+  { name: "writeRoomStatusBack", label: "Write room status back to the PMS" },
 ];

@@ -16,7 +16,7 @@
  * do its job: an empty custom property would override it and render invisible
  * text.
  */
-import type { Secret, Setting } from "./configuration";
+import type { Secret, Setting, Toggle } from "./configuration";
 
 /**
  * What kind of thing the status line is saying.
@@ -102,6 +102,36 @@ const CSS = `
    */
   .panel .actions { display: flex; gap: 8px; align-items: center; }
 
+  .panel .scope { display: flex; flex-direction: column; gap: 6px; }
+
+  .panel .row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-top: 1px solid var(--color-line, currentColor);
+  }
+
+  .panel .row .name { flex: 1; }
+
+  /*
+   * A capability that does not exist yet, drawn as absent rather than as a
+   * control that lies. ADR 0128 s4 rules v1 inbound-only, so write-back has
+   * nothing behind it - and a disabled checkbox invites somebody to look for
+   * the permission that would enable it.
+   */
+  .panel .row.later .name { color: var(--color-ink-faint, inherit); }
+
+  .panel .later-tag {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-ink-faint, inherit);
+    border: 1px solid var(--color-line, currentColor);
+    border-radius: 99px;
+    padding: 1px 8px;
+  }
+
   .panel .test {
     padding: 8px 16px;
     background: transparent;
@@ -120,6 +150,8 @@ interface Drawn {
   readonly subtitle: string;
   readonly settings: readonly (Setting & { value: string })[];
   readonly secrets: readonly (Secret & { placeholder: string })[];
+  readonly toggles: readonly (Toggle & { on: boolean })[];
+  readonly deferred: readonly Toggle[];
   onSubmit(typed: {
     settings: Record<string, string>;
     secrets: Record<string, string>;
@@ -237,6 +269,34 @@ export function panel(root: HTMLElement) {
         form.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
       }
 
+      const scope = node("div", "scope");
+
+      for (const toggle of drawn.toggles) {
+        const row = node("label", "row");
+        row.dataset["field"] = toggle.name;
+
+        const box = node("input");
+        box.type = "checkbox";
+        box.name = toggle.name;
+        box.checked = toggle.on;
+
+        row.appendChild(node("span", "name", toggle.label));
+        row.appendChild(box);
+        scope.appendChild(row);
+      }
+
+      for (const later of drawn.deferred) {
+        const row = node("div", "row later");
+        row.dataset["field"] = later.name;
+        row.appendChild(node("span", "name", later.label));
+        row.appendChild(node("span", "later-tag", "later"));
+        scope.appendChild(row);
+      }
+
+      if (drawn.toggles.length > 0 || drawn.deferred.length > 0) {
+        form.appendChild(scope);
+      }
+
       const actions = node("div", "actions");
 
       if (drawn.onTest !== undefined) {
@@ -274,6 +334,15 @@ export function panel(root: HTMLElement) {
           // "remove" — the API's only removal — and somebody editing an
           // endpoint would lose a credential they cannot retype.
           if (typed !== "") secrets[secret.name] = typed;
+        }
+
+        // **A checkbox stores `on` or `off`, never an absent key.** An
+        // unchecked box sends nothing in form data, so reading the elements
+        // rather than the FormData is what makes "turned this off" different
+        // from "this connector has no such setting".
+        for (const toggle of drawn.toggles) {
+          const box = form.querySelector<HTMLInputElement>(`input[name="${toggle.name}"]`);
+          settings[toggle.name] = box?.checked === true ? "on" : "off";
         }
 
         drawn.onSubmit({ settings, secrets });

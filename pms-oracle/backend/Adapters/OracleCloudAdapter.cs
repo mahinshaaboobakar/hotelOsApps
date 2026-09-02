@@ -59,23 +59,23 @@ public sealed class OracleCloudAdapter(IntegrationSettings settings, IOhipQueue 
     /// <inheritdoc />
     /// <remarks>
     /// <para>
-    /// <b>Three hours — `CONN-Q12`, and this is the value that actually
-    /// polls.</b> It said thirty seconds, which is 360 times the interval frame
-    /// 3 draws, against a vendor API that rate-limits. The form's hint was
-    /// corrected first and that was only half the fix: a hint is a placeholder
-    /// and this is the number the loop runs on, so correcting the hint alone
-    /// would have left the load exactly where it was.
+    /// <b>Two tiers, from configuration — `CONN-Q12`, frame 3.</b> Three hours
+    /// ordinarily and fifteen minutes around check-in, in the property's own
+    /// zone. It was a fixed thirty seconds, which is 360 times the interval the
+    /// frame draws against an API that rate-limits.
     /// </para>
     /// <para>
     /// The old reasoning was sound and answered a different question: the queue
     /// is emptied by reading, so a long interval makes a backlog rather than
-    /// saving work. That argues against hours *when there is traffic*, and
-    /// frame 3's answer is the tighter window around check-in rather than a
-    /// permanently short interval — which is step 4's two-tier schedule, read
-    /// from configuration rather than fixed here.
+    /// saving work. That argues for polling harder <i>when there is traffic</i>,
+    /// which is what the tighter window is — not for a permanently short
+    /// interval, which spends a rate limit on empty reads for twenty-two hours
+    /// a day.
     /// </para>
     /// </remarks>
-    public TimeSpan PollInterval => TimeSpan.FromHours(3);
+    public TimeSpan NextPollAfter(
+        IReadOnlyDictionary<string, string> configuration, DateTimeOffset now) =>
+        OhipPollingSchedule.Read(configuration).Wait(settings.Clock, now);
 
     /// <inheritdoc />
     public async Task<IReadOnlyList<PolledPayload>> DrainAsync(

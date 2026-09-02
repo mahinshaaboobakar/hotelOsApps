@@ -57,6 +57,8 @@ import {
   SECRETS,
   SETTINGS,
   TEST,
+  TOGGLES,
+  DEFERRED,
   type Configuration,
   type ConnectionTest,
 } from "./configuration";
@@ -111,6 +113,17 @@ function draw(
       ...setting,
       value: configuration.settings?.[setting.name] ?? "",
     })),
+    // **`on` is the default for a connector that has never been configured.**
+    // Its declared capabilities are what it was installed to supply, so
+    // arriving with everything off would make a working install look broken
+    // until somebody found the switches.
+    toggles: TOGGLES.map((toggle) => ({
+      ...toggle,
+      on: (configuration.settings?.[toggle.name] ?? "on") !== "off",
+    })),
+
+    deferred: DEFERRED,
+
     secrets: SECRETS.map((secret) => ({
       ...secret,
 
