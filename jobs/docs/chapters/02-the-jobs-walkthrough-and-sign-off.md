@@ -1482,6 +1482,64 @@ application inventing one — but **whether ADR 0062 binds an application's own
 tables, or is only a convention there, is worth one line from the architect**
 rather than assumed.
 
+---
+
+## S1.13 · Before any redesign — the interview
+
+**Owner, 2026-09-02:** *"Still you are mirroring the concept from Java —
+redesign the whole concept of these. Ask questions for me, from the Java
+concepts, then design. Keeping the type and only changing string to enum is
+not the design I want."*
+
+**Accepted.** §S1.10 and §S1.11 changed the values inside the reference's
+shape and kept the shape. That is the third time this section has been
+polished rather than rethought, and the pattern is the stream designing
+before understanding what the Java concepts were *for*.
+
+So: **no design here.** Questions only, each grounded in something the Java
+system actually did, so the answers become the ground the redesign stands on.
+The answers are recorded against each question as they arrive.
+
+### A · `workOrderType` — what was it actually for?
+
+| | Question | Answer |
+|---|---|---|
+| **A1** | In daily operation, what did the type **change**? A different screen? A different person? A different SLA? A different report? Or, honestly, nothing — it was just a label? | |
+| **A2** | Who picked it — the front desk, the guest app, the supervisor? And did they pick it correctly, or was it often wrong? | |
+| **A3** | `MAINTENANCE` is a department, and departments were already a field. **What did engineering work need that the others did not** — checklists, parts, inspection, a different close? That need is the real requirement; the type was how it was expressed | |
+| **A4** | Was there ever a job that fit none of the three? What did people do with it? | |
+
+### B · `service` and `WOServicePreference` — what was the list for?
+
+| | Question | Answer |
+|---|---|---|
+| **B1** | Who owned the list — the hotel or Instio? How big was it at a real property — 20 entries, 100, 300? | |
+| **B2** | Was it **one list for guests and staff**, or did the guest app show a different list? | |
+| **B3** | Could the same entry — say "AC" — be raised as a complaint **and** a request **and** maintenance? Or did each service really belong to one type? *(This decides whether type and service are two things or one.)* | |
+| **B4** | The entry carried department + assignee + priority + SLA. **Was that the routing engine?** Did it work? When it failed, how — wrong person, nobody, wrong SLA? | |
+| **B5** | `keywords`, `keywordAssignee` and `sameForAllKeyword` — what was the real scenario they solved? *(The stream's guess: a free-text guest request matched to an entry, and "AC" routed to the AC technician rather than the general engineer. Correct?)* | |
+| **B6** | Did different properties in one company have different lists, and did group-level reporting suffer for it? | |
+| **B7** | `trackMode` — was this the guest-visible progress stages, per service? Did guests use it? | |
+
+### C · What hurt
+
+| | Question | Answer |
+|---|---|---|
+| **C1** | The biggest operational complaint about classification in the Java system — wrong person, wrong SLA, meaningless reports, staff not knowing what to pick, or something else? | |
+| **C2** | What did hotels ask for that it could not do? | |
+| **C3** | What did nobody use? | |
+
+### D · Where the redesign might go — so the owner can steer before it is drawn
+
+| | Question | Answer |
+|---|---|---|
+| **D1** | If a guest or a colleague could say *"the AC in 214 is dead"* and the system worked out the department, the urgency and the person on its own — **would you still want staff to classify anything by hand?** | |
+| **D2** | Do you think of *"what kind of job this is"* and *"what it is about"* as **two things or one**? When you designed them as two fields, was that deliberate or just how it fell out? | |
+| **D3** | Is there a classification you have seen in another product — hotel or otherwise — that you thought was **right**? | |
+
+**S1-D5 and S1-D6 stay open, in interview.** The redesign follows the
+answers.
+
 
 ## Decisions — round 1 close
 
@@ -1491,8 +1549,8 @@ rather than assumed.
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **REDESIGNED — §S1.10.** Five values as an enum, each earning its place by behaving differently: REQUEST · COMPLAINT · FAULT · TASK · INSPECTION. `MAINTENANCE` dropped (it named a department), `category` dropped, `source` kept as a closed list |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **REDESIGNED — §S1.11.** UUID key, stable code, renameable per-language name; one category level; applies-to scope; duration, skill, photo-on-completion, chargeable; aliases. `keywordAssignee`, `sameForAllKeyword`, the stored assignee and `trackMode` all dropped. Entry organization-wide, promise per property |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **IN INTERVIEW — §S1.13.** §S1.10's enum was rejected by the owner as the reference's concept with new values. Questions A1–A4, B3, D1–D3 decide the redesign |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **IN INTERVIEW — §S1.13.** §S1.11 was rejected on the same ground. Questions B1–B7, C1–C3, D1–D3 decide the redesign |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
