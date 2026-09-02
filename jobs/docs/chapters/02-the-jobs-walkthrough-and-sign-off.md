@@ -43,8 +43,8 @@ constitution's order, not a preference.
 
 | # | Section | State | Signed off |
 |---|---|---|---|
-| S1 | The job itself — what a job *is* | **round 1 discussed** — 4 ruled, 4 designs with the owner | — |
-| S2 | Creating a job | queued | — |
+| S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-02 |
+| S2 | Creating a job | **OPEN** | — |
 | S3 | Assigning it | not started | — |
 | S4 | Accept, start, pause, finish | not started | — |
 | S5 | **Escalation** | not started | — |
@@ -75,8 +75,7 @@ project.
 ---
 # S1 · The job itself — what a job *is*
 
-**State: ROUND 1 DISCUSSED — four decisions settled, four sent back for a
-design.** Owner, 2026-09-02.
+**State: SIGNED OFF — owner, 2026-09-02.**
 
 ## What it does
 
@@ -176,6 +175,42 @@ Four rules that follow:
 * Should a job be allowed at building level, or is floor the coarsest
   sensible? (Recommendation: allow it; a generator room or a whole annexe
   block is a real subject.)
+
+### The place types to request — owner approved, 2026-09-02
+
+The kinds of place are **fixed in the platform** — a database CHECK
+constraint built from a constant list, so a hotel cannot add one and a
+property cannot invent one. That is deliberate, and the platform chose text
+with a check rather than a database enum precisely so that adding a kind is
+cheap: *"hotels invent places. A new type is a constraint edit, not a
+migration with a lock in it."*
+
+**What exists today:** building · floor · room · corridor · lobby ·
+restaurant · pool · plant_room · terrace · back_of_house.
+
+**To request of Master Data** — grouped so the ask is one change, not eight:
+
+```text
+guest-facing places      gym · spa · salon · banquet_hall · meeting_room
+                         bar · kids_club · business_centre
+
+outdoor and grounds      garden · beach · sports_court · driveway
+
+service and support      kitchen · laundry_room · store_room · staff_area
+                         parking · stairwell · service_area
+```
+
+Three notes on the list:
+
+* **A lift is not a place, it is an asset.** It has a manufacturer, a serial
+  number and a service history — `masterdata.assets`, sitting *in* a
+  building. Adding it as a location kind would give it two homes.
+* **`plant_room` already covers** generator, boiler and pump rooms; a
+  separate kind for each would fragment the same idea.
+* **The reception desk is in the lobby**, not beside it. `lobby` is enough.
+
+This goes up as one request, alongside the property-code shape rule from
+§S1.3. Neither blocks this round.
 
 ---
 
@@ -671,6 +706,34 @@ somebody remembered to set correctly.
 unplanned repair is a **Fix**, scheduled servicing is a **Fix** whose source
 is a schedule, and neither needs to be excluded from anything.
 
+### The four intents, checked against the field
+
+ITIL — which every service system in the table above implements — settles on
+**four** as well, and three of them line up exactly:
+
+```text
+ITIL                        ours
+Service Request   ────────  Deliver     bring something
+Incident          ────────  Fix         restore it to working
+Problem           ────────  Check       investigate; the output is a finding
+Change            ────────  (not ours)
+                            Prepare     make a place ready for use
+```
+
+**Two deliberate differences, and both are because a hotel is not an IT
+department:**
+
+* **`Change` is dropped.** ITIL's Change is *modify the environment under
+  control* — a release, a firewall rule. A hotel does not raise work orders
+  to change its own configuration.
+* **`Prepare` is added, and it is large.** Making a room ready before an
+  arrival, setting a banquet hall for an event, turning down a suite — this
+  is a substantial share of a hotel's daily work and ITIL has no shape for
+  it. Its "done" test is unlike the others: **ready by a time**, not fixed.
+
+So four either way, and the two that differ differ for a reason that can be
+stated. That is a better sign than matching ITIL exactly would have been.
+
 ### What is deliberately not a type
 
 * **Incident** — an injury, a theft, a fire alarm. Different lifecycle,
@@ -793,6 +856,95 @@ The reference reached for the same need with a `keywords` fuzzy match on the
 service name. This is the honest version of it: the gap is visible, counted,
 and closable, rather than guessed at.
 
+### Checked against the field — owner's instruction, 2026-09-02
+
+The owner asked for the same treatment the depth question got: *is this
+actually a better design, or just a different one — check how modern systems
+manage it.* Checked. The proposal is the mainstream answer, and the check
+produced two refinements it did not have.
+
+#### One list, availability per site — not a list per site
+
+| System | How the catalogue is scoped |
+|---|---|
+| **ServiceNow Service Catalog** | **one catalogue**, and items are made available per location, company or user group by *criteria* — never by duplicating the item |
+| **Jira Service Management** | **request types** live centrally in a project and are exposed through portals |
+| **Freshservice** | one service catalogue, categories, per-item visibility rules |
+| **ITIL itself** | the Service Catalogue is defined as *a single authoritative list*, with a business view and a technical view. **The discipline exists because fragmented lists destroy reporting** |
+| **Hotel systems** — Knowcross, Alice, Quore, hotelkit | ship a standard task list; a property enables and renames. Alice keeps brand-level templates above property lists |
+
+Every one of them: **one list, scoped availability.** Nobody duplicates the
+list per site, and ITIL names the reason out loud — it is the same reason the
+platform's department canon is organization-wide.
+
+#### The entry decides the behaviour — and this is not an invention
+
+| System | The mechanism |
+|---|---|
+| **Jira Service Management** | a customer picks a **Request Type** ("I need a new laptop"); it maps to an **Issue Type** (Service Request) which carries the workflow. **The user-facing noun determines the internal type.** |
+| **ServiceNow** | a Catalog Item carries the flow that runs when it is ordered |
+| **Zendesk** | the ticket **form** decides the fields and the triggers |
+| **Salesforce Field Service** | a **Work Type** carries estimated duration and required skills |
+
+So *"nobody picks Request and then towel; they pick towel"* is exactly
+Atlassian's request-type-to-issue-type mapping, and exactly ServiceNow's
+item-to-flow. **The proposal is the industry's shape, arrived at
+independently.**
+
+#### Two refinements the check produced
+
+**One · aliases on every entry.** The modern front door is a text box or a
+voice, not a category tree. ServiceNow, JSM and Freshservice all carry search
+synonyms on catalogue items for exactly this. So an entry carries its
+**aliases**:
+
+```text
+AC_NOT_COOLING     aliases:  ac · a/c · aircon · air conditioning ·
+                             not cooling · ac not working · room hot
+```
+
+That is what makes *"room 214 ac dead"* resolve to a real entry rather than
+falling into free text — and it is the honest version of the reference's
+`keywords` field, which was reaching for the same thing and used it for fuzzy
+service matching instead.
+
+**Two · duration and SLA are different things, and they split differently.**
+Salesforce Field Service puts **estimated duration** and **required skills**
+on the Work Type — the shared object — and that is right, because *how long
+changing a lightbulb takes* is the same in Kochi and in Goa. But *how fast we
+promise to do it* is a promise a property makes.
+
+```text
+CATALOGUE (shared)     how long the work TAKES      estimated duration
+                       what it NEEDS                skills, parts, a checklist
+POLICY (per property)  how fast we PROMISE          SLA
+                       how important it is here     default priority
+                       who does it here             routing · escalation
+```
+
+That split is sharper than the first draft, and it is what makes planning
+possible later: a shift's capacity is the sum of durations, and no property
+can distort it by editing its own SLA.
+
+### The recommendation, with the evidence behind it
+
+**One organization-wide catalogue · activated per property · renameable for
+display · with the policy per property.** Four independent reasons, and they
+do not depend on each other:
+
+1. **ITIL defines a service catalogue as one authoritative list**, and names
+   fragmentation as the failure it exists to prevent.
+2. **ServiceNow, JSM and Freshservice all scope by availability, never by
+   duplication.**
+3. **The platform has already ruled this exact shape once** — the department
+   canon (ADR 0119, ADR 0116 §4): a group-wide list, activated per property,
+   renameable for display, the code never moving.
+4. **The escape hatch removes the usual objection.** The standard complaint
+   against a central list is *"my hotel needs something yours does not"*.
+   "Something else" answers it: the gap is raised, routed, counted, and
+   promotable into a real entry — so a hotel is never blocked, and the
+   platform learns what it is missing rather than guessing.
+
 ### This still needs an architect's ruling
 
 It puts a new object in Core Administration, and it defines a vocabulary
@@ -837,16 +989,20 @@ anyone needs, and the third of them was never written at all.
 
 | id | Decision | Ruling |
 |---|---|---|
-| **S1-D1** | A job carries `location_id` (any node in Master Data's one tree) and an optional `asset_id` | *design proposed — §S1.1 — awaiting owner* |
+| **S1-D1** | A job carries `location_id` (any node in the one tree) and an optional `asset_id`. The missing place kinds go up as one request | **RULED** (owner, 2026-09-02) — §S1.1 |
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*, and "Maintenance" disappears with both its special cases | *revised design — §S1.5 — awaiting owner. This supersedes the stream's own five-type proposal* |
-| **S1-D6** | One catalogue whose entry carries its **intent**, so the job's type is never chosen separately — the noun to Core Administration, the policy to Jobs, plus an "something else" escape hatch that is counted and promotable | *revised design — §S1.6 — needs an architect ruling* |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **RULED** (owner, 2026-09-02). Checked against ITIL: four either way, `Change` dropped and `Prepare` added, both for stated reasons — §S1.5 |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **RULED by the stream on the owner's instruction** (2026-09-02) after the field check — §S1.6. Still needs an **architect** ruling, because it puts an object in Core Administration |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
-**Sign-off:** _not yet — four designs are with the owner._
+**Sign-off:** **S1 SIGNED OFF — owner, 2026-09-02.** Every decision carries
+a ruling. Two items leave this section as requests to other teams and neither
+blocks: the missing place kinds and a property-code shape rule (Master Data),
+and the catalogue's home (an architect ruling, §S1.6). The HosPilot half of
+§S1.2 is deferred by the owner, not open.
 
 ---
 
@@ -1482,7 +1638,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | 0 of 10 |
+| Sections signed off | **1 of 10** |
 | Page locked | no |
 | Locked on | — |
 
