@@ -93,6 +93,26 @@ const CSS = `
   }
 
   .panel .save:disabled { opacity: 0.6; cursor: default; }
+
+  /*
+   * Frame 3 draws two actions side by side: a secondary Test connection and
+   * the primary Save. The secondary is outlined rather than filled so the
+   * primary stays the one obvious action - a second brand-filled button would
+   * make the row ask which one the operator meant.
+   */
+  .panel .actions { display: flex; gap: 8px; align-items: center; }
+
+  .panel .test {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--color-ink, inherit);
+    border: 1px solid var(--color-line-strong, currentColor);
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .panel .test:disabled { opacity: 0.6; cursor: default; }
 `;
 
 interface Drawn {
@@ -104,6 +124,16 @@ interface Drawn {
     settings: Record<string, string>;
     secrets: Record<string, string>;
   }): void;
+
+  /**
+   * Ask the Hub to try what is stored.
+   *
+   * **Optional, and its absence is the grant.** Someone holding only
+   * `integration.read` gets a form that renders and neither saves nor tests,
+   * and the button is not drawn at all rather than drawn and refused — a
+   * control whose only outcome is a refusal is one somebody presses twice.
+   */
+  onTest?: () => void;
 }
 
 function node<K extends keyof HTMLElementTagNameMap>(
@@ -158,6 +188,7 @@ export function panel(root: HTMLElement) {
   status.dataset["field"] = "status";
 
   let save: HTMLButtonElement | undefined;
+  let test: HTMLButtonElement | undefined;
 
   root.replaceChildren(surface);
 
@@ -178,12 +209,17 @@ export function panel(root: HTMLElement) {
     },
 
     saving(text: string): void {
+      // **Both, because either action is a round trip.** Leaving Test enabled
+      // during a save would let an administrator ask the vendor about a
+      // configuration that is still being written.
       if (save !== undefined) save.disabled = true;
+      if (test !== undefined) test.disabled = true;
       this.status(text, "info");
     },
 
     saved(): void {
       if (save !== undefined) save.disabled = false;
+      if (test !== undefined) test.disabled = false;
     },
 
     form(drawn: Drawn): void {
@@ -201,9 +237,24 @@ export function panel(root: HTMLElement) {
         form.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
       }
 
+      const actions = node("div", "actions");
+
+      if (drawn.onTest !== undefined) {
+        test = node("button", "test", "Test connection");
+
+        // `button`, not `submit`: inside a form the default type is submit, so
+        // an unmarked button would save the configuration on its way to
+        // testing it — and a test that silently writes is not a test.
+        test.type = "button";
+        test.dataset["field"] = "test";
+        test.addEventListener("click", () => drawn.onTest?.());
+        actions.appendChild(test);
+      }
+
       save = node("button", "save", "Save");
       save.type = "submit";
-      form.appendChild(save);
+      actions.appendChild(save);
+      form.appendChild(actions);
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();

@@ -19,8 +19,31 @@
 /** The capability that renders — a permission id, `SHELL-Q34`. */
 export const READ = "integration.read";
 
-/** The capability that submits. */
+/** The capability that submits, and that tests. */
 export const CONFIGURE = "integration.configure";
+
+/**
+ * The method that asks the Hub to try this configuration.
+ *
+ * **On `CONFIGURE`, not `READ`.** A test authenticates somewhere on the
+ * property's behalf and appears in the vendor's logs, so it is an action rather
+ * than an observation — a read-only administrator can see what is configured
+ * and cannot press this.
+ */
+export const TEST = "test";
+
+/**
+ * What a connection test found — `CONN-Q12`.
+ *
+ * Six outcomes rather than a flag: a wrong credential and an unreachable host
+ * are the same red light only if you collapse them, and they send an
+ * administrator to different people.
+ */
+export interface ConnectionTest {
+  readonly outcome: string;
+  readonly detail: string;
+  readonly missing?: readonly string[];
+}
 
 /** One non-secret setting, and how to draw it. */
 export interface Setting {

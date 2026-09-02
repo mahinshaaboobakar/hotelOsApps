@@ -51,7 +51,15 @@
 import type { Activate, CallFailure, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { panel } from "./chrome";
-import { CONFIGURE, READ, SECRETS, SETTINGS, type Configuration } from "./configuration";
+import {
+  CONFIGURE,
+  READ,
+  SECRETS,
+  SETTINGS,
+  TEST,
+  type Configuration,
+  type ConnectionTest,
+} from "./configuration";
 
 /** Whether a failure carries a sentence a person may read — ADR 0041. */
 function isForPeople(kind: CallFailure["kind"]): boolean {
@@ -111,7 +119,50 @@ function draw(
       placeholder: configured.has(secret.name) ? "•••••••• configured" : "Not set",
     })),
     onSubmit: (typed) => save(host, surface, typed),
+
+    // **Always drawn, exactly as Save is** — and that is a consequence of
+    // `SHELL-Q34` rather than a choice here. A module can see its *bound*
+    // (`identity.capabilities`, what the manifest declares it may ever ask
+    // for) and never its *grant*, which is per user and the Kernel's. So the
+    // form cannot know in advance whether this person may test, any more than
+    // it knows whether they may save.
+    //
+    // What makes that acceptable is the refusal being readable: ADR 0041 lets
+    // a `rejected` sentence cross the bridge, so somebody holding only
+    // `integration.read` presses it once and is told which of the two they
+    // hold — rather than getting the fixed "that could not be completed" this
+    // round had to go and fix.
+    onTest: () => test(host, surface),
   });
+}
+
+/**
+ * How a test result is drawn.
+ *
+ * **Only a reached source is good news.** Everything else is either work for
+ * the administrator or a fact about the vendor, and drawing them all in the
+ * same muted ink is the defect `color-bad` was claimed to fix — so the outcome
+ * decides the tone rather than the sentence's wording.
+ */
+function toneFor(outcome: string): "info" | "failed" {
+  return outcome === "reached" || outcome === "notSupported" ? "info" : "failed";
+}
+
+function test(host: HostApi, surface: ReturnType<typeof panel>): void {
+  surface.saving("Testing…");
+
+  void host
+    .call(CONFIGURE, TEST)
+    .then((answer) => {
+      const found = answer as ConnectionTest;
+
+      surface.saved();
+      surface.status(found.detail, toneFor(found.outcome));
+    })
+    .catch((failure: unknown) => {
+      surface.saved();
+      surface.status(sentence(failure, "The connection could not be tested."), "failed");
+    });
 }
 
 function save(
