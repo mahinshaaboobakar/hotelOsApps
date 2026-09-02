@@ -985,8 +985,6 @@ simply follow, so the reason is on the record:
 So: **one column, `property_id`. Not three.** Which is what the owner's
 instinct was reaching for — the reference's three levels are two more than
 anyone needs, and the third of them was never written at all.
----
-
 ## S1.8 · The owner's challenge — "this comes from the Java reference; you just enhanced it"
 
 **Owner, 2026-09-02, on S1-D5 and S1-D6.** The challenge is correct and it is
@@ -1017,6 +1015,7 @@ answers that are not variants of one thing:
 ```text
 DELIVER   a MENU of what the hotel offers
           towel · water · extra pillow · turndown
+
           wants  quantity · sometimes a price · a stock consequence
           home   the offering / inventory model
 
@@ -1095,6 +1094,210 @@ wearing new words"* — and it is not something the stream can invent.
 **Until that list exists, S1-D5 and S1-D6 stay open and S1 is not signed
 off.**
 
+---
+
+## S1.9 · The redesign — Jobs is the exception handler
+
+**Owner, 2026-09-02:** *"for these 2 I designed in Java. You can modify or
+suggest a better design — not a repolish. Refer to other available systems.
+Overall I need a better design for the hotel domain."*
+
+### First, what the stream got wrong — the framing, not the details
+
+Both earlier passes tried to build **a taxonomy of jobs**: what kinds are
+there, and what list do they come from. That is the question the Java system
+asks, so answering it better still answers it.
+
+**The platform had already made that question obsolete and the stream did not
+notice.**
+
+### What real hotel systems actually do — and none of them has a type field
+
+| System | How it divides work |
+|---|---|
+| **Knowcross** | **six separate modules** — Service (guest requests) · Task (housekeeping) · Maintenance · Inspection · Lost & Found · **Glitch** (a service failure needing recovery) |
+| **Quore** | **six separate products** — Work Orders · Housekeeping · Inspections · Cleanings · Lost & Found · Readings (meter readings) |
+| **hotelkit** | four — Tasks · Repairs · Handovers · Checklists |
+| **Alice** | Service requests · Tickets · Checklists · Packages |
+| **HotSOS (Amadeus)** | not a type at all: an **Issue × Location × Action** triple |
+
+**Not one of them models "a work order with a type field."** They split by
+**operational rhythm** — because cleaning 200 rooms daily, servicing a
+chiller quarterly, and fetching a towel in four minutes are not three values
+of one enum. They are three different machines.
+
+### And HotelOS already splits exactly that way
+
+This is the part the stream missed. The platform is not one work-order
+service with a type column — it is **separate installable applications**, and
+the boundaries are already frozen:
+
+```text
+ROOM CARE      room statuses · cleaning · triggered by stay.departed
+               "not every hotel follows instant cleaning" — its own round,
+               its own scenario study, its own policy engine
+                                        (round 48; ADR 0051, ADR 0056)
+
+MAINTENANCE    asset service history · next service due · PPM
+               AND out-of-order state — explicitly NOT Room Care's
+                                        (ADR 0056)
+
+JOBS           ADR 0051's own table:  "what work is being performed"
+```
+
+So the real design question was never *"what types of job are there"*. It is:
+
+> **What is left for Jobs, once Room Care owns the routine and Maintenance
+> owns the planned?**
+
+### The answer, and it is a sharper definition than anything so far
+
+> **Jobs is the hotel's exception handler.**
+>
+> **Room Care owns the routine. Maintenance owns the planned. Jobs owns what
+> nobody planned for** — unplanned, often cross-department, usually with
+> somebody waiting.
+
+Everything follows from that sentence, and several earlier problems simply
+dissolve:
+
+* **"Planned" was never a Jobs concept.** Scheduled servicing is Maintenance;
+  the daily clean is Room Care. The reference needed a `MAINTENANCE` type
+  *and two special cases to exclude it* precisely because it was one
+  application pretending to be three.
+* **A routine inspection is not a Jobs concept either** — that is a checklist
+  run by whoever owns the rhythm. A *one-off* "go and look at 214" is an
+  ordinary job.
+* **A type that means different things depending on how often the work
+  happens is not a type.** That is the tell the stream should have caught two
+  rounds ago.
+
+### The design that follows: a job carries facts, not a class
+
+**There is no `type` field, and no `category`, and `service` stops being a
+required key.** A job carries three independent facts, and every one of them
+is true whether or not anybody picked something from a list.
+
+```text
+1 · WHO IS WAITING          a guest · a colleague · nobody
+                            → drives urgency, communication, and whether
+                              closing requires telling somebody
+
+2 · WHAT MUST BE TRUE AT THE END
+      PROVIDED    they have something they did not have, or an act has
+                  been performed for them      towel · wake-up call · escort
+      WORKING     something functions that did not                    AC · lift
+      READY       a place meets a standard, by a time     hall set for 19:00
+      KNOWN       a fact is established and recorded    lost watch · "go look"
+                            → drives skills, duration and how it is verified
+
+3 · BY WHEN                 at a moment · within a window · as soon as possible
+                            → drives scheduling and the deadline
+```
+
+**Reports are crossings of these, not a type column:**
+
+```text
+"guest requests today"      who-is-waiting = guest
+"faults"                    outcome = WORKING  AND  waiting ≠ guest
+"complaints"                outcome = WORKING  AND  waiting = guest
+"room readiness misses"     outcome = READY    AND  late
+```
+
+Every report the reference's `type` field served is still available — and
+three more that it could not express, because it collapsed *who is waiting*
+into the same field as *what kind of work it is.*
+
+**And the four misfits now fit, which is the test that matters:**
+
+```text
+wake-up call at 06:00     waiting: guest · PROVIDED · at a moment
+escort to the villa       waiting: guest · PROVIDED · as soon as possible
+guest left a watch        waiting: nobody · KNOWN   · as soon as possible
+move guest to 310         waiting: guest · PROVIDED · within a window
+```
+
+`PROVIDED` says *"an act has been performed for them"* rather than *"an item
+was delivered"*, which is the correction the misfits forced. `Deliver` was
+being stretched; `Provided` is the honest word.
+
+### The bigger move: the catalogue stops being a taxonomy and becomes a library
+
+This is the change that is not a repolish.
+
+```text
+BEFORE — in the reference, and in both of the stream's earlier passes
+    the catalogue is LOAD-BEARING
+    no entry  →  a degraded job: "uncatalogued", "not triaged"
+    free text is a fallback, and a slightly embarrassing one
+
+NOW
+    a job is FULLY EXPRESSIBLE WITHOUT ANY CATALOGUE ENTRY
+    it carries who is waiting, what must be true, by when, where, and who
+    the catalogue PRE-FILLS those. It does not define them
+```
+
+**Three consequences, and each one removes a problem the earlier design had:**
+
+1. **Free text becomes first-class**, not a fallback. Somebody says
+   *"mosquito net"* and gets a complete, routable, reportable job — because
+   the fields it needs are the job's own, not the catalogue's.
+2. **The four-way split of the catalogue becomes a non-event.** A menu, a
+   symptom list per asset type, a checklist definition and a readiness
+   standard are then just **four libraries that pre-fill the same job
+   fields**. They can live in four different applications, arrive at four
+   different times, and Jobs does not change when they do.
+3. **The `intent` field disappears entirely** — it existed only to tell one
+   overloaded list apart from itself.
+
+**What the catalogue is still for**, and it is worth having: speed and
+consistency. A picker beats typing, the same words produce the same report
+rows, and a library entry carries the things nobody should re-enter — the
+department that owns it, how long it takes, the skills it needs.
+
+**What it costs, stated honestly:** if everybody free-texts, reports
+fragment. The mitigations are the ones already designed and they survive
+because they were right — the library is offered first, free text is
+**counted**, and a frequent free text is **promotable** into a real entry.
+The difference is that a hotel is never *blocked* by a missing entry, only
+less consistent.
+
+### What this kills
+
+```text
+type · category · service-as-a-required-key      three overlapping fields
+the "uncatalogued, not triaged" degraded state   a job is never degraded
+the intent field                                 no list to tell apart
+"Planned" as a Jobs concept                      Maintenance's and Room Care's
+the MAINTENANCE special cases                    both of them, permanently
+```
+
+### The question this opens, and it is now the largest one in the round
+
+**Where exactly does Jobs end and Room Care and Maintenance begin?** ADR 0051
+gives one line each and it is not enough to build from:
+
+```text
+Maintenance    "what maintenance does it need"
+Jobs           "what work is being performed"
+Room Care      "how is this room type cleaned"
+```
+
+Real cases the line does not yet decide:
+
+| Case | Whose? |
+|---|---|
+| A guest reports the AC is dead | Jobs raises it — but does **Maintenance** own the repair, and does the asset's service history record it? |
+| Housekeeping finds a broken lamp mid-clean | Room Care is in the room; Jobs is where the repair goes |
+| A one-off "deep clean 214 after a spill" | routine cleaning is Room Care's — is a one-off? |
+| Setting a banquet hall for tomorrow | nobody owns Banquets yet |
+| Taking a room out of order | **Maintenance owns the state** (ADR 0056) — Jobs must not set it |
+
+**This is an architect ruling, not the owner's and not the stream's**, and it
+should be asked now rather than discovered during the build. It goes up as
+this round's largest question.
+
+---
 
 ## Decisions — round 1 close
 
@@ -1104,8 +1307,8 @@ off.**
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. Blocked on the owner's real work list — §S1.8 |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and the `intent` field was papering over that seam rather than naming it — §S1.8 |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **Redesigned in §S1.9: there is no type field at all.** Blocked on the owner's real work list to test it — §S1.8, §S1.9 |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and and §S1.9 demotes the catalogue **from a taxonomy to a library**, which makes that split a non-event — §S1.8, §S1.9 |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
@@ -1117,7 +1320,9 @@ quietly corrected: a sign-off is the owner's act, and a page that records one
 that did not happen is worse than a page with an open section.
 
 Six decisions carry rulings — D1, D2, D3, D4, D7, D8. **D5 and D6 are
-reopened** on the owner's challenge; see §S1.8.
+reopened** on the owner's challenge (§S1.8) and **redesigned** in §S1.9,
+which removes the type field and demotes the catalogue to a library. Both
+stay open until the owner's real work list tests them.
 
 ---
 
