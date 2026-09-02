@@ -2,6 +2,7 @@ using HotelOS.GuestOps.Application;
 using HotelOS.GuestOps.Grpc;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.GuestOps.Infrastructure.Platform;
+using Wire = HotelOS.Contracts.Integration.V1;
 using HotelOS.GuestOps.Events;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
@@ -88,13 +89,15 @@ builder.Services.AddGuestOpsApplication();
 // this names handlers rather than subjects: a handler for something the
 // manifest does not declare fails at start-up, because it could never fire.
 //
-// `reservation.fact` is declared and has no handler yet — the Hub's contract
-// needs mapping into `InboundStayFact` first, and that mapper does not exist.
-// A declared subject with no handler is acknowledged and dropped, which is the
-// correct interim: nothing is lost that was ever being applied.
+// Both declared subjects now have handlers. `reservation.fact` carries the
+// Hub's own `RoomStayFact` — the contract is read at the edge by
+// `RoomStayFactMapper` and never restated, so a field DD changes is a compile
+// error in one file.
 builder.Services.AddApplicationEventConsumer(
     natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:4222",
-    declare: events => events.Consume<JobCreated, JobCreatedHandler>("job.created"));
+    declare: events => events
+        .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
+        .Consume<JobCreated, JobCreatedHandler>("job.created"));
 builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration);
 
 builder.Services.AddGrpc(options =>

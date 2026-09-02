@@ -43,6 +43,7 @@ public static class GuestOpsApplicationRegistration
         // DbContext: the host creates a scope per fact so two events never
         // share a unit of work.
         services.AddScoped<Events.JobCreatedHandler>();
+        services.AddScoped<Events.ReservationFactHandler>();
         services.AddScoped<ReconciliationService>();
 
         // The desk's own records — the card, the filing obligation it creates,
