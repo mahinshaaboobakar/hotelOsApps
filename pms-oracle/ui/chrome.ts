@@ -191,6 +191,12 @@ export function panel(root: HTMLElement) {
         drawn.onSubmit({ settings, secrets });
       });
 
+      // **The status is cleared as the form arrives.** It last said "Loading
+      // configuration…", and leaving that under a form that has finished
+      // loading is a screen telling an operator the opposite of what it shows.
+      // A caller with something to say says it after this returns.
+      status.textContent = "";
+
       surface.replaceChildren(form, status);
     },
   };
