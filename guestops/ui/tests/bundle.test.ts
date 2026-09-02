@@ -16,6 +16,15 @@
  * implementation of the host half, the same way `hello-hotel` is a second
  * implementation of the module half.
  *
+ * # Written to the strictest configuration in use
+ *
+ * This suite rides into every application, so it inherits each one's
+ * `tsconfig`. It is therefore written to the strictest bar any of them sets —
+ * today GuestOps's `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` and
+ * `verbatimModuleSyntax`. Writing to the laxest package that happens to compile
+ * it means the next app to adopt the suite is the one that discovers the
+ * problem, which is the wrong person and the wrong moment.
+ *
  * # No skip
  *
  * The bundle is built by this package's own `npm run build`. A missing artifact
@@ -45,7 +54,13 @@ const BUNDLE = resolve(process.cwd(), "module.js");
  */
 function declaredPermissions(): string[] {
   const manifest = readFileSync(resolve(process.cwd(), "../manifest.yaml"), "utf8");
-  return [...manifest.matchAll(/^\s*-\s+id:\s*([a-z0-9_.]+)/gm)].map((match) => match[1]);
+  // `flatMap` with an explicit undefined branch rather than `match[1]!`:
+  // `noUncheckedIndexedAccess` is right that a capture group may be absent, and
+  // the honest answer is that such a line declared no permission. Asserting it
+  // away would silence the compiler about the one case worth handling.
+  return [...manifest.matchAll(/^\s*-\s+id:\s*([a-z0-9_.]+)/gm)].flatMap((match) =>
+    match[1] === undefined ? [] : [match[1]],
+  );
 }
 
 /** The shipped artifact. Absent means `npm run build` has not been run. */
