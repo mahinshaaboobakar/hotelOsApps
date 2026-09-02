@@ -139,13 +139,16 @@ dependencies: []
 # Center hosts it inside Integration Management. That is the design, and
 # `docs/mockups/01-oracle-connector.html` draws it.
 #
-# It is not declared yet because **nothing can host it**. The desktop's module
-# registry composes built-in modules only — `registry.ts`: *"Today it composes
-# built-in modules; when Software Center lands it composes built-in modules
-# **and** installed packages"* — and `kernel-core`'s `validate` refuses a
-# declared `ui:` whose `ui/` payload is absent. Shipping a bundle nothing can
-# render is what hello-hotel called *"the same dishonesty pointing the other
-# way"* when it deleted its own block.
+# It is not declared yet because the payload is not written. **The host now
+# exists** — Software Center's Integration Management renders a verified module
+# through `ModuleFrame`, and the two capabilities a form needs are granted per
+# user and serve real RPCs (`SHELL-Q34`; the Hub's configuration surface landed
+# in `4ad0bfd`). What remains is this package's own `ui/`.
+#
+# `kernel-core`'s `validate` refuses a declared `ui:` whose payload is absent,
+# which is why the block still waits: shipping a declaration with nothing behind
+# it is what hello-hotel called *"the same dishonesty pointing the other way"*
+# when it deleted its own.
 #
 # Architect sequencing ruling, 2026-08-31: backend now, `ui/` when the shell
 # phase lands. The block and the payload arrive together, in one change.
