@@ -2,6 +2,7 @@ using HotelOS.GuestOps.Application;
 using HotelOS.GuestOps.Grpc;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.GuestOps.Infrastructure.Platform;
+using HotelOS.GuestOps.Events;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
 
@@ -81,6 +82,19 @@ builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
     certificateDirectory: builder.Configuration["Platform:CertificateDirectory"]);
 
 builder.Services.AddGuestOpsApplication();
+
+// Receive what the manifest declared — `EVT-Q4`. The Kernel read
+// `events.subscribes` at install and hands the admitted set to this process, so
+// this names handlers rather than subjects: a handler for something the
+// manifest does not declare fails at start-up, because it could never fire.
+//
+// `reservation.fact` is declared and has no handler yet — the Hub's contract
+// needs mapping into `InboundStayFact` first, and that mapper does not exist.
+// A declared subject with no handler is acknowledged and dropped, which is the
+// correct interim: nothing is lost that was ever being applied.
+builder.Services.AddApplicationEventConsumer(
+    natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:4222",
+    declare: events => events.Consume<JobCreated, JobCreatedHandler>("job.created"));
 builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration);
 
 builder.Services.AddGrpc(options =>

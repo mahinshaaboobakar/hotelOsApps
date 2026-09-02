@@ -38,6 +38,11 @@ public static class GuestOpsApplicationRegistration
         // recorded fact until that lands.
         services.AddScoped<StayMatcher>();
         services.AddScoped<InboundFactService>();
+
+        // The event handlers — `EVT-Q4`. Scoped, because each resolves its own
+        // DbContext: the host creates a scope per fact so two events never
+        // share a unit of work.
+        services.AddScoped<Events.JobCreatedHandler>();
         services.AddScoped<ReconciliationService>();
 
         // The desk's own records — the card, the filing obligation it creates,
