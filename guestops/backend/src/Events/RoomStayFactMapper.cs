@@ -212,12 +212,25 @@ public static class RoomStayFactMapper
     /// field on the inbound fact, which is a change to that record and its
     /// rules, not to this mapper.
     /// </para>
+    /// <para>
+    /// <b>The wire half of that is now done — <c>CONN-Q12</c>, Stream DD.</b>
+    /// The four are no longer flat fields 16-19: they are
+    /// <c>RoomStayFact.commercial_segment</c>, a <c>CommercialSegment</c>
+    /// message with its own rules — every value the source's own code carried
+    /// verbatim, and empty meaning "not sent" rather than "none". They are
+    /// deliberately <i>not</i> on <c>CommercialTerms</c>, which is what the stay
+    /// was sold on. This mapper is otherwise untouched: carrying the segment
+    /// onto <c>StaySource</c> is still this domain's, and still not this
+    /// method's.
+    /// </para>
     /// </remarks>
     private static CommercialTerms? Terms(Wire.RoomStayFact fact)
     {
         var terms = fact.CommercialTerms;
 
-        if (terms is null && fact.TotalAmount is null && string.IsNullOrEmpty(fact.Source))
+        if (terms is null
+            && fact.TotalAmount is null
+            && string.IsNullOrEmpty(fact.CommercialSegment?.Source))
         {
             return null;
         }
