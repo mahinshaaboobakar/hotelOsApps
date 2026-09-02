@@ -55,6 +55,7 @@ import {
   CONFIGURE,
   READ,
   SECRETS,
+  ENABLE,
   SETTINGS,
   TEST,
   TOGGLES,
@@ -184,6 +185,20 @@ function test(host: HostApi, surface: ReturnType<typeof panel>): void {
     });
 }
 
+/**
+ * Frame 3's one action, which is three calls and has to be.
+ *
+ * **The platform refuses to enable a connector that has not proved it can
+ * reach its source**, and that refusal is the point rather than an obstacle: a
+ * connector nobody tested, put into the path of real reservations, is what it
+ * exists to prevent. So one press does the whole sequence — store the
+ * configuration, try it against the source, and turn it on only if the source
+ * answered.
+ *
+ * A test that does not reach stops there and says why. The configuration is
+ * still saved, which is the honest half-outcome: somebody who mistyped a
+ * password should not lose the endpoint they got right.
+ */
 function save(
   host: HostApi,
   surface: ReturnType<typeof panel>,
@@ -199,10 +214,38 @@ function save(
       // which is the only honest thing a form can show about a value it cannot
       // read — and it is what keeps a typed secret out of the DOM afterwards.
       draw(host, surface, answer as Configuration);
-      surface.status("Saved.", "info");
+
+      return enable(host, surface);
     })
     .catch((failure: unknown) => {
       surface.saved();
       surface.status(sentence(failure, "The configuration could not be saved."), "failed");
     });
+}
+
+/**
+ * Test, and turn it on if the source answered.
+ *
+ * Split from [`save`] because it is a different sentence to an operator, not
+ * because it is a different act: the button says "Save & enable" and this is
+ * the "& enable".
+ */
+async function enable(host: HostApi, surface: ReturnType<typeof panel>): Promise<void> {
+  surface.saving("Testing…");
+
+  const found = (await host.call(CONFIGURE, TEST)) as ConnectionTest;
+
+  if (found.outcome !== "reached") {
+    // Saved but not enabled, and told which. The platform would refuse the
+    // enable anyway; saying so here means an operator reads one sentence
+    // instead of a success followed by a refusal.
+    surface.saved();
+    surface.status(`Saved, not enabled — ${found.detail}`, toneFor(found.outcome));
+    return;
+  }
+
+  await host.call(CONFIGURE, ENABLE);
+
+  surface.saved();
+  surface.status("Saved, tested and enabled.", "info");
 }

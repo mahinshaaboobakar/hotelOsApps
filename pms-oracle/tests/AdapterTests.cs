@@ -36,7 +36,7 @@ public sealed class AdapterTests
             ["oracle-cloud", "oracle-onpremise", "oracle-web"],
             new string[]
             {
-                new OracleCloudAdapter(Cloud, new NoQueue()).IntegrationId,
+                new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient()).IntegrationId,
                 new OracleOnSiteAdapter(OnPremise).IntegrationId,
                 new OracleOnSiteAdapter(Web).IntegrationId,
             });
@@ -48,8 +48,8 @@ public sealed class AdapterTests
         // A type test, which is what makes "does this poll?" answerable without
         // calling it — the reason the seams are three interfaces rather than
         // one with methods most implementers throw from.
-        Assert.IsAssignableFrom<IPollingConnector>(new OracleCloudAdapter(Cloud, new NoQueue()));
-        Assert.IsNotAssignableFrom<IJoiningConnector>(new OracleCloudAdapter(Cloud, new NoQueue()));
+        Assert.IsAssignableFrom<IPollingConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient()));
+        Assert.IsNotAssignableFrom<IJoiningConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient()));
 
         Assert.IsAssignableFrom<IJoiningConnector>(new OracleOnSiteAdapter(OnPremise));
         Assert.IsNotAssignableFrom<IPollingConnector>(new OracleOnSiteAdapter(OnPremise));
@@ -90,7 +90,7 @@ public sealed class AdapterTests
     [Fact]
     public void The_cloud_flavour_keys_a_notification_on_its_own_event_id()
     {
-        var adapter = new OracleCloudAdapter(Cloud, new NoQueue());
+        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient());
         var body = Bytes("""{"eventId":"evt-1","moduleName":"Reservation"}""");
 
         Assert.Equal(
@@ -101,7 +101,7 @@ public sealed class AdapterTests
     [Fact]
     public void A_notification_with_no_id_gets_a_key_that_cannot_collide()
     {
-        var adapter = new OracleCloudAdapter(Cloud, new NoQueue());
+        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient());
         var body = Bytes("""{"moduleName":"Reservation"}""");
 
         var first = adapter.DedupeKey(body, OracleCloudAdapter.NotificationPayload);
@@ -153,7 +153,7 @@ public sealed class AdapterTests
     [Fact]
     public void A_business_event_notification_produces_no_fact_and_is_not_a_failure()
     {
-        var result = new OracleCloudAdapter(Cloud, new NoQueue())
+        var result = new OracleCloudAdapter(Cloud, new NoQueue(), new HttpClient())
             .Normalise(
                 Bytes("""{"eventId":"evt-1","moduleName":"Reservation"}"""),
                 OracleCloudAdapter.NotificationPayload);

@@ -32,7 +32,10 @@ namespace PmsOracle.Adapters;
 /// store open on messages that are already complete.
 /// </para>
 /// </remarks>
-public sealed class OracleCloudAdapter(IntegrationSettings settings, IOhipQueue queue)
+public sealed class OracleCloudAdapter(
+    IntegrationSettings settings,
+    IOhipQueue queue,
+    HttpClient http)
     : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
     /// <summary>A reservation as OHIP returns it.</summary>
@@ -84,39 +87,47 @@ public sealed class OracleCloudAdapter(IntegrationSettings settings, IOhipQueue 
 
     /// <inheritdoc />
     /// <remarks>
+    /// Exactly the set <see cref="OhipCredentials"/> needs for a password
+    /// grant, and no more. The Token Vault prefix is shared with the ingress,
+    /// whose shared secret has no business reaching an outbound dial.
+    /// </remarks>
+    public IReadOnlyList<string> RequiredSecrets => OhipCredentials.SecretNames;
+
+    /// <inheritdoc />
+    /// <remarks>
     /// <para>
-    /// <b>Completeness, which is the failure that actually happens.</b> A
-    /// half-filled form is answered here, while somebody is still looking at
-    /// the screen, instead of as a 401 at the next poll with nobody watching.
-    /// The missing names come from <see cref="OhipCredentials.MissingFrom"/> —
-    /// the same list a credential read builds, so the test and the poll cannot
-    /// disagree about what is absent.
+    /// <b>Completeness first, because it is the failure that actually
+    /// happens.</b> A half-filled form is answered here, while somebody is
+    /// still looking at the screen, instead of as a 401 at the next poll with
+    /// nobody watching — and it is answered without dialling anyone, which
+    /// matters because an incomplete set could not authenticate anyway.
     /// </para>
     /// <para>
-    /// <b>Reachability is not answered, and saying so is the honest outcome.</b>
-    /// Reaching OHIP means a password grant, which means credential *values*,
-    /// and nothing in the Hub reads a connector credential back out of the
-    /// Token Vault — <c>IConnectorSecretWriter</c> has no read method by
-    /// design. Opening one as a side effect of a button is a decision with a
-    /// ruling owed, not an implementation detail. So a complete configuration
-    /// answers <c>NOT_SUPPORTED</c> with a sentence that says which half was
-    /// checked, rather than a green light that tested nothing.
+    /// <b>Then a real token request</b> — the smallest OHIP call that proves
+    /// the whole set at once, and the one call with no side effect. The queue
+    /// is emptied by reading, so a test that drained it would discard a hotel's
+    /// changes in order to prove it could reach them.
+    /// </para>
+    /// <para>
+    /// <b>It runs through the credential path the poller will use</b>, which is
+    /// what makes the answer worth anything: a green result means what a
+    /// successful poll would mean, rather than that a separate test path
+    /// happened to work.
     /// </para>
     /// </remarks>
-    public Task<ConnectionTest> TestAsync(
+    public async Task<ConnectionTest> TestAsync(
         IReadOnlyDictionary<string, string> configuration,
-        IReadOnlyList<string> configuredSecrets,
+        IReadOnlyDictionary<string, string> secrets,
         CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
+        var reading = OhipCredentials.Read(configuration, secrets);
 
-        var missing = OhipCredentials.MissingFrom(configuration, configuredSecrets);
+        if (!reading.TryGet(out var credentials))
+        {
+            return ConnectionTest.Incomplete(reading.Missing);
+        }
 
-        return Task.FromResult(missing.Count > 0
-            ? ConnectionTest.Incomplete(missing)
-            : ConnectionTest.NotSupported(
-                "Every credential is set. Reaching OHIP to check them needs the "
-                + "polling transport, which is not built yet."));
+        return await OhipTokenAttempt.TryAsync(http, credentials, cancellationToken);
     }
 
     /// <inheritdoc />

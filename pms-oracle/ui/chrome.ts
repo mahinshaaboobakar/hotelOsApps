@@ -337,7 +337,7 @@ export function panel(root: HTMLElement) {
         actions.appendChild(test);
       }
 
-      save = node("button", "save", "Save");
+      save = node("button", "save", "Save & enable");
       save.type = "submit";
       actions.appendChild(save);
       form.appendChild(actions);

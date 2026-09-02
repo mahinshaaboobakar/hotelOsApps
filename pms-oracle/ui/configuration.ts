@@ -32,6 +32,9 @@ export const CONFIGURE = "integration.configure";
  */
 export const TEST = "test";
 
+/** The method that turns the connector on — frame 3's second half. */
+export const ENABLE = "enable";
+
 /**
  * What a connection test found — `CONN-Q12`.
  *
