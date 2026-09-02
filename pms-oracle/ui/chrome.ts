@@ -115,6 +115,16 @@ const CSS = `
   .panel .row .name { flex: 1; }
 
   /*
+   * A value this form shows and cannot change. Drawn as text rather than as a
+   * disabled input: a greyed-out box invites somebody to look for the
+   * permission that would unlock it, and there is none - the field belongs to
+   * Core Administration.
+   */
+  .panel .locked { display: flex; flex-direction: column; gap: 4px; }
+  .panel .locked .value { color: var(--color-ink-muted, inherit); font-size: 13px; }
+  .panel .locked .source { color: var(--color-ink-faint, inherit); font-size: 11px; }
+
+  /*
    * A capability that does not exist yet, drawn as absent rather than as a
    * control that lies. ADR 0128 s4 rules v1 inbound-only, so write-back has
    * nothing behind it - and a disabled checkbox invites somebody to look for
@@ -152,6 +162,9 @@ interface Drawn {
   readonly secrets: readonly (Secret & { placeholder: string })[];
   readonly toggles: readonly (Toggle & { on: boolean })[];
   readonly deferred: readonly Toggle[];
+
+  /** The property's zone, drawn locked. Absent when the platform has none. */
+  readonly timeZone?: string;
   onSubmit(typed: {
     settings: Record<string, string>;
     secrets: Record<string, string>;
@@ -267,6 +280,19 @@ export function panel(root: HTMLElement) {
 
       for (const secret of drawn.secrets) {
         form.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
+      }
+
+      if (drawn.timeZone !== undefined && drawn.timeZone !== "") {
+        const locked = node("div", "locked");
+        locked.dataset["field"] = "propertyTimeZone";
+
+        locked.appendChild(node("span", "label", "Time zone"));
+        locked.appendChild(node("span", "value", drawn.timeZone));
+        locked.appendChild(
+          node("span", "source", "From Core Administration · Property Registration"),
+        );
+
+        form.appendChild(locked);
       }
 
       const scope = node("div", "scope");

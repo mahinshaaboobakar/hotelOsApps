@@ -124,6 +124,12 @@ function draw(
 
     deferred: DEFERRED,
 
+    // **Drawn only when the platform actually knows it.** An empty zone means
+    // the Hub could not find the property, and a field showing nothing under a
+    // "Time zone" label reads as a configuration somebody forgot rather than
+    // as a platform that cannot answer.
+    timeZone: configuration.propertyTimeZone,
+
     secrets: SECRETS.map((secret) => ({
       ...secret,
 

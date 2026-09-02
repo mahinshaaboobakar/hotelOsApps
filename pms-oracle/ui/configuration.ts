@@ -70,6 +70,16 @@ export interface Configuration {
   readonly propertyId: string;
   readonly settings?: Readonly<Record<string, string>>;
   readonly configuredSecrets?: readonly string[];
+
+  /**
+   * The property's IANA zone — read-only, and there is nowhere to send it back.
+   *
+   * Frame 3 draws it locked because it is the PROPERTY's, not the
+   * integration's: Core Administration configures it, and this connector's
+   * tighter polling window is expressed in it. The submit message has no such
+   * field, so the lock is the contract's rather than this form's discipline.
+   */
+  readonly propertyTimeZone?: string;
   readonly updatedAt?: string;
 }
 
