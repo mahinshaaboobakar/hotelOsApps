@@ -1660,6 +1660,113 @@ Next morning:
 
 No type was picked at any point. Every number a manager wants exists.
 
+### How the concept is kept — the data, owner's question 2026-09-03
+
+**Owner:** *"I liked this concept. On resolve, ask for the resolution list
+based on the symptom, plus a plain text box. In future we predict an AC needs
+replacing when the same symptom and the same resolution recur. My doubt is
+how we keep this concept."*
+
+**Answer: the vocabulary lives in the catalogue; the job stores three ids.**
+Everything that can be renamed, reordered or extended lives in the
+catalogue. Everything that must never change lives on the job.
+
+```text
+THE CATALOGUE — the vocabulary, editable, group-wide
+
+  issue            id · code AC · name {en,…} · department ENG ·
+                   guest_requestable · applies_to (room | public area |
+                   asset_type HVAC) · standard_resolution_minutes · active
+
+  symptom          id · issue_id → AC · code NOT_COOLING · name · aliases · active
+
+  resolution       id · code GAS_RECHARGED · name
+                   issue_id     → AC        (null = universal: "no fault found",
+                                              "referred to vendor", "other")
+                   symptom_id   → optional  (null = every symptom of that issue)
+
+THE JOB — three ids, stamped once, never derived
+
+  issue_id         → AC
+  symptom_id       → not cooling
+  asset_id         → 214-AC            (Master Data; when the issue is about a thing)
+  location_id      → room 214
+  …
+  resolution_id    → gas recharged     (null until resolved)
+  resolution_note  free text           the plain text box — always available
+  resolved_at · resolved_by
+```
+
+**Ids, never names.** Rename "AC" to "Air Conditioning", reorder the
+symptoms, retire a resolution — every job ever raised still points at the
+same thing. That is the reference's worst defect (§S1.11) not recurring.
+
+### On resolve — what the technician sees
+
+```text
+Resolve KOC-ENG-441   AC › not cooling
+
+  ( ) filter cleaned          ← resolutions for AC, symptom "not cooling" first
+  ( ) gas recharged
+  ( ) thermostat replaced
+  ( ) unit replaced
+  ( ) no fault found          ← universal
+  ( ) referred to vendor      ← universal
+  ( ) other                   ← universal; makes the note MANDATORY
+
+  Note  [                                          ]   ← always there
+```
+
+Two rules:
+
+* **The list is per issue, filtered by symptom.** A resolution mapped to a
+  symptom shows first; one mapped only to the issue shows after; universal
+  ones last. One table, no duplication.
+* **"Other" is counted.** A note under "other" that appears often is promoted
+  into a real resolution — the same loop as an uncatalogued issue. The list
+  grows from what technicians actually type, not from what somebody guessed
+  in a workshop.
+
+### The prediction — a query, not a model
+
+```sql
+SELECT asset_id, symptom_id, resolution_id, count(*)
+FROM   jobs.jobs
+WHERE  resolved_at > now() - interval '12 months'
+GROUP  BY asset_id, symptom_id, resolution_id
+HAVING count(*) >= 3
+```
+
+*"214-AC · not cooling · gas recharged · 3 times in 12 months"* is a row of
+that result. It exists on day one because the three ids exist on day one.
+
+Later, a small **recurrence rule** table makes it a recommendation rather
+than a report:
+
+```text
+issue AC · symptom not cooling · resolution gas recharged · 3 in 12 months
+      → "replacement candidate"
+issue Plumbing · any symptom · any resolution · 5 in 6 months
+      → "inspect the riser"
+```
+
+That table is Maintenance's when Maintenance exists; until then it is a Jobs
+report. Nothing on the job changes either way.
+
+### The asset — what makes the prediction about a *unit* and not a room
+
+The recurrence is only as good as `asset_id`. So:
+
+* When an issue's `applies_to` is an asset type and the location holds
+  **exactly one** asset of that type, it is attached automatically. Room 214
+  has one AC unit; "AC not cooling in 214" gets `asset_id = 214-AC` without
+  anyone choosing.
+* **Several** of that type in the location → the technician picks at
+  resolve time (a plant room with four pumps).
+* **None registered** → the job carries the location only, and the
+  recurrence works per location — weaker, still useful, and it tells
+  Maintenance which assets to register.
+
 ### Against the reference, in one table
 
 | Reference concept | Here |
