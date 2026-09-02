@@ -117,7 +117,7 @@ no rule separating them.
 | **S1-D1** | What a job is *about* | **Sent back for a design** — room-or-asset is too narrow; public areas, pools and the rest are all subjects. See §S1.1 |
 | **S1-D2** | One subject per job, and how jobs relate | **RULED: one subject, one job — and TWO relationships, not one.** A **group** for peers that go together (water, then a towel), and **parent ▸ children** for work made of steps, where the parent cannot close until every child does, children run parallel or sequential by step number, and each child is a full job with its own department, assignee and SLA. See §S1.2 |
 | **S1-D3** | Job number | **RULED: `<PropertyCode>-<Dept>-<Number>`**, the number shared across departments at the property. See §S1.3 |
-| **S1-D4** | Priority levels | **RULED: Emergency · High · Normal · Low, plus Not triaged.** How it is set automatically **sent back for a design** — see §S1.4 |
+| **S1-D4** | Priority levels, and how it is set | **RULED in full** (owner, 2026-09-02): Emergency · High · Normal · Low · Not triaged, decided by a person's choice → the guest flow → the catalogue default → Not triaged. §S1.4 |
 | **S1-D5** | Job types | **Sent back for a design** — see §S1.5 |
 | **S1-D6** | Who owns the service list | **Sent back for a design** — see §S1.6 |
 | **S1-D7** | Drop `category` | **RULED: dropped.** |
@@ -294,7 +294,12 @@ all while three steps each sit just inside their limits.
    steps in the same order, to the same departments. This is where the value
    is operationally, and the reference has nothing like it.
 
-### Part 3 · When HosPilot plans the children — owner, 2026-09-02
+### Part 3 · When HosPilot plans the children — **DEFERRED**, owner 2026-09-02
+
+> **Deferred, not dropped.** The owner set this aside for now. It is kept here
+> because the model must not preclude it, and because it is the strongest
+> argument for two things this round decides anyway: **templates** and
+> **children being full jobs**. Nothing is built for it in this round.
 
 The owner's case: somebody tells the AI *"room 214 AC dead"*, and it should
 **create the parent, check whether a guest is in the room, and plan the
@@ -457,183 +462,250 @@ Three rules:
 
 ---
 
-## S1.4 · How priority is set automatically — the design
+## S1.4 · How priority is set — RULED, owner 2026-09-02
 
-Levels ruled: **Emergency · High · Normal · Low**, plus **Not triaged**.
+**Levels:** Emergency · High · Normal · Low, plus **Not triaged**.
 
-Priority is decided by four layers, **first match wins**, and every job
-records *which layer decided it* — so *"why is this Emergency?"* always has
-an answer.
+**How it is decided** — the owner's chain, written out:
 
 ```text
-1  the person chose one          they picked it on the form        → use it
-2  a property rule matched       "complaint + occupied room"       → use it, name the rule
-3  the service's default         the catalogue says AC = High      → use it
-4  nothing matched               → NOT TRIAGED, and that is a real state
-                                   a supervisor can filter for it
+1  a person chose one                         → that wins, and is recorded as manual
+2  the guest flow decides it                  → needs PMS or GuestOps installed
+3  the service's own default                  → always available
+4  nothing matched                            → NOT TRIAGED, a real state
 ```
 
-**Layer 2 is the useful one.** A rule is *conditions → priority*, built from
-a **fixed, small set of conditions** — not a general expression language.
-(The reference shipped a general rules engine with conditions, operators and
-a join-by field; it has no callers, its validator returns `true` under a
-`TODO`, and it ignores the join-by. A closed condition set is what makes
-rules reviewable.)
+Where a property has **no PMS and no GuestOps**, layer 2 never fires and the
+chain is exactly what the owner described: *a person chose it, else the
+service default, else not triaged.* Nothing breaks and nothing waits — the
+absent-neighbour rule (ADR 0116 §5) doing its job.
 
-The conditions worth having:
+**Every job records which layer decided it**, so *"why is this Emergency?"*
+always has an answer.
 
-| Condition | Comes from | Note |
+### Layer 2 — what "the flow" actually tells us
+
+This is the layer worth building, and it is the one thing the reference could
+never do. The room's place in the guest cycle changes what a fault *means*:
+
+| The room is… | What it means | Effect |
 |---|---|---|
-| job type | the job | Complaint / Request / Fault / Planned |
-| service | the job | AC · Plumbing · Towel · WiFi |
-| place kind | the location tree | guest room · public area · back of house |
-| **is the room occupied right now** | Context | **the single most valuable one in a hotel** |
-| is the guest a VIP | Context / GuestOps | if GuestOps is not installed the condition simply never matches — it never blocks the flow |
-| time of day / business day | the property's calendar | night rules differ |
-| asset criticality | Maintenance, when installed | same absence rule |
+| **Occupied, guest in house** | somebody is affected right now | raise it |
+| **Arriving today, still vacant** | it must be right before check-in | raise it, and **the deadline is the arrival time**, not a fixed SLA |
+| **Due out today** | the guest is leaving in hours | lower — unless the guest complained, and then it is not lower at all |
+| **Vacant, nothing booked** | nobody is affected | normal or low |
+| **Out of order already** | unsellable either way | planned work, not urgent work |
 
-Rules a hotel would actually write, in order:
+Two things fall out of that table which the reference cannot express:
 
-```text
-service is fire · lift-entrapment · gas · flood      →  EMERGENCY   always
-type = Complaint  AND  guest room  AND  occupied     →  HIGH
-   ... and service is AC or Plumbing                 →  EMERGENCY
-type = Request    AND  guest room  AND  occupied     →  NORMAL
-place is back of house                               →  LOW
-```
+* **A deadline can come from the flow, not from a fixed SLA.** *"AC in 214,
+  arrival at 14:00"* is due at 14:00 — not in 45 minutes because the
+  catalogue says 45 minutes.
+* **A complaint from a departing guest is still a complaint.** Layer 2 lowers
+  priority for a due-out room, and a guest actually complaining overrides
+  that — because the guest is standing there.
 
-Three rules about the rules:
+**Two rules about the rules:**
 
-1. **A human override always wins and always sticks.** Nothing re-runs and
-   quietly undoes it. The override records who and why.
-2. **Priority does not drift upward as a deadline approaches.** That is
-   escalation's job, and mixing the two is precisely how the reference ended
-   up with an `ESCALATED` value in its *status* field. Priority says how
-   important this is; escalation says who to wake up.
-3. **A rule that depends on an absent application never fires and never
-   fails.** No GuestOps means no occupancy condition, which means the next
-   rule is tried. (ADR 0116 §5: *absent is not blocking*.)
-
-**Open for the owner:** is "occupied room" available to us? It depends on
-GuestOps or the PMS connector being installed. If a property runs Jobs alone,
-the occupancy condition is dead and the rule set has to work without it.
+1. **A human override always wins and always sticks.** Nothing re-runs later
+   and quietly undoes it. Who changed it, and why, is recorded.
+2. **Priority never drifts upward as a deadline approaches.** That is
+   escalation's job. Mixing the two is exactly how the reference ended up
+   with `ESCALATED` sitting inside its *status* field.
 
 ---
 
-## S1.5 · Job types — the design
+## S1.5 · What kind of job it is — a better design than the reference's
 
-**The test for what belongs here:** a type is not *where it came from* (that
-is `source`) and not *what it is about* (that is `service`). A type is
-**why the job exists and what "done" means**.
+**The owner's direction, 2026-09-02:** *type and service are the Java
+system's concepts; propose something better if there is one.* There is.
 
-Applying that test gives five, not three:
+### What is actually wrong with `workOrderType`
 
-| Type | Why it exists | "Done" means | Clock |
-|---|---|---|---|
-| **Complaint** | something is wrong **and someone is affected** | fixed **and the affected person told** | shortest |
-| **Request** | someone wants something brought or done | delivered | short |
-| **Fault** | something is broken and nobody has complained yet | repaired | medium |
-| **Planned** | scheduled or preventive work | performed and recorded | by its schedule |
-| **Inspection** | go and look; the output is a finding, not a fix | checklist completed | by its schedule |
+The reference's type field is doing **three unrelated jobs at once**:
 
-**Why Complaint and Fault are separate**, when the repair may be identical: a
-complaint is not finished when the tap stops dripping — it is finished when
-somebody tells the guest. That closing step exists on one and not the other,
-and hotels feel the difference sharply. Collapsing them is how a hotel ends
-up with fixed taps and angry guests.
+```text
+1  gating features        a checklist is allowed only if type = MAINTENANCE
+2  gating escalation      escalation is skipped if type = MAINTENANCE
+3  classifying reports    "how many complaints this month"
+```
 
-**Why "Maintenance" is not a type.** The reference has one, and it then needs
-a special case at the top of the escalation engine to exclude it, and another
-in the checklist validator to permit only it. That is the smell: "Maintenance"
-was doing the work of two types — unplanned **Fault** and scheduled
-**Planned** — which have different deadlines and different escalation.
+Three different questions wearing one field. That is why it needs a special
+case at the top of the escalation engine and another in the checklist
+validator — and why adding a fourth type would mean finding every place the
+third one is named.
 
-**What is deliberately not a type:**
+### The better cut: **what will make this finished?**
+
+A type should answer exactly one question — *what does "done" mean?* — and
+nothing else. That gives **four**:
+
+| Intent | The work is | Done when |
+|---|---|---|
+| **Deliver** | bring something, or perform a small service | it has been delivered |
+| **Fix** | restore something to working order | it works again |
+| **Check** | go and assess — the output is a **finding**, not a repair | the assessment is recorded |
+| **Prepare** | make a place ready for use | it is ready, before the time it is needed |
+
+### And the thing my own earlier proposal got wrong
+
+Last round the stream proposed five, separating **Complaint** from **Fault**
+— the same repair, but a complaint is not finished until somebody tells the
+guest. That distinction is real. **It is not a type.**
+
+*"Is somebody waiting for an answer"* is a **fact about the job** — whether
+it has a requester — not a kind of work. So:
+
+```text
+a Fix with a guest requester      = what the reference calls a Complaint
+a Fix with no requester           = what it calls a Fault
+a Deliver with a guest requester  = a Request
+anything raised by a schedule     = Planned  (that is the SOURCE, not the type)
+a Check                           = an Inspection
+```
+
+**Every one of the reference's five is expressible, and none of them needs
+its own type.** The closing rule — *tell the person who asked* — comes from
+**there being a requester**, which is testable, rather than from a type
+somebody remembered to set correctly.
+
+**"Maintenance" disappears entirely**, and with it both special cases: an
+unplanned repair is a **Fix**, scheduled servicing is a **Fix** whose source
+is a schedule, and neither needs to be excluded from anything.
+
+### What is deliberately not a type
 
 * **Incident** — an injury, a theft, a fire alarm. Different lifecycle,
-  different confidentiality, a legal record, and often no repair at all. An
-  incident *causes* jobs; it is not one. That belongs to Security.
-* **Guest / Staff** — that is `source`, and it is already a separate field.
+  different confidentiality, a legal record, often no repair at all. An
+  incident *causes* jobs; it is not one. Security's, when that application
+  exists.
+* **Guest / Staff / PMS / Scheduled** — that is `source`, already its own
+  field.
 
-**Open for the owner:**
+### The recommendation that follows
 
-* Is five the right set, and is **Fault** worth separating from **Complaint**
-  for your operation?
-* **Inspection**: the reference calls out to a separate checklist service for
-  this and the call is commented out. Is inspection Jobs' work, or a separate
-  application that raises Jobs when it finds something?
-* Is the type list fixed in the product, or may a hotel add one? (Strong
-  recommendation: **fixed** — every type needs behaviour written for it, and a
-  type nobody wrote behaviour for is a type that silently does nothing. That
-  is exactly what happened to `DEVICE` in the reference.)
+**The type list is fixed in the product, not hotel-editable.** Every intent
+needs behaviour written for it, and an intent nobody wrote behaviour for is
+one that silently does nothing — which is precisely what happened to
+`DEVICE` in the reference.
 
 ---
 
-## S1.6 · Who owns the service list — the design
+## S1.6 · The catalogue — a better design than the reference's
 
-The list: *AC · Plumbing · WiFi · Towel · Water · Turndown · Lift · Laundry
-pickup …* — what a job can be **about**.
+**The owner's direction, 2026-09-02:** same as S1.5 — propose something
+better. There is, and it makes S1.5 simpler rather than adding to it.
 
-**The reference's mistake, stated plainly:** its catalogue entry is *also*
-the routing policy. One document holds the service's name **and** its
-department, its default assignee, its SLA, its priority, its icon, its
-keywords and its tracking mode. So the vocabulary and the behaviour cannot be
-owned separately, and Room Care reading the vocabulary would inherit Jobs'
-behaviour.
+### What is actually wrong with `WOServicePreference`
 
-**The design: split the noun from the policy.**
+Two faults, and the second is the interesting one.
+
+**One · the entry is also the policy.** A single document holds the service's
+name **and** its department, its default assignee, its SLA, its priority, its
+keywords, its icon and its tracking mode. So the *vocabulary* — which Room
+Care, Maintenance and GuestOps all need — cannot be shared without also
+sharing Jobs' *behaviour*.
+
+**Two · one list is being asked to be two different things.**
 
 ```text
-THE CATALOGUE — what can be asked for            shared, Core Administration
+a MENU          towel · water · turndown · extra pillow
+                something a person asks for, and somebody brings
+
+a SYMPTOM LIST  AC not cooling · tap leaking · lift noisy
+                something that is wrong, points at a kind of equipment,
+                and has to be diagnosed before it is fixed
+```
+
+A menu item has a quantity and a delivery. A symptom points at an asset type
+and needs a diagnosis. Holding both in one shape is why the reference's entry
+has so many fields that are empty most of the time.
+
+### The better design: one catalogue, and the entry carries its intent
+
+Rather than a menu and a symptom list — or one shapeless list — **every entry
+declares which of S1.5's four intents it is.** That single field is what lets
+one list serve both purposes without either being bent.
+
+```text
+code                 TOWEL              AC_NOT_COOLING
+name                 Extra towel        AC not cooling
+INTENT               Deliver            Fix
+owning department    HK                 ENG
+guest may request    yes                yes
+targets              —                  asset type: HVAC
+```
+
+**And then the job's type is not chosen at all — it comes with the entry.**
+
+That is the real gain. Nobody picks *"Request"* and then *"towel"*; they pick
+**towel**, and the system knows it is a Deliver, owned by Housekeeping, that
+a guest may raise. A whole class of mistake — a delivery logged as a repair —
+becomes unrepresentable rather than merely discouraged.
+
+### Where each half lives
+
+```text
+THE CATALOGUE — what a job can be about         Core Administration, shared
     code · name · translations · icon
-    the department that owns it by default
-    whether a guest may request it
+    INTENT (Deliver | Fix | Check | Prepare)
+    owning department · guest-requestable · targets an asset type
     active / inactive
 
-THE ROUTING POLICY — what we do about it         Jobs' own, per property
-    default priority          default SLA
+THE POLICY — what we do about it                Jobs' own, per property
+    default priority · default SLA
     which escalation policy applies
     the auto-assignment rule
 ```
 
-**Why the split is the right cut.** The catalogue is a *vocabulary several
-applications must agree on*: GuestOps shows a guest a list to choose from,
-Room Care raises "turndown", Maintenance raises "AC service", Jobs raises
-"AC not cooling" — and a group's reports only add up if all four mean the
-same thing by "AC". The policy is Jobs' behaviour, and no other application
-should ever read it.
+Room Care, Maintenance and GuestOps read the **catalogue**. Nobody but Jobs
+reads the **policy**.
 
-**Answering the owner's question — same across properties, or per hotel?**
-The platform has already ruled this exact shape once, for departments (ADR
-0119 and ADR 0116 §4), and the same answer fits:
+### Same in every hotel, or different? — both, and the platform has ruled this shape once already
+
+The department canon (ADR 0119, ADR 0116 §4) solved the identical problem:
 
 ```text
-the catalogue     organization-wide, seeded with the product
-                  each property ACTIVATES the ones it offers
-                  a property may RENAME for display; the code never moves
-                  → group reporting can never fragment
+the catalogue    organization-wide, shipped with the product
+                 each property ACTIVATES what it offers
+                 a property may RENAME for display — the code never moves
+                 → a group's reports can never fragment
 
-the policy        per property, always
-                  Kochi's AC response time is not Goa's
+the policy       per property, always
+                 Kochi's AC response time is not Goa's
 ```
 
-That is the department canon's exact pattern, and it exists because a
-property-local list means two hotels invent two spellings of one thing and
-the group's report has two rows for the same service. The accepted cost is
-the same too: a hotel needing a service the catalogue lacks waits for it to
-be added centrally — which argues for shipping a **generous** list, exactly
-as the department canon did with 45 codes.
+The accepted cost is the same one the canon accepted: a hotel needing an
+entry the catalogue lacks waits for it to be added centrally — **which is why
+the canon shipped 45 departments rather than six, and why this list must ship
+generously too.**
 
-**This needs an architect's ruling, because it puts a new object in Core
-Administration.** It is one of the questions this round sends up.
+### The escape hatch, because a catalogue must not become a straitjacket
 
-**Open for the owner, and it decides how hard the ruling is:** are your
-properties' service lists genuinely the same today, or does each hotel run
-its own? If they already differ per hotel, activation-plus-rename has to
-absorb that, and we should see a real example of the difference before
-proposing it.
+A guest says something nobody has listed. The rule:
 
----
+* **"Something else"** is always available, with free text.
+* It routes to a default department, is marked **uncatalogued**, and is
+  **Not triaged** by definition — there is no entry to take a priority from.
+* A supervisor can **promote** a frequent free-text into a real catalogue
+  entry, and the platform can show *"you have raised 'mosquito net' 40 times
+  this month"*.
+
+The reference reached for the same need with a `keywords` fuzzy match on the
+service name. This is the honest version of it: the gap is visible, counted,
+and closable, rather than guessed at.
+
+### This still needs an architect's ruling
+
+It puts a new object in Core Administration, and it defines a vocabulary
+three other applications will read. It goes up as one of this round's
+questions.
+
+**Open for the owner, and it decides how hard that ruling is:** are your
+properties' lists genuinely the same today, or does each hotel run its own?
+If they already differ, activation-and-rename has to absorb that, and the
+stream would want to see a real example of the difference before proposing
+it.
 
 ## S1.7 · Tenancy — why one column stays
 
@@ -670,9 +742,9 @@ anyone needs, and the third of them was never written at all.
 | **S1-D1** | A job carries `location_id` (any node in Master Data's one tree) and an optional `asset_id` | *design proposed — §S1.1 — awaiting owner* |
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
-| **S1-D4** | Emergency · High · Normal · Low · Not triaged | **RULED.** The automatic rule design is §S1.4 — awaiting owner |
-| **S1-D5** | Complaint · Request · Fault · Planned · Inspection | *design proposed — §S1.5 — awaiting owner* |
-| **S1-D6** | Catalogue in Core Administration, routing policy in Jobs | *design proposed — §S1.6 — needs an architect ruling* |
+| **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*, and "Maintenance" disappears with both its special cases | *revised design — §S1.5 — awaiting owner. This supersedes the stream's own five-type proposal* |
+| **S1-D6** | One catalogue whose entry carries its **intent**, so the job's type is never chosen separately — the noun to Core Administration, the policy to Jobs, plus an "something else" escape hatch that is counted and promotable | *revised design — §S1.6 — needs an architect ruling* |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
