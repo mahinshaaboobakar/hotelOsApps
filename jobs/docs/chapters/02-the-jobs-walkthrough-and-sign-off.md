@@ -1096,208 +1096,392 @@ off.**
 
 ---
 
-## S1.9 · The redesign — Jobs is the exception handler
+## S1.9 · WITHDRAWN — the stream over-engineered and mis-answered
 
-**Owner, 2026-09-02:** *"for these 2 I designed in Java. You can modify or
-suggest a better design — not a repolish. Refer to other available systems.
-Overall I need a better design for the hotel domain."*
+**Owner, 2026-09-02:** *"still you are over-engineering. Each app's ownership
+we already documented — **any jobs from anywhere are handled by the Jobs
+app**. My question and what you answered are different."*
 
-### First, what the stream got wrong — the framing, not the details
+**Both corrections accepted. This section is withdrawn, not revised.**
 
-Both earlier passes tried to build **a taxonomy of jobs**: what kinds are
-there, and what list do they come from. That is the question the Java system
-asks, so answering it better still answers it.
+### What was wrong
 
-**The platform had already made that question obsolete and the stream did not
-notice.**
+1. **The premise was factually wrong.** The stream proposed *"Jobs is the
+   exception handler — Room Care owns the routine, Maintenance owns the
+   planned"*. **That is not the design.** Application ownership is already
+   documented, and **Jobs handles every job, whatever raised it** — a guest,
+   a colleague, Room Care, Maintenance, a schedule, a sensor. Room Care and
+   Maintenance decide *that work is needed*; the work itself is a job.
+2. **It re-opened a settled boundary** instead of answering the question, and
+   then asked the owner to re-rule it. The "where does Jobs end" question in
+   that section is withdrawn with it.
+3. **It was over-engineered.** A three-axis fact model replacing a type field
+   is a bigger idea than the problem needs.
 
-### What real hotel systems actually do — and none of them has a type field
+### What the question actually was
 
-| System | How it divides work |
+> *"Type and service came directly from the Java reference. We cannot mirror
+> the Java design and architecture. Take the overall idea, concept and
+> features — then redesign it in a better way. Sometimes add features,
+> sometimes drop some."*
+
+Not *"should these objects exist"*. They exist. **Take what the reference was
+reaching for, keep the good, fix the broken, add what it lacks, drop what it
+should never have had.** That is done in §S1.10 and §S1.11.
+
+### What survives from the withdrawn section
+
+Two things, and only because they are concrete rather than philosophical:
+
+* **`PROVIDED` covers acts, not only items** — a wake-up call and an escort
+  are jobs, and *"deliver"* does not describe them. Carried into §S1.10.
+* **Aliases for search** — carried into §S1.11.
+---
+
+## S1.10 · Job type — the redesign
+
+### What the reference has
+
+```java
+private String workOrderType;   // "COMPLAINT" · "REQUEST" · "MAINTENANCE"
+private String category;        // free text — "PLANNED", "UNPLANNED", …
+private String source;          // "PMS" · "FEEDBACK" · "HK" · "PPM" · "INSPECTION"
+```
+
+Three free-text fields, no constraint on any of them, used interchangeably by
+different callers.
+
+### What is broken, and it is not abstract
+
+| | |
 |---|---|
-| **Knowcross** | **six separate modules** — Service (guest requests) · Task (housekeeping) · Maintenance · Inspection · Lost & Found · **Glitch** (a service failure needing recovery) |
-| **Quore** | **six separate products** — Work Orders · Housekeeping · Inspections · Cleanings · Lost & Found · Readings (meter readings) |
-| **hotelkit** | four — Tasks · Repairs · Handovers · Checklists |
-| **Alice** | Service requests · Tickets · Checklists · Packages |
-| **HotSOS (Amadeus)** | not a type at all: an **Issue × Location × Action** triple |
+| **`type` is a `String`** | `"MAINTENANCE"`, `"Maintenance"` and `"maintenance"` are three types. Nothing stops any of them |
+| **`type` gates behaviour by name** | `if (!"MAINTENANCE".equals(type))` in the checklist validator; `if ("MAINTENANCE".equalsIgnoreCase(type)) skip escalation`. Add a type and you must find every string comparison |
+| **`category` overlaps `type`** | nobody can say which to use, so both get used |
+| **The three types are not the same kind of thing** | Complaint and Request describe *who is unhappy*; Maintenance describes *what department does it*. Mixing those two axes is why `MAINTENANCE` needed two special cases |
+| **No form or closure differences are expressible** | a complaint needs a complainant and a "we told them" step; the reference has neither |
 
-**Not one of them models "a work order with a type field."** They split by
-**operational rhythm** — because cleaning 200 rooms daily, servicing a
-chiller quarterly, and fetching a towel in four minutes are not three values
-of one enum. They are three different machines.
+### The redesign
 
-### And HotelOS already splits exactly that way
+**A fixed set of five, as an enum, chosen because each one has genuinely
+different behaviour** — not because five is a nice number. If two values
+behave identically they are one value.
 
-This is the part the stream missed. The platform is not one work-order
-service with a type column — it is **separate installable applications**, and
-the boundaries are already frozen:
+| Type | Raised when | What is different about it |
+|---|---|---|
+| **REQUEST** | somebody wants something | has a **requester**; closing means *telling them* |
+| **COMPLAINT** | somebody is **dissatisfied** | has a requester **and a recovery step**; feeds guest-satisfaction reporting; never auto-closes |
+| **FAULT** | something is broken, nobody is waiting yet | may carry an **asset**; may take the room out of service (via Maintenance) |
+| **TASK** | work sent by a person or another application | **no external requester** — this is how Room Care, Maintenance, a schedule or a sensor raise work |
+| **INSPECTION** | go and assess | the output is a **finding**, not a repair; carries a checklist; may *raise* other jobs |
 
-```text
-ROOM CARE      room statuses · cleaning · triggered by stay.departed
-               "not every hotel follows instant cleaning" — its own round,
-               its own scenario study, its own policy engine
-                                        (round 48; ADR 0051, ADR 0056)
+**`TASK` is the answer to *"any job from anywhere"***. Room Care saying *clean
+214 after a spill*, Maintenance saying *service the chiller*, a schedule, a
+sensor, an integration — all arrive as a `TASK`. Jobs does not care who
+decided the work was needed.
 
-MAINTENANCE    asset service history · next service due · PPM
-               AND out-of-order state — explicitly NOT Room Care's
-                                        (ADR 0056)
-
-JOBS           ADR 0051's own table:  "what work is being performed"
-```
-
-So the real design question was never *"what types of job are there"*. It is:
-
-> **What is left for Jobs, once Room Care owns the routine and Maintenance
-> owns the planned?**
-
-### The answer, and it is a sharper definition than anything so far
-
-> **Jobs is the hotel's exception handler.**
->
-> **Room Care owns the routine. Maintenance owns the planned. Jobs owns what
-> nobody planned for** — unplanned, often cross-department, usually with
-> somebody waiting.
-
-Everything follows from that sentence, and several earlier problems simply
-dissolve:
-
-* **"Planned" was never a Jobs concept.** Scheduled servicing is Maintenance;
-  the daily clean is Room Care. The reference needed a `MAINTENANCE` type
-  *and two special cases to exclude it* precisely because it was one
-  application pretending to be three.
-* **A routine inspection is not a Jobs concept either** — that is a checklist
-  run by whoever owns the rhythm. A *one-off* "go and look at 214" is an
-  ordinary job.
-* **A type that means different things depending on how often the work
-  happens is not a type.** That is the tell the stream should have caught two
-  rounds ago.
-
-### The design that follows: a job carries facts, not a class
-
-**There is no `type` field, and no `category`, and `service` stops being a
-required key.** A job carries three independent facts, and every one of them
-is true whether or not anybody picked something from a list.
+### What changes against the reference
 
 ```text
-1 · WHO IS WAITING          a guest · a colleague · nobody
-                            → drives urgency, communication, and whether
-                              closing requires telling somebody
-
-2 · WHAT MUST BE TRUE AT THE END
-      PROVIDED    they have something they did not have, or an act has
-                  been performed for them      towel · wake-up call · escort
-      WORKING     something functions that did not                    AC · lift
-      READY       a place meets a standard, by a time     hall set for 19:00
-      KNOWN       a fact is established and recorded    lost watch · "go look"
-                            → drives skills, duration and how it is verified
-
-3 · BY WHEN                 at a moment · within a window · as soon as possible
-                            → drives scheduling and the deadline
+ADDED     TASK          the reference has no way to say "work, no requester"
+                        — Room Care and Maintenance work was crammed into
+                        MAINTENANCE, which is a department, not a type
+ADDED     INSPECTION    the reference has checklists and inspections and no
+                        type for them; it gates them on MAINTENANCE instead
+ADDED     COMPLAINT is distinct from REQUEST in BEHAVIOUR, not only in name
+                        — a recovery step and a mandatory "we told them"
+SPLIT     FAULT out of MAINTENANCE
+                        "broken" is not the same as "engineering does it"
+DROPPED   MAINTENANCE   it named a department, and departments are already a
+                        field. Both of its special cases go with it
+DROPPED   category      three overlapping classifiers become one
+KEPT      source        it answers a different question — WHERE the job came
+                        from, not WHAT it is. Now a closed list, not free text
 ```
 
-**Reports are crossings of these, not a type column:**
+### The rules that make it hold
 
-```text
-"guest requests today"      who-is-waiting = guest
-"faults"                    outcome = WORKING  AND  waiting ≠ guest
-"complaints"                outcome = WORKING  AND  waiting = guest
-"room readiness misses"     outcome = READY    AND  late
-```
-
-Every report the reference's `type` field served is still available — and
-three more that it could not express, because it collapsed *who is waiting*
-into the same field as *what kind of work it is.*
-
-**And the four misfits now fit, which is the test that matters:**
-
-```text
-wake-up call at 06:00     waiting: guest · PROVIDED · at a moment
-escort to the villa       waiting: guest · PROVIDED · as soon as possible
-guest left a watch        waiting: nobody · KNOWN   · as soon as possible
-move guest to 310         waiting: guest · PROVIDED · within a window
-```
-
-`PROVIDED` says *"an act has been performed for them"* rather than *"an item
-was delivered"*, which is the correction the misfits forced. `Deliver` was
-being stretched; `Provided` is the honest word.
-
-### The bigger move: the catalogue stops being a taxonomy and becomes a library
-
-This is the change that is not a repolish.
-
-```text
-BEFORE — in the reference, and in both of the stream's earlier passes
-    the catalogue is LOAD-BEARING
-    no entry  →  a degraded job: "uncatalogued", "not triaged"
-    free text is a fallback, and a slightly embarrassing one
-
-NOW
-    a job is FULLY EXPRESSIBLE WITHOUT ANY CATALOGUE ENTRY
-    it carries who is waiting, what must be true, by when, where, and who
-    the catalogue PRE-FILLS those. It does not define them
-```
-
-**Three consequences, and each one removes a problem the earlier design had:**
-
-1. **Free text becomes first-class**, not a fallback. Somebody says
-   *"mosquito net"* and gets a complete, routable, reportable job — because
-   the fields it needs are the job's own, not the catalogue's.
-2. **The four-way split of the catalogue becomes a non-event.** A menu, a
-   symptom list per asset type, a checklist definition and a readiness
-   standard are then just **four libraries that pre-fill the same job
-   fields**. They can live in four different applications, arrive at four
-   different times, and Jobs does not change when they do.
-3. **The `intent` field disappears entirely** — it existed only to tell one
-   overloaded list apart from itself.
-
-**What the catalogue is still for**, and it is worth having: speed and
-consistency. A picker beats typing, the same words produce the same report
-rows, and a library entry carries the things nobody should re-enter — the
-department that owns it, how long it takes, the skills it needs.
-
-**What it costs, stated honestly:** if everybody free-texts, reports
-fragment. The mitigations are the ones already designed and they survive
-because they were right — the library is offered first, free text is
-**counted**, and a frequent free text is **promotable** into a real entry.
-The difference is that a hotel is never *blocked* by a missing entry, only
-less consistent.
-
-### What this kills
-
-```text
-type · category · service-as-a-required-key      three overlapping fields
-the "uncatalogued, not triaged" degraded state   a job is never degraded
-the intent field                                 no list to tell apart
-"Planned" as a Jobs concept                      Maintenance's and Room Care's
-the MAINTENANCE special cases                    both of them, permanently
-```
-
-### The question this opens, and it is now the largest one in the round
-
-**Where exactly does Jobs end and Room Care and Maintenance begin?** ADR 0051
-gives one line each and it is not enough to build from:
-
-```text
-Maintenance    "what maintenance does it need"
-Jobs           "what work is being performed"
-Room Care      "how is this room type cleaned"
-```
-
-Real cases the line does not yet decide:
-
-| Case | Whose? |
-|---|---|
-| A guest reports the AC is dead | Jobs raises it — but does **Maintenance** own the repair, and does the asset's service history record it? |
-| Housekeeping finds a broken lamp mid-clean | Room Care is in the room; Jobs is where the repair goes |
-| A one-off "deep clean 214 after a spill" | routine cleaning is Room Care's — is a one-off? |
-| Setting a banquet hall for tomorrow | nobody owns Banquets yet |
-| Taking a room out of order | **Maintenance owns the state** (ADR 0056) — Jobs must not set it |
-
-**This is an architect ruling, not the owner's and not the stream's**, and it
-should be asked now rather than discovered during the build. It goes up as
-this round's largest question.
+1. **It is an enum, not a string.** No casing, no typos, no unknown values.
+2. **Nothing branches on the type by name.** Behaviour hangs off the
+   catalogue entry and the job's own fields — never `if type == X` scattered
+   through the code. That is what made the reference's two special cases
+   possible.
+3. **A hotel cannot add a type.** Every value needs behaviour written for it,
+   and a value with no behaviour silently does nothing — which is exactly
+   what happened to `DEVICE` in the reference.
+4. **The type is normally filled in by the catalogue entry**, not chosen —
+   see §S1.11. A person picks *"extra towel"*, not *"REQUEST"*.
 
 ---
+
+## S1.11 · The job catalogue — the redesign
+
+### What the reference has
+
+```java
+@Document(collection = "work_order_service_preference")
+class WOServicePreference {
+    String service;                        // "Ac" — the DISPLAY NAME, and the KEY
+    Set<String> keywords;
+    String type; String departmentId; String department;
+    AssigneeType assigneeType; String assigneeId;
+    int priority; Integer sla; String trackMode; String icon;
+    boolean sameForAllKeyword;
+    HashMap<String,String> keywordAssignee;
+    String companyId; String siteId;
+}
+```
+
+And on the job itself, `service` is a `String`, rewritten on save by
+`WordUtils.capitalize(trimToEmpty(service), ' ', '-', '.')`.
+
+### What is broken, concretely
+
+| | |
+|---|---|
+| **The display name is the key** | change "Ac" to "Air Conditioning" and every existing job's `service` no longer matches any entry. Routing, SLA and reporting all break at once, silently |
+| **The key is *normalised* too** | what you typed is not what is stored. Two people produce two entries |
+| **One flat list** | a hotel with 300 entries has an unusable picker and no way to group them |
+| **`keywordAssignee`** | a `HashMap<String,String>` of keyword→person, propped up by a `sameForAllKeyword` flag. Routing written as a lookup table inside a config document |
+| **No language** | one name, one language, for a floor with multilingual staff |
+| **No scoping** | "extra towel" is offered for the lobby and the plant room |
+| **Vocabulary and promise in one document** | Room Care cannot read *what things are called* without also reading *Jobs' SLA* |
+| **Nothing about the work itself** | no duration, no skill, no parts, no "photo required" — so no planning is possible, ever |
+
+### The redesign
+
+**Two objects, and the split is along a line that has a test:**
+*would this value be the same at another hotel in the group?*
+
+```text
+CATALOGUE ENTRY — what the thing IS            same across the group
+    id            UUID                     the key. Never a name
+    code          TOWEL_EXTRA              stable, for integrations and reports
+    name          { en: "Extra towel",     display, RENAMEABLE, per language
+                    ml: "…" }
+    category      HOUSEKEEPING             groups the picker — one level only
+    job type      REQUEST                  §S1.10 — filled in, not chosen
+    department    HK                        who owns it by default
+    aliases       towel · extra towel ·    search, and how free text resolves
+                  more towels
+    applies to    guest room · public area · asset type: HVAC
+    guest may request      yes / no
+    needs a checklist      yes / no
+    photo on completion    required / optional / none
+    skill required         (optional)
+    typical duration       5 min           HOW LONG IT TAKES — the same anywhere
+
+PROPERTY POLICY — what WE PROMISE about it     per property
+    default priority · SLA · escalation policy
+    auto-assignment rule
+    chargeable · price
+    active here            yes / no          this is "activation"
+    display name override                    this is "rename"
+```
+
+### Every change against the reference, and why
+
+```text
+FIXED   the key is a UUID; code is stable; name is display and renameable
+        → renaming an entry can never break a job, a report or a route.
+          This is the reference's single worst defect and it is one line
+
+FIXED   the name is no longer rewritten on save
+        → what the operator typed is what is stored
+
+ADDED   category, one level                     a 300-item flat picker is unusable
+ADDED   name per language                       multilingual floors
+ADDED   applies-to scope                        "extra towel" never offered for a plant room
+ADDED   typical duration                        the first thing needed for capacity planning
+ADDED   skill required                          real assignment instead of a stored person id
+ADDED   photo on completion                     asked for constantly in hotel operations
+ADDED   needs a checklist                       replaces gating checklists on type = MAINTENANCE
+ADDED   chargeable + price                      late checkout, laundry, minibar — the reference
+                                                cannot express money at all
+ADDED   aliases                                 proper search; the honest version of `keywords`
+
+DROPPED keywordAssignee + sameForAllKeyword     routing is a rule, not a lookup table
+                                                buried in a config document
+DROPPED assigneeId on the entry                 a stored person leaves, goes off shift, or is on
+                                                leave. Routing resolves a ROLE at the moment of
+                                                assignment
+DROPPED trackMode                               belongs with tracking, not with the noun
+MOVED   priority · SLA                          to the property policy — they are promises,
+                                                and a promise is local
+KEPT    icon                                    it earns its place on a picker
+```
+
+### One list or one per hotel — answered by the split, not by choosing
+
+The split makes the question stop being a choice:
+
+```text
+the ENTRY      organization-wide          "Extra towel" means the same in every hotel
+                                          → a group's report has one row, not four
+the POLICY     per property               Kochi promises 15 minutes; Goa promises 30
+activation     per property               Goa offers it; the city hotel does not
+rename         per property, display only the code never moves
+```
+
+This is the department canon's shape (ADR 0119, ADR 0116 §4) — the platform
+has ruled it once already for the identical problem.
+
+### Free text is never blocked
+
+A guest asks for something not in the list. The job is raised with free text,
+routed to the category's default department, marked **uncatalogued**, and
+**counted**. A supervisor can promote a frequent free text into a real entry
+— and the platform can show *"'mosquito net' was raised 40 times this
+month"*.
+
+The reference's `keywords` fuzzy match was reaching for this and used it to
+guess. Counting the gap is better than guessing at it.
+
+### The name
+
+**`service` is dropped as a word.** In a hotel "service" already means
+hospitality, and a "service preference" is not a preference. The object is
+the **job catalogue**, and an entry is a **catalogue entry**.
+
+---
+
+## S1.12 · The two statuses — owner's question, 2026-09-02
+
+> *"How are we going to handle the status of a work order? We need two —
+> **jobStatus** and **status** (to manage entity lifecycle: ACTIVE, DELETED,
+> etc.)."*
+
+**Agreed, and the reference already has both** — `WorkOrderStatus` and
+`EntityStatus`. It gets both wrong, in different ways, and one of them has a
+platform ruling waiting for it.
+
+### What the reference has
+
+```java
+enum WorkOrderStatus { NEW, OPEN, ON_HOLD, IN_PROGRESS, ESCALATED,
+                       WAITING, CLOSED, REMOVED }
+enum EntityStatus    { ACTIVE(10), INACTIVE(20), CANCELLED(80), DELETED(100) }
+```
+
+Plus **five booleans on the job** doing the same work as the first enum:
+`accepted`, `started`, `waiting`, `guestAcknowledged`, `reopened`.
+
+What actually happens:
+
+* `ESCALATED` and `REMOVED` **are never written by anything.**
+* `EntityStatus` is set to `ACTIVE` at creation and **no endpoint ever
+  changes it** — so `CANCELLED` and `DELETED` are unreachable.
+* The five booleans disagree with the enum, because different code paths
+  maintain each.
+* `ON_HOLD` means three different things (§S4).
+
+### Axis 1 · `job_status` — where the work is
+
+Nine values, and each one earns its place by behaving differently:
+
+```text
+NEW           raised, nobody assigned — in the pool
+ASSIGNED      given to a person or team, not yet taken up
+ACCEPTED      the assignee has taken it on
+IN_PROGRESS   work is happening; the timer is running
+PAUSED        the assignee stopped — OUR delay. THE SLA CLOCK KEEPS RUNNING
+ON_HOLD       blocked on something outside our control — a part, a guest's
+              Do Not Disturb, an earlier step. THE SLA CLOCK STOPS
+                                  … and the row carries the REASON
+DONE          the work is finished, awaiting verification
+CLOSED        verified and signed off                          final
+CANCELLED     will not be done                                 final
+```
+
+**Why `PAUSED` and `ON_HOLD` are both needed** — this is the one pair worth
+defending: the difference is **whose fault the delay is**, and therefore
+whether the guest's clock keeps running. A technician on a break does not
+stop the guest waiting. A missing spare part does. Collapsing them makes
+every SLA report either too harsh or too kind, permanently.
+
+**What is gone:** `OPEN` (it meant *assigned* and *reopened* and *not closed*
+in different places) · `ESCALATED` (escalation is a fact **about** a job, not
+a state **of** it — it is why the reference has an escalation status nothing
+writes) · `WAITING` (renamed `ON_HOLD` with a reason) · `REMOVED` (that is
+the second axis) · **and all five booleans.**
+
+### Axis 2 · the record's own state — and here the platform has already ruled
+
+**ADR 0062:**
+
+> *"`active` is the canonical lifecycle flag. `deleted_at` is logical
+> removal. There is no third lifecycle column and no `archived` state."*
+> The verbs are **Deactivate / Reactivate** — never Archive / Restore.
+
+```text
+active = true,  deleted_at = null    Active
+active = false, deleted_at = null    Inactive
+deleted_at != null                   Deleted (soft)
+row removed                          Purged
+```
+
+So **the platform's answer is not an enum** — it is a boolean plus a
+timestamp. A `status` column holding `ACTIVE / INACTIVE / CANCELLED /
+DELETED` is exactly the shape ADR 0062 removed.
+
+**And for a job, one of the two is meaningless.** A job is never
+*deactivated* and *reactivated* — that is for a room closed for renovation or
+a staff member on long leave. So Jobs carries:
+
+```text
+deleted_at · deleted_by      soft deletion. Null means live
+                             NO `active` flag — nothing would ever set it
+```
+
+### The distinction the reference gets wrong, and it matters
+
+**`CANCELLED` belongs to the work, not to the record.** The reference puts it
+in `EntityStatus` beside `DELETED`, as though they were neighbours. They are
+not:
+
+```text
+CANCELLED   a BUSINESS OUTCOME. The job existed and we decided not to do it.
+            The guest cancelled; the fault fixed itself; it was a duplicate.
+            Fully reportable. It stays in every count of "raised", and
+            "cancelled %" is a number a manager wants to see.
+
+DELETED     an ADMINISTRATIVE ACT. The job should never have existed —
+            raised in error, or removed under a data-protection request.
+            Leaves every operational count. Recoverable by an administrator.
+            Always audited: who, when, why.
+```
+
+Putting them in one enum makes *"we chose not to do this"* and *"this should
+not exist"* the same fact. They are the two most different things on the job.
+
+### The shape, in full
+
+```text
+job_status    enum, 9 values, an explicit transition table
+              every change publishes a job.* event in the same transaction
+deleted_at    timestamp, null = live
+deleted_by    who did it
+delete_reason required — a deletion with no reason is not auditable
+```
+
+Two more rules, both of which the reference breaks:
+
+* **Every list and every count filters `deleted_at IS NULL` by default.** The
+  reference's `EntityStatus` filter defaults to `ACTIVE` and is passed in by
+  the *client*, so a caller can ask for deleted rows.
+* **`job_status` never moves without a transition being legal.** The
+  reference permits any value to any value, so `NEW → CLOSED` and
+  `CLOSED → IN_PROGRESS` are both accepted today. The table is in §S4.
+
+### One thing to confirm with the architect
+
+ADR 0062 is written for **master entities**. A job is operational, not master
+data. The stream is following its shape anyway — a platform that says
+*"`active` + `deleted_at`, never a lifecycle enum"* should not have an
+application inventing one — but **whether ADR 0062 binds an application's own
+tables, or is only a convention there, is worth one line from the architect**
+rather than assumed.
+
 
 ## Decisions — round 1 close
 
@@ -1307,10 +1491,12 @@ this round's largest question.
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **Redesigned in §S1.9: there is no type field at all.** Blocked on the owner's real work list to test it — §S1.8, §S1.9 |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and and §S1.9 demotes the catalogue **from a taxonomy to a library**, which makes that split a non-event — §S1.8, §S1.9 |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **REDESIGNED — §S1.10.** Five values as an enum, each earning its place by behaving differently: REQUEST · COMPLAINT · FAULT · TASK · INSPECTION. `MAINTENANCE` dropped (it named a department), `category` dropped, `source` kept as a closed list |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **REDESIGNED — §S1.11.** UUID key, stable code, renameable per-language name; one category level; applies-to scope; duration, skill, photo-on-completion, chargeable; aliases. `keywordAssignee`, `sameForAllKeyword`, the stored assignee and `trackMode` all dropped. Entry organization-wide, promise per property |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
+
+| **S1-D9** | **Two statuses.** `job_status` — 9 values with a transition table, replacing the reference's 8-value enum *and* its five booleans. Record state is **`deleted_at`, not an enum** (ADR 0062's shape), and **`CANCELLED` is a job outcome, not a record state** | *design proposed — §S1.12 — awaiting owner* |
 
 **Sign-off:** **NOT SIGNED OFF.**
 
@@ -1319,10 +1505,11 @@ not signed it.** That was the stream's error, recorded here rather than
 quietly corrected: a sign-off is the owner's act, and a page that records one
 that did not happen is worse than a page with an open section.
 
-Six decisions carry rulings — D1, D2, D3, D4, D7, D8. **D5 and D6 are
-reopened** on the owner's challenge (§S1.8) and **redesigned** in §S1.9,
-which removes the type field and demotes the catalogue to a library. Both
-stay open until the owner's real work list tests them.
+Six decisions carry rulings — D1, D2, D3, D4, D7, D8. **D5 and D6 were
+reopened** on the owner's challenge (§S1.8) and **redesigned from the
+reference in §S1.10 and §S1.11**. §S1.9 is **withdrawn** — the stream
+over-engineered it and got its premise wrong. **A ninth decision, S1-D9, is
+added**: the two statuses (§S1.12), at the owner's request.
 
 ---
 
