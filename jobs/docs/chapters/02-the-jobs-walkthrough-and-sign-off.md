@@ -370,15 +370,91 @@ no answer within N minutes               the plan accepts itself, and says it
 That needs the owner's ruling, and an architect's confirmation that it fits
 ADR 0130's approval-for-writes.
 
+### Part 4 · Depth and counting — RULED, owner 2026-09-02, checked against the field
+
+The owner asked for these two to be checked against how modern systems
+actually do it before being settled. They were, and both answers hold.
+
+#### Depth — **one level. No grandchildren.**
+
+| System | Depth below the work item |
+|---|---|
+| **Jira** | **one** — a sub-task cannot have a sub-task. Twenty years, deliberate; the levels they later added (Initiative, Epic) went *above*, never below |
+| **ServiceNow** | **one** — Incident ▸ Incident Tasks · Change ▸ Change Tasks |
+| **Salesforce Field Service** | **one** — Work Order ▸ Line Items |
+| **SAP PM** | two, and they are **different objects** — order ▸ operation — not recursion |
+| **IBM Maximo** | unlimited, and it is the one everyone describes as unmanageable |
+| **Asana** | unlimited, and it is the most-complained-about thing in the product: work disappears three levels down |
+
+The pattern is consistent: **where a second level exists it is a different
+kind of object, not the same object nested.** The two products that allow
+arbitrary depth are the two people complain about, for the same reason — a
+job nobody can see is a job nobody does.
+
+**And the modern direction is not deeper trees.** Linear, Height and Shortcut
+all moved the other way: a flat list with **explicit order and dependencies**
+rather than nesting. Which is precisely what the step number already is.
+
+So: **one level**, with two escape valves so nothing is ever trapped:
+
+```text
+a child turns out to need breaking down
+        → ADD MORE STEPS TO THE SAME PARENT
+          the list gets longer, never deeper
+
+it is genuinely separate work
+        → a NEW JOB, linked as related  (the group relation, Part 1)
+```
+
+And **templates are how depth is reached without a deep tree**: the six steps
+of a banquet changeover live in a named plan, not in a hierarchy somebody
+built by hand at 22:00.
+
+#### Counting — **two numbers, and never one that adds them**
+
+| System | How it counts |
+|---|---|
+| **Jira** | velocity counts stories; **sub-tasks are excluded**; epics are tracked on their own burndown |
+| **ServiceNow** | metrics are per task; the parent carries **its own** resolution time |
+| **IBM Maximo** | cost and labour **roll up** to the parent; counts stay per work order, with an explicit include-children switch |
+| **Zendesk** | side conversations never count as tickets |
+
+The same rule everywhere: **count the unit of work once, at the level where
+the work happens, and report the container separately as a container.**
+Nobody adds them together.
+
+For a hotel there are genuinely two questions, and they have two answers:
+
+```text
+"how much work did we get through?"     count LEAVES   84 pieces of work
+"how many issues did we resolve?"       count ROOTS    61 guest issues
+```
+
+A standalone job with no children is **both a leaf and a root** — counted
+once in each, and correctly in each.
+
+**And the two clocks line up with the two counts**, which is what makes this
+worth doing rather than merely tidy:
+
+```text
+the PARENT's clock     how long the GUEST waited        →  the GM's number
+the CHILDREN's clocks  how fast each TEAM responded     →  the head of
+                                                           department's number
+```
+
+**The rule, written down so no screen breaks it later: never display a single
+figure that adds parents and children.** That number answers no question, and
+it is the number a dashboard reaches for first.
+
 ### Open for the owner
 
 | | Question | Recommendation |
 |---|---|---|
 | a | Is a child a **full job** (own number, own queue, own escalation) or a lightweight sub-task? | full job — your "different behaviour for each" requires it |
-| b | **One level only**, or may a child have children? | one level. Grandchildren make the closure rule and the step ordering much harder to reason about, and nobody has asked for them |
+| b | **One level only**, or may a child have children? | **RULED: one level, no grandchildren** (owner, 2026-09-02, after the field check in Part 4) |
 | c | When the last child finishes, does the parent **close by itself** or wait for a person? | it becomes **Done** by itself; a person **Closes** it |
 | d | Does **cancelling a parent** cancel its open children? | yes, with the reason carried down |
-| e | Reporting — does *"jobs completed today"* count parents, children, or both? | count **children** as work done and parents as coordination; show both, never add them together |
+| e | Reporting — parents, children, or both? | **RULED: two numbers — leaves for workload, roots for outcomes — and never one that adds them** (owner, 2026-09-02; Part 4) |
 | f | Does the parent have **its own SLA**, separate from the children's? | yes — that is the guest's clock, and it is what the parent escalates on |
 | g | **Templates** — in the first release, or later? | later, but the model must allow them from day one |
 | h | Can a job be in a **group** and also be a **child**? | yes; they are independent relations, and neither affects the other |
@@ -447,12 +523,34 @@ Three rules:
    its department. A number that changes is worse than one that is stale,
    because people write them down.
 
-**Open for the owner:**
+### How the property code is configured — measured, and one conflict
 
-* `Property.Code`'s own example is `kochi-001`, which would give
-  `kochi-001-HK-412`. Do you want a **short uppercase code** convention —
-  `KOC`, `GOA`, `BLR` — and if so is that a rule we ask Core Administration
-  to enforce, or just how you fill it in?
+Set in **Core Administration** when the property is registered. Measured in
+`masterdata.properties`:
+
+```text
+required · unique within the organization · max 50 characters
+MUST BE LOWERCASE   — enforced by a database constraint:
+                      ck_properties__code_lowercase :  code = lower(code)
+no shape or length rule beyond that
+```
+
+**The conflict, reported rather than worked around.** The owner asked to keep
+the short **uppercase** convention (`KOC`, `GOA`). **The platform forbids an
+uppercase property code** — it is a CHECK constraint, not a convention.
+
+The resolution needs no platform change: **the stored code stays lowercase
+(`koc`), and the job number upper-cases it when it is stamped** — giving
+`KOC-HK-04`. The number is its own string written once at creation (§S1.3
+rule 1), so nothing is derived on read and nothing disagrees.
+
+**One small request to send up with the location types.** There is *no length
+or shape rule* on a property code — `kochi-marine-drive-main` is legal today,
+and would produce `KOCHI-MARINE-DRIVE-MAIN-HK-04`. A short-code rule (3–8
+characters, letters and digits) would keep job numbers readable. Same class
+of platform request as the missing place types, and equally small.
+
+**Open for the owner:**
 * What happens to a job raised before its department is known — a guest
   request that has not been routed yet? Options: hold the number until it is
   routed, or stamp a neutral segment (`GEN`) and never change it. The stream
