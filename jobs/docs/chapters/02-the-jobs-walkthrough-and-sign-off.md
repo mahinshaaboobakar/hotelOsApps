@@ -4823,3 +4823,22 @@ marked where the design depends on it.
    there.
 3. Mockups, then the owner gate, then build.
 
+## Rulings received after lock — architect, 2026-09-03, relayed by the owner
+
+The page is locked; these amend it, and the design chapter cites them.
+
+| # | Ruling | What it changes here |
+|---|---|---|
+| 1 | **This page + `03-the-jobs-design.md` are the design of record**, app-local on the pms-oracle precedent. A planner chapter, if ever written, amends rather than displaces | question 1 closed |
+| 2 | **The correlation-id rule's freeze point is the `EVT-Q3` owner ruling (2026-08-31)** — ADR 0116 has no correlation content, and `CLAUDE.md` now says so at the site, naming this round's finding. **Cite `EVT-Q3`** | S1.2, S1-D12, S5 — every "ADR 0116 §5" cited for correlation becomes `EVT-Q3` |
+| 3 | **The catalogue is Jobs' own, not Core Administration's.** ADR 0051's test decides it: uninstall everything but Core and *"deep-clean checklist"* describes nothing an entity is. **Organization-scoped inside Jobs; per-property activation is Jobs' behaviour** | **reverses S1-D6's home and S1-D14 / S1.14 ·7**: no Core Administration section, no manifest contribution; the catalogue screens are Jobs' own; the `jobs` schema holds `category · item · item_alias · resolution` with `organization_id`, and `property_item_policy` beside them |
+| 4 | **`property#jobs_manager` joins the grantable-relations registry by AUTHZ-Q25's mechanism exactly** — manifest declares, registry structures, install consent renders | S9-D7 unblocked |
+| 5 | **GuestOps-without-Jobs is the platform's Deferred + Replay shape** — the requests stay visible as GuestOps' own records; no pretended editing screen; an installing Jobs picks up the backlog by declared subscription and replay | the S1.14 ·7 gap closed; the design chapter's subscription section says so |
+| 6 | **ADR 0062's letter binds master entities; a job's states are its states** — but where tables need logical removal, **borrow 0062's two-column vocabulary** rather than minting a third spelling | S1-D9 confirmed: `deleted_at` · `deleted_by`, no `active`, no other spelling anywhere in the schema |
+| 7 | **The permission vocabulary stays parked** — bring it with the design chapter's draft | S9-D5 |
+
+**And the gate every app walked**: design chapter → mock UI in the current
+design language → owner redline → lock → build → the frame-beside-capture
+audit; with the standing directive that the finished work is verified against
+`00-master-architecture-v3.md` by the stream and said so in the report.
+
