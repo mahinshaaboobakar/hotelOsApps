@@ -2067,39 +2067,48 @@ Four rules, all platform law rather than choices:
 
 ### 6 · Assignment — the dropdown, the flip, and the fallback
 
-*"The creating user can assign manually. The dropdown does not show all
-users — only those working today (from Workforce) in the item's department.
-The creator can flip to all users, or to related departments. If nobody is
-assigned, the system finds a suitable user from Workforce."*
+**Corrected by the owner, 2026-09-03** — the first draft got two things
+wrong: it let "all users" include people off shift, and it filtered by
+*today*. Both are wrong. **Every list comes from Workforce, and every list
+shows only people working on the job's execution date.**
+
+*"The default dropdown always shows the category's department users (from
+Workforce). The user can flip to related departments, or all users. Any
+dropdown is from Workforce — only those working, based on the work order's
+execution date."*
 
 ```text
-the dropdown, by default
-    users POSTED to the item's department      (Workforce postings — ADR 0116 §6)
-    AND on shift now                           (Workforce roster, today)
-    AND not on leave                           (Workforce)
-    sorted: fewest open jobs first, then name
+THE DATE that filters every list
+    the job's execution date = scheduled_for, or today if it is for now
+    a job raised at 22:00 for tomorrow morning shows TOMORROW's shift
 
-the flip — two switches the creator may turn
-    "related departments"   HK also shows LDY and PA; ENG also shows HVAC/ELEC/PLUM
-                            — the canon's parent/children (ADR 0119)
-    "all users"             everyone posted at the property, marked
-                            (off shift) / (on leave) so the choice is visible
+default            users posted to the category's department
+                   AND on shift on the execution date        (Workforce)
+flip 1             related departments — the canon's parent and children:
+                   HK also shows LDY and PA; ENG also shows HVAC, ELEC, PLUM
+                   AND on shift on the execution date
+flip 2             all users at the property
+                   AND on shift on the execution date
+                   — never anyone off shift or on leave, in any list
 
-no assignee chosen  ->  AUTO
-    the same list as the default dropdown; take the first
-    -> ASSIGNED, assignment_mode AUTO, assigned_by = system
-    list empty (nobody on shift in that department)
-    -> the job stays RAISED in the department's pool, and THAT IS AN
-       ESCALATION CONDITION (S5): "not assigned" counts from now, and the
-       next rung is told nobody was available
+sorted             fewest open jobs first, then name
+
+no one chosen  ->  AUTO: first of the DEFAULT list
+                   -> ASSIGNED · assignment_mode AUTO · assigned_by system
+default list empty (nobody in that department on shift that day)
+                   -> the job stays RAISED in the department's pool,
+                      AND that is an escalation condition (S5): "not
+                      assigned" counts from now, and the next rung is told
+                      nobody was available
 ```
 
-Two things this deliberately does **not** do, both of which the reference did:
-nothing stores a person on the catalogue entry (`assigneeId` is gone — a
-stored person leaves, changes shift, goes on leave), and nothing routes by
+Two things this deliberately does **not** do, both of which the reference
+did: nothing stores a person on the catalogue entry (`assigneeId` is gone —
+a stored person leaves, changes shift, goes on leave), and nothing routes by
 keyword (`keywordAssignee` and `sameForAllKeyword` are gone). The item's
-department plus Workforce is the whole rule. Jobs **reads** Workforce through
-Context; it never rosters anyone (Workforce round ruling, 2026-08-31).
+department plus Workforce on the execution date is the whole rule. Jobs
+**reads** Workforce through Context; it never rosters anyone (Workforce round
+ruling, 2026-08-31).
 
 ### 7 · The catalogue screen appears in Core Administration only while Jobs is installed
 
@@ -2127,7 +2136,7 @@ several readers of the data.
 without Jobs needs a guest-requestable list and nothing contributes the
 screen to edit it.
 
-### 8 · "Anything I missed?"
+### 8 · "Anything I missed?" — **all seven required**, owner 2026-09-03
 
 | | Missing | Why it matters |
 |---|---|---|
@@ -2139,8 +2148,60 @@ screen to edit it.
 | **f** | **Guest access** — occupied room, guest asleep or DND | `ON_HOLD: GUEST_DND` covers the state; *who decides to enter* is not written |
 | **g** | **Reopen** — S4-D5 ruled who and when; what it does to sessions, resolution and the number is not | the `cycle` column on `job_resolution` is the hook |
 
-None of these changes the tables above. Listed so nothing is discovered in
-the build.
+**All seven are required** (owner, 2026-09-03). None changes the tables in §4;
+each becomes a row in the design chapter.
+
+### 9 · Who raises a job — staff now, guests next release
+
+*"Jobs are raised by staff and by guests. Staff, directly from our app. For
+guests, next release: a separate app generates a guest app and a QR; the
+guest scans the QR and raises a job. Guests know nothing about users or
+departments — they just tap **need water**, **need a burger**, **AC down**."*
+
+```text
+STAFF   the Jobs app. The full form: category › item, location, asset,
+        priority (or let the flow set it), assignee (or AUTO), photos, notes.
+        source: FRONT_DESK · HOUSEKEEPING · ENGINEERING · … (the raiser's dept)
+
+GUEST   the guest app, next release. No form — BUTTONS.
+        The QR encodes the ROOM. The guest sees only items marked
+        guest_requestable, as pictures and words in their language.
+        One tap = one job.
+
+        what the tap produces
+          location_id      from the QR's room
+          guest_stay_id    the current stay in that room — via Context/GuestOps
+                           (no GuestOps installed → no stay link; the job is
+                           still raised, for the room)
+          category · item  from the button
+          source           GUEST_APP
+          priority         the flow decides (occupied room, guest waiting)
+          assignee         never chosen by the guest — AUTO, always
+          glitch           set if the item is a fault, not a request
+
+        what the guest never sees
+          departments · users · priority · SLA · who is coming
+        what the guest may see, later
+          "someone is on the way" · "done" — GuestOps' surface (S8), read
+          from job.* events, never from a Jobs screen
+```
+
+**Jobs' side is ready for this now.** A guest-raised job is an ordinary job
+with `source: GUEST_APP`, a stay link and no chosen assignee. The catalogue's
+`guest_requestable` flag is what the guest app renders; nothing else in Jobs
+changes when the guest app arrives.
+
+**Two things belong to the guest-app round, not this one, and are recorded
+so they are not assumed:**
+
+* **What a QR scan authenticates.** A guest is not a user, and the
+  reference's answer — an id in a header — is the thing never to repeat
+  (01 §F15). Every operation passes Kernel authorization; what credential a
+  scanned QR produces is the architect's and the guest-app round's.
+* **"Need a burger."** In the first release a food order is a job to In-room
+  dining. When a POS / ordering application exists it takes the order and
+  raises the job itself — "any job from anywhere" — and the guest app's
+  button does not change.
 
 ## Decisions — round 1 close
 
@@ -2159,8 +2220,9 @@ the build.
 | **S1-D10** | **Live work tracking** — sessions: start / pause / resume / stop; the live board is a query; SLA clock and labour clock kept apart | *proposed — §S1.14 ·3* |
 | **S1-D11** | **Tables split by logic** — job · assignment · status history · work session · resolution · recovery · note · attachment · link · escalation | *proposed — §S1.14 ·4* |
 | **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `source: PPM`; `job.closed` back by correlation | *proposed — §S1.14 ·5* |
-| **S1-D13** | **Assignment** — dropdown from Workforce (posted · on shift · in the item's department), two flips, AUTO fallback; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6 |
+| **S1-D13** | **Assignment** — every list from Workforce, **on shift on the job's execution date**; default = the category's department; flips = related departments / all users, still on-shift only; AUTO takes the first; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6, corrected once |
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
+| **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `source: GUEST_APP`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
 **Sign-off:** **NOT SIGNED OFF.**
 
