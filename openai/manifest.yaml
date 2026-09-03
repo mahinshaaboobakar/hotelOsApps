@@ -1,0 +1,145 @@
+# openai — hosted frontier models, as an installable HotelOS provider.
+#
+# The second `kind: provider` package and the **other half of the endpoint
+# design**. `ollama` proved the configured arm — a local server whose address is
+# a fact about the property. This proves the arm it exists beside: a public
+# provider's endpoint is a fact about the *provider*, identical on every
+# property, and it ships signed.
+#
+#   ollama    endpoint.configuration    the hotel says where its server is
+#   openai    endpoint.url              there is one address and we know it
+#
+# Two arms rather than one string with a magic value, so neither case can be
+# written as the other (`declaration.proto`, `ProviderEndpoint`).
+#
+# # This one holds a credential, and still ships no key
+#
+# `authentication.secret` is a **vault path**, never a value. ADR 0130 §2: the
+# key is entered at configuration, held in the vault, and read by the Model
+# Gateway alone. The path is bounded to `providers/` twice over — the validator
+# refuses a manifest naming a path outside it, and the Kernel's policy gate
+# refuses the read whatever a manifest claims — so this package can name where
+# its credential lives without being able to name anyone else's.
+#
+# # The costs below are load-bearing, and they are the field to check first
+#
+# The degradation ladder **orders by cost**, so these numbers decide what a
+# property's money is spent on. They are published per 1,000,000 tokens and
+# written here per token; each line carries the per-million figure it came from
+# so the arithmetic is checkable without a calculator.
+#
+# **Verify them against OpenAI's current pricing before a property routes real
+# spend through this package.** They are correct to the best of the author's
+# knowledge at the time of writing and cannot be checked from inside this
+# repository — and a stale price here does not fail, it quietly misroutes.
+#
+# The catalogue is deliberately **short**. Only models whose pricing is known
+# with confidence are declared: a model omitted is a model the Gateway will not
+# route to, which is recoverable, while a model declared at a guessed price
+# sorts wrongly against every other rung and nobody finds out from a failure.
+
+manifest_version: 1
+kind: provider
+
+id: openai
+name: "OpenAI"
+version: 1.0.0
+publisher: hotelos
+category: ai
+description: >-
+  Hosted frontier models from OpenAI, for properties that want capability
+  beyond what their own hardware runs.
+
+platform:
+  min_version: "0.1.0"
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+provider:
+  endpoint:
+    # **The signed arm.** One address, the same on every property, and a fact
+    # about the provider rather than about the hotel — so it ships in the
+    # package and there is no configuration key to forget to set.
+    #
+    # The origin only. The transport appends the path its dialect defines,
+    # which is what stops this field carrying a second, silent claim about
+    # which API is spoken.
+    url: https://api.openai.com
+
+  authentication:
+    # The key goes in an `Authorization: Bearer …` header, fetched at call time
+    # and never held on the transport — a rotated key takes effect on the next
+    # call.
+    mode: bearer_token
+    # A PATH. The package ships no key and could not: this is a name, and the
+    # value behind it is sealed on the property by whoever holds the account.
+    secret: providers/openai/api_key
+
+  streaming: server_sent_events
+
+  # `POST {endpoint}/v1/chat/completions`, reading `choices[0].message.content`.
+  # The same dialect `ollama` declares, which is the point of the field: one
+  # transport shape serves a hosted provider and a local server that imitates
+  # it, and neither needs code of its own.
+  api_dialect: openai_chat_completions
+
+  models:
+    # Published at $2.50 / 1M input, $10.00 / 1M output.
+    - id: gpt-4o
+      capabilities: [tools, json_schema, vision, streaming, long_context]
+      context_limit: 128000
+      max_output: 16384
+      latency_class: standard
+      cost_per_input_token: 0.0000025
+      cost_per_output_token: 0.00001
+
+    # Published at $0.15 / 1M input, $0.60 / 1M output.
+    #
+    # **Sixteen times cheaper in, and that is what makes the ladder work.** The
+    # budget ladder steps down to this when a property is over its spend, and a
+    # cheap rung that is still capable is the difference between degrading and
+    # refusing.
+    - id: gpt-4o-mini
+      capabilities: [tools, json_schema, vision, streaming]
+      context_limit: 128000
+      max_output: 16384
+      latency_class: fast
+      cost_per_input_token: 0.00000015
+      cost_per_output_token: 0.0000006
+
+    # Published at $0.02 / 1M. Embeddings have no output tokens, so the output
+    # cost is a true zero rather than an unknown.
+    - id: text-embedding-3-small
+      capabilities: [embeddings]
+      context_limit: 8191
+      # A vector, not tokens. One is the smallest honest value for a required
+      # positive field; any larger number would claim an output nobody reads.
+      max_output: 1
+      latency_class: fast
+      cost_per_input_token: 0.00000002
+      cost_per_output_token: 0.0
+
+    # Published at $0.13 / 1M. Larger vectors, and the one to build an index
+    # with when retrieval quality matters more than storage.
+    - id: text-embedding-3-large
+      capabilities: [embeddings]
+      context_limit: 8191
+      max_output: 1
+      latency_class: fast
+      cost_per_input_token: 0.00000013
+      cost_per_output_token: 0.0
+
+# No `configuration:` block, and its absence is the design.
+#
+# `ollama` declares one because its endpoint is read from a key. This provider's
+# endpoint ships signed and its credential is a secret rather than a setting —
+# a secret is never a configuration key, because configuration is readable and
+# a key is not. So there is nothing for a property to configure, and nothing
+# that can be left unset.
+
+# **Empty, and present rather than omitted.** A provider is declarative-only
+# (ADR 0130 §3): no backend, no ui, no schema, no process. An absent inventory
+# and an empty one are different claims and only the second is true — and the
+# platform refuses a provider that ships a file, so this is enforced rather
+# than intended. `hopkg` rewrites this map at signing time.
+files: {}
