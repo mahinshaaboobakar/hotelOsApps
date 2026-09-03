@@ -3542,13 +3542,65 @@ Every report is a query on one table, because every escalation the hotel
 cares about was a **change of state**, and each change is one row.
 
 
+### The thresholds AND the ladder are policy — owner, 2026-09-03
+
+*"The accountable and the concern time are based on policy, right? Because
+by category or department it varies — for some issues, AT_RISK should
+already make the manager accountable. Can we get that flexibility?"*
+
+Yes — and the ladder above was written as fixed, which was wrong. Both halves
+belong to one named **concern policy**, per property:
+
+```text
+concern_policy                                  a named object, per property
+  for each state:  what enters it   +   who becomes accountable
+
+"Guest-room emergency"                          "Back-of-house routine"
+  AT_RISK    50 % · not accepted 2 min          AT_RISK    90 %
+             → accountable DEPT_HEAD                       → accountable ASSIGNEE
+  BREACHED   past due_at                        BREACHED   past due_at
+             → DUTY_MANAGER                                → DEPT_SUPERVISOR
+  STUCK      15 min no movement                 STUCK      2 h no movement
+             → GM                                          → DEPT_HEAD
+  overload   3 open jobs                        overload   8 open jobs
+```
+
+**Which policy a job gets — most specific wins:**
+
+```text
+item      property_item_policy.concern_policy_id      "AC not cooling, occupied room"
+category  the category's default                       all of Engineering's AC items
+dept      the department's default                     everything Housekeeping does
+property  the property default                         anything not covered above
+```
+
+A job is stamped with the policy it resolved to when it goes live, so a
+later policy edit changes future jobs, not the history of this one.
+
+**Subscriptions stay per role and are independent of the policy** — a
+department head who watches BREACHED sees it whichever policy put the job
+there. A subscription may narrow itself to a department or a category
+(*"I watch AT_RISK only for guest-room items"*), and that is the only
+filter it needs.
+
+So the two knobs a hotel turns are separate and both are theirs:
+
+```text
+the POLICY        how fast this kind of job becomes a worry, and who carries it then
+the SUBSCRIPTION  what I, in my role, want to be told about, and how often
+```
+
+**S5-D3 is this**: policies live in the `jobs` schema, edited in Jobs
+Settings, named, shared, resolved item → category → department → property.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
 | **S5-D1** | ~~four clocks~~ ~~a list of timer steps~~ → **a derived CONCERN state (ON_TRACK · AT_RISK · BREACHED · STUCK), an ACCOUNTABLE ladder that moves ownership, and per-role SUBSCRIPTIONS**. No timers, no rungs, nothing to miss | *redesigned, second attempt — awaiting owner* |
 | **S5-D2** | ~~Rungs~~ — dissolved: the ladder is *who is accountable*, four levels, roles the property's own | *follows D1* |
-| **S5-D3** | Escalation policy stored in the database and edited in the console | yes | *open* |
+| **S5-D3** | **A named concern policy** — per state, both the threshold *and* who becomes accountable; resolved item → category → department → property; stamped on the job when it goes live; subscriptions per role, independent of it | **RULED, owner 2026-09-03** — the flexibility the owner asked for |
 | **S5-D4** | After an outage | **dissolves** — concern is computed, so nothing is missed; nudges resume; the history records the moves | *follows D1* |
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
