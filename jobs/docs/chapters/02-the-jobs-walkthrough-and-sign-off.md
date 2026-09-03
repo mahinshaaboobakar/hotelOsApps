@@ -2425,6 +2425,79 @@ reference reached for exactly this with `applyStartByFloor` (01 §3.4) and
 then anchored its four clocks to four different fields. Here there is one
 anchor and every clock reads it.
 
+### 6 · Correction, owner 2026-09-03 — no `guest360_id`; the raiser and the creator are two people
+
+*"We don't need `guest360_id` on the job — `raised_by_id` already carries a
+user id or a guest id. And a rare case: a guest phones the front office and
+the staff member creates the job. The creator is staff; the owner is the
+guest. Reports of jobs raised by guest / by staff must count that as guest."*
+
+```text
+raised_by_kind       STAFF · GUEST · APPLICATION     WHOSE request it is  ← reports count THIS
+raised_by_id         user_id | guest id (Guest360's) | app name
+created_by_user_id   who ENTERED it — null when the guest did it themselves by QR
+guest_stay_id        the visit, when a guest is involved
+```
+
+The phone call: `raised_by_kind: GUEST · raised_by_id: <guest> ·
+created_by_user_id: <receptionist> · raised_via: STAFF_APP`. The report
+*"raised by guests"* counts it; the audit trail still says who typed it.
+`guest360_id` as a separate column is withdrawn — the guest's identity is
+`raised_by_id` when the kind is GUEST, and `guest_stay_id` when the job is
+about an occupied room but staff raised it.
+
+### 7 · Where things are configured — measured, with one conflict to report
+
+| What | Where | State |
+|---|---|---|
+| May this user open Jobs? | Core Administration → User → Applications card → Identity `SetApplicationAccess` | **built** |
+| Which departments is this user in? | Workforce postings (ADR 0116 §6) | **built** |
+| Property membership · general manager | Identity `SetPropertyAssignment` · `SetGeneralManager` | **built** |
+| **Which Jobs powers does this user hold?** | **No surface exists.** Identity has exactly those three grant RPCs and no per-user, per-permission one | **open — the architect's** |
+| The catalogue — category · item · resolution | Core Administration → Job catalogue (manifest-contributed, §S1.14 ·7) | designed |
+| **The policy — SLA, default priority, escalation policy, per item, per property** | **the Jobs app's own Settings** — it is Jobs' behaviour, and no other application reads it | designed |
+
+**The conflict, reported not resolved.** `infrastructure/openfga/permissions.yaml`
+**already declares five Jobs permissions**, on a `job` object:
+
+```text
+job.read          → job#viewer
+job.create        → job#can_create
+job.assign        → job#can_assign
+job.complete      → job#can_close
+job.approve_cost  → job#can_approve_cost
+```
+
+and its own header rules that *scope* is the policy layer's — *"one relation
+is repointed in `model.fga` and nothing else moves: no permission renamed."*
+So S9's six proposed names collide with five pre-declared ones, and S9's
+*scope* axis (own · department · property) is **not a permission at all** on
+this platform — it is what the relations on `job`, `department` and
+`property` resolve. The likely mapping, offered as a question and not
+written into anything: execute ≈ `job.complete` (+ read), manage ≈
+`job.assign` + `job.complete`, administer ≈ the property admin; and
+`job.approve_cost` is a power the owner has not yet named. **S9 is amended to
+say so, and the reconciliation goes up.**
+
+### 8 · The rest of the Java feature set, and how far S1 is from sign-off
+
+*"Still in Java there are more features — escalation levels and such."*
+Yes, and none of them is S1's. S1 is *what a job is*. The rest is where it
+was placed on the first day:
+
+```text
+escalation levels, chains, night handling      S5
+waiting / progress reminders                   S6
+notifications, followers (job_watcher)         S7
+guest tracking, rating, acknowledgement        S8
+scheduled / PPM                                S10  (the flow itself is S1-D12)
+checklists                                     after S10; a job is raisable FROM one
+```
+
+**S1 stands at 19 decisions: 17 ruled.** Open: **D10** work sessions,
+**D11** the split tables, **D12** the PPM flow — all three read by the owner
+without objection. **One "yes" to those three signs S1 off.**
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2446,7 +2519,7 @@ anchor and every clock reads it.
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
 | **S1-D17** | **Raiser and beneficiary are two facts** — `raised_by_kind` + `raised_by_id` (staff · guest · application); `guest_stay_id` for whom; `origin_app`/`origin_ref` whose record | **RULED, owner 2026-09-03** — §S1.16 ·1 |
-| **S1-D18** | **The guest is two ids** — `guest360_id` (the person, across visits) and `guest_stay_id` (this visit; the QR's room resolves to it); location defaults from the stay. Reservation derivable, not stored | **RULED, owner 2026-09-03** — §S1.16 ·4 |
+| **S1-D18** | **No `guest360_id` column** — the guest is `raised_by_id` when kind is GUEST; `guest_stay_id` is the visit; **`created_by_user_id` is who typed it**, so a phoned-in request counts as guest-raised with the receptionist on the audit trail | **RULED, owner 2026-09-03** — §S1.16 ·6 |
 | **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — clearing it makes the job live now; **every clock (SLA, escalation, labour) anchors at `live_at` = scheduled_for or created_at** | **RULED, owner 2026-09-03** — §S1.16 ·3, ·5; `job_status` is nine values |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
@@ -3119,10 +3192,10 @@ asks per operation.
 |---|---|---|
 | **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
 | **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
-| **S9-D6** | **Where it is configured** — app access: Core Admin Applications card (built); departments: Workforce postings (built); **per-user Jobs permissions: the Access card, pending the architect** | *open — goes up as a question* |
+| **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **per-user Jobs powers: no surface exists — Identity has three grant RPCs and no per-permission one** | *open — goes up as a question* |
 | **S9-D3** | *Capture from someone* is **administer**, not manage | *proposed* |
 | **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
-| **S9-D5** | Six manifest permissions, no more | *proposed* |
+| **S9-D5** | ~~Six manifest permissions~~ — **CONFLICT**: `permissions.yaml` already declares `job.read/create/assign/complete/approve_cost`, and scope is the relation layer's, not a permission. Reconciliation goes up | *open — the architect's* |
 
 **Sign-off:** _pending_
 
