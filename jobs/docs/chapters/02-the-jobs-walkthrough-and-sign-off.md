@@ -44,8 +44,8 @@ constitution's order, not a preference.
 | # | Section | State | Signed off |
 |---|---|---|---|
 | S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-03 |
-| S2 | Creating a job | **OPEN** | — |
-| S3 | Assigning it | not started | — |
+| S2 | Creating a job | **SIGNED OFF** | 2026-09-03 |
+| S3 | Assigning it | **OPEN** | — |
 | S4 | Accept, start, pause, finish | not started | — |
 | S5 | **Escalation** | not started | — |
 | S6 | Reminders | not started | — |
@@ -2847,7 +2847,7 @@ added**: the two statuses (§S1.12), at the owner's request.
 
 # S2 · Creating a job
 
-**State: not started**
+**State: SIGNED OFF — owner, 2026-09-03.**
 
 ## What it does
 
@@ -2890,13 +2890,13 @@ description and no reporter.
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S2-D1** | A job is complete when created — no background fill-in | yes | *open* |
-| **S2-D2** | Is backdating allowed, by whom, and how far back? | yes; supervisor and above; 7 days | *open* |
-| **S2-D3** | What is mandatory at creation? | type · service · subject · reporter | *open* |
-| **S2-D4** | Which ways in do we support at launch? | staff app · another application by event · scheduled. Guest via GuestOps (see S8) | *open* |
-| **S2-D5** | May a job exist with no assignee — an open pool the department picks from? | yes, this is the normal case | *open* |
+| **S2-D1** | A job is complete when created — no background fill-in; one transaction | **RULED, owner 2026-09-03** |
+| **S2-D2** | Backdating allowed — *manage* and above, up to 7 days | **RULED, owner 2026-09-03** |
+| **S2-D3** | Mandatory at creation: category › item · location · raiser. Summary optional when the item says it all | **RULED, owner 2026-09-03** |
+| **S2-D4** | Ways in at launch: staff app · application by event · scheduled. Guest QR next release (S1-D15) | **RULED, owner 2026-09-03** |
+| **S2-D5** | A job may exist with no assignee — the pool; AUTO fills it when someone is on shift | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S2 SIGNED OFF — owner, 2026-09-03: *"S2 approved."***
 
 ---
 
@@ -3607,7 +3607,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **1 of 10** |
+| Sections signed off | **2 of 10** |
 | Page locked | no |
 | Locked on | — |
 
