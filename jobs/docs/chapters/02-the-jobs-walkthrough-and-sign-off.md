@@ -50,8 +50,8 @@ constitution's order, not a preference.
 | S5 | **Escalation** | **SIGNED OFF** | 2026-09-03 |
 | S6 | Reminders | **SIGNED OFF** | 2026-09-03 |
 | S7 | Notifications | **SIGNED OFF** | 2026-09-03 |
-| S8 | The guest side | **OPEN** | — |
-| S9 | Who can see and manage a job | **DESIGNED** — owner's four levels, 5 decisions | — |
+| S8 | The guest side | **SIGNED OFF** | 2026-09-03 |
+| S9 | Who can see and manage a job | **OPEN** — designed; 7 decisions, 4 already ruled | — |
 | S10 | Scheduled / preventive work | not started | — |
 | — | **PAGE LOCKED** | no | — |
 
@@ -4507,16 +4507,50 @@ The reason is not tidiness. Every guest-facing feature inside Jobs is a
 second place that needs to know who a guest is, and the reference shows what
 that costs.
 
+## Ruled — owner, 2026-09-03
+
+**D2 — the rating flow, in the owner's words:** *"If a job was created from
+the guest app — the stay-specific link — then when it is closed, the guest
+can rate it."*
+
+```text
+1  guest raises by the stay's QR / link      → job: raised_kind GUEST · stay_id set
+2  worked · resolved · CLOSED
+3  on CLOSED, and raised_kind = GUEST         → the guest app shows "rate this" for that job
+                                               (it reads job.closed for the stay — no Jobs screen)
+4  guest rates: 1–5 stars + a comment         → one row in Jobs, one event out
+5  a low rating (≤ 2)                         → the department supervisor is pinged (S7's table
+                                               gains one row); Guest360 / GuestOps consume
+                                               job.rated for the guest's satisfaction history
+```
+
+**Storage — in Jobs, one table, because the rating is a fact about the
+job's outcome:**
+
+```text
+job_rating       job_id · stay_id · stars (1–5) · comment · rated_at
+                 one per job · only when raised_kind = GUEST and job_status = CLOSED ·
+                 only from the raising stay · replaceable for 7 days
+```
+
+The reference had **two** rating tables and an auto-reopen-on-low-rating
+that was later disabled with a warning comment. Here: one table, no
+auto-reopen — a low rating *tells* a supervisor, who decides.
+
+**D3 — tracking:** the guest app's, reading `job.*` events. **D4 — guest
+acknowledgement:** a fact, never a close.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S8-D1** | Does Jobs have any guest-facing surface at all? | no — GuestOps owns it | *open* |
-| **S8-D2** | Where does the rating live — Jobs or GuestOps? | GuestOps; Jobs learns of it by event | *open* |
-| **S8-D3** | Is a guest tracking page in scope for the first release? | not for Jobs; GuestOps' call | *open* |
-| **S8-D4** | Does a guest acknowledgement affect the job's state? | it records a fact; it does not close the job | *open* |
+| **S8-D1** | Guest-facing surface | none in Jobs — guests raise by the stay's QR from the guest app (S1-D15) | **RULED, owner 2026-09-03** |
+| **S8-D2** | The rating | **a guest-raised job, once CLOSED, may be rated from the guest app**; `job_rating` in Jobs, one per job; `job.rated` out; low rating pings the supervisor; no auto-reopen | **RULED, owner 2026-09-03** |
+| **S8-D3** | Tracking page | the guest app's, reading `job.*` events; not a Jobs screen | **RULED, owner 2026-09-03** |
+| **S8-D4** | Guest acknowledgement | a fact recorded; never a close | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S8 SIGNED OFF — owner, 2026-09-03.**
 
 ---
 
@@ -4746,7 +4780,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **7 of 10** |
+| Sections signed off | **8 of 10** |
 | Page locked | no |
 | Locked on | — |
 
