@@ -3908,6 +3908,62 @@ fallback.** `resume_at` stays on `job` for the fallback; where the event
 exists it is simply never needed.
 
 
+#### "But we need Quartz for escalation — how do we schedule a 30-minute SLA with different timings?" — owner, 2026-09-03
+
+We do not, and this is the whole point of the concern model. **Nothing is
+scheduled. Everything is compared.**
+
+A 30-minute SLA, live at 09:00, policy *"Guest-room emergency"*:
+
+```text
+due_at = 09:30                                                 stored on the job
+
+the policy says      AT_RISK at 50 %    BREACHED at due     STUCK 15 min after, no movement
+which means          09:15               09:30               09:45 with no session since 09:30
+
+— none of those three times is scheduled anywhere —
+```
+
+**Once a minute, one query** over every open job at the property:
+
+```sql
+SELECT job_id, due_at, policy thresholds, last concern, last session, assignment
+FROM   jobs.job  JOIN policy  LEFT JOIN latest session  …
+WHERE  job_status NOT IN ('RESOLVED','CLOSED','CANCELLED')  AND resume_at IS NULL
+```
+
+and for each row, arithmetic:
+
+```text
+09:14   now < 09:15          → still ON_TRACK                 nothing written
+09:15   now >= due − 50 %    → AT_RISK    ≠ last concern    → one history row, nudges
+09:30   now >= due           → BREACHED   ≠ last concern    → one history row, nudges
+09:45   breached 15 min,
+        no session since     → STUCK      ≠ last concern    → one history row, nudges
+```
+
+**Different timings per policy** are just different thresholds in the join
+— a *"back-of-house routine"* job in the same query crosses AT_RISK at 90 %,
+because that is what *its* policy row says. One query serves every policy
+at once.
+
+**Repeats** (*nudge every 5 minutes while AT_RISK*) are the same
+comparison: `now − last_nudged_at >= repeat_min` — a small
+`job_nudge { job_id, role, last_nudged_at }` row per watcher.
+
+**What runs it:** a background worker inside the Jobs service — a 60-second
+loop, the platform's ordinary hosted-service pattern. Not Quartz, not
+Temporal: there is nothing durable to hold, because **the state is derived
+from timestamps that are already durable**. If the service is down for an
+hour, the first sweep afterwards computes every job's correct concern; only
+the nudges of that hour are missing, and a nudge is not a record.
+
+**Why this is better than a scheduler, in one line:** a scheduler holds a
+*copy* of the future ("fire at 09:15") that has to be rebuilt every time the
+job changes — which is exactly what the reference did on every note added
+(01 §3.4). A comparison holds nothing.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
