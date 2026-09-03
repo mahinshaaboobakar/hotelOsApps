@@ -81,6 +81,9 @@ public class GuestOpsDbContext(DbContextOptions<GuestOpsDbContext> options) : Db
 
     public DbSet<StayNote> Notes => Set<StayNote>();
 
+    /// <summary>When each integration last sent anything — the feed's pulse.</summary>
+    public DbSet<InboundFeedMark> FeedMarks => Set<InboundFeedMark>();
+
     /// <summary>This application's own configuration, one row per property.</summary>
     public DbSet<GuestOpsSettings> Settings => Set<GuestOpsSettings>();
 

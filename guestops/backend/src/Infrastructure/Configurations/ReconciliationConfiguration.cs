@@ -57,3 +57,18 @@ public class HeldFactConfiguration : IEntityTypeConfiguration<HeldFact>
         builder.HasIndex(f => new { f.PropertyId, f.ResolvedAt });
     }
 }
+
+/// <summary>The feed's pulse, one row per property and integration.</summary>
+/// <remarks>
+/// Keyed on both, because a property with two feeds has two answers and a
+/// single combined stamp hides one of them going quiet.
+/// </remarks>
+public class InboundFeedMarkConfiguration : IEntityTypeConfiguration<InboundFeedMark>
+{
+    public void Configure(EntityTypeBuilder<InboundFeedMark> builder)
+    {
+        builder.ToTable("inbound_feed_marks");
+        builder.HasKey(m => new { m.PropertyId, m.IntegrationId });
+        builder.Property(m => m.IntegrationId).HasMaxLength(64);
+    }
+}

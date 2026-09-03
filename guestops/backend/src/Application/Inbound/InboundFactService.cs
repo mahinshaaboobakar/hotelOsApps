@@ -39,6 +39,12 @@ public sealed class InboundFactService(
     public async Task<InboundOutcome> ApplyAsync(
         RequestScope scope, InboundStayFact fact, CancellationToken cancellationToken)
     {
+        // The feed is alive, whatever this fact turns out to be. Stamped before
+        // the decision because "is the wire up" and "was this fact useful" are
+        // different questions, and the mark that answered only the second one
+        // read "never" exactly when the feed was healthiest.
+        await MarkFeedAsync(fact, cancellationToken);
+
         var known = await matcher.ByReferenceAsync(fact, cancellationToken);
 
         if (known is not null)
@@ -63,6 +69,41 @@ public sealed class InboundFactService(
     }
 
     /// <summary>A fact about a stay this application already holds.</summary>
+    /// <summary>Record that this integration has just been heard from.</summary>
+    /// <param name="fact">The arriving fact, for its property and integration.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    /// <remarks>
+    /// Upsert on the composite key, and it moves forward only. A replayed
+    /// window (section 13) re-sends facts that arrived days ago, and letting an
+    /// old one overwrite the mark would age a live feed backwards — the
+    /// inversion again, arriving by a different road.
+    /// </remarks>
+    private async Task MarkFeedAsync(InboundStayFact fact, CancellationToken cancellationToken)
+    {
+        var now = clock.GetUtcNow();
+
+        var mark = await db.FeedMarks.FirstOrDefaultAsync(
+            m => m.PropertyId == fact.PropertyId && m.IntegrationId == fact.IntegrationId,
+            cancellationToken);
+
+        if (mark is null)
+        {
+            db.FeedMarks.Add(new InboundFeedMark
+            {
+                PropertyId = fact.PropertyId,
+                IntegrationId = fact.IntegrationId,
+                LastFactAt = now,
+            });
+
+            return;
+        }
+
+        if (mark.LastFactAt < now)
+        {
+            mark.LastFactAt = now;
+        }
+    }
+
     private async Task<InboundOutcome> ApplyToAsync(
         RequestScope scope,
         RoomStay stay,

@@ -227,4 +227,52 @@ public class InboundFactTests
         Assert.Equal(InboundOutcome.Created, outcome);
         Assert.Empty(await harness.Db.LinkCandidates.ToListAsync());
     }
+
+    /// <summary>
+    /// Every arriving fact stamps the feed, whatever becomes of it.
+    /// </summary>
+    /// <remarks>
+    /// The inversion this replaced: `HeldFact.ReceivedAt` is written only when
+    /// a fact <b>fails</b>, so a healthy property had no arrival timestamp at
+    /// all and a widget reading it reported "never" exactly when the wire was
+    /// fine. The mark is taken before the decision, so a fact that settles
+    /// silently counts as much as one that is held.
+    /// </remarks>
+    [Fact]
+    public async Task A_settled_fact_still_proves_the_feed_is_alive()
+    {
+        await using var harness = await InboundHarness.CreateAsync();
+        var fact = InboundHarness.Fact(StayLifecycle.Booked);
+
+        await harness.Inbound.ApplyAsync(harness.Scope(), fact, CancellationToken.None);
+
+        var mark = await harness.Db.FeedMarks.SingleAsync();
+
+        Assert.Equal(fact.IntegrationId, mark.IntegrationId);
+        Assert.Empty(await harness.Db.HeldFacts.ToListAsync());
+    }
+
+    /// <summary>A replayed fact never ages a live feed backwards.</summary>
+    /// <remarks>
+    /// Section 13's replay re-sends facts that arrived days ago. The mark moves
+    /// forward only — letting an old one overwrite it would be the same
+    /// inversion arriving by a different road.
+    /// </remarks>
+    [Fact]
+    public async Task A_replayed_fact_does_not_move_the_mark_backwards()
+    {
+        await using var harness = await InboundHarness.CreateAsync();
+        var scope = harness.Scope();
+
+        await harness.Inbound.ApplyAsync(
+            scope, InboundHarness.Fact(StayLifecycle.Booked), CancellationToken.None);
+
+        var first = (await harness.Db.FeedMarks.SingleAsync()).LastFactAt;
+
+        harness.Clock.Advance(TimeSpan.FromMinutes(-30));
+        await harness.Inbound.ApplyAsync(
+            scope, InboundHarness.Fact(StayLifecycle.Booked), CancellationToken.None);
+
+        Assert.Equal(first, (await harness.Db.FeedMarks.SingleAsync()).LastFactAt);
+    }
 }
