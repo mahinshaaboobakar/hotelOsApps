@@ -46,8 +46,8 @@ constitution's order, not a preference.
 | S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-03 |
 | S2 | Creating a job | **SIGNED OFF** | 2026-09-03 |
 | S3 | Assigning it | **SIGNED OFF** | 2026-09-03 |
-| S4 | Accept, start, pause, finish | **OPEN** | — |
-| S5 | **Escalation** | not started | — |
+| S4 | Accept, start, pause, finish | **SIGNED OFF** | 2026-09-03 |
+| S5 | **Escalation** | **OPEN** | — |
 | S6 | Reminders | not started | — |
 | S7 | Notifications | not started | — |
 | S8 | The guest side | not started | — |
@@ -3060,14 +3060,14 @@ of "On Hold" separated:
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S4-D1** | The status list above — confirm or amend | as drawn | *open* |
-| **S4-D2** | Do we separate **Done** from **Closed**? | yes, with a per-property setting for whether verification is required | *open* |
-| **S4-D3** | Who may close — the assignee, or must a supervisor verify? | configurable; default supervisor verifies | *open* |
-| **S4-D4** | Does **Waiting** stop the SLA clock, and does **Paused**? | Waiting stops it; Paused does not | *open* |
-| **S4-D5** | Reopen — who may, within what window, and is it the same job or a linked new one? | supervisor and above; 7 days; same job, cycle counter increments | *open* |
-| **S4-D6** | Cancel — who may, and is a reason mandatory? | supervisor and above; reason mandatory | *open* |
+| **S4-D1** | The status list | the nine of S1-D9/D19: SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS · ON_HOLD · RESOLVED · CLOSED · CANCELLED | **RULED, owner 2026-09-03** (locked) |
+| **S4-D2** | RESOLVED and CLOSED are separate | "the technician says it's fixed" and "the supervisor agrees" are two facts | **RULED, owner 2026-09-03** (locked) |
+| **S4-D3** | Who may close | *manage* in scope; a worker never closes their own work. **Auto-close N hours after RESOLVED if nobody verifies — a per-property setting, and the owner confirms it is needed** | **RULED, owner 2026-09-03** |
+| **S4-D4** | Which states stop the SLA clock | ON_HOLD only; a paused session does not | **RULED, owner 2026-09-03** (locked) |
+| **S4-D5** | Reopen | *manage*, within 7 days of CLOSED; the same job; `cycle` +1; a new `job_resolution` row; sessions continue; the number does not change; escalation dedupe resets | **RULED, owner 2026-09-03** (locked) |
+| **S4-D6** | Cancel | *manage*; reason mandatory; cancelling a parent cancels its open children | **RULED, owner 2026-09-03** (locked) |
 
-**Sign-off:** _pending_
+**Sign-off:** **S4 SIGNED OFF — owner, 2026-09-03** (*"D3 is needed — auto-close after N hours; others locked"*).
 
 ---
 
@@ -3649,7 +3649,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **3 of 10** |
+| Sections signed off | **4 of 10** |
 | Page locked | no |
 | Locked on | — |
 
