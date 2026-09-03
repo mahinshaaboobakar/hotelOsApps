@@ -48,8 +48,8 @@ constitution's order, not a preference.
 | S3 | Assigning it | **SIGNED OFF** | 2026-09-03 |
 | S4 | Accept, start, pause, finish | **SIGNED OFF** | 2026-09-03 |
 | S5 | **Escalation** | **SIGNED OFF** | 2026-09-03 |
-| S6 | Reminders | **OPEN** | — |
-| S7 | Notifications | not started | — |
+| S6 | Reminders | **SIGNED OFF** | 2026-09-03 |
+| S7 | Notifications | **OPEN** | — |
 | S8 | The guest side | not started | — |
 | S9 | Who can see and manage a job | **DESIGNED** — owner's four levels, 5 decisions | — |
 | S10 | Scheduled / preventive work | not started | — |
@@ -4338,16 +4338,57 @@ to be* late. Make the thresholds configurable. Either build user reminders
 properly or take the button away; a button that does nothing is worse than no
 button.
 
+## Ruled — owner, 2026-09-03
+
+**D2 — waiting with a time, and the policy says who to warn and when.**
+*"A user marks the job waiting — e.g. an AC filter needs to be bought — and
+sets a time. The policy says how many days or hours before to inform, and
+whom."*
+
+```text
+ON_HOLD
+  hold_reason      free text — "filter on order"
+  hold_until       optional time — when it is expected to resume
+
+property policy   waiting_notice: lead (e.g. 1 day, or 2 hours) · roles (ASSIGNEE · DEPT_SUPERVISOR)
+
+the sweep
+  now ≥ hold_until − lead   → nudge the roles: "441 resumes at 10:00 — filter arrived?"
+  now ≥ hold_until          → ON_HOLD ends; the job returns to the state it left;
+                              the promise clock resumes; concern computes as usual
+                              — nothing happened? it becomes AT_RISK on its own thresholds
+```
+
+One nudge, policy-driven, before the hold ends. Nothing else.
+
+**D3 — manual reminders: yes, in v1.** *"I want to be reminded about this
+job at 16:00."* One small table, fired by the same sweep:
+
+```text
+job_reminder     job_id · remind_at · note · for (a user, or a role) · created_by · fired_at
+```
+
+In-app only, like everything else. The reference had this table and an
+empty handler; here the handler is the sweep, which already exists.
+
+**D4 — separate from escalation: yes.** Reminders never touch concern or
+accountability and never write to `job_concern_history`. A reminder is
+addressed *to the person doing the work*; an escalation goes *over their
+head*. Two tables, two purposes, one sweep.
+
+**D1 — progress reminders: absorbed by S5**, as recommended.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S6-D1** | Keep waiting reminders, and are the offsets configurable? | keep; configurable per property | *open* |
-| **S6-D2** | Keep progress reminders, and are the percentages configurable? | keep; configurable per property | *open* |
-| **S6-D3** | User-set reminders — build them or drop them? | build, but not in the first release | *open* |
-| **S6-D4** | Are reminders part of escalation, or separate? | separate — a reminder goes to the person doing the work, an escalation goes over their head | *open* |
+| **S6-D1** | Progress reminders | absorbed by S5's concern model — no separate feature | **RULED, owner 2026-09-03** |
+| **S6-D2** | Waiting with a time | `ON_HOLD` + `hold_until`; policy `waiting_notice` says the lead and the roles; one nudge before it ends; the job resumes at the time | **RULED, owner 2026-09-03** |
+| **S6-D3** | Manual reminders | **yes, in v1** — `job_reminder`, fired by the sweep, in-app | **RULED, owner 2026-09-03** |
+| **S6-D4** | Separate from escalation | yes — never touch concern, accountability or the concern history | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S6 SIGNED OFF — owner, 2026-09-03.**
 
 ---
 
@@ -4678,7 +4719,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **5 of 10** |
+| Sections signed off | **6 of 10** |
 | Page locked | no |
 | Locked on | — |
 
