@@ -17,10 +17,22 @@ namespace HotelOS.Workforce.Application.Abstractions;
 /// a gRPC channel here would make every posting test an integration test.
 /// </para>
 /// <para>
-/// <b>Deliberately narrow.</b> Two questions, both of which have a
-/// authorization consequence. This is not a general-purpose Master Data facade,
-/// and it must not grow into one — every method added here is a fact this
+/// <b>Deliberately narrow.</b> Every question here is one this application must
+/// ask and must not answer. It is not a general-purpose Master Data facade, and
+/// it must not grow into one — every method added here is a fact this
 /// application could start believing it owns.
+/// </para>
+/// <para>
+/// <b>Serving is not storing</b> — ruled 2026-09-03, on the gap the widget
+/// round found: four of Workforce's five widgets show a person's name and this
+/// application had none to give. <see cref="FindNamesAsync"/> reads the display
+/// name at the moment an answer is composed, and nothing keeps it — not a
+/// column, not a cache, not a field that outlives the response. The proto's rule
+/// (<i>this application can never become a second place somebody's name is
+/// stored</i>) is about <b>storage</b>, and reading master data to answer a
+/// question is what the constitution's <i>applications may read master data</i>
+/// is for. A name never written down cannot go stale and cannot disagree with
+/// Master Data, because there is no second copy to disagree with.
 /// </para>
 /// </remarks>
 public interface IStaffDirectory
@@ -85,4 +97,34 @@ public interface IStaffDirectory
     /// </para>
     /// </remarks>
     Task<string?> FindPropertyCountryAsync(Guid propertyId, CancellationToken cancellationToken);
+
+    /// <summary>The display names for a set of staff, for one answer.</summary>
+    /// <param name="propertyId">Whose property is asking.</param>
+    /// <param name="staffIds">The people an answer is about.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>
+    /// A name per id that Master Data knows. <b>An id that is absent from the
+    /// result has no name here</b> — a caller renders what it was given rather
+    /// than a placeholder, because "we could not find this person" and "this
+    /// person has no name" are different facts and neither is "Unknown".
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// <b>A set, not an id.</b> The shape is the round-trip decision: a widget
+    /// resolves five names for one card, and a per-id port would make that five
+    /// calls at every call site whether or not the adapter batched them. Taking
+    /// the set means the call site costs one call and the adapter is free to
+    /// answer it however Master Data's surface allows — today several small
+    /// reads in parallel, tomorrow one filtered list if that RPC gains an id
+    /// filter, with nothing above it changing.
+    /// </para>
+    /// <para>
+    /// <b>Display name, and nothing else about the person.</b> Not the employee
+    /// code, not the photograph, not the contact — a widget row and a rota cell
+    /// need what a name badge shows, and every further field would be another
+    /// fact this application could start believing it owns.
+    /// </para>
+    /// </remarks>
+    Task<IReadOnlyDictionary<Guid, string>> FindNamesAsync(
+        Guid propertyId, IReadOnlyCollection<Guid> staffIds, CancellationToken cancellationToken);
 }

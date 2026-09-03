@@ -91,4 +91,59 @@ public class MasterDataStaffDirectory(
 
         return string.IsNullOrWhiteSpace(property.Country) ? null : property.Country;
     }
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// <para>
+    /// <b>Several small reads, run together.</b> Master Data's <c>ListStaff</c>
+    /// filters by property, a search string and a page — it has no id filter —
+    /// so listing to find five people would pull and page everybody who works
+    /// there to answer a question about five. The gets are issued concurrently,
+    /// so the cost is one round trip's latency rather than five.
+    /// </para>
+    /// <para>
+    /// The port takes a set precisely so this stays the adapter's decision: the
+    /// day <c>ListStaff</c> gains an id filter, this becomes one call and
+    /// nothing above it changes.
+    /// </para>
+    /// <para>
+    /// <b>Nothing is kept.</b> Serving is not storing — the dictionary lives as
+    /// long as the answer being composed. A cache here would be the second copy
+    /// the ruling exists to avoid, and it would be wrong the first time somebody
+    /// was renamed.
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyDictionary<Guid, string>> FindNamesAsync(
+        Guid propertyId, IReadOnlyCollection<Guid> staffIds, CancellationToken cancellationToken)
+    {
+        var wanted = staffIds.Distinct().ToList();
+
+        if (wanted.Count == 0)
+        {
+            return new Dictionary<Guid, string>();
+        }
+
+        var context = RequestContextFactory.ForService("workforce", propertyId);
+
+        var people = await Task.WhenAll(wanted.Select(id =>
+            masterData.GetStaffAsync(
+                new GetStaffRequest { Context = context, Id = id.ToString() },
+                cancellationToken: cancellationToken).ResponseAsync));
+
+        var names = new Dictionary<Guid, string>(wanted.Count);
+
+        foreach (var person in people)
+        {
+            // An empty display name is left out rather than filled in. The
+            // caller renders what it was given; a placeholder invented here
+            // would be this application deciding what somebody is called.
+            if (Guid.TryParse(person.Id, out var id)
+                && !string.IsNullOrWhiteSpace(person.DisplayName))
+            {
+                names[id] = person.DisplayName;
+            }
+        }
+
+        return names;
+    }
 }

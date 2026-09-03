@@ -88,4 +88,40 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
     public Task<string?> FindPropertyCountryAsync(
         Guid propertyId, CancellationToken cancellationToken) =>
         Task.FromResult(Country);
+
+    private readonly Dictionary<Guid, string> _names = [];
+
+    /// <summary>Each set of ids a name was asked for — one entry per call.</summary>
+    /// <remarks>
+    /// Recorded as sets rather than flattened, because what is worth holding
+    /// still is that a card resolves its people in <b>one</b> call: a per-row
+    /// lookup is the round trip the port's shape exists to prevent, and a flat
+    /// list could not tell the two apart.
+    /// </remarks>
+    public List<IReadOnlyCollection<Guid>> NameLookups { get; } = [];
+
+    /// <summary>Give a staff member a display name.</summary>
+    /// <param name="staffId">The person.</param>
+    /// <param name="displayName">What a name badge shows.</param>
+    public void WithName(Guid staffId, string displayName) => _names[staffId] = displayName;
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// <b>Unknown by default.</b> A test that cares about a name says so, and one
+    /// that does not gets the honest answer for somebody this directory has never
+    /// heard of — which is the case a caller has to render without inventing a
+    /// placeholder.
+    /// </remarks>
+    public Task<IReadOnlyDictionary<Guid, string>> FindNamesAsync(
+        Guid propertyId, IReadOnlyCollection<Guid> staffIds, CancellationToken cancellationToken)
+    {
+        NameLookups.Add([.. staffIds]);
+
+        IReadOnlyDictionary<Guid, string> found = staffIds
+            .Distinct()
+            .Where(_names.ContainsKey)
+            .ToDictionary(id => id, id => _names[id]);
+
+        return Task.FromResult(found);
+    }
 }

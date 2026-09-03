@@ -233,6 +233,39 @@ public class SwapProposalService(
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>Every swap this property is waiting on, longest first.</summary>
+    /// <param name="scope">The caller.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>Proposals in either waiting state.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>A different question from <see cref="WaitingOnAsync"/>.</b> That one
+    /// answers <i>what needs me</i>, which is what a supervisor's screen asks.
+    /// This answers <i>what is this property waiting on</i> — what a general
+    /// manager asks and what a dock widget shows. Nothing answered it until now,
+    /// which the widget round found by trying to draw it.
+    /// </para>
+    /// <para>
+    /// Ordered by <see cref="SwapProposal.CreatedAt"/> and not by the shift's
+    /// date, because the figure beside one of these is <b>time waiting</b>. A
+    /// swap raised a week ago for tomorrow has been waiting a week; sorting by
+    /// the shift would file it below one raised this morning for tonight.
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyList<SwapProposal>> PendingAsync(
+        RequestScope scope, CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
+
+        return await db.SwapProposals
+            .Where(p => p.PropertyId == scope.PropertyId
+                        && (p.State == SwapProposalState.Proposed
+                            || p.State == SwapProposalState.Accepted))
+            .OrderBy(p => p.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     private DateOnly Today() => DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
 
     private async Task RefuseDuplicateAsync(

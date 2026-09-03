@@ -253,6 +253,38 @@ public class LeaveService(
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>Every request this property is waiting on, longest first.</summary>
+    /// <param name="scope">The caller.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>Requests still in <see cref="LeaveRequestState.Requested"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>Property-scoped, where <see cref="QueueAsync"/> is per approver.</b>
+    /// Two different questions: <i>what needs me</i>, and <i>what is this
+    /// property waiting on</i>. The second had no answer until the widget round
+    /// tried to draw it.
+    /// </para>
+    /// <para>
+    /// Ordered by <see cref="LeaveRequest.CreatedAt"/> rather than by
+    /// <see cref="LeaveRequest.From"/> — deliberately the opposite of
+    /// <see cref="QueueAsync"/>, and for a reason rather than by accident. An
+    /// approver's queue is worked in the order the days fall; a <i>waiting</i>
+    /// figure is about the person who raised it and has heard nothing.
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyList<LeaveRequest>> PendingAsync(
+        RequestScope scope, CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
+
+        return await db.LeaveRequests
+            .Where(r => r.PropertyId == scope.PropertyId
+                        && r.State == LeaveRequestState.Requested)
+            .OrderBy(r => r.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     private void Post(
         LeaveRequest request, decimal days, LeaveLedgerKind kind, DateOnly on, DateTimeOffset now) =>
         db.LeaveLedger.Add(new LeaveLedgerEntry

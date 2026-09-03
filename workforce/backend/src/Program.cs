@@ -11,6 +11,7 @@ using HotelOS.Workforce.Application.Periods;
 using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Swaps;
 using HotelOS.Workforce.Application.Shifts;
+using HotelOS.Workforce.Application.Summaries;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Grpc;
 using HotelOS.Workforce.Infrastructure;
@@ -147,6 +148,16 @@ builder.Services.AddScoped<PostingAnnouncer>();
 builder.Services.AddScoped<StaffChangeConsumer>();
 builder.Services.AddScoped<PeriodService>();
 builder.Services.AddScoped<AssignmentAdvisor>();
+
+// The five reads behind this application's dock widgets — `SHELL-Q35`. Each is
+// a view over rows this application already owns, and each is registered
+// separately rather than behind one facade: a widget asks one question, and a
+// service that answered five would be five purposes in one file.
+builder.Services.AddScoped<ShiftBoardSummary>();
+builder.Services.AddScoped<AttendanceTodaySummary>();
+builder.Services.AddScoped<PendingRequestsSummary>();
+builder.Services.AddScoped<ComingUpSummary>();
+builder.Services.AddScoped<OnLeaveSummary>();
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one. That is the property worth having: an installed package
