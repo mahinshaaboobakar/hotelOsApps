@@ -3594,6 +3594,13 @@ the SUBSCRIPTION  what I, in my role, want to be told about, and how often
 Settings, named, shared, resolved item → category → department → property.
 
 
+### D7 — RULED: Jobs' own. Owner, 2026-09-03
+
+*"Keep it separate — each app has its own logic and flow; all under one gets
+messy."* Ruled. The concern model below is Jobs', built for jobs, keyed by
+`job_id`; the lift-out shape proposed underneath is dropped. The reasoning
+that follows is kept as the record of what was considered.
+
 ### D7, simply — whose capability is this? — owner, 2026-09-03
 
 **The question.** Room Care will want exactly this: *"room not cleaned 30
@@ -3647,7 +3654,7 @@ with the code rather than before it.
 | **S5-D4** | After an outage | **dissolves** — concern is computed, so nothing is missed; nudges resume; the history records the moves | *follows D1* |
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
-| **S5-D7** | Whose capability | **both, on the platform's own line**: the *mechanism* (states, history, sweep, subscriptions, nudges) is shareable; the *meaning* (what puts a job at risk, who carries it) is each app's. Jobs builds it now with `subject_kind/subject_id` so it lifts out for one column's cost; the architect is asked with the working thing in hand | *awaiting owner: ask now, or build first* |
+| **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
 | **S5-D8** | Do escalations pause overnight, or continue through the night? | continue, but the *recipient* changes to whoever is on duty | *open* |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
