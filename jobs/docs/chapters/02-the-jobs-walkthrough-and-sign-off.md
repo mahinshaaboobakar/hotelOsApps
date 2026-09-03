@@ -3861,6 +3861,53 @@ a question's clothes.
 `resume_at` is computed from it directly.
 
 
+#### "Instead of `resume_at`: a scheduler DB, or a Workforce fanout event?" — owner, 2026-09-03
+
+Two proposals, one recommendation.
+
+**Option 1 — a Quartz-style scheduler store, needed later anyway for
+scheduled escalations and PPM cycles.** Rejected, for three reasons, each
+citable:
+
+* It is the reference's exact shape — a clustered Quartz job store with
+  chains in the job data — and it is **the part that broke**: chains
+  rebuilt on every change, overdue triggers dropped, a misfire comment
+  contradicting its own code (01 §F7).
+* **The concern model exists so that Jobs has no per-job timers.** A
+  scheduled trigger per paused job is per-job timers again.
+* **The platform already has a durable scheduler — Temporal** (the stack
+  standard; Chapter 11). Jobs must not bring a second one. And PPM cycles
+  are Engineering's to schedule, on the platform's scheduler, not Jobs'.
+
+**Option 2 — Workforce publishes a fanout event when a shift starts.**
+Better — and there is a version of it that is better still. *"The roster
+says 07:00"* is a time. *"Ramesh clocked in to Housekeeping at 06:58"* is a
+**fact**, and it is the fact that actually matters: if the roster says 07:00
+and nobody arrives until 07:20, the towel job should not go live at 07:00.
+
+```text
+PRIMARY   Workforce publishes   attendance.clocked_in { user_id, department_code, at }
+          on the property subject, department in the payload — the EVT-Q4 shape:
+          one subject, consumers filter
+          Jobs subscribes (declared). First clock-in to a department with paused
+          jobs → those jobs go live. No timer, no poll, no roster read.
+
+FALLBACK  a property without clock-in devices, or Workforce not installed:
+          the roster time, read once → resume_at, as designed above.
+          The event supersedes it wherever it exists.
+```
+
+**What this costs, and whose it is.** Workforce announces no attendance
+event today (measured: postings, headship, `shift.changed`,
+`shift.assigned` only), and attendance is Workforce's subject (its §3.2).
+So this is **a request to Workforce**, not something Jobs builds — the same
+class as the place kinds request to Master Data. Recorded and sent up.
+
+**Recommendation: Option 2, on attendance, with the roster time as the
+fallback.** `resume_at` stays on `job` for the fallback; where the event
+exists it is simply never needed.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
