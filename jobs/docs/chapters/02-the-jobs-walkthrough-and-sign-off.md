@@ -4716,7 +4716,7 @@ not before it.
 
 | id | Decision | Ruling |
 |---|---|---|
-| **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
+| **S9-D1** | Two axes — scope × power — **realised by four labels, three of which already exist**: `department#member` (own + execute) · `department#supervisor` (department + manage) · `property#admin` (property + administer) · **`property#jobs_manager`** (property + administer, **GM-grantable** — the new one, S9-D7). The axes are the concept; the labels are the implementation | *clarified 2026-09-03 — awaiting owner* |
 | **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
 | **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **Jobs powers: Workforce** — member / supervisor / head of a department (§S1.16 ·10). Not a Jobs screen, not a Core Admin card | **answered** — §S1.16 ·10 |
 | **S9-D3** | *Capture from someone* is property-level — `property#admin` **or `property#jobs_manager`** | **RULED, owner 2026-09-03** |
