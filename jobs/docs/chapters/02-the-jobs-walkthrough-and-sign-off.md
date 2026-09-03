@@ -3594,6 +3594,49 @@ the SUBSCRIPTION  what I, in my role, want to be told about, and how often
 Settings, named, shared, resolved item → category → department → property.
 
 
+### D7, simply — whose capability is this? — owner, 2026-09-03
+
+**The question.** Room Care will want exactly this: *"room not cleaned 30
+minutes after checkout → AT_RISK → the floor supervisor"*. Engineering's
+PPM: *"service overdue → BREACHED → the head"*. GuestOps: *"request
+unanswered"*. If each application builds its own, there are three copies
+that drift — which is the platform's no-duplicated-shared-code rule, and it
+is also the reference's own history: it had **four** escalation engines.
+
+**The split the platform already uses — mechanism versus meaning.**
+
+```text
+MECHANISM — the same for everyone                shared
+  the four states · the history table · the minute sweep ·
+  subscriptions per role · nudges and repeats · the board filter
+
+MEANING — different for each application         each app's own
+  WHAT puts a job at risk        due_at · accepted · sessions · roster
+  WHAT puts a room at risk       checkout time · arrival time · cleaning credits
+  WHO becomes accountable        each app's policy ladder
+```
+
+The platform's rule: *shared means mechanism, never meaning.* So the answer
+is not "Jobs' or the platform's" — it is **both, on that line**.
+
+**What Jobs does now.** Builds it, inside Jobs, as its own module — but
+shaped so the mechanism can be lifted out without a rewrite:
+
+```text
+job_concern_history   →  concern_history { subject_kind: "job", subject_id, … }
+concern_subscription  →  already has no job-specific field
+the sweep             →  asks each subject kind "compute your state" and compares
+```
+
+One column name is the whole cost of lifting it later.
+
+**Who decides.** The architect — a new platform capability is above an
+application round. The owner's part is only: *ask now, or let Jobs build
+first and ask with the working thing in hand.* The stream recommends the
+second: build it in Jobs with the lift-out shape, and send the question up
+with the code rather than before it.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -3604,7 +3647,7 @@ Settings, named, shared, resolved item → category → department → property.
 | **S5-D4** | After an outage | **dissolves** — concern is computed, so nothing is missed; nudges resume; the history records the moves | *follows D1* |
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
-| **S5-D7** | Does escalation belong to Jobs, or is it a platform capability shared with Room Care, Maintenance and GuestOps? | platform — needs an architect ruling | *open* |
+| **S5-D7** | Whose capability | **both, on the platform's own line**: the *mechanism* (states, history, sweep, subscriptions, nudges) is shareable; the *meaning* (what puts a job at risk, who carries it) is each app's. Jobs builds it now with `subject_kind/subject_id` so it lifts out for one column's cost; the architect is asked with the working thing in hand | *awaiting owner: ask now, or build first* |
 | **S5-D8** | Do escalations pause overnight, or continue through the night? | continue, but the *recipient* changes to whoever is on duty | *open* |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
