@@ -25,6 +25,22 @@
  *
  * A rejected artifact left in `.build/` is one the next packaging step picks up
  * and signs. It is a build output and regenerating it costs a second.
+ *
+ * # An app builds more than one bundle — `SHELL-Q35`
+ *
+ * ```
+ * node ../../scripts/build-module.mjs [outfile] [entry]
+ * ```
+ *
+ * The outfile was already an argument and the entry was not, so the script
+ * could name a different output and never a different input. A widget is a
+ * declared `ui/` file with its own digest and its own realm, which means one
+ * bundle each — five more for Workforce — and every one of them has to satisfy
+ * exactly the checks below: self-contained, self-starting, published tokens
+ * only, no same-realm assumptions.
+ *
+ * Both default to the module's own, so an invocation that passes neither is
+ * unchanged.
  */
 
 import { createRequire } from "node:module";
@@ -34,6 +50,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const app = process.cwd();
 const outfile = resolve(app, process.argv[2] ?? "module.js");
+const entry = resolve(app, process.argv[3] ?? "main.ts");
 const require_ = createRequire(pathToFileURL(`${app}/`));
 const esbuild = require_("esbuild");
 
@@ -169,6 +186,76 @@ async function declaredIcon(app) {
   return [];
 }
 
+/**
+ * Every declared widget is inside `ui/` and listed in `files:` — `SHELL-Q35`.
+ *
+ * Z's half, folded in here so the file has one author this round.
+ *
+ * # What this can check, and what it deliberately leaves to signing
+ *
+ * The brief was *exists, listed, self-starts*. Two of those belong here and one
+ * cannot: **existence is not knowable from one invocation.** An application
+ * builds its module and then its widgets in sequence, so on a clean checkout no
+ * widget bundle exists while the module is being built, and only the last of
+ * the five sees all five on disk. A check that ran anyway would fail every
+ * build but the last, which is a check nobody keeps.
+ *
+ * So existence stays where the whole payload is in hand — `hopkg sign`, whose
+ * `validate::payload` refuses with *"declares ui.widgets[coming-up] but the
+ * signed inventory has no ui/widgets/coming-up.js — a package cannot deliver
+ * what it does not carry"*. Verified by removing a bundle and watching it
+ * refuse.
+ *
+ * **Self-starting is already checked** — `selfStarts` runs on every bundle this
+ * script writes, widget or module, which is exactly the third requirement
+ * without a second implementation of it.
+ *
+ * What is left is the pair that is always knowable, and the one that catches
+ * the typo: a widget outside `ui/` the loader would never look for, one missing
+ * from `files:` so the signature would not cover it, and a bundle being written
+ * to a path the manifest does not declare — which would ship as an unverified
+ * file beside the verified ones.
+ */
+async function declaredWidgets(app, outfile) {
+  let manifest;
+  try {
+    manifest = await readFile(resolve(app, "../manifest.yaml"), "utf8");
+  } catch {
+    return [];
+  }
+
+  // The `file:` lines inside the `widgets:` block. A shallow parse, like the
+  // icon's: a YAML dependency here would be a second opinion about the manifest
+  // beside the Kernel's, and the Kernel's is the one that decides.
+  const declared = [...manifest.matchAll(/^\s+file:\s*(\S+)\s*$/gm)].map((m) => m[1]);
+  if (declared.length === 0) return [];
+
+  const problems = [];
+
+  for (const path of declared) {
+    if (!path.startsWith("ui/")) {
+      problems.push(`declares a widget at "${path}", which is not inside ui/.`);
+      continue;
+    }
+
+    if (!manifest.includes(`"${path}"`)) {
+      problems.push(
+        `declares a widget at "${path}" but does not list it in files:, so the signature would not cover it.`,
+      );
+    }
+  }
+
+  // The outfile, when it is a widget bundle, must be one the manifest declares.
+  const written = outfile.split(/[\\/]/).slice(-2).join("/");
+  if (written.startsWith("widgets/") && !declared.includes(`ui/${written}`)) {
+    problems.push(
+      `is being written to ui/${written}, which the manifest does not declare — it would ship beside the verified files and be verified by nothing.`,
+    );
+  }
+
+  return problems;
+}
+
 /** Same-realm assumptions the sandbox makes impossible. */
 function realmAssumptions(bundle) {
   return ["window.parent", "window.top", "document.cookie", "document.domain"].filter((reach) =>
@@ -177,7 +264,7 @@ function realmAssumptions(bundle) {
 }
 
 await esbuild.build({
-  entryPoints: [resolve(app, "main.ts")],
+  entryPoints: [entry],
   bundle: true,
   format: "esm",
   // The realm is a browser document served by `srcdoc`, and ES2022 is what the
@@ -215,6 +302,7 @@ if (unpublished.length > 0) {
 }
 
 for (const problem of await declaredIcon(app)) failures.push(problem);
+for (const problem of await declaredWidgets(app, outfile)) failures.push(problem);
 
 const reached = realmAssumptions(bundle);
 if (reached.length > 0) {
@@ -226,7 +314,11 @@ if (failures.length > 0) {
   // copies and hopkg signs, and the next person to see it is an administrator
   // reading a refusal.
   await rm(outfile, { force: true });
-  console.error(`\nui/module.js was NOT written — ${failures.length} problem(s):\n`);
+  // The outfile's own name, not a literal: an app builds several bundles now,
+  // and a refusal that always says "module.js" points at the wrong one.
+  console.error(
+    `\n${outfile.split(/[\\/]/).slice(-1)[0]} was NOT written — ${failures.length} problem(s):\n`,
+  );
   for (const failure of failures) console.error(`  • the bundle ${failure}`);
   console.error("");
   process.exit(1);

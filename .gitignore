@@ -38,6 +38,10 @@
 # (hello-hotel) is the deliberate exception: it is hand-written, has no build
 # step at all (PKG-Q42), and is a source file rather than an artifact.
 */ui/module.js
+# And a widget's, for the same reason — SHELL-Q35 gives an application one
+# bundle per declared widget, each built by the same pipeline and signed as
+# found. The sources are ui/widgets/panel/ and ui/widgets/entry/.
+*/ui/widgets/*.js
 .build/
 
 # ---------- node ----------
