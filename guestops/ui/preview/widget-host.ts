@@ -29,7 +29,11 @@ const BASE = `<style>${TOKENS}
   body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; }
 </style>`;
 
-for (const name of WIDGETS) {
+// `?only=<id>` draws one card, so a capture pairs with a single artboard.
+const only = new URLSearchParams(location.search).get("only");
+const drawn = only === null ? WIDGETS : WIDGETS.filter((w) => w === only);
+
+for (const name of drawn) {
   const bundle = await (await fetch(`../widgets/${name}.js`)).text();
 
   const figure = document.createElement("figure");
