@@ -3693,6 +3693,37 @@ the platform gains department operating hours, Jobs reads them and its own
 setting goes. Recorded, not blocking.
 
 
+#### D8, simply — the setting and where it lives
+
+**The setting:** a "we are closed" window. Two levels, department wins.
+
+```text
+JOBS APP → SETTINGS → QUIET HOURS
+
+  Property          23:00 – 07:00                    the hotel's default
+  Housekeeping      22:00 – 06:00                    overrides it for HK jobs
+  Engineering       (none)                           ENG follows the property's
+  Front Office      off                              FO runs all night — no pause
+
+  Emergency jobs    never pause · call: DUTY_MANAGER, SECURITY
+```
+
+**What it does, in one line each:**
+
+```text
+job raised inside the window     the clock does not start until the window ends
+job already running              the clock pauses at the start, resumes at the end
+concern                          frozen — nothing becomes AT_RISK or BREACHED overnight
+nudges                           none
+EMERGENCY                        ignores all of it; its night contacts are called
+morning                          the board shows everything that waited, in order
+```
+
+**Storage:** one table, `quiet_hours` — `property_id · department_code (null
+= the property row) · from · to`. Which row applies to a job: the job's
+department's row if it has one, else the property's. Nothing else.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -3704,7 +3735,7 @@ setting goes. Recorded, not blocking.
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
 | **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
-| **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | *proposed on the owner's question — awaiting owner* |
+| **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03** — property level and department level, department wins; Jobs Settings → Quiet hours |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
