@@ -203,6 +203,42 @@ ui:
   # dock, the launcher and every persisted layout resolve an application by id
   # alone.
   module: guestops
+
+  # The five widgets, right-clicked off this application's dock tile —
+  # SHELL-Q35. Each file is declared here and digest-listed in `files:` below,
+  # so `verified_ui_file` covers it with no verification code of its own.
+  #
+  # `stackable` defaults to true and a widget opts out. The test is attention,
+  # not size: a widget you GO AND LOOK at can stack, because missing it for an
+  # hour costs nothing; one that has to CATCH YOU cannot, because a warning
+  # nobody flipped to is a warning that did not happen.
+  widgets:
+    - id: today-at-the-desk
+      name: Today at the Desk
+      file: ui/widgets/today.js
+
+    - id: occupancy
+      name: Occupancy
+      file: ui/widgets/occupancy.js
+
+    # Never stacked. It exists to make a silent feed visible, and silence is
+    # precisely what nobody goes looking for — so it can never be the card
+    # underneath.
+    - id: from-the-pms
+      name: From the PMS
+      file: ui/widgets/from-the-pms.js
+      stackable: false
+
+    - id: business-mix
+      name: Business Mix
+      file: ui/widgets/business-mix.js
+
+    # Never stacked, for the same reason: the overdue departure this catches is
+    # the one nobody was thinking about.
+    - id: watchlist
+      name: Watchlist
+      file: ui/widgets/watchlist.js
+      stackable: false
   # The dock icon — `SHELL-Q34`. An SVG in the package, listed below and
   # therefore covered by the signature: the desktop verifies it against this
   # inventory at every load, so an icon replaced on disk after install refuses
@@ -220,4 +256,9 @@ ui:
 files:
   "backend/HotelOS.GuestOps.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/today.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/occupancy.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/from-the-pms.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/business-mix.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/watchlist.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>GuestOps widgets</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The harness's own chrome only. Each pane is a real iframe at the popover's
+   * size, because that is the realm and the size a widget is given — mounted
+   * into a div it would size itself against the whole page.
+   */
+  body { margin: 0; padding: 18px; background: var(--color-surface);
+         color: var(--color-ink); font: 13px/1.5 system-ui, sans-serif; }
+  .row { display: flex; gap: 18px; flex-wrap: wrap; }
+  figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  figcaption { font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+               color: var(--color-ink-faint); }
+  iframe { width: 320px; height: 384px; border: 1px solid var(--color-line);
+           border-radius: 16px; background: var(--color-surface-raised); }
+</style>
+</head><body>
+  <div class="row" id="row"></div>
+  <script type="module" src="./widget-frame.js"></script>
+</body></html>
