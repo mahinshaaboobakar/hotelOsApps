@@ -179,6 +179,40 @@ ui:
   # an operator trusts.
   icon: ui/icon.svg
 
+  # The five widgets this application offers on its dock tile — `SHELL-Q35`,
+  # owner-approved 2026-09-03 on Z's canvas.
+  #
+  # Each `file` is a declared `ui/` path, so it is listed below, covered by the
+  # signature and verified at load by `verified_ui_file` — the return on
+  # `SHELL-Q34` having generalised that check rather than special-casing the
+  # icon. A widget that fails verification refuses **the widget**, named and
+  # unopenable with its reason, and not the application: one bad widget says
+  # nothing about the module's bytes, which were verified independently.
+  #
+  # **None opts out of stacking, and that is per widget rather than per app.**
+  # The test is attention, not size: a widget you *go and look at* can stack,
+  # because missing it for an hour costs nothing; one that has to *catch you*
+  # cannot. All five of these are consulted — a duty manager opens Shift Board
+  # to ask whether the property is covered — so `stackable` stays at its
+  # default. Reading that as a Workforce setting would be the wrong lesson from
+  # the same table: GuestOps opts two of five out, Jobs one of five.
+  widgets:
+    - id: shift-board
+      name: Shift Board
+      file: ui/widgets/shift-board.js
+    - id: attendance-today
+      name: Attendance Today
+      file: ui/widgets/attendance-today.js
+    - id: pending-requests
+      name: Pending Requests
+      file: ui/widgets/pending-requests.js
+    - id: coming-up
+      name: Coming Up
+      file: ui/widgets/coming-up.js
+    - id: on-leave
+      name: On Leave
+      file: ui/widgets/on-leave.js
+
 # What this application may establish in the authorization graph — `AUTHZ-Q25`,
 # schema `packages/hotelos-package/src/authorization.rs`.
 #
@@ -246,3 +280,11 @@ files:
   # exact key. The bundle is what ships; the TypeScript stays in the repository.
   "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  # One per widget. `validate::payload` refuses a declared widget that is not
+  # listed here — a widget outside `files:` is one the loader cannot verify,
+  # and an unverifiable surface is what `SHELL-Q34` exists to make impossible.
+  "ui/widgets/shift-board.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/attendance-today.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/pending-requests.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/coming-up.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/on-leave.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

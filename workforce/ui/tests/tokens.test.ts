@@ -60,6 +60,15 @@ describe("the module's token references", () => {
       }
     }
 
+    // The widgets' sheet — a second *document* rather than a second screen:
+    // five bundles share it and none of them is the module. Added the day the
+    // directory was, because this guard's own history is exactly the failure of
+    // not doing that: it shipped naming two stylesheets and was still green at
+    // six.
+    if (readdirSync(join(root, "widgets")).includes("styles.ts")) {
+      found.push("widgets/styles.ts");
+    }
+
     return found;
   }
 
