@@ -3763,6 +3763,47 @@ optional). The levels the owner asked for are kept — property comes from
 the roster as a whole, department from that department's roster.
 
 
+#### "At 07:00 the shift starts — how does Jobs know? Is there a trigger from Workforce?" — owner, 2026-09-03
+
+**Measured first.** Workforce announces postings (`user.posted`,
+`user.posting_ended`), headship, and roster *plan* changes (`shift.assigned`,
+`shift.changed`). **It does not announce "a shift has started"** — 07:00 is a
+time written on the roster, not an event that fires when the clock reaches
+it. So there is no trigger to subscribe to, and inventing one in Workforce
+for Jobs' sake would be the wrong direction.
+
+**So the workflow is the sweep, and it needs nothing new:**
+
+```text
+every minute, the sweep that already exists (S5 step 2) does one more thing
+
+  for each department with jobs waiting for staff
+      ask Workforce, through Context:  "who is on shift in HK right now?"
+      — the same read S1-D13's assignment dropdown already makes
+
+  06:59   HK: nobody            → the towel job stays paused
+  07:00   HK: Ramesh, Devi      → the answer changed
+            → the paused jobs in HK go live: due_at set from now,
+              concern computed, the supervisor's board updates,
+              AUTO assignment runs if the policy says so
+```
+
+**Why a sweep and not an event, in one line:** *"is anyone on shift"* is a
+question with a different answer every minute of the day — that is a thing
+to **ask**, not a thing to be **told**. Workforce publishing "07:00 arrived"
+for every department at every property would be the roster narrating the
+clock.
+
+**What the roster change events are for.** `shift.changed` / `shift.assigned`
+matter to Jobs only as *cache-busting*: if Jobs keeps the last answer to
+"who is on shift" for a minute, a roster edit should invalidate it. That is
+an optimisation for later, not part of the design.
+
+**And if Workforce is not installed:** the read answers nothing, so the
+sweep treats every department as staffed — the clock never pauses for
+staffing, only for service hours. Absent is not blocking (ADR 0116 §5).
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
