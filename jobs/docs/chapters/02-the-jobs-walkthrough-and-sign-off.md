@@ -2669,8 +2669,11 @@ raised_kind           STAFF · GUEST · APPLICATION            who is asking
 raised_by_id          user_id · Guest360 id · application id
 stay_id               the guest's visit — NOT NULL when raised_kind = GUEST
 
-scheduled_for         null = now; a future time = SCHEDULED
-due_at                the deadline — a time, set at creation, editable by manage
+scheduled_for         null = now; a future time = SCHEDULED        (the RAISER's choice)
+resume_at             null = clock running. Set = clock paused until then, because
+                      nobody is on shift or it is outside service hours (the SYSTEM's,
+                      from one roster read; recomputed on shift.changed)   ← added 2026-09-03
+due_at                the deadline — a time, set when the clock starts, editable by manage
 job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
                       ON_HOLD · RESOLVED · CLOSED · CANCELLED
 cycle                 1, +1 per reopen
@@ -2679,7 +2682,7 @@ created_by · created_at · updated_by · updated_at · version    the platform'
 deleted_at · deleted_by · delete_reason                        soft delete
 ```
 
-Twenty-three columns, five of them the platform's own. Every clock counts
+Twenty-four columns, five of them the platform's own (`resume_at` added on D8, 2026-09-03). Every clock counts
 from `scheduled_for ?? created_at`, computed where it is needed.
 
 **The four cases, in the four raiser fields:**
@@ -3835,6 +3838,14 @@ when Workforce publishes shift.changed / shift.assigned for that department
         → re-read once → resume_at = 06:30
 06:30   sweep: now >= resume_at → job live. No call.
 ```
+
+**`resume_at` is a new column on `job`** — the owner asked. It is not in
+§S1.18's first cut; it is added there now. Why it is a column and not
+derived: deriving it each minute *is* the poll just rejected. Why it is on
+`job` and not a per-department cache: it is a fact about *this job's* clock
+(§S1.14 ·4's rule), and `due_at` is computed from it when the clock starts.
+It is distinct from `scheduled_for`, which is the **raiser's** choice and
+must not be overwritten by the roster.
 
 **Calls to Workforce, that night: two.** One at pause, one because the
 roster changed. The minute sweep touches nothing outside Jobs — it compares
