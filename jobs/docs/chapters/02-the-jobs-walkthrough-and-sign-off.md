@@ -3724,6 +3724,45 @@ morning                          the board shows everything that waited, in orde
 department's row if it has one, else the property's. Nothing else.
 
 
+#### "Jobs, or Workforce?" — owner, 2026-09-03. Both, because quiet hours are two facts
+
+The platform's test (ADR 0052): **who establishes the value?** Applied, the
+setting above splits in two:
+
+```text
+IS ANYONE ON SHIFT?            a fact. Workforce establishes it — the roster.
+                               Jobs already reads it for assignment (S1-D13).
+                               → NOT a Jobs setting. Jobs derives it:
+                                 nobody rostered in the job's department right now
+                                 = the clock pauses, automatically, no table
+
+DO WE PROMISE SERVICE NOW?     a policy. A hotel may have night staff and still not
+                               promise 12-minute towels at 03:00.
+                               Nobody but Jobs reads it — it is about the promise.
+                               → a Jobs setting: SERVICE HOURS, per department,
+                                 optional, default "always"
+```
+
+So the `quiet_hours` table above is **replaced**:
+
+```text
+pause the clock when        nobody is on shift in the department      (Workforce, read)
+                  OR        outside the department's service hours    (Jobs policy, optional)
+EMERGENCY                   never pauses; its policy names the night contacts
+```
+
+The property with no night staff needs **no setting at all** — the roster
+already says so. The property that is staffed but does not promise sets
+service hours. And the question sent up under D8 — *where do department
+operating hours live?* — is answered by this: **they are the roster**, and
+Jobs stops needing its own copy.
+
+**Corrected ruling for D8:** the staffing half is Workforce's and derived;
+the promise half is Jobs' (Settings → Service hours, per department,
+optional). The levels the owner asked for are kept — property comes from
+the roster as a whole, department from that department's roster.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -3735,7 +3774,7 @@ department's row if it has one, else the property's. Nothing else.
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
 | **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
-| **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03** — property level and department level, department wins; Jobs Settings → Quiet hours |
+| **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03**, then sharpened on the owner's question: the clock pauses when **nobody is on shift** (Workforce, derived — no setting) **or** outside optional **service hours** (Jobs policy, per department); EMERGENCY exempt. Property and department levels both hold; the operating-hours question is closed — they are the roster |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
