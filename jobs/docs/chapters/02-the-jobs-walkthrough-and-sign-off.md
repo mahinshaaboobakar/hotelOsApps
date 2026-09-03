@@ -4721,7 +4721,7 @@ not before it.
 | **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **Jobs powers: Workforce** — member / supervisor / head of a department (§S1.16 ·10). Not a Jobs screen, not a Core Admin card | **answered** — §S1.16 ·10 |
 | **S9-D3** | *Capture from someone* is property-level — `property#admin` **or `property#jobs_manager`** | **RULED, owner 2026-09-03** |
 | **S9-D7** | **The property-wide level is grantable by the GM** — a Jobs-declared grant kind `property#jobs_manager` (AUTHZ-Q25's route); granted/revoked by the GM or admin; needs a grantable-relations-registry entry | **RULED as a requirement, owner 2026-09-03**; the registry entry is the architect's |
-| **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
+| **S9-D4** | A job can be **restricted** — visible only to the raiser, the assignee and property level. **Set by a person, never automatically**: the raiser ticks it when raising, or anyone with property-level access later; **or a catalogue item carries `restricted_by_default`** (e.g. *Staff conduct*, *Security incident*) so raising it sets the flag without anyone remembering. Un-restricting is property-level only and a history row | *clarified 2026-09-03 — awaiting owner* |
 | **S9-D5** | ~~Six manifest permissions~~ — the platform already has the five actions and the relations (`model.fga` `type job`). **Parked for the owner's separate discussion**, as asked | *parked* |
 
 **Sign-off:** _pending_
