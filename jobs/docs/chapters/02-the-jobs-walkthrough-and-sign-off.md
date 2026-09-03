@@ -4061,6 +4061,44 @@ to build**, on the platform's scheduler. Nothing of it lives in Jobs.
 asked. **The job table is twenty-four columns.**
 
 
+#### "Then we can use Temporal for Jobs too, right?" — owner, 2026-09-03
+
+**Yes — for what Temporal is for, and not for the part that just failed as
+`next_check_at`.** Three uses, and Chapter 11 already names two of them.
+
+```text
+1  THE TICKER            Temporal Cron runs the concern sweep every minute
+                         — one schedule per property, not one per job.
+                         What it buys: durability and visibility of the sweep
+                         itself (did it run, when, how long) instead of a bare
+                         hosted-service loop. The sweep's work is unchanged.
+
+2  WORKFLOWS ON A JOB    Chapter 11, Event-driven workflows:
+                            "workorder.completed → Verification workflow"
+                         (pre-rename; APPS-Q3 makes it job.completed)
+                         The S4-D3 verify-or-auto-close step is exactly this:
+                         a workflow started by job.resolved that waits N hours
+                         for a CLOSED, else closes — a real long-running thing
+                         with a real wait, which is Temporal's shape.
+
+3  NOT per-job timers    "sleep until 09:15 then check" per job is the copy of
+                         the future again — a thousand open jobs is a thousand
+                         workflows holding timers, each cancelled and restarted
+                         on every assignment, pause and hold. That is the
+                         rebuild-on-change problem the owner named, wearing
+                         Temporal's clothes. Concern stays a comparison over
+                         stored timestamps.
+```
+
+**The line:** *Temporal holds a future when the future is the thing — a
+schedule, a wait for an approval, a verification window. It does not hold a
+future that is already sitting on the row as `due_at`.*
+
+So: the sweep is **triggered by** Temporal Cron and **computes** the way S5
+describes; the verify window after RESOLVED is a Temporal workflow; per-job
+escalation timers are not built.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
