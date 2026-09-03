@@ -1486,6 +1486,8 @@ rather than assumed.
 
 ## S1.13 · The redesign, hotel domain first
 
+> **Renamed 2026-09-03 (§S1.14 ·1):** *issue › symptom* became **category › item** — "issue" does not fit a request for water. The identifiers below carry the new names; the prose keeps the old words where it quotes the reference.
+
 **Owner, 2026-09-02:** *"Redesign it, based on our hotel domain. Take concepts
 from the reference."* An interview was offered instead and declined — the
 owner wants the design, not questions. Written here.
@@ -1563,7 +1565,7 @@ IN-ROOM DINING
   Water · Tea/coffee · Ice · Order follow-up
 ```
 
-Two levels: **issue → symptom**. "AC" is the issue; "not cooling" is the
+Two levels: **category › item**. "AC" is the issue; "not cooling" is the
 symptom. The symptom is what routes to the *right* engineer and what makes
 the fault history useful — "this unit has failed *not cooling* four times"
 is a sentence only a symptom level can produce.
@@ -1678,17 +1680,17 @@ THE CATALOGUE — the vocabulary, editable, group-wide
                    guest_requestable · applies_to (room | public area |
                    asset_type HVAC) · standard_resolution_minutes · active
 
-  symptom          id · issue_id → AC · code NOT_COOLING · name · aliases · active
+  symptom          id · category_id → AC · code NOT_COOLING · name · aliases · active
 
   resolution       id · code GAS_RECHARGED · name
-                   issue_id     → AC        (null = universal: "no fault found",
+                   category_id     → AC        (null = universal: "no fault found",
                                               "referred to vendor", "other")
-                   symptom_id   → optional  (null = every symptom of that issue)
+                   item_id   → optional  (null = every symptom of that issue)
 
 THE JOB — three ids, stamped once, never derived
 
-  issue_id         → AC
-  symptom_id       → not cooling
+  category_id         → AC
+  item_id       → not cooling
   asset_id         → 214-AC            (Master Data; when the issue is about a thing)
   location_id      → room 214
   …
@@ -1730,10 +1732,10 @@ Two rules:
 ### The prediction — a query, not a model
 
 ```sql
-SELECT asset_id, symptom_id, resolution_id, count(*)
+SELECT asset_id, item_id, resolution_id, count(*)
 FROM   jobs.jobs
 WHERE  resolved_at > now() - interval '12 months'
-GROUP  BY asset_id, symptom_id, resolution_id
+GROUP  BY asset_id, item_id, resolution_id
 HAVING count(*) >= 3
 ```
 
@@ -1774,16 +1776,16 @@ One job, start to finish. Only the fields that matter for the concept.
 **0 · What exists before anyone calls — the catalogue**
 
 ```json
-{ "issue":      { "id": "I-AC",  "code": "AC", "name": "AC", "department": "ENG",
+{ "category":      { "id": "I-AC",  "code": "AC", "name": "AC", "department": "ENG",
                   "applies_to": "asset_type:HVAC", "standard_minutes": 45 },
-  "symptoms":   [ { "id": "S-NC", "issue": "I-AC", "code": "NOT_COOLING", "name": "not cooling",
+  "items":   [ { "id": "S-NC", "category": "I-AC", "code": "NOT_COOLING", "name": "not cooling",
                     "aliases": ["ac not working", "room hot", "aircon"] },
-                  { "id": "S-NZ", "issue": "I-AC", "code": "NOISY",       "name": "noisy" } ],
-  "resolutions":[ { "id": "R-FC", "issue": "I-AC", "symptom": "S-NC", "name": "filter cleaned" },
-                  { "id": "R-GR", "issue": "I-AC", "symptom": "S-NC", "name": "gas recharged" },
-                  { "id": "R-UR", "issue": "I-AC", "symptom": null,   "name": "unit replaced" },
-                  { "id": "R-NF", "issue": null,   "symptom": null,   "name": "no fault found" },
-                  { "id": "R-OT", "issue": null,   "symptom": null,   "name": "other" } ] }
+                  { "id": "S-NZ", "category": "I-AC", "code": "NOISY",       "name": "noisy" } ],
+  "resolutions":[ { "id": "R-FC", "category": "I-AC", "item": "S-NC", "name": "filter cleaned" },
+                  { "id": "R-GR", "category": "I-AC", "item": "S-NC", "name": "gas recharged" },
+                  { "id": "R-UR", "category": "I-AC", "item": null,   "name": "unit replaced" },
+                  { "id": "R-NF", "category": null,   "item": null,   "name": "no fault found" },
+                  { "id": "R-OT", "category": null,   "item": null,   "name": "other" } ] }
 ```
 
 **1 · 19:40 — the guest calls. Front desk types "ac not working 214".**
@@ -1794,7 +1796,7 @@ flow sets priority.
 ```json
 { "job_id": "…uuid…", "number": "KOC-ENG-441",
   "location_id": "L-214", "asset_id": "A-214-AC",
-  "issue_id": "I-AC", "symptom_id": "S-NC",
+  "category_id": "I-AC", "item_id": "S-NC",
   "department": "ENG", "guest_stay_id": "STAY-8812", "source": "FRONT_DESK",
   "priority": "HIGH", "priority_set_by": "flow:occupied+complaint",
   "glitch": true,
@@ -1831,7 +1833,7 @@ move is an event.
 **5 · Next morning — the report reads the ids, never the names.**
 
 ```json
-{ "asset_id": "A-214-AC", "symptom_id": "S-NC", "resolution_id": "R-GR",
+{ "asset_id": "A-214-AC", "item_id": "S-NC", "resolution_id": "R-GR",
   "count_12_months": 3 }
 ```
 
@@ -1848,7 +1850,7 @@ when displayed.
 | Reference concept | Here |
 |---|---|
 | `workOrderType` — Complaint / Request / Maintenance | **gone.** Department + guest link + glitch flag cover every use |
-| `service` — a flat string list, display name as key | **issue → symptom**, two levels, organised by department, UUID-keyed, aliases |
+| `service` — a flat string list, display name as key | **category › item**, two levels, organised by department, UUID-keyed, aliases |
 | `category` | gone |
 | `source` | kept, closed list |
 | routing baked into the entry (assignee id, keyword map) | **department on the issue**; the person is resolved by S3's rules at assignment time |
@@ -1873,6 +1875,273 @@ trackMode.
 | **d** | Are **resolution actions** mandatory on close, or optional? | mandatory for ENG issues, optional for HK requests — set per issue |
 | **e** | Is a **checklist run** in the first release? | no — but a job must be raisable *from* one when it exists |
 
+---
+
+## S1.14 · Round 2 — the owner's seven points, 2026-09-03
+
+### 1 · The word — "issue" is wrong for a request; the pair is **category › item**
+
+*"Someone asks for water — we can't say that is an issue and a symptom."*
+Correct. The catalogue needs a pair of words that read naturally for a fault
+**and** a request. **Category › Item** is the plainest pair, and it is
+literally what the picker shows:
+
+```text
+category            item
+AC                  not cooling · noisy · leaking · filter change (PPM)
+Plumbing            tap dripping · no hot water · drain blocked
+In-room dining      water · tea/coffee · ice
+Extra items         towel · pillow · blanket
+Room move           guest request · upgrade · noise
+```
+
+*"AC, not cooling"* and *"In-room dining, water"* both read as a category and
+an item. The job stores `category_id` and `item_id`. `resolution` keeps its
+name. **§S1.13 is read with these words** — its `issue`/`symptom` identifiers
+are renamed there; nothing else about it changes. The owner may rename the
+pair again; the ids do not care.
+
+### 2 · Statuses rephrased, and every person is an id
+
+The time log (point 3) makes *paused* a fact about the **worker**, not the
+job — Suresh's tea break does not change what state the job is in. So
+`PAUSED` leaves `job_status` and lives in the time log. Eight remain:
+
+```text
+RAISED        created; nobody has it yet                          clock runs
+ASSIGNED      given to a person or a team                         clock runs
+ACCEPTED      the assignee has taken it up                        clock runs
+IN_PROGRESS   work has begun — a session exists, running or paused   clock runs
+ON_HOLD       blocked by something outside our control            CLOCK STOPS
+              a part · guest DND · an earlier step — reason required
+RESOLVED      a resolution has been recorded                      clock stops
+CLOSED        verified by a supervisor                            final
+CANCELLED     will not be done — reason required                  final
+```
+
+`DONE` → **`RESOLVED`**, because that is the act (§S1.13). `NEW` →
+**`RAISED`**. Every person on every table is **`user_id`** — Master Data's
+staff id, never a name: `created_by_user_id`, `assigned_to_user_id`,
+`assigned_to_team_id`, `resolved_by_user_id`, `closed_by_user_id`,
+`changed_by_user_id`. Names are looked up for display, as catalogue names are.
+
+### 3 · Live tracking of work — the time log
+
+The reference's `WorkOrderTimeLog` had the right idea and left
+`started=true` after every timer ended (01 §F11). Rebuilt as sessions:
+
+```text
+job_work_session
+  id · job_id · user_id
+  started_at
+  ended_at         null  =  RUNNING NOW
+  end_reason       PAUSE · STOP · REASSIGNED · AUTO_STOPPED
+  minutes          computed at end, stored
+```
+
+```text
+START     opens a session; job → IN_PROGRESS if not already.
+          If this user has a session running on another job, that one is
+          paused first — one person works one job at a time.
+PAUSE     closes the session, reason PAUSE. Job stays IN_PROGRESS.
+RESUME    opens a NEW session. The old row is never reopened.
+STOP      closes the session, reason STOP, and opens the resolve screen.
+          Resolving also closes any session still open — nothing is left
+          running by accident.
+```
+
+**The live board is a query:** every session with `ended_at IS NULL` is
+*someone working right now* — who, on what, where, since when. Always
+correct, because it is not a copy of anything.
+
+**Derived, never stored on the job:** labour minutes = `SUM(minutes)`;
+running now = any open session; worked by = distinct `user_id` — two people
+on a lift job are two rows, not an `executedById` column.
+
+**Two clocks, kept apart.** The *SLA clock* follows `job_status` and stops
+only on `ON_HOLD`. The *labour clock* is the sessions. A tea break pauses the
+second and not the first. The reference had one clock trying to be both.
+
+### 4 · Not one wide table — split by what each thing is
+
+The reference's `work_orders` has 40 columns and five satellite tables split
+by nothing in particular (two identical contact tables; followers in two
+places). Split by **logic** — one table, one fact:
+
+```text
+jobs.job                    the job itself — what, where, for whom, priority, status
+    job_id · number · property_id
+    category_id · item_id · asset_id · location_id
+    guest_stay_id · source · priority · priority_set_by · glitch
+    job_status · scheduled_for · created_by_user_id · created_at
+    reopen_count · deleted_at · deleted_by_user_id · delete_reason
+
+jobs.job_assignment         who it was given to — a history, not a column
+    job_id · assigned_to_user_id | assigned_to_team_id · assigned_by_user_id
+    assigned_at · ended_at · end_reason (REASSIGNED · HANDED_BACK · RESOLVED)
+    assignment_mode (MANUAL · AUTO · INHERITED)
+
+jobs.job_status_history     every transition — the audit trail
+    job_id · from_status · to_status · changed_by_user_id · at · reason
+
+jobs.job_work_session       the time log (point 3)
+
+jobs.job_resolution         the closing fact, one per cycle
+    job_id · cycle · resolution_id · note · resolved_by_user_id · resolved_at
+    closed_by_user_id · closed_at
+
+jobs.job_recovery           only when glitch = true
+    job_id · recovery_owed · recovery_done_by_user_id · done_at · guest_satisfied
+
+jobs.job_note               comments, mentions, and the activity feed
+    job_id · user_id · text · mentions[] · at
+
+jobs.job_attachment         photos — at creation and at resolution
+    job_id · media_id (Master Data media) · stage (RAISED · RESOLVED) · user_id · at
+
+jobs.job_link               group and parent-child (S1.2)
+    job_id · related_job_id · relation (GROUP · PARENT) · step · linked_by_user_id
+
+jobs.job_escalation         the escalation ledger (S5)
+
+catalogue (Core Administration, group-wide)
+    category · item · resolution
+jobs.property_item_policy   the per-property promise: priority default,
+                            standard minutes, escalation policy, active, display name
+```
+
+**The rule that keeps it split:** a column goes on `job` only if it is a
+fact about the job *as a whole* that has exactly one value. Anything with a
+history (assignment, status, work) or that only some jobs have (recovery,
+links) is its own table. That is what stops `job` growing back to forty
+columns.
+
+### 5 · PPM — planned in Engineering, executed in Jobs
+
+*"An AC needs its filter changed every three months. We plan it in the
+Engineering app's PPM section; when the time comes, an entry is created there
+**and** a job is created; the execution is in Jobs."*
+
+```text
+ENGINEERING (Maintenance) — PPM section
+  plan        asset 214-AC · "filter change" · every 3 months · dept ENG
+                                  (the item is a catalogue item: AC › filter change)
+  when due    creates ppm_occurrence  P-77   planned_for 2026-12-01
+              appends event  maintenance.ppm.due
+                { occurrence_id: P-77, asset_id: A-214-AC,
+                  category_id: AC, item_id: FILTER_CHANGE,
+                  planned_for, correlation_id: C-1 }
+
+JOBS
+  consumes    maintenance.ppm.due            (a declared subscription — EVT-Q4)
+  creates     KOC-ENG-512
+                source: PPM · category AC · item filter change · asset 214-AC
+                location 214 (from the asset) · no guest · priority from policy
+                scheduled_for 2026-12-01 · origin { app: maintenance, ref: P-77 }
+  appends     job.created  { job_id, correlation_id: C-1 }
+              ← Maintenance learns the job's id from THIS, never by calling Jobs
+  … assigned · accepted · sessions · resolved (filter replaced) · closed — as any job
+  appends     job.closed   { job_id, correlation_id: C-1, asset_id,
+                             resolution_id: FILTER_REPLACED, resolved_at }
+
+ENGINEERING
+  consumes    job.closed with its correlation
+              marks P-77 done · writes the asset's service history
+              schedules the next occurrence  +3 months
+```
+
+Four rules, all platform law rather than choices:
+
+* **No call in either direction.** An event with a correlation id each way
+  (constitution §6, ADR 0116 §5). A blocking call would make one application
+  mandatory for the other.
+* **Maintenance absent** → nothing in Jobs changes; there are simply no PPM
+  jobs. **Jobs absent** → the occurrence sits in Maintenance as *awaiting
+  execution* and says so. Neither blocks the other.
+* **The PPM job is an ordinary job.** Same number series, same statuses,
+  same sessions, same resolve screen, same reports. `source: PPM` and the
+  `origin` reference are the only difference — "any job from anywhere".
+* **The item is a catalogue item**, so *filter change* is reportable beside
+  *not cooling* on the same asset — and the recurrence query in §S1.13 sees
+  both.
+
+### 6 · Assignment — the dropdown, the flip, and the fallback
+
+*"The creating user can assign manually. The dropdown does not show all
+users — only those working today (from Workforce) in the item's department.
+The creator can flip to all users, or to related departments. If nobody is
+assigned, the system finds a suitable user from Workforce."*
+
+```text
+the dropdown, by default
+    users POSTED to the item's department      (Workforce postings — ADR 0116 §6)
+    AND on shift now                           (Workforce roster, today)
+    AND not on leave                           (Workforce)
+    sorted: fewest open jobs first, then name
+
+the flip — two switches the creator may turn
+    "related departments"   HK also shows LDY and PA; ENG also shows HVAC/ELEC/PLUM
+                            — the canon's parent/children (ADR 0119)
+    "all users"             everyone posted at the property, marked
+                            (off shift) / (on leave) so the choice is visible
+
+no assignee chosen  ->  AUTO
+    the same list as the default dropdown; take the first
+    -> ASSIGNED, assignment_mode AUTO, assigned_by = system
+    list empty (nobody on shift in that department)
+    -> the job stays RAISED in the department's pool, and THAT IS AN
+       ESCALATION CONDITION (S5): "not assigned" counts from now, and the
+       next rung is told nobody was available
+```
+
+Two things this deliberately does **not** do, both of which the reference did:
+nothing stores a person on the catalogue entry (`assigneeId` is gone — a
+stored person leaves, changes shift, goes on leave), and nothing routes by
+keyword (`keywordAssignee` and `sameForAllKeyword` are gone). The item's
+department plus Workforce is the whole rule. Jobs **reads** Workforce through
+Context; it never rosters anyone (Workforce round ruling, 2026-08-31).
+
+### 7 · The catalogue screen appears in Core Administration only while Jobs is installed
+
+*"The catalogue lives in Core — fine — but do not always show it. Only when
+Jobs is installed, because it is common to GuestOps too."*
+
+The platform already has the mechanism: an installed package **declares what
+it contributes**, and Core Administration shows a section only while a
+package declaring it is installed (the manifest-declared pattern of
+PKG-Q39 / AUTHZ-Q25 / CFG-Q1).
+
+```text
+jobs/manifest.yaml
+  contributes:
+    core_administration:
+      - section: job_catalogue        category · item · resolution
+```
+
+Jobs installed → the section is there. Uninstalled → gone, data kept (the
+archived-schema pattern). GuestOps reads the same catalogue for what a guest
+may request and contributes **no** editing screen — one owner of the screen,
+several readers of the data.
+
+**One gap recorded beside the ruling, for the architect:** GuestOps installed
+without Jobs needs a guest-requestable list and nothing contributes the
+screen to edit it.
+
+### 8 · "Anything I missed?"
+
+| | Missing | Why it matters |
+|---|---|---|
+| **a** | **`scheduled_for`** — a job for later: *"turndown at 21:00"*, *"after checkout"* | otherwise every job is "now"; the PPM flow already needs it. Already on `job` (§4) |
+| **b** | **Photos** at raise and at resolve — in the tables, not yet in the flow | before/after is the most-requested proof in engineering |
+| **c** | **Notes and mentions** — the reference's activity feed | how a technician says "need a part, back at 3" |
+| **d** | **Parts used** on resolve | the third gas recharge should record the gas; Inventory's when it exists, a structured note until then |
+| **e** | **Shift handover** — a job open at 23:00 | hotelkit has an object for it; the rule *"who owns it now"* is unwritten |
+| **f** | **Guest access** — occupied room, guest asleep or DND | `ON_HOLD: GUEST_DND` covers the state; *who decides to enter* is not written |
+| **g** | **Reopen** — S4-D5 ruled who and when; what it does to sessions, resolution and the number is not | the `cycle` column on `job_resolution` is the hook |
+
+None of these changes the tables above. Listed so nothing is discovered in
+the build.
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -1881,12 +2150,17 @@ trackMode.
 | **S1-D2** | One subject; a **group** for peers; **parent ▸ children** for a breakdown, with step numbers, blocked children, and no close until all children are done | *design proposed — §S1.2 — ten details open (a–j)* |
 | **S1-D3** | `<PropertyCode>-<RootDept>-<Number>`, number property-wide, stamped once | **RULED** — two details open in §S1.3 |
 | **S1-D4** | Emergency · High · Normal · Low · Not triaged, decided by: a person chose it → the guest flow (PMS/GuestOps) → the catalogue default → Not triaged | **RULED** (owner, 2026-09-02) — §S1.4 |
-| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **REDESIGNED — §S1.13. There is no type.** Department + guest link + glitch flag replace it; inspections become checklist runs that raise jobs |
-| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **REDESIGNED — §S1.13.** An **issue → symptom** list organised by department, with **resolution actions** on close (HotSOS's model) — the concept the reference lacks entirely |
+| **S1-D5** | **Deliver · Fix · Check · Prepare** — four intents, not five types. Complaint-vs-Fault falls out of *is there a requester*; "Maintenance" disappears with both its special cases | **REOPENED** by the owner, 2026-09-02 — the shape is inherited from the reference's `workOrderType`, and four real hotel jobs do not fit it. **RULED, owner 2026-09-03 — no type.** Department + guest link + glitch flag replace it. The pair is **category › item** (§S1.14 ·1) |
+| **S1-D6** | One organization-wide catalogue, activated per property, renameable for display; the entry carries its **intent**, its **aliases** and how long the work **takes**, so the job's type is never chosen separately. The **promise** (SLA, priority, routing, escalation) is Jobs', per property. Plus a counted, promotable "something else" | **REOPENED** by the owner, 2026-09-02. The first-principles read says the list is **four different things**, and **RULED, owner 2026-09-03.** A **category › item** catalogue by department, **resolution actions** on close, three ids on the job. Lives in Core Administration; its screen appears only while Jobs is installed (§S1.14 ·7) |
 | **S1-D7** | `category` dropped | **RULED** |
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
-| **S1-D9** | **Two statuses.** `job_status` — 9 values with a transition table, replacing the reference's 8-value enum *and* its five booleans. Record state is **`deleted_at`, not an enum** (ADR 0062's shape), and **`CANCELLED` is a job outcome, not a record state** | *design proposed — §S1.12 — awaiting owner* |
+| **S1-D9** | **Two statuses.** `job_status` — 9 values with a transition table, replacing the reference's 8-value enum *and* its five booleans. Record state is **`deleted_at`, not an enum** (ADR 0062's shape), and **`CANCELLED` is a job outcome, not a record state** | **RULED, owner 2026-09-03** — §S1.12, rephrased to 8 values in §S1.14 ·2 |
+| **S1-D10** | **Live work tracking** — sessions: start / pause / resume / stop; the live board is a query; SLA clock and labour clock kept apart | *proposed — §S1.14 ·3* |
+| **S1-D11** | **Tables split by logic** — job · assignment · status history · work session · resolution · recovery · note · attachment · link · escalation | *proposed — §S1.14 ·4* |
+| **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `source: PPM`; `job.closed` back by correlation | *proposed — §S1.14 ·5* |
+| **S1-D13** | **Assignment** — dropdown from Workforce (posted · on shift · in the item's department), two flips, AUTO fallback; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6 |
+| **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 
 **Sign-off:** **NOT SIGNED OFF.**
 
