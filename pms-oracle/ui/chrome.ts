@@ -16,6 +16,7 @@
  * do its job: an empty custom property would override it and render invisible
  * text.
  */
+import { SECTIONS } from "./configuration";
 import type { Secret, Setting, Toggle } from "./configuration";
 
 /**
@@ -29,18 +30,67 @@ export type Tone = "info" | "failed";
 const SHEET_ID = "oracle-styles";
 
 const CSS = `
+  /*
+   * **Full width, and that is frame 3's shape rather than a preference.**
+   * This read a 520-pixel cap on a single flex column, so every capture of
+   * a hosted form had a blank right half and Polling sat under Sync scope
+   * instead of beside it. The frames draw four cards across the width of the
+   * region the host gives us; the host gives us all of it.
+   */
   .panel {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    max-width: 520px;
+    gap: 14px;
     padding: 16px;
-    background: var(--color-surface-raised, transparent);
     color: var(--color-ink, inherit);
-    border: 1px solid var(--color-line, currentColor);
-    border-radius: var(--radius-panel, 8px);
     font-family: var(--font-sans, system-ui, sans-serif);
     font-size: 14px;
+  }
+
+  /* The two actions sit with the title, as the frame's header row has them. */
+  .panel .head { display: flex; align-items: flex-end; gap: 14px; }
+  .panel .head .grow { flex: 1; }
+
+  .panel .card {
+    background: var(--color-surface-raised, transparent);
+    border: 1px solid var(--color-line, currentColor);
+    border-radius: var(--radius-panel, 8px);
+  }
+
+  .panel .cardh {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--color-line, currentColor);
+  }
+
+  .panel .cardh b { font-weight: 600; }
+  .panel .cardh small { font-size: 12px; color: var(--color-ink-muted, inherit); }
+  .panel .cardbody { padding: 14px 16px; }
+
+  /*
+   * Two fields across, one on a narrow region. The frames pair them because
+   * the questions pair — a host beside its property code, a client id beside
+   * the secret that proves it.
+   */
+  .panel .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+  /* Polling and Sync scope side by side, which is how frame 3 draws them. */
+  .panel .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+
+  @media (max-width: 860px) {
+    .panel .grid2, .panel .pair { grid-template-columns: 1fr; }
+  }
+
+  .panel .note {
+    margin: 0;
+    padding: 11px 14px;
+    border-left: 3px solid var(--color-brand, currentColor);
+    border-radius: 8px;
+    background: var(--color-surface, transparent);
+    font-size: 12px;
+    color: var(--color-ink-muted, inherit);
   }
 
   .panel .title { margin: 0; font-size: 16px; font-weight: 600; }
@@ -102,7 +152,9 @@ const CSS = `
    */
   .panel .actions { display: flex; gap: 8px; align-items: center; }
 
-  .panel .scope { display: flex; flex-direction: column; gap: 6px; }
+  .panel .scope { display: flex; flex-direction: column; }
+
+  .panel .scope .row:first-child { border-top: 0; }
 
   .panel .row {
     display: flex;
@@ -164,7 +216,13 @@ interface Drawn {
   readonly deferred: readonly Toggle[];
 
   /** The property's zone, drawn locked. Absent when the platform has none. */
-  readonly timeZone?: string;
+  // `| undefined` written out, because the package sets
+  // `exactOptionalPropertyTypes`: the caller reads an optional field off the
+  // configuration and passes what it finds, so the property is genuinely
+  // present-and-undefined rather than absent. This typecheck was already
+  // failing before this round touched the file — esbuild does not type, so the
+  // build never said so.
+  readonly timeZone?: string | undefined;
   onSubmit(typed: {
     settings: Record<string, string>;
     secrets: Record<string, string>;
@@ -271,20 +329,113 @@ export function panel(root: HTMLElement) {
       const form = node("form");
       form.dataset["state"] = "ready";
 
-      form.appendChild(node("h1", "title", drawn.title));
-      form.appendChild(node("p", "subtitle", drawn.subtitle));
+      // The header row: what this is, and the two things that can be done to
+      // it. Frame 3 puts the actions here rather than at the foot — a form
+      // long enough to scroll would otherwise hide its own Save.
+      const head = node("div", "head");
+      const heading = node("div");
+      heading.appendChild(node("h1", "title", drawn.title));
+      heading.appendChild(node("p", "subtitle", drawn.subtitle));
+      head.appendChild(heading);
+      head.appendChild(node("div", "grow"));
+      form.appendChild(head);
 
-      for (const setting of drawn.settings) {
-        form.appendChild(field(setting.name, setting.label, setting.value, setting.hint, false));
+      const settingsIn = (section: string) =>
+        drawn.settings.filter((setting) => setting.section === section);
+
+      // Connection · Authentication — a card each, two fields across.
+      for (const section of ["connection", "authentication"] as const) {
+        const meta = SECTIONS.find((one) => one.id === section);
+        const fields = settingsIn(section);
+        const secrets = drawn.secrets.filter((secret) => secret.section === section);
+
+        if (fields.length === 0 && secrets.length === 0) continue;
+
+        const card = node("div", "card");
+        card.dataset["section"] = section;
+
+        const header = node("div", "cardh");
+        header.appendChild(node("b", undefined, meta?.title ?? section));
+        if (meta !== undefined) header.appendChild(node("small", undefined, meta.note));
+        card.appendChild(header);
+
+        const body = node("div", "cardbody");
+        const grid = node("div", "grid2");
+
+        // **A setting, then the secret that proves it.** The grid is two
+        // across, so adjacency is the pairing: emitting every setting and then
+        // every secret would put the two identities in one row and their two
+        // proofs in the next, and frame 3 draws `PMS username` beside
+        // `PMS password`. `Secret.proves` carries which, so the layout follows
+        // from what the field is rather than from the order of two loops.
+        for (const setting of fields) {
+          grid.appendChild(
+            field(setting.name, setting.label, setting.value, setting.hint, false),
+          );
+
+          for (const secret of secrets.filter((one) => one.proves === setting.name)) {
+            grid.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
+          }
+        }
+
+        // A secret that proves nothing has no partner to sit beside, and goes
+        // last — which is where the frame draws the application key, because
+        // it addresses the tenancy rather than authenticating to it.
+        for (const secret of secrets.filter((one) => one.proves === undefined)) {
+          grid.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
+        }
+
+        body.appendChild(grid);
+
+        // **Written once, never read back** — under whichever card holds a
+        // masked field, because the sentence is about the Vault rather than
+        // about authentication. The application key is a secret and is not a
+        // credential, and it needs the same warning.
+        if (secrets.length > 0) {
+          const note = node(
+            "p",
+            "note",
+            "Written once, never read back. These go straight to the Token Vault: this " +
+              "screen can replace them and can test them, and neither it nor the package " +
+              "can display them again.",
+          );
+          note.style.marginTop = "14px";
+          body.appendChild(note);
+        }
+
+        card.appendChild(body);
+        form.appendChild(card);
       }
 
-      for (const secret of drawn.secrets) {
-        form.appendChild(field(secret.name, secret.label, "", secret.placeholder, true));
+      // Polling and Sync scope, side by side.
+      const pair = node("div", "pair");
+
+      const pollingMeta = SECTIONS.find((one) => one.id === "polling");
+      const polling = node("div", "card");
+      polling.dataset["section"] = "polling";
+
+      const pollingHead = node("div", "cardh");
+      pollingHead.appendChild(node("b", undefined, pollingMeta?.title ?? "Polling"));
+      if (pollingMeta !== undefined) {
+        pollingHead.appendChild(node("small", undefined, pollingMeta.note));
       }
+      polling.appendChild(pollingHead);
+
+      const pollingBody = node("div", "cardbody");
+      const pollingFields = node("div", "grid2");
+
+      for (const setting of settingsIn("polling")) {
+        pollingFields.appendChild(
+          field(setting.name, setting.label, setting.value, setting.hint, false),
+        );
+      }
+
+      pollingBody.appendChild(pollingFields);
 
       if (drawn.timeZone !== undefined && drawn.timeZone !== "") {
         const locked = node("div", "locked");
         locked.dataset["field"] = "propertyTimeZone";
+        locked.style.marginTop = "14px";
 
         locked.appendChild(node("span", "label", "Time zone"));
         locked.appendChild(node("span", "value", drawn.timeZone));
@@ -292,9 +443,24 @@ export function panel(root: HTMLElement) {
           node("span", "source", "From Core Administration · Property Registration"),
         );
 
-        form.appendChild(locked);
+        pollingBody.appendChild(locked);
       }
 
+      polling.appendChild(pollingBody);
+      pair.appendChild(polling);
+
+      const scopeMeta = SECTIONS.find((one) => one.id === "scope");
+      const scopeCard = node("div", "card");
+      scopeCard.dataset["section"] = "scope";
+
+      const scopeHead = node("div", "cardh");
+      scopeHead.appendChild(node("b", undefined, scopeMeta?.title ?? "Sync scope"));
+      if (scopeMeta !== undefined) {
+        scopeHead.appendChild(node("small", undefined, scopeMeta.note));
+      }
+      scopeCard.appendChild(scopeHead);
+
+      const scopeBody = node("div", "cardbody");
       const scope = node("div", "scope");
 
       for (const toggle of drawn.toggles) {
@@ -319,9 +485,10 @@ export function panel(root: HTMLElement) {
         scope.appendChild(row);
       }
 
-      if (drawn.toggles.length > 0 || drawn.deferred.length > 0) {
-        form.appendChild(scope);
-      }
+      scopeBody.appendChild(scope);
+      scopeCard.appendChild(scopeBody);
+      pair.appendChild(scopeCard);
+      form.appendChild(pair);
 
       const actions = node("div", "actions");
 
@@ -340,7 +507,9 @@ export function panel(root: HTMLElement) {
       save = node("button", "save", "Save & enable");
       save.type = "submit";
       actions.appendChild(save);
-      form.appendChild(actions);
+
+      // Into the header, beside the title — frame 3's placement.
+      head.appendChild(actions);
 
       form.addEventListener("submit", (event) => {
         event.preventDefault();
