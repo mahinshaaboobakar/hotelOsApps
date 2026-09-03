@@ -2498,6 +2498,74 @@ checklists                                     after S10; a job is raisable FROM
 **D11** the split tables, **D12** the PPM flow — all three read by the owner
 without objection. **One "yes" to those three signs S1 off.**
 
+### 9 · No null that means something — one **actor** shape, used everywhere
+
+*"`created_by_user_id` — null when the guest did it by QR: suggest another
+design."* Right: a null carrying a fact is a fact nobody can query. The fix is
+one value type, and it is never null:
+
+```text
+actor = { kind: STAFF | GUEST | APPLICATION,  id }
+        STAFF → user_id · GUEST → Guest360's guest id · APPLICATION → app name
+```
+
+Every "who" on every table is an actor — `created_by`, `raised_by`,
+`assigned_by`, `resolved_by`, `closed_by`, `changed_by`, `linked_by`. **Both
+`created_by` and `raised_by` are always set**, and when one person did both
+they hold the same value:
+
+```text
+guest by QR          created_by GUEST/g-rao     raised_by GUEST/g-rao
+phoned-in request    created_by STAFF/u-priya   raised_by GUEST/g-rao
+staff's own job      created_by STAFF/u-suresh  raised_by STAFF/u-suresh
+PPM                  created_by APP/maintenance raised_by APP/maintenance
+```
+
+*"Raised by guests"* is `raised_by.kind = GUEST`, with no null test anywhere.
+The alternative — `created_by` plus an optional `on_behalf_of` — was
+considered and refused for the same reason the owner refused the null: it
+makes the requester a derivation (`on_behalf_of ?? created_by`) instead of a
+stored fact.
+
+### 10 · "Which Jobs powers does the user hold — where did we design this?" — found
+
+It is designed, and it was designed **before this round**, in the platform's
+authorization model. `infrastructure/openfga/model.fga`, `type job`:
+
+```text
+viewer            creator  or  assignee  or  viewer from department
+can_create        member     from department
+can_assign        supervisor from department
+can_close         assignee  or  supervisor from department
+can_approve_cost  manager    from department
+```
+
+So a user's Jobs powers are **not granted per user at all** — they are
+**department relations**, and department relations come from **Workforce**:
+a posting makes someone a department *member* (ADR 0116 §6, AUTHZ-Q20's
+`department#posted`); headship makes the department *manager*
+(`user.headship_started`); *supervisor* is the relation between. The owner's
+four levels map onto it almost one for one:
+
+| Owner's level | The relation that gives it | Configured in |
+|---|---|---|
+| normal user — own jobs, execute, resolve | posted to the department (`member`) → `can_create`, `can_close` on own jobs | **Workforce** |
+| next level — reassign, change priority | `supervisor` of the department → `can_assign`, `can_close` | **Workforce** (the posting's role) |
+| sees all in my departments | `viewer from department` | **Workforce** |
+| everything, anyone's, capture to self | `property#admin` | Core Administration — the property administrator, born not appointed (ADR 0116 §3) |
+
+**Answer to the question:** *where you configure it is Workforce, by posting
+a person to a department as member or supervisor, or making them its head.*
+Not a Jobs screen, not a Core Administration card. And the security guard
+who must only execute is a `member` who is nobody's `supervisor` — which is
+the default.
+
+What S9 got wrong: it proposed six new permission names and a per-user grant
+screen. Neither is needed; the model already has the five actions and the
+relations, and **the reconciliation of S9's vocabulary to `model.fga` is
+parked for the owner's separate discussion, as asked** — not sent to the
+architect.
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2519,7 +2587,7 @@ without objection. **One "yes" to those three signs S1 off.**
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
 | **S1-D17** | **Raiser and beneficiary are two facts** — `raised_by_kind` + `raised_by_id` (staff · guest · application); `guest_stay_id` for whom; `origin_app`/`origin_ref` whose record | **RULED, owner 2026-09-03** — §S1.16 ·1 |
-| **S1-D18** | **No `guest360_id` column** — the guest is `raised_by_id` when kind is GUEST; `guest_stay_id` is the visit; **`created_by_user_id` is who typed it**, so a phoned-in request counts as guest-raised with the receptionist on the audit trail | **RULED, owner 2026-09-03** — §S1.16 ·6 |
+| **S1-D18** | **No `guest360_id` column** — the guest is `raised_by_id` when kind is GUEST; `guest_stay_id` is the visit; **`created_by` and `raised_by` are both actors, both always set** — no null that means something (§S1.16 ·9); a phoned-in request is created by staff and raised by the guest | **RULED, owner 2026-09-03** — §S1.16 ·6, ·9 |
 | **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — clearing it makes the job live now; **every clock (SLA, escalation, labour) anchors at `live_at` = scheduled_for or created_at** | **RULED, owner 2026-09-03** — §S1.16 ·3, ·5; `job_status` is nine values |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
@@ -3192,10 +3260,10 @@ asks per operation.
 |---|---|---|
 | **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
 | **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
-| **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **per-user Jobs powers: no surface exists — Identity has three grant RPCs and no per-permission one** | *open — goes up as a question* |
+| **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **Jobs powers: Workforce** — member / supervisor / head of a department (§S1.16 ·10). Not a Jobs screen, not a Core Admin card | **answered** — §S1.16 ·10 |
 | **S9-D3** | *Capture from someone* is **administer**, not manage | *proposed* |
 | **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
-| **S9-D5** | ~~Six manifest permissions~~ — **CONFLICT**: `permissions.yaml` already declares `job.read/create/assign/complete/approve_cost`, and scope is the relation layer's, not a permission. Reconciliation goes up | *open — the architect's* |
+| **S9-D5** | ~~Six manifest permissions~~ — the platform already has the five actions and the relations (`model.fga` `type job`). **Parked for the owner's separate discussion**, as asked | *parked* |
 
 **Sign-off:** _pending_
 
