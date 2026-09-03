@@ -2670,10 +2670,8 @@ raised_by_id          user_id · Guest360 id · application id
 stay_id               the guest's visit — NOT NULL when raised_kind = GUEST
 
 scheduled_for         null = now; a future time = SCHEDULED        (the RAISER's choice)
-resume_at             null = clock running. Set = clock paused until then, because
-                      nobody is on shift or it is outside service hours (the SYSTEM's,
-                      from one roster read; recomputed on shift.changed)   ← added 2026-09-03
-due_at                the deadline — a time, set when the clock starts, editable by manage
+due_at                the deadline — set when the clock starts, i.e. when the job's
+                      department is open (department_presence, S5); editable by manage
 job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
                       ON_HOLD · RESOLVED · CLOSED · CANCELLED
 cycle                 1, +1 per reopen
@@ -2682,7 +2680,7 @@ created_by · created_at · updated_by · updated_at · version    the platform'
 deleted_at · deleted_by · delete_reason                        soft delete
 ```
 
-Twenty-four columns, five of them the platform's own (`resume_at` added on D8, 2026-09-03; `next_check_at` proposed and withdrawn the same day). Every clock counts
+Twenty-three columns, five of them the platform's own. (`resume_at` and `next_check_at` were each proposed and withdrawn on 2026-09-03 — the pause is the department's, held in `department_presence`.) Every clock counts
 from `scheduled_for ?? created_at`, computed where it is needed.
 
 **The four cases, in the four raiser fields:**
@@ -4126,6 +4124,45 @@ So the job table stays at **twenty-four columns**, `resume_at` included, and
 one small table is added beside it for nudge memory. Temporal's two jobs in
 Jobs are the ones already recorded: **run the sweep** and **hold the
 verification window** after RESOLVED.
+
+
+#### `resume_at` on the job — withdrawn. The pause is the department's — owner, 2026-09-03
+
+*"Nobody on shift"* and *"outside service hours"* are facts about a
+**department**, not about a job. Every Housekeeping job pauses at 23:00 and
+resumes when the first attendant clocks in — the same moment for all of them.
+A `resume_at` on each job stores one department fact once per job. Gone.
+
+**One row per department instead:**
+
+```text
+department_presence          one row per department, per property
+  department_code
+  staffed                    true / false
+  since                      when it last changed
+  next_shift_at              the roster fallback — read once when it became
+                             unstaffed, used only if no clock-in event arrives
+
+kept current by             attendance.clocked_in / clocked_out   (Workforce, once published)
+                            or the roster time, read once at the moment staffed flips false
+```
+
+**The sweep, per department, once a minute:**
+
+```text
+is the department open?   presence.staffed  AND  inside service hours    (local, no call)
+  no  → skip all its jobs. Their concern shows PAUSED — a display state,
+        derived, not stored. Nothing else is touched.
+  yes → and it was closed a minute ago?
+        → every waiting job in it goes live NOW:  due_at = now + standard minutes
+          (set on the job at this moment, not earlier)
+        then evaluate concern as usual
+```
+
+So **the job table loses `resume_at` and is back to twenty-three columns**;
+`due_at` is simply not set until the job's department is open. The
+department row is the only new thing, and it holds one fact per department
+instead of one per job.
 
 
 ## Decisions
