@@ -49,8 +49,8 @@ constitution's order, not a preference.
 | S4 | Accept, start, pause, finish | **SIGNED OFF** | 2026-09-03 |
 | S5 | **Escalation** | **SIGNED OFF** | 2026-09-03 |
 | S6 | Reminders | **SIGNED OFF** | 2026-09-03 |
-| S7 | Notifications | **OPEN** | — |
-| S8 | The guest side | not started | — |
+| S7 | Notifications | **SIGNED OFF** | 2026-09-03 |
+| S8 | The guest side | **OPEN** | — |
 | S9 | Who can see and manage a job | **DESIGNED** — owner's four levels, 5 decisions | — |
 | S10 | Scheduled / preventive work | not started | — |
 | — | **PAGE LOCKED** | no | — |
@@ -4427,16 +4427,43 @@ roles should know"*; the platform decides the channel and holds the
 addresses. Jobs stores nobody's contact details — it asks, every time. An
 email is an email.
 
+## Ruled — owner, 2026-09-03
+
+**D4 — the fixed table above, in-app, to the raiser, the assignee and the
+department supervisor. Locked.**
+
+*"Is this new? I did not see it in the Java reference."* Not new — it is the
+reference's **followers + `EventCommunicationService`**, redesigned. The
+reference kept a `followers` set on every work order, silently added every
+actor to it, and on CREATE · ASSIGNMENT · PRIORITY · DUE_DATE · NOTE · CLOSE
+sent to those followers through the four preference layers and four
+channels. So the *concept* is theirs. What changed:
+
+```text
+followers set, grown by every actor      →  three named roles: raiser · assignee · supervisor
+four preference layers, four channels    →  one fixed table, in-app
+told on assignment only (new assignee)   →  reassignment tells BOTH the old and the new
+nothing on accept                        →  "Suresh took it" to the raiser        (new)
+close → creator / supervisor / HOD       →  resolved → "please verify" to the supervisor;
+   by preference                            closed → to the raiser                 (sharper)
+priority · due-date pings                →  dropped from D4 — they are changes a raiser sees
+                                            on the job, not events to ping about
+```
+
+So two pings are genuinely new (accept, verify) and the rest is the
+reference's idea with its machinery removed.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S7-D1** | Which channels at launch? | email + in-app notification | *open* |
-| **S7-D2** | How many preference layers do we actually need? | two — property default, and the individual's override | *open* |
-| **S7-D3** | Jobs holds no contact details for anyone | yes | *open* |
-| **S7-D4** | Who is notified on each event, by default? | needs a table from the owner — see the discussion | *open* |
+| **S7-D1** | Channels | in-app only — ruled in S5-D10 | **RULED, owner 2026-09-03** |
+| **S7-D2** | Preference layers | none — the reference's four do not come across | **RULED, owner 2026-09-03** |
+| **S7-D3** | Jobs holds no contact details | yes — ruled in S1 | **RULED, owner 2026-09-03** |
+| **S7-D4** | Who is told on which event | the fixed table — raiser · assignee · supervisor; not configurable. The reference's followers + event communication, redesigned; accept and verify pings are new | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S7 SIGNED OFF — owner, 2026-09-03.**
 
 ---
 
@@ -4719,7 +4746,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **6 of 10** |
+| Sections signed off | **7 of 10** |
 | Page locked | no |
 | Locked on | — |
 
