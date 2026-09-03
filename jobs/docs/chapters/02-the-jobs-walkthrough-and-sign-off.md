@@ -4099,6 +4099,35 @@ describes; the verify window after RESOLVED is a Temporal workflow; per-job
 escalation timers are not built.
 
 
+#### "So Temporal replaces the fields — for working hours, repeats and concern?" — owner, 2026-09-03
+
+Not quite, and the line matters. **Temporal replaces the ticker, not the
+facts.** Three things, three answers:
+
+```text
+CONCERN          Temporal Cron RUNS the minute sweep. The sweep COMPUTES concern
+                 from due_at, the assignment, the sessions. Nothing new on the job.
+                 (next_check_at withdrawn — the sweep reads open jobs.)
+
+REPEATS          the same sweep: "nudge every 5 min while AT_RISK" is
+                 now − last nudge ≥ 5. It needs to remember the last nudge:
+                 one small row  job_nudge { job_id, role, last_nudged_at }.
+                 Not a job column. Not Temporal — a per-job timer again.
+
+WORKING HOURS    Temporal does NOT hold the pause; that would be a per-job timer.
+   the pause     resume_at on the job stays — it is a fact about THIS job's clock
+                 (paused until), and due_at is computed from it when it ends.
+   ends when     attendance.clocked_in arrives (primary, once Workforce publishes it)
+                 or  now ≥ resume_at (fallback, from the roster time read once)
+   service hours a Jobs setting; the sweep checks it directly — no field, no call
+```
+
+So the job table stays at **twenty-four columns**, `resume_at` included, and
+one small table is added beside it for nudge memory. Temporal's two jobs in
+Jobs are the ones already recorded: **run the sweep** and **hold the
+verification window** after RESOLVED.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
