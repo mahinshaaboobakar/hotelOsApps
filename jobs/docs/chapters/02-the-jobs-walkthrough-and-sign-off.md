@@ -2674,6 +2674,8 @@ resume_at             null = clock running. Set = clock paused until then, becau
                       nobody is on shift or it is outside service hours (the SYSTEM's,
                       from one roster read; recomputed on shift.changed)   ← added 2026-09-03
 due_at                the deadline — a time, set when the clock starts, editable by manage
+next_check_at         the earliest moment concern could change — rewritten with every change;
+                      the sweep's index, so a minute touches a handful of jobs   ← added 2026-09-03
 job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
                       ON_HOLD · RESOLVED · CLOSED · CANCELLED
 cycle                 1, +1 per reopen
@@ -2682,7 +2684,7 @@ created_by · created_at · updated_by · updated_at · version    the platform'
 deleted_at · deleted_by · delete_reason                        soft delete
 ```
 
-Twenty-four columns, five of them the platform's own (`resume_at` added on D8, 2026-09-03). Every clock counts
+Twenty-five columns, five of them the platform's own (`resume_at` and `next_check_at` added on D8, 2026-09-03). Every clock counts
 from `scheduled_for ?? created_at`, computed where it is needed.
 
 **The four cases, in the four raiser fields:**
@@ -3962,6 +3964,57 @@ the nudges of that hour are missing, and a nudge is not a record.
 *copy* of the future ("fire at 09:15") that has to be rebuilt every time the
 job changes — which is exactly what the reference did on every note added
 (01 §3.4). A comparison holds nothing.
+
+
+#### "1000 open jobs — one query a minute is heavy?" and the PPM concern — owner, 2026-09-03
+
+**First, the number.** 1,000 open jobs is a very large hotel on a bad day,
+and one installation serves one property. An indexed read of 1,000 rows
+joined to their policies is a few milliseconds in PostgreSQL — a phone does
+it. It is not heavy. But the owner's instinct is still right: **a sweep
+should touch the jobs that can change this minute, not every open job.**
+
+**The fix is one column, and it is the honest version of what a scheduler
+is underneath:**
+
+```text
+next_check_at    the earliest moment this job's concern COULD change
+                 = the nearest of: due − 50 % · due · due + stuck window ·
+                   last session + stuck window · resume_at · next repeat
+                 written with the job, in the same transaction, every time
+                 anything on the job changes
+```
+
+Then the sweep is not *"every open job"* but:
+
+```sql
+SELECT …  FROM jobs.job
+WHERE  next_check_at <= now()          -- an index; a handful of rows a minute
+```
+
+With 1,000 open jobs, a typical minute touches **five or ten** — the ones
+whose threshold has just arrived. After each is evaluated, its
+`next_check_at` is moved to its next threshold. The rest are not read.
+
+**Why this is not Quartz wearing a column.** A scheduler keeps a *copy* of
+the future in **another store** that has to be *told* when the job changes —
+and the reference's chain was rebuilt from scratch on every note because
+telling it was unreliable. `next_check_at` is **on the job's own row,
+computed from the job's own facts, rewritten in the same transaction as the
+change.** It cannot be stale, because there is no second place for it to be
+stale in. That is the difference, and it is the whole difference.
+
+It is a derived-at-write value like `due_at` — allowed for the same reason
+`due_at` is. Added to the job table: **twenty-five columns.**
+
+**On PPM — the owner's concern about rebuild-on-change is exactly the
+same problem, and it has exactly the same answer.** *"Change the filter
+every three months"* is a plan with a `next_due_at`. When the plan is edited,
+`next_due_at` is rewritten with it. Engineering's sweep — daily is enough —
+raises the occurrences whose `next_due_at` has arrived and moves each to its
+next cycle. No Quartz, no chain, nothing to rebuild: the plan row *is* the
+schedule. That is Engineering's design to make in its own round; the pattern
+is recorded here so the two applications do not solve one problem two ways.
 
 
 ## Decisions
