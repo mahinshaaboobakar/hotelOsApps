@@ -3454,6 +3454,94 @@ concern_subscription    per property, per role: which concerns · channels · re
 Three things, one of them a history. `job_escalation` is gone.
 
 
+### The full concept, end to end — owner, 2026-09-03: *"how do we send the alert, based on what? how do we report jobs escalated to manager level? keep the four moments — but give the full concept."*
+
+```text
+1  THE PROMISE        each item, per property, has standard minutes
+                      → every job gets due_at when it is raised            (S1)
+
+2  THE CONCERN        computed for every open job, two ways:
+                        · whenever something happens to it — assigned, accepted,
+                          a session starts or stops, resolved
+                        · once a minute, by ONE sweep over all open jobs
+                          (not a timer per job — one query, every minute)
+                      → ON_TRACK · AT_RISK · BREACHED · STUCK
+
+3  THE CHANGE         if the computed concern differs from the last recorded one,
+                      ONE ROW is written:
+                        job_concern_history { job, at, from, to, reason, accountable }
+                      → and the event  job.concern_changed  is appended in the same
+                        transaction (platform rule)
+
+4  THE ALERT          is sent BECAUSE OF THAT ROW, and to WHOEVER WATCHES that state:
+                        concern_subscription { property, role, concern, channels, repeat_min }
+                      the role is resolved through Workforce right then — the actual
+                      supervisor on shift, the actual head of that department
+                      → nudge sent
+
+5  THE REPEAT         while a job stays in a watched state, the same minute-sweep
+                      re-nudges each watcher every repeat_min. No new rows — repeats
+                      are not history
+
+6  ACCOUNTABLE        written on the row (3): who is carrying the job at that moment
+                      assignee → department head at BREACHED → duty manager at STUCK
+                      nobody on shift for that role → one step up, reason recorded
+
+7  THE BOARD          a supervisor's screen is  "concern ≠ ON_TRACK in my departments"
+                      — a filter, live, no notification needed to be correct
+
+8  THE REPORT         from the history rows, never from the alerts
+```
+
+**"Based on what?" — on the transition.** Not on a clock reaching a
+number; on the job *entering* a state somebody watches. The clock only
+decides *when the state changes*; the subscription decides *who hears*.
+
+### The alert, as data — the owner's 12-minute job
+
+```json
+09:09  the minute-sweep finds 75 % of the promise used
+       → history { job: 441, from: "ON_TRACK", to: "AT_RISK",
+                   reason: "75% of promise used", accountable: {role: "ASSIGNEE", id: "u-suresh"} }
+       → event   job.concern_changed
+       → subscriptions watching AT_RISK at KOC:
+            ASSIGNEE        → Suresh    in-app   "No time — hurry up"   repeat 5 min
+            DEPT_SUPERVISOR → Anil      in-app   (resolved via Workforce: ENG supervisor on shift now)
+
+09:12  past due_at
+       → history { 441, "AT_RISK" → "BREACHED", "past due_at",
+                   accountable: {role: "DEPT_HEAD", id: "u-menon"} }
+       → DEPT_HEAD → Menon   in-app + email   repeat 15 min
+```
+
+### The report, simply
+
+*"How many jobs escalated to manager level this month?"* is one question of
+the history table:
+
+```sql
+SELECT count(DISTINCT job_id)
+FROM   jobs.job_concern_history
+WHERE  accountable_role IN ('DEPT_HEAD', 'DUTY_MANAGER')
+AND    at >= date_trunc('month', now())
+```
+
+And its neighbours, all from the same rows:
+
+```text
+how many breached                   to = BREACHED
+average minutes AT_RISK before      pair each AT_RISK row with the next row on that job
+  breach or recovery
+who was accountable when resolved   the job's last history row before RESOLVED
+which items breach most             join item_id · group by
+which department's supervisor       group by accountable_id where role = DEPT_SUPERVISOR
+  carried the most
+```
+
+Every report is a query on one table, because every escalation the hotel
+cares about was a **change of state**, and each change is one row.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
