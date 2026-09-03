@@ -2566,6 +2566,66 @@ relations, and **the reconciliation of S9's vocabulary to `model.fga` is
 parked for the owner's separate discussion, as asked** — not sent to the
 architect.
 
+---
+
+## S1.17 · Every field, plainly — owner's request, 2026-09-03
+
+One line per field. *actor* means `{ kind: STAFF | GUEST | APPLICATION, id }`
+and is never null.
+
+### `job` — one row per job
+
+| Field | Plainly |
+|---|---|
+| `job_id` | the id nobody reads — a UUID, never shown, never reused |
+| `job_number` | the one people read — `KOC-ENG-441`, stamped once, never recomputed |
+| `property_id` | which hotel |
+| `category_id` · `item_id` | what it is about — *AC › not cooling*, *Extra items › towel* |
+| `location_id` | where — a room, the pool, a corridor, a whole floor |
+| `asset_id` | the thing, when it is a thing — *214-AC*; attached automatically when the room has exactly one of that kind |
+| `department_code` | who does it — comes from the item, a supervisor may change it; the number does not change |
+| `summary` | what the person said, one line |
+| `details` | the long version, optional |
+| `priority` | EMERGENCY · HIGH · NORMAL · LOW · NOT_TRIAGED |
+| `priority_decided_by` | MANUAL · FLOW · CATALOGUE · NONE — *why* it is that priority |
+| `glitch` | yes when a guest was let down and recovery is owed |
+| `guest_stay_id` | the guest's visit, when a guest is involved — the QR's room resolves to it; the reservation is one step away |
+| `raised_by` *(actor)* | **whose request it is** — reports count this |
+| `created_by` *(actor)* | **who entered it** — the receptionist on a phoned-in request; the guest themselves by QR |
+| `raised_via` | how it arrived — STAFF_APP · GUEST_QR · ROOM_CARE · ENGINEERING_PPM · CHECKLIST · HOSPILOT · INTEGRATION |
+| `origin_app` · `origin_ref` | the other application's record, when one started it — *maintenance · P-77* |
+| `scheduled_for` | when the job goes live — null means now; in the future means `SCHEDULED` |
+| `live_at` | `scheduled_for`, or `created_at` if none — **every clock counts from here** |
+| `resolve_by` | the deadline — a time, computed from the item's standard minutes, the flow (an arrival at 14:00), and `live_at` |
+| `job_status` | SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS · ON_HOLD · RESOLVED · CLOSED · CANCELLED |
+| `cycle` | 1, and one more each time the job is reopened |
+| `created_at` · `updated_at` · `version` | the platform's own three — `version` is what stops two people saving over each other |
+| `deleted_at` · `deleted_by` *(actor)* · `delete_reason` | soft delete — set only by administer, reason required, always audited |
+
+### The tables beside it — one fact each
+
+| Table | One row per | Fields, plainly |
+|---|---|---|
+| `job_assignment` | each time the job is given to someone | `assigned_to` (a user **or** a team) · `assigned_by` *(actor)* · `assigned_at` · `ended_at` · `end_reason` REASSIGNED · HANDED_BACK · RESOLVED · `mode` MANUAL · AUTO · INHERITED — **the current assignee is the row with no `ended_at`** |
+| `job_status_history` | each status change | `from` · `to` · `changed_by` *(actor)* · `at` · `reason` — the audit trail |
+| `job_work_session` | each stretch of work by one person | `user_id` · `started_at` · `ended_at` (null = working now) · `end_reason` PAUSE · STOP · REASSIGNED · AUTO_STOPPED · `minutes` — the live board is every row with no `ended_at` |
+| `job_resolution` | each cycle's closing | `cycle` · `resolution_id` (*gas recharged*) · `note` (the free text) · `resolved_by` · `resolved_at` · `closed_by` · `closed_at` |
+| `job_recovery` | a glitch job, once | `recovery_owed` (apology · upgrade · compensation · manager visit) · `done_by` · `done_at` · `guest_satisfied` yes · no · not asked |
+| `job_note` | each comment | `by` *(actor)* · `text` · `mentions[]` · `at` |
+| `job_attachment` | each photo | `media_id` (Master Data's media) · `stage` RAISED · RESOLVED · `by` *(actor)* · `at` |
+| `job_link` | each relation to another job | `related_job_id` · `relation` GROUP · PARENT · `step` (parent/child only) · `linked_by` *(actor)* |
+| `job_escalation` | each escalation row | S5 — pending · fired · cancelled · missed, with the rung and who was told |
+
+### The catalogue — Core Administration, group-wide
+
+| Table | Plainly |
+|---|---|
+| `category` | *AC*, *Plumbing*, *Extra items* — `code` · `name` per language · `department_code` · `icon` · `active` |
+| `item` | *not cooling*, *towel* — `category_id` · `code` · `name` per language · `guest_requestable` · `applies_to` room · public area · asset type · `needs_checklist` · `photo_on_completion` · `typical_minutes` · `active` |
+| `item_alias` | *aircon*, *a/c*, *ac not working* — so free text and a guest's tap land on the right item |
+| `resolution` | *gas recharged*, *no fault found*, *other* — `category_id` (null = universal) · `item_id` (null = every item of that category) · `name` |
+| `property_item_policy` | **per property** — `item_id` · `active_here` · `display_name` (rename) · `default_priority` · `standard_minutes` · `escalation_policy_id` · `chargeable` · `price` — *what we promise about it here* |
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -3254,6 +3314,52 @@ Two of the three pieces exist today; the third is the question to send up.
 front of the authority (01 §F14). One place grants; the Kernel decides; Jobs
 asks per operation.
 
+## The top level is not admin-only — the GM must be able to give it — owner, 2026-09-03
+
+*"Sees all in my departments and manages all in the department; and
+'everything, anyone's' — not only the admin. The property GM must be able to
+give that permission."*
+
+Two corrections to the table above, and the second needs one thing the
+platform does not have yet.
+
+**Department level, restated.** A department **supervisor** both *sees* every
+job in the department and *manages* it — assign, reassign, re-prioritise,
+reschedule, hold, close. One relation, both halves; a person posted as
+supervisor of two departments has it in both.
+
+**Property level, corrected.** *"Everything, anyone's"* today resolves only to
+`property#admin`, who is **born at activation and never appointed** (ADR
+0116 §3) — so nobody can *give* it, which is exactly the owner's objection.
+The shape that fits the platform:
+
+```text
+a new relation on the property     property#jobs_manager      (name provisional)
+who holds it                       whoever the GM or the admin grants it to
+what it resolves                   job.viewer · can_assign · can_close · capture-from-anyone
+                                   for every job at the property, any department
+who may grant / revoke it          general_manager or admin of the property
+                                   — one permission for both directions (ADR 0125 §6)
+```
+
+**How it reaches the platform — the route already ruled.** Jobs does not
+write a tuple; it **declares a grant kind in its manifest** (AUTHZ-Q25 —
+manifest-declared, materialised by the Kernel from the manifest it stores,
+shown on the install approval screen, folded from the event store on
+rebuild, removed with the package). The GM's action in Jobs publishes
+`user.jobs_manager_granted` / `_revoked`; the Kernel materialises
+`property#jobs_manager`. This is the first grant kind Jobs declares — R30
+said *"if Jobs grants anything at all"*, and this is the thing.
+
+**The one platform item, stated not decided:** AUTHZ-Q25's ruling also says
+a declared kind may only name a relation listed in the **grantable-relations
+registry** — a platform file — so `property#jobs_manager` must be *added
+there* before the manifest can declare it, and the registry's own rule is that
+escalations to `property#admin` are inexpressible. A relation that grants
+*every job at the property* is a large one; whether the registry admits it is
+the architect's, and it goes up **with** the parked vocabulary discussion,
+not before it.
+
 ## Decisions
 
 | id | Decision | Ruling |
@@ -3261,7 +3367,8 @@ asks per operation.
 | **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
 | **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
 | **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **Jobs powers: Workforce** — member / supervisor / head of a department (§S1.16 ·10). Not a Jobs screen, not a Core Admin card | **answered** — §S1.16 ·10 |
-| **S9-D3** | *Capture from someone* is **administer**, not manage | *proposed* |
+| **S9-D3** | *Capture from someone* is property-level — `property#admin` **or `property#jobs_manager`** | *proposed* |
+| **S9-D7** | **The property-wide level is grantable by the GM** — a Jobs-declared grant kind `property#jobs_manager` (AUTHZ-Q25's route); granted/revoked by the GM or admin; needs a grantable-relations-registry entry | **RULED as a requirement, owner 2026-09-03**; the registry entry is the architect's |
 | **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
 | **S9-D5** | ~~Six manifest permissions~~ — the platform already has the five actions and the relations (`model.fga` `type job`). **Parked for the owner's separate discussion**, as asked | *parked* |
 
