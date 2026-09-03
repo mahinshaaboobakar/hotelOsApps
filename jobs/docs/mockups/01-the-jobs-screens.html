@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs · 01 · the screens</title>
+<style>
+/* ===========================================================================
+   HotelOS design tokens — apps/desktop/src/styles.css, ADR 0106.
+   Rule 1: every colour is a token; no frame names a hex of its own.
+   Chrome: the current era — one window, top tabs, no left rail
+   (copied from 55-the-marketplace-round.html). Dark frames first.
+   =========================================================================== */
+:root{
+  --bg:#0b0d14;--glass:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);
+  --text:#e9ecf5;--dim:#9aa3b8;--faint:#5d657a;
+  --indigo:#6b7cff;--cyan:#3fd0e0;--violet:#a06bff;
+  --grad:linear-gradient(135deg,var(--indigo),var(--violet));
+  --ok:#3ecf8e;--warn:#f5b53f;--bad:#ff5c7a;--defer:#8d96ad;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
+code{font:12px ui-monospace,Menlo,monospace;color:var(--cyan)}
+.intro{max-width:920px;color:var(--dim);margin-bottom:40px}
+.intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
+.intro p{margin:6px 0}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:64px 0 18px;border-top:1px solid var(--line);padding-top:18px}
+h1.frame{font-size:17px;font-weight:500;color:var(--dim);margin:44px 0 12px}
+h1.frame b{color:var(--text);font-weight:600}
+/* window chrome */
+.win{border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--line);height:56px}
+.app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--grad);display:grid;place-items:center;font-size:12px}
+.tab{color:var(--dim);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
+.tab.on{color:var(--text);border-bottom-color:var(--indigo)}
+.search{margin-left:auto;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
+.who{color:var(--faint);font-size:12px}
+.body{padding:22px}
+.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+/* rows, pills, cards */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.sel td{background:rgba(107,124,255,.08)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}
+.pill.run{color:var(--cyan);border-color:var(--cyan)}
+.pill.hold{color:var(--defer);border-color:var(--defer)}
+.pill.p1{background:var(--bad);color:var(--bg);border-color:var(--bad)}
+.pill.p2{background:var(--warn);color:var(--bg);border-color:var(--warn)}
+.pill.p3{background:var(--indigo);color:var(--text);border-color:var(--indigo)}
+.pill.nt{border-style:dashed}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px;background:rgba(0,0,0,.18)}
+.card h3{margin:0 0 10px;font-size:13px;font-weight:600}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
+.kv div:nth-child(odd){color:var(--faint)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--line);color:var(--text);margin-right:8px}
+.btn.pri{background:var(--grad);border-color:transparent}
+.btn.off{color:var(--faint);border-style:dashed}
+.field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:rgba(0,0,0,.2)}
+.field.ph{color:var(--faint)}
+label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+.tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
+.tl div{margin-bottom:10px;font-size:13px}
+.tl b{display:block;color:var(--text);font-weight:600}
+.tl span{color:var(--faint);font-size:12px}
+.big{font-size:34px;font-weight:600;line-height:1}
+.mono{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim)}
+.chip.on{border-color:var(--indigo);color:var(--text)}
+.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
+.tog.on{background:var(--ok)}
+.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text)}
+.tog.on i{left:18px}
+/* widget */
+.widget{max-width:360px;border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.widget h3{margin:0 0 12px;font-size:13px;display:flex;justify-content:space-between}
+.widget h3 span{color:var(--faint);font-weight:400}
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.wrow:last-child{border:0}
+/* notes under frames */
+.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:rgba(107,124,255,.05)}
+.note b{color:var(--text)}
+.note.stop{border-color:var(--bad);background:rgba(255,92,122,.05)}
+.note.hold{border-color:var(--warn);background:rgba(245,181,63,.05)}
+.note.fix{border-color:var(--ok);background:rgba(62,207,142,.05)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
+.tag.obs{color:var(--bad);border-color:var(--bad)}
+.tag.later{color:var(--warn);border-color:var(--warn)}
+ul.flows{max-width:920px;color:var(--dim)}
+ul.flows li{margin-bottom:10px}
+ul.flows b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Jobs · the screens</h1>
+  <p><b>Palette authority:</b> the tokens in <code>apps/desktop/src/styles.css</code> (ADR 0106). Every colour on this page is one of those tokens; no frame names a hex of its own. Chrome is the current era — one window, top tabs — copied from <code>55-the-marketplace-round.html</code>; notes and structure follow <code>pms-oracle/docs/mockups/01-oracle-connector.html</code>.</p>
+  <p><b>Design of record:</b> <code>02-the-jobs-walkthrough-and-sign-off.md</code> (locked 2026-09-03) and <code>03-the-jobs-design.md</code>. Each frame's caption names the walkthrough section (S1–S10) or survey requirement (R-row) it draws.</p>
+  <p><b>The property:</b> The Marina Bay, code <code>mrn</code>, three departments in play — Engineering (ENG), Housekeeping (HK), Front Office (FO). Numbers are the numbers those screens would show on a Tuesday afternoon; none is lorem.</p>
+  <p>Dark frames first. Every state that exists is drawn below or listed under <i>Deliberately not drawn</i>. No control on this page pretends to a feature the design does not have.</p>
+</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">A · the desk — board and one job</h2>
+
+<h1 class="frame">1 · <b>The board</b>. The department's open jobs, concern first.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Priya Nair · ENG supervisor</div>
+  </div>
+  <div class="body">
+    <div style="margin-bottom:12px">
+      <span class="chip on">My departments · ENG</span><span class="chip">All departments</span><span class="chip">Assigned to me</span><span class="chip">Raised by guests</span><span class="chip">Restricted</span>
+      <span class="btn pri" style="float:right">＋ Raise a job</span>
+    </div>
+    <table>
+      <tr><th>Job</th><th>Where</th><th>What</th><th>Priority</th><th>Status</th><th>Who</th><th>Concern</th><th>Due</th></tr>
+      <tr class="sel"><td class="num">MRN-ENG-142</td><td>Room 1204</td><td>Air conditioning › Not cooling</td><td><span class="pill p1">P1</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Arjun M.</td><td><span class="pill bad">BREACHED · 14m</span></td><td>14:10</td></tr>
+      <tr><td class="num">MRN-ENG-141</td><td>Pool plant room</td><td>Pump › Vibration</td><td><span class="pill p2">P2</span></td><td><span class="pill hold">ON HOLD</span></td><td>Deepak R.</td><td><span class="pill">waiting · parts, Thu</span></td><td>Thu 09:00</td></tr>
+      <tr><td class="num">MRN-ENG-140</td><td>Room 0817</td><td>Lighting › Bedside lamp dead</td><td><span class="pill p3">P3</span></td><td><span class="pill warn">ACCEPTED</span></td><td>Arjun M.</td><td><span class="pill warn">AT RISK · 6m left</span></td><td>14:40</td></tr>
+      <tr><td class="num">MRN-ENG-139</td><td>Restaurant · Azure</td><td>Refrigeration › Walk-in warm</td><td><span class="pill p1">P1</span></td><td><span class="pill">ASSIGNED</span></td><td>Team · Night shift</td><td><span class="pill bad">STUCK · not accepted 9m</span></td><td>14:25</td></tr>
+      <tr><td class="num">MRN-ENG-138</td><td>Room 1512</td><td>Plumbing › Shower drains slowly</td><td><span class="pill nt">NOT TRIAGED</span></td><td><span class="pill">RAISED</span></td><td>—</td><td><span class="pill ok">ON TRACK</span></td><td>16:00</td></tr>
+      <tr><td class="num">MRN-ENG-137</td><td>Room 1204</td><td>Housekeeping › Extra towels <span class="tag">linked</span></td><td><span class="pill p3">P3</span></td><td><span class="pill ok">RESOLVED</span></td><td>Meera K. (HK)</td><td>—</td><td>auto-close 18:00</td></tr>
+    </table>
+    <p class="sect" style="margin-top:22px">Today · ENG</p>
+    <div class="cols3">
+      <div class="card"><div class="big">11</div><div class="mono">open · 2 breached · 1 stuck</div></div>
+      <div class="card"><div class="big">3</div><div class="mono">running now · 2 people, 1 team</div></div>
+      <div class="card"><div class="big">18</div><div class="mono">closed today · avg 41 min to resolve</div></div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S1.18, S3, S5.</b> The row carries the lean job's public columns — <code>job_number</code> (<code>MRN-ENG-142</code>: property code upper, root department, one counter per property, S1 D3), catalogue <b>category › item</b> instead of a type (S1 D5/D6, R7), the priority chain's result (<code>P1</code> set by the flow; <code>NOT TRIAGED</code> when nothing matched, S1 D4), the 9-status job status (S2), and the <b>derived</b> concern — ON_TRACK / AT_RISK / BREACHED / STUCK is computed by the 60-second sweep, never stored as a job column (S5 D1).</div>
+<div class="note"><b>Filters are the access model, not a preference.</b> "My departments" is what <code>job.viewer</code> from department membership shows; "All departments" appears only for <code>property#jobs_manager</code> and the GM (S8 D1). "Restricted" is the catalogue-defaulted flag (S8 D4).</div>
+<div class="note hold"><b>MRN-ENG-137 is Housekeeping's job on the ENG board</b> because it is <i>linked</i> to 142 (water then towel, same room — S1 D2 group link). It shows here read-only; ENG cannot act on it.</div>
+
+<h1 class="frame">2 · <b>One job</b>. MRN-ENG-142, mid-work, breached.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Priya Nair · ENG supervisor</div>
+  </div>
+  <div class="body">
+    <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:6px">
+      <span class="num" style="font-size:14px">MRN-ENG-142</span>
+      <span style="font-size:18px;font-weight:600">Air conditioning › Not cooling — Room 1204</span>
+      <span class="pill p1">P1</span><span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED · 14m over</span>
+    </div>
+    <div class="mono" style="margin-bottom:18px">raised 13:31 via GUEST_APP by the guest of stay 7F2A · due 14:10 · accountable now: <b>Priya Nair</b> (department supervisor, ladder step 2)</div>
+    <div class="cols">
+      <div>
+        <div class="card">
+          <h3>Details</h3>
+          <div class="kv">
+            <div>Summary</div><div>Room feels warm since noon, set to 19 but blowing ambient.</div>
+            <div>Location</div><div>Room 1204 · Floor 12 · Tower B</div>
+            <div>Asset</div><div>FCU-12-04 · Daikin FXFQ · last filter change 11 weeks ago</div>
+            <div>Department</div><div>Engineering (ENG)</div>
+            <div>Raised</div><div>GUEST · stay 7F2A · Mr. Okafor · departs Thu</div>
+            <div>Priority</div><div>P1 · decided by <b>flow</b> (guest in room, PMS occupied)</div>
+            <div>Restricted</div><div>No</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3>Work · running 00:23:41</h3>
+          <div class="kv">
+            <div>Assigned</div><div>Arjun Menon · on shift 14:00–22:00 · accepted 13:47</div>
+            <div>Sessions</div><div>13:52 started · 14:02 paused (fetch gauge) · 14:06 resumed</div>
+          </div>
+          <div style="margin-top:12px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span><span class="btn">Put on hold…</span><span class="btn">Reassign…</span></div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3>Linked · same room</h3>
+          <div class="kv"><div class="num">MRN-HK-388</div><div>Housekeeping › Extra towels · RESOLVED · Meera K.</div></div>
+          <div style="margin-top:10px"><span class="btn">Link a job…</span><span class="btn">Add a child step…</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>History</h3>
+          <div class="tl">
+            <div><b>Concern → BREACHED</b><span>14:10 · sweep · accountable moved to Priya Nair · nudge sent</span></div>
+            <div><b>Concern → AT_RISK</b><span>14:00 · sweep · nudge to Arjun Menon: "10 minutes left"</span></div>
+            <div><b>Session paused / resumed</b><span>14:02 – 14:06 · Arjun Menon · "fetch gauge"</span></div>
+            <div><b>Session started</b><span>13:52 · Arjun Menon</span></div>
+            <div><b>ACCEPTED</b><span>13:47 · Arjun Menon</span></div>
+            <div><b>ASSIGNED</b><span>13:33 · AUTO · on shift today, fewest open P1</span></div>
+            <div><b>RAISED</b><span>13:31 · GUEST_APP · stay 7F2A</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3>Notes &amp; photos</h3>
+          <div class="tl">
+            <div><b>Arjun Menon · 14:07</b><span>Suction pressure low, likely refrigerant. Photo ×1.</span></div>
+            <div><b>Front Office · 13:40</b><span>Guest called too; offered fan meanwhile.</span></div>
+          </div>
+          <div class="field ph" style="margin-top:10px">Add a note…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S1.18, S2, S4, S5, S8.</b> Every label is a lean-job column or a satellite table: <code>raised_via</code> = GUEST_APP, <code>raised_kind</code> = GUEST, <code>stay_id</code> (S1 D9/D10 — the guest's identity is the stay, never a <code>guest360_id</code>), <code>priority_decided_by</code> = flow, <code>due_at</code> (S1 D11). Work is <code>job_work_session</code> rows — start / pause / resume / stop live there, so PAUSED is never a job status (S2 D2, S4). History is <code>job_status_history</code> + <code>job_concern_history</code> interleaved.</div>
+<div class="note"><b>The accountable line is the ladder, not a field.</b> "Accountable now: Priya Nair, step 2" is derived from the property's concern policy (S5 D1–D3): assignee → department supervisor → department manager → property jobs manager; the reader sees who holds it, the table stores only the concern transitions.</div>
+<div class="note fix"><b>Buttons are the permission set.</b> Pause/Stop/Resolve are <code>job.execute</code>; Put on hold / Reassign are <code>job.manage</code> (§4 of the design chapter). A user who holds neither sees the same page with no button row — that state is not drawn; it is this frame minus one line.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">B · raising and resolving</h2>
+
+<h1 class="frame">3 · <b>Raise a job</b>. Staff, from the app.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Sana Rahman · FO agent</div>
+  </div>
+  <div class="body">
+    <div class="cols">
+      <div>
+        <label>Where</label><div class="field">Room 0817 · Floor 8 · Tower A</div>
+        <label>What</label><div class="field">Lighting › Bedside lamp dead <span class="mono" style="float:right">alias matched: "lamp not working"</span></div>
+        <label>Asset · optional</label><div class="field ph">Pick from Room 0817's assets…</div>
+        <label>Summary</label><div class="field">Guest says right-side bedside lamp is dead, bulb changed by HK, still dead.</div>
+        <label>Details · optional</label><div class="field ph">Anything the technician should know first</div>
+      </div>
+      <div>
+        <label>Department</label><div class="field">Engineering (ENG) <span class="mono" style="float:right">from the catalogue item</span></div>
+        <label>Priority</label><div class="field">P3 <span class="mono" style="float:right">catalogue default · you may override</span></div>
+        <label>Due</label><div class="field">Today 15:40 <span class="mono" style="float:right">policy: P3 within 60 min</span></div>
+        <label>Assign to · on shift today</label><div class="field ph">AUTO — or pick: Arjun Menon · Deepak Rao · Team · Day shift</div>
+        <label>Schedule for later · optional</label><div class="field ph">Leave empty to raise now</div>
+        <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">Restricted · off (catalogue default for this item)</span></div>
+        <div style="margin-top:20px"><span class="btn pri">Raise MRN-ENG-143</span><span class="btn">Cancel</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S1 D1/D4/D5, S3, S6.</b> Where = one <code>location_id</code> against Master Data's single location tree (S1 D1); What = category › item with the alias table doing the matching (S1 D6, R8); department and default priority come <b>from the catalogue item</b>, the flow overrides when it knows more, and the user may set it by hand — the chain in S1 D4. The assignee list is <b>Workforce's people on shift on the execution date</b> — person or team (S3 D1, team option added post-lock) — never the whole directory.</div>
+<div class="note"><b>Schedule for later</b> sets <code>scheduled_for</code>; a scheduled job is SCHEDULED, invisible to the board, and its concern clock starts on the day (S2 D3). A manager may clear the date to raise it immediately.</div>
+<div class="note hold"><b>The guest's version of this screen is not here.</b> Guest raising happens in the guest app (a stay-specific link, or a room QR) and the job arrives with <code>raised_via</code> GUEST_APP / QR — that screen belongs to the guest-app round (S6 D3 request); this page draws only what Jobs itself renders. The WhatsApp entry has no screen at all.</div>
+
+<h1 class="frame">4 · <b>Resolve</b>. The catalogue asks what fixed it.</h1>
+<div class="win" style="max-width:720px">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab on">Board</div>
+    <div class="who" style="margin-left:auto">Arjun Menon · ENG technician</div>
+  </div>
+  <div class="body">
+    <div style="font-weight:600;margin-bottom:4px">Resolve MRN-ENG-142 · Air conditioning › Not cooling</div>
+    <div class="mono" style="margin-bottom:16px">work 00:31:12 across 2 sessions · stopping the clock now</div>
+    <label>What fixed it</label>
+    <div style="margin:6px 0 14px">
+      <span class="chip">Filter cleaned</span><span class="chip">Filter replaced</span><span class="chip on">Refrigerant topped up</span><span class="chip">Thermostat replaced</span><span class="chip">Compressor fault — escalate to vendor</span><span class="chip">No fault found</span><span class="chip">Other…</span>
+    </div>
+    <label>In your words · optional</label>
+    <div class="field">Suction 45 psi, charged to 68. Recommend leak test at next PPM.</div>
+    <label>Photo · optional</label><div class="field ph">Add a photo</div>
+    <div style="margin-top:14px"><span class="btn pri">Resolve</span><span class="btn">Back</span></div>
+    <div class="mono" style="margin-top:12px">Guest-raised: the guest will be asked to rate this after it closes. Auto-close in 4 h unless reopened.</div>
+  </div>
+</div>
+<div class="note"><b>Draws S1 D7, S2 D3, S10 D2.</b> The chips are <code>resolution</code> rows of the catalogue item — the "ENGINEERING · AC" concept the owner kept: item × location × resolution, so that in a year the property can see that FCU-12-04 has had refrigerant three times (S1 D7). One resolution id plus a free text box (S1 "I need a plain text box too"). Resolving stops the open work session (S4). RESOLVED → CLOSED after the policy's <i>n</i> hours (S2 D3, post-lock); a guest-raised job invites the rating on close (S10 D2).</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">C · the property at a glance</h2>
+
+<h1 class="frame">5 · <b>Live</b>. Who is working on what, and who is on shift to take more.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab">Board</div><div class="tab on">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Rohan Desai · property jobs manager</div>
+  </div>
+  <div class="body">
+    <div class="cols3">
+      <div class="card">
+        <h3>Engineering · <span class="pill ok">present</span> <span class="mono">day shift since 07:00 · 4 on</span></h3>
+        <div class="wrow"><span>Arjun Menon</span><span class="pill run">MRN-ENG-142 · 23m</span></div>
+        <div class="wrow"><span>Deepak Rao</span><span class="pill hold">on hold · 141</span></div>
+        <div class="wrow"><span>Farhan Ali</span><span class="mono">free · 2 accepted</span></div>
+        <div class="wrow"><span>Team · Night shift</span><span class="pill bad">139 not accepted</span></div>
+        <div class="bar"><i class="bad" style="width:64%"></i></div><div class="mono">11 open · 2 breached</div>
+      </div>
+      <div class="card">
+        <h3>Housekeeping · <span class="pill ok">present</span> <span class="mono">since 07:00 · 9 on</span></h3>
+        <div class="wrow"><span>Meera Krishnan</span><span class="pill run">MRN-HK-391 · 6m</span></div>
+        <div class="wrow"><span>Lakshmi P.</span><span class="pill run">MRN-HK-390 · 12m</span></div>
+        <div class="wrow"><span>7 more</span><span class="mono">free</span></div>
+        <div class="bar"><i style="width:30%"></i></div><div class="mono">14 open · 0 breached</div>
+      </div>
+      <div class="card">
+        <h3>Front Office · <span class="pill">no service hours</span></h3>
+        <div class="mono">This department has no presence configured — its jobs run on the property clock (S7 D8: off).</div>
+        <div class="bar"><i style="width:10%"></i></div><div class="mono">2 open · 0 breached</div>
+      </div>
+    </div>
+    <p class="sect" style="margin-top:22px">Concern · property · last 60-second sweep 14:24:00</p>
+    <table>
+      <tr><th>Job</th><th>Dept</th><th>State</th><th>Since</th><th>Accountable now</th><th>Last nudge</th></tr>
+      <tr><td class="num">MRN-ENG-142</td><td>ENG</td><td><span class="pill bad">BREACHED</span></td><td>14:10</td><td>Priya Nair · supervisor</td><td>14:10 · in-app</td></tr>
+      <tr><td class="num">MRN-ENG-139</td><td>ENG</td><td><span class="pill bad">STUCK</span></td><td>14:15</td><td>Priya Nair · supervisor</td><td>14:15 · in-app</td></tr>
+      <tr><td class="num">MRN-ENG-140</td><td>ENG</td><td><span class="pill warn">AT RISK</span></td><td>14:34</td><td>Arjun Menon · assignee</td><td>14:34 · in-app</td></tr>
+    </table>
+  </div>
+</div>
+<div class="note"><b>Draws S4, S5, S7.</b> Presence is the fan-out — Workforce's <code>shift.started</code> / <code>shift.ended</code> events (requested of Workforce, S7) marking a department present; service hours are the fallback; a department with neither runs on the property clock, which is the owner's on/off ruling (S7 D8) — <b>not a disabled control</b>, a stated state. The concern table is the sweep's output (S5 D1: Temporal Cron, every 60 seconds, overlap SKIP, one query over open jobs); the accountable column is the ladder position at that moment.</div>
+<div class="note"><b>Nudges are in-app only</b> (S9 D10): "Last nudge · in-app" is the whole notification story; there is no channel picker because there is no channel.</div>
+
+<h1 class="frame">6 · <b>Scheduled</b>. PPM and anything raised for a day.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab">Board</div><div class="tab">Live</div><div class="tab on">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Priya Nair · ENG supervisor</div>
+  </div>
+  <div class="body">
+    <table>
+      <tr><th>Day</th><th>Job</th><th>Where</th><th>What</th><th>From</th><th>Cycle</th><th>Assign</th></tr>
+      <tr><td>Wed 3 Sep</td><td class="num">MRN-ENG-131</td><td>Floor 12 · all rooms</td><td>Air conditioning › Filter change <span class="tag">parent · 24 steps</span></td><td>APPLICATION · Engineering PPM</td><td>every 3 months</td><td>Team · Day shift</td></tr>
+      <tr><td>Wed 3 Sep</td><td class="num">MRN-ENG-144</td><td>Room 1204</td><td>Air conditioning › Leak test</td><td>STAFF · Arjun Menon</td><td>—</td><td>AUTO</td></tr>
+      <tr><td>Mon 15 Sep</td><td class="num">MRN-ENG-118</td><td>Plant room B</td><td>Generator › Monthly load test</td><td>APPLICATION · Engineering PPM</td><td>15th monthly</td><td>Deepak Rao</td></tr>
+    </table>
+    <div class="mono" style="margin-top:14px">A scheduled job becomes RAISED at 00:00 on its day and its concern clock starts then. Cycles are the Engineering app's PPM plan on Temporal Cron; Jobs holds the job, not the calendar.</div>
+  </div>
+</div>
+<div class="note"><b>Draws S1 D2 (parent › child), S2 D3, S7 (Temporal).</b> The filter change is a parent with 24 child steps, one per room, blocked children carry a stopped clock, cancel cascades, close never does (S1 D2). PPM rows arrive as <code>maintenance.ppm.due</code> events with <code>raised_kind</code> APPLICATION (§3); "15th monthly" is the platform scheduler finding the date, which is why <code>next_due_at</code> was withdrawn from the job (S7).</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">D · configuration</h2>
+
+<h1 class="frame">7 · <b>Catalogue</b>. Category › item › resolutions, organisation-owned, property-activated.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab on">Catalogue</div><div class="tab">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Rohan Desai · property jobs manager</div>
+  </div>
+  <div class="body">
+    <div class="cols" style="grid-template-columns:260px 1fr">
+      <div class="card">
+        <h3>Categories · Marina Hotels (org)</h3>
+        <div class="wrow"><span>Air conditioning</span><span class="mono">ENG · 6</span></div>
+        <div class="wrow"><span>Plumbing</span><span class="mono">ENG · 9</span></div>
+        <div class="wrow"><span>Lighting</span><span class="mono">ENG · 4</span></div>
+        <div class="wrow"><span>Housekeeping</span><span class="mono">HK · 12</span></div>
+        <div class="wrow"><span>Guest request</span><span class="mono">FO · 7</span></div>
+        <div class="wrow"><span style="color:var(--faint)">Spa</span><span class="mono">not active here</span></div>
+      </div>
+      <div class="card">
+        <h3>Air conditioning › Not cooling</h3>
+        <div class="kv">
+          <div>Department</div><div>Engineering (ENG)</div>
+          <div>Default priority</div><div>P2 · this property overrides to <b>P1 when the room is occupied</b></div>
+          <div>Due within</div><div>40 min</div>
+          <div>Restricted</div><div>No</div>
+          <div>Aliases</div><div>"AC not working" · "room warm" · "AC broken" · "cooling"</div>
+          <div>Active at</div><div>Marina Bay ✓ · Marina Hills ✓ · Marina Airport — off</div>
+        </div>
+        <p class="sect">Resolutions</p>
+        <span class="chip">Filter cleaned</span><span class="chip">Filter replaced</span><span class="chip">Refrigerant topped up</span><span class="chip">Thermostat replaced</span><span class="chip">Compressor fault — escalate to vendor</span><span class="chip">No fault found</span>
+        <div style="margin-top:10px"><span class="btn">Add resolution</span><span class="btn">Edit item</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S1 D5–D7 and the architect's ruling (3), 2026-09-03.</b> The catalogue is <b>Jobs' own</b>, organisation-scoped, with per-property activation as Jobs' behaviour — the earlier "keep it in Core" reading was reversed by the architect and is drawn as reversed. The property override row is <code>property_item_policy</code> (S1 D12); aliases are <code>item_alias</code>; the item's <code>restricted</code> default is where the flag on a job comes from (S8 D4).</div>
+
+<h1 class="frame">8 · <b>Settings</b>. Concern policy, presence, access — property and department.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab on">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Rohan Desai · property jobs manager</div>
+  </div>
+  <div class="body">
+    <div class="cols3">
+      <div class="card">
+        <h3>Concern policy · ENG <span class="mono">(property default below)</span></h3>
+        <div class="kv">
+          <div>P1 due</div><div>40 min · at risk at 75 %</div>
+          <div>P2 due</div><div>2 h · at risk at 75 %</div>
+          <div>P3 due</div><div>Same shift</div>
+          <div>Stuck when</div><div>not accepted 8 min · no session 15 min</div>
+          <div>Ladder</div><div>assignee → supervisor → manager → jobs manager</div>
+          <div>Manager at risk</div><div><span class="tog on"><i></i></span>P1 only</div>
+          <div>Auto-close</div><div>4 h after RESOLVED</div>
+          <div>On-hold warning</div><div>1 day before <code>hold_until</code> · to supervisor</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Presence · ENG</h3>
+        <div class="kv">
+          <div>Follow shifts</div><div><span class="tog on"><i></i></span>from Workforce</div>
+          <div>Service hours</div><div>07:00 – 23:00 · fallback</div>
+          <div>Outside hours</div><div>P1 keeps its clock; P2/P3 pause</div>
+        </div>
+        <h3 style="margin-top:16px">Presence · FO</h3>
+        <div class="kv"><div>Follow shifts</div><div><span class="tog"><i></i></span>off — property clock</div></div>
+      </div>
+      <div class="card">
+        <h3>Access · Marina Bay</h3>
+        <div class="kv">
+          <div>Jobs managers</div><div>Rohan Desai · granted by GM 2026-08-28</div>
+          <div>Subscriptions</div><div>Priya Nair · ENG breached, stuck<br>Rohan Desai · property breached</div>
+        </div>
+        <div class="mono" style="margin-top:12px">Department membership and headship come from Workforce; the GM grants <code>property#jobs_manager</code> in Identity. Nothing else is configurable here.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S5 D1–D3, S7 D8, S8 D1, S9 D2/D10, S2 D3.</b> <code>concern_policy</code> per property with a department override; "Manager at risk · P1 only" is the owner's flexibility ask ("some issue at risk we set accountable to manager") as a policy line; <code>concern_subscription</code> is per role (S5 D3); <code>service_hours</code> + <code>department_presence</code> (S7); the on-hold warning is the <code>hold_until</code> reminder policy (S9 D2). Access shows what Identity granted — there is no permission editor in Jobs, because grants are Identity's RPCs and the manifest's grant kind (§4, AUTHZ-Q25).</div>
+<div class="note stop"><b>No notification settings exist</b> (S9 D10: in-app only, no config). A frame with a notifications tab would be a control pretending to a feature; none is drawn.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">E · the widget</h2>
+
+<h1 class="frame">9 · <b>Jobs now</b>. The dock widget, three states.</h1>
+<div style="display:flex;gap:18px;flex-wrap:wrap">
+  <div class="widget">
+    <h3>Jobs now <span>ENG · all quiet</span></h3>
+    <div class="wrow"><span>Open</span><span>7</span></div>
+    <div class="wrow"><span>Running</span><span class="pill run">2</span></div>
+    <div class="wrow"><span>Concern</span><span class="pill ok">ON TRACK</span></div>
+    <div class="wrow"><span>Scheduled today</span><span>1</span></div>
+  </div>
+  <div class="widget">
+    <h3>Jobs now <span>ENG · 14:24</span></h3>
+    <div class="wrow"><span>Open</span><span>11</span></div>
+    <div class="wrow"><span>Running</span><span class="pill run">3</span></div>
+    <div class="wrow"><span>At risk</span><span class="pill warn">1</span></div>
+    <div class="wrow"><span>Breached · stuck</span><span class="pill bad">2 · 1</span></div>
+    <div class="wrow"><span class="num">MRN-ENG-142</span><span class="pill bad">14m over → Priya</span></div>
+  </div>
+  <div class="widget">
+    <h3>Jobs now <span>you · Arjun</span></h3>
+    <div class="wrow"><span class="num">MRN-ENG-142</span><span class="pill run">running 23m</span></div>
+    <div class="wrow"><span class="num">MRN-ENG-140</span><span class="pill warn">6m left</span></div>
+    <div class="wrow"><span>Accepted, not started</span><span>1</span></div>
+    <div class="wrow"><span>Nudges</span><span class="pill warn">1 unread</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws manifest widget <code>jobs-now</code> (§5) and S5.</b> Quiet / escalated / mine — the widget reads the same sweep output as the Live tab and shows the viewer what their access shows them (S8): a technician sees their jobs, a supervisor their department, a jobs manager the property. In-app nudges surface here as "unread" (S9 D10); there is nowhere else they go.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">F · flows</h2>
+<ul class="flows">
+  <li><b>Guest raises from the room.</b> Guest app (stay link) or room QR → job RAISED with <code>raised_via</code>, <code>stay_id</code> → flow sets priority from PMS occupancy → AUTO assigns from Workforce's on-shift list → frame 2 → resolve (frame 4) → auto-close → guest rates (S6, S10).</li>
+  <li><b>Concern escalates.</b> Sweep every 60 s → AT_RISK at the policy's percentage → nudge assignee → BREACHED → accountable climbs the ladder → nudge the subscriber → frame 5 and the widget change; nothing on the job row changes except what the sweep derives (S5).</li>
+  <li><b>Shift starts.</b> Workforce publishes <code>shift.started</code> → Jobs marks the department present → clocks that paused outside service hours resume; nothing polls Workforce (S7).</li>
+  <li><b>PPM arrives.</b> Engineering's plan fires on Temporal Cron → <code>maintenance.ppm.due</code> → SCHEDULED parent with child steps → RAISED at 00:00 of the day (frame 6).</li>
+  <li><b>Hold with a date.</b> Put on hold with <code>hold_reason</code> + <code>hold_until</code> → clock stopped → reminder before the date to the policy's role → resume or reassign (S9 D2).</li>
+</ul>
+
+<h2 class="sec">Deliberately not drawn</h2>
+<ul class="flows">
+  <li><b>The guest app's raise and rating screens</b> — the guest-app round's, reached by stay link or QR (S6, S10 D2). Jobs renders neither.</li>
+  <li><b>WhatsApp intake</b> — a channel, not a screen; it lands as <code>raised_via</code> WHATSAPP.</li>
+  <li><b>A notifications settings page</b> — none exists (S9 D10).</li>
+  <li><b>A permission editor</b> — grants are Identity's (S8 D1, AUTHZ-Q25); Jobs only displays what was granted.</li>
+  <li><b>Reports</b> — "how many jobs reached the manager" is a query over <code>job_concern_history</code> (S5 D1); the reporting screen follows the build, when the data exists to draw it honestly.</li>
+  <li><b>The manual reminder dialog</b> (S9 D3) — a date and a note; frame 2's "Add a note…" field with a date is its whole shape.</li>
+  <li><b>CANCELLED and deleted jobs</b> — a cancel reason dialog and a row with <code>deleted_at</code> shown struck through in the board's "Closed" filter (S2 D1, ADR 0062 vocabulary); listed, not drawn.</li>
+  <li><b>The empty department</b> (no shift, no service hours, no open jobs) — frame 5's FO card with zeros.</li>
+  <li><b>Mobile layouts</b> — same frames, one column; drawn after the desktop frames are locked.</li>
+  <li><b>Light theme</b> — the same tokens per ADR 0106, drawn once the dark frames are approved.</li>
+</ul>
+
+</body>
+</html>
