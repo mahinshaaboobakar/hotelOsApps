@@ -43,8 +43,8 @@ constitution's order, not a preference.
 
 | # | Section | State | Signed off |
 |---|---|---|---|
-| S1 | The job itself — what a job *is* | **OPEN** — 6 ruled, S1-D5 and S1-D6 reopened | — |
-| S2 | Creating a job | not started | — |
+| S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-03 |
+| S2 | Creating a job | **OPEN** | — |
 | S3 | Assigning it | not started | — |
 | S4 | Accept, start, pause, finish | not started | — |
 | S5 | **Escalation** | not started | — |
@@ -75,8 +75,7 @@ project.
 ---
 # S1 · The job itself — what a job *is*
 
-**State: OPEN.** Six decisions ruled. **S1-D5 and S1-D6 reopened by the
-owner, 2026-09-02** — see §S1.8.
+**State: SIGNED OFF — owner, 2026-09-03.**
 
 ## What it does
 
@@ -2754,6 +2753,59 @@ POLICY      property_item_policy — active here · display name · default prio
 
 Nothing but Jobs reads the policy, so nothing but Jobs holds it.
 
+## S1 — signed off. What is in force, consolidated
+
+**Owner, 2026-09-03: "D10, D11, D12 okay — sign off S1."** The decision table
+below records the day's route, supersessions included; this is the settled
+state, and it is what the design chapter is built from.
+
+```text
+THE JOB                 23 columns (§S1.18): identity · what · where · who does it ·
+                        summary/details · priority + why · the four raiser fields ·
+                        stay · scheduled_for · due_at · job_status · cycle · audit · delete
+WHAT IT IS ABOUT        category › item from the catalogue; location_id from Master
+                        Data's one tree; asset_id when there is a thing
+NO TYPE                 department + raiser kind cover every use
+THE CATALOGUE           category · item · item_alias · resolution — Core Administration,
+                        group-wide, activated per property, screen shown only while
+                        Jobs is installed
+THE POLICY              property_item_policy — the jobs schema, Jobs Settings, per property
+RESOLUTION              job_resolution, one row per cycle; the list from the catalogue;
+                        a note always; "other" makes it mandatory; three ids on the job
+                        make the recurrence report a query
+PRIORITY                EMERGENCY · HIGH · NORMAL · LOW · NOT_TRIAGED, decided by a person,
+                        else the flow, else the catalogue, else NOT_TRIAGED
+NUMBER                  <PropertyCode>-<RootDept>-<n>, one counter per property, stamped
+                        once, upper-cased from Master Data's lowercase code
+STATUSES                nine, with SCHEDULED; PAUSED lives in the time log; record state
+                        is deleted_at, never an enum; CANCELLED is an outcome
+TIME                    work sessions start / pause / resume / stop; the live board is a
+                        query; SLA clock and labour clock kept apart; every clock counts
+                        from scheduled_for ?? created_at
+RELATIONS               a GROUP for peers; PARENT › CHILD for steps, one level, step numbers,
+                        blocked children with stopped clocks, no close until all children
+TABLES                  job · assignment · status history · work session · resolution ·
+                        note · attachment · link · escalation — one fact each
+ASSIGNMENT              every list from Workforce on the execution date; default = the
+                        category's department; flips = related / all, on-shift only;
+                        AUTO takes the first; nobody available is an escalation condition
+PPM                     planned in Engineering; maintenance.ppm.due → an ordinary job;
+                        job.closed back by correlation; no calls either way
+WHO RAISES              staff from the app now; guests by QR next release, buttons only
+ACCESS                  department member / supervisor from Workforce; property-wide via a
+                        GM-grantable property#jobs_manager (registry entry pending);
+                        the vocabulary reconciliation parked for the owner
+TENANCY                 property_id, one column
+```
+
+**Leaves S1 as requests, none blocking:** the missing place kinds and a
+property-code shape rule (Master Data) · the catalogue's home in Core
+Administration (architect) · `property#jobs_manager` in the grantable-
+relations registry (architect, with the parked discussion) · GuestOps
+without Jobs and the catalogue screen (architect) · what a QR authenticates
+(the guest-app round). **Deferred by the owner:** HosPilot raising jobs.
+
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2768,9 +2820,9 @@ Nothing but Jobs reads the policy, so nothing but Jobs holds it.
 | **S1-D8** | One scope column, `property_id` | **RULED** — reasoning in §S1.7 |
 
 | **S1-D9** | **Two statuses.** `job_status` — 9 values with a transition table, replacing the reference's 8-value enum *and* its five booleans. Record state is **`deleted_at`, not an enum** (ADR 0062's shape), and **`CANCELLED` is a job outcome, not a record state** | **RULED, owner 2026-09-03** — §S1.12, rephrased to 8 values in §S1.14 ·2 |
-| **S1-D10** | **Live work tracking** — sessions: start / pause / resume / stop; the live board is a query; SLA clock and labour clock kept apart | *proposed — §S1.14 ·3* |
-| **S1-D11** | **Tables split by logic** — job · assignment · status history · work session · resolution · recovery · note · attachment · link · escalation | *proposed — §S1.14 ·4* |
-| **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `raised_via: ENGINEERING_PPM`; `job.closed` back by correlation | *proposed — §S1.14 ·5* |
+| **S1-D10** | **Live work tracking** — sessions: start / pause / resume / stop; the live board is a query; SLA clock and labour clock kept apart | **RULED, owner 2026-09-03** — §S1.14 ·3 |
+| **S1-D11** | **Tables split by logic** — job · assignment · status history · work session · resolution · recovery · note · attachment · link · escalation | **RULED, owner 2026-09-03** — §S1.14 ·4 |
+| **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `raised_via: ENGINEERING_PPM`; `job.closed` back by correlation | **RULED, owner 2026-09-03** — §S1.14 ·5 |
 | **S1-D13** | **Assignment** — every list from Workforce, **on shift on the job's execution date**; default = the category's department; flips = related departments / all users, still on-shift only; AUTO takes the first; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6, corrected once |
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
@@ -2781,12 +2833,9 @@ Nothing but Jobs reads the policy, so nothing but Jobs holds it.
 | **S1-D21** | **The policy lives in the `jobs` schema, edited in Jobs Settings** — the stream's "Core Administration" listing was wrong; only the catalogue is Core's | **corrected, 2026-09-03** — §S1.18 |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
-**Sign-off:** **NOT SIGNED OFF.**
+**Sign-off:** **S1 SIGNED OFF — owner, 2026-09-03, in the owner's own words: *"D10, D11, D12 okay — sign off S1."*** Twenty-one decisions, every one ruled or explicitly parked by the owner.
 
-The stream marked this section signed off on 2026-09-02 and **the owner had
-not signed it.** That was the stream's error, recorded here rather than
-quietly corrected: a sign-off is the owner's act, and a page that records one
-that did not happen is worse than a page with an open section.
+*(The stream had marked this section signed off on 2026-09-02 without the owner's word; that was reversed and is kept on the record above.)*
 
 Six decisions carry rulings — D1, D2, D3, D4, D7, D8. **D5 and D6 were
 reopened** on the owner's challenge (§S1.8) and **redesigned from the
@@ -3558,7 +3607,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | 0 of 10 |
+| Sections signed off | **1 of 10** |
 | Page locked | no |
 | Locked on | — |
 
