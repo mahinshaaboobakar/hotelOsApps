@@ -4218,6 +4218,26 @@ unchanged; only *who notices the minute* changes. Recorded as the owner's
 decision to make: **S5-D12**.
 
 
+#### D12 ruled — the sweep, run by Temporal Cron. Interval: 60 seconds — owner, 2026-09-03
+
+```text
+interval        every 60 seconds, one schedule per property, fixed — not a setting
+why 60          every threshold is in minutes or a % of a promise measured in minutes;
+                the reference itself rounded every time to the minute.
+                a threshold at 09:15:00 fires at the first tick ≥ 09:15 — at most
+                59 seconds late, which no hotel measures
+why not 30      halves the lateness nobody notices, doubles the reads
+why not more    a 12-minute promise checked every 5 minutes is a 40 % error
+overlap         Temporal schedule overlap policy = SKIP — if a sweep is still
+                running when the next tick comes, the tick is dropped, never
+                run twice on the same rows
+cost            one indexed query over open jobs per minute per property —
+                milliseconds; a property of 1,000 open jobs is still milliseconds
+```
+
+Not configurable: a knob here invites a 15-minute setting that silently
+breaks every 12-minute promise.
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -4232,7 +4252,7 @@ decision to make: **S5-D12**.
 | **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03**, then sharpened on the owner's question: the clock pauses when **nobody is on shift** (Workforce, derived — no setting) **or** outside optional **service hours** (Jobs policy, per department); EMERGENCY exempt. Property and department levels both hold; the operating-hours question is closed — they are the roster |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
-| **S5-D12** | **Who notices the minute** — the sweep run by Temporal Cron (one schedule per property, database the single truth) **or** a Temporal entity workflow per job (signalled on every change, second-precision, a second copy of job state) | *the owner's — stream recommends the sweep* |
+| **S5-D12** | **The sweep, run by Temporal Cron — every 60 seconds**, one schedule per property, fixed, overlap policy SKIP; database the single truth | **RULED, owner 2026-09-03** |
 | **S5-D13** | **Department presence by `shift.started` / `shift.ended`** — Temporal-scheduled fan-out from Workforce, one subject, department in payload; supersedes attendance-first and the roster fallback | **RULED, owner 2026-09-03** — a request to Workforce |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
 
