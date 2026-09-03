@@ -4238,6 +4238,47 @@ cost            one indexed query over open jobs per minute per property —
 Not configurable: a knob here invites a 15-minute setting that silently
 breaks every 12-minute promise.
 
+#### D10 and D11, on the owner's questions — 2026-09-03
+
+**D10 — "in-app, no config needed. Opinion?"** Agreed, and one step
+further: **in-app is always on and has no setting at all.** The only
+question a channel setting should ever ask is *"also email this?"* — one
+checkbox per subscription, because a head of department may want a breach
+in their inbox while off the floor. That is the whole channel configuration
+at launch:
+
+```text
+in-app     always · every nudge · nothing to configure
+email      one checkbox on a subscription — off by default
+SMS · WhatsApp   absent from the screen until wired end to end
+```
+
+The reference had **four layers** of channel preference — company, site,
+department, user — each with per-event × per-channel toggles, and two of the
+four channels dead. None of that comes across. A screen with one checkbox is
+the design.
+
+**D11 — "purpose and value of manual escalation?"** Purpose: **reality
+outruns the policy.** A supervisor sees what no threshold can — a VIP
+standing at the desk, a smell of gas, a guest about to check out angry — and
+needs the manager *now*, not at 75 %. Value, three things:
+
+```text
+1  it happens INSIDE the record       without it, the supervisor phones or WhatsApps the
+                                      manager, the job is escalated in reality, and the
+                                      history says nothing happened
+2  accountability actually moves      the head now owns it on their board — not just a call
+3  the report can tell the two apart  reason: MANUAL vs the system's — "how often do our
+                                      people override the policy" is itself a signal that
+                                      the policy is wrong
+```
+
+Cost: a button, and a `reason` on a row that already exists. It also works
+downward — *"false alarm, back to ON_TRACK"* — same row, same reason, and
+the history keeps both moves. **If the owner judges it noise it can go; the
+stream keeps it because the alternative is escalation happening off the
+record.**
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -4251,7 +4292,7 @@ breaks every 12-minute promise.
 | **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
 | **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03**, then sharpened on the owner's question: the clock pauses when **nobody is on shift** (Workforce, derived — no setting) **or** outside optional **service hours** (Jobs policy, per department); EMERGENCY exempt. Property and department levels both hold; the operating-hours question is closed — they are the roster |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
-| **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
+| **S5-D10** | Channels | **in-app always on, no setting; email one checkbox per subscription, off by default**; SMS/WhatsApp absent until wired. The reference's four preference layers do not come across | **RULED, owner 2026-09-03** |
 | **S5-D12** | **The sweep, run by Temporal Cron — every 60 seconds**, one schedule per property, fixed, overlap policy SKIP; database the single truth | **RULED, owner 2026-09-03** |
 | **S5-D13** | **Department presence by `shift.started` / `shift.ended`** — Temporal-scheduled fan-out from Workforce, one subject, department in payload; supersedes attendance-first and the roster fallback | **RULED, owner 2026-09-03** — a request to Workforce |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
