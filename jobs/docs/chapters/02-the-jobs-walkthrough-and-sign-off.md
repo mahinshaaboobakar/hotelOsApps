@@ -4165,6 +4165,59 @@ department row is the only new thing, and it holds one fact per department
 instead of one per job.
 
 
+#### The owner's architecture — Temporal + fan-out — 2026-09-03
+
+*"When a shift is created, Temporal holds each shift's start and end; at
+those times it triggers and Workforce fans out `shift.started` /
+`shift.ended` to all services. PPM: Temporal. And for finding a job's
+escalation time: Temporal."*
+
+**1 · Shift start and end as a Temporal-scheduled fan-out — agreed, and it
+is the better primary.** It is Workforce's to build: the roster row *is* the
+schedule; Temporal holds the start and end; at each, Workforce appends
+`shift.started { department, property, shift_id }` / `shift.ended`, one
+subject, department in the payload, every interested application subscribes.
+Jobs' `department_presence` is kept by these two events — no roster read,
+no `next_shift_at` fallback needed. Attendance (`clocked_in`) becomes a
+later refinement for hotels that want *presence* rather than *plan*. This
+supersedes the attendance-first design above.
+
+**2 · PPM on Temporal — agreed.** Chapter 11 names it; Engineering builds it.
+
+**3 · A job's escalation time on Temporal — one honest tradeoff, then the
+owner's call.** This is fairer than the stream said earlier: a per-job
+Temporal workflow is **not** the reference's Quartz failure. Quartz had no
+state and no signals, so its chain had to be deleted and rebuilt. A Temporal
+entity workflow holds the job's timers and can be *signalled* on every
+change and recompute deterministically — that is what Temporal is built for.
+So it is viable. The cost is elsewhere:
+
+```text
+PER-JOB WORKFLOW                          SWEEP RUN BY TEMPORAL CRON
+one workflow per open job                 one schedule per property
+every job change must SIGNAL its          every job change is just a row write;
+  workflow — assign, accept, pause,       the sweep reads the row next minute
+  hold, resolve, reassign
+two places know the job's state:          one place: the database
+  the row AND the workflow
+fires at 09:15:00 exactly                 fires at the next minute tick
+thresholds live in the workflow's code    thresholds live in the policy row;
+  path — a policy edit means              a policy edit is read next minute
+  re-signalling every open workflow
+```
+
+**Recommendation: the sweep, run by Temporal Cron.** It is Temporal finding
+the escalation time — once a minute for every job at once, with the
+database as the single truth. The per-job workflow buys second-precision a
+hotel does not need and costs a second copy of every job's state, which is
+the class of defect this whole page has been removing.
+
+**But it is a legitimate Temporal pattern, and if the owner prefers it the
+design still stands** — concern, accountable, subscriptions and history are
+unchanged; only *who notices the minute* changes. Recorded as the owner's
+decision to make: **S5-D12**.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -4179,6 +4232,8 @@ instead of one per job.
 | **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03**, then sharpened on the owner's question: the clock pauses when **nobody is on shift** (Workforce, derived — no setting) **or** outside optional **service hours** (Jobs policy, per department); EMERGENCY exempt. Property and department levels both hold; the operating-hours question is closed — they are the roster |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
+| **S5-D12** | **Who notices the minute** — the sweep run by Temporal Cron (one schedule per property, database the single truth) **or** a Temporal entity workflow per job (signalled on every change, second-precision, a second copy of job state) | *the owner's — stream recommends the sweep* |
+| **S5-D13** | **Department presence by `shift.started` / `shift.ended`** — Temporal-scheduled fan-out from Workforce, one subject, department in payload; supersedes attendance-first and the roster fallback | **RULED, owner 2026-09-03** — a request to Workforce |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
 
 **Sign-off:** _pending_
