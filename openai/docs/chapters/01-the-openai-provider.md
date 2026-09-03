@@ -78,45 +78,45 @@ property's money is spent on. Four models are declared:
 
 | Model | Latency | Published per 1M in / out | For |
 |---|---|---|---|
-| `gpt-4o-mini` | fast | $0.15 / $0.60 | the sole conversation rung |
+| `gpt-4o` | standard | $2.50 / $10.00 | the capable rung |
+| `gpt-4o-mini` | fast | $0.15 / $0.60 | the cheap rung the ladder steps down to |
 | `text-embedding-3-small` | fast | $0.02 / — | retrieval |
+| `text-embedding-3-large` | fast | $0.13 / — | retrieval, when quality beats storage |
 
-### 3.1 Two models, by the owner's policy
+`gpt-4o-mini` is sixteen times cheaper in, and that is what makes degradation
+mean something: a cheap rung that is still capable is the difference between
+degrading and refusing.
 
-**Ruled 2026-09-03.** `gpt-4o` and `text-embedding-3-large` are **removed
-rather than deprioritised**, and that distinction is the whole point.
-
-A costlier model left in the catalogue is one the router *weighs*: it can be
-reached by a request the ladder judges worth it, and *worth it* is a rule nobody
-has written yet. Removed, it is not a preference the router balances but a model
-that does not exist to route to — `resolve` iterates the declared catalogue, so
-a bound expressed in the manifest is **structural rather than advisory**.
-
-The consequence is worth knowing before it is met: with one conversation model
-the ladder has one rung, so a failure is a **refusal rather than a downgrade**.
-There is no cheaper tier to step to. `gpt-4o-mini` is capable enough that this
-is a real policy rather than a crippled one.
-
-`text-embedding-3-small` stays because removing it would restrict a *capability*
-rather than a *cost* — at cents per million tokens it is not what a spending
-bound is aimed at, and without an embeddings model the Gateway does not return
-worse search results, it **refuses to search** (§5). It is also the cheaper of
-the two embedding models, so the trim is consistent in both directions.
-
-**The full catalogue returns when `AI-Q15`'s policy surface ships** and the
-owner can prefer rather than restrict. Until then the manifest is the only place
-the bound can be stated truthfully.
-
-### 3.2 Why the numbers are checked first
-
-Only models whose pricing is known with confidence are declared — a model
-declared at a guessed price sorts wrongly against every other rung and nobody
-finds out from a failure. **Verify the figures against OpenAI's current pricing
-before a property routes real spend**: a stale price here does not fail, it
-quietly misroutes.
+**The catalogue is deliberately short.** Only models whose pricing is known with
+confidence are declared. A model omitted is one the Gateway will not route to,
+which is recoverable; a model declared at a guessed price sorts wrongly against
+every other rung and nobody finds out from a failure. **Verify the figures
+against OpenAI's current pricing before a property routes real spend** — a stale
+price here does not fail, it quietly misroutes.
 
 Embeddings carry a true zero output cost, because embeddings have no output
 tokens — not an unknown written as zero.
+
+### 3.1 The catalogue is the provider's truth, not the property's policy
+
+**This list is what OpenAI offers.** A property that wants to spend less does
+not edit it — editing it would make the package lie about the vendor, and put a
+hotel's policy inside a file the vendor signs.
+
+The property's bound is a platform configuration key:
+
+```text
+ai.routing.pinned_model = openai/gpt-4o-mini
+```
+
+Unset, the ladder routes by the resolver's design. Set, **every call the pinned
+model can serve goes through it** and nothing ladders past it — a bound, not a
+weight. It applies per capability it satisfies, so a pinned conversation model
+does not bind embedding requests, and a pin naming a model nobody installed
+refuses namefully rather than quietly spending elsewhere.
+
+`AI-Q15`'s Settings screen will edit the same key. Until then it is set through
+the configuration store.
 
 ---
 
@@ -127,7 +127,7 @@ person's message
    → Kernel admission (ai_agent.execute)
    → Policy → input Guardrails
    → agent engine
-   → Model Gateway          resolve: openai/gpt-4o-mini — the only rung
+   → Model Gateway          resolve: openai/gpt-4o, then openai/gpt-4o-mini
    → HttpProviderTransport  POST https://api.openai.com/v1/chat/completions
                             Authorization: Bearer «from providers/openai/api_key»
    → choices[0].message.content, usage.prompt_tokens / completion_tokens
@@ -154,16 +154,9 @@ provider and a local Ollama imitating it, with no code for either.
 | `timed out` | connected, no answer in time | do not restart anything |
 
 The `client` / `server` split is the useful half: a 4xx sends an operator to
-this property's configuration, a 5xx to the vendor's status page. Observed
-against the real `api.openai.com` with an invalid key:
-
-```text
-every rung failed: openai/gpt-4o-mini refused (client, 401)
-```
-
-**One rung named, because there is one.** Under the four-model catalogue this
-line named two, and the difference is the policy in §3.1 showing through the
-diagnostics: what the operator is told is exactly what was tried.
+this property's configuration, a 5xx to the vendor's status page. Observed on
+this package's first live run — an invalid key produced exactly
+`refused (client, 401)`, naming both models the ladder tried.
 
 ---
 
