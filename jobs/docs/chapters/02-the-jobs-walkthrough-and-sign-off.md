@@ -1794,11 +1794,11 @@ it attaches itself. Mr Rao is in the room, so it is guest-facing and the
 flow sets priority.
 
 ```json
-{ "job_id": "…uuid…", "number": "KOC-ENG-441",
+{ "job_id": "…uuid…", "job_number": "KOC-ENG-441",
   "location_id": "L-214", "asset_id": "A-214-AC",
   "category_id": "I-AC", "item_id": "S-NC",
-  "department": "ENG", "guest_stay_id": "STAY-8812", "source": "FRONT_DESK",
-  "priority": "HIGH", "priority_set_by": "flow:occupied+complaint",
+  "department": "ENG", "guest_stay_id": "STAY-8812", "raised_via": "STAFF_APP",
+  "priority": "HIGH", "priority_decided_by": "FLOW",
   "glitch": true,
   "job_status": "NEW", "deleted_at": null,
   "raised_at": "19:40" }
@@ -1972,7 +1972,7 @@ places). Split by **logic** — one table, one fact:
 jobs.job                    the job itself — what, where, for whom, priority, status
     job_id · number · property_id
     category_id · item_id · asset_id · location_id
-    guest_stay_id · source · priority · priority_set_by · glitch
+    guest_stay_id · source · priority · priority_decided_by · glitch
     job_status · scheduled_for · created_by_user_id · created_at
     reopen_count · deleted_at · deleted_by_user_id · delete_reason
 
@@ -2035,9 +2035,9 @@ ENGINEERING (Maintenance) — PPM section
 JOBS
   consumes    maintenance.ppm.due            (a declared subscription — EVT-Q4)
   creates     KOC-ENG-512
-                source: PPM · category AC · item filter change · asset 214-AC
+                raised_via: ENGINEERING_PPM · category AC · item filter change · asset 214-AC
                 location 214 (from the asset) · no guest · priority from policy
-                scheduled_for 2026-12-01 · origin { app: maintenance, ref: P-77 }
+                scheduled_for 2026-12-01 · origin_app maintenance · origin_ref P-77
   appends     job.created  { job_id, correlation_id: C-1 }
               ← Maintenance learns the job's id from THIS, never by calling Jobs
   … assigned · accepted · sessions · resolved (filter replaced) · closed — as any job
@@ -2059,7 +2059,7 @@ Four rules, all platform law rather than choices:
   jobs. **Jobs absent** → the occurrence sits in Maintenance as *awaiting
   execution* and says so. Neither blocks the other.
 * **The PPM job is an ordinary job.** Same number series, same statuses,
-  same sessions, same resolve screen, same reports. `source: PPM` and the
+  same sessions, same resolve screen, same reports. `raised_via: ENGINEERING_PPM` and the
   `origin` reference are the only difference — "any job from anywhere".
 * **The item is a catalogue item**, so *filter change* is reportable beside
   *not cooling* on the same asset — and the recurrence query in §S1.13 sees
@@ -2161,7 +2161,7 @@ departments — they just tap **need water**, **need a burger**, **AC down**."*
 ```text
 STAFF   the Jobs app. The full form: category › item, location, asset,
         priority (or let the flow set it), assignee (or AUTO), photos, notes.
-        source: FRONT_DESK · HOUSEKEEPING · ENGINEERING · … (the raiser's dept)
+        raised_via: STAFF_APP · raised_by_user_id: the member of staff
 
 GUEST   the guest app, next release. No form — BUTTONS.
         The QR encodes the ROOM. The guest sees only items marked
@@ -2174,7 +2174,7 @@ GUEST   the guest app, next release. No form — BUTTONS.
                            (no GuestOps installed → no stay link; the job is
                            still raised, for the room)
           category · item  from the button
-          source           GUEST_APP
+          raised_via       GUEST_QR
           priority         the flow decides (occupied room, guest waiting)
           assignee         never chosen by the guest — AUTO, always
           glitch           set if the item is a fault, not a request
@@ -2187,7 +2187,7 @@ GUEST   the guest app, next release. No form — BUTTONS.
 ```
 
 **Jobs' side is ready for this now.** A guest-raised job is an ordinary job
-with `source: GUEST_APP`, a stay link and no chosen assignee. The catalogue's
+with `raised_via: GUEST_QR`, a stay link and no chosen assignee. The catalogue's
 `guest_requestable` flag is what the guest app renders; nothing else in Jobs
 changes when the guest app arrives.
 
@@ -2202,6 +2202,95 @@ so they are not assumed:**
   dining. When a POS / ordering application exists it takes the order and
   raises the job itself — "any job from anywhere" — and the guest app's
   button does not change.
+
+---
+
+## S1.15 · The field vocabulary — nothing reads like the reference
+
+**Owner, 2026-09-03:** *"`source: GUEST_APP` — I need to rephrase all fields
+from Java."* Correct: `source` and its values are the reference's. This is
+the whole pass, field by field, so a reader of our schema never meets the
+Java system's words. **The left column is what the reference has; the right
+is ours and is final unless the owner renames it.**
+
+### `work_orders` → `jobs.job`
+
+| Reference | Ours | Note |
+|---|---|---|
+| `id` (Long, auto-increment) | `job_id` (UUIDv7) | never exposed as a business identifier |
+| `companyWOId` | `job_number` | `KOC-ENG-441`, stamped once |
+| `companyId` · `siteId` · `facilityId` | `property_id` | one scope column |
+| `comment` (500) | `summary` | one line — what the raiser said |
+| `description` (1000) | `details` | the long text |
+| `workOrderType` · `category` · `service` | `category_id` · `item_id` | no type |
+| `location` (text) | `location_id` | Master Data's tree |
+| — | `asset_id` | the reference has none |
+| `priority` (1–10, default 5) | `priority` | **kept — a universal word, not a Java one**; the values are ours: EMERGENCY · HIGH · NORMAL · LOW · NOT_TRIAGED |
+| — | `priority_decided_by` | MANUAL · FLOW · CATALOGUE · NONE — which layer set it |
+| `slaDuration` (minutes) | `resolve_by` | a **time**, computed from the policy and the flow — not a duration to be recomputed |
+| `startTime` + `startTimeInMillis` | `scheduled_for` | one field, one type |
+| `dueDate` + `dueDateMillis` | `resolve_by` | same as above; two Java fields become one |
+| `departmentId` + `department` | `department_code` | the canon code, one field |
+| `assigneeType` · `assignedToId` · `executedById` | — | on `job_assignment` and `job_work_session` |
+| `source` (PMS · FEEDBACK · HK · PPM …) | `raised_via` | STAFF_APP · GUEST_QR · ROOM_CARE · ENGINEERING_PPM · HOSPILOT · CHECKLIST · INTEGRATION |
+| `referenceId` | `origin_app` + `origin_ref` | which application raised it, and its own id for the thing (`maintenance` · `P-77`) |
+| `guestReferenceId` | `guest_stay_id` | a stay, resolved through Context |
+| `initiatedById` + `addedByStaff` | `raised_by_user_id` | null when a guest raised it; `raised_via` says so |
+| `checklistId` · `inspectionId` | `checklist_run_id` | later; one field |
+| `workOrderStatus` | `job_status` | 8 values, §S1.14 ·2 |
+| `accepted` · `started` · `waiting` · `guestAcknowledged` · `reopened` | — | gone; state lives in `job_status` and the tables |
+| `reopenCount` | `cycle` | starts at 1; reopen increments |
+| `followers` | — | `job_watcher`, designed with notifications (S7) |
+| `images` | — | `job_attachment` |
+| `status` (`EntityStatus`) | `deleted_at` · `deleted_by_user_id` · `delete_reason` | ADR 0062's shape |
+| `createdOn` · `updatedOn` · `version` | `created_at` · `updated_at` · `version` | the platform's own names (`MasterEntity`) |
+| — | `glitch` | the reference had a type instead |
+
+### The satellite tables
+
+| Reference | Ours | What changed |
+|---|---|---|
+| `work_order_activity` (from/to as free text) | `job_status_history` **+** `job_note` | a transition and a comment are two things |
+| `work_order_time_log` (`startReason` · `endReason` · `timeInMinutes`) | `job_work_session` (`started_at` · `ended_at` · `end_reason` · `minutes`) | resume never reopens a row |
+| `work_order_escalations` | `job_escalation` | S5 |
+| `work_order_reminders` | `job_reminder` | S6 |
+| `work_order_follower` + `followers` | `job_watcher` | one place, S7 |
+| `tbl_work_order_affiliation` | `job_link` | group **and** parent, with `step` |
+| `work_order_cix` | `checklist_run_id` on the job | later |
+| `work_order_rating` · `work_order_feedback` · `work_order_track` | — | GuestOps' surfaces (S8) |
+| `work_order_summary` (15 derived columns) | — | derived on read; no table |
+| `work_order_contact_info` · `work_order_customer_info` | — | Context answers |
+| `wo_sequence` (per company) | `property_job_sequence` | per property |
+| `wo_device` | — | dropped with device assignment |
+
+### The catalogue
+
+| Reference | Ours |
+|---|---|
+| `WOServicePreference.service` (name as key) | `category` · `item` — UUID keys, `code`, `name` per language |
+| `keywords` · `keywordAssignee` · `sameForAllKeyword` | `item_alias` — search only, never routing |
+| `type` on the entry | — |
+| `departmentId` + `department` on the entry | `category.department_code` |
+| `assigneeType` · `assigneeId` on the entry | — |
+| `priority` · `sla` on the entry | `property_item_policy.default_priority` · `standard_minutes` |
+| `trackMode` · `icon` | `icon` kept on `category`; `trackMode` gone |
+| — | `resolution` · `item_resolution` |
+
+### `raised_via` — the values, since `source` was the trigger
+
+```text
+STAFF_APP          a member of staff, from the Jobs app
+GUEST_QR           a guest, from the generated guest app (next release)
+ROOM_CARE          Room Care raised it (found during cleaning)
+ENGINEERING_PPM    a planned-maintenance occurrence became due
+CHECKLIST          a failed line on a checklist run
+HOSPILOT           the assistant raised it (deferred)
+INTEGRATION        a connector — PMS, sensor, other
+```
+
+`raised_via` says **how it arrived**; `origin_app` + `origin_ref` say **whose
+record it came from**. A PPM job has both: `raised_via: ENGINEERING_PPM`,
+`origin_app: maintenance`, `origin_ref: P-77`.
 
 ## Decisions — round 1 close
 
@@ -2219,10 +2308,11 @@ so they are not assumed:**
 | **S1-D9** | **Two statuses.** `job_status` — 9 values with a transition table, replacing the reference's 8-value enum *and* its five booleans. Record state is **`deleted_at`, not an enum** (ADR 0062's shape), and **`CANCELLED` is a job outcome, not a record state** | **RULED, owner 2026-09-03** — §S1.12, rephrased to 8 values in §S1.14 ·2 |
 | **S1-D10** | **Live work tracking** — sessions: start / pause / resume / stop; the live board is a query; SLA clock and labour clock kept apart | *proposed — §S1.14 ·3* |
 | **S1-D11** | **Tables split by logic** — job · assignment · status history · work session · resolution · recovery · note · attachment · link · escalation | *proposed — §S1.14 ·4* |
-| **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `source: PPM`; `job.closed` back by correlation | *proposed — §S1.14 ·5* |
+| **S1-D12** | **PPM flow** — planned in Engineering; `maintenance.ppm.due` → an ordinary job with `raised_via: ENGINEERING_PPM`; `job.closed` back by correlation | *proposed — §S1.14 ·5* |
 | **S1-D13** | **Assignment** — every list from Workforce, **on shift on the job's execution date**; default = the category's department; flips = related departments / all users, still on-shift only; AUTO takes the first; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6, corrected once |
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
-| **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `source: GUEST_APP`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
+| **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
+| **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
 **Sign-off:** **NOT SIGNED OFF.**
 
