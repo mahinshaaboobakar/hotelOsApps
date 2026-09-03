@@ -3252,12 +3252,101 @@ second application copies it and the two drift. My instinct is that this is a
 **platform capability** and Jobs is its first user — but that is a decision
 above this application, and it is `S5-D7`.
 
+## S5-D1 redesigned — one timeline of alert steps, not four clocks — owner, 2026-09-03
+
+*"D1 is exactly mirrored from Java. Each stage's alert has a different cycle:
+someone is working a job with a 12-minute SLA — first alert to the assignee,
+'no time, hurry up'; after the SLA (minutes or a percentage) the department
+manager; after a further time or percentage, the manager. Redesign it."*
+
+### The gaps in the reference's four clocks
+
+| Gap | Where |
+|---|---|
+| **Four identifiers are code**, not data — `WO_NOT_ASSIGNED` … `WO_NOT_CLOSED` are string constants, each with its own `case` block. A fifth stage is a release | `EventExecutorServiceImpl:302–361` |
+| **Five rungs are an enum** — `FIRST_ESCALATION` … `FIFTH_ESCALATION`, hard-coded in the email context to supervisor / HOD / RM / cluster / CRO | `EscalationLevel`, `putEscalationMailContext` |
+| **Each clock's anchor is hard-coded** — creation, `lastAssignedOn`, `acceptedTimeInMillis`, `startTime` — one per identifier | the same four `case`s |
+| **One interval unit per config** — minutes *or* percentage, per file, never per step | `DefaultEscConfig` |
+| **No repeat** — a step fires once; the next rung is the only follow-up | — |
+| **The condition is the identifier** — "not accepted" can only mean *assigned and not accepted*; *still open after the SLA, whoever holds it* is inexpressible | — |
+| **Maintenance excluded by a string compare** | `:262` |
+
+One defect underneath all seven: **the shape of an escalation is written in
+code, so a hotel can only fill in numbers.**
+
+### The redesign: a policy is an ordered list of steps
+
+No identifiers, no rungs. Each step says *when*, *counting from what*, *if
+the job is still where*, and *who to tell*:
+
+```text
+step
+  when        after N minutes   OR   after P % of the SLA
+  from        LIVE · ASSIGNED · ACCEPTED · STARTED · DUE          the anchor
+  if          still in …  RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS · OPEN (any)
+  tell        ASSIGNEE · DEPT_SUPERVISOR · DEPT_HEAD · DUTY_MANAGER · GM · <a named role>
+  message     template
+  channels    in-app · email · (SMS · WhatsApp when wired)
+  repeat      every N minutes until the condition clears        optional
+```
+
+The **anchors are facts the tables already hold**: `LIVE` is
+`scheduled_for ?? created_at`; `ASSIGNED` the current assignment row's start;
+`ACCEPTED` the status history; `STARTED` the first work session; `DUE` is
+`due_at`. **The SLA is `due_at − LIVE`**, so a percentage works whether the
+deadline came from the item's standard minutes or from the flow.
+
+### The owner's example, as data — SLA 12 minutes, live at 09:00
+
+```text
+#  when       from   if           tell          message
+1  at 75 %    LIVE   IN_PROGRESS  ASSIGNEE      "No time — hurry up"          09:09
+2  at 100 %   LIVE   OPEN         DEPT_HEAD     "SLA breached on #441"        09:12
+3  at 150 %   LIVE   OPEN         GM            "Still open, 6 min past SLA"  09:18
+   repeat every 10 min until resolved
+```
+
+Three rows. Different units per step are fine (step 3 could be `+6 min from
+DUE`); a different target per step; a repeat on the last. **A fourth stage
+is a fourth row.**
+
+### Nothing of the reference is lost — its four clocks as steps
+
+```text
+not assigned    +10 min  from LIVE      if RAISED     tell DEPT_SUPERVISOR
+not accepted    +5 min   from ASSIGNED  if ASSIGNED   tell ASSIGNEE · then +10 min DEPT_SUPERVISOR
+not started     +10 min  from ACCEPTED  if ACCEPTED   tell DEPT_SUPERVISOR
+not resolved    the percentage ladder above
+```
+
+Four names gone; four behaviours as eight rows in one list — and *"tell the
+duty manager if a guest job is unassigned for 3 minutes at night"* is a row,
+not a release.
+
+### Downstream
+
+* **`job_escalation` rows are per (job, step)** — due time, outcome
+  `pending · fired · cancelled · missed`, who was told. *Step* replaces
+  *identifier + rung*; the outcomes are unchanged.
+* **Recompute on an anchor move.** Reassignment restarts `ASSIGNED`-anchored
+  steps for the new assignee (S3-D6) and leaves `LIVE`-anchored ones alone —
+  the guest's timeline never restarts.
+* **A step whose condition cleared is `cancelled`, with the reason** —
+  *"accepted at 09:04, before the 09:05 step"*.
+* **Policies are named and shared** — `property_item_policy.escalation_policy_id`;
+  many items, one policy, one edit.
+* **PPM jobs get their own policy** — a row, not an exclusion (S5-D9).
+
+**S5-D1 is amended to this. S5-D2 dissolves** — no rungs, only order; the
+roles a property tells are its own.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S5-D1** | Keep the four clocks — not assigned, not accepted, not started, not closed | yes, all four | *open* |
-| **S5-D2** | How many rungs, and are the names fixed or per-property? | five rungs; names configurable per property, ladder shape fixed | *open* |
+| **S5-D1** | ~~Keep the four clocks~~ → **a policy is an ordered list of alert steps** — *when* (minutes or % of SLA) · *from* (LIVE · ASSIGNED · ACCEPTED · STARTED · DUE) · *if* (still in which state) · *tell* (a role) · *repeat*. The four clocks are eight rows | *redesigned on the owner's instruction — awaiting owner* |
+| **S5-D2** | ~~Rungs~~ — **dissolved by D1**: no rungs, only steps in order; the roles a property tells are its own | *follows D1* |
 | **S5-D3** | Escalation policy stored in the database and edited in the console | yes | *open* |
 | **S5-D4** | After an outage, what happens to escalations that were due? | fire the **highest** rung that was missed, mark the rest skipped, record all of them | *open* |
 | **S5-D5** | Deduplication per cycle — a reopened job escalates again | yes | *open* |
