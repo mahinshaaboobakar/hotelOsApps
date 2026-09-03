@@ -2674,8 +2674,6 @@ resume_at             null = clock running. Set = clock paused until then, becau
                       nobody is on shift or it is outside service hours (the SYSTEM's,
                       from one roster read; recomputed on shift.changed)   ← added 2026-09-03
 due_at                the deadline — a time, set when the clock starts, editable by manage
-next_check_at         the earliest moment concern could change — rewritten with every change;
-                      the sweep's index, so a minute touches a handful of jobs   ← added 2026-09-03
 job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
                       ON_HOLD · RESOLVED · CLOSED · CANCELLED
 cycle                 1, +1 per reopen
@@ -2684,7 +2682,7 @@ created_by · created_at · updated_by · updated_at · version    the platform'
 deleted_at · deleted_by · delete_reason                        soft delete
 ```
 
-Twenty-five columns, five of them the platform's own (`resume_at` and `next_check_at` added on D8, 2026-09-03). Every clock counts
+Twenty-four columns, five of them the platform's own (`resume_at` added on D8, 2026-09-03; `next_check_at` proposed and withdrawn the same day). Every clock counts
 from `scheduled_for ?? created_at`, computed where it is needed.
 
 **The four cases, in the four raiser fields:**
@@ -4015,6 +4013,52 @@ raises the occurrences whose `next_due_at` has arrived and moves each to its
 next cycle. No Quartz, no chain, nothing to rebuild: the plan row *is* the
 schedule. That is Engineering's design to make in its own round; the pattern
 is recorded here so the two applications do not solve one problem two ways.
+
+
+#### `next_check_at` and `next_due_at` rejected — "15th of every month: the system finds the date, not the user. So Quartz?" — owner, 2026-09-03
+
+Both withdrawn. And the owner's example separates two things the stream had
+run together:
+
+```text
+THE RULE           what the user says        "15th of every month, 09:00"
+                                             "every Monday and Thursday, 06:00"
+                                             "every 90 days from installation"
+THE NEXT DATE      what the system computes  2026-10-15 09:00
+THE FIRING         what makes it happen      something durable that wakes up then
+```
+
+**The user never types a date.** They author the rule; the next date is
+computed from it. The stream's `next_due_at` put the computed date on the
+plan row and asked Engineering's sweep to fire it — which is a scheduler
+written by hand. The owner is right that it is the wrong shape. **But the
+right shape is not Quartz either — it is the platform's own answer, already
+written:**
+
+> **Chapter 11 · Scheduled workflows** — *Daily occupancy report · Morning
+> briefing · Night audit · Backup verification · Inventory reconciliation ·
+> **Preventive maintenance** — "Temporal Cron schedules these reliably."*
+
+So for PPM:
+
+```text
+the plan             "AC filter change · every 3 months · 09:00"      Engineering, a row
+the schedule         a Temporal Cron / calendar schedule for that plan  the platform's scheduler
+                     — computes every next occurrence, fires durably,
+                       survives restarts, no chain to rebuild
+when it fires        Engineering raises the occurrence and appends
+                     maintenance.ppm.due → Jobs makes the job (S1-D12)
+the plan is edited   the schedule is updated with it — one call, not a rebuild
+```
+
+Quartz is not in the stack standard; Temporal is, and Chapter 11 names
+preventive maintenance as one of its uses. This is **Engineering's round's
+to build**, on the platform's scheduler. Nothing of it lives in Jobs.
+
+**For Jobs' own escalation, nothing recurs**: thresholds are offsets from a
+`due_at` that already exists. So the plain minute sweep over open jobs stands
+— milliseconds at 1,000 jobs — and `next_check_at` is withdrawn as the owner
+asked. **The job table is twenty-four columns.**
 
 
 ## Decisions
