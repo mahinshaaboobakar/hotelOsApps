@@ -51,7 +51,7 @@ constitution's order, not a preference.
 | S6 | Reminders | not started | — |
 | S7 | Notifications | not started | — |
 | S8 | The guest side | not started | — |
-| S9 | Who can see what | not started | — |
+| S9 | Who can see and manage a job | **DESIGNED** — owner's four levels, 5 decisions | — |
 | S10 | Scheduled / preventive work | not started | — |
 | — | **PAGE LOCKED** | no | — |
 
@@ -2292,6 +2292,80 @@ INTEGRATION        a connector — PMS, sensor, other
 record it came from**. A PPM job has both: `raised_via: ENGINEERING_PPM`,
 `origin_app: maintenance`, `origin_ref: P-77`.
 
+---
+
+## S1.16 · Who raised it, who it is for, and when it may start — owner, 2026-09-03
+
+### 1 · `raised_by_user_id` is wrong, because a guest can raise a job
+
+Staff and guests both raise jobs; a column named for users misdescribes half
+of them. And *who raised it* is not the same fact as *who it is for* — a
+receptionist raises a job **for** Mr Rao; Mr Rao raises one for himself.
+
+```text
+WHO RAISED IT
+  raised_via          STAFF_APP · GUEST_QR · ROOM_CARE · ENGINEERING_PPM · …   (ruled)
+  raised_by_kind      STAFF · GUEST · APPLICATION
+  raised_by_id        STAFF        → the staff user_id
+                      GUEST        → the guest's stay_id
+                      APPLICATION  → the application's name (maintenance · roomcare)
+
+WHO / WHAT IT IS FOR
+  guest_stay_id       the guest concerned, if any — set whether staff or the
+                      guest raised it
+  origin_app          the application whose record started it     maintenance
+  origin_ref          that application's own id for it              P-77
+```
+
+**Every raiser has a reference id.** For PPM it is `origin_ref = P-77`. For a
+guest it is the **stay**. *(Owner asked for the reservation id — see the next
+point.)*
+
+### 2 · Reservation or stay — the platform has already chosen
+
+The owner asked for `reservation_id` on a guest-raised job. The platform's
+guest model (`GUEST-Q2`) is:
+
+```text
+reservation      the booking — may cover several rooms
+  └─ stay        one room, one occupancy — what a QR's room resolves to
+```
+
+Check-in, check-out and *"who is in room 214 right now"* all happen to the
+**stay**, and a reservation with two rooms has two stays. So the job stores
+**`guest_stay_id`**, and **the reservation is one step away through it** —
+Context answers *"which reservation is this stay?"* on every screen that
+needs it.
+
+Storing `reservation_id` beside it would be a copy of a derivable fact, which
+the platform forbids (*clients never write a derived projection*). If the
+owner wants the reservation *shown* on the job, it is shown — from the stay.
+
+### 3 · `scheduled_for` and `startTime` were the same thing — one field, one state
+
+*"Both mean: until that time arrives, the job is blocked; no action can be
+taken on it."* Agreed. The reference kept both (`startTime` **and**
+`dueDate`, each twice); here there is one field and it produces a state:
+
+```text
+scheduled_for      null  = now.  Otherwise the moment the job becomes live.
+
+SCHEDULED          a job whose scheduled_for is in the future
+                   visible · not actionable · SLA clock NOT started
+                   the only moves: reschedule · cancel
+                   when the time arrives → RAISED (or ASSIGNED, if pre-assigned)
+                   and the clock starts then
+```
+
+So `job_status` gains one value and is nine again — but this one is earned:
+a job for tomorrow morning must not sit in today's pool, must not escalate
+tonight, and must not be started early by mistake. Without the state, every
+list and every clock has to remember to check a date.
+
+**Who may change the time:** the raiser, and anyone holding **manage** on the
+job (S9). A worker cannot move their own start time forward; a supervisor
+can.
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2312,6 +2386,9 @@ record it came from**. A PPM job has both: `raised_via: ENGINEERING_PPM`,
 | **S1-D13** | **Assignment** — every list from Workforce, **on shift on the job's execution date**; default = the category's department; flips = related departments / all users, still on-shift only; AUTO takes the first; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6, corrected once |
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
+| **S1-D17** | **Raiser and beneficiary are two facts** — `raised_by_kind` + `raised_by_id` (staff · guest · application); `guest_stay_id` for whom; `origin_app`/`origin_ref` whose record | **RULED, owner 2026-09-03** — §S1.16 ·1 |
+| **S1-D18** | **A guest job stores the stay, not the reservation** — the reservation is derivable through it (GUEST-Q2; no derived projections) | *proposed — §S1.16 ·2 — the owner asked for reservation id* |
+| **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — visible, not actionable, clock not started; reschedule needs raiser or *manage* | **RULED, owner 2026-09-03** — §S1.16 ·3; `job_status` is nine values |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
 **Sign-off:** **NOT SIGNED OFF.**
@@ -2865,48 +2942,99 @@ that costs.
 
 ---
 
-# S9 · Who can see what
+# S9 · Who can see and manage a job
 
-**State: not started** · *most of this is platform law rather than our
-choice, but two things are genuinely ours*
+**State: DESIGNED — owner's four levels, 2026-09-03.** *"An important thing
+I missed: who can see and manage a job."* Its own section, as the owner
+asked.
 
-## What's wrong today
+## The owner's four levels, verbatim
 
-**1 · Reading, updating and patching a job has no tenancy check at all.** Job
-ids are sequential numbers; change the number in the address and you read
-another hotel's job. The correctly-scoped database query **exists in the code
-and is never called once.** *(01 §F3.)*
+```text
+1  a normal user      sees only their own jobs; can execute and say resolved
+2  the next level     can also reassign to someone, change priority, and such
+3  the next           sees everything in MY departments, including mine
+4  the top            sees all jobs in ANY department, assigned to anyone —
+                      can reassign, capture to self from someone, do anything
+```
 
-**2 · Search takes the company id from the request body**, not from your
-login. Send someone else's company id and you get their jobs.
+## The model: two axes, because that is how the platform authorises
 
-**3 · Eighteen of the twenty-three screens' APIs are completely
-unauthenticated.** A security rule was written without a path list, so it
-silently matches everything remaining and permits it — including an endpoint
-that lists work orders for whatever company id you type. *(01 §F16.)*
+The four levels are combinations of **what you can see** and **what you can
+do**. Keeping the axes separate is what lets the platform's authorization
+(OpenFGA, per-operation, manifest-declared — AUTHZ-Q25) express them without
+a role table of its own.
 
-**4 · `admin` / `password` is in the source in three places** and it
-satisfies the security check. The database password, the platform key and
-three sets of message-broker credentials are committed too. *(01 §F17.)*
+```text
+SCOPE — what you can see
+  own            jobs assigned to me, or raised by me
+  department     every job in a department I am POSTED to   (Workforce — ADR 0116 §6)
+  property       every job at the property
 
-**5 · Sessions are cached for ten minutes.** Revoke someone's access and they
-keep working for another ten minutes. *(01 §F14.)*
+POWER — what you can do to a job you can see
+  execute        accept · start / pause / resume / stop · resolve · note · photo
+  manage         + reassign · change priority · reschedule · put on hold ·
+                   cancel · close (verify)
+  administer     + capture from anyone · edit any field · delete (soft)
+```
 
-## What I propose
+The owner's four, as combinations — **the defaults, and the second is the
+one to confirm**:
 
-Every read scoped by your session, never by anything in the request. Every
-operation through the platform's authorization. No credentials in the
-repository. Jobs caches no security decision — it asks the platform, every
-time.
+| Level | Scope | Power | Typical |
+|---|---|---|---|
+| 1 | own | execute | technician, attendant, runner |
+| 2 | own | manage | senior technician — hands off their own, re-prioritises their own |
+| 3 | department | manage | department supervisor, HOD |
+| 4 | property | administer | duty manager, operations manager, property admin |
+
+**Property admin holds everything always** (ADR 0116 §5). Department
+membership is **never stored in Jobs** — it derives from Workforce postings,
+permanently, and Jobs asks Context (ADR 0116 §6).
+
+## What each power means at the edges, so nothing is argued at build time
+
+```text
+"capture to self from someone"      administer only. Manage may reassign to
+                                    anyone in scope; taking a job OFF a person
+                                    onto yourself is the stronger act
+"resolve"                           execute — but only by an assignee, or
+                                    anyone with manage in scope
+"close" (verify)                    manage. A worker never closes their own
+                                    work (S4-D2/D3)
+"change scheduled_for"              the raiser, or manage in scope (S1.16 ·3)
+"delete"                            administer, reason required, audited
+"see a job's notes and photos"      follows the job's scope — no separate rule
+guest-raised job, nobody assigned   visible to department scope of the item's
+                                    department; the pool
+```
+
+## How it reaches the platform
+
+The manifest declares the permissions; the Kernel enforces per operation.
+Six names, and nothing else:
+
+```text
+job.view.own · job.view.department · job.view.property
+job.execute  · job.manage          · job.administer
+```
+
+A screen shows a button only when the Kernel would allow the operation; the
+Kernel refuses regardless of the screen. **Jobs caches no decision**
+(01 §F14 is the reference doing exactly that, for ten minutes).
 
 ## Decisions
 
-| id | Decision | Recommendation | Ruling |
-|---|---|---|---|
-| **S9-D1** | By default, whose jobs can a member of staff see — their own, their department's, or the whole property's? | their department's; supervisors see the property | *open* |
-| **S9-D2** | Can a job be restricted — a complaint about a staff member, say? | yes, a restricted flag visible only to the raiser and management | *open* |
+| id | Decision | Ruling |
+|---|---|---|
+| **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
+| **S9-D2** | Level 2 = **own + manage** — a senior worker managing only their own jobs. Or is level 2 already department-wide? | *open — the owner's description fits both* |
+| **S9-D3** | *Capture from someone* is **administer**, not manage | *proposed* |
+| **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
+| **S9-D5** | Six manifest permissions, no more | *proposed* |
 
 **Sign-off:** _pending_
+
 
 ---
 
