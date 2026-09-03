@@ -2671,7 +2671,7 @@ raised_by_id          user_id · Guest360 id · application id
 stay_id               the guest's visit — NOT NULL when raised_kind = GUEST
 
 scheduled_for         null = now; a future time = SCHEDULED
-resolve_by            the deadline — a time, set at creation, editable by manage
+due_at                the deadline — a time, set at creation, editable by manage
 job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
                       ON_HOLD · RESOLVED · CLOSED · CANCELLED
 cycle                 1, +1 per reopen
@@ -2697,6 +2697,45 @@ the platform's `created_by`. Nothing else is needed.
 
 **The tables beside it are unchanged** (§S1.17) **except `job_recovery`, which
 goes with `glitch`.**
+
+### Two questions on the lean table — owner, 2026-09-03
+
+**"`resolve_by` — what is this?"** The deadline: the time by which the job
+must be resolved. The name was bad — it reads like *"resolved by whom"*.
+**Renamed `due_at`.**
+
+```text
+due_at  =  (scheduled_for ?? created_at)  +  the item's standard minutes at this property
+           … unless the flow gives a harder time — an arrival at 14:00 makes due_at 14:00
+           set once at creation · a supervisor with manage may move it
+           "late" means now > due_at and the job is not RESOLVED
+```
+
+**"Where is `resolution_id`, and the list of what we solved for AC?"** Not on
+`job` — on **`job_resolution`**, one row per cycle, because a reopened job is
+resolved twice and the first answer must not be lost (*no fault found*, then
+reopened, then *gas recharged* is exactly the pattern the recurrence report
+wants to see).
+
+```text
+CATALOGUE                                   THE JOB
+resolution                                  job_resolution
+  category AC · item not cooling               job_id
+    filter cleaned                             cycle            1
+    gas recharged                              resolution_id  → "gas recharged"
+    thermostat replaced                        note             "low gas; check in a month"
+    unit replaced                              resolved_by      u-suresh
+  category AC · item (any)                     resolved_at      20:30
+    referred to vendor                         closed_by        u-priya
+  universal (any category)                     closed_at        20:50
+    no fault found
+    other  → note becomes mandatory
+```
+
+On the resolve screen the technician sees the list for **AC › not cooling**
+first, then AC's general ones, then the universal ones, and always the note
+box. What he picks is `resolution_id`; what he types is `note`. Reopen the
+job and cycle 2 gets its own row; cycle 1 stays.
 
 ### The policy's home — a contradiction in the stream's own words, corrected
 
