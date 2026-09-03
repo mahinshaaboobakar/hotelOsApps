@@ -3644,6 +3644,55 @@ second: build it in Jobs with the lift-out shape, and send the question up
 with the code rather than before it.
 
 
+### D8 — the night, and the property with no night staff — owner, 2026-09-03
+
+*"We need an on/off option — some properties have no staff at night. Your
+opinion?"*
+
+**Opinion: not an on/off for escalation — quiet hours that pause the
+clock.** Two reasons, and the second is the one that matters.
+
+**One — nudges already go nowhere when nobody is there.** Concern still
+computes at 02:00, but *accountable* resolves through Workforce, and a role
+with nobody on shift is empty. An empty role is not nudged. So a property
+with no night staff gets no night nudges **without any switch** — and at
+07:00 the board and the history show *"breached at 02:14, nobody on shift"*,
+which is exactly what a manager wants to see first thing.
+
+**Two — but the promise should not burn while nobody can act.** A towel
+asked for at 23:30 at a hotel that closes its desk at 23:00 is not "12
+minutes late" at 23:42; it is *"first thing tomorrow"*. That is a **clock**
+question, not a notification one, and it needs a setting:
+
+```text
+quiet_hours          per property, optionally per department
+                     e.g. 23:00–07:00 · Housekeeping 22:00–06:00
+                     off by default — a 24-hour hotel sets nothing
+
+during quiet hours   the promise clock PAUSES (as ON_HOLD does)
+                     concern is frozen where it stands
+                     no nudges
+                     due_at is computed skipping the window — raised 23:30 with a
+                     30-minute promise → due 07:28, not 00:00
+
+exempt               priority EMERGENCY ignores quiet hours — a flood or a lift
+                     entrapment does not wait for the morning, and the policy for
+                     it names who is called at night (the duty manager, security)
+```
+
+So the "off" the owner wants is real, it is per property and per
+department, and it is a pause of the clock rather than a silence of the
+alerts — which keeps the history honest: a job that waited the night is
+*paused*, not *ignored*.
+
+**Where the setting lives, and one thing to send up.** For now,
+`quiet_hours` sits on the property's Jobs settings. But *when a department
+operates* is a fact about the department, not about jobs — the same kind of
+fact as the holiday calendar that WF-Q16 placed in Core Administration. If
+the platform gains department operating hours, Jobs reads them and its own
+setting goes. Recorded, not blocking.
+
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
@@ -3655,7 +3704,7 @@ with the code rather than before it.
 | **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
 | **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
-| **S5-D8** | Do escalations pause overnight, or continue through the night? | continue, but the *recipient* changes to whoever is on duty | *open* |
+| **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | *proposed on the owner's question — awaiting owner* |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
 | **S5-D10** | Which channels at launch? | email + in-app notification. SMS/WhatsApp only when genuinely wired | *open* |
 | **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
