@@ -590,7 +590,8 @@ frames carry the same citations.
 | 5 | **The live board** — who is working on what right now: open sessions, since when, where | supervisors | S1-D10 |
 | 6 | **Catalogue** — categories › items › aliases › resolutions, organization-wide; per-property activation and rename beside each item | property level | S1.11, ruling 3 |
 | 7 | **Settings** — concern policies (thresholds and the accountable ladder) · subscriptions per role · service hours · auto-close hours · waiting notice · jobs-manager grants (the GM's) | property level | S5-D3, S5-D8, S4-D3, S6-D2, S9-D7 |
-| 8 | **The widget — "Jobs now"** — open · running · escalated, three numbers and the worst three rows | the desktop | the approved widget shape |
+| 8 | **Scheduled** — PPM parents with their child steps and anything raised for a day; RAISED at 00:00 of the day, clock starts then | supervisors | S1-D2, S2-D3, S7 |
+| 9 | **The widget — "Jobs now"** — open · running · escalated, three numbers and the worst three rows | the desktop | the approved widget shape |
 
 **Deliberately not drawn** (the mockup lists them too): a guest-facing page
 (the guest app's, S8) · a team editor (Workforce's, S3-D1) · a role or
