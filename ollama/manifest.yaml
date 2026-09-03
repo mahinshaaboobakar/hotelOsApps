@@ -1,0 +1,166 @@
+# ollama — HotelOS's first shippable `kind: provider` package.
+#
+# Local models, on the property's own hardware, through an Ollama server the
+# hotel runs. **This is the product**, not a test input: it is what a property
+# installs to give HosPilot something to think with, and it is signed and
+# distributed exactly as an application is.
+#
+# # The platform repository holds a copy, and that is deliberate
+#
+# `HosPilotOS/tests/packages/ollama/` is a **fixture** — the input the union
+# parser, the validator, the signer, the install transaction and the wire test
+# are all proven against. This is its promotion, and the two are kept as two on
+# the precedent this repository already sets for `hello-hotel`: *"a fixture that
+# imported the SDK could not catch an assumption the SDK makes"* (README). A
+# fixture that WAS the shipping artifact could not fail independently of it.
+#
+# They cannot drift silently in the direction that matters. Both are read by
+# the same `hotelos-package` validator — at signing here, and at install on
+# every property — so a shipping manifest that stopped agreeing with the
+# contract is refused with the field named, by the same code the fixture proves.
+#
+# # What a provider package is, and is not
+#
+# ADR 0130 §3 makes a provider **declarative-only**. There is no backend, no
+# `ui/`, no schema, no migration and no process: this directory is the manifest
+# and its documentation, and the signed package carries `files: {}`. The
+# platform refuses a provider that ships anything else — `ProviderShipsFiles` —
+# so the emptiness is enforced rather than merely intended.
+#
+# That is why there is no `runtime:` block to read below. It is not omitted; a
+# provider manifest has nowhere to write one (`PKG-Q44`).
+#
+# # Why ollama first, and not Anthropic
+#
+# It is the harder of the two and the one that proves the shape. A public
+# provider's endpoint is a fact about the provider and ships signed; ollama's is
+# a fact about the property, and it needs no credential at all — `AI-Q3`'s
+# addendum: *a URL is configuration, a key is not*. Starting from the easy case
+# would have left both untested.
+#
+# # Building it
+#
+# `node ../scripts/build-provider.mjs ollama` — see that script for why a build
+# step exists at all for a package with no payload.
+
+manifest_version: 1
+
+# Without this the manifest is an `application` — CONN-Q10 made that the default
+# so every existing package kept parsing, which means a provider that omits the
+# line is not refused, it is silently something else.
+kind: provider
+
+id: ollama
+name: "Ollama"
+version: 1.0.0
+publisher: hotelos
+category: ai
+description: "Models running on this property's own hardware, through Ollama."
+
+platform:
+  min_version: "0.1.0"
+  # Exclusive: claims every 0.x and promises nothing about 1.0.
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+provider:
+  endpoint:
+    # The `configuration` arm, and the reason the endpoint is a `oneof` at all.
+    #
+    # This package cannot know where the property runs Ollama, so it names the
+    # key that will hold the answer rather than carrying a URL that would be
+    # wrong on every machine but one. The key is **named here** rather than
+    # assembled by the Gateway from the id: a convention is a second place the
+    # key is spelled, and this package could then never move it.
+    configuration: ai.providers.ollama.base_url
+
+  authentication:
+    # No credential exists to hold. `AI-Q3`'s addendum in one word — and the
+    # mode is what renders the configuration screen, so this is why the platform
+    # asks for a URL and asks for no key.
+    mode: none
+
+  streaming: newline_delimited_json
+
+  # **Ollama's OpenAI-compatible surface, not its native one.**
+  #
+  # It serves both — `/api/chat` in its own shape and `/v1/chat/completions` in
+  # OpenAI's — and this package declares the compatible one so the platform
+  # needs no Ollama-specific transport code. That is what keeps *a hotel adds a
+  # model* from turning into *a hotel needs a platform release*.
+  #
+  # The field exists because slice 4's walk found the transport assuming
+  # Anthropic's `/v1/messages` of every provider: this package would have 404ed
+  # with the server running and the model pulled.
+  api_dialect: openai_chat_completions
+
+  # What this package claims to support.
+  #
+  # **A claim about the package, not about the property** — and that gap is
+  # real, reported with this fixture rather than papered over. A property that
+  # has pulled none of these still installs the package, and the Gateway would
+  # route to a model the machine does not hold; the call then fails at Ollama
+  # rather than at resolution. Nothing reconciles the two today.
+  #
+  # Kept short deliberately: three models the local case actually uses, so the
+  # fixture is small enough to read and each line is defensible.
+  models:
+    - id: llama3.1:8b
+      capabilities: [tools, json_schema, streaming]
+      context_limit: 131072
+      max_output: 8192
+      latency_class: standard
+      # Local inference costs electricity, not tokens. Zero is the honest
+      # number and it is load-bearing: the degradation ladder orders by cost,
+      # so a local model sorts first — which is what `AI-Q3` wants when the
+      # internet is down and what a property paying per token wants anyway.
+      cost_per_input_token: 0.0
+      cost_per_output_token: 0.0
+
+    - id: qwen2.5:14b
+      capabilities: [tools, json_schema, streaming, long_context]
+      context_limit: 131072
+      max_output: 8192
+      latency_class: deep
+      cost_per_input_token: 0.0
+      cost_per_output_token: 0.0
+
+    # The embedding model, and its absence is what retrieval refuses on.
+    # A property installing only a chat provider gets a *refusal* from search
+    # rather than an empty result — `MODEL_CAPABILITY_EMBEDDINGS` exists so that
+    # difference is visible.
+    - id: nomic-embed-text
+      capabilities: [embeddings]
+      context_limit: 8192
+      # An embedding model produces a vector, not tokens. One is the smallest
+      # honest value for a required positive field; zero would fail validation
+      # and any larger number would be a claim about output nobody reads.
+      max_output: 1
+      latency_class: fast
+      cost_per_input_token: 0.0
+      cost_per_output_token: 0.0
+
+# The shared block, not a provider-specific one — PKG-Q44.
+#
+# `endpoint.configuration` above names this key, and CC's store refuses a write
+# to a key nobody declared, so these two entries are what make the endpoint
+# settable at all.
+configuration:
+  - key: ai.providers.ollama.base_url
+    type: string
+    default: "http://127.0.0.1:11434"
+    # Property, not user: which machine runs the models is the hotel's answer,
+    # and a per-user override would let one person point the platform's AI at
+    # something nobody else could see.
+    scope: property
+
+# **Empty, and present rather than omitted.**
+#
+# `files:` is the signed inventory — *"the signature covers this manifest, and
+# this manifest covers every other file."* A declarative-only package has no
+# other file: no assembly, no UI bundle, nothing. So the map is empty and the
+# signature over the manifest is the whole of what is signed.
+#
+# Written out rather than left off because an absent `files:` and an empty one
+# are different claims, and only one of them is true here.
+files: {}

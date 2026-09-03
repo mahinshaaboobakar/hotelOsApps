@@ -114,10 +114,42 @@ this repository         each connector — its PMS study, its design, its
                         mapping and its package
 ```
 
+## Providers live here too — the third kind
+
+A **model provider** is an installable package like the other two, and it is the
+smallest of them: platform ADR 0130 §3 makes `kind: provider`
+**declarative-only**, so it ships no backend, no `ui/`, no schema and no
+process. The whole package is its manifest.
+
+```text
+<provider>/
+  docs/chapters/     the provider's design
+  manifest.yaml      the whole package
+```
+
+Flat, and that is the shape rather than an unfinished version of the shape.
+There is nothing to build and nothing to start: installing one adds a row the
+Kernel serves from, and the Model Gateway builds its routing table out of the
+declaration. A provider that shipped a file would be refused
+(`ProviderShipsFiles`), and a provider manifest has nowhere to write a
+`runtime:` block — `PKG-Q44` makes it inexpressible rather than
+validated-and-rejected.
+
+**It still needs a build step**, and the reason is worth knowing before writing
+the second one: `hopkg` inventories every file beneath the directory it is
+given, so signing a provider directory directly signs `docs/` as payload and the
+platform then refuses the result. `scripts/build-provider.mjs` stages the
+manifest alone and signs that.
+
+```bash
+node scripts/build-provider.mjs ollama --key <path outside this repository>
+```
+
 ## Applications and connectors
 
 | Directory | Kind | Status |
 |---|---|---|
+| `ollama/` | **provider** — local models on the property's own hardware (`PKG-Q44`, `PKG-Q45`, ADR 0130 §3) | **shipping — the first `kind: provider` package.** Promoted from the platform's fixture by Stream EE, 2026-09-03, after the provider walk closed over the real wire: signed (`files: {}`, 0 payload files), installed by the real install transaction, transmitted by `ListProviders` over mutual TLS, and routed by the Model Gateway from the transmitted bytes. Declares `api_dialect: openai_chat_completions` — Ollama's OpenAI-compatible surface, so the platform needs no Ollama-specific transport code (`PKG-Q45(b)`). Endpoint is the **property's**, read from `ai.providers.ollama.base_url`; no credential exists to hold (`AI-Q3`). `HosPilotOS/tests/packages/ollama/` remains the platform's fixture, kept as a second copy on `hello-hotel`'s precedent. **Open:** a live turn against a running Ollama — no daemon on the development machine yet; every link in front of it is proven |
 | `workforce/` | application — Roster (`APPS-Q1`'s name table) | **design complete, awaiting the owner's read** — Stream GG, 2026-08-31. Plan `01-the-workforce-application.md` (revision 2 — nine aggregates, six slices, scope ruled by `WF-Q11`) · study `02-the-current-system-and-the-gaps.md` (all eight seed subjects walked, 59 rows sorted) · gold mockup `docs/mockups/01-workforce-gold.html` (**revision 2 — 12 frames**; frames 1–6 redrawn, five surfaces new) · flows `docs/mockups/02-workforce-flows.html` (seven paths, and `WF-Q16`'s refuse/warn table made visible). **No reference backend exists for this app** (owner, 2026-08-31), as for GuestOps; the study ran on the owner's answers subject by subject, under `WF-Q1`–`WF-Q16` and ADR 0063/0052/0116/0119/0128. **Owner corrections taken at the mockup read:** *Staff Schedule*, not *My Schedule* — Workforce is a manager and HR application, so every request is raised on behalf with `entered_by` recorded, and the staff-facing door **stays** for login-holders (owner, 2026-08-31 — `WF-Q9`(b) whole); plus the shift-creation page the catalogue had been missing. **Backend code is GO** (owner, 2026-08-31) — `backend/` on the GuestOps split, slice 1 first (postings, the `department#posted` writer, the Context resolver); **nothing desktop until round 50 lands**, and gaps go to the register as questions. Routing prerequisite **met** (`PKG-Q39`, all four domains, `fca1b96`). **Backend slices 1–2 built and green** — 36 tests, 0 skipped: postings with the `department#posted` writer's seam, and capability with the certification register. Findings page `03-the-code-round-findings.md`; the announcement contract's application half is `04-the-announcement-contract.md`, drafted for the joint work with the Kernel stream. Raised out of the round: **`AUTHZ-Q20`** (the announcement, joint with CC) · **`AUTHZ-Q23`** (the event-appender grant — already implemented platform-side) · **`PKG-Q39`** (event domains — Workforce declares **four**, `attendance` included) · **`PKG-Q40`** (no lifecycle convention for an installable application) · **`SHELL-Q23`** (print ruled, the file half left open) |
 | `pms-oracle/` | connector (working name — `CONN-Q1` and the owner's "which PMS first" decide the final one) | in study — Stream DD; the reference study lands as `pms-oracle/docs/chapters/01-the-oracle-pms-reference-study.md` |
 | `guestops/` | application — the Reservations domain of ADR 0089 / Chapter 26 (`APPS-Q1`'s name table) | **design complete, awaiting the owner's read** — Stream FF, 2026-08-31. Scenarios `01-the-front-desk-scenarios.md` (S1–S39) · design `02-the-guestops-design.md` · open questions `03-the-open-questions.md` · gold mockup `docs/mockups/01-guestops-gold.html` · flows `docs/mockups/02-guestops-flows.html` · **readiness `04-the-code-readiness-note.md`**. **No reference backend exists for this app** (owner, 2026-08-31); the round was built from the PMS study's reservation facts, the chapters and the owner's scenarios, under rulings GUEST-Q1–Q8. **Reconciled 2026-08-31 against `CONN-Q11`, `SHELL-Q23`, `WF-Q7/Q8`, `PKG-Q39` and DD's `dto.proto`: nine mismatches reported, none resolved — `PKG-Q39` passes clean (all three domains routed to `GUEST`).** Code is gated on the owner's verification, on `APPS-Q1`'s two prerequisites, and on the contract questions in readiness §1.5 |
