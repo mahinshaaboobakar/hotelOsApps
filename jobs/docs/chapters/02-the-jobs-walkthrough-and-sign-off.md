@@ -45,8 +45,8 @@ constitution's order, not a preference.
 |---|---|---|---|
 | S1 | The job itself — what a job *is* | **SIGNED OFF** | 2026-09-03 |
 | S2 | Creating a job | **SIGNED OFF** | 2026-09-03 |
-| S3 | Assigning it | **OPEN** | — |
-| S4 | Accept, start, pause, finish | not started | — |
+| S3 | Assigning it | **SIGNED OFF** | 2026-09-03 |
+| S4 | Accept, start, pause, finish | **OPEN** | — |
 | S5 | **Escalation** | not started | — |
 | S6 | Reminders | not started | — |
 | S7 | Notifications | not started | — |
@@ -2934,18 +2934,60 @@ is on shift, or is on leave. It writes whatever id the configuration holds.
   department, on shift now. If nobody is, the job stays in the pool and that
   is itself visible.
 
+## The team, restored — owner, 2026-09-03
+
+*"I forgot about the team concept. We need the team as an option: manually a
+user can choose a team or a user; when the system auto-assigns it is based on
+policy. The others we can lock."*
+
+**A job is assigned to a person or a team.** One assignment row, one of two
+targets: `assigned_to_user_id` **or** `assigned_to_team_id`.
+
+**Manual** — the dropdown offers both, from Workforce on the execution date:
+people (S1-D13's lists) and **teams with at least one member on shift** (a
+night crew with nobody on shift tonight is not offered).
+
+**Auto** — the item policy says which:
+
+```text
+property_item_policy.auto_assign     USER  → the first person on the default list
+                                     TEAM  → this team_id
+```
+
+**A team assignment becomes a person's on accept.** Any member may accept;
+that opens a new assignment row for the person and ends the team's row with
+`end_reason: ACCEPTED_BY_MEMBER`. Until then the job is `ASSIGNED` to the
+team and the *not accepted* clock runs against the whole team — the case the
+reference's `WO_NOT_ACCEPTED` was written for and never quite handled.
+
+### Where the team object lives — measured, then asked
+
+**No team object exists on the platform today** — not in Master Data, not in
+Workforce's chapter or design pages, not in the authorization model. It is
+new, and its home is a ruling. The platform's own test says where: **ADR
+0063** — *"if an attribute exists primarily to determine operational
+assignment or workforce capability, it belongs to Workforce."* A team exists
+to be assigned work; it is Workforce's, read by Jobs through Context like
+postings and shifts. **Jobs must not create its own `teams` table** — that is
+the reference's `TeamClient` reborn as a copy.
+
+**Sent up, not assumed:** *does Workforce gain a `team` — a named group of
+posted staff within a department — for Jobs and Room Care to assign to?* Jobs
+carries `assigned_to_team_id` and `auto_assign: TEAM` and waits for the
+object.
+
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S3-D1** | Assignee is a person or a team — device dropped | yes | *open* |
-| **S3-D2** | May a job be assigned to a *department* rather than a person — a queue? | yes; this is the pool | *open* |
-| **S3-D3** | Keep self-assignment from the pool ("capture")? | yes | *open* |
-| **S3-D4** | Keep auto-assignment by service configuration? | yes, but resolved through Workforce, not a stored id | *open* |
-| **S3-D5** | Who may reassign — the assignee, the supervisor, or both? | supervisor always; assignee may hand back to the pool | *open* |
-| **S3-D6** | Does reassignment reset the SLA clock? | no — the guest has been waiting since it was reported | *open* |
+| **S3-D1** | Assignee is a **person or a team**; device dropped | manual offers both; auto per the item policy; a team assignment becomes a person's on accept. **The team object is Workforce's — asked, not assumed** | **RULED, owner 2026-09-03** |
+| **S3-D2** | A job may sit with a department and no person | the pool | **RULED, owner 2026-09-03** (locked) |
+| **S3-D3** | Self-assign from the pool | any department member on shift | **RULED, owner 2026-09-03** (locked) |
+| **S3-D4** | Auto-assignment | per the item policy — a person from the default list, or a team | **RULED, owner 2026-09-03** (locked) |
+| **S3-D5** | Who may reassign | *manage* in scope; the assignee may hand back to the pool, never pick the next person | **RULED, owner 2026-09-03** (locked) |
+| **S3-D6** | Reassignment and the clock | `due_at` does not move; the new assignee's own *not accepted* clock starts fresh | **RULED, owner 2026-09-03** (locked) |
 
-**Sign-off:** _pending_
+**Sign-off:** **S3 SIGNED OFF — owner, 2026-09-03** (*"the others we can lock"*). One question leaves: the team object's home.
 
 ---
 
@@ -3607,7 +3649,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **2 of 10** |
+| Sections signed off | **3 of 10** |
 | Page locked | no |
 | Locked on | — |
 
