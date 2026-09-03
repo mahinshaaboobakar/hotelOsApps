@@ -2366,6 +2366,65 @@ list and every clock has to remember to check a date.
 job (S9). A worker cannot move their own start time forward; a supervisor
 can.
 
+### 4 · Corrections, owner 2026-09-03 — the guest is two ids, and the location comes with the stay
+
+*"We need stay_id. But we have the CRM app (called something else here —
+already documented), so we keep user_id and crm_id (the field name will
+follow the app), and stay_id, and the location — from the stay we get it."*
+
+The CRM application is **Guest360** (APPS-Q1: *"Guest360 = CRM — the
+guest-profile/CRM application"*; its register prefix is `G360`). So the guest
+on a job is **two ids, for two different facts**:
+
+```text
+guest360_id     WHO the guest is — the person, across every visit
+                the field is named for the app, as the owner asked
+guest_stay_id   WHICH visit — this room, this occupancy
+                the QR's room resolves to it; check-in/out happen to it (GUEST-Q2)
+location_id     defaulted FROM the stay's room when a guest raises the job,
+                and kept as its own column — a guest may report the pool
+```
+
+**Why both, in one line each:** *"Mr Rao complains about the AC every visit"*
+needs `guest360_id`; *"who is in 214 tonight"* needs `guest_stay_id`. And
+Guest360's own founding input (G360-Q1) says guest identities **merge** —
+phone-only and email-only guests later found to be one person — so the job
+stores the `guest360_id` it was given, and Guest360 owns the merge lineage.
+The reservation, when a screen needs it, is one step from the stay.
+
+**The raiser, restated with these names:**
+
+```text
+raised_by_kind    STAFF · GUEST · APPLICATION
+raised_by_id      STAFF → user_id · GUEST → guest360_id · APPLICATION → app name
+```
+
+`S1-D18` is closed by this: **stay, not reservation — and the person beside
+it.**
+
+### 5 · `SCHEDULED`, confirmed — and clearing it, and what escalation anchors to
+
+*"What is the status of a scheduled job? A manager can set that field to
+null too. And the escalations are based on this time."*
+
+```text
+status while waiting     SCHEDULED     (§S1.16 ·3)
+
+set scheduled_for = null → the job goes live NOW
+                           SCHEDULED → RAISED, or ASSIGNED if pre-assigned
+                           who: the raiser, or anyone with MANAGE in scope
+
+every clock anchors at   live_at = scheduled_for, or created_at if null
+    SLA                  resolve_by counts from live_at
+    escalation           "not assigned after N minutes" counts from live_at
+    labour               sessions cannot open before live_at
+```
+
+So a job raised at 22:00 for 07:00 escalates at 07:15, not at 22:15 — the
+reference reached for exactly this with `applyStartByFloor` (01 §3.4) and
+then anchored its four clocks to four different fields. Here there is one
+anchor and every clock reads it.
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2387,8 +2446,8 @@ can.
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
 | **S1-D17** | **Raiser and beneficiary are two facts** — `raised_by_kind` + `raised_by_id` (staff · guest · application); `guest_stay_id` for whom; `origin_app`/`origin_ref` whose record | **RULED, owner 2026-09-03** — §S1.16 ·1 |
-| **S1-D18** | **A guest job stores the stay, not the reservation** — the reservation is derivable through it (GUEST-Q2; no derived projections) | *proposed — §S1.16 ·2 — the owner asked for reservation id* |
-| **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — visible, not actionable, clock not started; reschedule needs raiser or *manage* | **RULED, owner 2026-09-03** — §S1.16 ·3; `job_status` is nine values |
+| **S1-D18** | **The guest is two ids** — `guest360_id` (the person, across visits) and `guest_stay_id` (this visit; the QR's room resolves to it); location defaults from the stay. Reservation derivable, not stored | **RULED, owner 2026-09-03** — §S1.16 ·4 |
+| **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — clearing it makes the job live now; **every clock (SLA, escalation, labour) anchors at `live_at` = scheduled_for or created_at** | **RULED, owner 2026-09-03** — §S1.16 ·3, ·5; `job_status` is nine values |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
 **Sign-off:** **NOT SIGNED OFF.**
@@ -3023,12 +3082,44 @@ A screen shows a button only when the Kernel would allow the operation; the
 Kernel refuses regardless of the screen. **Jobs caches no decision**
 (01 §F14 is the reference doing exactly that, for ten minutes).
 
+## The owner's correction — levels are not fixed; scope and power are set per user
+
+*"May or may not. Sometimes a normal user is given the manage permission. But
+a security user — we do not give it; they must just execute their job. And I
+need to know where we configure the scope and power."*
+
+So **S9-D2 is answered by dissolving it**: there is no fixed "level 2". The
+two axes are granted **per user**, in any combination the property wants.
+
+```text
+technician Suresh      department · execute            sees his department, does the work
+senior tech Anil       department · manage             same view, may reassign and re-prioritise
+security guard Ravi    own · execute                   his jobs, nothing else
+duty manager Priya     property · administer           everything
+```
+
+### Where scope and power are configured — measured against the platform
+
+Two of the three pieces exist today; the third is the question to send up.
+
+| | Where | State |
+|---|---|---|
+| **May this user open Jobs at all?** | **Core Administration → User → Applications card** (ADR 0114 consequences; ADR 0116 §5 — every app is per-user gateable) | built |
+| **Which departments is this user in?** | **Workforce → postings** — never a Jobs setting, never a Core Admin toggle (ADR 0116 §6) | built |
+| **Which Jobs permissions does this user hold** — the six from §"How it reaches the platform"? | The permission *names* are manifest-declared (`permissions.yaml`, `required_permission`) and the grant flows Identity → event → Kernel (ADR 0125 §2, §6). **A per-user, per-application permission screen is not identified in the ADRs read** — the User → Access card is where it belongs, and whether it carries per-application permissions or only platform ones is **the architect's to say** | **open — goes up** |
+
+**What Jobs must not do:** build its own role screen. That is the reference's
+`PermissionEvaluator` reborn — two methods returning `true` and a cache in
+front of the authority (01 §F14). One place grants; the Kernel decides; Jobs
+asks per operation.
+
 ## Decisions
 
 | id | Decision | Ruling |
 |---|---|---|
 | **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
-| **S9-D2** | Level 2 = **own + manage** — a senior worker managing only their own jobs. Or is level 2 already department-wide? | *open — the owner's description fits both* |
+| **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
+| **S9-D6** | **Where it is configured** — app access: Core Admin Applications card (built); departments: Workforce postings (built); **per-user Jobs permissions: the Access card, pending the architect** | *open — goes up as a question* |
 | **S9-D3** | *Capture from someone* is **administer**, not manage | *proposed* |
 | **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
 | **S9-D5** | Six manifest permissions, no more | *proposed* |
