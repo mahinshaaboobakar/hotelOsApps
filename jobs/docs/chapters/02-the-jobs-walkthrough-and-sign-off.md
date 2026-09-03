@@ -2001,7 +2001,7 @@ jobs.job_attachment         photos — at creation and at resolution
 jobs.job_link               group and parent-child (S1.2)
     job_id · related_job_id · relation (GROUP · PARENT) · step · linked_by_user_id
 
-jobs.job_escalation         the escalation ledger (S5)
+jobs.job_concern_history    when concern changed, to what, why, who became accountable (S5)
 
 catalogue (Core Administration, group-wide)
     category · item · resolution
@@ -2615,7 +2615,7 @@ and is never null.
 | `job_note` | each comment | `by` *(actor)* · `text` · `mentions[]` · `at` |
 | `job_attachment` | each photo | `media_id` (Master Data's media) · `stage` RAISED · RESOLVED · `by` *(actor)* · `at` |
 | `job_link` | each relation to another job | `related_job_id` · `relation` GROUP · PARENT · `step` (parent/child only) · `linked_by` *(actor)* |
-| `job_escalation` | each escalation row | S5 — pending · fired · cancelled · missed, with the rung and who was told |
+| `job_concern_history` | each change of concern | S5 — `at` · `concern` · `reason` · `accountable_role` · `accountable_id` |
 
 ### The catalogue — Core Administration, group-wide
 
@@ -3337,20 +3337,133 @@ not a release.
   many items, one policy, one edit.
 * **PPM jobs get their own policy** — a row, not an exclusion (S5-D9).
 
-**S5-D1 is amended to this. S5-D2 dissolves** — no rungs, only order; the
-roles a property tells are its own.
+**Superseded below** — the owner rejected this as the reference's engine with its constants moved into rows.
+
+
+### Second attempt — owner, 2026-09-03: *"still exactly mirrored from Java. Redesign our way, like type and service."*
+
+Correct. The step list above is the reference's timer engine with the
+constants moved into rows. It still thinks of escalation as **timers firing
+at people** — that is the ITSM frame, and it is the part of the reference
+that broke (the Quartz chains, the overdue drops, the dedupe that outlived a
+reopen). Withdrawn. Start from the hotel.
+
+### What escalation is *for* in a hotel
+
+Not "send alert level 2". It is two questions a hotel asks all day:
+
+```text
+"Is this guest's problem slipping?"          the state of the job
+"Who is carrying it right now?"               the person accountable for it
+```
+
+The reference answers neither. It fires messages and keeps no state, so
+*"which jobs are in trouble right now"* is unanswerable, and *"who owns this
+at 21:00"* is whoever last got an email.
+
+### The design: a state, a ladder, and who watches
+
+**1 · Concern — a derived state, always current, never scheduled**
+
+Every open job is, at every moment, in exactly one of four:
+
+```text
+ON_TRACK    nothing to worry about
+AT_RISK     it is slipping — 75 % of the promise used · assigned and not accepted
+            for 5 min · accepted and not started for 10 min · nobody on shift
+            · the assignee has too many open jobs
+BREACHED    the promise is broken — past due_at
+STUCK       breached, and no movement for 30 min — abandoned
+```
+
+The thresholds are the property's, per item policy. **The state is
+computed, not stored** — from `due_at`, the assignment, the sessions and the
+roster, exactly as *late* is. There is no timer to fire, no chain to rebuild,
+nothing to miss during an outage: when the platform comes back, every job's
+concern is simply what it is.
+
+**2 · Accountable — the ladder is ownership, not notification**
+
+In a hotel, when a job slips the real move is not *"tell the HOD"* — it is
+*"the HOD is now carrying it."* So concern moves the **accountable** person:
+
+```text
+ON_TRACK    the assignee
+AT_RISK     the assignee — and the department supervisor now sees it on their board
+BREACHED    the department head is accountable
+STUCK       the duty manager
+```
+
+`accountable` is a role resolved at that moment through Workforce; if nobody
+holds it on shift, it moves one more step up **and the board says why**.
+That is S5-D6 answered by construction.
+
+**3 · Watching — who is told, and how often, is a subscription, not a rung**
+
+```text
+role              watches                     nudge
+assignee          my job entering AT_RISK     "No time — hurry up"  · repeat every 5 min while AT_RISK
+dept supervisor   AT_RISK in my departments   in-app
+dept head         BREACHED in my department   in-app + email · repeat every 15 min while BREACHED
+duty manager      STUCK property-wide         in-app + email · immediately
+```
+
+A nudge is sent when a job **enters** a state a role watches, and repeats
+while it stays there. Nobody configures *when* to tell whom; they configure
+*what they watch*. The owner's example is three subscriptions, and the
+"different cycles per stage" the owner named are the three `repeat` values.
+
+### The owner's 12-minute job under it — live 09:00
+
+```text
+09:09  75 % used, still IN_PROGRESS     → AT_RISK    assignee nudged; supervisor's board shows it
+09:12  past due_at                      → BREACHED   accountable: dept head; head nudged
+09:42  breached, no session 30 min      → STUCK      accountable: duty manager; nudged now
+09:50  resolved                         → (closed)   concern history keeps all four moves
+```
+
+No timers were scheduled. The supervisor's board at 09:10 already showed the
+job in amber without anyone being emailed.
+
+### Why this is the hotel's design and not the reference's
+
+* **It answers the two questions.** *"What is in trouble now"* is a filter
+  on a state; *"who is carrying #441"* is a field. Neither exists in the
+  reference or in the step list.
+* **Prevention, not alarms.** AT_RISK includes *assignee overloaded* and
+  *nobody on shift* — conditions the reference cannot see, and the ones a
+  modern operation acts on before a breach. A supervisor's board can offer
+  *"reassign to Anil — 0 open"* at 09:09, which is worth more than an email
+  at 09:12.
+* **The outage question (D4) dissolves.** Nothing is missed; nudges resume.
+* **Reopen (D5) dissolves.** The state is recomputed; a reopened job starts
+  ON_TRACK.
+* **The record survives** — `job_concern_history`: when the concern changed,
+  to what, why, and who became accountable. That is the audit S5-D4 wanted,
+  and it replaces `job_escalation`'s pending/fired/missed rows entirely.
+
+### What is stored
+
+```text
+job_concern_history     job_id · at · concern · reason · accountable_role · accountable_id
+property_item_policy    the thresholds: at_risk_pct · not_accepted_min · not_started_min ·
+                        stuck_min · overload_open_jobs
+concern_subscription    per property, per role: which concerns · channels · repeat_min
+```
+
+Three things, one of them a history. `job_escalation` is gone.
 
 
 ## Decisions
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S5-D1** | ~~Keep the four clocks~~ → **a policy is an ordered list of alert steps** — *when* (minutes or % of SLA) · *from* (LIVE · ASSIGNED · ACCEPTED · STARTED · DUE) · *if* (still in which state) · *tell* (a role) · *repeat*. The four clocks are eight rows | *redesigned on the owner's instruction — awaiting owner* |
-| **S5-D2** | ~~Rungs~~ — **dissolved by D1**: no rungs, only steps in order; the roles a property tells are its own | *follows D1* |
+| **S5-D1** | ~~four clocks~~ ~~a list of timer steps~~ → **a derived CONCERN state (ON_TRACK · AT_RISK · BREACHED · STUCK), an ACCOUNTABLE ladder that moves ownership, and per-role SUBSCRIPTIONS**. No timers, no rungs, nothing to miss | *redesigned, second attempt — awaiting owner* |
+| **S5-D2** | ~~Rungs~~ — dissolved: the ladder is *who is accountable*, four levels, roles the property's own | *follows D1* |
 | **S5-D3** | Escalation policy stored in the database and edited in the console | yes | *open* |
-| **S5-D4** | After an outage, what happens to escalations that were due? | fire the **highest** rung that was missed, mark the rest skipped, record all of them | *open* |
-| **S5-D5** | Deduplication per cycle — a reopened job escalates again | yes | *open* |
-| **S5-D6** | Recipients are roles resolved at fire time. What if nobody holds the role? | go to the next rung immediately and say why | *open* |
+| **S5-D4** | After an outage | **dissolves** — concern is computed, so nothing is missed; nudges resume; the history records the moves | *follows D1* |
+| **S5-D5** | Reopen | **dissolves** — the state is recomputed; a reopened job starts ON_TRACK | *follows D1* |
+| **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
 | **S5-D7** | Does escalation belong to Jobs, or is it a platform capability shared with Room Care, Maintenance and GuestOps? | platform — needs an architect ruling | *open* |
 | **S5-D8** | Do escalations pause overnight, or continue through the night? | continue, but the *recipient* changes to whoever is on duty | *open* |
 | **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
