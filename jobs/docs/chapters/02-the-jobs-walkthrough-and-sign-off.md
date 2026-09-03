@@ -4719,7 +4719,7 @@ not before it.
 | **S9-D1** | Two axes — scope (own · department · property) and power (execute · manage · administer) | *proposed* |
 | **S9-D2** | **No fixed levels — scope and power are granted per user**, in any combination (a security guard: own + execute; a senior tech: department + manage) | **RULED, owner 2026-09-03** |
 | **S9-D6** | **Where it is configured** — app access: Core Admin Applications card, Identity `SetApplicationAccess` (built); departments: Workforce postings (built); **Jobs powers: Workforce** — member / supervisor / head of a department (§S1.16 ·10). Not a Jobs screen, not a Core Admin card | **answered** — §S1.16 ·10 |
-| **S9-D3** | *Capture from someone* is property-level — `property#admin` **or `property#jobs_manager`** | *proposed* |
+| **S9-D3** | *Capture from someone* is property-level — `property#admin` **or `property#jobs_manager`** | **RULED, owner 2026-09-03** |
 | **S9-D7** | **The property-wide level is grantable by the GM** — a Jobs-declared grant kind `property#jobs_manager` (AUTHZ-Q25's route); granted/revoked by the GM or admin; needs a grantable-relations-registry entry | **RULED as a requirement, owner 2026-09-03**; the registry entry is the architect's |
 | **S9-D4** | Can a job be **restricted** — a complaint about a staff member — visible only to the raiser and level 4? | *proposed: yes, a flag* |
 | **S9-D5** | ~~Six manifest permissions~~ — the platform already has the five actions and the relations (`model.fga` `type job`). **Parked for the owner's separate discussion**, as asked | *parked* |
