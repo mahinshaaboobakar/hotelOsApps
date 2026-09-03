@@ -3772,7 +3772,7 @@ time written on the roster, not an event that fires when the clock reaches
 it. So there is no trigger to subscribe to, and inventing one in Workforce
 for Jobs' sake would be the wrong direction.
 
-**So the workflow is the sweep, and it needs nothing new:**
+**First answer — superseded just below, because it polled:**
 
 ```text
 every minute, the sweep that already exists (S5 step 2) does one more thing
@@ -3802,6 +3802,52 @@ an optimisation for later, not part of the design.
 **And if Workforce is not installed:** the read answers nothing, so the
 sweep treats every department as staffed — the clock never pauses for
 staffing, only for service hours. Absent is not blocking (ADR 0116 §5).
+
+
+#### "So Jobs calls Workforce every minute?" — owner, 2026-09-03. No — corrected
+
+The sweep as written above would. That is wrong: *when the next shift
+starts* is written on the roster, so it is a thing to read **once** and
+remember, not to ask sixty times an hour. And the events Workforce already
+publishes — `shift.changed`, `shift.assigned` — are exactly the signal that
+the remembered answer is stale.
+
+**The corrected workflow — one read, then arithmetic:**
+
+```text
+when a job pauses for staffing (nobody on shift in HK)
+    read ONCE, through Context:   "HK's next shift starts at?"   → 07:00
+    remember it:                  resume_at = 07:00 on the paused job
+
+every minute, the sweep — NO external call
+    now >= resume_at ?  → the job goes live: due_at, concern, board, AUTO
+
+when Workforce publishes shift.changed / shift.assigned for that department
+    (a declared subscription — the consumer host of EVT-Q4)
+    re-read once, recompute resume_at for that department's paused jobs
+```
+
+```text
+23:30   towel job pauses. Reads: HK next shift 07:00. resume_at = 07:00.
+        — one call —
+02:00   sweep: 02:00 < 07:00. Nothing. No call.
+04:15   Workforce: shift.changed — early shift moved to 06:30
+        → re-read once → resume_at = 06:30
+06:30   sweep: now >= resume_at → job live. No call.
+```
+
+**Calls to Workforce, that night: two.** One at pause, one because the
+roster changed. The minute sweep touches nothing outside Jobs — it compares
+timestamps it already holds, which is what it does for the 75 % threshold
+too.
+
+**Why this is the platform's shape and not just cheaper:** between
+applications, a fact arrives as an event and a question is asked once
+(constitution §6). Asking the same question every minute is a poll wearing
+a question's clothes.
+
+**The service-hours half needs no call at all** — it is Jobs' own setting;
+`resume_at` is computed from it directly.
 
 
 ## Decisions
