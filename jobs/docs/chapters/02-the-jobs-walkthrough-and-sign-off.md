@@ -2570,6 +2570,8 @@ architect.
 
 ## S1.17 · Every field, plainly — owner's request, 2026-09-03
 
+> **The `job` table below is superseded by §S1.18** (the owner's cut, the same day): `glitch`, `live_at`, the `created_by` actor and `origin_app`/`origin_ref` are gone. The satellite and catalogue tables here stand, except `job_recovery`.
+
 One line per field. *actor* means `{ kind: STAFF | GUEST | APPLICATION, id }`
 and is never null.
 
@@ -2626,6 +2628,93 @@ and is never null.
 | `resolution` | *gas recharged*, *no fault found*, *other* — `category_id` (null = universal) · `item_id` (null = every item of that category) · `name` |
 | `property_item_policy` | **per property** — `item_id` · `active_here` · `display_name` (rename) · `default_priority` · `standard_minutes` · `escalation_policy_id` · `chargeable` · `price` — *what we promise about it here* |
 
+---
+
+## S1.18 · The lean job table — the owner's cut, 2026-09-03
+
+*"You are over-engineering concepts. Why `glitch`? Why two fields, `live_at`
+and `scheduled_for`? Why that many fields for origin? We need `raised_via`,
+`raised_kind`, `raised_by_id`, and one `stay_id` — that is enough. Redesign
+the job table and show me."*
+
+Accepted, and two of the four were the stream breaking rules it had itself
+written down.
+
+| Dropped | Why it was there | Why it goes |
+|---|---|---|
+| **`glitch`** + `job_recovery` | to mark "a guest was let down" and track apology / compensation | *a guest complained* is already `raised_kind = GUEST` on a fault; recovery (apology, upgrade, comp) is **Guest360 / GuestOps' concern**, not a job's. Gone from v1 |
+| **`live_at`** | the one anchor every clock reads | it is `scheduled_for ?? created_at` — **a derived value, which the platform forbids storing** and §S1.3 rule 1 forbade too. Computed, never a column |
+| **`created_by` as an actor** | who typed a phoned-in guest request | the platform already has **`created_by`** on every table as its standard audit column (`MasterEntity.CreatedBy`, a user). The receptionist is there without a new field |
+| **`origin_app` · `origin_ref`** | PPM's *P-77* | Maintenance learns the job's id from `job.created` and **keeps the link on its own occurrence** — the consumer holds the reference, which is the platform's direction. Jobs needs only `raised_kind = APPLICATION` and `raised_by_id` = the application |
+
+### `job` — one row, and this is all of it
+
+```text
+job_id                UUID — never shown
+job_number            KOC-ENG-441 — stamped once
+property_id
+
+category_id           what — AC › not cooling
+item_id
+location_id           where — room · pool · corridor · floor
+asset_id              the thing, when there is one
+department_code       who does it — from the item; a supervisor may change it
+
+summary               what was said, one line
+details               the long version, optional
+priority              EMERGENCY · HIGH · NORMAL · LOW · NOT_TRIAGED
+priority_decided_by   MANUAL · FLOW · CATALOGUE · NONE
+
+raised_via            APP · QR · GUEST_APP · WHATSAPP        how it arrived
+raised_kind           STAFF · GUEST · APPLICATION            who is asking
+raised_by_id          user_id · Guest360 id · application id
+stay_id               the guest's visit — NOT NULL when raised_kind = GUEST
+
+scheduled_for         null = now; a future time = SCHEDULED
+resolve_by            the deadline — a time, set at creation, editable by manage
+job_status            SCHEDULED · RAISED · ASSIGNED · ACCEPTED · IN_PROGRESS ·
+                      ON_HOLD · RESOLVED · CLOSED · CANCELLED
+cycle                 1, +1 per reopen
+
+created_by · created_at · updated_by · updated_at · version    the platform's standard five
+deleted_at · deleted_by · delete_reason                        soft delete
+```
+
+Twenty-three columns, five of them the platform's own. Every clock counts
+from `scheduled_for ?? created_at`, computed where it is needed.
+
+**The four cases, in the four raiser fields:**
+
+```text
+staff, own job         APP        STAFF        u-suresh     stay null
+guest by QR            QR         GUEST        g-rao        stay 8812
+guest phones the desk  APP        GUEST        g-rao        stay 8812    created_by = u-priya
+PPM                    APP        APPLICATION  maintenance  stay null
+```
+
+*"Raised by guests"* = `raised_kind = GUEST`. Who typed the phoned-in one is
+the platform's `created_by`. Nothing else is needed.
+
+**The tables beside it are unchanged** (§S1.17) **except `job_recovery`, which
+goes with `glitch`.**
+
+### The policy's home — a contradiction in the stream's own words, corrected
+
+The stream wrote *"the policy is the Jobs app's own Settings"* and then
+listed `property_item_policy` under *"Catalogue — Core Administration"*. The
+second was wrong.
+
+```text
+CATALOGUE   category · item · item_alias · resolution
+            Core Administration, group-wide, the screen contributed by Jobs' manifest
+
+POLICY      property_item_policy — active here · display name · default priority ·
+            standard minutes · escalation policy · chargeable · price
+            THE JOBS SCHEMA, edited in the JOBS APP's own Settings, per property
+```
+
+Nothing but Jobs reads the policy, so nothing but Jobs holds it.
+
 ## Decisions — round 1 close
 
 | id | Decision | Ruling |
@@ -2646,9 +2735,11 @@ and is never null.
 | **S1-D13** | **Assignment** — every list from Workforce, **on shift on the job's execution date**; default = the category's department; flips = related departments / all users, still on-shift only; AUTO takes the first; *nobody available* is an escalation condition | **RULED, owner 2026-09-03** — §S1.14 ·6, corrected once |
 | **S1-D14** | **Catalogue screen in Core Administration only while Jobs is installed** — manifest-contributed | **RULED, owner 2026-09-03** — §S1.14 ·7; the GuestOps-without-Jobs gap recorded |
 | **S1-D16** | **The field vocabulary** — every Java field renamed or removed; `source` → `raised_via` + `origin_app`/`origin_ref`; `priority` kept as a universal word with our values | **RULED, owner 2026-09-03** — §S1.15 |
-| **S1-D17** | **Raiser and beneficiary are two facts** — `raised_by_kind` + `raised_by_id` (staff · guest · application); `guest_stay_id` for whom; `origin_app`/`origin_ref` whose record | **RULED, owner 2026-09-03** — §S1.16 ·1 |
-| **S1-D18** | **No `guest360_id` column** — the guest is `raised_by_id` when kind is GUEST; `guest_stay_id` is the visit; **`created_by` and `raised_by` are both actors, both always set** — no null that means something (§S1.16 ·9); a phoned-in request is created by staff and raised by the guest | **RULED, owner 2026-09-03** — §S1.16 ·6, ·9 |
-| **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — clearing it makes the job live now; **every clock (SLA, escalation, labour) anchors at `live_at` = scheduled_for or created_at** | **RULED, owner 2026-09-03** — §S1.16 ·3, ·5; `job_status` is nine values |
+| **S1-D17** | **Four raiser fields and no more** — `raised_via` (APP · QR · GUEST_APP · WHATSAPP) · `raised_kind` (STAFF · GUEST · APPLICATION) · `raised_by_id` · `stay_id` (not null for a guest). Who typed it is the platform's own `created_by` | **RULED, owner 2026-09-03** — §S1.18 |
+| **S1-D18** | **No `guest360_id` column** — the guest is `raised_by_id` when kind is GUEST; `guest_stay_id` is the visit; **superseded by D17** — the actor pair is withdrawn; `stay_id` stays, not null for a guest | see D17 |
+| **S1-D19** | **One `scheduled_for`, and a `SCHEDULED` status** — clearing it makes the job live now; **every clock (SLA, escalation, labour) anchors at `live_at` = scheduled_for or created_at** | **RULED, owner 2026-09-03** — §S1.16 ·3, ·5; `job_status` is nine values. **`live_at` is not a column** — computed as `scheduled_for ?? created_at` (§S1.18) |
+| **S1-D20** | **`glitch` and `job_recovery` dropped from v1** — a guest complaint is `raised_kind = GUEST` on a fault; recovery is Guest360 / GuestOps' | **RULED, owner 2026-09-03** — §S1.18 |
+| **S1-D21** | **The policy lives in the `jobs` schema, edited in Jobs Settings** — the stream's "Core Administration" listing was wrong; only the catalogue is Core's | **corrected, 2026-09-03** — §S1.18 |
 | **S1-D15** | **Guests raise jobs by QR, next release** — buttons only, `raised_via: GUEST_QR`, stay from the room via Context, AUTO assignment, nothing about users or departments shown. Jobs is ready now; the QR credential is the guest-app round's | **RULED, owner 2026-09-03** — §S1.14 ·9 |
 
 **Sign-off:** **NOT SIGNED OFF.**
