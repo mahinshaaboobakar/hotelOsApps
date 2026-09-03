@@ -52,8 +52,8 @@ constitution's order, not a preference.
 | S7 | Notifications | **SIGNED OFF** | 2026-09-03 |
 | S8 | The guest side | **SIGNED OFF** | 2026-09-03 |
 | S9 | Who can see and manage a job | **SIGNED OFF** | 2026-09-03 |
-| S10 | Scheduled / preventive work | **OPEN** — largely settled by S1-D12 | — |
-| — | **PAGE LOCKED** | no | — |
+| S10 | Scheduled / preventive work | **SIGNED OFF** | 2026-09-03 |
+| — | **PAGE LOCKED** | **YES** | **2026-09-03** |
 
 ---
 
@@ -4766,28 +4766,60 @@ keeps Jobs as the place work is executed.
 
 | id | Decision | Recommendation | Ruling |
 |---|---|---|---|
-| **S10-D1** | Does Jobs hold schedules, or does Maintenance announce and Jobs create? | Maintenance announces; Jobs creates | *open* |
-| **S10-D2** | Is scheduled work in scope for the first release of Jobs? | no — Jobs must be able to *receive* it, but not schedule it | *open* |
+| **S10-D1** | Schedules | Engineering plans, Temporal Cron schedules, `maintenance.ppm.due` fires, Jobs creates an ordinary job. Jobs holds no schedule and no cron | **RULED, owner 2026-09-03** — S1-D12, S5 |
+| **S10-D2** | First release | Jobs must be able to *receive* it — the subscription, the APPLICATION-raised job, `job.closed` back by correlation — and schedules nothing itself | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S10 SIGNED OFF — owner, 2026-09-03.**
 
 ---
 
 # Lock
 
-**The page is not locked.** It locks when all ten sections carry a sign-off,
-and nothing is designed or built from it before then.
+**LOCKED — owner, 2026-09-03.** All ten sections signed off. Nothing is
+designed or built from any state but this one.
 
 | | |
 |---|---|
-| Sections signed off | **9 of 10** |
-| Page locked | no |
-| Locked on | — |
+| Sections signed off | **10 of 10** |
+| Page locked | **yes** |
+| Locked on | **2026-09-03** |
 
-When it locks, three things follow, in this order and no other:
+## What leaves this page — the one list
 
-1. every ruling recorded in the platform's question register;
-2. an ADR for the decisions that change the platform rather than only this
-   application — at minimum `S5-D7` (whose escalation is it) and `S1-D6`
-   (who owns the service taxonomy);
-3. the Jobs design chapter, written against the locked page.
+**Requests to other teams** — none blocks the design chapter; each is
+marked where the design depends on it.
+
+| To | Request | From |
+|---|---|---|
+| Master Data | add place kinds: gym · spa · salon · banquet_hall · meeting_room · bar · kids_club · business_centre · garden · beach · sports_court · driveway · kitchen · laundry_room · store_room · staff_area · parking · stairwell · service_area | S1.1 |
+| Master Data | a shape / length rule for `Property.Code` (3–8 chars) so job numbers stay readable | S1.3 |
+| Workforce | a **team** object — a named group of posted staff within a department | S3-D1 |
+| Workforce | **`shift.started` / `shift.ended`** — Temporal-scheduled fan-out, one subject, department in payload | S5-D13 |
+| Workforce | `attendance.clocked_in` — later refinement, not v1 | S5 |
+| Guest-app round | what a QR scan authenticates; the stay-specific link | S1-D15, S8 |
+| Engineering round | PPM on Temporal Cron; `maintenance.ppm.due`; consume `job.closed` by correlation | S1-D12, S10 |
+
+**Questions for the architect** — rulings the design chapter must cite.
+
+| # | Question | From |
+|---|---|---|
+| 1 | There is no Jobs chapter — is this page + the design chapter the design of record? | 01 §7 |
+| 2 | The correlation-id rule is cited to ADR 0116 §5 and is not in it — where is it frozen? | 01 §7 |
+| 3 | The **job catalogue** (category · item · alias · resolution) as a Core Administration object, group-wide, activated per property, screen contributed by Jobs' manifest | S1.11, S1.14 ·7 |
+| 4 | **`property#jobs_manager`** in the grantable-relations registry — a relation covering every job at the property | S9-D7 |
+| 5 | GuestOps installed without Jobs: a guest-requestable list with no screen to edit it | S1.14 ·7 |
+| 6 | Does ADR 0062's `deleted_at` shape bind an application's own tables, or is it convention there? | S1.12 |
+| 7 | S9's vocabulary against `model.fga`'s five `job.*` permissions — **parked for the owner's separate discussion first** | S9-D5 |
+
+**Deferred by the owner:** HosPilot raising jobs (S1.2 Part 3).
+
+## What follows, in this order and no other
+
+1. The requests and questions above go up — the register rows are the
+   architect's to commit at round close.
+2. **The Jobs design chapter** — `03-the-jobs-design.md` — written against
+   this locked page: schema, events, permissions, the manifest, the sweep,
+   the screens. Where a line depends on a ruling above, it says so and stops
+   there.
+3. Mockups, then the owner gate, then build.
+
