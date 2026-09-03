@@ -33,10 +33,21 @@
 # knowledge at the time of writing and cannot be checked from inside this
 # repository — and a stale price here does not fail, it quietly misroutes.
 #
-# The catalogue is deliberately **short**. Only models whose pricing is known
-# with confidence are declared: a model omitted is a model the Gateway will not
-# route to, which is recoverable, while a model declared at a guessed price
-# sorts wrongly against every other rung and nobody finds out from a failure.
+# The catalogue is deliberately **short**, for two independent reasons that
+# happen to point the same way.
+#
+#   confidence   only models whose pricing is known are declared. A model
+#                omitted is one the Gateway will not route to, which is
+#                recoverable; a model declared at a guessed price sorts
+#                wrongly against every other rung and nobody finds out from
+#                a failure
+#   policy       the owner's ruling of 2026-09-03 — see the block above the
+#                catalogue. `gpt-4o-mini` for conversation, and nothing else
+#
+# **A model absent from here cannot be reached at all**, and that is the point
+# rather than a side effect: `resolve` iterates what a provider declares, so
+# this file is where a spending bound can be made structural instead of
+# advisory.
 
 manifest_version: 1
 kind: provider
@@ -83,22 +94,31 @@ provider:
   # it, and neither needs code of its own.
   api_dialect: openai_chat_completions
 
+  # ┌──────────────────────────────────────────────────────────────────────┐
+  # │ TWO MODELS, BY THE OWNER'S POLICY — 2026-09-03.                      │
+  # │                                                                      │
+  # │ `gpt-4o-mini` is the only conversation model, and `gpt-4o` and       │
+  # │ `text-embedding-3-large` are **removed rather than deprioritised**.  │
+  # │                                                                      │
+  # │ That distinction is the whole instruction. A costlier model left in  │
+  # │ the catalogue is one the router *weighs* — it can be reached by a    │
+  # │ request the ladder judges worth it, and "worth it" is a rule nobody  │
+  # │ has written yet. Removed, it is not a preference the router balances │
+  # │ but a model that does not exist to route to: `resolve` iterates the  │
+  # │ declared catalogue, so a bound expressed here is structural.         │
+  # │                                                                      │
+  # │ **The full catalogue returns when `AI-Q15`'s policy surface ships**  │
+  # │ and the owner can *prefer* rather than *restrict*. Until then the    │
+  # │ manifest is the only place the bound can be stated truthfully.       │
+  # └──────────────────────────────────────────────────────────────────────┘
   models:
-    # Published at $2.50 / 1M input, $10.00 / 1M output.
-    - id: gpt-4o
-      capabilities: [tools, json_schema, vision, streaming, long_context]
-      context_limit: 128000
-      max_output: 16384
-      latency_class: standard
-      cost_per_input_token: 0.0000025
-      cost_per_output_token: 0.00001
-
     # Published at $0.15 / 1M input, $0.60 / 1M output.
     #
-    # **Sixteen times cheaper in, and that is what makes the ladder work.** The
-    # budget ladder steps down to this when a property is over its spend, and a
-    # cheap rung that is still capable is the difference between degrading and
-    # refusing.
+    # **The sole conversation rung.** With one model the ladder has one step:
+    # there is no cheaper tier to degrade to, so a failure here is a refusal
+    # rather than a downgrade — which is the honest behaviour and worth knowing
+    # before it is met. `gpt-4o-mini` is capable enough that this is a real
+    # policy rather than a crippled one.
     - id: gpt-4o-mini
       capabilities: [tools, json_schema, vision, streaming]
       context_limit: 128000
@@ -107,8 +127,14 @@ provider:
       cost_per_input_token: 0.00000015
       cost_per_output_token: 0.0000006
 
-    # Published at $0.02 / 1M. Embeddings have no output tokens, so the output
-    # cost is a true zero rather than an unknown.
+    # Published at $0.02 / 1M — cents per million tokens, which is why it stays
+    # while the costlier models go.
+    #
+    # **Kept so retrieval stays answerable at all.** Without an embeddings
+    # model the Gateway does not return worse search results, it *refuses* to
+    # search — `MODEL_CAPABILITY_EMBEDDINGS` exists so that difference is
+    # visible. Removing it would have restricted a capability rather than a
+    # cost.
     - id: text-embedding-3-small
       capabilities: [embeddings]
       context_limit: 8191
@@ -117,16 +143,6 @@ provider:
       max_output: 1
       latency_class: fast
       cost_per_input_token: 0.00000002
-      cost_per_output_token: 0.0
-
-    # Published at $0.13 / 1M. Larger vectors, and the one to build an index
-    # with when retrieval quality matters more than storage.
-    - id: text-embedding-3-large
-      capabilities: [embeddings]
-      context_limit: 8191
-      max_output: 1
-      latency_class: fast
-      cost_per_input_token: 0.00000013
       cost_per_output_token: 0.0
 
 # No `configuration:` block, and its absence is the design.
