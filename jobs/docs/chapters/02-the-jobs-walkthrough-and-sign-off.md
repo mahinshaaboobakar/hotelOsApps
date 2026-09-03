@@ -47,8 +47,8 @@ constitution's order, not a preference.
 | S2 | Creating a job | **SIGNED OFF** | 2026-09-03 |
 | S3 | Assigning it | **SIGNED OFF** | 2026-09-03 |
 | S4 | Accept, start, pause, finish | **SIGNED OFF** | 2026-09-03 |
-| S5 | **Escalation** | **OPEN** | — |
-| S6 | Reminders | not started | — |
+| S5 | **Escalation** | **SIGNED OFF** | 2026-09-03 |
+| S6 | Reminders | **OPEN** | — |
 | S7 | Notifications | not started | — |
 | S8 | The guest side | not started | — |
 | S9 | Who can see and manage a job | **DESIGNED** — owner's four levels, 5 decisions | — |
@@ -4291,13 +4291,13 @@ record.**
 | **S5-D6** | Nobody holds the accountable role on shift | accountability moves one more step up **and the board says why** — by construction | *follows D1* |
 | **S5-D7** | Whose capability | **RULED: Jobs' own.** Owner, 2026-09-03: *"keep it separate — each app has its own logic and flow; all under one gets messy."* The concern model is built inside Jobs, for jobs, with `job_id` — the lift-out shape is dropped. Room Care and the others design their own when they come. *(Recorded beside it: the constitution's no-duplicated-shared-code rule may be raised by the architect at the platform level; that is theirs, and this ruling stands until then.)* | **RULED, owner 2026-09-03** |
 | **S5-D8** | The night | **quiet hours** per property / department pause the promise clock and freeze concern; off by default; EMERGENCY exempt with its own night policy. Nudges to empty roles never send regardless. *Where department operating hours live* goes up, not blocking | **RULED, owner 2026-09-03**, then sharpened on the owner's question: the clock pauses when **nobody is on shift** (Workforce, derived — no setting) **or** outside optional **service hours** (Jobs policy, per department); EMERGENCY exempt. Property and department levels both hold; the operating-hours question is closed — they are the roster |
-| **S5-D9** | Are Maintenance-type jobs escalated? (the reference excludes them) | yes, with their own policy — planned work has different deadlines | *open* |
-| **S5-D10** | Channels | **in-app always on, no setting; email one checkbox per subscription, off by default**; SMS/WhatsApp absent until wired. The reference's four preference layers do not come across | **RULED, owner 2026-09-03** |
+| **S5-D9** | PPM / planned jobs | **a normal job, no special treatment** — whatever policy its item resolves to; the reference's exclusion does not come across | **RULED, owner 2026-09-03** |
+| **S5-D10** | Channels | **in-app only — the HotelOS desktop and mobile app — and no configuration of any kind.** No email checkbox, no channel screen. The reference's four preference layers and four channels do not come across | **RULED, owner 2026-09-03** |
 | **S5-D12** | **The sweep, run by Temporal Cron — every 60 seconds**, one schedule per property, fixed, overlap policy SKIP; database the single truth | **RULED, owner 2026-09-03** |
 | **S5-D13** | **Department presence by `shift.started` / `shift.ended`** — Temporal-scheduled fan-out from Workforce, one subject, department in payload; supersedes attendance-first and the roster fallback | **RULED, owner 2026-09-03** — a request to Workforce |
-| **S5-D11** | Can a *single job* be escalated by hand, outside the policy? | yes — a supervisor can escalate now, and it is recorded as manual | *open* |
+| **S5-D11** | Manual escalation | kept — a button, `reason: MANUAL` on the history row, works downward too | **RULED, owner 2026-09-03** |
 
-**Sign-off:** _pending_
+**Sign-off:** **S5 SIGNED OFF — owner, 2026-09-03.** Thirteen decisions. The concern model — four states, a policy-driven accountability ladder, per-role watching, one history table, a 60-second sweep on Temporal Cron, department presence by Workforce's shift fan-out — is the design. Requests leaving: `shift.started` / `shift.ended` (Workforce).
 
 ---
 
@@ -4678,7 +4678,7 @@ and nothing is designed or built from it before then.
 
 | | |
 |---|---|
-| Sections signed off | **4 of 10** |
+| Sections signed off | **5 of 10** |
 | Page locked | no |
 | Locked on | — |
 
