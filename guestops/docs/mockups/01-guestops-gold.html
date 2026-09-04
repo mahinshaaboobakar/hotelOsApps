@@ -10,7 +10,7 @@
      The standard: docs/working/64-the-app-surface-standard.md. */
   :root{
     --color-surface:#0b0d14;--color-surface-raised:#11141f;
-    --color-line:rgb(255 255 255 / .07);--color-line-strong:rgb(255 255 255 / .14);
+    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
     --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
     --color-ink-on-accent:#0b0d14;
     --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
@@ -172,9 +172,8 @@
      so centring pushed every other cell down against the guest's name — the
      booking number sat between the two lines rather than beside the name. */
   .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
-  .tr.hd>div{align-items:center}
-  .tr.hd>div{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
-             color:var(--faint);padding:8px 10px}
+  .tr.hd>div{align-items:center;font-size:11px;font-weight:500;text-transform:uppercase;
+             letter-spacing:.08em;color:var(--faint);padding:8px 10px}
   .tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
   .tr .nm b{font-weight:600}
   .tr .nm span{font-size:10.5px;color:var(--faint)}
