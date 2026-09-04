@@ -7,7 +7,6 @@ export const POLICY_CSS = `
 .field{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
        border-radius:8px;padding:5px 11px;font-size:12.5px;font-weight:600;
        background:var(--color-surface-raised,#11141f)}
-.spans{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .choices{display:flex;gap:6px}
 .choice{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
         border-radius:8px;padding:6px 14px;font-size:12.5px;cursor:pointer;

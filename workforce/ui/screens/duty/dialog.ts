@@ -38,10 +38,10 @@ export function assignDuty(close: () => void): HTMLElement {
 /** The two ends, and what they come to. */
 function span(): HTMLElement {
   const row = el("div", "fld");
-  // `ends`, not Policy's `.spans`: that is a FOUR-column grid for a split
-  // shift's times, and two date fields in it got a quarter of the width each,
-  // so `Fri 28 · 20:00` wrapped at the separator and one instant read as two.
-  const pair = el("div", "ends");
+  // The chrome's field row, two columns. It was Policy's four-column grid for
+  // a while and each date got a quarter of the width, so `Fri 28 · 20:00`
+  // wrapped at the separator and one instant read as two.
+  const pair = el("div", "spans");
 
   pair.append(
     el("div", "finput", "Fri 28 · 20:00"),

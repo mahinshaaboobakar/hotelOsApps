@@ -89,7 +89,10 @@ function kind(): HTMLElement {
 /** Two spans, the second optional. */
 function times(): HTMLElement {
   const row = el("div", "fld");
-  const spans = el("div", "spans");
+  // Four, said out loud. The row is two columns by default because two is
+  // what every other dialog needs; a split shift is the exception and names
+  // itself rather than making the default wrong for everyone else.
+  const spans = el("div", "spans four");
 
   spans.append(
     el("div", "finput", "10:00"), el("div", "finput", "14:00"),

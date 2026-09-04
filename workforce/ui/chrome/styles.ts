@@ -196,6 +196,52 @@ button.row{cursor:pointer}
 button.row:hover{background:color-mix(in srgb, var(--color-brand) 6%, transparent)}
 button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-2px}
 
+/* # Primitives more than one screen draws
+   Each of these lived in the file of whichever screen was written first, and
+   the guard could not see it: a screen may reach into another screen's
+   vocabulary from its MARKUP, and a check that compares stylesheets against
+   stylesheets is blind to exactly that. Four screens wore the rota's column
+   heading; the duty dialog wore the rota's picker; People wore the rota's name
+   cell; the leave form wore Policy's four-column field row.
+
+   A primitive several screens draw belongs to none of them. */
+
+.rhd{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+     color:var(--color-ink-faint,#5a6172);padding:2px 0 4px}
+
+.wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
+.wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
+       background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
+
+.rlab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+      color:var(--color-warn,#fbbf24)}
+
+.picks{display:flex;flex-direction:column;gap:2px}
+
+.pk{display:flex;gap:10px;align-items:center;padding:7px 9px;border-radius:8px;
+    font-size:12.5px;cursor:pointer}
+.pk:hover{background:var(--color-surface,#0b0d14)}
+.pk.on{background:color-mix(in srgb, var(--color-brand) 10%, transparent);
+       box-shadow:inset 0 0 0 1px var(--color-brand,#818cf8)}
+.pk s{text-decoration:none;margin-left:auto;font-size:11.5px;
+      color:var(--color-ink-faint,#5a6172)}
+.pk .code{min-width:34px;text-align:center;border-radius:6px;padding:2px 6px;
+          font-size:11.5px;font-weight:600}
+.pk .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
+                color:var(--color-brand,#818cf8)}
+.pk .code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+             color:var(--color-ok,#34d399)}
+.pk .code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+               color:var(--color-warn,#fbbf24)}
+.pk .code.neutral{color:var(--color-ink-faint,#5a6172)}
+
+/* The field row inside a dialog. Two columns by default; four where a split
+   shift needs them. It was Policy's four-column grid and the leave form wore
+   it for two dates, so each got a quarter of the width and one instant broke
+   over two lines. The count is now said out loud at the call site. */
+.spans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.spans.four{grid-template-columns:repeat(4,1fr);gap:6px}
+.spans .finput{white-space:nowrap}
 /* The dialog, and the fields inside one. Here rather than in a screen because
    three screens open one — Policy, Leave and Teams — and the shape a person
    meets on the third has to be the shape they learned on the first. */

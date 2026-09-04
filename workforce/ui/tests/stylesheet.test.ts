@@ -208,7 +208,14 @@ describe("the module's one stylesheet", () => {
       const screen = /^screens\/([^/]+)\//u.exec(file)?.[1];
       if (screen === undefined) continue;
 
-      for (const match of source.matchAll(/el\(\s*"[a-z]+"\s*,\s*"([a-z0-9 -]+)"/giu)) {
+      // No word boundary here, and that is deliberate rather than lazy: this
+        // pattern was written with one, through a tool that turned `` into a
+        // literal BACKSPACE byte. The regex then anchored on a control
+        // character, matched nothing, and the guard reported green while a live
+        // instance of the very defect it was written for sat two files away.
+        // A guard that cannot fail is worse than no guard, because it is also
+        // an argument that the code is clean.
+        for (const match of source.matchAll(/el\(\s*"[a-z]+"\s*,\s*"([a-z0-9 -]+)"/giu)) {
         for (const name of match[1]!.split(" ").filter((one) => one.length > 0)) {
           const home = owner.get(name);
           if (home === undefined || home === chrome) continue;

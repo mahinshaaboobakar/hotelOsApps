@@ -100,7 +100,10 @@ function tabs(board: LeaveBoard, current: string, go: (tab: string) => void): HT
 
     // The count comes from the queue itself — the same list the tab opens.
     if (label === "Approvals") {
-      tab.append(el("s", undefined, String(board.waiting.length)));
+      // The chrome styles `.tab .cnt` as a pill. A bare `s` here rendered
+      // "Approvals3" — the number welded to the word, which is what an
+      // element with no rule looks like.
+      tab.append(el("span", "cnt", String(board.waiting.length)));
     }
 
     tab.addEventListener("click", () => go(label));

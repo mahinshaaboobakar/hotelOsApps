@@ -12,16 +12,10 @@ export const ROTA_CSS = `
 .rota{display:flex;flex-direction:column;gap:10px;min-width:0}
 
 .rgrid{display:grid;grid-template-columns:230px repeat(7,1fr);gap:6px;min-width:0}
-.rhd{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
-     color:var(--color-ink-faint,#5a6172);padding:2px 0 4px}
-
 /* person, not who: the app bar owns .who for the signed-in person, which
    is the name Jobs and GuestOps both draw. This is a grid cell, internal to one
    screen, so it is the one that renames. */
 .person{display:flex;gap:10px;align-items:center;min-width:0;padding:6px 0}
-.wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
-.wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
-       background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
 .wr{font-size:11.5px;color:var(--color-ink-faint,#5a6172)}
 
 /* A chip is data: the colour and the code are the catalogue's, never derived. */
@@ -58,8 +52,6 @@ export const ROTA_CSS = `
 /* The MOD ribbon is a timeline, because a duty running 20:00→08:00 covers two
    dates and fits in no day cell — WF-Q8. */
 .ribbon{display:grid;grid-template-columns:230px 1fr;gap:6px;align-items:center}
-.rlab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
-      color:var(--color-warn,#fbbf24)}
 .bars{position:relative;height:30px;border-radius:9px;
       background:var(--color-surface-raised,#11141f);
       border:1px solid var(--color-line,rgb(255 255 255/.07))}
@@ -74,23 +66,6 @@ export const ROTA_CSS = `
       background:var(--color-surface-raised,#11141f);
       border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
       border-radius:var(--radius-panel,1rem)}
-.picks{display:flex;flex-direction:column;gap:2px}
-.pk{display:flex;gap:10px;align-items:center;padding:7px 9px;border-radius:8px;
-    font-size:12.5px;cursor:pointer}
-.pk:hover{background:var(--color-surface,#0b0d14)}
-.pk.on{background:color-mix(in srgb, var(--color-brand) 10%, transparent);
-       box-shadow:inset 0 0 0 1px var(--color-brand,#818cf8)}
-.pk s{text-decoration:none;margin-left:auto;font-size:11.5px;
-      color:var(--color-ink-faint,#5a6172)}
-.pk .code{min-width:34px;text-align:center;border-radius:6px;padding:2px 6px;
-          font-size:11.5px;font-weight:600}
-.pk .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
-                color:var(--color-brand,#818cf8)}
-.pk .code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
-             color:var(--color-ok,#34d399)}
-.pk .code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
-               color:var(--color-warn,#fbbf24)}
-.pk .code.neutral{color:var(--color-ink-faint,#5a6172)}
 .custom{display:flex;gap:10px;align-items:baseline;padding:8px 9px;border-radius:8px;
         cursor:pointer;border:1px dashed var(--color-line-strong,rgb(255 255 255/.14))}
 .custom b{font-size:12.5px;font-weight:600}
