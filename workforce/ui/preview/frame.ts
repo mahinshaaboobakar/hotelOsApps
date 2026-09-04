@@ -25,6 +25,7 @@ import { recordedFirstRun, recordedPeople } from "../roster/people";
 import { recordedPolicy } from "../roster/policy";
 import { recordedMonth } from "../roster/reports";
 import { recordedSchedule } from "../roster/schedule";
+import { recordedNoTeams, recordedTeams } from "../roster/teams";
 
 const params = new URLSearchParams(location.search);
 
@@ -42,6 +43,10 @@ function host(granted: readonly string[]): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: granted },
 
+    // What the host tells a module at connect — `JOBS-Q1(8)`. The harness has
+    // to hand it too, or the panes run against a contract no property serves.
+    property: { timezone: "Asia/Kolkata", locale: null },
+
     /**
      * Answer every method a screen asks for.
      *
@@ -57,6 +62,13 @@ function host(granted: readonly string[]): HostApi {
       if (method === "people") {
         return Promise.resolve(
           params.get("state") === "first-run" ? recordedFirstRun : recordedPeople);
+      }
+
+      // Frame 7 the same way: the property that has formed no team is answered
+      // with none, and the screen it gets is the screen everybody gets.
+      if (method === "teams") {
+        return Promise.resolve(
+          params.get("state") === "no-teams" ? recordedNoTeams : recordedTeams);
       }
 
       const answers: Record<string, unknown> = {
@@ -154,6 +166,23 @@ async function drive(): Promise<void> {
   if (open === "shift") { click(".btn", "New shift"); await settle(); }
   if (open === "leave") { click(".btn", "Request leave"); await settle(); }
   if (open === "duty") { click(".btn", "Assign duty"); await settle(); }
+  if (open === "form") { click(".btn", "Form a team"); await settle(); }
+
+  // Frame 2 opens by clicking the team, and frame 6 by clicking the person —
+  // both are rows, and both are the row the frame draws rather than the first
+  // one that matches. The rota picker taught that lesson once already.
+  const openTeam = params.get("team");
+  if (openTeam !== null) { click("button.tgrid", openTeam); await settle(); }
+
+  const endWho = params.get("end");
+  if (endWho !== null) { click("button.row", endWho); await settle(); }
+
+  // After the team, never before: both controls live in the detail pane, which
+  // does not exist until one is open. This is the same ordering the shift
+  // dialog needed — a click on a control its own screen has not drawn yet
+  // finds nothing and fails silently.
+  if (open === "member") { click(".btn", "Add a member"); await settle(); }
+  if (open === "down") { click(".btn", "Stand down"); await settle(); }
 
   // The rota's picker opens on a cell rather than a button, so it is reached by
   // clicking the cell a person would click — and it must be THE cell the frame

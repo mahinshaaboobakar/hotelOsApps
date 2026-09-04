@@ -99,11 +99,11 @@ function shifts(rows: readonly CatalogueRow[]): HTMLElement {
     item.append(
       el("b", undefined, row.name),
       cell(codeChip(row.code, swatch(row.colour))),
-      el("div", "dim", row.times),
-      cell(colourDot(`${row.colour} · ${row.kind}`, swatch(row.colour)), "dim"),
+      el("div", "quiet", row.times),
+      cell(colourDot(`${row.colour} · ${row.kind}`, swatch(row.colour)), "quiet"),
       // Why retiring a shift is not deleting it: these assignments still name it,
       // and a rota worked under it has to stay readable.
-      el("div", "dim", row.inUse),
+      el("div", "quiet", row.inUse),
     );
     list.append(item);
   }
@@ -138,8 +138,8 @@ function leave(rows: readonly LeaveRow[]): HTMLElement {
     item.append(
       el("b", undefined, row.type),
       el("div", undefined, row.accrues),
-      el("div", "dim", row.perYear),
-      el("div", "dim", row.note),
+      el("div", "quiet", row.perYear),
+      el("div", "quiet", row.note),
     );
     list.append(item);
   }
@@ -161,10 +161,10 @@ function overtime(config: Policy): HTMLElement {
 
   const row = el("div", "otrow");
   row.append(
-    el("span", "dim", "Overtime begins after"),
+    el("span", "quiet", "Overtime begins after"),
     el("div", "field", config.overtimeDaily),
     el("div", "field", config.overtimeWeekly),
-    el("span", "dim", "Warns while the rota is being built. Never blocks."),
+    el("span", "quiet", "Warns while the rota is being built. Never blocks."),
   );
 
   section.append(row);

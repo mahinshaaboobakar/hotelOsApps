@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Workforce — one screen, at its frame's size</title>
+<style>
+  /*
+   * One realm, sized to the frame it will be photographed beside.
+   *
+   * `index.html` shows every screen at one size, for reading. This shows ONE,
+   * at the exact width and height its approved frame was drawn at — because a
+   * capture beside a frame is evidence only when the two are the same shape. A
+   * screen photographed at the viewport's height and set beside a 790px drawing
+   * reports every vertical difference as a divergence.
+   *
+   * Where the frame is taller than the display can show, the whole realm is
+   * scaled by one factor and the frame is scaled by the same one. Cropping the
+   * capture instead reports the part below the fold as missing, which has
+   * happened here once already.
+   *
+   * # Same origin, deliberately
+   *
+   * The iframe is a relative path rather than an absolute URL, so the capture
+   * pass can read into the realm and ask the DOM what it actually computed. The
+   * first version pointed at a second port; the sheet in Form a team rendered
+   * white on white and nothing could say why, because `contentDocument` was
+   * null across origins. One `getComputedStyle` named the collision.
+   */
+  html,body{margin:0;padding:0;background:#07090f;overflow:hidden}
+  #stage{transform-origin:0 0}
+  iframe{display:block;border:0;background:#0b0d14}
+</style>
+</head><body>
+<div id="stage"><iframe id="f" title="Workforce module realm"></iframe></div>
+<script>
+  const params = new URLSearchParams(location.search);
+  const width = Number(params.get("w") || 1220);
+  const height = Number(params.get("h") || 790);
+
+  const frame = document.getElementById("f");
+  frame.width = width;
+  frame.height = height;
+  frame.src = "./frame.html?" + (params.get("q") || "");
+
+  const scale = Math.min(window.innerWidth / width, window.innerHeight / height, 1);
+  document.getElementById("stage").style.transform = "scale(" + scale + ")";
+
+  /*
+   * The realm raises `data-ready` on its own root when its screen has settled.
+   * That flag is inside the iframe and the capture waits on the page it can
+   * see, so it is mirrored out here — polled rather than posted, because the
+   * realm's contract with its host has no room for a harness signal in it.
+   */
+  frame.addEventListener("load", () => {
+    const tick = setInterval(() => {
+      const inner = frame.contentDocument;
+      if (inner === null) { clearInterval(tick); return; }
+
+      if (inner.documentElement.getAttribute("data-ready") === "true") {
+        clearInterval(tick);
+        document.documentElement.setAttribute("data-ready", "true");
+      }
+    }, 60);
+  });
+</script></body></html>

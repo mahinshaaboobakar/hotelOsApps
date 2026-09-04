@@ -107,9 +107,9 @@ function table(rows: readonly CatalogueRow[]): HTMLElement {
     item.append(
       name,
       cell(codeChip(row.code, swatch(row.colour))),
-      el("div", "dim", row.times),
-      cell(colourDot(row.colour, swatch(row.colour)), "dim"),
-      el("div", "dim", row.inUse),
+      el("div", "quiet", row.times),
+      cell(colourDot(row.colour, swatch(row.colour)), "quiet"),
+      el("div", "quiet", row.inUse),
     );
 
     list.append(item);

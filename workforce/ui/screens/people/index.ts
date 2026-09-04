@@ -14,25 +14,68 @@ import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
 import { recordedPeople, type People, type Posting } from "../../roster/people";
+import { endPosting } from "./end-posting";
+import { recordedPostingEnding } from "../../roster/teams";
+import type { PostingEnding } from "../../roster/team";
 
 const COLUMNS = "1.5fr 116px 96px 1fr 1fr 116px";
 
-/** Draw the screen. */
-export async function people(host: HostApi, main: HTMLElement): Promise<void> {
+/**
+ * Draw the screen.
+ *
+ * @param host the bridge, and the only route out of this realm
+ * @param main where the screen mounts
+ * @param ending whether the end-posting dialog is open over it
+ * @param close dismiss the dialog
+ * @param onEnd open the dialog on one person's posting
+ */
+export async function people(
+  host: HostApi,
+  main: HTMLElement,
+  ending: string | null = null,
+  close: () => void = () => {},
+  onEnd: (who: string) => void = () => {},
+): Promise<void> {
   const got = await load(host, ROSTER_READ, "people", recordedPeople);
   const board = got.value;
 
   const body = el("div", "body");
 
   // Nobody posted is a real state with its own screen, not an empty table.
-  body.append(board.postings.length === 0 ? firstRun() : table(board.postings));
+  body.append(board.postings.length === 0 ? firstRun() : table(board.postings, onEnd));
   body.append(ownership());
 
-  main.replaceChildren(header(board), body);
+  main.replaceChildren(header(board, ending), body);
+
+  // Ending a posting closes team memberships with it, and until this dialog
+  // existed nothing said so — the round's finding, drawn.
+  if (ending !== null) main.append(endPosting(close, closing(ending)));
 }
 
-/** The header, counting what the list holds. */
-function header(board: People): HTMLElement {
+/**
+ * What ending this person's posting does, as the service would answer it.
+ *
+ * The recorded answer covers one person, so everybody else gets an ending that
+ * closes nothing — and the panel is then **absent** rather than empty. That is
+ * the honest shape: a screen inventing two teams for whoever was clicked would
+ * be exactly the second version of the rule this dialog exists to avoid.
+ */
+function closing(who: string): PostingEnding {
+  return who === recordedPostingEnding.who
+    ? recordedPostingEnding
+    : { who, department: "Front Office", lastDay: "Thu 4 Sep 2026", alsoEnds: [] };
+}
+
+/**
+ * The header, counting what the list holds.
+ *
+ * @param board the postings
+ * @param ending whose posting is being ended, when one is — the subtitle names
+ *   them, because a dialog over a dimmed table needs the page to say who it is
+ *   about
+ * @returns the header
+ */
+function header(board: People, ending: string | null): HTMLElement {
   const head = el("div", "head");
   const title = el("div");
 
@@ -42,9 +85,7 @@ function header(board: People): HTMLElement {
 
   title.append(
     el("div", "ht", "People"),
-    el("div", "hsub", board.postings.length === 0
-      ? "Nobody is posted yet"
-      : `${board.postings.length} posted · ${here} in Front Office · ${expiring} certifications expiring`),
+    el("div", "hsub", subtitle(board, ending, here, expiring)),
   );
 
   const picker = el("div", "sel");
@@ -55,7 +96,21 @@ function header(board: People): HTMLElement {
   return head;
 }
 
-function table(postings: readonly Posting[]): HTMLElement {
+/** What the header says under the title. */
+function subtitle(
+  board: People, ending: string | null, here: number, expiring: number,
+): string {
+  if (ending !== null) {
+    const posting = board.postings.find((one) => one.who === ending);
+    return `${ending} · ${posting?.departments.join(" · ") ?? ""}`.trim();
+  }
+
+  return board.postings.length === 0
+    ? "Nobody is posted yet"
+    : `${board.postings.length} posted · ${here} in Front Office · ${expiring} certifications expiring`;
+}
+
+function table(postings: readonly Posting[], onEnd: (who: string) => void): HTMLElement {
   const list = el("div", "rows");
 
   const head = el("div", "row hd");
@@ -66,15 +121,26 @@ function table(postings: readonly Posting[]): HTMLElement {
   list.append(head);
 
   for (const posting of postings) {
-    list.append(row(posting));
+    list.append(row(posting, onEnd));
   }
 
   return list;
 }
 
-function row(posting: Posting): HTMLElement {
-  const item = el("div", "row");
+/**
+ * One posting.
+ *
+ * **A button, because it opens something.** The locked frame draws the table
+ * blurred behind the dialog and so does not say what was clicked; a row that
+ * opens the posting it names is the module's existing idiom (the rota's cells
+ * and the teams list both work this way), and it is recorded as an
+ * implementation choice rather than read off the drawing.
+ */
+function row(posting: Posting, onEnd: (who: string) => void): HTMLElement {
+  const item = el("button", "row");
+  item.setAttribute("type", "button");
   item.style.gridTemplateColumns = COLUMNS;
+  item.addEventListener("click", () => { onEnd(posting.who); });
 
   const who = el("div");
   const name = el("div", "wn");
@@ -96,7 +162,7 @@ function row(posting: Posting): HTMLElement {
     departments,
     zone(posting.zone),
     el("div", undefined, posting.role),
-    el("div", "dim", posting.reportsTo),
+    el("div", "quiet", posting.reportsTo),
     el("div", `pill ${posting.tone}`, posting.capability),
   );
 
@@ -138,7 +204,7 @@ function firstRun(): HTMLElement {
  */
 function zone(value: string | null): HTMLElement {
   const cell = el("div");
-  cell.append(value === null ? el("span", "dim", "—") : el("span", "pill acc", value));
+  cell.append(value === null ? el("span", "quiet", "—") : el("span", "pill acc", value));
   return cell;
 }
 

@@ -25,6 +25,7 @@ import { recordedShiftBoard } from "../roster/summaries";
 function unavailable(): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
+    property: { timezone: "Asia/Kolkata", locale: null },
     call: () =>
       Promise.reject(
         new HostCallError({ kind: "unavailable", message: "no Workforce client" }),
@@ -37,6 +38,7 @@ function unavailable(): HostApi {
 function answering(answer: unknown): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
+    property: { timezone: "Asia/Kolkata", locale: null },
     call: () => Promise.resolve(answer),
     on: () => () => {},
   };
@@ -106,6 +108,7 @@ describe("every Workforce widget", () => {
     const asked: { capability: string; method: string; params: unknown }[] = [];
     const host: HostApi = {
       identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
+      property: { timezone: "Asia/Kolkata", locale: null },
       call: (capability, method, params) => {
         asked.push({ capability, method, params });
         // The data call is answered so the card draws; only the tap is under

@@ -129,6 +129,10 @@ public class TeamService(
     /// <param name="command">The team and its version.</param>
     /// <param name="active">Whether it is offered.</param>
     /// <param name="cancellationToken">Cancellation.</param>
+    /// <param name="keepMembers">
+    /// Whether a stand-down leaves the memberships alone. True by default,
+    /// because that is what a seasonal crew means; false ends them on the day.
+    /// </param>
     /// <returns>The team.</returns>
     /// <remarks>
     /// <b>Reactivation is required, not optional.</b> ADR 0062 §22 · 2: a
@@ -140,15 +144,85 @@ public class TeamService(
         RequestScope scope,
         AmendTeamCommand command,
         bool active,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool keepMembers = true)
     {
         var team = await ForWriteAsync(scope, command.Id, command.ExpectedVersion, cancellationToken);
 
         team.Active = active;
         Touch(team);
 
+        // **Frame 5's toggle, and it defaults to keeping them.** A crew stood
+        // down for the low season comes back with the same people, which is why
+        // the switch is on by default and why standing down is not a disband. A
+        // property that means the other thing says so, once, at the moment it
+        // decides — and the memberships close on that day rather than being
+        // deleted, because who was in this team in March is still a question.
+        if (!active && !keepMembers)
+        {
+            var now = clock.GetUtcNow();
+            var on = DateOnly.FromDateTime(now.UtcDateTime);
+
+            foreach (var member in await Live(scope.PropertyId, team.Id)
+                         .ToListAsync(cancellationToken))
+            {
+                Close(member, on, now);
+            }
+        }
+
         await db.SaveChangesAsync(cancellationToken);
         return team;
+    }
+
+    /// <summary>The teams a posting is holding open for somebody.</summary>
+    /// <param name="scope">The caller.</param>
+    /// <param name="staffId">Whose posting is about to end.</param>
+    /// <param name="departmentCode">The department it is in.</param>
+    /// <param name="on">The day it would end.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>The teams, and when the person joined each.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>The read that lets an interface say what a write is about to do.</b>
+    /// Ending a posting closes these memberships — that has always been true and
+    /// is tested — and until this existed there was no way for a screen to tell
+    /// anybody: a supervisor ended a posting, two teams quietly emptied, and
+    /// nothing said so.
+    /// </para>
+    /// <para>
+    /// It is the same query <see cref="EndMembershipsForPostingAsync"/> makes,
+    /// which is the point: a screen that predicted the consequence with its own
+    /// logic would eventually predict it wrongly, and the version that disagreed
+    /// would be the one a person read.
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyList<(Team Team, DateOnly Since)>> SupportedTeamsAsync(
+        RequestScope scope,
+        Guid staffId,
+        string departmentCode,
+        DateOnly on,
+        CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
+
+        var code = Normalise(departmentCode);
+
+        var rows = await db.TeamMembers
+            .Where(m => m.PropertyId == scope.PropertyId
+                        && m.StaffId == staffId
+                        && m.LeftOn == null)
+            .Join(
+                db.Teams.Where(t => t.PropertyId == scope.PropertyId
+                                    && t.DepartmentCode == code
+                                    && t.DeletedAt == null),
+                member => member.TeamId,
+                team => team.Id,
+                (member, team) => new { team, member.JoinedOn })
+            .OrderBy(row => row.JoinedOn)
+            .ToListAsync(cancellationToken);
+
+        return [.. rows.Where(row => row.JoinedOn <= on).Select(row => (row.team, row.JoinedOn))];
     }
 
     /// <summary>Put somebody in a team.</summary>

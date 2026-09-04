@@ -43,6 +43,8 @@ import { POLICY_CSS } from "./screens/policy/styles";
 import { reports } from "./screens/reports";
 import { REPORTS_CSS } from "./screens/reports/styles";
 import { shifts } from "./screens/shifts";
+import { teams } from "./screens/teams";
+import { TEAMS_CSS } from "./screens/teams/styles";
 import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
 import { schedule } from "./screens/schedule";
@@ -55,6 +57,14 @@ interface Place {
 
   /** Whether the screen's dialog is open. */
   dialog: boolean;
+
+  /**
+   * Which one, for a screen that has more than one.
+   *
+   * A second boolean per dialog would make two-open-at-once expressible, and
+   * the first state nobody drew is the one that ships.
+   */
+  which: string | null;
 
   /** Change the tab and redraw. */
   go: (tab: string) => void;
@@ -70,6 +80,18 @@ interface Place {
 
   /** Open the picker on a cell. */
   onPick: (person: string, day: number) => void;
+
+  /** Whose posting is being ended, when one is. */
+  who: string | null;
+
+  /** Which team the detail pane is open on, when one is. */
+  team: string | null;
+
+  /** Open one. */
+  onTeam: (id: string) => void;
+
+  /** Open the end-posting dialog on somebody. */
+  onWho: (who: string) => void;
 }
 
 /**
@@ -103,7 +125,19 @@ const SCREENS: readonly {
     label: "Duty Register", glyph: "★",
     draw: (h, m, place) => void duty(h, m, place.dialog, () => place.open("duty"), place.close),
   },
-  { label: "People", glyph: "◎", draw: (h, m) => void people(h, m) },
+  {
+    label: "People", glyph: "◎",
+    draw: (h, m, place) => void people(
+      h, m, place.who, place.close, (who) => { place.onWho(who); }),
+  },
+  {
+    label: "Teams", glyph: "⛌",
+    draw: (h, m, place) => void teams(
+      h, m, {
+        dialog: place.which, open: place.open, close: place.close,
+        team: place.team, onTeam: place.onTeam,
+      }),
+  },
   { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
   {
     label: "Policy", glyph: "⚙",
@@ -133,14 +167,17 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // the type-check nor the suite can see it.
   const style = stylesheet([
     ROTA_CSS, LEAVE_CSS, ATTENDANCE_CSS, DUTY_CSS,
-    PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS, PRINTED_CSS,
+    PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS, PRINTED_CSS, TEAMS_CSS,
   ]);
 
   let current = "Team Rota";
   let tab = "Requests";
   let dialog = false;
+  let which: string | null = null;
   let detail: string | null = null;
   let pick: { person: string; day: number } | null = null;
+  let who: string | null = null;
+  let team: string | null = null;
 
   function show(next: string): void {
     if (root === null) return;
@@ -165,11 +202,28 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     screen.draw(host, main, {
       tab,
       dialog,
+      which,
       go: (chosen) => { tab = chosen; show(current); },
-      close: () => { dialog = false; detail = null; pick = null; show(current); },
+      close: () => {
+        dialog = false;
+        which = null;
+        detail = null;
+        pick = null;
+        who = null;
+        // The team stays selected. Cancelling *Add a member* returns to the
+        // team it was opened from, not to the list — dismissing a dialog is
+        // not a decision to leave the page behind it.
+        show(current);
+      },
       open,
       pick,
       onPick: (person, day) => { pick = { person, day }; show(current); },
+      who,
+      onWho: (person) => { who = person; show(current); },
+      team,
+      // Clicking the open team closes it, which is the only way back to the
+      // plain list: the rail cannot reach a state it has no entry for.
+      onTeam: (id) => { team = team === id ? null : id; show(current); },
     });
   }
 
@@ -198,6 +252,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     }
 
     dialog = true;
+    which = what;
     show(current);
   }
 

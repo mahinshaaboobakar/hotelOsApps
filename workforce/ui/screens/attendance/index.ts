@@ -86,12 +86,12 @@ function posted(value: string | null): HTMLElement {
   const cell = el("div", "postedcell");
 
   if (value === null) {
-    cell.append(el("span", "dim", "not rostered"));
+    cell.append(el("span", "quiet", "not rostered"));
     return cell;
   }
 
   const [code = "", ...time] = value.split(" ");
-  cell.append(codeChip(code, tone(code)), el("span", "dim", time.join(" ")));
+  cell.append(codeChip(code, tone(code)), el("span", "quiet", time.join(" ")));
   return cell;
 }
 

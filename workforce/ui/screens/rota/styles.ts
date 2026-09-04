@@ -16,10 +16,6 @@ export const ROTA_CSS = `
      color:var(--color-ink-faint,#5a6172);padding:2px 0 4px}
 
 .who{display:flex;gap:10px;align-items:center;min-width:0;padding:6px 0}
-.av{width:26px;height:26px;border-radius:99px;display:grid;place-items:center;flex:0 0 auto;
-    font-size:10.5px;font-weight:600;
-    background:var(--color-surface-raised,#11141f);color:var(--color-ink-muted,#8b93a7);
-    border:1px solid var(--color-line,rgb(255 255 255/.07))}
 .wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
 .wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
        background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}

@@ -25,15 +25,6 @@ export const LEAVE_CSS = `
 .bal s{text-decoration:none;display:block;font-size:11px;
        color:var(--color-ink-faint,#5a6172);margin-top:3px}
 
-.rows{display:flex;flex-direction:column;gap:1px}
-.row{display:grid;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;
-     background:var(--color-surface-raised,#11141f);font-size:12.5px}
-.row.hd{background:transparent;font-size:11px;font-weight:600;letter-spacing:.04em;
-        text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:2px 12px}
-.row b{font-weight:600}
-.row s{text-decoration:none;display:block;font-size:11.5px;
-       color:var(--color-ink-faint,#5a6172);margin-top:2px}
-
 .swap{background:var(--color-surface-raised,#11141f);
       border:1px solid var(--color-line,rgb(255 255 255/.07));
       border-radius:var(--radius-panel,1rem);padding:16px;display:flex;
@@ -52,7 +43,6 @@ export const LEAVE_CSS = `
 .move{display:flex;gap:8px;align-items:center;font-size:12.5px;
       color:var(--color-ink-muted,#8b93a7);margin-top:4px}
 .arrow{display:grid;place-items:center;font-size:16px;color:var(--color-ink-faint,#5a6172)}
-.acts{display:flex;gap:8px;justify-content:flex-end}
 
 .warnrow{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;
          font-size:12px;line-height:1.6;

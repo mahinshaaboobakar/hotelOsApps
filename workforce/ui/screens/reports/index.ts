@@ -76,16 +76,16 @@ function table(rows: readonly MonthRow[]): HTMLElement {
 
     for (const figure of [row.posted, row.present, row.late, row.casual,
       row.sick, row.earned, row.comp]) {
-      item.append(el("div", figure === 0 ? "dim" : undefined, String(figure)));
+      item.append(el("div", figure === 0 ? "quiet" : undefined, String(figure)));
     }
 
     // Absent, never zero — WF-Q18. A dash says the number was not computed; a
     // zero would say the staff worked no holidays, and payroll cannot tell the
     // difference between those two from a figure alone.
-    item.append(el("div", "dim", row.holidays === null ? "—" : String(row.holidays)));
+    item.append(el("div", "quiet", row.holidays === null ? "—" : String(row.holidays)));
 
     item.append(el("div", undefined, row.hours),
-      el("div", row.overtime === "0" ? "dim" : "otv", row.overtime));
+      el("div", row.overtime === "0" ? "quiet" : "otv", row.overtime));
 
     list.append(item);
   }

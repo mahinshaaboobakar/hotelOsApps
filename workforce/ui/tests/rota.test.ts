@@ -16,6 +16,7 @@ import { recordedOvertime, recordedWeek } from "../roster";
 function host(answer: unknown, granted: readonly string[] = ["roster.read"]): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: granted },
+    property: { timezone: "Asia/Kolkata", locale: null },
     call: () => Promise.resolve(answer),
     on: () => () => {},
   };
@@ -25,6 +26,7 @@ function host(answer: unknown, granted: readonly string[] = ["roster.read"]): Ho
 function failing(): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
+    property: { timezone: "Asia/Kolkata", locale: null },
     // `unavailable` is not `isForPeople`, so the module shows its own words
     // rather than a platform diagnostic — ADR 0041, asked by the SDK.
     call: () => Promise.reject(
@@ -97,6 +99,7 @@ describe("the Team Rota", () => {
     let asked = false;
     const api: HostApi = {
       identity: { id: "workforce", version: "0.1.0", capabilities: [] },
+      property: { timezone: "Asia/Kolkata", locale: null },
       call: () => { asked = true; return Promise.resolve(recordedWeek); },
       on: () => () => {},
     };
