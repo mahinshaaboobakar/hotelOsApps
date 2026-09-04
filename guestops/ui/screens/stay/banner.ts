@@ -46,7 +46,7 @@ export function banner(banner: Banner): HTMLElement {
   const acts = el("div", "grow");
 
   banner.actions.forEach((label, index) => {
-    acts.append(control(index === 0 ? "mini pri" : "mini", label));
+    acts.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
   });
 
   element.append(said, acts);

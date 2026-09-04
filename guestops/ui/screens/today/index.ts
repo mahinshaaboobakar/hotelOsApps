@@ -40,25 +40,68 @@ export async function today(
 
   const showing = day.lists.find((one) => one.label === list) ?? day.lists[0];
 
+  const views = tabs(
+    day.lists.map((one) => ({ label: one.label, count: one.count })),
+    showing?.label ?? "",
+    go,
+  );
+
+  // The screen's actions sit at the right of the view switcher, where Jobs
+  // floats "＋ Raise a job". With the section named in the bar there is no
+  // page header left to put them in — docs/working/64 §3.
+  views.append(
+    el("div", "grow"),
+    control("btn", "Walk-in"),
+    control("btn pri", "＋ New booking"),
+  );
+
   const body = el("div", "body");
   fill(
     body,
     loaded.live ? null : standIn(loaded.because),
-    strip(day.stats, showing?.label ?? ""),
-    tabs(day.lists.map((one) => ({ label: one.label, count: one.count })), showing?.label ?? "", go),
+    strip(day.stats, showing?.label ?? "", day),
+    views,
     table(showing?.rows ?? [], open),
   );
 
-  into.replaceChildren(header(day), body);
+  // No page heading. It said "Today", which the bar already says — the same
+  // word twice and a row of vertical space (§3). What it carried is not lost:
+  // the business day moved into the strip, the actions onto the tabs.
+  into.replaceChildren(body);
 }
 
-/** Title, the business-day sentence, and the two ways to start a stay. */
-function header(day: Today): HTMLElement {
-  const head = el("div", "head");
-  const title = el("div");
+/**
+ * The counts, and the day they describe.
+ *
+ * One thin bar rather than four cards — docs/working/64 §5. The cards cost
+ * about 68px at the top of the screen, which is two guests' worth of rows,
+ * and repeated the counts the tabs directly below already carry.
+ *
+ * The selected entry is matched by label rather than by index, so the strip
+ * and the tabs cannot disagree about which list is showing.
+ */
+function strip(stats: readonly Stat[], showing: string, day: Today): HTMLElement {
+  const element = el("div", "strip");
 
-  const sub = el("div", "hsub");
-  sub.append(
+  for (const stat of stats) {
+    // The label carries a sub-detail — "Arrivals · 6 unassigned" — so the entry
+    // is matched on the word before it.
+    const selected = stat.label.split(" · ")[0] === showing;
+    const entry = el("span", selected ? "on" : undefined);
+
+    entry.append(el("b", undefined, stat.value), document.createTextNode(stat.label));
+    element.append(entry);
+  }
+
+  element.append(context(day));
+  return element;
+}
+
+/** The business day, pushed right — Jobs' board carries its date here. */
+function context(day: Today): HTMLElement {
+  const ctx = el("span", "ctx");
+
+  ctx.append(
     document.createTextNode("Business day "),
     el("b", undefined, day.businessDate),
     document.createTextNode(
@@ -69,33 +112,5 @@ function header(day: Today): HTMLElement {
     ),
   );
 
-  title.append(el("div", "ht", "Today"), sub);
-
-  const acts = el("div", "grow");
-  acts.append(control("btn2", "Walk-in"), control("create", "＋ New booking"));
-
-  head.append(title, acts);
-  return head;
-}
-
-/**
- * The stat strip.
- *
- * The selected tile is matched by label rather than by index, so the strip and
- * the tabs cannot disagree about which list is showing.
- */
-function strip(stats: readonly Stat[], showing: string): HTMLElement {
-  const element = el("div", "strip");
-
-  for (const stat of stats) {
-    // The label carries a sub-detail — "Arrivals · 6 unassigned" — so the tile
-    // is matched on the word before it.
-    const selected = stat.label.split(" · ")[0] === showing;
-    const tile = el("div", selected ? "stat on" : "stat");
-
-    tile.append(el("b", undefined, stat.value), el("span", undefined, stat.label));
-    element.append(tile);
-  }
-
-  return element;
+  return ctx;
 }

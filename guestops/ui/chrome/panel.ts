@@ -104,7 +104,7 @@ export function actions(labels: readonly string[]): HTMLElement | null {
   const row = el("div", "acts");
 
   labels.forEach((label, index) => {
-    row.append(control(index === 0 ? "mini pri" : "mini", label));
+    row.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
   });
 
   return row;

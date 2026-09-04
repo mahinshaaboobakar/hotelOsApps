@@ -57,61 +57,82 @@ const DERIVED = `
   --go-warn-edge:color-mix(in srgb, var(--color-warn,#fbbf24) 35%, transparent);
   --go-ink-wash:color-mix(in srgb, var(--color-ink,#e8ebf4) 6%, transparent);
   --go-row-hover:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent);
-  --go-accent:linear-gradient(120deg,var(--go-pms),var(--go-override));
+  /* 135deg, not 120 — docs/working/64 §2. Jobs and GuestOps had independently
+     derived the same fill down to the 62% and differed only in the angle;
+     Jobs' is the baseline, because the geometry is. */
+  --go-accent:linear-gradient(135deg,var(--go-pms),var(--go-override));
 }
 `;
 
-/** The window: rail, header, body — the shape every frame shares. */
+/** The window: app bar, body — the shape every screen shares. */
 const SHELL = `
-.go{display:flex;height:100vh;font-size:13px;color:var(--color-ink,#e8ebf4);
+/* A COLUMN, not a row — docs/working/64 §3. An installed application
+   navigates from the top; the platform's own four keep their left rail,
+   because they are the desktop's own furniture and a guest application
+   drawing its own 212px rail competes with the shell's chrome for the same
+   edge of the same screen. */
+.go{display:flex;flex-direction:column;height:100vh;font-size:13px;
+  color:var(--color-ink,#e8ebf4);
   font-family:var(--font-sans,system-ui,sans-serif);background:var(--color-surface,#0b0d14)}
-.rail{width:212px;flex:none;padding:20px 12px;display:flex;flex-direction:column;gap:1px;
-  border-right:1px solid var(--color-line,rgba(255,255,255,.08))}
-.app{display:flex;gap:11px;align-items:center;font-weight:600;font-size:14.5px;padding:0 10px 18px}
-.mark{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:11px;
-  font-weight:700;color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent);
-  border:1px solid var(--color-line-strong,rgba(255,255,255,.16))}
-.ri{display:flex;gap:11px;align-items:center;padding:8px 12px;border-radius:10px;
-  color:var(--color-ink-muted,#8b93a7);font-size:13.5px;cursor:pointer;
-  background:none;border:0;width:100%;text-align:left;font-family:inherit}
-.ri:hover{color:var(--color-ink,#e8ebf4)}
-.ri.on{color:var(--color-ink,#e8ebf4);font-weight:500;background:var(--go-brand-wash);
-  box-shadow:inset 2.5px 0 0 var(--color-brand,#818cf8)}
-.ri .cnt{margin-left:auto;font-size:11px;color:var(--color-ink-faint,#5a6172)}
-.ri .cnt.att{color:var(--color-warn,#fbbf24)}
-.me{margin-top:auto;padding:12px;font-size:12px;line-height:1.5;
-  border-top:1px solid var(--color-line,rgba(255,255,255,.08));color:var(--color-ink-faint,#5a6172)}
-.me b{display:block;color:var(--color-ink-muted,#8b93a7);font-weight:500}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;
+  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+.app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
+.mark{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;
+  font-weight:700;color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent)}
+/* Scoped to the bar, because \`.tab\` already means the body's view switcher.
+   Two meanings, one class, kept apart by specificity rather than by a rename
+   that would say the same word twice. */
+.head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;font-size:13px;
+  font-weight:400;color:var(--color-ink-muted,#8b93a7);border-bottom:2px solid transparent;
+  border-left:0;border-right:0;border-top:0;background:none;font-family:inherit;cursor:pointer}
+.head .tab:hover{color:var(--color-ink,#e8ebf4)}
+.head .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
+.head .tab .n{margin-left:0;font-size:11px;color:var(--color-ink-faint,#5a6172)}
+.head .tab .n.att{color:var(--color-warn,#fbbf24)}
+.who{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:12px;white-space:nowrap}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
-.head{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
+/* The page's own title row, for a screen naming a RECORD. A screen does not
+   print its section name — the bar already says it (§3). */
+.title{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
 .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .hsub{color:var(--color-ink-faint,#5a6172);font-size:12px;margin-top:2px;
   display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .hsub b{color:var(--color-ink-muted,#8b93a7);font-weight:500}
 .grow{margin-left:auto;display:flex;gap:8px}
-.body{padding:0 26px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+/* Padded on all four sides. It was 0 on top because the page title supplied
+   it; with the title gone from section screens, the strip would otherwise sit
+   flush against the bar's rule (§3). */
+.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px}
 /* A flex child shrinks by default, so once the column overflows every card
    is compressed and its own overflow:hidden clips the controls off the
    bottom — the buttons vanish and the card still looks deliberate. */
 .body>*{flex:none}
-.btn2,.create,.danger,.mini{font-family:inherit;cursor:pointer;white-space:nowrap;
-  display:inline-flex;gap:8px;align-items:center}
-.btn2{border:1px solid var(--color-line-strong,rgba(255,255,255,.16));border-radius:11px;
-  padding:8px 15px;font-size:12.5px;color:var(--color-ink-muted,#8b93a7);background:none}
-.create{border:0;border-radius:11px;padding:8px 18px;font-size:13px;font-weight:600;
+/* ONE control, modified — §2. This was four base classes at three geometries
+   (.btn2 .create .danger .mini); a second base class is a second geometry
+   within a week. Geometry is Jobs', colour is the shell's. */
+.btn{font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;gap:8px;
+  align-items:center;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
+  border-radius:8px;padding:7px 14px;font-size:13px;color:var(--color-ink,#e8ebf4);
+  background:none}
+.btn.pri{border-color:transparent;font-weight:600;
   color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent)}
-.danger{border:1px solid var(--go-bad-edge);border-radius:11px;padding:8px 15px;
-  font-size:12.5px;color:var(--color-bad,#f87171);background:none}
-.mini{border:1px solid var(--color-line-strong,rgba(255,255,255,.16));border-radius:9px;
-  padding:6px 12px;font-size:12px;color:var(--color-ink,#e8ebf4);background:none}
-.mini.pri{background:var(--go-brand-wash);border-color:var(--go-brand-edge)}
-.strip{display:flex;gap:10px}
-.stat{flex:1;padding:11px 14px;border-radius:var(--radius-panel,14px);
-  border:1px solid var(--color-line,rgba(255,255,255,.08));
-  background:var(--color-surface-raised,#11141f)}
-.stat b{display:block;font-size:15px;font-weight:600}
-.stat span{color:var(--color-ink-faint,#5a6172);font-size:11.5px}
-.stat.on{box-shadow:inset 0 0 0 1.5px var(--go-brand-edge)}
+.btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed}
+.btn.danger{border-color:var(--go-bad-edge);color:var(--color-bad,#f87171)}
+.btn.sm{padding:2px 8px;font-size:11px;gap:6px}
+.btn.sm.pri{background:var(--go-brand-wash);border-color:var(--go-brand-edge);
+  color:var(--color-ink,#e8ebf4);font-weight:500}
+/* One thin bar, not four cards — §3/§5. Four stat cards cost ~68px at the top
+   of every list screen, which is two guests' worth of rows, and repeated the
+   counts the tabs immediately below already carry. */
+.strip{display:flex;gap:24px;align-items:center;flex-wrap:wrap;font-size:12px;
+  color:var(--color-ink-muted,#8b93a7);padding:8px 12px;border-radius:8px;
+  border:1px solid var(--color-line,rgba(255,255,255,.08))}
+.strip b{color:var(--color-ink,#e8ebf4);font-size:14px;font-weight:600;margin-right:5px}
+.strip .on{color:var(--color-ink,#e8ebf4)}
+.strip .on b{color:var(--color-brand,#818cf8)}
+/* The day's context, pushed right — Jobs' board carries its date here. */
+.strip .ctx{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
+.strip .ctx b{font-size:12px;color:var(--color-ink-muted,#8b93a7);margin-right:0}
 .tabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;
   border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
 .tab{padding:8px 14px;font-size:12.5px;color:var(--color-ink-faint,#5a6172);
@@ -124,21 +145,42 @@ const SHELL = `
   color:var(--color-ink-faint,#5a6172)}
 `;
 
-/** The day's table — a real table, with a header row and hairline dividers. */
+/** The day's table — bare on the page, and its pager. */
 const TABLE = `
-.tbl{border:1px solid var(--color-line,rgba(255,255,255,.08));overflow:hidden;
-  border-radius:var(--radius-panel,14px);background:var(--color-surface-raised,#11141f)}
+/* NO CARD — docs/working/64 §4. This was a filled, bordered, 14px-radius box
+   with the header row filled again inside it. Jobs' board sits bare and
+   separates rows with one rule, and two applications drawing a list two ways
+   is more visible than two buttons, because a list is most of what an
+   operator looks at. */
+.tbl{font-size:13px}
 .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;
   border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
-.tr:last-child{border-bottom:none}
-.tr>div{padding:11px 13px;display:flex;align-items:center;gap:7px;min-width:0}
-.tr.hd>div{padding:8px 13px;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;
-  color:var(--color-ink-faint,#5a6172);background:var(--go-ink-wash)}
+/* The last row keeps its rule: with no card around the list, that final line
+   is what closes it. */
+.tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+.tr.hd>div{align-items:center;padding:8px 10px;font-size:11px;font-weight:500;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint,#5a6172)}
 .tr.act{cursor:pointer}
 .tr.act:hover{background:var(--go-row-hover)}
-.tr .nm{display:flex;flex-direction:column;gap:2px;align-items:flex-start}
+.tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
 .tr .nm b{font-weight:600}
-.tr .nm span{font-size:11px;color:var(--color-ink-faint,#5a6172)}
+.tr .nm span{font-size:10.5px;color:var(--color-ink-faint,#5a6172)}
+/* The pager — §6, numbered because the wire now carries a total.
+   \`ListStays\` pages on \`PagedRequest\`/\`PagedResponse\`, so an ordinal and a
+   count both exist and "showing 1-25 of 47" is something the service can
+   actually answer.
+   It MATCHES components/design/pager.tsx rather than importing it: a hosted
+   module is styled by tokens and never by importing components across a
+   realm, so the match is a rendering obligation, not a dependency. */
+.pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
+  padding:10px 4px 0;font-size:12px;color:var(--color-ink-faint,#5a6172)}
+.pager .pnav{display:flex;align-items:center}
+.pager .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
+  border:1px solid var(--color-line,rgba(255,255,255,.08));font-family:inherit;
+  font-size:12px;background:none;cursor:pointer;color:var(--color-ink-muted,#8b93a7)}
+.pager .pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
+.pager .pg[disabled]{color:var(--color-ink-faint,#5a6172);opacity:.45;cursor:default}
+.pager .gap{margin-left:4px;color:var(--color-ink-faint,#5a6172)}
 `;
 
 /** Cards, their header bands, label–value rows, and the activity timeline. */

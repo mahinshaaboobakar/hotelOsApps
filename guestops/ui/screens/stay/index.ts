@@ -84,7 +84,7 @@ function header(page: StayPage): HTMLElement {
 
   const acts = el("div", "grow");
   for (const action of page.actions) {
-    acts.append(control(action.danger ? "danger" : "btn2", action.label));
+    acts.append(control(action.danger ? "btn danger" : "btn", action.label));
   }
 
   head.append(title, acts);

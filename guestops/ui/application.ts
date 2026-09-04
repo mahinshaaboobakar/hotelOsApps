@@ -24,9 +24,9 @@
  * a realm: an installed application looks like HotelOS because the platform
  * styles it, not because it renders the platform's components.
  *
- * # Navigation is the rail and the tabs
+ * # Navigation is the bar and the tabs
  *
- * There is no back button. The rail keeps `Today` lit while a stay is open — a
+ * There is no back button. The bar keeps `Today` lit while a stay is open — a
  * stay is reached *from* the day and belongs to it — so the way back is the way
  * in, which is how the approved design navigates.
  *
@@ -49,20 +49,20 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { recordedAttention, recordedToday } from "./book";
 import { el } from "./chrome/element";
-import { rail, type RailItem } from "./chrome/rail";
+import { bar, type BarItem } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
 
-/** Where the module is. A stay keeps `Today` lit in the rail. */
+/** Where the module is. A stay keeps `Today` lit in the bar. */
 interface Place {
   screen: "Today" | "Bookings" | "Guests" | "Attention" | "Stay";
   list: string;
   tab: string;
 }
 
-/** Who is signed in, drawn at the rail's foot. */
+/** Who is signed in, drawn at the right of the bar. */
 const OPERATOR = { name: "Anitha Menon", where: "Front Office · Avenue Regent" };
 
 /** Rendered by the host into the module's own document. */
@@ -85,7 +85,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     const main = el("div", "main");
 
     frame.append(
-      rail(items(), where.screen === "Stay" ? "Today" : where.screen, OPERATOR, (label) =>
+      bar(items(), where.screen === "Stay" ? "Today" : where.screen, OPERATOR, (label) =>
         show({ screen: label as Place["screen"], list: "Arrivals" })),
       main,
     );
@@ -132,13 +132,13 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 };
 
 /**
- * The rail's entries and their counts.
+ * The bar's entries and their counts.
  *
- * Counts come from the same recorded facts the screens read, so the rail cannot
+ * Counts come from the same recorded facts the screens read, so the bar cannot
  * claim a number the list does not show. When the client lands they arrive
  * through the same seam.
  */
-function items(): readonly RailItem[] {
+function items(): readonly BarItem[] {
   return [
     { label: "Today", count: recordedToday.businessDate.split(" ").slice(1).join(" ") },
     { label: "Bookings", count: "218" },

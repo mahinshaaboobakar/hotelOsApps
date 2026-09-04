@@ -22,6 +22,12 @@ const GRANTED = ["reservation.read", "stay.override", "registration.capture", "r
 function host(granted: readonly string[] = GRANTED): HostApi {
   return {
     identity: { id: "guestops", version: "0.1.0", capabilities: granted },
+
+    // The host tells a module its property's zone and locale. Both are `null`
+    // here on purpose: the SDK types them nullable because a property that has
+    // not been configured is a real state, and a double that invented
+    // "Asia/Kolkata" would hide every place this module forgets to handle it.
+    property: { timezone: null, locale: null },
     call: (_capability, method) => {
       // Each method answers with its own shape. A double that returned one
       // shape for every method would make the module crash on a screen the
@@ -58,7 +64,7 @@ describe("the module's own stylesheet", () => {
   it("survives a screen change", async () => {
     const root = await mount();
 
-    const attention = [...root.querySelectorAll<HTMLElement>(".ri")]
+    const attention = [...root.querySelectorAll<HTMLElement>(".head .tab")]
       .find((item) => item.textContent?.includes("Attention") === true);
 
     attention?.click();
@@ -116,18 +122,18 @@ describe("the day's table", () => {
   });
 });
 
-describe("the rail", () => {
+describe("the app bar", () => {
   /**
    * Gold frames 1 and 12 disagree about the Attention count — 2 and 4. One
    * running screen cannot hold both, so the count is derived from the list and
-   * the rail cannot claim a number the screen does not show.
+   * the bar cannot claim a number the screen does not show.
    */
   it("counts attention from the list itself", async () => {
     const root = await mount();
 
-    const count = [...root.querySelectorAll<HTMLElement>(".ri")]
+    const count = [...root.querySelectorAll<HTMLElement>(".head .tab")]
       .find((item) => item.textContent?.includes("Attention") === true)
-      ?.querySelector(".cnt")?.textContent;
+      ?.querySelector(".n")?.textContent;
 
     expect(count).toBe(String(recordedAttention.length));
   });
@@ -139,7 +145,7 @@ describe("the rail", () => {
     root.querySelector<HTMLElement>(".tr.act")?.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    expect(root.querySelector(".ri.on")?.textContent).toContain("Today");
+    expect(root.querySelector(".head .tab.on")?.textContent).toContain("Today");
     expect(root.textContent).not.toContain("← Today");
   });
 });

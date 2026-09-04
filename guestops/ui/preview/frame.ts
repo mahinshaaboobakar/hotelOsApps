@@ -35,6 +35,12 @@ function host(granted: readonly string[]): HostApi {
   return {
     identity: { id: "guestops", version: "0.1.0", capabilities: granted },
 
+    // The host tells a module its property's zone and locale. Both are `null`
+    // here on purpose: the SDK types them nullable because a property that has
+    // not been configured is a real state, and a double that invented
+    // "Asia/Kolkata" would hide every place this module forgets to handle it.
+    property: { timezone: null, locale: null },
+
     call(capability: string, method: string): Promise<unknown> {
       if (method === "today") return Promise.resolve(recordedToday);
       if (method === "attention") return Promise.resolve(recordedAttention);
