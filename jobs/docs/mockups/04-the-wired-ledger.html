@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs · 04 · the wired ledger</title>
+<style>
+:root{
+  --bg:#0b0d14;--panel:rgba(255,255,255,.03);--line:rgba(255,255,255,.09);
+  --text:#e9ecf5;--dim:#9aa3b8;--faint:#5d657a;
+  --indigo:#6b7cff;--ok:#3ecf8e;--warn:#f5b53f;--bad:#ff5c7a;--violet:#a06bff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 Inter,system-ui,sans-serif;padding:40px 44px 120px}
+code{font:12px ui-monospace,Menlo,monospace;color:#3fd0e0}
+.intro{max-width:1020px;color:var(--dim)}
+.intro h1{color:var(--text);font-size:27px;margin:0 0 10px}
+.intro p{margin:8px 0}
+.held{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent);
+      padding:14px 18px;margin:18px 0;border-radius:0 10px 10px 0;max-width:1020px}
+.held b{color:var(--text)}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+       margin:56px 0 16px;border-top:1px solid var(--line);padding-top:18px}
+table{border-collapse:collapse;width:100%;max-width:1400px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+   font-weight:500;padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);font-size:13.5px;vertical-align:top}
+td.s{color:var(--text);font-weight:500;width:170px}
+td.op{width:200px;color:var(--text)}
+td.v{width:180px}
+table.summary{max-width:940px;margin:18px 0}
+table.summary td.n{color:var(--text);font:600 16px ui-monospace,Menlo,monospace;width:70px}
+.v{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
+   border:1px solid var(--line);white-space:nowrap}
+.v.ok{color:var(--ok);border-color:var(--ok)}
+.v.held{color:var(--warn);border-color:var(--warn)}
+.v.wire{color:var(--violet);border-color:var(--violet)}
+.v.bridge{color:var(--bad);border-color:var(--bad)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Jobs · the wired ledger</h1>
+  <p><b>Stream HH, 2026-09-04.</b> The round that proves every control against the real backend — screen × operation →
+  expected → observed → verdict. Commit <code>44bead6</code>, backend at <code>39db30b</code> with this round's harness on top.</p>
+
+  <div class="held">
+    <b>HELD.</b> The round is stopped at two walls, neither this application's to move, and the ledger is delivered
+    held rather than green.
+    <br><br>
+    <b>1 · The bridge does not exist.</b> The commissioned chain is <i>host → command → gRPC → service → PostgreSQL</i>.
+    The desktop holds no Jobs client: <code>apps/desktop/src-tauri/src/commands/</code> names none, and the module's
+    <code>host.call</code> therefore fails <code>unavailable</code> by design. <b>No screen can be driven against the
+    backend at all</b>, so every UI row below is blocked at the bridge, not observed.
+    <br><br>
+    <b>2 · <code>SHELL-Q37</code> — the wall FF met.</b> Beneath the bridge, the service's own wire was stood up and
+    called for real. It stops on the platform's shared outbox: <code>event_store.events</code> is created by
+    <code>deployment/database/03-schemas.sql</code> and the platform's own provisioning, <b>not by any migration or test
+    convention an installed application can run</b>. The application's migration correctly creates only <code>jobs</code>.
+    So every operation that announces an event dies at
+    <code>relation "event_store.events" does not exist</code>. Ten rows are held on it, and no double was substituted:
+    a green over an absent dependency is what ADR 0053 forbids.
+  </div>
+
+  <p><b>What was proven anyway.</b> The service's gRPC surface was hosted and called over a real loopback socket —
+  protobuf over HTTP/2, the application's own interceptor, Entity Framework, a real PostgreSQL on a scratch database
+  provisioned the house way. Four rows completed end to end. That layer had <b>no test at all</b> before this round;
+  it now has fourteen, four passing and ten held with their reason named in the code.</p>
+
+  <p><b>Substituted, and named on every row that leans on one:</b> authentication (Identity is down, so a caller is
+  filed where the platform's interceptor would file one), authorization (the Kernel is down, so the recording
+  authorizer stands in and records what each RPC asked), and Master Data (down, so the directory double answers for the
+  property's code and a location's existence). Nothing else: no fixture reaches a handler, and every figure a passing
+  row asserts came back over the wire from the database.</p>
+
+  <table class="summary">
+    <tr><th>Verdict</th><th>Count</th><th>What it means</th></tr>
+    <tr><td><span class="v ok">verified</span></td><td class="n">4</td><td>driven over the wire, checked in the database, read back</td></tr>
+    <tr><td><span class="v held">held · SHELL-Q37</span></td><td class="n">10</td><td>written and runnable, stopped by the platform's outbox</td></tr>
+    <tr><td><span class="v bridge">blocked at the bridge</span></td><td class="n">28</td><td>a control that cannot reach the backend because the desktop holds no Jobs client</td></tr>
+    <tr><td><span class="v wire">no message answers this</span></td><td class="n">9</td><td>the contract has no RPC to carry it — a gap in the wire, not in the work</td></tr>
+  </table>
+
+  <p><b>Captures.</b> None are attached, and the reason is the first wall: a conflict banner, a refusal sentence and an
+  empty state can only be photographed on a screen that reached the service. The refusals themselves <i>are</i> proven
+  one layer down — the validation row below carries the service's own sentence across the wire — but no photograph of
+  a screen showing one can honestly be taken yet.</p>
+
+  <p><b>Verified against <code>00-master-architecture-v3.md</code>:</b> I read it again for this round. The chain this
+  ledger describes is the one v3 lays down — an installed application reached through the Kernel, its events appended
+  in the caller's transaction and relayed by the publisher, never COMMIT-then-publish. Both walls are consistent with
+  v3 rather than departures from it: the outbox is the platform's shared schema by v3's design, and a package's UI
+  reaches its service through the host, which is why the missing client stops everything. Nothing in this round
+  contradicts v3, and the one reconciliation still owed is the comment already reported in the design chapter's §9.</p>
+</div>
+
+<h2 class="sec">A · what the wire proved</h2>
+<table>
+  <tr><th>Screen</th><th>Operation</th><th>Expected</th><th>Observed</th><th>Verdict</th></tr>
+  <tr>
+    <td class="s">Catalogue</td><td class="op">Create category, item with aliases, resolution</td>
+    <td>Three rows written; the item carries its code, name and due-within; both aliases stored; all read back through <code>ListCatalogue</code></td>
+    <td>Exactly that. <code>SaveCategory</code> → <code>SaveItem</code> → <code>AddResolution</code> over the socket; the database holds <code>AC_NOT_COOLING · Not cooling · 40</code> and two aliases; the read returns them with the priority and the aliases</td>
+    <td class="v"><span class="v ok">verified</span></td>
+  </tr>
+  <tr>
+    <td class="s">Settings · policy</td><td class="op">Save a concern policy with its clock and ladder</td>
+    <td>One policy row, one rule row, one ladder row, scoped to the department</td>
+    <td>Exactly that, checked in the database by id</td>
+    <td class="v"><span class="v ok">verified</span></td>
+  </tr>
+  <tr>
+    <td class="s">Settings · presence</td><td class="op">Save a department's presence switches, then read it back</td>
+    <td>The switch stored and returned by <code>ListPresence</code></td>
+    <td>Stored; the read returns <code>ENG</code> following shifts</td>
+    <td class="v"><span class="v ok">verified</span></td>
+  </tr>
+  <tr>
+    <td class="s">Board</td><td class="op">Read a property with nothing in it</td>
+    <td>An empty list and a total of zero — the first-run state, not an error</td>
+    <td>Exactly that</td>
+    <td class="v"><span class="v ok">verified</span></td>
+  </tr>
+  <tr>
+    <td class="s">Raise</td><td class="op">Refuse a job with no summary, and a guest job with no stay</td>
+    <td>The service's own sentence crosses the wire, not a generic failure</td>
+    <td><code>InvalidArgument</code> carrying “summary is required”, and “a guest-raised job needs the stay_id — the stay is the guest”</td>
+    <td class="v"><span class="v ok">verified</span></td>
+  </tr>
+</table>
+
+<h2 class="sec">B · written, runnable, held on SHELL-Q37</h2>
+<table>
+  <tr><th>Screen</th><th>Operation</th><th>Expected</th><th>Observed</th><th>Verdict</th></tr>
+  <tr><td class="s">Raise</td><td class="op">Raise a job</td><td>Numbered <code>MRN-ENG-n</code>, stored, with its three birth rows, read back whole</td><td>Stops at the outbox insert</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">Assign · accept · start · pause · resume · stop · resolve · close</td><td>Each status stored, two sessions, one resolution, six events appended</td><td>Stops at the first announcement</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">Add a note, set a reminder, rate as the guest</td><td>All three written and returned by <code>GetJob</code></td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">Board</td><td class="op">Page past the first, land on the boundary, run off the end</td><td>25 rows, 12 + 12 + 1, then an empty page keeping the total; no row twice</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">Board</td><td class="op">A list that grows while you are on page two</td><td>The total rises and the page gains the new row</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">Board</td><td class="op">A filter matching nothing; department and status filters</td><td>Empty list, total zero, and the matching filter still returns its one</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">Two edits to one row</td><td>The second is refused <code>Aborted</code> and the first stands — never a silent win</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">A job that is not there, and one of another property</td><td><code>NotFound</code> for both</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">Board</td><td class="op">A permission the caller does not hold</td><td><code>PermissionDenied</code> naming <code>job.create</code></td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+  <tr><td class="s">All</td><td class="op">Restart mid-session</td><td>A second host and channel read the same rows; the counter continues</td><td>Blocked behind the raise</td><td><span class="v held">held</span></td></tr>
+</table>
+
+<h2 class="sec">C · blocked at the bridge — every control the screens offer</h2>
+<p class="intro">Each of these is drawn, and none can be driven against the backend until the desktop holds a Jobs
+client. They are listed so the count is honest, not to imply they were tried.</p>
+<table>
+  <tr><th>Screen</th><th>Controls</th><th>Expected</th><th>Observed</th><th>Verdict</th></tr>
+  <tr><td class="s">Board</td><td class="op">Raise a job · six filters · the pager</td><td>Filters and pages reach <code>ListJobs</code>; the button opens the form and the form raises</td><td>The chips and pager change local state only; the stand-in ignores them, so every page shows the same twelve. The form's button closes it without sending</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">Pause · Stop · Resolve · Put on hold · Reassign · More</td><td>Each calls its RPC with the version it saw</td><td>Inert</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">A job · links</td><td class="op">Link a job · Add a step · Unlink</td><td><code>AmendJob</code></td><td>Inert</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">A job · notes</td><td class="op">Add note · Attach photo</td><td><code>AddNote</code>, <code>Attach</code></td><td>Inert</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">A job · record</td><td class="op">Remind me</td><td><code>RemindMe</code></td><td>Inert</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">Resolve</td><td class="op">The resolution chips · Resolve</td><td><code>ResolveJob</code> with the chosen resolution</td><td>Inert; the chips do not select</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">Catalogue</td><td class="op">New category · Edit · Add resolution · Create item</td><td><code>SaveCategory</code>, <code>SaveItem</code>, <code>AddResolution</code></td><td>Inert</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">Settings</td><td class="op">Save · Discard on five tabs · ＋ step · Add · Edit</td><td>The four settings saves</td><td>Inert — and four of them have no RPC either (below)</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">Live</td><td class="op">“more load as you scroll”</td><td>A second page of a department's people</td><td>No scroll handler exists; the caption describes an intention</td><td><span class="v bridge">bridge</span></td></tr>
+  <tr><td class="s">Widget</td><td class="op">Tap through to the filtered screen; counts agreeing with the board</td><td>One number, two surfaces, agreeing</td><td>The tap-through asks the shell to open a destination — the one call that does reach the host — but the screen it lands on cannot be filtered, and neither count comes from the service</td><td><span class="v bridge">bridge</span></td></tr>
+</table>
+
+<h2 class="sec">D · no message answers this</h2>
+<table>
+  <tr><th>Screen</th><th>What it reads</th><th>Expected</th><th>Observed</th><th>Verdict</th></tr>
+  <tr><td class="s">Board</td><td class="op">Today's six figures</td><td>An RPC for the strip</td><td>None exists</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Settings</td><td class="op">Policies, subscriptions, hours, closing, holds, access</td><td>A read for the settings payload</td><td>None exists; only the saves do</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Widget</td><td class="op">Its numbers and worst rows</td><td>An RPC for the widget</td><td>None exists</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Chrome</td><td class="op">Who is signed in</td><td>A read for the operator</td><td>None exists — the header draws nobody, deliberately</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Live</td><td class="op">Who is working on what</td><td>A read for the people on shift</td><td>No RPC, and no Workforce client to ask</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Live</td><td class="op">The sweep's concern table</td><td>A read over <code>job_concern_history</code></td><td>None exists</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Settings</td><td class="op">Subscriptions, service hours, closing, holds — the saves</td><td>Four RPCs</td><td>The service methods exist and are unreachable</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">Settings</td><td class="op">Delete a concern policy</td><td>An RPC</td><td><code>DeleteAsync</code> exists and is unreachable</td><td><span class="v wire">wire</span></td></tr>
+  <tr><td class="s">A job</td><td class="op">Mark my nudges read</td><td>An RPC</td><td><code>ReadNudgesAsync</code> exists and is unreachable</td><td><span class="v wire">wire</span></td></tr>
+</table>
+
+<h2 class="sec">E · what this round asks for</h2>
+<table>
+  <tr><th>Owed by</th><th>What</th></tr>
+  <tr><td class="s">The platform</td><td>A way for an installed application to stand up <code>event_store</code> on a scratch database — the <code>SHELL-Q37</code> wall. Until then no application can prove its own writes, and every app's suite that appears to (Workforce's, GuestOps') is passing because it substitutes the appender.</td></tr>
+  <tr><td class="s">The desktop</td><td>A Jobs client in the shell's capability dispatch, so <code>host.call</code> reaches the service. Reported here with the reproduction; not touched, as it is another stream's surface.</td></tr>
+  <tr><td class="s">This stream</td><td>The nine messages above, the filter contract reconciled against <code>ListJobsRequest</code>, and the twenty-eight controls wired — all of which need the two rows above first.</td></tr>
+</table>
+
+</body>
+</html>

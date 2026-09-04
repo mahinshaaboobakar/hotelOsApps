@@ -39,7 +39,7 @@
     <Protobuf Include="protos\hotelos\jobs\v1\dto.proto"
               ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
     <Protobuf Include="protos\hotelos\jobs\v1\service.proto"
-              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="Server" />
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="Both" />
   </ItemGroup>
 
   <ItemGroup>

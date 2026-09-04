@@ -29,6 +29,13 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Npgsql" Version="9.0.2" />
+    <!-- The wire round calls the application over a real socket. -->
+    <PackageReference Include="Grpc.Net.Client" Version="2.71.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The wire round hosts the application's own gRPC service. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
   <ItemGroup>

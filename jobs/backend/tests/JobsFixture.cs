@@ -150,6 +150,10 @@ public sealed class JobsFixture : IAsyncLifetime
     }
 
     /// <summary>A context over the scratch database, as the application role.</summary>
+    /// <summary>The application role's connection — what the hosted service opens in the wire round.</summary>
+    public string ApplicationConnection =>
+        (_database ?? throw NotInitialised()).ConnectionFor(ApplicationRole);
+
     public JobsDbContext Context() =>
         Context((_database ?? throw NotInitialised()).ConnectionFor(ApplicationRole));
 
