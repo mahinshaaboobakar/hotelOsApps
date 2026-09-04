@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Jobs — preview harness</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The harness's own chrome only. Each pane is a real iframe — the shape the
+   * module gets in production — so nothing this page styles reaches inside it.
+   * The headings name the approved frame each pane is to be read beside.
+   */
+  body { margin: 0; padding: 18px 0 8px; background: #07090f; color: var(--color-ink);
+         font: 13px/1.5 system-ui, sans-serif; }
+  h2 { margin: 0 0 8px; padding: 0 18px; font-size: 11px; font-weight: 600;
+       letter-spacing: .09em; text-transform: uppercase; color: var(--color-ink-faint); }
+  iframe { display: block; width: 1220px; height: 660px; border: 0;
+           margin: 0 18px 28px; border-radius: 14px;
+           background: var(--color-surface);
+           border: 1px solid var(--color-line); }
+  iframe.tall { height: 780px; }
+  iframe.short { height: 420px; }
+  iframe.widget { width: 380px; height: 300px; display: inline-block; }
+</style>
+</head><body>
+  <h2>1 · The board — today's strip, the filters, twelve rows, the pager</h2>
+  <iframe src="./frame.html?screen=Board"></iframe>
+
+  <h2>2 · One job · Overview — MRN-ENG-142, mid-work, breached</h2>
+  <iframe src="./frame.html?open=job"></iframe>
+
+  <h2>2b · One job · Work — the clock and the sessions</h2>
+  <iframe src="./frame.html?open=job&amp;tab=Work"></iframe>
+
+  <h2>2c · One job · History — status, concern and work as one timeline</h2>
+  <iframe src="./frame.html?open=job&amp;tab=History"></iframe>
+
+  <h2>2d · One job · Notes &amp; photos</h2>
+  <iframe src="./frame.html?open=job&amp;tab=Notes"></iframe>
+
+  <h2>2e · One job · Links &amp; steps</h2>
+  <iframe src="./frame.html?open=job&amp;tab=Links"></iframe>
+
+  <h2>2f · One job · Rating — the closed towel job, rated</h2>
+  <iframe src="./frame.html?open=job&amp;job=rated&amp;tab=Rating"></iframe>
+
+  <h2>2g · One job · Record</h2>
+  <iframe src="./frame.html?open=job&amp;tab=Record"></iframe>
+
+  <h2>3 · Raise a job — staff, from the app</h2>
+  <iframe src="./frame.html?open=raise"></iframe>
+
+  <h2>4 · Resolve — the catalogue asks what fixed it</h2>
+  <iframe class="short" src="./frame.html?open=resolve"></iframe>
+
+  <h2>5 · Live — presence, scrolling department cards, the sweep's concern table</h2>
+  <iframe src="./frame.html?screen=Live"></iframe>
+
+  <h2>6 · Scheduled — jobs set for a day, no cycle column</h2>
+  <iframe class="short" src="./frame.html?screen=Scheduled"></iframe>
+
+  <h2>7 · Catalogue — category › item › resolutions, and how they are made</h2>
+  <iframe class="tall" src="./frame.html?screen=Catalogue"></iframe>
+
+  <h2>8a · Settings · Concern policy — Engineering's clock, with the scope rail</h2>
+  <iframe src="./frame.html?screen=Settings"></iframe>
+
+  <h2>8b · Settings · Policies — seven, nested by scope, two departments</h2>
+  <iframe src="./frame.html?screen=Settings&amp;view=list"></iframe>
+
+  <h2>8c · Settings · New policy · 1 of 3 — department › category › item</h2>
+  <iframe src="./frame.html?screen=Settings&amp;view=flow"></iframe>
+
+  <h2>8d · Settings · New policy · 3 of 3 — the ladder builder</h2>
+  <iframe class="tall" src="./frame.html?screen=Settings&amp;view=flow&amp;step=3%20·%20The%20ladder"></iframe>
+
+  <h2>8e · Settings · Shifts &amp; presence</h2>
+  <iframe class="short" src="./frame.html?screen=Settings&amp;tab=Shifts"></iframe>
+
+  <h2>8f · Settings · Who is told</h2>
+  <iframe class="short" src="./frame.html?screen=Settings&amp;tab=Who"></iframe>
+
+  <h2>8g · Settings · Access — shown, not edited</h2>
+  <iframe class="short" src="./frame.html?screen=Settings&amp;tab=Access"></iframe>
+
+  <h2>9 · The widget — quiet, escalated, mine</h2>
+  <iframe class="widget" src="./frame.html?widget=quiet"></iframe>
+  <iframe class="widget" src="./frame.html?widget=escalated"></iframe>
+  <iframe class="widget" src="./frame.html?widget=mine"></iframe>
+
+  <h2>10 · Read-only — the same board with only job.read granted, and no action row</h2>
+  <iframe src="./frame.html?open=job&amp;granted=none"></iframe>
+</body></html>

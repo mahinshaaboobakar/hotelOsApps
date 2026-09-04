@@ -1,0 +1,249 @@
+/**
+ * What a Jobs screen is given — the shapes, with no data in them. These are
+ * the module's view types, not the service's DTOs; every judgment (concern,
+ * accountable, running) arrives made, so no screen recomputes a rule.
+ */
+
+/** One row of the board — frame 1's nine columns. */
+export interface JobRow {
+  id: string;
+  number: string;
+  where: string;
+  what: string;
+  priority: string;
+  status: string;
+  raisedBy: string;
+  assignedTo: string;
+  concern: string;
+  concernDetail: string | null;
+  /** ISO instant, or null for a job with no clock. */
+  dueAt: string | null;
+  tags: readonly string[];
+}
+
+/** A page of the board. */
+export interface BoardPage {
+  rows: readonly JobRow[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/** Today's strip above the board. */
+export interface Today {
+  open: number;
+  breached: number;
+  stuck: number;
+  running: number;
+  closedToday: number;
+  avgResolveMinutes: number;
+  department: string;
+  /** ISO instant the strip was read. */
+  at: string;
+}
+
+/** A key/value line on the Overview tab. */
+export interface Detail {
+  k: string;
+  v: string;
+}
+
+/** One session on the Work tab. */
+export interface Session {
+  no: number;
+  who: string;
+  startedAt: string;
+  pausedAt: string | null;
+  pauseReason: string | null;
+  resumedAt: string | null;
+  stoppedAt: string | null;
+  workedSeconds: number;
+}
+
+/** One line of the History tab — status, concern or work, interleaved. */
+export interface HistoryLine {
+  at: string;
+  kind: "status" | "concern" | "work";
+  what: string;
+  by: string;
+  detail: string;
+}
+
+export interface Note {
+  who: string;
+  at: string;
+  text: string;
+  photo: string | null;
+}
+
+export interface Step {
+  no: number;
+  number: string;
+  what: string;
+  status: string;
+  clock: string;
+  assignedTo: string;
+}
+
+export interface Link {
+  number: string;
+  department: string;
+  what: string;
+  status: string;
+  assignedTo: string;
+}
+
+export interface Rating {
+  stars: number;
+  text: string;
+  ratedAt: string;
+  askedAt: string;
+  windowUntil: string;
+  resolvedBy: string;
+  minutesRaisedToResolved: number;
+}
+
+/** Everything the job view's seven tabs draw — frames 2 to 2g. */
+export interface JobDetail {
+  row: JobRow;
+  raisedLine: string;
+  /** Present while a session runs — the header's timer. */
+  runningSince: string | null;
+  runningWho: string | null;
+  totalWorkedSeconds: number;
+  accountable: string;
+  whatAndWhere: readonly Detail[];
+  whoAsked: readonly Detail[];
+  priorityAndTime: readonly Detail[];
+  assignment: readonly Detail[];
+  resolution: string | null;
+  sessions: readonly Session[];
+  history: readonly HistoryLine[];
+  notes: readonly Note[];
+  steps: readonly Step[];
+  links: readonly Link[];
+  rating: Rating | null;
+  record: readonly Detail[];
+}
+
+/** One department on the Live tab. */
+export interface LiveDepartment {
+  code: string;
+  name: string;
+  presence: "present" | "hours" | "off";
+  presenceLine: string;
+  people: readonly { name: string; doing: string; tone: "run" | "hold" | "bad" | "dim" }[];
+  peopleTotal: number;
+  open: number;
+  breached: number;
+}
+
+/** One row of the Live tab's concern table. */
+export interface ConcernRow {
+  number: string;
+  department: string;
+  concern: string;
+  since: string;
+  accountable: string;
+  lastNudge: string;
+}
+
+export interface Live {
+  departments: readonly LiveDepartment[];
+  concern: readonly ConcernRow[];
+  sweptAt: string;
+}
+
+/** A scheduled row — frame 6. */
+export interface ScheduledRow {
+  scheduledFor: string;
+  number: string;
+  where: string;
+  what: string;
+  tags: readonly string[];
+  raisedBy: string;
+  assignedTo: string;
+  dueAt: string;
+}
+
+export interface CatalogueCategory {
+  id: string;
+  name: string;
+  department: string;
+  items: number;
+  activeHere: boolean;
+}
+
+export interface CatalogueItem {
+  id: string;
+  categoryId: string;
+  name: string;
+  department: string;
+  defaultPriority: string;
+  dueWithinMinutes: number | null;
+  restricted: boolean;
+  aliases: readonly string[];
+  activeAt: readonly { property: string; on: boolean }[];
+  resolutions: readonly string[];
+}
+
+export interface Catalogue {
+  organisation: string;
+  categories: readonly CatalogueCategory[];
+  items: readonly CatalogueItem[];
+}
+
+/** One policy on the settings list — page 02 frame 7. */
+export interface PolicyRow {
+  scope: "property" | "department" | "category" | "item";
+  scopeLabel: string;
+  name: string;
+  due: string;
+  atRisk: string;
+  ladder: string;
+  usedBy: string;
+}
+
+export interface PolicyRule {
+  priority: string;
+  due: string;
+  atRisk: string;
+  notAccepted: string;
+  noSession: string;
+  ladder: string;
+  managerAtRisk: boolean;
+}
+
+export interface PresenceRow {
+  department: string;
+  enabled: boolean;
+  followShifts: boolean;
+  hours: string;
+  now: string;
+}
+
+export interface Settings {
+  scopes: readonly { label: string; state: string; indent: number }[];
+  policies: readonly PolicyRow[];
+  engineeringRules: readonly PolicyRule[];
+  presence: readonly PresenceRow[];
+  whoIsTold: readonly { role: string; atRisk: boolean; breached: string; stuck: string; untriaged: boolean; repeat: string; departments: string }[];
+  holds: readonly Detail[];
+  holdWarnings: readonly { when: string; who: string }[];
+  closing: readonly { scope: string; hours: string }[];
+  rating: readonly Detail[];
+  access: readonly { label: string; who: string; from: string }[];
+  numbering: string;
+}
+
+/** The widget's three numbers and the worst rows — the manifest's `jobs-now`. */
+export interface JobsNow {
+  scope: string;
+  open: number;
+  running: number;
+  atRisk: number;
+  breached: number;
+  stuck: number;
+  worst: readonly { number: string; line: string; tone: "bad" | "warn" | "run" }[];
+  unreadNudges: number;
+}
