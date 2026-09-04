@@ -298,8 +298,11 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     }
 
     if (what === "print") {
+      // The sheet replaces the module's chrome, so the way back has to be
+      // handed in — a preview a person cannot leave is worse than one whose
+      // Print does not work yet.
       root.replaceChildren(style);
-      void printed(host, root);
+      void printed(host, root, () => { show(current); });
       return;
     }
 

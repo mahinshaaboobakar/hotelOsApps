@@ -19,20 +19,60 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load, recordedWeek, type Week } from "../../roster";
 import { recordedRegister, type Register } from "../../roster/duty";
 
-/** Draw the sheet into `root`, replacing the module's chrome entirely. */
-export async function printed(host: HostApi, root: HTMLElement): Promise<void> {
+/**
+ * Draw the preview into `root`, replacing the module's chrome entirely.
+ *
+ * @param host the bridge
+ * @param root where it mounts
+ * @param back leave the preview
+ */
+export async function printed(
+  host: HostApi, root: HTMLElement, back: () => void = () => {},
+): Promise<void> {
   const got = await load(host, ROSTER_READ, "week", recordedWeek);
   const week = got.value;
 
   const sheet = el("div", "sheet");
-
   sheet.append(masthead(week), grid(week, recordedRegister), legend(week), changes());
-  root.append(sheet);
+
+  const paper = el("div", "paper");
+  paper.append(sheet);
+
+  root.append(preview(back), paper);
+}
+
+/**
+ * The preview's own chrome — what the sheet is, and the way out of it.
+ *
+ * The build had none: the sheet replaced the module's chrome and the frame's
+ * Page setup and Print went with it, on the argument that a dead button is
+ * worse than none. That was wrong twice over. The option is what the screen is
+ * for, and a preview a person cannot leave is worse than one with a control
+ * that does not work yet — so Back is here as well, and it does work.
+ *
+ * @param back leave the preview and return to the rota
+ * @returns the row
+ */
+function preview(back: () => void): HTMLElement {
+  const row = el("div", "title pbar");
+  const name = el("div");
+
+  name.append(
+    el("div", "ht", "Print preview"),
+    el("div", "hsub",
+      "Front Office · 24 – 30 August 2026 · A4 landscape"));
+
+  const leave = el("button", "btn", "‹ Back to the rota");
+  leave.setAttribute("type", "button");
+  leave.addEventListener("click", back);
+
+  return fill(row, name, el("div", "grow"), leave,
+    el("div", "btn", "Page setup"), el("div", "btn pri", "⎙ Print"));
 }
 
 /** Who issued it and when — a printed sheet has no other provenance. */

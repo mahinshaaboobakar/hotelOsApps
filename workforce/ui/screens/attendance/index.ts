@@ -69,10 +69,17 @@ function marks(day: Day): HTMLElement {
   return row;
 }
 
+/**
+ * One figure on the strip.
+ *
+ * A card no longer — the app surface standard's one thin bar. The tone stays on
+ * the class rather than on the figure's own element, because the strip may
+ * later want to tint the whole item and the caller should not have to know.
+ */
 function mark(figure: string, label: string, tone: string): HTMLElement {
-  const card = el("div", `mk ${tone}`);
-  card.append(el("b", undefined, figure), el("div", undefined, label));
-  return card;
+  const item = el("div", `mk ${tone}`);
+  item.append(el("b", undefined, figure), el("div", undefined, label));
+  return item;
 }
 
 /**

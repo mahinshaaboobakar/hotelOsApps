@@ -6,6 +6,13 @@
  * theme. A themed print sheet would come out of the machine as grey on grey.
  */
 export const PRINTED_CSS = `
+/* The preview's chrome — the module's palette, wrapped round a sheet that is
+   deliberately not on it. The bar tells a person what they are looking at and
+   gives them the way out; the paper below stays black on white. */
+.pbar{border-bottom:1px solid var(--color-line,rgb(255 255 255/.07));flex:0 0 auto;
+      padding:16px 26px}
+.paper{padding:20px 26px 26px;overflow:auto;flex:1 1 auto;
+       background:var(--color-surface,#0b0d14)}
 .sheet{background:#fff;color:#111;padding:26px 30px;min-height:100vh;
        font:12px/1.5 "Times New Roman",Georgia,serif}
 .phead{display:flex;justify-content:space-between;align-items:flex-end;

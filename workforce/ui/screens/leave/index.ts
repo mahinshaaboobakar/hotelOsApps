@@ -39,7 +39,13 @@ export async function leave(
   const body = el("div", "body");
 
   if (tab === "Approvals") {
-    body.append(queue(board.waiting), swapCard(board.swap));
+    // Side by side, as the drawing has it. Stacked, the swap's own preview
+    // table fell past the bottom of the screen — the table was built and
+    // simply could not be reached, which is the worst shape a layout
+    // divergence takes.
+    const split = el("div", "asplit");
+    split.append(queue(board.waiting), swapCard(board.swap));
+    body.append(split);
   } else {
     body.append(balances(board.balances), requests(board.requests));
   }

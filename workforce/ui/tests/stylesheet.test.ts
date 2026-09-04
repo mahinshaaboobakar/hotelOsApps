@@ -189,6 +189,39 @@ describe("the module's one stylesheet", () => {
     }
   });
 
+  it("lets a screen wear only the chrome's classes and its own", () => {
+    // **The gap the previous version had.** It compared stylesheets against
+    // stylesheets, so it could not see a screen reaching into another screen's
+    // vocabulary from its MARKUP. Duty's dialog wore Policy's `.spans` — a
+    // four-column grid for a split shift's times — and put two date fields in
+    // it, so `Fri 28 · 20:00` wrapped at the separator and one instant read as
+    // two. Type-checked, tested, and only a capture beside a frame found it.
+    const owner = new Map<string, string>();
+    for (const sheet of stylesheets()) {
+      for (const name of scopes(sheet.css)) owner.set(name, sheet.name);
+    }
+
+    const chrome = "chrome/styles.ts";
+    const borrowed: string[] = [];
+
+    for (const [file, source] of sources()) {
+      const screen = /^screens\/([^/]+)\//u.exec(file)?.[1];
+      if (screen === undefined) continue;
+
+      for (const match of source.matchAll(/el\(\s*"[a-z]+"\s*,\s*"([a-z0-9 -]+)"/giu)) {
+        for (const name of match[1]!.split(" ").filter((one) => one.length > 0)) {
+          const home = owner.get(name);
+          if (home === undefined || home === chrome) continue;
+          if (home === `screens/${screen}/styles.ts`) continue;
+
+          borrowed.push(`.${name}: ${file} wears it, ${home} styles it`);
+        }
+      }
+    }
+
+    expect([...new Set(borrowed)].sort()).toEqual([]);
+  });
+
   it("has a rule for every class the screens draw", () => {
     const css = stylesheet(stylesheets().map((sheet) => sheet.css)).textContent ?? "";
 

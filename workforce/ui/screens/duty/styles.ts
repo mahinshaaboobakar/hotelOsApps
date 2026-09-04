@@ -1,6 +1,9 @@
 /** The Duty Register's own rules — now/next, and the two-band week. */
 export const DUTY_CSS = `
 .nn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* The two ends of a duty span. One instant per box, on one line. */
+.ends{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ends .finput{white-space:nowrap}
 .nl{display:flex;gap:12px;align-items:center;padding:12px 14px;
     background:var(--color-surface-raised,#11141f);
     border:1px solid var(--color-line,rgb(255 255 255/.07));

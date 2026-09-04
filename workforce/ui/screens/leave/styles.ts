@@ -19,6 +19,10 @@ export const LEAVE_CSS = `
 .bal s{text-decoration:none;display:block;font-size:11px;
        color:var(--color-ink-faint,#5a6172);margin-top:3px}
 
+/* The queue beside the decision. The detail is what somebody came to read,
+   so it takes the wider column. */
+.asplit{display:grid;grid-template-columns:minmax(0,0.85fr) minmax(0,1.15fr);gap:14px;
+        align-items:start;min-height:0}
 .swap{background:var(--color-surface-raised,#11141f);
       border:1px solid var(--color-line,rgb(255 255 255/.07));
       border-radius:var(--radius-panel,1rem);padding:16px;display:flex;

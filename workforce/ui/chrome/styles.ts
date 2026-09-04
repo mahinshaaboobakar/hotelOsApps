@@ -65,11 +65,17 @@ button{background:transparent;color:inherit;font:inherit;border:0;
 /* A colour the published names do not carry is DERIVED, never declared — the
    accent's stops are the ones Jobs and GuestOps reached independently, down to
    the 62%, at the settled 135 degrees. A derived colour still follows the
-   theme; a hex stops following it the day the theme changes. */
-.wf{--accent:linear-gradient(135deg, var(--color-brand,#818cf8),
-                             color-mix(in srgb, var(--color-brand,#818cf8) 62%,
-                                       var(--color-bad,#f87171)));
-    height:100vh;display:flex;flex-direction:column;
+   theme; a hex stops following it the day the theme changes.
+
+   **On the root, not on .wf.** It was declared on the module's own frame, and
+   the printed week REPLACES that frame with a sheet — so on the one screen
+   without a .wf, every .btn.pri lost its ground and drew dark text on
+   nothing. The Print button was in the DOM, 72px wide, and invisible. A derived
+   value belongs where the whole realm can see it. */
+:root{--accent:linear-gradient(135deg, var(--color-brand,#818cf8),
+                               color-mix(in srgb, var(--color-brand,#818cf8) 62%,
+                                         var(--color-bad,#f87171)))}
+.wf{height:100vh;display:flex;flex-direction:column;
     background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);
     font:13.5px/1.55 var(--font-sans,"Segoe UI",system-ui,sans-serif);
     font-variant-numeric:tabular-nums}
