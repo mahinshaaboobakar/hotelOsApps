@@ -62,7 +62,7 @@ export const recordedJob: JobDetail = {
   notes: [
     { who: "Arjun Menon", at: at("14:07"), text: "Suction pressure low, likely refrigerant.", photo: "gauge.jpg · 1.2 MB" },
     { who: "Sana Rahman (FO)", at: at("13:40"), text: "Guest called too; offered fan meanwhile.", photo: null },
-    { who: "Guest", at: at("13:31"), text: "Room feels warm since noon, set to 19 but blowing ambient.", photo: null },
+    { who: "Guest", at: at("13:31"), text: "Room feels warm since noon, set to 19 but blowing ambient.", photo: null, raising: true },
   ],
   steps: [
     { no: 1, number: "MRN-ENG-130", what: "Air conditioning › Leak test", status: "ASSIGNED · blocked", clock: "stopped until this job resolves", assignedTo: "Arjun Menon" },
@@ -105,7 +105,7 @@ export const recordedRatedJob: JobDetail = {
     { at: at("13:54"), kind: "work", what: "session 1 started", by: "Meera Krishnan", detail: "" },
     { at: at("13:53"), kind: "status", what: "RAISED", by: "guest · stay 7F2A", detail: "via the guest app" },
   ],
-  notes: [{ who: "Guest", at: at("13:53"), text: "Could we have two extra towels please?", photo: null }],
+  notes: [{ who: "Guest", at: at("13:53"), text: "Could we have two extra towels please?", photo: null, raising: true }],
   rating: {
     stars: 5, text: "Towels came in six minutes. Thank you Meera.", ratedAt: at("18:14"),
     askedAt: at("18:00"), windowUntil: "departure Thu 04 Sep", resolvedBy: "Meera Krishnan · \"Delivered\" · 02 Sep 13:59",

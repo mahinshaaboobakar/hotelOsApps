@@ -18,6 +18,7 @@ import { recordedCatalogue } from "../board/recorded/catalogue";
 import { recordedJob, recordedRatedJob } from "../board/recorded/job";
 import { recordedLive, recordedScheduled } from "../board/recorded/live";
 import { recordedSettings } from "../board/recorded/settings";
+import { recordedMe } from "../board/recorded/me";
 import { recordedEscalated, recordedMine, recordedQuiet } from "../board/recorded/widget";
 import { jobsNow } from "../widgets/panel/jobs-now";
 import { stylesheet } from "../widgets/card";
@@ -35,6 +36,7 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
     property: PROPERTY,
     call(capability: string, method: string): Promise<unknown> {
       const answers: Record<string, unknown> = {
+        me: recordedMe,
         today: recordedToday,
         board: recordedBoard,
         job: params.get("job") === "rated"

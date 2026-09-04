@@ -81,6 +81,20 @@ export interface Note {
   at: string;
   text: string;
   photo: string | null;
+
+  /** The text the job was raised with, shown as such (frame 2d). */
+  raising?: boolean;
+}
+
+/**
+ * Who is signed in, as the service knows them. The module cannot invent this:
+ * `ModuleIdentity` carries capabilities, not a person, so a name in the header
+ * that the module made up would be a fabricated identity shown to a real one
+ * (audit finding, 2026-09-04).
+ */
+export interface Operator {
+  name: string;
+  where: string;
 }
 
 export interface Step {

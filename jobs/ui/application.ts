@@ -23,7 +23,10 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 import { el } from "./chrome/element";
 import { MARKS_CSS } from "./chrome/marks";
 import { stylesheet } from "./chrome/styles";
-import { head, type Operator, type Tab } from "./chrome/tabs";
+import { head, type Tab } from "./chrome/tabs";
+import { JOB_READ } from "./chrome/permissions";
+import { load, type Operator } from "./board";
+import { recordedMe } from "./board/recorded/me";
 import { board } from "./screens/board";
 import { catalogue } from "./screens/catalogue";
 import { job } from "./screens/job";
@@ -37,9 +40,6 @@ import { settings } from "./screens/settings";
 const TABS: readonly Tab[] = [
   { label: "Board" }, { label: "Live" }, { label: "Scheduled" }, { label: "Catalogue" }, { label: "Settings" },
 ];
-
-/** Who is signed in, drawn at the head's end. */
-const OPERATOR: Operator = { name: "Priya Nair", where: "ENG supervisor" };
 
 /** Where the module is, in one object — no screen keeps its own copy. */
 interface Place {
@@ -63,6 +63,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // render and the module would draw itself unstyled.
   const style = stylesheet([MARKS_CSS]);
 
+  // Drawn only once the service has said who is looking (audit finding,
+  // 2026-09-04): the module has no user of its own to name.
+  let operator: Operator | null = null;
+
   const place: Place = {
     tab: "Board", jobId: null, jobTab: "Overview", mode: "board",
     boardFilter: "My departments · ENG", boardPage: 0,
@@ -77,7 +81,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     main.style.display = "flex";
     main.style.flexDirection = "column";
     main.style.minHeight = "0";
-    frame.append(head(TABS, place.tab, OPERATOR, go), main);
+    frame.append(head(TABS, place.tab, operator, go), main);
     root.replaceChildren(style, frame);
     void draw(main);
   }
@@ -132,6 +136,15 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     mount(element) {
       root = element;
       show();
+      void load(host, JOB_READ, "me", recordedMe).then((got) => {
+        // Only what the platform actually established. Every screen that
+        // stands in says so in a note; the chrome has nowhere to say it, so a
+        // name that is not the property's own is not drawn at all.
+        if (!got.live) return;
+
+        operator = got.value;
+        show();
+      });
     },
 
     unmount() {

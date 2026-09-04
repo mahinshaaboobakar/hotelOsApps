@@ -101,7 +101,16 @@ function scopeStep(): HTMLElement {
     sample("Sample A · Engineering, one category", [["Department", "Engineering ▾"], ["Category · optional", "AC not working ▾"], ["Item · optional", "— all items of the category ▾", true], ["Name", "AC — guest in room"], ["Start from", "Copy of \"Engineering\" (department) ▾"]], "Applies to: every AC job at Marina Bay, unless the item has its own policy."),
     sample("Sample B · Housekeeping, one category", [["Department", "Housekeeping ▾"], ["Category · optional", "Bottle of water ▾"], ["Item · optional", "— all items of the category ▾", true], ["Name", "Water — 10 minutes"], ["Start from", "Copy of \"Housekeeping\" (department) ▾"]], "Applies to: Still water · Sparkling water — the two items of the category."),
   );
-  return fill(el("div"), grid, el("div", "mono", "The pickers are the catalogue's own lists for this property. Leave category empty for a department policy; leave item empty for a category policy. One policy per scope."));
+  const c = el("div", "card");
+  c.append(el("h3", undefined, "Sample C · one item, narrower still"));
+  const kv = el("div", "kv");
+  kv.style.gridTemplateColumns = "130px 1fr";
+  for (const [k, v] of [["Department", "Engineering"], ["Category", "AC not working"], ["Item", "Water dropping from unit"],
+    ["Name", "AC leak — ceiling risk"], ["Start from", 'Copy of "AC — guest in room" (category)']] as const) {
+    kv.append(el("div", "k", k), el("div", undefined, v));
+  }
+  c.append(kv);
+  return fill(el("div"), grid, c, el("div", "mono", "The pickers are the catalogue's own lists for this property. Leave category empty for a department policy; leave item empty for a category policy. One policy per scope."));
 }
 
 function clockStep(s: Settings): HTMLElement {
@@ -114,6 +123,12 @@ function clockStep(s: Settings): HTMLElement {
     tr.append(fill(el("td"), priority(r.priority)), el("td", undefined, r.due), el("td", undefined, `${r.atRisk} of due`), el("td", undefined, r.notAccepted), el("td", undefined, r.noSession), el("td", undefined, r.priority === "P1" ? "keeps running" : "pauses"));
     t.append(tr);
   }
+
+  const nt = el("tr");
+  const rest = el("td", "dim", "Not triaged: no clock · stuck after 15 min untriaged → supervisor");
+  rest.setAttribute("colspan", "5");
+  nt.append(fill(el("td"), priority("NOT_TRIAGED")), rest);
+  t.append(nt);
   return fill(el("div"), t, el("div", "mono", "Example, P1 raised 13:31: at risk from 14:00 (75 % of 40 min) · breached from 14:10 · stuck at 13:39 if nobody has accepted, or at 14:02 if accepted but nobody has started."));
 }
 

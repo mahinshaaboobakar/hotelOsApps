@@ -18,6 +18,7 @@ export function notes(host: HostApi, d: JobDetail): HTMLElement {
   for (const note of d.notes) {
     const ev = el("div", "ev");
     ev.append(el("b", undefined, `${note.who} · ${when(host, note.at)}`), el("span", undefined, note.text));
+    if (note.raising === true) ev.append(el("i", "dim", " (the raising text)"));
     line.append(ev);
   }
   left.append(line, el("div", "field ph", "Write a note…"));

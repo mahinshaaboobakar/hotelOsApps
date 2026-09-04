@@ -4,6 +4,7 @@
  */
 
 import { control, el, fill } from "./element";
+import type { Operator } from "../board/model";
 
 /** A destination on the top bar or a sub-navigation. */
 export interface Tab {
@@ -13,17 +14,11 @@ export interface Tab {
   count?: string;
 }
 
-/** Who is signed in, drawn at the head's end. */
-export interface Operator {
-  name: string;
-  where: string;
-}
-
 /** The head: mark, top tabs, search, operator. */
 export function head(
   tabs: readonly Tab[],
   current: string,
-  operator: Operator,
+  operator: Operator | null,
   go: (label: string) => void,
 ): HTMLElement {
   const bar = el("div", "head");
@@ -33,10 +28,9 @@ export function head(
   for (const tab of tabs) {
     bar.append(control(tab.label === current ? "tab on" : "tab", tab.label, () => go(tab.label)));
   }
-  bar.append(
-    el("div", "search", "Search job number, room, summary…"),
-    el("div", "who", `${operator.name} · ${operator.where}`),
-  );
+  bar.append(el("div", "search", "Search job number, room, summary…"));
+  // Nothing, rather than a name nobody established.
+  if (operator !== null) bar.append(el("div", "who", `${operator.name} · ${operator.where}`));
   return bar;
 }
 
