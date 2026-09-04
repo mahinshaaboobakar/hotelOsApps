@@ -22,10 +22,21 @@ import type { Secret, Setting, Toggle } from "./configuration";
 /**
  * What kind of thing the status line is saying.
  *
- * Two tones and no default: `info` for progress and success, `failed` for a
+ * Two tones and no default: `neutral` for progress and success, `bad` for a
  * refusal or an error. See [`panel`]'s `status`.
+ *
+ * **The platform's names, for the platform's concept** — `42i` entry 4. The
+ * desktop's `Tone` is `neutral | ok | warn | bad`, and this package had `info`
+ * and `failed`: the same two roles under names that match neither. The SDK
+ * publishes the colour tokens and not the vocabulary that uses them, so every
+ * package picks its own — and picking the platform's is the cheapest way to
+ * stop that becoming four vocabularies.
+ *
+ * **Two rather than four, and that is deliberate.** This form has no `ok` or
+ * `warn` state to draw; adopting names it does not use would be inventing
+ * surface to look conformant.
  */
-export type Tone = "info" | "failed";
+export type Tone = "neutral" | "bad";
 
 const SHEET_ID = "oracle-styles";
 
@@ -105,7 +116,7 @@ const CSS = `
    * them apart. The color-bad token is published for exactly this — "a
    * failure, a refusal, a destructive action" — and nothing was using it.
    */
-  .panel .status[data-tone="failed"] { color: var(--color-bad, currentColor); }
+  .panel .status[data-tone="bad"] { color: var(--color-bad, currentColor); }
 
   .panel .field { display: flex; flex-direction: column; gap: 4px; }
   .panel .label { font-size: 12px; color: var(--color-ink-muted, inherit); }
@@ -317,7 +328,7 @@ export function panel(root: HTMLElement) {
       // configuration that is still being written.
       if (save !== undefined) save.disabled = true;
       if (test !== undefined) test.disabled = true;
-      this.status(text, "info");
+      this.status(text, "neutral");
     },
 
     saved(): void {
@@ -548,7 +559,7 @@ export function panel(root: HTMLElement) {
       // loading is a screen telling an operator the opposite of what it shows.
       // A caller with something to say says it after this returns.
       status.textContent = "";
-      status.dataset["tone"] = "info";
+      status.dataset["tone"] = "neutral";
 
       surface.replaceChildren(form, status);
     },

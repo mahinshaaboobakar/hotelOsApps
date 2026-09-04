@@ -48,7 +48,7 @@
  * be a second design system arriving inside the first, drifting at the next
  * theme change.
  */
-import type { Activate, CallFailure, HostApi, HostedModule } from "@hotelos/sdk";
+import { HostCallError, type Activate, type HostApi, type HostedModule } from "@hotelos/sdk";
 
 import { panel } from "./chrome";
 import {
@@ -64,16 +64,24 @@ import {
   type ConnectionTest,
 } from "./configuration";
 
-/** Whether a failure carries a sentence a person may read — ADR 0041. */
-function isForPeople(kind: CallFailure["kind"]): boolean {
-  return kind === "rejected" || kind === "invalid";
-}
-
+/**
+ * The failure's own words, when ADR 0041 permits a person to read them.
+ *
+ * **The SDK answers this, and this file used to answer it again** — `42i`
+ * entry 5. `HostCallError.isForPeople` carries the rule with a doc saying it
+ * exists *"rather than leaving each package to rediscover the rule"*, and this
+ * package rediscovered it: the same two kinds, written out a second time, so a
+ * third client-facing kind would have reached two of the three places that
+ * decide.
+ *
+ * It was also casting to `CallFailure`, which is not what the bridge rejects
+ * with. `connect.ts` rejects a `HostCallError`; the cast happened to work
+ * because the shapes overlap, which is the kind of accident that survives until
+ * one of them changes.
+ */
 function sentence(failure: unknown, fallback: string): string {
-  const classified = failure as CallFailure | undefined;
-
-  return classified !== undefined && isForPeople(classified.kind)
-    ? classified.message
+  return failure instanceof HostCallError && failure.isForPeople
+    ? failure.message
     : fallback;
 }
 
@@ -84,7 +92,7 @@ export const activate: Activate = (host: HostApi): HostedModule => ({
     // Something is on screen before the first call resolves. A form that
     // renders nothing until the platform answers renders nothing at all when
     // the platform is slow, and an operator cannot tell that from a break.
-    surface.status("Loading configuration…", "info");
+    surface.status("Loading configuration…", "neutral");
 
     void host
       .call(READ, "configuration")
@@ -94,7 +102,7 @@ export const activate: Activate = (host: HostApi): HostedModule => ({
         // shown an empty form that silently cannot do anything.
         surface.status(
           sentence(failure, "This connector's configuration could not be read."),
-          "failed",
+          "bad",
         );
       });
   },
@@ -164,8 +172,8 @@ function draw(
  * same muted ink is the defect `color-bad` was claimed to fix — so the outcome
  * decides the tone rather than the sentence's wording.
  */
-function toneFor(outcome: string): "info" | "failed" {
-  return outcome === "reached" || outcome === "notSupported" ? "info" : "failed";
+function toneFor(outcome: string): "neutral" | "bad" {
+  return outcome === "reached" || outcome === "notSupported" ? "neutral" : "bad";
 }
 
 function test(host: HostApi, surface: ReturnType<typeof panel>): void {
@@ -181,7 +189,7 @@ function test(host: HostApi, surface: ReturnType<typeof panel>): void {
     })
     .catch((failure: unknown) => {
       surface.saved();
-      surface.status(sentence(failure, "The connection could not be tested."), "failed");
+      surface.status(sentence(failure, "The connection could not be tested."), "bad");
     });
 }
 
@@ -219,7 +227,7 @@ function save(
     })
     .catch((failure: unknown) => {
       surface.saved();
-      surface.status(sentence(failure, "The configuration could not be saved."), "failed");
+      surface.status(sentence(failure, "The configuration could not be saved."), "bad");
     });
 }
 
@@ -247,5 +255,5 @@ async function enable(host: HostApi, surface: ReturnType<typeof panel>): Promise
   await host.call(CONFIGURE, ENABLE);
 
   surface.saved();
-  surface.status("Saved, tested and enabled.", "info");
+  surface.status("Saved, tested and enabled.", "neutral");
 }

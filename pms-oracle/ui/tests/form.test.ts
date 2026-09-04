@@ -31,6 +31,13 @@ const CONFIGURATION = {
 function host(granted: readonly string[] = GRANTED): HostApi {
   return {
     identity: { id: "pms-oracle", version: "0.1.0", capabilities: granted },
+
+    // The host hands every module its property's zone and locale — the SDK
+    // gained this with `JOBS-Q1(8)`, after this suite was written, so `tsc` was
+    // already refusing it before this round touched the file. Stated rather
+    // than left null: a form that renders an instant should be tested against a
+    // property that has one.
+    property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: () => Promise.resolve(CONFIGURATION),
     on: () => () => {},
   };
