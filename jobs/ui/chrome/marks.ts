@@ -8,18 +8,18 @@ import { el } from "./element";
 
 const PILL_CSS = `
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;
-      border:1px solid var(--color-line,rgb(255 255 255/.09));color:var(--color-ink-muted,#9aa3b8);white-space:nowrap}
-.pill.ok{color:var(--color-ok,#3ecf8e);border-color:var(--color-ok,#3ecf8e)}
-.pill.warn{color:var(--color-warn,#f5b53f);border-color:var(--color-warn,#f5b53f)}
-.pill.bad{color:var(--color-bad,#ff5c7a);border-color:var(--color-bad,#ff5c7a)}
-.pill.run{color:var(--color-brand,#6b7cff);border-color:var(--color-brand,#6b7cff)}
-.pill.hold{color:var(--color-ink-faint,#5d657a);border-color:var(--color-ink-faint,#5d657a)}
-.pill.p1{background:var(--color-bad,#ff5c7a);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
-.pill.p2{background:var(--color-warn,#f5b53f);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
-.pill.p3{background:var(--color-brand,#6b7cff);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
+      border:1px solid var(--color-line,rgb(255 255 255 / 0.07));color:var(--color-ink-muted,#8b93a7);white-space:nowrap}
+.pill.ok{color:var(--color-ok,#34d399);border-color:var(--color-ok,#34d399)}
+.pill.warn{color:var(--color-warn,#fbbf24);border-color:var(--color-warn,#fbbf24)}
+.pill.bad{color:var(--color-bad,#f87171);border-color:var(--color-bad,#f87171)}
+.pill.run{color:var(--color-brand,#818cf8);border-color:var(--color-brand,#818cf8)}
+.pill.hold{color:var(--color-ink-faint,#5a6172);border-color:var(--color-ink-faint,#5a6172)}
+.pill.p1{background:var(--color-bad,#f87171);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
+.pill.p2{background:var(--color-warn,#fbbf24);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
+.pill.p3{background:var(--color-brand,#818cf8);color:var(--color-ink-on-accent,#0b0d14);border-color:transparent}
 .pill.nt{border-style:dashed}
 .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:6px;
-     border:1px solid var(--color-line,rgb(255 255 255/.09));color:var(--color-ink-faint,#5d657a);vertical-align:middle}
+     border:1px solid var(--color-line,rgb(255 255 255 / 0.07));color:var(--color-ink-faint,#5a6172);vertical-align:middle}
 `;
 
 /** The marks' own sheet, added to the module's stylesheet once. */

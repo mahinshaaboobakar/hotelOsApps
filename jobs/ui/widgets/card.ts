@@ -11,27 +11,27 @@ import { el, fill } from "../chrome/element";
 const SHELL_OPEN = "shell.open";
 
 const WIDGET_CSS = `
-.wcard{font:14px/1.5 var(--font-sans,"Segoe UI",system-ui,sans-serif);color:var(--color-ink,#e9ecf5);
+.wcard{font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);color:var(--color-ink,#e8ebf4);
        background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums}
 .whead{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:12px}
-.whead span{color:var(--color-ink-faint,#5d657a);font-weight:400;font-size:12px}
+.whead span{color:var(--color-ink-faint,#5a6172);font-weight:400;font-size:12px}
 .wfig{display:flex;gap:18px;margin-bottom:10px}
 .wfig b{display:block;font-size:22px;line-height:1.1}
-.wfig .lbl{color:var(--color-ink-faint,#5d657a);font-size:11px}
-.wfig .ok b{color:var(--color-ok,#3ecf8e)}
-.wfig .warn b{color:var(--color-warn,#f5b53f)}
-.wfig .bad b{color:var(--color-bad,#ff5c7a)}
-.wfig .run b{color:var(--color-brand,#6b7cff)}
-.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.09));
+.wfig .lbl{color:var(--color-ink-faint,#5a6172);font-size:11px}
+.wfig .ok b{color:var(--color-ok,#34d399)}
+.wfig .warn b{color:var(--color-warn,#fbbf24)}
+.wfig .bad b{color:var(--color-bad,#f87171)}
+.wfig .run b{color:var(--color-brand,#818cf8)}
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));
       font-size:13px;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;
       color:inherit;font-family:inherit;cursor:pointer}
 .wrow:last-child{border-bottom:0}
-.wrow .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#9aa3b8)}
-.wrow .bad{color:var(--color-bad,#ff5c7a)}
-.wrow .warn{color:var(--color-warn,#f5b53f)}
-.wrow .run{color:var(--color-brand,#6b7cff)}
-.wquiet{color:var(--color-ok,#3ecf8e);font-size:12px}
-.wrefusal{color:var(--color-ink-faint,#5d657a);font-size:12px;padding-top:8px}
+.wrow .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
+.wrow .bad{color:var(--color-bad,#f87171)}
+.wrow .warn{color:var(--color-warn,#fbbf24)}
+.wrow .run{color:var(--color-brand,#818cf8)}
+.wquiet{color:var(--color-ok,#34d399);font-size:12px}
+.wrefusal{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
 `;
 
 /** The widget's stylesheet, added once per draw. */
