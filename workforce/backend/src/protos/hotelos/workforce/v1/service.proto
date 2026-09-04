@@ -150,10 +150,26 @@ message ListPostingsRequest {
   // Include postings whose window has closed. Default false: the ordinary
   // question is "who works here now".
   bool include_ended = 5;
+
+  // PAGED, not cursor — `CORE-Q13`. This is the one list in Workforce whose
+  // length is the property's headcount rather than a day, a week or a
+  // department: every other read here is bounded by a natural key and needs no
+  // pager at all. A resort runs 100 to 600 postings, so the count is a fact and
+  // an ordinal is honest, which is the test the ruling gives.
+  //
+  // Absent means the first page at the server's default size, so a caller that
+  // does not page still works.
+  hotelos.common.v1.PagedRequest paging = 6;
 }
 
 message ListPostingsResponse {
   repeated PostingView postings = 1;
+
+  // Echoed from the server, never assumed by the client: `page_size` is the
+  // size APPLIED after the clamp, and `total` is rows matching the query rather
+  // than rows on this page. A pager numbered from what the caller asked for is
+  // wrong on every button while the list underneath looks perfect.
+  hotelos.common.v1.PagedResponse paging = 2;
 }
 
 message RecordCapabilityRequest {

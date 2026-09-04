@@ -15,6 +15,7 @@ import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
 import { recordedPeople, type People, type Posting } from "../../roster/people";
 import { endPosting } from "./end-posting";
+import { pager } from "../../chrome/pager";
 import { recordedPostingEnding } from "../../roster/teams";
 import type { PostingEnding } from "../../roster/team";
 
@@ -28,6 +29,8 @@ const COLUMNS = "1.5fr 116px 96px 1fr 1fr 116px";
  * @param ending whether the end-posting dialog is open over it
  * @param close dismiss the dialog
  * @param onEnd open the dialog on one person's posting
+ * @param onPage turn to a page, 0-based
+ * @param page which page to ask for, 0-based
  */
 export async function people(
   host: HostApi,
@@ -35,17 +38,34 @@ export async function people(
   ending: string | null = null,
   close: () => void = () => {},
   onEnd: (who: string) => void = () => {},
+  onPage: (page: number) => void = () => {},
+  page = 0,
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "people", recordedPeople);
+  // The page is part of the QUESTION, not something the screen slices off the
+  // answer. A screen that fetched everything and cut it locally would be a
+  // pager over a list the property already sent in full, which is the thing
+  // paging exists to avoid.
+  const got = await load(host, ROSTER_READ, "people", recordedPeople, { page });
   const board = got.value;
 
   const body = el("div", "body");
 
   // Nobody posted is a real state with its own screen, not an empty table.
   body.append(board.postings.length === 0 ? firstRun() : table(board.postings, onEnd));
+
   body.append(ownership());
 
-  main.replaceChildren(header(board, ending), body);
+  // **Outside the body, which scrolls.** §5: the list viewport scrolls within
+  // the screen and the pager does not move. Inside it, the control that turns
+  // the page is the one thing a reader has to scroll to the bottom to reach —
+  // and on a full page it is off the screen entirely, which is how the first
+  // capture of this found it.
+  //
+  // It draws nothing when the list fits, rather than a disabled row of one.
+  const pages = pager(board.paging, onPage);
+
+  main.replaceChildren(
+    ...[header(board, ending), body, pages].filter((one) => one !== null));
 
   // Ending a posting closes team memberships with it, and until this dialog
   // existed nothing said so — the round's finding, drawn.
@@ -104,9 +124,13 @@ function subtitle(
     return `${ending} · ${posting?.departments.join(" · ") ?? ""}`.trim();
   }
 
+  // **The property's total, not this page's length.** A subtitle counting the
+  // rows in front of you under a list that pages says something false about the
+  // property the moment somebody turns to page two.
   return board.postings.length === 0
     ? "Nobody is posted yet"
-    : `${board.postings.length} posted · ${here} in Front Office · ${expiring} certifications expiring`;
+    : `${board.paging.total} posted · ${here} in Front Office on this page · `
+      + `${expiring} certifications expiring`;
 }
 
 function table(postings: readonly Posting[], onEnd: (who: string) => void): HTMLElement {
@@ -146,7 +170,7 @@ function row(posting: Posting, onEnd: (who: string) => void): HTMLElement {
   name.append(el("span", undefined, posting.who));
 
   if (posting.reportsTo.startsWith("—")) {
-    name.append(el("em", undefined, "head"));
+    name.append(el("em", undefined, "★ head"));
   }
 
   who.append(name, el("s", undefined, posting.since));

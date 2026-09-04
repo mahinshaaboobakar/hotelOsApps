@@ -39,7 +39,16 @@
   const frame = document.getElementById("f");
   frame.width = width;
   frame.height = height;
-  frame.src = "./frame.html?" + (params.get("q") || "");
+  /*
+   * The realm's bundle is rebuilt between captures, and a browser that has
+   * already fetched `frame.js` will re-use it — so a capture pass photographs
+   * the previous build while every source file on disk is correct. That is the
+   * stale-run trap in its browser form: the shot is real, and it is of
+   * something that no longer exists. The harness therefore carries its own
+   * cache-buster through to the realm.
+   */
+  const bust = params.get("build") || String(Date.now());
+  frame.src = "./frame.html?build=" + bust + "&" + (params.get("q") || "");
 
   /*
    * The scale may be given rather than derived, and for a capture pass it

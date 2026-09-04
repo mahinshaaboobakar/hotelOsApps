@@ -22,4 +22,9 @@
   body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; }
   * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
 </style>
-</head><body><script type="module" src="./frame.js"></script></body></html>
+</head><body><script type="module">
+  // The build tag rides in from the harness so a rebuilt bundle is actually
+  // fetched; without it a capture pass photographs the previous build.
+  const build = new URLSearchParams(location.search).get("build") || "";
+  await import("./frame.js?build=" + build);
+</script></body></html>

@@ -119,14 +119,38 @@ function clickCell(person: string, day: number): void {
   (cells[start + 1 + day] as HTMLElement | undefined)?.click();
 }
 
-/** Click the first element matching `selector` whose text contains `text`. */
-function click(selector: string, text: string): void {
-  for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
-    if (node.textContent?.includes(text) === true) {
-      node.click();
-      return;
+/**
+ * Click the first element matching `selector` whose text contains `text` —
+ * waiting for it to exist rather than assuming it already does.
+ *
+ * **A fixed pause is not a wait for a control.** This clicked once, immediately,
+ * and every capture that opened a dialog from a screen's header worked while the
+ * one whose button sits under an asynchronously loaded list silently did
+ * nothing: *Add a member* is drawn after a team's members resolve, so the click
+ * ran against a detail pane that had a Rename and a Stand down and not yet the
+ * button being asked for. The capture then photographed a correct screen with no
+ * dialog on it, which is the worst failure a harness can have — it looks like a
+ * missing feature, and there was a `settle()` on the line above vouching for it.
+ *
+ * Polling for the node makes the harness wait for the thing rather than for a
+ * duration, which is the same correction the ready flag already applies to the
+ * screen as a whole.
+ *
+ * @returns whether anything was found and clicked
+ */
+async function click(selector: string, text: string): Promise<boolean> {
+  for (let turn = 0; turn < 40; turn += 1) {
+    for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
+      if (node.textContent?.includes(text) === true) {
+        node.click();
+        return true;
+      }
     }
+
+    await new Promise((resolve) => { setTimeout(resolve, 50); });
   }
+
+  return false;
 }
 
 /**
@@ -147,6 +171,8 @@ function click(selector: string, text: string): void {
  * version clicked *Policy* and then *New shift* immediately, and the second
  * click found nothing because the header had not been drawn yet.
  */
+const misses: string[] = [];
+
 async function drive(): Promise<void> {
   const settle = (): Promise<void> =>
     new Promise((resolve) => { setTimeout(resolve, 120); });
@@ -156,38 +182,38 @@ async function drive(): Promise<void> {
   // Two levels: the bar names a section, `view` names one of its views. The
   // module opens Rota's first view on mount, so neither is required.
   const screen = params.get("screen");
-  if (screen !== null && screen !== "Rota") { click(".head .tab", screen); await settle(); }
+  if (screen !== null && screen !== "Rota") { missed(".head .tab", screen, await click(".head .tab", screen)); await settle(); }
 
   const view = params.get("view");
-  if (view !== null) { click(".tabs .tab", view); await settle(); }
+  if (view !== null) { missed(".tabs .tab", view, await click(".tabs .tab", view)); await settle(); }
 
   const tab = params.get("tab");
-  if (tab !== null) { click(".tab", tab); await settle(); }
+  if (tab !== null) { missed(".tab", tab, await click(".tab", tab)); await settle(); }
 
   // The two states the rail cannot reach are opened the way a person opens
   // them — by clicking the button the approved frame draws.
   const open = params.get("open");
-  if (open === "print") { click(".btn", "Print"); await settle(); }
-  if (open === "shift") { click(".btn", "New shift"); await settle(); }
-  if (open === "leave") { click(".btn", "Request leave"); await settle(); }
-  if (open === "duty") { click(".btn", "Assign duty"); await settle(); }
-  if (open === "form") { click(".btn", "Form a team"); await settle(); }
+  if (open === "print") { missed(".btn", "Print", await click(".btn", "Print")); await settle(); }
+  if (open === "shift") { missed(".btn", "New shift", await click(".btn", "New shift")); await settle(); }
+  if (open === "leave") { missed(".btn", "Request leave", await click(".btn", "Request leave")); await settle(); }
+  if (open === "duty") { missed(".btn", "Assign duty", await click(".btn", "Assign duty")); await settle(); }
+  if (open === "form") { missed(".btn", "Form a team", await click(".btn", "Form a team")); await settle(); }
 
   // Frame 2 opens by clicking the team, and frame 6 by clicking the person —
   // both are rows, and both are the row the frame draws rather than the first
   // one that matches. The rota picker taught that lesson once already.
   const openTeam = params.get("team");
-  if (openTeam !== null) { click("button.tgrid", openTeam); await settle(); }
+  if (openTeam !== null) { missed("button.tgrid", openTeam, await click("button.tgrid", openTeam)); await settle(); }
 
   const endWho = params.get("end");
-  if (endWho !== null) { click("button.row", endWho); await settle(); }
+  if (endWho !== null) { missed("button.row", endWho, await click("button.row", endWho)); await settle(); }
 
   // After the team, never before: both controls live in the detail pane, which
   // does not exist until one is open. This is the same ordering the shift
   // dialog needed — a click on a control its own screen has not drawn yet
   // finds nothing and fails silently.
-  if (open === "member") { click(".btn", "Add a member"); await settle(); }
-  if (open === "down") { click(".btn", "Stand down"); await settle(); }
+  if (open === "member") { missed(".btn", "Add a member", await click(".btn", "Add a member")); await settle(); }
+  if (open === "down") { missed(".btn", "Stand down", await click(".btn", "Stand down")); await settle(); }
 
   // The rota's picker opens on a cell rather than a button, so it is reached by
   // clicking the cell a person would click — and it must be THE cell the frame
@@ -202,7 +228,29 @@ async function drive(): Promise<void> {
   // Every screen rendered correctly while `data-ready` stayed absent, which is
   // the worst shape for a signal: the thing it reports was fine and the signal
   // was not.
+  //
+  // **A step that found nothing never becomes ready.** The realm is only worth
+  // photographing if every control the query asked for was actually reached, so
+  // a miss is stated on the screen and the flag is withheld — the capture cannot
+  // then be mistaken for a screen that simply has no dialog on it.
+  if (misses.length > 0) {
+    const banner = document.createElement("div");
+
+    banner.textContent = "HARNESS MISSED: " + misses.join(" · ");
+    banner.setAttribute("style", "position:fixed;inset:0 0 auto 0;z-index:9999;"
+      + "background:#b91c1c;color:#fff;font:600 13px system-ui;padding:10px 14px");
+
+    document.body.append(banner);
+    document.documentElement.setAttribute("data-ready", "missed");
+    return;
+  }
+
   document.documentElement.setAttribute("data-ready", "true");
+}
+
+/** Remember a control the query named and the screen never drew. */
+function missed(selector: string, text: string, found: boolean): void {
+  if (!found) misses.push(`${text} (${selector})`);
 }
 
 void drive();

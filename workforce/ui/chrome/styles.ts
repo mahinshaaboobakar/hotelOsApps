@@ -127,7 +127,12 @@ button{background:transparent;color:inherit;font:inherit;border:0;
 /* Padded on all four sides. It was 0 24px 20px — a deliberate zero on top,
    because the title row above supplied it — so removing that row leaves the
    first element flush against the bar's rule. */
-.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+/* flex:1 1 auto with min-height:0 is what makes the scroll happen HERE
+   rather than pushing whatever sits below out of the frame. Without it the
+   body sizes to its content and the pinned pager is off the screen — which
+   is the first thing the capture showed. */
+.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px;
+      flex:1 1 auto;min-height:0}
 /* ...unless a switcher sits above and has already paid for it. */
 .tabs + .main .body{padding-top:14px}
 
@@ -182,7 +187,11 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    is not a detail — a first cell of two lines otherwise pushes every other cell
    in the row down past the name it belongs beside. */
 .rows{display:flex;flex-direction:column}
-.row{display:grid;gap:12px;align-items:flex-start;padding:10px;font-size:13px;
+/* 6px 10px, not 10px all round — §4's named exception. Jobs' rows carry one
+   line and take 10px; these carry two, the person and since when, so 10px
+   vertical makes the list half as dense as the board it is meant to match.
+   Jobs' horizontal exactly, and a vertical the second line pays for. */
+.row{display:grid;gap:12px;align-items:flex-start;padding:6px 10px;font-size:13px;
      border:0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.07));
      background:none;width:100%;text-align:left;color:inherit;font-family:inherit}
 /* The last row keeps its rule: with no card around the list, that line is what
@@ -242,6 +251,38 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 .spans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .spans.four{grid-template-columns:repeat(4,1fr);gap:6px}
 .spans .finput{white-space:nowrap}
+/* # The pager — §6, and it MATCHES the design system rather than importing it
+   A hosted module is styled by tokens and never by importing a component
+   across a realm, so the match is a rendering obligation. The arithmetic is
+   the SDK's pagedView, shared with the desktop's React pager, because that
+   is where the mistakes are; only the markup differs, and only where differing
+   costs nothing.
+
+   Numbered, because the wire carries a total: ListPostings pages on
+   PagedRequest / PagedResponse, so an ordinal and a count both exist and
+   showing 1-6 of 42 is something the service can actually answer. */
+/* Pinned under the list rather than inside it — §5. The body scrolls; this
+   does not, so the control that turns the page is never the thing a reader has
+   to scroll to the bottom to find. */
+.pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
+       flex:0 0 auto;padding:11px 26px;font-size:12px;
+       border-top:1px solid var(--color-line,rgb(255 255 255/.07));
+       color:var(--color-ink-faint,#5a6172)}
+.pager .pnav{display:flex;align-items:center}
+.pager .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
+           border:1px solid var(--color-line,rgb(255 255 255/.07));font:inherit;
+           font-size:12px;background:none;cursor:pointer;
+           color:var(--color-ink-muted,#8b93a7)}
+.pager .pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
+/* Present and dimmed at the ends rather than disappearing: a row whose controls
+   move as you page is a row you have to re-find on every click. */
+.pager .pg[disabled]{color:var(--color-ink-faint,#5a6172);opacity:.45;cursor:default}
+/* elide, not gap: the rota owns .gap for an uncovered cell, and every
+   screen's rules compose into one stylesheet. */
+.pager .elide{margin-left:4px;color:var(--color-ink-faint,#5a6172)}
+/* The range, on the left. It is the half a reader actually reads. */
+.pager .showing{color:var(--color-ink-muted,#8b93a7)}
+
 /* The dialog, and the fields inside one. Here rather than in a screen because
    three screens open one — Policy, Leave and Teams — and the shape a person
    meets on the third has to be the shape they learned on the first. */

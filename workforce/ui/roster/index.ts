@@ -40,6 +40,8 @@ export interface Loaded<T> {
  * @param capability the permission the manifest requested
  * @param method the operation within it
  * @param recorded what to show when the platform cannot answer
+ * @param params what the question needs — which page, for the one list that has
+ *   them. Absent for every other read, which is bounded by a natural key.
  * @returns the value, and whether it is real
  */
 export async function load<T>(
@@ -47,6 +49,7 @@ export async function load<T>(
   capability: string,
   method: string,
   recorded: T,
+  params?: unknown,
 ): Promise<Loaded<T>> {
   // Asking for a capability that was not granted is not worth a round trip, and
   // the refusal would read as an outage rather than as a permission a property
@@ -56,7 +59,11 @@ export async function load<T>(
   }
 
   try {
-    return { value: (await host.call(capability, method)) as T, live: true, because: null };
+    return {
+      value: (await host.call(capability, method, params)) as T,
+      live: true,
+      because: null,
+    };
   } catch (error) {
     if (error instanceof HostCallError) {
       // ADR 0041, asked by the SDK so a package does not rediscover the rule:

@@ -126,7 +126,10 @@
      because the page-title row above supplied it — so removing that row leaves
      the first element flush against the bar’s rule. §3’s trap, and every app
      doing this removal has the same zero waiting for it. */
-  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  /* flex:1 with min-height:0 is what makes the scroll happen HERE rather
+     than pushing the pinned pager out of the frame. */
+  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;
+        gap:12px;flex:1 1 auto;min-height:0}
   /* summary strip */
   /* ONE THIN BAR, not a row of cards — docs/working/64 §3, Jobs' board, and
      the owner's finding on the whole-surface audit: this drawing still spent a
@@ -335,6 +338,24 @@
   .rep .nm b{font-weight:500}
   .rep .nm span{display:block;color:var(--faint);font-size:11px}
   .rep .ot{color:var(--warn);font-weight:600}
+  /* The pager — §6, numbered because the wire carries a total. ListPostings
+     pages on PagedRequest / PagedResponse, so an ordinal and a count both
+     exist and "showing 1–6 of 42" is something the service can answer.
+     Added 2026-09-04: this drawing showed 42 posted over six rows and no
+     pager, which is §8's own rule about a number checked against its frame. */
+  /* Pinned under the list rather than inside it — §5: the list viewport
+     scrolls and the pager does not move. Drawn inside the body it was below
+     the fold on a full page, which is the control a reader most needs to
+     reach. */
+  .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
+         flex:0 0 auto;padding:11px 26px;font-size:12px;color:var(--faint);
+         border-top:1px solid var(--line)}
+  .pager .showing{color:var(--dim)}
+  .pnav{display:flex;align-items:center}
+  .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
+      border:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .pg.on{color:var(--text);border-color:var(--indigo)}
+  .pg.off{color:var(--faint);opacity:.45}
   /* the printed week — a light artifact, deliberately not the screen */
   .paper{background:#fff;color:#111;border-radius:6px;padding:26px 28px;font:11.5px/1.5 "Segoe UI",system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5)}
   .paper h2{font-size:15px;font-weight:700;margin:0}

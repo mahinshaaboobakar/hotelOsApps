@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>One drawn frame, at its own size</title>
+<style>
+  /*
+   * The drawn half of an audit pair, photographed on its own.
+   *
+   * `ui/preview/shot.html` does this for the BUILT half — one screen, at the
+   * exact width and height its approved frame was drawn at, scaled by a factor
+   * given rather than derived. This is its counterpart for the DRAWING, and it
+   * exists for the same reason: a capture beside a frame is evidence only when
+   * the two are the same shape and the same scale. Cropping one frame out of a
+   * screenshot of the whole mockup put both of those in the hands of whoever
+   * typed the numbers.
+   *
+   * It isolates one `.win` by index — `?n=6` is the sixth frame of the file —
+   * rather than by a name or an id, because the mockups carry neither and
+   * adding them would be changing the artifact to suit the camera.
+   *
+   *   ?n=<1-based frame>&w=<css width>&h=<css height>&k=<scale>&src=<mockup>
+   */
+  html,body{margin:0;background:#07090f;overflow:hidden}
+  #stage{transform-origin:0 0}
+  iframe{display:block;border:0}
+</style>
+</head><body><div id="stage"><iframe id="f" title="One approved frame"></iframe></div>
+<script>
+  const p = new URLSearchParams(location.search);
+  const n = Number(p.get("n") || 1);
+  const w = Number(p.get("w") || 1220);
+  const h = Number(p.get("h") || 600);
+  const k = Number(p.get("k") || 1);
+  const src = p.get("src") || "01-workforce-gold.html";
+
+  const f = document.getElementById("f");
+  f.width = w; f.height = h; f.src = "./" + src;
+  document.getElementById("stage").style.transform = "scale(" + k + ")";
+
+  f.addEventListener("load", () => {
+    const d = f.contentDocument;
+    const win = d.querySelectorAll(".win")[n - 1];
+    if (win === undefined) return;   // no flag: an absent frame must not photograph
+
+    d.body.style.cssText = "margin:0;padding:0;background:#07090f";
+    d.querySelectorAll("body > *").forEach((el) => { el.style.display = "none"; });
+
+    // Walk up to the frame's own top-level container and show only that. When
+    // the `.win` IS a body child the two are the same node, and hiding "the
+    // siblings" would hide the frame's own contents — which is exactly what the
+    // first version did, and it photographed a rectangle of empty background.
+    // Set properties, never `cssText`: the frames carry their drawn height as
+    // an inline style, and replacing the declaration dropped it — the window
+    // then grew past the height it was drawn at and the pinned pager fell
+    // below the crop, which reads on the page as a missing control.
+    let top = win;
+    while (top.parentElement !== d.body) top = top.parentElement;
+    // "" restores the stylesheet's own value; "block" would OVERRIDE it, and
+    // `.win` is a flex column — forcing block stopped the body flexing, so the
+    // pinned pager was pushed past the frame's height and photographed as
+    // absent. Unhide, never re-declare.
+    top.style.display = "";
+    top.style.margin = "0";
+    top.style.padding = "0";
+    if (top !== win) {
+      Array.from(top.children).forEach((el) => {
+        if (!el.contains(win)) el.style.display = "none";
+      });
+    }
+
+    win.style.margin = "0";
+    d.documentElement.setAttribute("data-ready", "true");
+    document.documentElement.setAttribute("data-ready", "true");
+  });
+</script></body></html>

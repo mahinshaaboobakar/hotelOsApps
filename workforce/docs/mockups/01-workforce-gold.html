@@ -126,7 +126,10 @@
      because the page-title row above supplied it — so removing that row leaves
      the first element flush against the bar’s rule. §3’s trap, and every app
      doing this removal has the same zero waiting for it. */
-  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  /* flex:1 with min-height:0 is what makes the scroll happen HERE rather
+     than pushing the pinned pager out of the frame. */
+  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;
+        gap:12px;flex:1 1 auto;min-height:0}
   /* summary strip */
   /* ONE THIN BAR, not a row of cards — docs/working/64 §3, Jobs' board, and
      the owner's finding on the whole-surface audit: this drawing still spent a
@@ -335,6 +338,24 @@
   .rep .nm b{font-weight:500}
   .rep .nm span{display:block;color:var(--faint);font-size:11px}
   .rep .ot{color:var(--warn);font-weight:600}
+  /* The pager — §6, numbered because the wire carries a total. ListPostings
+     pages on PagedRequest / PagedResponse, so an ordinal and a count both
+     exist and "showing 1–6 of 42" is something the service can answer.
+     Added 2026-09-04: this drawing showed 42 posted over six rows and no
+     pager, which is §8's own rule about a number checked against its frame. */
+  /* Pinned under the list rather than inside it — §5: the list viewport
+     scrolls and the pager does not move. Drawn inside the body it was below
+     the fold on a full page, which is the control a reader most needs to
+     reach. */
+  .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
+         flex:0 0 auto;padding:11px 26px;font-size:12px;color:var(--faint);
+         border-top:1px solid var(--line)}
+  .pager .showing{color:var(--dim)}
+  .pnav{display:flex;align-items:center}
+  .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
+      border:1px solid var(--line);font-size:12px;color:var(--dim)}
+  .pg.on{color:var(--text);border-color:var(--indigo)}
+  .pg.off{color:var(--faint);opacity:.45}
   /* the printed week — a light artifact, deliberately not the screen */
   .paper{background:#fff;color:#111;border-radius:6px;padding:26px 28px;font:11.5px/1.5 "Segoe UI",system-ui,sans-serif;box-shadow:0 20px 60px rgba(0,0,0,.5)}
   .paper h2{font-size:15px;font-weight:700;margin:0}
@@ -708,7 +729,7 @@
 
 <!-- 6 · People -->
 <h1>6 · <b>People</b> — postings, and the zone that makes a posting complete</h1>
-<div class="win" style="height:560px">
+<div class="win" style="height:620px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -722,7 +743,7 @@
   </div>
   <div class="main">
     <div class="tabs"><div class="tab on">Postings</div><div class="tab">Teams</div></div>
-    <div class="acts"><div class="hsub">42 posted · 6 in Front Office · 2 certifications expiring</div><div class="sel" style="margin-left:14px">All departments <span>▾</span></div><div class="grow"></div><div class="btn pri">＋ Post a staff member</div></div>
+    <div class="acts"><div class="hsub">42 posted · 5 in Front Office on this page · 5 certifications expiring</div><div class="sel" style="margin-left:14px">All departments <span>▾</span></div><div class="grow"></div><div class="btn pri">＋ Post a staff member</div></div>
     <div class="body" style="padding-top:14px">
       <div class="card">
         <div class="prow hd" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div>Person</div><div>Department</div><div>Zone</div><div>Job role</div><div>Reports to</div><div>Capability</div></div>
@@ -732,9 +753,11 @@
         <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Rajan Pillai</b><span class="sub">Since 2 Feb 2020 · 2 postings</span></div><div><span class="dep">KIT</span> <span class="dep" style="opacity:.6">BQT</span></div><div><span class="zn">Zone 5</span></div><div>Sous chef</div><div>Mathew George</div><div><span class="pill bad2">1 expired</span></div></div>
         <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Rahul Nair</b><span class="sub">Since 8 Jun 2024</span></div><div><span class="dep">SEC</span></div><div><span class="zn">Zone 1</span></div><div>Security officer</div><div>Thomas Varghese</div><div><span class="pill ok">4 valid</span></div></div>
         <div class="prow" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div><b>Sneha Iyer</b><span class="sub">Since 30 Nov 2025</span></div><div><span class="dep">FO</span></div><div><span class="zn">Zone 2</span></div><div>Receptionist</div><div>Priya Thomas</div><div><span class="pill neu">none recorded</span></div></div>
+        <div class="prow" style="color:var(--faint);font-size:11.5px"><div>… 19 more on this page</div><div></div><div></div><div>25 per page · about 6 rows visible at this height, 12 in a normal window, 15 maximised</div><div></div></div>
       </div>
       <div class="not" style="margin:0;max-width:none"><b>Identity is Master Data's and read-only here.</b> Name, employee number, contact and photograph belong to the person and are edited in Core Administration. This screen owns what is <i>operational</i> — the posting, the job role, the reporting line, the zone and the department head — which is the half ADR 0063 §Q5 moved out of Core, and the reason Core Administration's Staff section deliberately no longer shows it.</div>
     </div>
+      <div class="pager"><div class="showing">Showing 1–25 of 42 · <span style="color:var(--faint)">6 of the 25 drawn</span></div><div class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">›</span></div></div>
   </div>
 </div>
 <div class="cap"><b>The zone is on the posting, not beside it.</b> <i>"Anjali has zone 3"</i> is an incomplete fact; <i>"Anjali has zone 3 <b>as Front Office</b>"</i> is complete — so the zone lives on the posting that already carries the department, which makes the incomplete state impossible to write rather than merely discouraged (<b>WF-Q7</b>). It is <b>optional</b>: most postings have none, and a receptionist posted to Front Office and to no area is the ordinary case. It is <b>durable until changed</b> — a standing arrangement edited here or on the rota, not re-decided each morning — and it inherits the posting's effective dating. <b>Rajan carries two postings</b> (<b>WF-Q3</b>) and one <b>expired</b> certification, which is shown and named and blocks nothing (<b>WF-Q16</b>). <b>This screen is why Room Care can ask "who has zone 3"</b> — through the Context Service, never by reading this application's tables (<b>CTX-Q4</b>, <b>WF-Q6</b>).</div>

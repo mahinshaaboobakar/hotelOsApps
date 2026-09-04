@@ -92,6 +92,12 @@ interface Place {
 
   /** Open the end-posting dialog on somebody. */
   onWho: (who: string) => void;
+
+  /** Which page of the one list that has them. */
+  page: number;
+
+  /** Turn to a page of a list, 0-based. */
+  onPage: (page: number) => void;
 }
 
 /** One view, and the screen it opens. */
@@ -151,7 +157,8 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
       {
         label: "Postings",
         draw: (h, m, place) => void people(
-          h, m, place.who, place.close, (who) => { place.onWho(who); }),
+          h, m, place.who, place.close, (who) => { place.onWho(who); },
+          (chosen) => { place.onPage(chosen); }, place.page),
       },
       {
         label: "Teams",
@@ -211,6 +218,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let detail: string | null = null;
   let pick: { person: string; day: number } | null = null;
   let who: string | null = null;
+  let page = 0;
   let team: string | null = null;
 
   function show(next: string, chosen: string | null = null): void {
@@ -271,6 +279,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       onPick: (person, day) => { pick = { person, day }; show(current); },
       who,
       onWho: (person) => { who = person; show(current); },
+      // Which page of the one list that has them. Held here rather than in the
+      // screen, because a screen is redrawn from scratch on every change.
+      page,
+      onPage: (chosen) => { page = chosen; show(current); },
       team,
       // Clicking the open team closes it, which is the only way back to the
       // plain list: neither level of navigation reaches a state it has no

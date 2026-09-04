@@ -256,6 +256,56 @@ public class PostingService(
             .ToListAsync(cancellationToken);
     }
 
+    /// <summary>The largest page this service will serve.</summary>
+    /// <remarks>
+    /// A size is <b>a request, not an instruction</b>. The clamp lives here
+    /// because it is a property of what this service will do, and the size
+    /// actually applied is echoed back: a caller that asked for 500, silently
+    /// got 50 and numbered its pager from 500 draws every button wrongly over a
+    /// list that looks perfect.
+    /// </remarks>
+    private const int LargestPage = 100;
+
+    /// <summary>The size served when a caller does not ask for one.</summary>
+    private const int DefaultPage = 25;
+
+    /// <summary>One page of postings, with what a pager needs to draw itself.</summary>
+    /// <param name="scope">The caller.</param>
+    /// <param name="query">The filters, and which page.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>The rows, the page served, the size applied and the total.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>Paged rather than cursor</b> — <c>CORE-Q13</c>, and the test the
+    /// ruling gives is whether the count is a fact or a moving target. A
+    /// property's postings change when somebody is hired, which is not while a
+    /// supervisor reads page two, so an ordinal and a total are both honest.
+    /// </para>
+    /// <para>
+    /// <b>This is the only Workforce list that needs one.</b> Every other read
+    /// here is bounded by a natural key — one person's month, one department's
+    /// week or day, the property's own catalogue. This one is bounded by the
+    /// property's headcount, which at a resort is hundreds.
+    /// </para>
+    /// <para>
+    /// <b>The total counts rows matching the query</b>, after every filter and
+    /// before the page is cut. Counted any other way it puts a wrong number
+    /// under the list and a wrong page count in the pager.
+    /// </para>
+    /// </remarks>
+    public async Task<PostingPage> ListPageAsync(
+        RequestScope scope, ListPostingsQuery query, CancellationToken cancellationToken)
+    {
+        var all = await ListAsync(scope, query, cancellationToken);
+
+        var size = Math.Clamp(query.Paging?.Size ?? DefaultPage, 1, LargestPage);
+        var pages = Math.Max(1, (int)Math.Ceiling(all.Count / (double)size));
+        var page = Math.Clamp(query.Paging?.Page ?? 0, 0, pages - 1);
+
+        return new PostingPage(
+            [.. all.Skip(page * size).Take(size)], page, size, all.Count);
+    }
+
     /// <summary>
     /// Two open postings for one person in one department cannot both be true.
     /// </summary>

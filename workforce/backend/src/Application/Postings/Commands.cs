@@ -1,3 +1,5 @@
+using HotelOS.Workforce.Domain;
+
 namespace HotelOS.Workforce.Application.Postings;
 
 /// <summary>Create a posting.</summary>
@@ -93,6 +95,22 @@ public sealed record EndPostingCommand
     public required DateOnly EffectiveTo { get; init; }
 }
 
+/// <summary>Which page of a list, and how big.</summary>
+/// <param name="Page">0-based; 0 is the first page.</param>
+/// <param name="Size">
+/// A request rather than an instruction — the service clamps it, and echoes
+/// back the size it actually applied.
+/// </param>
+public readonly record struct PagedQuery(int Page, int Size);
+
+/// <summary>One page of postings, and what the pager needs to draw itself.</summary>
+/// <param name="Postings">The rows on this page.</param>
+/// <param name="Page">The page served, 0-based.</param>
+/// <param name="Size">The size APPLIED, after the clamp.</param>
+/// <param name="Total">Rows matching the query — not rows on this page.</param>
+public sealed record PostingPage(
+    IReadOnlyList<Posting> Postings, int Page, int Size, int Total);
+
 /// <summary>Which postings to list.</summary>
 public sealed record ListPostingsQuery
 {
@@ -104,6 +122,15 @@ public sealed record ListPostingsQuery
 
     /// <summary>Only postings covering this zone — the Context resolver's query.</summary>
     public Guid? ZoneId { get; init; }
+
+    /// <summary>Which page, 0-based, and how big.</summary>
+    /// <remarks>
+    /// Null asks for the first page at the default size — <c>CORE-Q13</c>'s
+    /// paged pattern, which applies here because the count is a fact: this list
+    /// is the property's headcount, and every other read in Workforce is
+    /// bounded by a day, a week, a month or a department.
+    /// </remarks>
+    public PagedQuery? Paging { get; init; }
 
     /// <summary>
     /// Include postings whose window has closed. Default false: the ordinary

@@ -57,7 +57,7 @@ function who(person: Person): HTMLElement {
   // `WF-Q7`: the zone lives on the posting that already carries the department,
   // so "Zone 3" is never shown as a fact on its own.
   if (person.head) {
-    name.append(el("em", undefined, "head"));
+    name.append(el("em", undefined, "★ head"));
   }
 
   text.append(
