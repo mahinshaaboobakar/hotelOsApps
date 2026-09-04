@@ -51,18 +51,38 @@
   .lead b{color:var(--text)}
   .win{max-width:1220px;margin:0 auto;border-radius:18px;position:relative;overflow:hidden;
        background:radial-gradient(900px 420px at 10% 118%, rgba(79,70,229,.28), transparent 60%),radial-gradient(700px 360px at 94% 106%, rgba(8,145,178,.20), transparent 55%),var(--bg);
-       border:1px solid var(--line2);box-shadow:var(--shadow);display:grid;grid-template-columns:240px 1fr}
-  .rail{border-right:1px solid var(--line);padding:20px 12px;background:rgba(10,12,18,.35);display:flex;flex-direction:column;gap:1px}
-  .app{display:flex;gap:11px;align-items:center;font-weight:600;font-size:14.5px;padding:0 10px 18px}
-  .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(120deg,rgba(125,211,252,.25),rgba(192,132,252,.25));border:1px solid var(--line2);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--cyan)}
-  .ri{display:flex;gap:11px;align-items:center;padding:8px 12px;border-radius:10px;color:var(--dim);font-size:13.5px}
-  .ri.on{background:linear-gradient(90deg,rgba(129,140,248,.18),rgba(129,140,248,.05));color:var(--text);box-shadow:inset 2.5px 0 0 var(--indigo)}
-  .ri .cnt{margin-left:auto;font-size:11px;color:var(--faint)}
-  .ri .cnt.att{color:var(--warn)}
-  .me{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);line-height:1.5}
-  .me b{display:block;color:var(--dim);font-weight:500}
+       border:1px solid var(--line2);box-shadow:var(--shadow)}
+
+  /* # The app bar — Jobs' `.head`, and the rail is gone
+     An INSTALLED application navigates from the TOP. The platform's own four
+     — Core Administration, Operations Center, My Hotel, Software Center —
+     keep their left rail, because they are the desktop's own furniture rather
+     than something a property installed.
+     This was a 240px rail with pill-shaped items and an inset brand bar: a
+     second navigation design for the same job, which is visible the moment a
+     receptionist has Jobs and GuestOps open side by side. Owner direction,
+     2026-09-04; the standard is docs/working/64. */
+  .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;
+        border-bottom:1px solid var(--line)}
+  .app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
+  .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);
+        display:grid;place-items:center;font-size:11px;font-weight:700;
+        color:var(--color-ink-on-accent)}
+  /* Scoped to the bar, because `.tab` already means the body's view switcher.
+     Two meanings, one class, and specificity is what keeps them apart —
+     the alternative was renaming 68 items to say the same thing twice. */
+  .head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;
+             font-size:13px;color:var(--dim);border-bottom:2px solid transparent;
+             font-weight:400}
+  .head .tab.on{color:var(--text);border-bottom-color:var(--color-brand)}
+  .head .tab .n{margin-left:0;font-size:11px;color:var(--faint)}
+  .head .tab .n.att{color:var(--warn)}
+  /* No search box in this bar. Jobs has one; inventing one here would be a
+     control nobody designed, drawn into a specification. */
+  .who{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
   .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-  .head{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
+  /* The page's own title row, inside the frame rather than in the bar. */
+  .title{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
   .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
   .hsub{color:var(--faint);font-size:12px;margin-top:2px}
   .grow{margin-left:auto}
@@ -117,11 +137,22 @@
   /* Density — docs/working/64 §3. This drawing fitted five guests where Jobs
      fits twelve, because a row was given a card's worth of air. A card is for a
      thing you are looking AT; a row is one of many you are looking THROUGH. */
-  .tbl{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:13px}
+  /* No box — Jobs' board, docs/working/64 §3. This was a card: a filled
+     background, a 1px border and a 14px radius wrapped around every list,
+     with the header row filled again inside it. Jobs' table sits bare on the
+     page and separates rows with a single bottom rule, and two applications
+     drawing a list two ways is visible in one glance at the dock.
+     The rules below are Jobs' th/td, with only the vertical padding reduced —
+     a GuestOps row carries two lines (the guest, then how to reach them) where
+     a Jobs row carries one, so equal padding would make this list half as
+     dense as the board it is matching. */
+  .tbl{font-size:13px}
   .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;border-bottom:1px solid var(--line)}
-  .tr:last-child{border-bottom:none}
-  .tr>div{padding:5px 12px;display:flex;align-items:center;gap:7px;min-width:0}
-  .tr.hd>div{background:var(--sunken);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:5px 12px}
+  /* Jobs keeps the rule on every row, including the last: with no card around
+     the list, that final line is what closes it. */
+  .tr>div{padding:6px 10px;display:flex;align-items:center;gap:7px;min-width:0}
+  .tr.hd>div{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
+             color:var(--faint);padding:8px 10px}
   .tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
   .tr .nm b{font-weight:600}
   .tr .nm span{font-size:10.5px;color:var(--faint)}
@@ -130,7 +161,9 @@
      elision it does not state reads as the screen's own answer. */
   .tr.more{grid-template-columns:1fr}
   .tr.more>div{color:var(--faint);font-style:italic;font-size:11.5px;padding:6px 12px}
-  .tr.sel{background:rgba(129,140,248,.07);box-shadow:inset 2.5px 0 0 var(--indigo)}
+  /* Jobs tints the selected row and nothing else — the 2.5px inset brand bar
+     that used to be here was this application's own invention. */
+  .tr.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
   .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
   .un{color:var(--faint);font-style:italic}
   /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
@@ -254,16 +287,16 @@
 <!-- 1 · Today, standalone -->
 <h1 style="margin-top:12px">1 · <b>Today</b> — the front desk day, in a property with no PMS. Arrivals, in house, departures, and the honest list; the day is the <b>business day</b>, not midnight to midnight</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">4</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">4</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Today</div><div class="hsub">Business day <b style="color:var(--dim)">Tue 31 Aug</b> · rolls at 04:00 · standalone — this property is the book</div></div>
       <div class="grow"></div>
       <div class="btn">Walk-in</div>
@@ -368,16 +401,16 @@
 <!-- 2 · Bookings list -->
 <h1>2 · <b>Bookings</b> — the list. Everything the property has ever booked, searched the way a receptionist searches: a name, a phone, or the confirmation number a guest reads off their email</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Bookings</div><div class="hsub">218 with a stay in the next 30 days</div></div>
       <div class="grow"></div>
       <div class="btn">Walk-in</div>
@@ -453,16 +486,16 @@
 <!-- 3 · The stay · overview -->
 <h1 style="margin-top:12px">3 · <b>The stay · Overview</b> — PMS-connected, with an override standing and Opera disagreeing. The one truth the desk sees is the override; the disagreement is a mark on it, never a second answer</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · <span class="sh pms" style="display:inline-flex"><i></i>Opera manages this stay</span></div></div>
       <div class="grow"></div>
       <div class="btn">Move room</div>
@@ -519,16 +552,16 @@
 <!-- 4 · Activity -->
 <h1>4 · <b>The stay · Activity</b> — everything that has happened to this booking, with who said it. The desk's answer to "why does it say that?"</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
       <div class="btn off">Export <span class="lock no">NEEDS SHELL-Q23'S FILE-SAVE HALF</span></div>
@@ -578,16 +611,16 @@
 <!-- 5 · Requests and jobs -->
 <h1>5 · <b>The stay · Requests &amp; jobs</b> — the front desk raises work from the guest's stay, when Jobs is installed. GuestOps records the request; Jobs owns the work</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
       <div class="btn pri">＋ Raise a job</div>
@@ -646,16 +679,16 @@
 <!-- 5b · Jobs not installed -->
 <h1 style="margin-top:26px">5b · <b>The same tab, with Jobs not installed.</b> The request is still recorded. What disappears is the raising, not the guest's complaint</h1>
 <div class="win" style="min-height:380px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
       <div class="btn off">＋ Raise a job</div>
@@ -689,16 +722,16 @@
 <!-- 6 · Servicing -->
 <h1>6 · <b>The stay · Servicing</b> — a four-night stay is cleaned four times, and the desk needs to know what happened in the room while the guest was in it</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">2 Sep</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">2 Sep</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">31 Aug → 4 Sep · four nights · in house</div></div>
       <div class="grow"></div>
       <div class="btn">Ask for service</div>
@@ -751,16 +784,16 @@
 <h1>7 · <b>The stay · Payment</b> — what the booking is worth, what was promised, and what the platform cannot yet tell you</h1>
 <div class="caveat"><b>Read the second band before approving this frame.</b> GUEST-Q6 (2026-08-31) ruled that v1 carries the stay's <b>commercial terms</b> and that the <b>folio</b> — posting, payments, settlement, invoicing — is Finance's later round. The first band below is v1 and is buildable today. <b>The second band is not ruled and nothing is built behind it:</b> a balance in a PMS-connected property needs the connector to fetch and carry it, which the inbound v1 contract does not include (ADR 0128 §4), and in a standalone property it needs Finance. It is drawn because you asked for payment information — and reported as a finding, not proposed as a plan.</div>
 <div class="win" style="margin-top:12px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · four nights</div></div>
       <div class="grow"></div>
       <div class="btn">Open in Opera</div>
@@ -806,16 +839,16 @@
 <!-- 8 · Cancel -->
 <h1>8 · <b>Cancel</b> — one stay, or every stay in the booking. There is no such thing as cancelling a group, and the confirmation says what will actually happen</h1>
 <div class="win" style="min-height:600px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Fatima Sheikh · BK-4506</div><div class="hsub">Two stays · 3 Sep → 7 Sep · <span class="sh pms" style="display:inline-flex"><i></i>Opera manages this booking</span></div></div>
       <div class="grow"></div>
       <div class="btn danger">Cancel…</div>
@@ -852,16 +885,16 @@
 <!-- 9 · The group -->
 <h1 style="margin-top:12px">9 · <b>The group</b> — an incomplete booking drawn honestly. Opera said three rooms and has sent one; the other two are <b>not</b> rows, not placeholders, and not counted</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri on">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">3</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab on">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">3</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Booking BK-4471</div><div class="hsub">Group 84119377 · from Opera · booked 28 Aug</div></div>
       <div class="grow"></div>
       <div class="btn danger">Cancel…</div>
@@ -893,16 +926,16 @@
 <!-- 10 · Walk-in -->
 <h1>10 · <b>Walk-in</b> — standalone. Booking and arrival are the same moment, so it is one action; the walk-in flag is recorded when the stay is created or it is unrecoverable</h1>
 <div class="win" style="min-height:560px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">2</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">2</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug · standalone</div></div><div class="grow"></div><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div>
+    <div class="title"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug · standalone</div></div><div class="grow"></div><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div>
     <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span></div></div>
     <div class="scrim">
       <div class="sheet">
@@ -934,16 +967,16 @@
 <!-- 11 · Today PMS-connected -->
 <h1>11 · <b>Today, PMS-connected — with the feed silent since 09:00.</b> The same screen, the same rules: there is no second mode, and nothing here gates a write</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">2</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">2</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
+    <div class="title">
       <div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug · Opera connected</div></div>
       <div class="grow"></div>
       <div class="btn">Walk-in</div>
@@ -994,16 +1027,16 @@
 <!-- 12 · Attention -->
 <h1>12 · <b>Attention</b> — the honest list. Not a defect log: every row is an ordinary condition of running a hotel against a PMS feed</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri on">Attention<span class="cnt att">4</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab on">Attention<span class="n att">4</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Attention</div><div class="hsub">Four things a person has to decide — nothing here decides itself</div></div></div>
+    <div class="title"><div><div class="ht">Attention</div><div class="hsub">Four things a person has to decide — nothing here decides itself</div></div></div>
     <div class="body">
       <div class="card">
         <div class="ch">Same stay, or two? <div class="grow"><span class="sh unk">Opera doesn't know</span></div></div>
@@ -1044,16 +1077,16 @@
 <!-- 13 · First run -->
 <h1>13 · <b>First run</b> — a PMS-connected property on install day. The book is not empty, and the screen says why</h1>
 <div class="win" style="min-height:420px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">—</span></div>
-    <div class="ri">Bookings<span class="cnt">—</span></div>
-    <div class="ri">Guests<span class="cnt">—</span></div>
-    <div class="ri">Attention<span class="cnt">—</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">—</span></div>
+    <div class="tab">Bookings<span class="n">—</span></div>
+    <div class="tab">Guests<span class="n">—</span></div>
+    <div class="tab">Attention<span class="n">—</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug</div></div></div>
+    <div class="title"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug</div></div></div>
     <div class="empty">
       <div class="ic">⌛</div>
       <b>Bringing in what Opera already sent</b>
@@ -1070,16 +1103,16 @@
 <!-- 14 · availability -->
 <h1 style="margin-top:12px">14 · <b>New booking</b> — the answer before the sale. Availability is computed from what we already hold; it is not a table anyone feeds</h1>
 <div class="win" style="min-height:620px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">2</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">2</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">New booking</div><div class="hsub">Standalone — this property is the book</div></div><div class="grow"></div><div class="btn">Walk-in</div></div>
+    <div class="title"><div><div class="ht">New booking</div><div class="hsub">Standalone — this property is the book</div></div><div class="grow"></div><div class="btn">Walk-in</div></div>
     <div class="body">
       <div style="display:flex;gap:10px">
         <div class="inp" style="flex:1">Arrive <b style="margin-left:6px">3 Sep</b></div>
@@ -1135,16 +1168,16 @@
 <!-- 14 · the card -->
 <h1 style="margin-top:12px">15 · <b>The registration card</b> — what the guest signs. The fields are the design's proposal; which of them are <i>required</i> is the property's setting</h1>
 <div class="win" style="min-height:640px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri on">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri">Attention<span class="cnt att">2</span></div>
-    <div class="me"><b>Anitha Menon</b>Front Office · Avenue Regent</div>
+    <div class="tab on">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab">Attention<span class="n att">2</span></div>
+    <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Checking in · Fatima Sheikh</div><div class="hsub">Room 506 · 31 Aug → 4 Sep</div></div><div class="grow"></div><div class="btn">Print card</div></div>
+    <div class="title"><div><div class="ht">Checking in · Fatima Sheikh</div><div class="hsub">Room 506 · 31 Aug → 4 Sep</div></div><div class="grow"></div><div class="btn">Print card</div></div>
     <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span></div></div>
     <div class="scrim">
       <div class="sheet">
@@ -1199,16 +1232,16 @@
 <!-- 15 · setup -->
 <h1>16 · <b>Setup · Registration, stop-sell and guest reporting</b> — the screen the owner asked for. A property that has to tell an authority turns it on; a property that does not never sees it</h1>
 <div class="win">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="ri">Today<span class="cnt">31 Aug</span></div>
-    <div class="ri">Bookings<span class="cnt">218</span></div>
-    <div class="ri">Guests<span class="cnt">1 904</span></div>
-    <div class="ri on">Setup</div>
-    <div class="me"><b>Rakesh Varma</b>General Manager · Avenue Regent</div>
+    <div class="tab">Today<span class="n">31 Aug</span></div>
+    <div class="tab">Bookings<span class="n">218</span></div>
+    <div class="tab">Guests<span class="n">1 904</span></div>
+    <div class="tab on">Setup</div>
+    <div class="who">Rakesh Varma · General Manager</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Setup</div><div class="hsub">GuestOps's own settings for this property</div></div><div class="grow"></div><div class="btn">Discard</div><div class="btn pri">Save</div></div>
+    <div class="title"><div><div class="ht">Setup</div><div class="hsub">GuestOps's own settings for this property</div></div><div class="grow"></div><div class="btn">Discard</div><div class="btn pri">Save</div></div>
     <div class="body">
       <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stop-sell</div><div class="tab">Stay defaults</div></div>
       <div class="card">
