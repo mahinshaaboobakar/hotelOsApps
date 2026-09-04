@@ -26,8 +26,7 @@ export function elapsed(seconds: number): string {
   return formatDuration(seconds);
 }
 
-/** Seconds since an instant, as of now — the live timer's figure. */
-export function sinceSeconds(iso: string, now: Date = new Date()): number {
-  const start = new Date(iso).getTime();
-  return Number.isNaN(start) ? 0 : Math.max(0, Math.floor((now.getTime() - start) / 1000));
-}
+// There is deliberately no "seconds since" here. Elapsed time is computed by
+// the service, which owns the clock the property runs on, and handed over as a
+// figure; a module that subtracted from `new Date()` would show the machine's
+// drift as the hotel's promise (audit finding, 2026-09-04).

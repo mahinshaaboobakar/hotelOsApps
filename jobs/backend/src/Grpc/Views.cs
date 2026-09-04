@@ -14,7 +14,10 @@ public static class Views
 
     private static Timestamp? T(DateTimeOffset? at) => at is { } a ? Timestamp.FromDateTimeOffset(a) : null;
 
-    public static JobView Job(JobRow row)
+    /// <param name="row">The job and what its row derives.</param>
+    /// <param name="viewer">The caller, so the view can say whether they hold the job.</param>
+    /// <param name="runningSeconds">Worked seconds on the open session as of now, or zero.</param>
+    public static JobView Job(JobRow row, Guid? viewer = null, long runningSeconds = 0)
     {
         var j = row.Job;
         return new JobView
@@ -34,12 +37,18 @@ public static class Views
             AccountableUserId = S(row.Concern?.AccountableUserId),
             AssigneeUserId = S(row.Assignment?.AssigneeUserId), TeamId = S(row.Assignment?.TeamId),
             Accepted = row.Assignment?.AcceptedAt is not null, SessionRunning = row.SessionRunning,
+            ViewerIsAssignee = viewer is { } who && row.Assignment?.AssigneeUserId == who,
+            RunningSeconds = runningSeconds,
         };
     }
 
-    public static JobDetail Detail(JobDetailRows d, DateTimeOffset now)
+    /// <param name="d">Every satellite of the job.</param>
+    /// <param name="now">The instant a running session is measured against.</param>
+    /// <param name="viewer">The caller.</param>
+    public static JobDetail Detail(JobDetailRows d, DateTimeOffset now, Guid? viewer = null)
     {
-        var detail = new JobDetail { Job = Job(d.Row) };
+        var running = d.Sessions.FirstOrDefault(s => s.StoppedAt is null);
+        var detail = new JobDetail { Job = Job(d.Row, viewer, running?.WorkedSecondsAt(now) ?? 0) };
         detail.Assignments.AddRange(d.Assignments.Select(a => new AssignmentView
         {
             Id = a.Id.ToString(), AssigneeUserId = S(a.AssigneeUserId), TeamId = S(a.TeamId), How = a.How,
@@ -81,7 +90,7 @@ public static class Views
         {
             JobId = (l.JobId == d.Row.Job.Id ? l.LinkedJobId : l.JobId).ToString(), At = T(l.At),
         }));
-        detail.Steps.AddRange(d.Steps.Select(Job));
+        detail.Steps.AddRange(d.Steps.Select(step => Job(step, viewer)));
         return detail;
     }
 

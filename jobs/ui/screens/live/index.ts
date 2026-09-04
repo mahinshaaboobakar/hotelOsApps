@@ -7,7 +7,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
-import { clock, when } from "../../chrome/instant";
+import { when } from "../../chrome/instant";
 import { concern } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
 import { standIn } from "../../chrome/standin";
@@ -56,7 +56,7 @@ function table(host: HostApi, l: Live): HTMLElement {
     const tr = el("tr");
     tr.append(
       el("td", "num", r.number), el("td", undefined, r.department), fill(el("td"), concern(r.concern)),
-      el("td", undefined, clock(host, r.since)), el("td", undefined, r.accountable), el("td", undefined, r.lastNudge),
+      el("td", undefined, when(host, r.since)), el("td", undefined, r.accountable), el("td", undefined, r.lastNudge),
     );
     t.append(tr);
   }

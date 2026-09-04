@@ -19,6 +19,13 @@ export interface JobRow {
   /** ISO instant, or null for a job with no clock. */
   dueAt: string | null;
   tags: readonly string[];
+
+  /**
+   * Whether the person looking at this holds it. The module cannot know who is
+   * looking — `ModuleIdentity` carries no user — so the service says, where the
+   * caller is established. The work controls are the assignee's own acts.
+   */
+  viewerIsAssignee: boolean;
 }
 
 /** A page of the board. */
@@ -106,9 +113,19 @@ export interface Rating {
 /** Everything the job view's seven tabs draw — frames 2 to 2g. */
 export interface JobDetail {
   row: JobRow;
-  raisedLine: string;
-  /** Present while a session runs — the header's timer. */
-  runningSince: string | null;
+
+  /** How it was raised, as parts — the module composes the line, so every date goes through the formatter. */
+  raised: { at: string; via: string; kind: string; who: string };
+
+  /** When it ended, for a closed job. */
+  endedAt: string | null;
+
+  /**
+   * Seconds worked on the running session as of the service's reply, or null
+   * when nothing runs. Never computed from the machine's clock: a desktop
+   * whose clock is minutes off would show a figure the property never had.
+   */
+  runningSeconds: number | null;
   runningWho: string | null;
   totalWorkedSeconds: number;
   accountable: string;

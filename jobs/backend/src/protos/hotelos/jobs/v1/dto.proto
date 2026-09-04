@@ -49,6 +49,15 @@ message JobView {
   string team_id            = 34;
   bool   accepted           = 35;
   bool   session_running    = 36;
+
+  // Whether the caller is this job's assignee — the module cannot know who is
+  // looking, and the work controls (pause, stop, resolve) are the assignee's
+  // own acts. Computed here, where the caller is established.
+  bool   viewer_is_assignee = 37;
+
+  // Seconds worked on the running session as of this reply, so no client
+  // computes elapsed time from its own clock.
+  int64  running_seconds    = 38;
 }
 
 message AssignmentView {

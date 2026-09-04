@@ -37,7 +37,13 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
       const answers: Record<string, unknown> = {
         today: recordedToday,
         board: recordedBoard,
-        job: params.get("job") === "rated" ? recordedRatedJob : recordedJob,
+        job: params.get("job") === "rated"
+          ? recordedRatedJob
+          : params.get("granted") === "none"
+            // A supervisor looking at somebody else's job: not the assignee, so
+            // no work controls — the state the read-only pane exists to show.
+            ? { ...recordedJob, row: { ...recordedJob.row, viewerIsAssignee: false } }
+            : recordedJob,
         live: recordedLive,
         scheduled: recordedScheduled,
         catalogue: recordedCatalogue,

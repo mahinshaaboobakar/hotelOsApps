@@ -91,7 +91,17 @@ describe("the Jobs module", () => {
     await settle();
     const tabs = Array.from(root.querySelectorAll(".subnav .tab")).map((t) => t.textContent?.split(" · ")[0]);
     expect(tabs).toEqual(["Overview", "Work", "History", "Notes & photos", "Links & steps", "Rating", "Record"]);
-    expect(root.querySelector(".timer")?.textContent).toMatch(/\d{2}:\d{2}:\d{2}/);
+    // The service's figure, not the machine's clock — the frame's 00:23:41.
+    expect(root.querySelector(".timer")?.textContent).toContain("00:23:41");
+  });
+
+  it("draws no work controls for a viewer who does not hold the job", async () => {
+    const other = mount(host(ALL, { ...live(), job: { ...recordedJob, row: { ...recordedJob.row, viewerIsAssignee: false } } }));
+    await settle();
+    click(other, "tr.pick td", "MRN-ENG-142");
+    await settle();
+    expect(other.textContent).toContain("Resolve…");
+    expect(other.textContent).not.toContain("Pause");
   });
 
   it("draws the sessions on the Work tab, the running one as running", async () => {

@@ -10,9 +10,12 @@ const row142 = recordedBoard.rows[0]!;
 const row388 = recordedBoard.rows[11]!;
 
 export const recordedJob: JobDetail = {
-  row: row142,
-  raisedLine: `raised ${"02 Sep 13:31"} via GUEST_APP by the guest of stay 7F2A · due 02 Sep 14:10`,
-  runningSince: at("14:06"),
+  // The approved example is Arjun's own job: he is the assignee looking at it,
+  // so the work controls are his to press (frame 2's action row).
+  row: { ...row142, viewerIsAssignee: true },
+  raised: { at: at("13:31"), via: "GUEST_APP", kind: "GUEST", who: "the guest of stay 7F2A" },
+  endedAt: null,
+  runningSeconds: 23 * 60 + 41,
   runningWho: "Arjun Menon",
   totalWorkedSeconds: 31 * 60 + 12,
   accountable: "Priya Nair (supervisor, ladder step 2)",
@@ -84,9 +87,10 @@ export const recordedJob: JobDetail = {
 /** The towel job, closed and rated — the filled state of the Rating tab. */
 export const recordedRatedJob: JobDetail = {
   ...recordedJob,
-  row: { ...row388, status: "CLOSED", concern: "ON_TRACK", concernDetail: null },
-  raisedLine: "raised 02 Sep 13:53 via GUEST_APP by the guest of stay 7F2A · closed 02 Sep 18:00",
-  runningSince: null,
+  row: { ...row388, status: "CLOSED", concern: "ON_TRACK", concernDetail: null, viewerIsAssignee: false },
+  raised: { at: at("13:53"), via: "GUEST_APP", kind: "GUEST", who: "the guest of stay 7F2A" },
+  endedAt: at("18:00"),
+  runningSeconds: null,
   runningWho: null,
   totalWorkedSeconds: 6 * 60,
   accountable: "—",
@@ -94,6 +98,14 @@ export const recordedRatedJob: JobDetail = {
   sessions: [{ no: 1, who: "Meera Krishnan", startedAt: at("13:54"), pausedAt: null, pauseReason: null, resumedAt: null, stoppedAt: at("13:59"), workedSeconds: 300 }],
   steps: [],
   links: [{ number: "MRN-ENG-142", department: "ENG", what: "Air conditioning › Not cooling", status: "IN_PROGRESS", assignedTo: "Arjun Menon" }],
+  history: [
+    { at: at("18:14"), kind: "status", what: "RATED", by: "guest · stay 7F2A", detail: "5 stars" },
+    { at: at("18:00"), kind: "status", what: "CLOSED", by: "sweep", detail: "auto-close after 1 h" },
+    { at: at("13:59"), kind: "status", what: "RESOLVED", by: "Meera Krishnan", detail: "Delivered" },
+    { at: at("13:54"), kind: "work", what: "session 1 started", by: "Meera Krishnan", detail: "" },
+    { at: at("13:53"), kind: "status", what: "RAISED", by: "guest · stay 7F2A", detail: "via the guest app" },
+  ],
+  notes: [{ who: "Guest", at: at("13:53"), text: "Could we have two extra towels please?", photo: null }],
   rating: {
     stars: 5, text: "Towels came in six minutes. Thank you Meera.", ratedAt: at("18:14"),
     askedAt: at("18:00"), windowUntil: "departure Thu 04 Sep", resolvedBy: "Meera Krishnan · \"Delivered\" · 02 Sep 13:59",

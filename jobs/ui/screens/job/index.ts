@@ -7,7 +7,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
-import { elapsed, sinceSeconds } from "../../chrome/instant";
+import { elapsed, when } from "../../chrome/instant";
 import { concern, priority, status } from "../../chrome/marks";
 import { JOB_AMEND, JOB_ASSIGN, JOB_CANCEL, JOB_COMPLETE, JOB_READ } from "../../chrome/permissions";
 import { standIn } from "../../chrome/standin";
@@ -74,20 +74,37 @@ function header(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
     priority(d.row.priority), status(d.row.status),
     concern(d.row.concern, d.row.concernDetail === null ? undefined : `${d.row.concernDetail} over`),
   );
-  if (d.runningSince !== null) {
-    const timer = fill(el("span", "timer grow"), el("i"), elapsed(sinceSeconds(d.runningSince)));
-    top.append(timer);
+  if (d.runningSeconds !== null) {
+    top.append(fill(el("span", "timer grow"), el("i"), elapsed(d.runningSeconds)));
   }
 
-  const line = el("div", "mono", `${d.runningWho === null ? "" : `${d.runningWho} working · `}${d.raisedLine} · accountable now ${d.accountable}`);
+  const line = el("div", "mono", raisedLine(host, d));
   return fill(el("div"), top, line, actions(host, d, place));
 }
 
-/** The action row is the permission set (design §4.1); a viewer with none sees no row. */
+/**
+ * The one-line story of the job, composed here so every instant in it goes
+ * through the property's formatter rather than arriving as prose.
+ */
+function raisedLine(host: HostApi, d: JobDetail): string {
+  const parts = [
+    d.runningWho === null ? null : `${d.runningWho} working`,
+    `raised ${when(host, d.raised.at)} via ${d.raised.via} by ${d.raised.who}`,
+    d.endedAt === null ? `due ${when(host, d.row.dueAt)}` : `closed ${when(host, d.endedAt)}`,
+    `accountable now ${d.accountable}`,
+  ];
+  return parts.filter((part) => part !== null).join(" · ");
+}
+
+/**
+ * The action row is the permission set (design §4.1) — and the work controls
+ * are the assignee's own acts, so they need the service's word on who is
+ * looking, not a guess (audit finding, 2026-09-04).
+ */
 function actions(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement | null {
   if (d.row.status === "CLOSED" || d.row.status === "CANCELLED") return null;
   const row = el("div", "row");
-  if (d.runningWho !== null) row.append(control("btn", "Pause"), control("btn", "Stop"));
+  if (d.runningSeconds !== null && d.row.viewerIsAssignee) row.append(control("btn", "Pause"), control("btn", "Stop"));
   if (may(host, JOB_COMPLETE)) row.append(control("btn pri", "Resolve…", place.onResolve));
   if (may(host, JOB_AMEND)) row.append(control("btn", "Put on hold…"));
   if (may(host, JOB_ASSIGN)) row.append(control("btn", "Reassign…"));

@@ -54,5 +54,5 @@ public partial class JobsGrpcService(
 
     /// <summary>A job's row after a write: re-read so the wire carries the derived columns.</summary>
     private async Task<JobView> RowAsync(RequestScope scope, Job job, CancellationToken cancellationToken) =>
-        Views.Job((await queries.DetailAsync(scope, job.Id, cancellationToken)).Row);
+        Views.Detail(await queries.DetailAsync(scope, job.Id, cancellationToken), queries.Now, scope.UserId).Job;
 }
