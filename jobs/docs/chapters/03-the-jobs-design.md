@@ -633,7 +633,19 @@ Design of record · `EVT-Q3` cited for correlation · catalogue Jobs' own ·
 Jobs · ADR 0062's two-column vocabulary borrowed, its letter not stretched ·
 the permission vocabulary parked and carried in §4.1.
 
-### Still open — none blocks the mockup
+### The mockups are locked — owner, 2026-09-04
+
+`docs/mockups/01-the-jobs-screens.html` (fifteen frames) and
+`02-the-jobs-settings.html` (eleven) were redlined five times on
+2026-09-04 and locked by the owner the same day. They are the frames the
+build is audited against, frame beside capture. Folded on the way: the
+board's paging and its two "who" columns, the tabbed job view with every
+tab drawn, dated timestamps in Core's format, the catalogue kept in Jobs
+and read through Context, the settings split to their own page, the
+policy scope picked department › category › item, and the policies list
+for two departments.
+
+### Still open — none blocks the build, except the first
 
 | | State | What it blocks |
 |---|---|---|
