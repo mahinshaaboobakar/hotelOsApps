@@ -65,16 +65,16 @@ export async function policy(
 }
 
 function header(config: Policy, open: () => void): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
-  title.append(el("div", "ht", "Workforce policy"), el("div", "hsub", config.property));
+  title.append(el("div", "hsub", config.property));
 
   const grow = el("div", "grow");
   const add = el("div", "btn", "＋ New shift");
   add.addEventListener("click", open);
 
-  head.append(title, grow, add, el("div", "btn go", "Save changes"));
+  head.append(title, grow, add, el("div", "btn pri", "Save changes"));
   return head;
 }
 

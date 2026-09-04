@@ -64,7 +64,7 @@ export async function leave(
 
 /** The header, with counts derived from the board. */
 function header(board: LeaveBoard, open: () => void): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   const pending = board.requests.filter((row) => row.state === "Requested").length;
@@ -72,14 +72,13 @@ function header(board: LeaveBoard, open: () => void): HTMLElement {
   const swaps = board.waiting.filter((item) => item.kind === "Swap").length;
 
   title.append(
-    el("div", "ht", "Leave & Requests"),
     el("div", "hsub",
       `${board.waiting.length} waiting · ${board.waiting.length - swaps} leave · ${swaps} swap`
       + ` · ${pending} of mine pending`),
   );
 
   const grow = el("div", "grow");
-  const raise = el("div", "btn go", "＋ Request leave");
+  const raise = el("div", "btn pri", "＋ Request leave");
   raise.addEventListener("click", open);
 
   head.append(title, grow, raise);

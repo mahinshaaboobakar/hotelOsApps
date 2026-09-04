@@ -73,7 +73,7 @@ export async function rota(
  * it, and the header is the one a manager reads first.
  */
 function header(week: Week, print: () => void): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   // **A week-off is not a shift** — `WF-Q12`: it is a rota marker, with no
@@ -89,7 +89,6 @@ function header(week: Week, print: () => void): HTMLElement {
     (total, person) => total + person.week.filter((cell) => cell.gap).length, 0);
 
   title.append(
-    el("div", "ht", "Team Rota"),
     el("div", "hsub",
       `${week.people.length} people · ${shifts} shifts · ${away} on leave · ${gaps} slot uncovered`),
   );
@@ -103,7 +102,7 @@ function header(week: Week, print: () => void): HTMLElement {
   const swap = el("div", "btn", "⇄ Swap");
   const printBtn = el("div", "btn", "⎙ Print");
   printBtn.addEventListener("click", print);
-  const assign = el("div", "btn go", "＋ Assign shift");
+  const assign = el("div", "btn pri", "＋ Assign shift");
 
   head.append(title, picker, grow, week_, copy, swap, printBtn, assign);
   return head;

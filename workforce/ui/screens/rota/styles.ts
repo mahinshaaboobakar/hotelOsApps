@@ -15,7 +15,10 @@ export const ROTA_CSS = `
 .rhd{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
      color:var(--color-ink-faint,#5a6172);padding:2px 0 4px}
 
-.who{display:flex;gap:10px;align-items:center;min-width:0;padding:6px 0}
+/* person, not who: the app bar owns .who for the signed-in person, which
+   is the name Jobs and GuestOps both draw. This is a grid cell, internal to one
+   screen, so it is the one that renames. */
+.person{display:flex;gap:10px;align-items:center;min-width:0;padding:6px 0}
 .wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
 .wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
        background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}

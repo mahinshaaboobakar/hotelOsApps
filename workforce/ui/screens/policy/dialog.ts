@@ -133,6 +133,6 @@ function actions(close: () => void): HTMLElement {
   const cancel = el("div", "btn", "Cancel");
 
   cancel.addEventListener("click", close);
-  row.append(cancel, el("div", "btn go", "Create shift"));
+  row.append(cancel, el("div", "btn pri", "Create shift"));
   return row;
 }

@@ -26,7 +26,7 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
 import { recordedLeave } from "./roster/leave";
-import { rail, type Operator, type RailItem } from "./chrome/rail";
+import { bar, switcher, type Operator, type Section } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attendance } from "./screens/attendance";
 import { ATTENDANCE_CSS } from "./screens/attendance/styles";
@@ -94,54 +94,82 @@ interface Place {
   onWho: (who: string) => void;
 }
 
-/**
- * Every destination, its glyph, and the screen it opens.
- *
- * **The rail is derived from this**, so a destination without a screen cannot
- * be listed and a screen nothing reaches cannot be written. The alternative — a
- * list of rail items beside a chain of `if`s — needs a fallback for the case
- * the two disagree, and a fallback that quietly draws something else is the
- * unreachable state this module just deleted, wearing a different hat.
- */
-const SCREENS: readonly {
+/** One view, and the screen it opens. */
+interface View {
   label: string;
-  glyph: string;
   draw: (host: HostApi, main: HTMLElement, place: Place) => void;
-}[] = [
-  { label: "Staff Schedule", glyph: "◫", draw: (h, m) => void schedule(h, m) },
+}
+
+/**
+ * Every destination, and the views inside it.
+ *
+ * **Both levels of navigation are derived from this**, so a destination without
+ * a screen cannot be listed and a screen nothing reaches cannot be written. The
+ * alternative — a list of bar items beside a chain of `if`s — needs a fallback
+ * for the case the two disagree, and a fallback that quietly draws something
+ * else is an unreachable state wearing a different hat.
+ *
+ * **Nine views, seven sections.** They do not fit a 56px bar, and the standard
+ * was written from two applications with four sections each. Two sections carry
+ * two views, which is the shape §3 itself sanctions rather than one invented
+ * here: *the bar carries sections; a switcher within a section stays in the
+ * body*. Rota is one question at two scopes, and Postings and Teams are both
+ * who works here.
+ */
+const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
   {
-    label: "Team Rota", glyph: "▦",
-    draw: (h, m, place) => void rota(
-      h, m, () => place.open("print"), undefined,
-      place.pick, place.onPick, place.close),
+    label: "Rota",
+    views: [
+      {
+        label: "Team rota",
+        draw: (h, m, place) => void rota(
+          h, m, () => place.open("print"), undefined,
+          place.pick, place.onPick, place.close),
+      },
+      { label: "Staff schedule", draw: (h, m) => void schedule(h, m) },
+    ],
   },
   {
-    label: "Leave & Requests", glyph: "◷",
-    draw: (h, m, place) => void leave(
-      h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close),
+    label: "Leave & Requests",
+    views: [{
+      label: "Leave & Requests",
+      draw: (h, m, place) => void leave(
+        h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close),
+    }],
   },
-  { label: "Attendance", glyph: "◉", draw: (h, m) => void attendance(h, m) },
+  { label: "Attendance", views: [{ label: "Attendance", draw: (h, m) => void attendance(h, m) }] },
   {
-    label: "Duty Register", glyph: "★",
-    draw: (h, m, place) => void duty(h, m, place.dialog, () => place.open("duty"), place.close),
+    label: "Duty",
+    views: [{
+      label: "Duty",
+      draw: (h, m, place) => void duty(h, m, place.dialog, () => place.open("duty"), place.close),
+    }],
   },
   {
-    label: "People", glyph: "◎",
-    draw: (h, m, place) => void people(
-      h, m, place.who, place.close, (who) => { place.onWho(who); }),
+    label: "People",
+    views: [
+      {
+        label: "Postings",
+        draw: (h, m, place) => void people(
+          h, m, place.who, place.close, (who) => { place.onWho(who); }),
+      },
+      {
+        label: "Teams",
+        draw: (h, m, place) => void teams(
+          h, m, {
+            dialog: place.which, open: place.open, close: place.close,
+            team: place.team, onTeam: place.onTeam,
+          }),
+      },
+    ],
   },
+  { label: "Reports", views: [{ label: "Reports", draw: (h, m) => void reports(h, m) }] },
   {
-    label: "Teams", glyph: "⛌",
-    draw: (h, m, place) => void teams(
-      h, m, {
-        dialog: place.which, open: place.open, close: place.close,
-        team: place.team, onTeam: place.onTeam,
-      }),
-  },
-  { label: "Reports", glyph: "▤", draw: (h, m) => void reports(h, m) },
-  {
-    label: "Policy", glyph: "⚙",
-    draw: (h, m, place) => void policy(h, m, false, place.close, () => place.open("shift")),
+    label: "Policy",
+    views: [{
+      label: "Policy",
+      draw: (h, m, place) => void policy(h, m, false, place.close, () => place.open("shift")),
+    }],
   },
 ];
 
@@ -170,7 +198,12 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     PEOPLE_CSS, REPORTS_CSS, SCHEDULE_CSS, POLICY_CSS, PRINTED_CSS, TEAMS_CSS,
   ]);
 
-  let current = "Team Rota";
+  // Where the module is, at both levels. `view` is null until a section with
+  // two of them is opened, and resolves to that section's first — so a section
+  // cannot show a view belonging to another one, which is the state a single
+  // `current` string made expressible.
+  let current = "Rota";
+  let view: string | null = null;
   let tab = "Requests";
   let dialog = false;
   let which: string | null = null;
@@ -179,18 +212,35 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let who: string | null = null;
   let team: string | null = null;
 
-  function show(next: string): void {
+  function show(next: string, chosen: string | null = null): void {
     if (root === null) return;
 
-    const screen = SCREENS.find((entry) => entry.label === next);
-    if (screen === undefined) return;
+    const section = SECTIONS.find((entry) => entry.label === next);
+    if (section === undefined) return;
+
+    // A section change lands on its first view; a switcher click names one.
+    // Resolved rather than remembered, so `view` can never hold a label the
+    // current section does not offer.
+    const wanted = next === current ? chosen ?? view : chosen;
+    const screen = section.views.find((one) => one.label === wanted)
+      ?? section.views[0]!;
 
     current = next;
+    view = screen.label;
 
     const frame = el("div", "wf");
     const main = el("div", "main");
 
-    frame.append(rail(items(), current, OPERATOR, show), main);
+    // **Beside `main`, not inside it.** Every screen calls `replaceChildren` on
+    // the element it is handed, so a switcher appended there is deleted by the
+    // first render — the same trap the stylesheet hit, one element over.
+    const strip = switcher(section.views, screen.label,
+      (label) => { show(current, label); });
+
+    frame.append(bar(sections(), current, OPERATOR, show));
+    if (strip !== null) frame.append(strip);
+    frame.append(main);
+
     root.replaceChildren(style, frame);
 
     if (detail === "Shifts") {
@@ -222,13 +272,14 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       onWho: (person) => { who = person; show(current); },
       team,
       // Clicking the open team closes it, which is the only way back to the
-      // plain list: the rail cannot reach a state it has no entry for.
+      // plain list: neither level of navigation reaches a state it has no
+      // entry for.
       onTeam: (id) => { team = team === id ? null : id; show(current); },
     });
   }
 
   /**
-   * Open a dialog, or the printed sheet, from outside the rail.
+   * Open a dialog, or the printed sheet, from outside the bar.
    *
    * The printed week is **not a screen**: it replaces the module's chrome
    * entirely, because it is a different artifact rather than a view of one.
@@ -237,7 +288,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     if (root === null) return;
 
     // Shifts is a place, not a dialog: the frame draws it as its own screen with
-    // the rail still on Policy, and the New shift dialog opens over it.
+    // the bar still on Policy, and the New shift dialog opens over it.
     if (what === "shift") {
       dialog = true;
       detail = "Shifts";
@@ -269,18 +320,18 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 };
 
 /**
- * The rail's entries.
+ * The bar's sections.
  *
  * **The count is the queue's own length**, read from the same facts the screen
- * draws — not a literal beside it. A rail carrying its own number would
- * eventually disagree with the list it points at, and the rail is the one a
+ * draws — not a literal beside it. A bar carrying its own number would
+ * eventually disagree with the list it points at, and the bar is the one a
  * person believes. When a client lands, both come through the seam and this
  * stays true without being changed.
  */
-function items(): readonly RailItem[] {
-  return SCREENS.map((screen) => screen.label === "Leave & Requests"
-    ? { label: screen.label, glyph: screen.glyph, count: String(recordedLeave.waiting.length) }
-    : { label: screen.label, glyph: screen.glyph });
+function sections(): readonly Section[] {
+  return SECTIONS.map((section) => section.label === "Leave & Requests"
+    ? { label: section.label, count: String(recordedLeave.waiting.length) }
+    : { label: section.label });
 }
 
 export default activate;

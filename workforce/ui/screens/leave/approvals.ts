@@ -84,7 +84,7 @@ export function swapCard(swap: SwapDetail): HTMLElement {
   );
 
   const acts = el("div", "acts");
-  acts.append(el("div", "btn", "Decline…"), el("div", "btn go", "Approve swap"));
+  acts.append(el("div", "btn", "Decline…"), el("div", "btn pri", "Approve swap"));
 
   card.append(title, steps, pair, preview(swap), note, atomic, acts);
   return card;

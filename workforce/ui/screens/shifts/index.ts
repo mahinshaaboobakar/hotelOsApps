@@ -65,7 +65,7 @@ export async function shifts(
 }
 
 function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "title");
   const title = el("div");
 
   title.append(
@@ -74,7 +74,7 @@ function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLEleme
       `Kochi Beach Resort · ${catalogue.length} shifts · shared by every department`),
   );
 
-  const add = el("div", "btn go", "＋ New shift");
+  const add = el("div", "btn pri", "＋ New shift");
   add.addEventListener("click", open);
 
   head.append(title, el("div", "grow"), add);

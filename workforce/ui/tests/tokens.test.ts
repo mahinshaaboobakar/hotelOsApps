@@ -88,9 +88,37 @@ describe("the module's token references", () => {
     return names;
   }
 
-  it("names only tokens the host actually injects", () => {
+  it("injects exactly what the SDK publishes, in the harness", () => {
+    // **Derived, not counted.** This file said fourteen and the contract said
+    // seventeen for a week: the tone vocabulary joined the published surface
+    // and the harness — a hand-written list — had no way to notice. A module
+    // using `--color-ok-soft` would have photographed on its fallback while
+    // rendering correctly in the product, which is the direction of error
+    // nobody chases, because the capture merely looks a little duller.
+    const css = readFileSync(join(root, "preview", "tokens.css"), "utf8");
+    const declared = new Set(
+      [...css.matchAll(/^\s*--([a-z0-9-]+):/gmu)].map((match) => match[1]!));
+
+    expect([...declared].sort()).toEqual([...TOKEN_NAMES].sort());
+  });
+
+  it("names only tokens the host injects, or ones it derives itself", () => {
     const published = new Set<string>(TOKEN_NAMES);
-    const unpublished = [...referenced()].filter((name) => !published.has(name)).sort();
+
+    // **A name this module declares is not an unpublished token.** The surface
+    // standard is explicit that a colour the published set does not carry is
+    // DERIVED rather than declared — `--accent` is the brand gradient, mixed
+    // from two published tokens on the module's own root — and a derived colour
+    // still follows the theme. Reading those as missing tokens would have this
+    // test forbid the very thing the standard requires.
+    const declared = new Set<string>();
+    for (const file of stylesheets()) {
+      const source = readFileSync(join(root, file), "utf8");
+      for (const match of source.matchAll(/--([a-z0-9-]+)\s*:/gu)) declared.add(match[1]!);
+    }
+
+    const unpublished = [...referenced()]
+      .filter((name) => !published.has(name) && !declared.has(name)).sort();
 
     // An unpublished name is not a contract — `tokens.ts`'s own words. A module
     // that writes one gets its fallback forever, which is the failure this

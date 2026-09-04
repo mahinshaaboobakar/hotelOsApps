@@ -1,11 +1,5 @@
 /** The Leave & Requests screen's own rules — balances, the queue, the swap card. */
 export const LEAVE_CSS = `
-.tabs{display:flex;gap:4px;padding:0 24px 10px}
-.tab{padding:5px 12px;border-radius:8px;font-size:12.5px;cursor:pointer;
-     color:var(--color-ink-muted,#8b93a7)}
-.tab.on{background:var(--color-surface-raised,#11141f);color:var(--color-ink,#e8ebf4)}
-.tab s{text-decoration:none;margin-left:6px;font-size:10.5px;
-       color:var(--color-ink-faint,#5a6172)}
 
 .bals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .bal{background:var(--color-surface-raised,#11141f);

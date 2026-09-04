@@ -76,7 +76,7 @@ function closing(who: string): PostingEnding {
  * @returns the header
  */
 function header(board: People, ending: string | null): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   const here = board.postings.filter((p) => p.departments.includes("FO")).length;
@@ -84,7 +84,6 @@ function header(board: People, ending: string | null): HTMLElement {
     (p) => p.tone === "warn" || p.tone === "bad").length;
 
   title.append(
-    el("div", "ht", "People"),
     el("div", "hsub", subtitle(board, ending, here, expiring)),
   );
 
@@ -92,7 +91,7 @@ function header(board: People, ending: string | null): HTMLElement {
   picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
 
   const grow = el("div", "grow");
-  head.append(title, picker, grow, el("div", "btn go", "＋ Post a staff member"));
+  head.append(title, picker, grow, el("div", "btn pri", "＋ Post a staff member"));
   return head;
 }
 
@@ -190,7 +189,7 @@ function firstRun(): HTMLElement {
     el("div", "note",
       "It also opens the department folders in My Hotel: until a property has "
       + "postings, department-based document access has nobody to resolve to."),
-    el("div", "btn go", "＋ Post a staff member"),
+    el("div", "btn pri", "＋ Post a staff member"),
   );
 
   return panel;

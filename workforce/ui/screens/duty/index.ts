@@ -41,13 +41,12 @@ export async function duty(
 }
 
 function header(register: Register, open: () => void): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   // Property-wide, and the subtitle says so: the person keeps their own
   // department and posting — WF-Q1, MOD is a duty, not a role.
   title.append(
-    el("div", "ht", "Duty Register"),
     el("div", "hsub",
       `Manager on Duty · property-wide · ${register.duties.filter((d) => d.who !== null).length} duties this week`),
   );
@@ -61,7 +60,7 @@ function header(register: Register, open: () => void): HTMLElement {
 
 /** The button that opens the dialog. */
 function assign(open: () => void): HTMLElement {
-  const button = el("div", "btn go", "＋ Assign duty");
+  const button = el("div", "btn pri", "＋ Assign duty");
   button.addEventListener("click", open);
   return button;
 }

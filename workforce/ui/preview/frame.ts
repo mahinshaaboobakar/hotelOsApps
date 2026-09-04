@@ -108,7 +108,7 @@ activate(host(granted)).mount(document.body);
  * @param day which column, zero-based from Monday
  */
 function clickCell(person: string, day: number): void {
-  const rows = Array.from(document.querySelectorAll<HTMLElement>(".rgrid .who"));
+  const rows = Array.from(document.querySelectorAll<HTMLElement>(".rgrid .person"));
   const row = rows.find((node) => node.textContent?.includes(person) === true);
   if (row === undefined) return;
 
@@ -153,8 +153,13 @@ async function drive(): Promise<void> {
 
   await settle();
 
+  // Two levels: the bar names a section, `view` names one of its views. The
+  // module opens Rota's first view on mount, so neither is required.
   const screen = params.get("screen");
-  if (screen !== null && screen !== "Team Rota") { click(".ri", screen); await settle(); }
+  if (screen !== null && screen !== "Rota") { click(".head .tab", screen); await settle(); }
+
+  const view = params.get("view");
+  if (view !== null) { click(".tabs .tab", view); await settle(); }
 
   const tab = params.get("tab");
   if (tab !== null) { click(".tab", tab); await settle(); }

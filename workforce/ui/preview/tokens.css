@@ -4,13 +4,24 @@
  * # Why exactly, and not the shell's whole palette
  *
  * `apps/desktop/src/shell/module-host/tokens.ts` reads **`TOKEN_NAMES` and
- * nothing else** from the shell's root and hands those across. Fourteen names
- * reach a module; every other variable in `styles.css` stops at the realm
- * boundary.
+ * nothing else** from the shell's root and hands those across. Every other
+ * variable in `styles.css` stops at the realm boundary.
  *
  * A harness that injected more would show colours no property will ever get —
  * the inverse of auditing against fallbacks, and a worse error, because the
  * capture would look *better* than the product rather than worse.
+ *
+ * # Seventeen, not fourteen — and a hand-written list is why this was stale
+ *
+ * The tone vocabulary joined the published surface in `894e230` (`PKG-Q46` (2)),
+ * adding the three `-soft` names. This file was written out by hand against
+ * fourteen and had no way to notice: a module using `--color-ok-soft` would
+ * have rendered on its fallback in every capture while rendering correctly in
+ * the product — a harness that makes the module look *worse* than it is, which
+ * is the failure that hides longest because nobody chases it.
+ *
+ * `tests/tokens.test.ts` now asserts this file against `TOKEN_NAMES`, so the
+ * next addition fails here rather than waiting to be noticed.
  *
  * The values are the shell's own, read from `apps/desktop/src/styles.css`
  * (the default dark block). Not invented, and not the module's fallbacks: this
@@ -30,6 +41,9 @@
   --color-ok: #34d399;
   --color-warn: #fbbf24;
   --color-bad: #f87171;
+  --color-ok-soft: rgb(52 211 153 / 0.12);
+  --color-warn-soft: rgb(251 191 36 / 0.12);
+  --color-bad-soft: rgb(248 113 113 / 0.12);
   --radius-panel: 1rem;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

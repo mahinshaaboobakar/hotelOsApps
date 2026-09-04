@@ -126,7 +126,7 @@ async function overlays(
  * @returns the header
  */
 function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   // **The count is what the list holds**, stood-down rows included, because the
@@ -135,14 +135,13 @@ function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLEl
   const departments = new Set(board.teams.map((team) => team.department)).size;
 
   title.append(
-    el("div", "ht", "Teams"),
     el("div", "hsub", board.teams.length === 0
       ? board.property
       : `${board.property} · ${board.teams.length} teams in ${departments} departments`),
   );
 
   const grow = el("div", "grow");
-  const form = el("button", "btn go", "＋ Form a team");
+  const form = el("button", "btn pri", "＋ Form a team");
   form.setAttribute("type", "button");
   form.addEventListener("click", () => { place.open("form"); });
 
@@ -168,7 +167,10 @@ function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLEl
  * @returns the card
  */
 function list(board: Teams, place: TeamPlace): HTMLElement {
-  const card = el("div", "panel");
+  // A list sits bare on the page — no wrapper, no fill, no radius. A card is
+  // for a thing you are looking at; a row is for one of many you are looking
+  // through, and the difference is how many fit on a screen.
+  const card = el("div", "list");
   const head = el("div", "tgrid hd");
 
   head.append(
@@ -195,7 +197,10 @@ function list(board: Teams, place: TeamPlace): HTMLElement {
  */
 function split(board: Teams, open: TeamDetail, place: TeamPlace): HTMLElement {
   const columns = el("div", "tsplit");
-  const card = el("div", "panel");
+  // A list sits bare on the page — no wrapper, no fill, no radius. A card is
+  // for a thing you are looking at; a row is for one of many you are looking
+  // through, and the difference is how many fit on a screen.
+  const card = el("div", "list");
   const head = el("div", "tnarrow hd");
 
   head.append(
@@ -292,7 +297,7 @@ function firstRun(place: TeamPlace): HTMLElement {
     + "shift's regulars — and it exists so work can be given to the group "
     + "rather than to one person."));
 
-  const form = el("button", "btn go", "＋ Form a team");
+  const form = el("button", "btn pri", "＋ Form a team");
   form.setAttribute("type", "button");
   form.addEventListener("click", () => { place.open("form"); });
 

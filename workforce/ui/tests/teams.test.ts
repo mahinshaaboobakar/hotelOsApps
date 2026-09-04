@@ -74,21 +74,38 @@ async function click(root: HTMLElement, selector: string, text: string): Promise
   await settle();
 }
 
-async function open(root: HTMLElement, screen: string): Promise<void> {
-  await click(root, ".ri", screen);
+/**
+ * Reach a screen the way a person does — the bar, then the switcher.
+ *
+ * Two levels since the module took the app surface standard: nine views do not
+ * fit a 56px bar, so Teams sits under People and the switcher chooses between
+ * Postings and Teams. A test that clicked one control would silently pass on
+ * whichever screen the section happened to open first.
+ */
+async function open(root: HTMLElement, section: string, view?: string): Promise<void> {
+  await click(root, ".head .tab", section);
+  if (view !== undefined) await click(root, ".tabs .tab", view);
 }
 
 describe("Teams", () => {
-  it("is a destination the rail reaches", async () => {
+  it("is a view the bar reaches, one level down", async () => {
     const root = await mount(host({ teams: recordedTeams }));
 
-    const labels = Array.from(root.querySelectorAll(".ri")).map((one) => one.textContent);
-    expect(labels.some((label) => label?.includes("Teams") === true)).toBe(true);
+    // Not in the bar: nine views do not fit 56px, so People carries two and
+    // the switcher below chooses. The section is what the bar lists.
+    const sections = Array.from(root.querySelectorAll(".head .tab"))
+      .map((one) => one.textContent);
+    expect(sections).toEqual(
+      ["Rota", "Leave & Requests3", "Attendance", "Duty", "People", "Reports", "Policy"]);
+
+    await click(root, ".head .tab", "People");
+    const views = Array.from(root.querySelectorAll(".tabs .tab")).map((one) => one.textContent);
+    expect(views).toEqual(["Postings", "Teams"]);
   });
 
   it("lists every team with its department and its state", async () => {
     const root = await mount(host({ teams: recordedTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
 
     const rows = Array.from(root.querySelectorAll(".tgrid")).slice(1);
     expect(rows).toHaveLength(recordedTeams.teams.length);
@@ -102,7 +119,7 @@ describe("Teams", () => {
 
   it("names the department it belongs to rather than a zone", async () => {
     const root = await mount(host({ teams: recordedTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
 
     // A team is people and a zone is a place — `WF-Q7` keeps the zone on the
     // posting, so a team row that carried one would be the confusion the
@@ -112,7 +129,7 @@ describe("Teams", () => {
 
   it("draws the first run when the property has formed none", async () => {
     const root = await mount(host({ teams: recordedNoTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
 
     expect(root.querySelector(".tvoid")).not.toBeNull();
     expect(root.querySelectorAll(".tgrid")).toHaveLength(0);
@@ -124,7 +141,7 @@ describe("Teams", () => {
 
   it("opens the team whose roll the answer carries, and only that one", async () => {
     const root = await mount(host({ teams: recordedTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
 
     // Frame 1 first: a list, with no pane beside it. The fixture used to carry
     // an open team, so this state could not be produced at all.
@@ -143,7 +160,7 @@ describe("Teams", () => {
 
   it("shows the candidate it refuses, with the reason", async () => {
     const root = await mount(host({ teams: recordedTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
     await click(root, "button.tgrid", "Morning Crew");
     await click(root, ".btn", "Add a member");
 
@@ -159,7 +176,7 @@ describe("Teams", () => {
 
   it("offers the toggle as a switch a keyboard can reach", async () => {
     const root = await mount(host({ teams: recordedTeams }));
-    await open(root, "Teams");
+    await open(root, "People", "Teams");
     await click(root, "button.tgrid", "Morning Crew");
     await click(root, ".btn", "Stand down");
 
@@ -178,7 +195,7 @@ describe("Teams", () => {
 describe("ending a posting", () => {
   it("states what else it closes before the button that does it", async () => {
     const root = await mount(host({ people: recordedPeople, teams: recordedTeams }));
-    await open(root, "People");
+    await open(root, "People", "Postings");
     await click(root, ".row", recordedPostingEnding.who);
 
     const panel = root.querySelector<HTMLElement>(".conseq");
@@ -205,7 +222,7 @@ describe("ending a posting", () => {
 
   it("says nothing when the posting holds nothing open", async () => {
     const root = await mount(host({ people: recordedPeople, teams: recordedTeams }));
-    await open(root, "People");
+    await open(root, "People", "Postings");
 
     const other = recordedPeople.postings
       .find((one) => one.who !== recordedPostingEnding.who);

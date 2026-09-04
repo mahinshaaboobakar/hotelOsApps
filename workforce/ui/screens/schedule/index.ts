@@ -36,11 +36,10 @@ export async function schedule(host: HostApi, main: HTMLElement): Promise<void> 
 }
 
 function header(month: Schedule): HTMLElement {
-  const head = el("div", "head");
-  const title = el("div");
+  const head = el("div", "tools");
 
-  title.append(el("div", "ht", "Staff Schedule"));
-
+  // No sub-line either: the picker below names the person, and a line above it
+  // saying the same name is the duplication §3 removes, one level down.
   const picker = el("div", "sel");
   picker.append(
     el("span", "av", month.initials),
@@ -49,10 +48,10 @@ function header(month: Schedule): HTMLElement {
   );
 
   const grow = el("div", "grow");
-  head.append(title, picker, grow,
+  head.append(picker, grow,
     el("div", "btn", `‹ ${month.month} ›`),
     el("div", "btn", "⇄ Propose swap"),
-    el("div", "btn go", "＋ Request leave"));
+    el("div", "btn pri", "＋ Request leave"));
   return head;
 }
 

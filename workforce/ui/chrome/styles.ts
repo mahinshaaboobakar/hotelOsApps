@@ -62,62 +62,123 @@ button{background:transparent;color:inherit;font:inherit;border:0;
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb, var(--color-ink-faint) 60%, transparent);border-radius:3px}
 ::-webkit-scrollbar-button{display:none}
 
-.wf{height:100vh;display:grid;grid-template-columns:240px 1fr;
+/* A colour the published names do not carry is DERIVED, never declared — the
+   accent's stops are the ones Jobs and GuestOps reached independently, down to
+   the 62%, at the settled 135 degrees. A derived colour still follows the
+   theme; a hex stops following it the day the theme changes. */
+.wf{--accent:linear-gradient(135deg, var(--color-brand,#818cf8),
+                             color-mix(in srgb, var(--color-brand,#818cf8) 62%,
+                                       var(--color-bad,#f87171)));
+    height:100vh;display:flex;flex-direction:column;
     background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);
     font:13.5px/1.55 var(--font-sans,"Segoe UI",system-ui,sans-serif);
     font-variant-numeric:tabular-nums}
 
-.rail{border-right:1px solid var(--color-line,rgb(255 255 255/.07));padding:20px 12px;
-      display:flex;flex-direction:column;gap:1px;min-width:0}
-.app{display:flex;gap:11px;align-items:center;font-weight:600;font-size:14.5px;padding:0 10px 18px}
-.mark{width:26px;height:26px;border-radius:8px;
-      background:var(--color-surface-raised,#11141f);
-      border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
-      display:grid;place-items:center;font-size:12px;color:var(--color-brand,#818cf8)}
-.ri{display:flex;gap:11px;align-items:center;padding:8px 12px;border-radius:10px;
-    color:var(--color-ink-muted,#8b93a7);font-size:13.5px;cursor:pointer}
-.ri.on{background:var(--color-surface-raised,#11141f);color:var(--color-ink,#e8ebf4);
-       box-shadow:inset 2.5px 0 0 var(--color-brand,#818cf8)}
-.ri .cnt{margin-left:auto;font-size:11px;color:var(--color-ink-faint,#5a6172)}
-.me{margin-top:auto;padding:12px;border-top:1px solid var(--color-line,rgb(255 255 255/.07));
-    font-size:12px;color:var(--color-ink-faint,#5a6172);line-height:1.5}
-.me b{display:block;color:var(--color-ink-muted,#8b93a7);font-weight:500}
+/* # The app bar — an installed application navigates from the top
+   The platform's own four keep the left rail, because they are the desktop's
+   own furniture. An installed application is a guest in that shell, and a guest
+   that draws its own 240px rail competes with the desktop's chrome for the same
+   edge of the same screen. Jobs' geometry: 56px, one bottom rule, the mark and
+   name first, sections as tabs with a 2px brand underline, the person right. */
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;
+      border-bottom:1px solid var(--color-line,rgb(255 255 255/.07));flex:0 0 auto}
+.app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--accent);
+      display:grid;place-items:center;font-size:11px;font-weight:700;
+      color:var(--color-ink-on-accent,#0b0d14)}
+/* Scoped to the bar, because .tab also means the body's view switcher.
+   Specificity is what keeps the two meanings apart — the alternative was two
+   names for one idea, which is how a vocabulary splits. */
+.head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;font-size:13px;
+           color:var(--color-ink-muted,#8b93a7);border-bottom:2px solid transparent;
+           font-weight:400;cursor:pointer;background:none}
+.head .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
+.head .tab .n{font-size:11px;color:var(--color-ink-faint,#5a6172)}
+.who{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:12px;white-space:nowrap}
 
-.main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-.head{display:flex;align-items:center;gap:10px;padding:15px 24px 11px}
-.ht{font-size:17px;font-weight:600;letter-spacing:-.01em}
+/* The body's view switcher — the second of the two levels. The bar carries
+   sections; a choice WITHIN one stays here. */
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--color-line,rgb(255 255 255/.07));
+      padding:0 26px;flex:0 0 auto}
+.tab{padding:8px 4px;margin-right:18px;color:var(--color-ink-muted,#8b93a7);font-size:13px;
+     border-bottom:2px solid transparent;cursor:pointer;background:none}
+.tab.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
+.tab .cnt{margin-left:6px;font-size:10.5px;padding:1px 7px;border-radius:99px;
+          background:color-mix(in srgb, var(--color-brand) 18%, transparent);
+          color:var(--color-brand,#818cf8)}
+
+.main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0;
+      flex:1 1 auto}
+/* Not a title row. A screen does not print its own section name — the bar
+   already says it — so what survives is the context line and the screen's
+   controls, which is the row Jobs draws above its table. */
+.tools{display:flex;align-items:center;gap:10px;padding:22px 26px 0}
+/* Kept for the one screen that still names something the bar cannot say. */
+.title{display:flex;align-items:center;gap:10px;padding:22px 26px 14px}
+.ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
 .hsub{color:var(--color-ink-faint,#5a6172);font-size:12px;margin-top:2px}
 .grow{margin-left:auto}
-.body{padding:0 24px 20px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+/* Padded on all four sides. It was 0 24px 20px — a deliberate zero on top,
+   because the title row above supplied it — so removing that row leaves the
+   first element flush against the bar's rule. */
+.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+/* ...unless a switcher sits above and has already paid for it. */
+.tabs + .main .body{padding-top:14px}
 
-.btn{display:flex;gap:6px;align-items:center;border-radius:9px;padding:5px 11px;
-     font-size:12px;white-space:nowrap;cursor:pointer;
+/* ONE control vocabulary, at Jobs' geometry. Not .btn2, not .create, and no
+   longer .go: a second base class is a second geometry within a week, and three
+   applications proved it. This was 9px / 5px 11px / 12px on ink-muted.
+
+   font:inherit is load-bearing rather than tidy — without it a control leaves
+   --font-sans and picks up the UA's, which is invisible until a capture sits
+   beside a frame. */
+.btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;
+     white-space:nowrap;cursor:pointer;background:none;
      border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
-     color:var(--color-ink-muted,#8b93a7)}
-button.btn{justify-content:center}
-.btn.go{background:var(--color-brand,#818cf8);color:var(--color-ink-on-accent,#0b0d14);
-        font-weight:600;border-color:transparent}
-/* The destructive twin of .go. Here in the chrome rather than in a screen,
-   because a confirm that looked different on two screens would teach a person
-   two things — and the second one they meet is the one they misread. */
-.btn.danger{background:var(--color-bad,#f87171);color:var(--color-ink-on-accent,#0b0d14);
-            font-weight:600;border-color:transparent}
+     border-radius:8px;padding:7px 14px;font:inherit;font-size:13px;
+     color:var(--color-ink,#e8ebf4)}
+.btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);
+         font-weight:600;background:var(--accent)}
+/* Unavailable, and saying so — dashed rather than hidden, for the same reason a
+   refused candidate is drawn rather than filtered out. */
+.btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed;cursor:default}
+.btn.sm{padding:2px 8px;font-size:11px;gap:6px}
+/* The destructive twin. Here in the chrome rather than in a screen, because a
+   confirm that looked different on two screens would teach a person two things
+   — and the second one they meet is the one they misread.
+
+   **Outline, not filled.** This module drew it filled from its own frames; the
+   standard rules it an outline and the frames amended to match. That it makes
+   the most consequential control the quietest is a redline to FF, raised rather
+   than answered by keeping a private fill. */
+.btn.danger{color:var(--color-bad,#f87171);
+            border-color:color-mix(in srgb, var(--color-bad) 45%, transparent)}
 /* The table row, used by six screens. A row that opens something is a real
    <button>, so the reset is on the class rather than on a second one: a
    button carries the UA's border, centred text and its own font family, and a
    row that acquired all three the day somebody made it clickable is a defect
    only a capture can see. */
-.rows{display:flex;flex-direction:column;gap:1px}
-.row{display:grid;gap:12px;align-items:center;padding:10px 12px;border-radius:10px;
-     background:var(--color-surface-raised,#11141f);font-size:12.5px;
-     border:0;width:100%;text-align:left;color:inherit;font-family:inherit}
-.row.hd{background:transparent;font-size:11px;font-weight:600;letter-spacing:.04em;
-        text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:2px 12px}
+/* A list sits BARE on the page — no wrapper, no fill, no radius, rows separated
+   by a single rule. Each row carried its own raised fill and a 10px radius,
+   which is a card per row: a card is for a thing you are looking at, a row is
+   for one of many you are looking through, and the difference is how many fit.
+
+   align-items:flex-start is vertical-align:top in its flex spelling, and it
+   is not a detail — a first cell of two lines otherwise pushes every other cell
+   in the row down past the name it belongs beside. */
+.rows{display:flex;flex-direction:column}
+.row{display:grid;gap:12px;align-items:flex-start;padding:10px;font-size:13px;
+     border:0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.07));
+     background:none;width:100%;text-align:left;color:inherit;font-family:inherit}
+/* The last row keeps its rule: with no card around the list, that line is what
+   closes it. */
+.row.hd{font-size:11px;font-weight:500;letter-spacing:.08em;align-items:center;
+        text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:8px 10px}
 .row b{font-weight:600}
 .row s{text-decoration:none;display:block;font-size:11.5px;
        color:var(--color-ink-faint,#5a6172);margin-top:2px}
 button.row{cursor:pointer}
-button.row:hover{background:color-mix(in srgb, var(--color-brand) 7%, var(--color-surface-raised))}
+button.row:hover{background:color-mix(in srgb, var(--color-brand) 6%, transparent)}
 button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-2px}
 
 /* The dialog, and the fields inside one. Here rather than in a screen because

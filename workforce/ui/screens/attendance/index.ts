@@ -34,10 +34,10 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
 }
 
 function header(day: Day): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
-  title.append(el("div", "ht", "Attendance"), el("div", "hsub", day.date));
+  title.append(el("div", "hsub", day.date));
 
   const picker = el("div", "sel");
   picker.append(el("span", undefined, day.department), el("i", undefined, "▾"));
@@ -45,7 +45,7 @@ function header(day: Day): HTMLElement {
   const grow = el("div", "grow");
   head.append(title, picker, grow,
     el("div", "btn", "‹ Fri 28 Aug ›"),
-    el("div", "btn go", "＋ Mark attendance"));
+    el("div", "btn pri", "＋ Mark attendance"));
   return head;
 }
 

@@ -48,7 +48,7 @@ export function grid(
 
 /** The person column — the zone included, because it completes the posting. */
 function who(person: Person): HTMLElement {
-  const row = el("div", "who");
+  const row = el("div", "person");
   const text = el("div");
   const name = el("div", "wn");
 

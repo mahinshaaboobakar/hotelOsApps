@@ -38,11 +38,10 @@ export async function reports(host: HostApi, main: HTMLElement): Promise<void> {
 }
 
 function header(month: Month): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "tools");
   const title = el("div");
 
   title.append(
-    el("div", "ht", "Month-end summary"),
     el("div", "hsub", `${month.label} · ${month.rows.length} people`),
   );
 

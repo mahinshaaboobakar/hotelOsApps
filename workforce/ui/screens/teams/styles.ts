@@ -4,18 +4,19 @@ export const TEAMS_CSS = `
    class — a UA border, centred text and a different font family arriving the
    day somebody made a row clickable is a defect only a capture can see. */
 .tgrid{display:grid;grid-template-columns:1.4fr 120px 100px 140px 120px;gap:12px;
-       align-items:center;padding:11px 18px;width:100%;text-align:left;
+       align-items:flex-start;padding:11px 18px;width:100%;text-align:left;
        background:transparent;color:inherit;font-family:inherit;font-size:13px;
        border:0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.07))}
-.tgrid:last-child{border-bottom:0}
+/* The list, bare. The last row keeps its rule: with no card around it, that
+   line is what closes the list. */
+.list{display:flex;flex-direction:column}
 button.tgrid,button.tnarrow{cursor:pointer}
 button.tgrid:hover,button.tnarrow:hover{
   background:color-mix(in srgb, var(--color-brand) 6%, transparent)}
 button.tgrid:focus-visible,button.tnarrow:focus-visible{
   outline:2px solid var(--color-brand,#818cf8);outline-offset:-2px}
-.tgrid.hd{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-          color:var(--color-ink-faint,#5a6172);padding:8px 18px;
-          background:color-mix(in srgb, var(--color-surface) 30%, transparent)}
+.tgrid.hd{align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+          color:var(--color-ink-faint,#5a6172);padding:8px 18px;font-weight:500}
 .tgrid.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent);
            box-shadow:inset 2.5px 0 0 var(--color-brand,#818cf8)}
 /* A team stood down reads one step quieter, which is the whole difference
@@ -30,14 +31,12 @@ button.tgrid:focus-visible,button.tnarrow:focus-visible{
    somebody came to read. */
 .tsplit{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;
         align-items:start}
-.tnarrow{display:grid;grid-template-columns:1fr 60px 70px;gap:10px;align-items:center;
+.tnarrow{display:grid;grid-template-columns:1fr 60px 70px;gap:10px;align-items:flex-start;
          padding:11px 16px;width:100%;text-align:left;background:transparent;
          color:inherit;font-family:inherit;font-size:13px;border:0;
          border-bottom:1px solid var(--color-line,rgb(255 255 255/.07))}
-.tnarrow:last-child{border-bottom:0}
-.tnarrow.hd{font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-            color:var(--color-ink-faint,#5a6172);padding:8px 16px;
-            background:color-mix(in srgb, var(--color-surface) 30%, transparent)}
+.tnarrow.hd{align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+            color:var(--color-ink-faint,#5a6172);padding:8px 16px;font-weight:500}
 /* The formed date. Tabular, and one step quieter than the name beside it. */
 .tm{font-variant-numeric:tabular-nums;color:var(--color-ink-muted,#8b93a7)}
 .tnarrow.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent);
