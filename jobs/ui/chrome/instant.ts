@@ -16,6 +16,11 @@ export function clock(host: HostApi, iso: string | null): string {
   return iso === null ? "—" : formatInstant(iso, host.property, "time");
 }
 
+/** `Tue 02 Sept, 14:24` — a line that names today, as the board's strip does. */
+export function today(host: HostApi, iso: string): string {
+  return formatInstant(iso, host.property, "weekday-time");
+}
+
 /** `03 Sep 2026` — a calendar day the property named. */
 export function day(host: HostApi, isoDate: string): string {
   return formatDay(isoDate, host.property);

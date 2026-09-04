@@ -66,11 +66,18 @@ function tab(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
   }
 }
 
+/** The job number in the header is a size larger than in a table cell. */
+function number(text: string): HTMLElement {
+  const span = el("span", "num", text);
+  span.style.fontSize = "14px";
+  return span;
+}
+
 function header(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
   const top = el("div", "row");
   top.append(
     control("btn sm", "‹ Board", place.onBack),
-    el("span", "num", d.row.number), el("span", "title", `${d.row.what} — ${d.row.where}`),
+    number(d.row.number), el("span", "title", `${d.row.what} — ${d.row.where}`),
     priority(d.row.priority), status(d.row.status),
     concern(d.row.concern, d.row.concernDetail === null ? undefined : `${d.row.concernDetail} over`),
   );
@@ -79,6 +86,7 @@ function header(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
   }
 
   const line = el("div", "mono", raisedLine(host, d));
+  line.style.marginBottom = "6px";
   return fill(el("div"), top, line, actions(host, d, place));
 }
 
@@ -103,7 +111,7 @@ function raisedLine(host: HostApi, d: JobDetail): string {
  */
 function actions(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement | null {
   if (d.row.status === "CLOSED" || d.row.status === "CANCELLED") return null;
-  const row = el("div", "row");
+  const row = el("div", "row act");
   if (d.runningSeconds !== null && d.row.viewerIsAssignee) row.append(control("btn", "Pause"), control("btn", "Stop"));
   if (may(host, JOB_COMPLETE)) row.append(control("btn pri", "Resolve…", place.onResolve));
   if (may(host, JOB_AMEND)) row.append(control("btn", "Put on hold…"));

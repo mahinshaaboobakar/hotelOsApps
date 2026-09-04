@@ -7,7 +7,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
-import { clock, when } from "../../chrome/instant";
+import { today as dayLine, when } from "../../chrome/instant";
 import { concern, priority, status, tag } from "../../chrome/marks";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
 import { standIn } from "../../chrome/standin";
@@ -44,7 +44,8 @@ function strip(host: HostApi, today: Today): HTMLElement {
     figure(String(today.open), "open"), figure(String(today.breached), "breached"), figure(String(today.stuck), "stuck"),
     figure(String(today.running), "running"), figure(String(today.closedToday), "closed today"),
     figure(`${String(today.avgResolveMinutes)} min`, "avg to resolve"),
-    el("span", "end", `${today.department} · ${clock(host, today.at)}`),
+    // Department, day and time — the drawing's "ENG · Tue 2 Sep · 14:24".
+    el("span", "end", `${today.department} · ${dayLine(host, today.at)}`),
   );
   return line;
 }

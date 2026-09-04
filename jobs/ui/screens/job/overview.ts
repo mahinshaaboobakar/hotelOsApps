@@ -7,9 +7,9 @@ import { el, fill } from "../../chrome/element";
 import type { Detail, JobDetail } from "../../board";
 
 export function overview(d: JobDetail): HTMLElement {
-  const left = fill(el("div"), card("What and where", d.whatAndWhere), card("Who asked", d.whoAsked));
+  const left = fill(el("div", "stack"), card("What and where", d.whatAndWhere), card("Who asked", d.whoAsked));
   const right = fill(
-    el("div"),
+    el("div", "stack"),
     card("Priority and time", d.priorityAndTime),
     card("Assignment", d.assignment),
     resolution(d.resolution),

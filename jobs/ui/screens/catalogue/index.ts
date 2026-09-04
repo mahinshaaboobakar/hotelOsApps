@@ -21,7 +21,7 @@ export async function catalogue(host: HostApi, main: HTMLElement): Promise<void>
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "260px 1fr";
   const item = got.value.items[0];
-  grid.append(categories(got.value, curate), fill(el("div"), item === undefined ? null : detail(item, curate), curate ? newItem() : null));
+  grid.append(categories(got.value, curate), fill(el("div", "stack"), item === undefined ? null : detail(item, curate), curate ? newItem() : null));
   body.append(grid);
   if (!got.live) body.append(standIn("catalogue", got.because));
   main.replaceChildren(body);

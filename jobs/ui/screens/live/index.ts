@@ -19,7 +19,9 @@ export async function live(host: HostApi, main: HTMLElement): Promise<void> {
   const body = el("div", "body");
   const cards = el("div", "cols3");
   for (const d of got.value.departments) cards.append(department(d));
-  body.append(cards, el("div", "sect", `Concern · property · last 60-second sweep ${when(host, got.value.sweptAt)}`), table(host, got.value));
+  const heading = el("div", "sect", `Concern · property · last 60-second sweep ${when(host, got.value.sweptAt)}`);
+  heading.style.marginTop = "22px";
+  body.append(cards, heading, table(host, got.value));
   if (!got.live) body.append(standIn("live board", got.because));
   main.replaceChildren(body);
 }

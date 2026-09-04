@@ -13,7 +13,7 @@ export function notes(host: HostApi, d: JobDetail): HTMLElement {
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "2fr 1fr";
 
-  const left = el("div");
+  const left = el("div", "stack");
   const line = el("div", "tl");
   for (const note of d.notes) {
     const ev = el("div", "ev");
