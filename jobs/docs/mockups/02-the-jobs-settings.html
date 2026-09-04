@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs · 02 · settings</title>
+<style>
+/* ===========================================================================
+   HotelOS design tokens — apps/desktop/src/styles.css, ADR 0106.
+   Rule 1: every colour is a token; no frame names a hex of its own.
+   Chrome: the current era — one window, top tabs, no left rail
+   (copied from 55-the-marketplace-round.html). Dark frames first.
+   =========================================================================== */
+:root{
+  --bg:#0b0d14;--glass:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);
+  --text:#e9ecf5;--dim:#9aa3b8;--faint:#5d657a;
+  --indigo:#6b7cff;--cyan:#3fd0e0;--violet:#a06bff;
+  --grad:linear-gradient(135deg,var(--indigo),var(--violet));
+  --ok:#3ecf8e;--warn:#f5b53f;--bad:#ff5c7a;--defer:#8d96ad;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
+code{font:12px ui-monospace,Menlo,monospace;color:var(--cyan)}
+.intro{max-width:920px;color:var(--dim);margin-bottom:40px}
+.intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
+.intro p{margin:6px 0}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:64px 0 18px;border-top:1px solid var(--line);padding-top:18px}
+h1.frame{font-size:17px;font-weight:500;color:var(--dim);margin:44px 0 12px}
+h1.frame b{color:var(--text);font-weight:600}
+/* window chrome */
+.win{border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--line);height:56px}
+.app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--grad);display:grid;place-items:center;font-size:12px}
+.tab{color:var(--dim);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
+.tab.on{color:var(--text);border-bottom-color:var(--indigo)}
+.search{margin-left:auto;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
+.who{color:var(--faint);font-size:12px}
+.body{padding:22px}
+.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+/* rows, pills, cards */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.sel td{background:rgba(107,124,255,.08)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}
+.pill.run{color:var(--cyan);border-color:var(--cyan)}
+.pill.hold{color:var(--defer);border-color:var(--defer)}
+.pill.p1{background:var(--bad);color:var(--bg);border-color:var(--bad)}
+.pill.p2{background:var(--warn);color:var(--bg);border-color:var(--warn)}
+.pill.p3{background:var(--indigo);color:var(--text);border-color:var(--indigo)}
+.pill.nt{border-style:dashed}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);border-radius:12px;padding:16px;background:rgba(0,0,0,.18)}
+.card h3{margin:0 0 10px;font-size:13px;font-weight:600}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
+.kv div:nth-child(odd){color:var(--faint)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--line);color:var(--text);margin-right:8px}
+.btn.pri{background:var(--grad);border-color:transparent}
+.btn.off{color:var(--faint);border-style:dashed}
+.field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:rgba(0,0,0,.2)}
+.field.ph{color:var(--faint)}
+label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
+.tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
+.tl div{margin-bottom:10px;font-size:13px}
+.tl b{display:block;color:var(--text);font-weight:600}
+.tl span{color:var(--faint);font-size:12px}
+.big{font-size:34px;font-weight:600;line-height:1}
+.mono{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--ok)}
+.bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim)}
+.chip.on{border-color:var(--indigo);color:var(--text)}
+.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
+.tog.on{background:var(--ok)}
+.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text)}
+.tog.on i{left:18px}
+/* redline 2026-09-04 */
+.strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
+.strip b{color:var(--text);font-size:14px;margin-right:4px}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
+.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
+.pager span.pg.on{color:var(--text);border-color:var(--indigo)}
+.scroll{max-height:168px;overflow:hidden;position:relative}
+.scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--bg))}
+.more{font-size:11px;color:var(--faint);text-align:center;padding-top:4px}
+.timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--cyan);line-height:1}
+.timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:10px;vertical-align:middle}
+.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
+.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:rgba(107,124,255,.06)}
+td.dimtd{color:var(--faint)}
+/* widget */
+.widget{max-width:360px;border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.widget h3{margin:0 0 12px;font-size:13px;display:flex;justify-content:space-between}
+.widget h3 span{color:var(--faint);font-weight:400}
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.wrow:last-child{border:0}
+/* notes under frames */
+.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:rgba(107,124,255,.05)}
+.note b{color:var(--text)}
+.note.stop{border-color:var(--bad);background:rgba(255,92,122,.05)}
+.note.hold{border-color:var(--warn);background:rgba(245,181,63,.05)}
+.note.fix{border-color:var(--ok);background:rgba(62,207,142,.05)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
+.tag.obs{color:var(--bad);border-color:var(--bad)}
+.tag.later{color:var(--warn);border-color:var(--warn)}
+ul.flows{max-width:920px;color:var(--dim)}
+ul.flows li{margin-bottom:10px}
+ul.flows b{color:var(--text)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Jobs · the settings</h1>
+  <p>Companion to <code>01-the-jobs-screens.html</code>, split out on the owner's leave (2026-09-04) when the concern-policy flow made one page too long. Same palette authority — the ADR 0106 tokens, no hex of its own — and the same chrome. Dark frames first.</p>
+  <p><b>Part A</b> is the Settings tab of the app, one frame per sub-tab, each with its purpose stated. <b>Part B</b> is the three-step flow that creates a concern policy, ending in the ladder builder.</p>
+</div>
+
+<h2 class="sec">A · the settings tabs</h2>
+<h1 class="frame">1 · <b>Settings · Concern policy</b>. The promise clock, per priority.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab on">Settings</div>
+    <div class="search">Search job number, room, summary…</div>
+    <div class="who">Rohan Desai · property jobs manager</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div class="on">Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div><div style="margin-left:auto;color:var(--faint)">Numbering · <code>MRN-ENG-…</code> · next 145 · property code from Master Data</div></div>
+    <div class="cols" style="grid-template-columns:220px 1fr">
+      <div class="card">
+        <h3>Scope</h3>
+        <div class="wrow"><span>Marina Bay · property</span><span class="mono">default</span></div>
+        <div class="wrow"><span style="color:var(--text)">Engineering</span><span class="pill">override</span></div>
+        <div class="wrow"><span>Housekeeping</span><span class="mono">inherits</span></div>
+        <div class="wrow"><span>Front Office</span><span class="mono">inherits</span></div>
+        <div class="wrow"><span>Food &amp; Beverage</span><span class="pill">override</span></div>
+        <div class="mono" style="margin-top:8px">Property first; a department overrides only the rows it changes.</div>
+      </div>
+      <div class="card">
+        <h3>Engineering <span class="mono">overrides the property default</span> <span class="btn" style="float:right;padding:2px 8px;font-size:11px">Reset to property</span></h3>
+        <table>
+          <tr><th>Priority</th><th>Due within</th><th>At risk at</th><th>Stuck: not accepted</th><th>Stuck: no session</th><th>Ladder</th><th>Manager at risk</th></tr>
+          <tr><td><span class="pill p1">P1</span></td><td>40 min</td><td>75 %</td><td>8 min</td><td>15 min</td><td>assignee → supervisor → manager → jobs manager</td><td><span class="tog on"><i></i></span>yes</td></tr>
+          <tr><td><span class="pill p2">P2</span></td><td>2 h</td><td>75 %</td><td>20 min</td><td>45 min</td><td>assignee → supervisor → manager</td><td><span class="tog"><i></i></span>no</td></tr>
+          <tr><td><span class="pill p3">P3</span></td><td>same shift</td><td>80 %</td><td>60 min</td><td>—</td><td>assignee → supervisor</td><td><span class="tog"><i></i></span>no</td></tr>
+          <tr><td><span class="pill nt">NT</span></td><td colspan="6" class="dimtd">Not triaged: no clock · stuck after 15 min untriaged → supervisor</td></tr>
+        </table>
+        <div class="mono" style="margin-top:8px">Outside presence: P1 keeps running · P2 and P3 pause until the department is present.</div>
+        <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> this is the whole escalation design (S5 D1–D3) as one table — how long a job of each priority has, when it turns AT_RISK, what counts as STUCK, who becomes accountable at each step, and whether a manager hears of a P1 already at risk (the owner's flexibility ask). Table <code>concern_policy</code>; property default with per-department override. Everything the 60-second sweep decides, it decides from this table.</div>
+
+<h1 class="frame">2 · <b>Settings · Shifts &amp; presence</b>. When a department's clock runs.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div class="on">Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <table>
+      <tr><th>Department</th><th>Presence</th><th>Follow Workforce shifts</th><th>Service hours (fallback)</th><th>Now</th></tr>
+      <tr><td>Engineering</td><td><span class="pill ok">on</span></td><td><span class="tog on"><i></i></span>yes</td><td>07:00 – 23:00</td><td>present · day shift since 07:00</td></tr>
+      <tr><td>Housekeeping</td><td><span class="pill ok">on</span></td><td><span class="tog on"><i></i></span>yes</td><td>07:00 – 22:00</td><td>present · since 07:00</td></tr>
+      <tr><td>Food &amp; Beverage</td><td><span class="pill ok">on</span></td><td><span class="tog"><i></i></span>no · hours only</td><td>06:00 – 00:00</td><td>present · by hours</td></tr>
+      <tr><td>Front Office</td><td><span class="pill">off</span></td><td class="dimtd">—</td><td class="dimtd">—</td><td>property clock · always running</td></tr>
+    </table>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> the owner's on/off (S7 D8) — a property with no staff on a shift should not be breaching promises nobody could keep. "Follow Workforce shifts" makes presence come from <code>shift.started</code> / <code>shift.ended</code>; service hours are the fallback when Workforce has no roster for that department; off means the property clock. Tables <code>department_presence</code>, <code>service_hours</code>. The "Now" column is read-only and shows what the fan-out last said.</div>
+
+<h1 class="frame">3 · <b>Settings · Who is told</b>. Which role hears which concern.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div class="on">Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <table>
+      <tr><th>Role</th><th>At risk</th><th>Breached</th><th>Stuck</th><th>Not triaged</th><th>Repeat every</th><th>Departments</th></tr>
+      <tr><td>Assignee</td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td class="dimtd">—</td><td class="dimtd">—</td><td>10 min</td><td>own jobs</td></tr>
+      <tr><td>Department supervisor</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td>15 min</td><td>own department</td></tr>
+      <tr><td>Department manager</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span> P1 only</td><td><span class="tog on"><i></i></span> &gt; 30 min</td><td><span class="tog"><i></i></span></td><td>30 min</td><td>own department</td></tr>
+      <tr><td>Property jobs manager</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span> P1 only</td><td><span class="tog on"><i></i></span> ladder's last step</td><td><span class="tog"><i></i></span></td><td>30 min</td><td>all</td></tr>
+    </table>
+    <div class="mono" style="margin-top:8px">In-app only. There is no channel, no quiet hours, no per-person setting — the role decides (S9 D10).</div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> escalation without this table would nudge everyone about everything. "Who is told" is <code>concern_subscription</code> (S5 D3): for each role, which concern states reach it, how often the nudge repeats while the state lasts, and for which departments. It is separate from the ladder in frame 1 — the ladder says who is <i>accountable</i>; this says who <i>hears</i>. A manager can be told of a breach without being accountable for it yet.</div>
+
+<h1 class="frame">4 · <b>Settings · Holds &amp; reminders</b>. Waiting with a date, and being warned before it.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div class="on">Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Putting a job on hold</h3>
+        <div class="kv" style="grid-template-columns:130px 1fr">
+          <div>Requires</div><div>a reason and a <code>hold_until</code> date</div>
+          <div>Clock</div><div>stopped while on hold</div>
+          <div>Longest hold</div><div>30 days · then STUCK → supervisor</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Warn before the date</h3>
+        <table>
+          <tr><th>When</th><th>Who</th></tr>
+          <tr><td>1 day before</td><td>department supervisor</td></tr>
+          <tr><td>on the day, 08:00</td><td>assignee</td></tr>
+          <tr><td>date passed, still on hold</td><td>supervisor · repeat daily</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="mono" style="margin-top:12px">Manual reminders (S9 D3) need no setting: anyone can set one on a job they can see, for themselves, from the job's "More ▾".</div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> the owner's example — "AC filter needs to be bought, set a time" (S9 D2). A hold is a promise to come back on a date; this tab says what a hold must carry and who is warned, how far ahead, so the date is not missed. Table <code>job_reminder</code> policy rows at property level; the per-job rows are made when the hold is set.</div>
+
+<h1 class="frame">5 · <b>Settings · Closing &amp; rating</b>. From RESOLVED to CLOSED, and what the guest is asked.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div class="on">Closing &amp; rating</div><div>Access</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Auto-close after RESOLVED</h3>
+        <table>
+          <tr><th>Scope</th><th>Hours</th></tr>
+          <tr><td>Property default</td><td>4 h</td></tr>
+          <tr><td>Housekeeping</td><td>1 h</td></tr>
+          <tr><td>Engineering</td><td>4 h</td></tr>
+        </table>
+        <div class="mono" style="margin-top:8px">Until then the raiser may reopen; after, it is CLOSED and the resolution stands.</div>
+      </div>
+      <div class="card">
+        <h3>Resolving and rating</h3>
+        <div class="kv" style="grid-template-columns:150px 1fr">
+          <div>Note required</div><div>when the resolution is "Other"</div>
+          <div>Photo</div><div>as the catalogue item says: none · optional · required</div>
+          <div>Guest rating</div><div><span class="tog on"><i></i></span>ask on close of guest-raised jobs, in the guest app</div>
+          <div>Rating scale</div><div>1–5 and a line of text</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> S2 D3's "auto close after n hours" needs the <i>n</i> somewhere, per department if the work differs (a towel does not need a four-hour reopen window; a compressor might). The rating half is S10 D2: a guest who raised a job through their stay link is asked once it closes. The photo rule is the catalogue item's; it is shown here so the property sees the whole closing story in one place, but it is edited in the catalogue.</div>
+
+<h1 class="frame">6 · <b>Settings · Access</b>. Who holds what — shown, not edited.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div class="on">Access</div></div>
+    <table>
+      <tr><th>Label</th><th>Who</th><th>Comes from</th></tr>
+      <tr><td>Property jobs manager</td><td>Rohan Desai</td><td>granted by the GM in Identity · 2026-08-28</td></tr>
+      <tr><td>Department manager · ENG</td><td>Kiran Bhat</td><td>Workforce headship</td></tr>
+      <tr><td>Department supervisor · ENG</td><td>Priya Nair</td><td>Workforce headship</td></tr>
+      <tr><td>Department member · ENG</td><td>9 people</td><td>Workforce posting</td></tr>
+      <tr><td>Department manager · HK</td><td>Anjali Rao</td><td>Workforce headship</td></tr>
+    </table>
+    <div class="mono" style="margin-top:12px">To change any of this: postings and headships in Workforce; the jobs-manager grant in Identity (GM only). Jobs has no editor because it owns none of these facts.</div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> a jobs manager asked "who else can do what here?" needs one place to look (S8 D1: the two axes realised by four labels). This tab is that answer and nothing more — a read-only view of Workforce postings and headships and the Identity grant of <code>property#jobs_manager</code> (AUTHZ-Q25). <b>None of it is in Jobs' database</b>: the rows are answered by Context at display time — Workforce for postings and headships, Identity for the grant — and Jobs stores only the <code>department_code</code> and user ids it already carries on jobs. It is a tab rather than a note because the question is asked often and the answer changes with every roster.</div>
+<div class="note fix"><b>Redline folded (2026-09-04, second pass).</b> Each settings tab is now its own frame with its purpose stated. <b>Numbering is no longer a tab</b>: nothing on it was configurable — the property code is Master Data's, the department part and the counter are fixed by S1 D3 — so it is one read-only line in the sub-nav, and a tab that only displays is not built.</div>
+<div class="note stop"><b>No notification settings exist</b> (S9 D10: in-app only, no config). "Who is told" chooses <i>which role hears which concern</i>, never <i>how</i>.</div>
+
+<h2 class="sec">B · creating a concern policy — the ladder, step by step</h2>
+
+<h1 class="frame">7 · <b>New concern policy · 1 of 3 · Name and scope</b>.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div class="on">1 · Name and scope</div><div>2 · The clock</div><div>3 · The ladder</div></div>
+    <div class="cols">
+      <div>
+        <label>Name</label><div class="field">Engineering · guest-facing</div>
+        <label>Applies to</label><div class="field">Department · Engineering</div>
+        <label>Start from</label><div class="field">Copy of "Marina Bay · property default"</div>
+      </div>
+      <div class="card">
+        <h3>Where a policy can sit</h3>
+        <div class="kv" style="grid-template-columns:120px 1fr">
+          <div>Property</div><div>the default for every job here</div>
+          <div>Department</div><div>overrides the property for that department's jobs</div>
+          <div>Catalogue item</div><div>overrides both, for one item, from the item's property policy</div>
+        </div>
+        <div class="mono" style="margin-top:8px">Resolution order for a job: item → department → property (§2.3).</div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><span class="btn pri">Next · the clock</span><span class="btn">Cancel</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S5 D1–D3, §2.3.</b> A policy is a named row of <code>concern_policy</code> with a scope. Starting from a copy is the normal case; a property has one default and a few department overrides, never a policy per job.</div>
+
+<h1 class="frame">8 · <b>New concern policy · 2 of 3 · The clock</b>. What "on time" means for each priority.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>1 · Name and scope</div><div class="on">2 · The clock</div><div>3 · The ladder</div></div>
+    <table>
+      <tr><th>Priority</th><th>Due within</th><th>At risk when</th><th>Stuck if not accepted in</th><th>Stuck if no work session in</th><th>Outside presence</th></tr>
+      <tr><td><span class="pill p1">P1</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">40 min</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">75 %</span> of due</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">8 min</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">15 min</span></td><td>keeps running</td></tr>
+      <tr><td><span class="pill p2">P2</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">2 h</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">75 %</span> of due</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">20 min</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">45 min</span></td><td>pauses</td></tr>
+      <tr><td><span class="pill p3">P3</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">same shift</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">80 %</span> of due</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">60 min</span></td><td>—</td><td>pauses</td></tr>
+      <tr><td><span class="pill nt">NT</span></td><td class="dimtd">no clock</td><td class="dimtd">—</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">15 min</span> untriaged</td><td class="dimtd">—</td><td class="dimtd">—</td></tr>
+    </table>
+    <div class="mono" style="margin-top:10px">Example, P1 raised 13:31: at risk from 14:00 (75 % of 40 min) · breached from 14:10 · stuck at 13:39 if nobody has accepted, or at 14:02 if accepted but nobody has started.</div>
+    <div style="margin-top:12px"><span class="btn pri">Next · the ladder</span><span class="btn">Back</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S5 D1.</b> Four thresholds per priority: due, the at-risk point as a share of due, and the two stuck tests (not accepted; accepted but never started). "Outside presence" is fixed by 8b's rule, shown for the reader. The sweep computes ON_TRACK / AT_RISK / BREACHED / STUCK from these and nothing else.</div>
+
+<h1 class="frame">9 · <b>New concern policy · 3 of 3 · The ladder</b>. Who becomes accountable, in what order.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>1 · Name and scope</div><div>2 · The clock</div><div class="on">3 · The ladder</div></div>
+    <div class="cols" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="card">
+        <h3>P1 <span class="mono">4 steps</span></h3>
+        <div class="wrow"><span>1 · Assignee</span><span class="mono">at risk</span></div>
+        <div class="wrow"><span>2 · Department supervisor</span><span class="mono">breached</span></div>
+        <div class="wrow"><span>3 · Department manager</span><span class="mono">breached + 15 min</span></div>
+        <div class="wrow"><span>4 · Property jobs manager</span><span class="mono">breached + 45 min</span></div>
+        <div style="margin-top:8px"><span class="tog on"><i></i></span><span class="mono">manager also accountable from <b>at risk</b></span></div>
+        <div style="margin-top:8px"><span class="btn" style="padding:3px 10px;font-size:12px">＋ step</span><span class="mono">drag to reorder</span></div>
+      </div>
+      <div class="card">
+        <h3>P2 <span class="mono">3 steps</span></h3>
+        <div class="wrow"><span>1 · Assignee</span><span class="mono">at risk</span></div>
+        <div class="wrow"><span>2 · Department supervisor</span><span class="mono">breached</span></div>
+        <div class="wrow"><span>3 · Department manager</span><span class="mono">breached + 60 min</span></div>
+        <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">manager from at risk</span></div>
+        <div style="margin-top:8px"><span class="btn" style="padding:3px 10px;font-size:12px">＋ step</span></div>
+      </div>
+      <div class="card">
+        <h3>P3 <span class="mono">2 steps</span></h3>
+        <div class="wrow"><span>1 · Assignee</span><span class="mono">at risk</span></div>
+        <div class="wrow"><span>2 · Department supervisor</span><span class="mono">breached</span></div>
+        <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">manager from at risk</span></div>
+        <div style="margin-top:8px"><span class="btn" style="padding:3px 10px;font-size:12px">＋ step</span></div>
+      </div>
+    </div>
+    <div class="dlg" style="margin-top:14px;max-width:520px">
+      <h3 style="margin:0 0 10px;font-size:13px">Add a step to P1</h3>
+      <label>Role</label><div class="field">Department manager ▾ &nbsp;<span class="mono">assignee · supervisor · manager · property jobs manager · GM</span></div>
+      <label>Becomes accountable</label><div class="field">when breached ▾ &nbsp;+ <span class="field" style="display:inline-block;margin:0;padding:2px 8px">15</span> min</div>
+      <span class="btn pri">Add</span><span class="btn">Cancel</span>
+    </div>
+    <div class="mono" style="margin-top:12px">Stuck goes straight to the supervisor for every priority. If a step's role has nobody today (no supervisor posted), the sweep moves one step up and records why.</div>
+    <div style="margin-top:12px"><span class="btn pri">Save policy</span><span class="btn">Back</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S5 D2–D3 and §6's sweep.</b> A ladder is an ordered list of <b>roles</b>, not people — assignee, department supervisor, department manager, property jobs manager, GM — each with the concern state and delay at which it becomes accountable. Roles resolve to today's people through Context (Workforce postings and headships; the Identity grant), so a roster change never edits a policy. Per priority, because a P3 need not reach a manager. The "manager from at risk" toggle is the owner's ask, per priority.</div>
+<div class="note fix"><b>Redline folded (2026-09-04, third pass).</b> "How do we set the ladder" — drawn as the third step of creating a policy: roles in order, each with its trigger, an add-step dialog, drag to reorder. Saving writes one <code>concern_policy</code> row with its ladder rows; the sweep uses it from the next minute.</div>
+
+<h2 class="sec">Deliberately not drawn</h2>
+<ul class="flows">
+  <li><b>Editing an existing policy</b> — the same three steps opened on a row of frame 1.</li>
+  <li><b>Deleting a policy</b> — refused while any department or item still points at it; a one-line message, not a screen.</li>
+  <li><b>A notifications page</b> — none exists (S9 D10).</li>
+  <li><b>A permission or team editor</b> — Identity's and Workforce's.</li>
+  <li><b>Light theme</b> — the same tokens per ADR 0106, drawn once the dark frames are approved.</li>
+</ul>
+
+</body>
+</html>
