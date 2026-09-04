@@ -10,7 +10,7 @@ namespace HotelOS.Jobs.Application.Concerns;
 /// <summary>The sweep as Temporal executes it — <c>TEMPORAL-Q1</c>, page 62a.</summary>
 /// <remarks>
 /// <para>
-/// The body is <see cref="ConcernSweepHost"/>'s tick moved, not rewritten: the
+/// The body is the hosted timer's tick moved, not rewritten: the
 /// discovery of properties from open jobs, the per-property loop, the order of
 /// the three passes and the try/catch that keeps one property's failure off the
 /// others are the audited behaviour and stay exactly as they were. Temporal
@@ -19,10 +19,7 @@ namespace HotelOS.Jobs.Application.Concerns;
 /// <para>
 /// <b>The provider arrives as a function</b>, because an activity instance must
 /// be declared before <c>builder.Build()</c> and cannot do its work without the
-/// provider that call returns. It is the lazy shape page 62a offers, taken over
-/// resolving the instance after the build: this way the timer and the workflow
-/// hold the <i>same</i> object, and the two triggers cannot drift into meaning
-/// different things for the release in which both exist.
+/// provider that call returns — page 62a's lazy shape.
 /// </para>
 /// </remarks>
 public sealed class ConcernActivities(Func<IServiceProvider> services)
@@ -31,7 +28,7 @@ public sealed class ConcernActivities(Func<IServiceProvider> services)
     [Activity]
     public Task SweepAsync() => SweepAsync(ActivityExecutionContext.Current.CancellationToken);
 
-    /// <summary>One tick over every property with jobs.</summary>
+    /// <summary>One tick over every property with jobs — separately callable, so a test can drive it.</summary>
     public async Task SweepAsync(CancellationToken cancellationToken)
     {
         var root = services();

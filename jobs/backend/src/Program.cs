@@ -144,18 +144,16 @@ builder.Services.AddScoped<ConcernSweep>();
 builder.Services.AddScoped<DayStart>();
 builder.Services.AddScoped<AutoClose>();
 
-// The tick, twice over, deliberately — TEMPORAL-Q1, page 62a's order. The
-// Schedule is the trigger from now on; the timer stays until this installation
-// is confirmed firing it, because until INSTALL-Q69 closes a property may have
-// no Temporal, where the reconciler correctly does nothing. Both run the same
-// object, so they cannot come to mean different things.
+// The tick — TEMPORAL-Q1. A Schedule starts the workflow every minute, the
+// workflow runs the activity, and the activity is what used to be the hosted
+// timer's body. The in-process ticker was deleted once a Schedule was seen
+// firing this workflow against a real server.
 var sweepActivities = new ConcernActivities(() => started!.Services);
 builder.Services.AddSingleton(sweepActivities);
-builder.Services.AddHostedService<ConcernSweepHost>();
 builder.Services.AddTemporal(temporal => temporal
     .Workflow<ConcernSweepWorkflow>()
     .Activities(sweepActivities)
-    .Schedule(ConcernSweepWorkflow.ScheduleId, ConcernSweepHost.Interval, nameof(ConcernSweepWorkflow)));
+    .Schedule(ConcernSweepWorkflow.ScheduleId, ConcernSweepWorkflow.Cadence, nameof(ConcernSweepWorkflow)));
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one — the property worth having: an installed package with no

@@ -49,8 +49,8 @@ public sealed class ConcernScheduleTests(JobsFixture fixture)
     public void The_property_gets_the_cadence_the_walkthrough_locked()
     {
         Assert.Equal("jobs-concern-sweep", ConcernSweepWorkflow.ScheduleId);
-        Assert.Equal(TimeSpan.FromSeconds(60), ConcernSweepHost.Interval);
-        Assert.Equal(ConcernSweepHost.Interval, ConcernSweepWorkflow.Ceiling);
+        Assert.Equal(TimeSpan.FromSeconds(60), ConcernSweepWorkflow.Cadence);
+        Assert.Equal(ConcernSweepWorkflow.Cadence, ConcernSweepWorkflow.Ceiling);
     }
 
     [Fact]

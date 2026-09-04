@@ -27,6 +27,14 @@ public sealed class ConcernSweepWorkflow
     /// </remarks>
     public const string ScheduleId = "jobs-concern-sweep";
 
+    /// <summary>Every sixty seconds — S5 D1's cadence, which the walkthrough locked.</summary>
+    /// <remarks>
+    /// It lived on the hosted timer until the timer was deleted. The Schedule is
+    /// the only thing that ticks now, so the number lives with the workflow it
+    /// starts rather than with the class that used to.
+    /// </remarks>
+    public static readonly TimeSpan Cadence = TimeSpan.FromSeconds(60);
+
     /// <summary>The ceiling on one tick — deliberately the cadence itself.</summary>
     /// <remarks>
     /// <para>
@@ -45,7 +53,7 @@ public sealed class ConcernSweepWorkflow
     /// finished by the time the next is due has already missed its slot.
     /// </para>
     /// </remarks>
-    public static readonly TimeSpan Ceiling = TimeSpan.FromMinutes(1);
+    public static readonly TimeSpan Ceiling = Cadence;
 
     /// <summary>Run one tick.</summary>
     [WorkflowRun]

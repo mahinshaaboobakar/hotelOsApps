@@ -42,7 +42,7 @@ flowchart TB
 
     subgraph PKG["jobs · one .hopkg"]
         SVC["HotelOS.Jobs · .NET service<br/>Application · Domain · Events · Grpc · Infrastructure"]
-        SWEEP["concern sweep<br/>every 60 s, run by Temporal Cron"]
+        SWEEP["concern sweep<br/>every 60 s, started by a Temporal Schedule"]
         VERIFY["verification workflow<br/>N hours after RESOLVED"]
     end
 
@@ -97,8 +97,10 @@ Four lines of it are rules, not drawing:
   event in (`maintenance.ppm.due`, `shift.started`) or an event out
   (`job.created` with the correlation id the raiser sent — `EVT-Q3`). Every
   cross-application *question* goes to Context.
-* **Jobs holds no schedule and no timers.** Temporal Cron wakes the sweep;
-  the sweep compares timestamps already on the rows (walkthrough S5-D12).
+* **Jobs holds no per-job timers.** One Temporal Schedule wakes the sweep, and
+  the sweep compares timestamps already on the rows (walkthrough S5-D12) — a
+  timer per job is the rebuild-on-every-edit trap the platform's own boundary
+  test names.
 * **Jobs writes no authorization tuple.** It declares one grant kind in its
   manifest and publishes the two events; the Kernel materialises
   `property#jobs_manager` (AUTHZ-Q25; ruling 4).
@@ -467,10 +469,39 @@ GuestOps publishes it (ruling 5). No SMS or WhatsApp anywhere — in-app only
 
 ## 6 · The sweep, and what Temporal does
 
-### 6.1 · The concern sweep — every 60 seconds, one schedule per property
+### 6.1 · The concern sweep — every 60 seconds, one schedule
 
-Temporal Cron wakes it (S5-D12); it calls nothing outside PostgreSQL and
-Context.
+Temporal wakes it (S5-D12); it calls nothing outside PostgreSQL and Context.
+
+**Built, 2026-09-04 — `TEMPORAL-Q1`**, applying II's exemplar (design page
+62a) in this tree. A **Temporal Schedule** named `jobs-concern-sweep` starts
+`ConcernSweepWorkflow` every minute; the workflow's one act is to run
+`ConcernActivities.SweepAsync`, which is the hosted timer's body moved rather
+than rewritten. **Overlap SKIP** is a requirement, not a default — a slow tick
+is followed by the next due one and never by a catch-up — and it is read back
+from the server rather than asserted at the call site.
+
+Three decisions were this tree's to make, and page 62a says so:
+
+* the three passes take the tick's `RequestScope` **instead of** the property,
+  rather than beside it: all three used to invent a service scope at the top of
+  their own body, which is what `RequestScope.ForBackgroundWork` exists to
+  prevent, and a scope that carries the property cannot disagree with a
+  property passed next to it;
+* the activity's ceiling is **one minute, not five** — the timeout unsticks a
+  hung tick rather than policing the sweep's speed, and under overlap SKIP it
+  is the ceiling on how long escalation can be *silently* absent. A five-minute
+  hang hides four missed sweeps behind one workflow that still looks alive;
+* the tests drive the activity, and doing so found the tick had **no test at
+  all** — the three passes were each covered and the loop around them was not,
+  so the try/catch that keeps one property's failure off the others was
+  asserted nowhere. It is now, either way round.
+
+**The in-process timer is gone** (its own commit, after a Schedule was seen
+firing this workflow against a real server: the workflow started, the activity
+swept, a job moved ON_TRACK → AT_RISK). **The exposure that leaves is §9's**:
+an installed property with no Temporal now has no sweep, and `INSTALL-Q69`
+owns when a property gets a server.
 
 ```text
 for each department at the property
@@ -521,7 +552,7 @@ wait for a real window.
 ### 6.3 · What Temporal does not do
 
 Hold per-job escalation timers (S5-D12), hold the department pause (S5-D8),
-or schedule PPM — that last is Engineering's, on Temporal Cron in its own
+or schedule PPM — that last is Engineering's, on a Temporal Schedule in its own
 round (S10).
 
 ---
@@ -691,6 +722,7 @@ for two departments.
 | **The 19 place kinds · a `Property.Code` shape rule** | requested of Master Data | nothing — a job for the gym is a job at a `back_of_house` node until then |
 | **`guestops.request.raised`** | GuestOps' to name | the replay subscription's subject |
 | **What a QR authenticates** | the guest-app round's | nothing in Jobs |
+| **A property with no Temporal has no sweep** | opened by this migration, 2026-09-04 | the timer that used to cover it is deleted; `INSTALL-Q69` owns when an installation gets a Temporal, and until it does an installed property escalates nothing. **Reported, not decided** — §6.1 |
 | **The v3 comment** *"a .hopkg has no database role, so the Kernel appends on its behalf"* | predates ADR 0103's addendum; Workforce appends in its own transaction through the SDK today | **reported for reconciliation, not built to** — §1 |
 
 ### Verified against `00-master-architecture-v3.md`
