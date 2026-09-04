@@ -130,31 +130,26 @@ provider:
       cost_per_output_token: 0.0
 
     # ┌──────────────────────────────────────────────────────────────────┐
-    # │ THE TWO SPEECH MODELS PRICE IN UNITS THIS CONTRACT CANNOT NAME.  │
+    # │ THE TWO SPEECH MODELS PRICE IN UNITS THE CONTRACT NOW NAMES.     │
     # │                                                                  │
-    # │ The declared fields are `cost_per_input_token` and               │
-    # │ `cost_per_output_token`. Speech is not sold by the token:        │
+    # │ `PKG-Q45(c)` gave the declaration a closed `cost_unit`, so each   │
+    # │ line states the unit it is priced in rather than pretending to   │
+    # │ be tokens:                                                       │
     # │                                                                  │
     # │   whisper-1   $0.006 per MINUTE of audio                         │
     # │   tts-1       $15.00 per 1,000,000 CHARACTERS of input           │
     # │                                                                  │
-    # │ Each line below carries its real price with **its own unit named │
-    # │ on the line**, because a number whose unit is wrong is worse     │
-    # │ than no number: the field says *token* and the value is not one. │
-    # │                                                                  │
-    # │ Nothing reads these today — `_by_capability`, which resolves      │
-    # │ embeddings, transcription and speech, does not consult cost at   │
-    # │ all; only `resolve` (completions) does, through `_within_budget`. │
-    # │ So these are for an operator and for whatever budgets speech     │
-    # │ later, and the mismatch is **reported to the platform** rather    │
-    # │ than papered over here.                                          │
+    # │ This package raised the mismatch and the platform answered it —  │
+    # │ the interim was a truthful figure under a field named `token`,   │
+    # │ safe only because nothing read it. Now the figure and the unit   │
+    # │ are both true, and validation refuses a unit foreign to its      │
+    # │ capability rather than letting it sort into a budget ladder.     │
     # │                                                                  │
     # │ Verify both against OpenAI's current pricing before real spend,  │
     # │ exactly as for the chat models above.                            │
     # └──────────────────────────────────────────────────────────────────┘
 
-    # $0.006 per MINUTE of audio. The value below is that price; the field
-    # name is the contract's, not this package's.
+    # $0.006 per minute of audio, and the unit says so.
     - id: whisper-1
       capabilities: [speech_to_text]
       # **Neither limit's unit applies to audio**, and both are required to be
@@ -166,16 +161,17 @@ provider:
       context_limit: 1
       max_output: 1
       latency_class: fast
+      cost_unit: per_minute
       cost_per_input_token: 0.006
       cost_per_output_token: 0.0
 
-    # $15.00 per 1,000,000 CHARACTERS of input — 0.000015 per character. The
-    # value below is per character.
+    # $15.00 per 1,000,000 characters of input — 0.000015 per character.
     - id: tts-1
       capabilities: [text_to_speech]
       context_limit: 1
       max_output: 1
       latency_class: fast
+      cost_unit: per_character
       cost_per_input_token: 0.000015
       # Audio out is not charged separately; the input characters are the whole
       # price. A true zero, like the embedding models' output.
