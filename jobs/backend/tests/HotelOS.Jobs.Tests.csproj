@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Jobs' characterisation suite — beside `backend/src/`, against a real
+    PostgreSQL on a scratch database of its own (ADR 0053: an absent database
+    FAILS). The CHECK constraints on vocabularies and the sweep's one query are
+    the rules worth meeting on the real planner.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Jobs.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\HotelOS.Jobs.csproj" />
+    <!-- The recording doubles and the scratch database — one implementation, shared. -->
+    <ProjectReference
+      Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

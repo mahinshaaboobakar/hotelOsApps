@@ -1,0 +1,184 @@
+syntax = "proto3";
+
+// Jobs — the views this application returns. Vocabularies are strings, the
+// same spellings the database CHECKs (design §2.1), so a reader never maps.
+
+package hotelos.jobs.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option csharp_namespace = "HotelOS.Jobs.Contracts.V1";
+
+// The lean job, as a screen reads it.
+message JobView {
+  string id                 = 1;
+  string job_number         = 2;
+  string property_id        = 3;
+  string category_id        = 4;
+  string item_id            = 5;
+  string location_id        = 6;
+  string asset_id           = 7;   // empty when none
+  string department_code    = 8;
+  string summary            = 9;
+  string details            = 10;
+  string priority           = 11;
+  string priority_decided_by = 12;
+  string raised_via         = 13;
+  string raised_kind        = 14;
+  string raised_by_id       = 15;
+  string stay_id            = 16;
+  string scheduled_for      = 17;  // ISO date, the property's own day; empty when none
+  google.protobuf.Timestamp due_at = 18;
+  string job_status         = 19;
+  string cycle              = 20;
+  bool   restricted         = 21;
+  string hold_reason        = 22;
+  google.protobuf.Timestamp hold_until = 23;
+  string parent_job_id      = 24;
+  int32  step_no            = 25;
+  string concern_policy_id  = 26;
+  google.protobuf.Timestamp created_at = 27;
+  google.protobuf.Timestamp updated_at = 28;
+  int64  version            = 29;
+
+  // Derived for the row: the latest concern row and the current assignment.
+  string concern            = 30;
+  string accountable_role   = 31;
+  string accountable_user_id = 32;
+  string assignee_user_id   = 33;
+  string team_id            = 34;
+  bool   accepted           = 35;
+  bool   session_running    = 36;
+}
+
+message AssignmentView {
+  string id               = 1;
+  string assignee_user_id = 2;
+  string team_id          = 3;
+  string how              = 4;
+  string assigned_by      = 5;
+  google.protobuf.Timestamp assigned_at = 6;
+  google.protobuf.Timestamp accepted_at = 7;
+  google.protobuf.Timestamp ended_at    = 8;
+}
+
+message WorkSessionView {
+  string id       = 1;
+  string user_id  = 2;
+  google.protobuf.Timestamp started_at = 3;
+  google.protobuf.Timestamp paused_at  = 4;
+  string pause_reason = 5;
+  google.protobuf.Timestamp resumed_at = 6;
+  google.protobuf.Timestamp stopped_at = 7;
+  int64  worked_seconds = 8;   // live for a running row
+}
+
+message StatusHistoryView {
+  string from_status = 1;
+  string to_status   = 2;
+  string by_user_id  = 3;
+  string by_what     = 4;
+  google.protobuf.Timestamp at = 5;
+  string note        = 6;
+}
+
+message ConcernHistoryView {
+  string concern             = 1;
+  string accountable_role    = 2;
+  int32  ladder_step         = 3;
+  string accountable_user_id = 4;
+  google.protobuf.Timestamp since = 5;
+  string reason              = 6;
+}
+
+message NoteView {
+  string id          = 1;
+  string author_kind = 2;
+  string author_id   = 3;
+  string text        = 4;
+  bool   internal    = 5;
+  google.protobuf.Timestamp at = 6;
+}
+
+message AttachmentView {
+  string id       = 1;
+  string media_id = 2;
+  string name     = 3;
+  int64  bytes    = 4;
+  string added_by = 5;
+  google.protobuf.Timestamp at = 6;
+}
+
+message ResolutionView {
+  string resolution_id = 1;
+  string note          = 2;
+  string resolved_by   = 3;
+  google.protobuf.Timestamp resolved_at = 4;
+}
+
+message RatingView {
+  int32  stars = 1;
+  string text  = 2;
+  google.protobuf.Timestamp rated_at = 3;
+}
+
+message LinkView {
+  string job_id = 1;   // the other job
+  google.protobuf.Timestamp at = 2;
+}
+
+// Everything the job view's tabs draw — frames 2 to 2g.
+message JobDetail {
+  JobView job                             = 1;
+  repeated AssignmentView assignments     = 2;
+  repeated WorkSessionView sessions       = 3;
+  repeated StatusHistoryView status_history = 4;
+  repeated ConcernHistoryView concern_history = 5;
+  repeated NoteView notes                 = 6;
+  repeated AttachmentView attachments     = 7;
+  ResolutionView resolution               = 8;
+  RatingView rating                       = 9;
+  repeated LinkView links                 = 10;
+  repeated JobView steps                  = 11;
+}
+
+message CategoryView {
+  string id              = 1;
+  string code            = 2;
+  string name            = 3;
+  string department_code = 4;
+  bool   active          = 5;
+  int64  version         = 6;
+}
+
+message ItemView {
+  string id                  = 1;
+  string category_id         = 2;
+  string code                = 3;
+  string name                = 4;
+  string default_priority    = 5;
+  int32  due_within_minutes  = 6;   // 0 when none
+  bool   restricted_by_default = 7;
+  bool   guest_requestable   = 8;
+  string photo_on_completion = 9;
+  bool   active              = 10;
+  int64  version             = 11;
+  repeated string aliases    = 12;
+}
+
+message CatalogueResolutionView {
+  string id            = 1;
+  string category_id   = 2;
+  string item_id       = 3;
+  string name          = 4;
+  bool   note_required = 5;
+}
+
+message PresenceView {
+  string department_code = 1;
+  bool   enabled         = 2;
+  bool   follow_shifts   = 3;
+  bool   staffed         = 4;
+  google.protobuf.Timestamp since = 5;
+  int32  on_shift        = 6;
+}

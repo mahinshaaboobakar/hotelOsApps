@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Jobs — repairs and tasks, as an installable application.
+
+    ADR 0122: a package, developed in its own repository, binding to HotelOS at
+    exactly one point — the signed `.hopkg` install. It depends on the
+    platform's contracts and SDK through the sibling-path reference the
+    Workforce and GuestOps projects use, never on a platform service.
+
+    Master Data is read, not embedded (locations, assets, departments); the
+    catalogue is this application's own (design §2.3, ruling 3 of 2026-09-03).
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Jobs</RootNamespace>
+    <!-- Fixed: the manifest names it, and install step 6 runs
+         `dotnet backend/HotelOS.Jobs.dll migrate`. -->
+    <AssemblyName>HotelOS.Jobs</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <SelfContained>false</SelfContained>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+    <PlatformProtos>$(PlatformRoot)\shared\protos</PlatformProtos>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- This application's own contract. The platform proto tree is on the
+         include path without being generated from — `common.proto` is already
+         compiled into HotelOS.Platform. -->
+    <Protobuf Include="protos\hotelos\jobs\v1\dto.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="protos\hotelos\jobs\v1\service.proto"
+              ProtoRoot="protos" AdditionalImportDirs="$(PlatformProtos)" GrpcServices="Server" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Master Data's surface, Client only: the property's code and zone, its
+         departments, a location's existence. Reads; never a server stub. -->
+    <Protobuf Include="$(PlatformProtos)\hotelos\masterdata\v1\dto.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="$(PlatformProtos)\hotelos\masterdata\v1\service.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="Client" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.2" />
+    <PackageReference Include="EFCore.NamingConventions" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform\HotelOS.Platform.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,297 @@
+syntax = "proto3";
+
+// Jobs — the service surface. Every request carries the platform's
+// RequestContext; every write carries the version it saw. Verbs follow the
+// eight permissions of design §4.1.
+
+package hotelos.jobs.v1;
+
+import "google/protobuf/timestamp.proto";
+import "hotelos/common/v1/common.proto";
+import "hotelos/jobs/v1/dto.proto";
+
+option csharp_namespace = "HotelOS.Jobs.Contracts.V1";
+
+service JobsService {
+  // job.read
+  rpc ListJobs   (ListJobsRequest)   returns (ListJobsResponse);
+  rpc GetJob     (GetJobRequest)     returns (JobDetail);
+  rpc ListPresence (ListPresenceRequest) returns (ListPresenceResponse);
+  rpc ListCatalogue (ListCatalogueRequest) returns (ListCatalogueResponse);
+
+  // job.create
+  rpc RaiseJob   (RaiseJobRequest)   returns (JobView);
+
+  // job.assign · the assignee's own acts
+  rpc AssignJob  (AssignJobRequest)  returns (JobView);
+  rpc AcceptJob  (JobVersionRequest) returns (JobView);
+  rpc StartWork  (JobRequest)        returns (WorkSessionView);
+  rpc PauseWork  (PauseWorkRequest)  returns (WorkSessionView);
+  rpc ResumeWork (JobRequest)        returns (WorkSessionView);
+  rpc StopWork   (JobRequest)        returns (WorkSessionView);
+
+  // job.complete
+  rpc ResolveJob (ResolveJobRequest) returns (JobView);
+  rpc CloseJob   (JobVersionRequest) returns (JobView);
+  rpc ReopenJob  (ReopenJobRequest)  returns (JobView);
+
+  // job.cancel
+  rpc CancelJob  (CancelJobRequest)  returns (JobView);
+
+  // job.amend
+  rpc HoldJob    (HoldJobRequest)    returns (JobView);
+  rpc ResumeJob  (JobVersionRequest) returns (JobView);
+  rpc AmendJob   (AmendJobRequest)   returns (JobView);
+
+  // job.read — speaking on a job
+  rpc AddNote    (AddNoteRequest)    returns (NoteView);
+  rpc Attach     (AttachRequest)     returns (AttachmentView);
+  rpc RemindMe   (RemindMeRequest)   returns (RemindMeResponse);
+
+  // the guest, by stay
+  rpc RateJob    (RateJobRequest)    returns (RatingView);
+
+  // job.curate
+  rpc SaveCategory   (SaveCategoryRequest)   returns (CategoryView);
+  rpc SaveItem       (SaveItemRequest)       returns (ItemView);
+  rpc AddResolution  (AddResolutionRequest)  returns (CatalogueResolutionView);
+
+  // job.configure
+  rpc SaveItemPolicy   (SaveItemPolicyRequest)   returns (SaveItemPolicyResponse);
+  rpc SaveConcernPolicy (SaveConcernPolicyRequest) returns (SaveConcernPolicyResponse);
+  rpc SavePresence     (SavePresenceRequest)     returns (PresenceView);
+}
+
+message ListJobsRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string department_code = 2;      // empty: every department the caller may see
+  repeated string statuses = 3;    // empty: the open ones
+  bool   scheduled_only = 4;
+  string assignee_user_id = 5;
+  int32  page_size = 6;            // 0: 24
+  int32  page = 7;                 // 0-based
+}
+
+message ListJobsResponse {
+  repeated JobView jobs = 1;
+  int32 total = 2;
+}
+
+message GetJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+}
+
+message ListPresenceRequest { hotelos.common.v1.RequestContext context = 1; }
+message ListPresenceResponse { repeated PresenceView departments = 1; }
+
+message ListCatalogueRequest { hotelos.common.v1.RequestContext context = 1; }
+message ListCatalogueResponse {
+  repeated CategoryView categories = 1;
+  repeated ItemView items = 2;
+  repeated CatalogueResolutionView resolutions = 3;
+}
+
+message RaiseJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string item_id       = 2;
+  string location_id   = 3;
+  string asset_id      = 4;
+  string summary       = 5;
+  string details       = 6;
+  string priority      = 7;   // manual, or empty
+  string flow_priority = 8;   // the flow's, or empty
+  string raised_via    = 9;
+  string raised_kind   = 10;
+  string raised_by_id  = 11;
+  string stay_id       = 12;
+  string scheduled_for = 13;  // ISO date or empty
+  string cycle         = 14;
+  optional bool restricted = 15;
+  string assign_to_user_id = 16;
+  string assign_to_team_id = 17;
+  string parent_job_id = 18;
+}
+
+message JobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+}
+
+message JobVersionRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+}
+
+message AssignJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string user_id = 4;
+  string team_id = 5;
+}
+
+message PauseWorkRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  string reason = 3;
+}
+
+message ResolveJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string resolution_id = 4;
+  string note = 5;
+}
+
+message ReopenJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string note = 4;
+}
+
+message CancelJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string reason = 4;
+}
+
+message HoldJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string reason = 4;
+  google.protobuf.Timestamp until = 5;
+}
+
+message AmendJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string priority = 4;
+  optional string scheduled_for = 5;   // present and empty: raise now
+  optional bool restricted = 6;
+  string link_job_id = 7;
+}
+
+message AddNoteRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  string text = 3;
+  bool   internal = 4;
+}
+
+message AttachRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  string media_id = 3;
+  string name = 4;
+  int64  bytes = 5;
+}
+
+message RemindMeRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  google.protobuf.Timestamp at = 3;
+  string note = 4;
+}
+message RemindMeResponse { string reminder_id = 1; }
+
+message RateJobRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  string stay_id = 3;
+  int32  stars = 4;
+  string text = 5;
+}
+
+message SaveCategoryRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string code = 4;
+  string name = 5;
+  string department_code = 6;
+  bool   active = 7;
+}
+
+message SaveItemRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string category_id = 4;
+  string code = 5;
+  string name = 6;
+  string default_priority = 7;
+  int32  due_within_minutes = 8;
+  bool   restricted_by_default = 9;
+  bool   guest_requestable = 10;
+  string photo_on_completion = 11;
+  bool   active = 12;
+  repeated string aliases = 13;
+  bool   replace_aliases = 14;
+}
+
+message AddResolutionRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string category_id = 2;
+  string item_id = 3;
+  string name = 4;
+  bool   note_required = 5;
+}
+
+message SaveItemPolicyRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string item_id = 2;
+  bool   active_here = 3;
+  string display_name = 4;
+  string default_priority = 5;
+  int32  due_within_minutes = 6;
+  string concern_policy_id = 7;
+  string auto_assign = 8;
+  string auto_assign_team_id = 9;
+}
+message SaveItemPolicyResponse { string id = 1; int64 version = 2; }
+
+message ConcernRule {
+  string priority = 1;
+  int32  due_within_minutes = 2;   // 0: same shift
+  int32  at_risk_percent = 3;
+  int32  not_accepted_minutes = 4; // 0: off
+  int32  no_session_minutes = 5;   // 0: off
+  bool   manager_at_risk = 6;
+  bool   runs_outside_presence = 7;
+}
+
+message LadderStep {
+  string priority = 1;
+  int32  step_no = 2;
+  string role = 3;
+  string trigger = 4;
+  int32  delay_minutes = 5;
+}
+
+message SaveConcernPolicyRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string id = 2;
+  int64  expected_version = 3;
+  string name = 4;
+  string department_code = 5;
+  string category_id = 6;
+  string item_id = 7;
+  int32  untriaged_stuck_minutes = 8;
+  repeated ConcernRule rules = 9;
+  repeated LadderStep ladder = 10;
+}
+message SaveConcernPolicyResponse { string id = 1; int64 version = 2; }
+
+message SavePresenceRequest {
+  hotelos.common.v1.RequestContext context = 1;
+  string department_code = 2;
+  bool   enabled = 3;
+  bool   follow_shifts = 4;
+}

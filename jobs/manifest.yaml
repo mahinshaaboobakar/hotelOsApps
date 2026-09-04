@@ -1,0 +1,116 @@
+# Jobs — a repair or a task somebody has to do, raised from anywhere, as an
+# installable HotelOS application.
+#
+# Every field comes from ADR 0092's table and the manifest type the Kernel
+# parses (`packages/hotelos-package/src/manifest.rs`), which is
+# `deny_unknown_fields`. Workforce's manifest is the sibling this follows.
+#
+# Design of record: `docs/chapters/02-the-jobs-walkthrough-and-sign-off.md`
+# (owner-locked 2026-09-03) and `docs/chapters/03-the-jobs-design.md`; the
+# screens are `docs/mockups/01-the-jobs-screens.html` and
+# `02-the-jobs-settings.html` (owner-locked 2026-09-04).
+#
+# `files:` is a placeholder the packager fills after the payload is published.
+
+manifest_version: 1
+id: jobs
+name: "Jobs"
+version: 0.1.0
+publisher: hotelos
+category: operations
+description: >-
+  Repairs and tasks — raised by staff, guests or another application; assigned
+  from today's roster; worked, resolved and closed against a promise clock.
+
+platform:
+  min_version: "0.1.0"
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+runtime:
+  kind: dotnet-service
+  # Install step 6 runs `dotnet backend/<this> migrate`; it must equal the
+  # csproj's AssemblyName exactly.
+  assembly: HotelOS.Jobs.dll
+  # AUTHZ-Q17: the principal is the certificate subject and the capability key.
+  principal: jobs
+
+database:
+  # ADR 0092 addendum §Q15: declared and constrained — the schema `id` derives.
+  schema: jobs
+
+resources:
+  # Requests, not rights. The 60-second concern sweep holds one connection for
+  # under a second; the board, a raise and a resolve are three more.
+  memory: "512Mi"
+  cpu: "0.5"
+  db_connections: 4
+  event_rate: 200
+
+permissions:                            # eight concrete verbs — design §4.1, ruled 2026-09-04
+  - id: job.read
+    reason: "See jobs — your own, your department's, or the property's, as your posting allows"
+  - id: job.create
+    reason: "Raise a job for a room, an area or an asset, now or for a day"
+  - id: job.assign
+    reason: "Assign or reassign a job to a person or a team"
+  - id: job.complete
+    reason: "Resolve a job, and close or reopen it"
+  - id: job.cancel
+    reason: "Cancel a job with a reason"
+  - id: job.amend
+    reason: "Hold, reschedule, re-prioritise, restrict, link or add steps to a job"
+  - id: job.configure
+    reason: "Set this property's concern policies, ladders, presence and closing rules"
+  - id: job.curate
+    reason: "Edit the organisation's job catalogue — categories, items, resolutions"
+
+events:
+  publishes:
+    - job.created
+    - job.assigned
+    - job.accepted
+    - job.started
+    - job.held
+    - job.resumed
+    - job.resolved
+    - job.closed
+    - job.cancelled
+    - job.reopened
+    - job.rated
+    - job.concern_changed
+    - user.jobs_manager_granted
+    - user.jobs_manager_revoked
+  subscribes:
+    - maintenance.ppm.due
+    - shift.started
+    - shift.ended
+    - stay.departed
+    - staff.exited
+
+ui:
+  module: jobs
+  icon: ui/icon.svg
+  widgets:
+    - id: jobs-now
+      name: Jobs Now
+      file: ui/widgets/jobs-now.js
+
+authorization:
+  # Design §4.2, ruling (4) of 2026-09-03: `property#jobs_manager` joins the
+  # grantable-relations registry by AUTHZ-Q25's mechanism — the package
+  # declares, the registry structures, install consent renders.
+  grants:
+    - domain: user
+      aggregate: property
+      granted: jobs_manager_granted
+      revoked: jobs_manager_revoked
+      ends: both_in_body
+      body_object: property
+      relation: jobs_manager
+
+files:
+  "backend/HotelOS.Jobs.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/jobs-now.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
