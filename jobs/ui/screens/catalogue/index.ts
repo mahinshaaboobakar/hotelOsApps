@@ -61,7 +61,9 @@ function detail(item: CatalogueItem, curate: boolean): HTMLElement {
   box.append(chips);
   if (curate) {
     const row = el("div", "row");
-    row.append(el("div", "field", "Condenser coil cleaned"), control("btn", "＋ Add resolution"));
+    const draft = el("div", "field", "Condenser coil cleaned");
+    draft.style.minWidth = "260px";
+    row.append(draft, control("btn", "＋ Add resolution"));
     box.append(row);
   }
   return box;

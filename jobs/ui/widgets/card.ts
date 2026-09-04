@@ -11,9 +11,9 @@ import { el, fill } from "../chrome/element";
 const SHELL_OPEN = "shell.open";
 
 const WIDGET_CSS = `
-.wcard{font:13px/1.5 var(--font-sans,"Segoe UI",system-ui,sans-serif);color:var(--color-ink,#e9ecf5);
+.wcard{font:14px/1.5 var(--font-sans,"Segoe UI",system-ui,sans-serif);color:var(--color-ink,#e9ecf5);
        background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums}
-.whead{display:flex;justify-content:space-between;align-items:baseline;font-weight:600;margin-bottom:12px}
+.whead{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:12px}
 .whead span{color:var(--color-ink-faint,#5d657a);font-weight:400;font-size:12px}
 .wfig{display:flex;gap:18px;margin-bottom:10px}
 .wfig b{display:block;font-size:22px;line-height:1.1}
@@ -22,7 +22,7 @@ const WIDGET_CSS = `
 .wfig .warn b{color:var(--color-warn,#f5b53f)}
 .wfig .bad b{color:var(--color-bad,#ff5c7a)}
 .wfig .run b{color:var(--color-brand,#6b7cff)}
-.wrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.09));
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-line,rgb(255 255 255/.09));
       font-size:13px;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;
       color:inherit;font-family:inherit;cursor:pointer}
 .wrow:last-child{border-bottom:0}
