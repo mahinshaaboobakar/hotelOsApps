@@ -275,37 +275,60 @@ idempotent on `event_id`, `DeliverPolicy: New` with the store as the archive
 
 ## 4 · Permissions and the one grant kind
 
-### 4.1 · Permissions — the five that exist, and what is parked
+### 4.1 · Permissions — concrete verbs, no tiers (architect, 2026-09-04)
 
-`infrastructure/openfga/permissions.yaml` already declares, on `type job`
-(walkthrough S1.16 ·10):
+> **Architect's correction, 2026-09-04:** *manage* and *administer* are the
+> generic-verb class the permission registry's parser refuses — the
+> platform already paid for it when `integration.manage` could not be
+> registered and became `integration.configure`. Three rules: (1) concrete
+> verbs naming the operation the screen gates, in the registry's live
+> `domain.verb` idiom; (2) tiers are FGA relations, not permissions — the
+> bundling lives in `model.fga`; (3) a name changes when the capability
+> changes, never the implementation — name the operation, not the screen.
 
-```text
-job.read           job#viewer          creator · assignee · viewer from department
-job.create         job#can_create      member from department
-job.assign         job#can_assign      supervisor from department
-job.complete       job#can_close       assignee · supervisor from department
-job.approve_cost   job#can_approve_cost  manager from department
-```
+`infrastructure/openfga/permissions.yaml` already declares five on
+`type job`; the registry's verb census (read 20 · create 15 · update 14 ·
+configure 8 · assign 4 · amend 2 · record 2 …) is the idiom matched below.
 
-The walkthrough's powers map onto them: **execute** = `job.read` +
-`job.complete` (as the assignee); **manage** = `job.assign` + `job.complete`
-(as supervisor); **administer** = property level. The manifest requests these
-five and no others.
+| Permission | Exists | The operation it gates | Screen |
+|---|---|---|---|
+| `job.read` | yes · `job#viewer` | open the board and a job in my department, my own jobs anywhere | 1, 2–2g, 5, 6 |
+| `job.create` | yes · `job#can_create` | raise a job — now, or for a day (`scheduled_for`) | 3 |
+| `job.assign` | yes · `job#can_assign` | assign or reassign a job to a person or a team; accept AUTO's pick | 2 Reassign, 3 Assign to |
+| `job.complete` | yes · `job#can_close` | resolve a job with a resolution, and close it; reopen inside the window | 4 |
+| `job.amend` | **new** | change a job's course after it exists: hold and resume, reschedule, re-prioritise, restrict / unrestrict, link, add a step, cancel with a reason | 2 More ▾, hold, priority, cancel |
+| `job.configure` | **new** | the catalogue (categories, items, aliases, resolutions, property activation), concern policies and their ladders, presence and service hours, who is told, holds, closing and rating rules | 7 and page 02 |
 
-**What the walkthrough needs that the five do not name — parked, for the
-owner's discussion (ruling 7), listed so the draft carries it:**
+Registered and **not requested**: `job.approve_cost` — no cost exists on a
+job in this design (§7); it stays in the registry untouched until one does.
 
-```text
-hold · cancel · reopen · reschedule · restrict / unrestrict   →  today all fall under can_assign
-                                                                 (manage); is that the owner's intent?
-rate                                                          →  the guest's, through the guest app;
-                                                                 no staff permission
-jobs_manager grant / revoke                                   →  one permission, both directions
-                                                                 (ADR 0125 §6): user.grant_jobs_manager
-approve_cost                                                  →  a power nobody has named; not requested
-                                                                 until a cost exists on a job
-```
+**The work-session verbs** — accept, start, pause, resume, stop — are not
+permissions. They are the assignee's acts on their own job and ride on the
+`job#assignee` relation, exactly as `can_close` already does; a supervisor
+stopping someone else's session is `job.assign` (a reassignment) or
+`job.amend` (a hold), never a sixth verb.
+
+**Tiers dissolve into relations** (`model.fga`, §4.2): the walkthrough's
+*execute* is `viewer or assignee`; *manage* is `supervisor from department`;
+*everything, anyone's* is `jobs_manager from property` — a relation that the
+four `can_*` and the two new `can_amend` / `can_configure` each name with
+`or jobs_manager from property`. No permission is called a tier.
+
+**Flagged for the architect's one-pass confirm-or-correct:**
+
+1. `job.amend` folds *cancel* in. If cancelling deserves its own row
+   (an outcome with a reason, S2), it is `job.cancel` and `amend` keeps the rest.
+2. `job.configure` covers the catalogue and the policies together. If the
+   catalogue's organisation-level editing (page 01 frame 7, an org admin)
+   is a different capability from a property's policy editing, it splits as
+   `job.configure` (property) and `job.curate` (organisation catalogue) —
+   `curate` is not yet in the census and would be a new verb.
+3. The permission that lets a GM grant `property#jobs_manager` is
+   Identity's, not this domain's — ADR 0125 §6's one-permission-both-ways
+   pattern — and is declared by the manifest's grant kind (§4.2), so no
+   `job.*` row is proposed for it.
+
+The manifest (§5) requests the six above.
 
 ### 4.2 · The grant kind — `property#jobs_manager` (S9-D7, ruling 4)
 
@@ -328,8 +351,10 @@ authorization:
       relation: jobs_manager
 ```
 
-`model.fga` gains, on `type property`, `define jobs_manager: [user]`, and on
-`type job` the four `can_*` relations gain `or jobs_manager from property`.
+`model.fga` gains, on `type property`, `define jobs_manager: [user]`; on
+`type job`, `can_amend: supervisor from department` and
+`can_configure: manager from department` are added, and all six `can_*`
+relations gain `or jobs_manager from property`.
 **The registry entry is the architect's** (ruling 4 confirms the route; the
 row itself is written there, not here). Jobs never writes the tuple.
 
@@ -371,17 +396,19 @@ resources:
   db_connections: 4                     # the board, a technician resolving, the sweep, migrate
   event_rate: 200
 
-permissions:                            # the five permissions.yaml already carries — §4.1
+permissions:                            # six concrete verbs — §4.1; approve_cost not requested
   - id: job.read
     reason: "See jobs — your own, your department's, or the property's, as your posting allows"
   - id: job.create
-    reason: "Raise a job for a room, an area or an asset"
+    reason: "Raise a job for a room, an area or an asset, now or for a day"
   - id: job.assign
-    reason: "Assign, reassign, hold, reschedule and cancel jobs in your department"
+    reason: "Assign or reassign a job to a person or a team"
   - id: job.complete
-    reason: "Record how a job was resolved, and verify and close it"
-  - id: job.approve_cost
-    reason: "Approve a cost recorded against a job"     # requested only when costs exist — §4.1
+    reason: "Resolve a job, and close or reopen it"
+  - id: job.amend
+    reason: "Hold, reschedule, re-prioritise, restrict, link, add steps to, or cancel a job"
+  - id: job.configure
+    reason: "Set up the catalogue, concern policies and ladders, presence and closing rules"
 
 events:
   publishes:
