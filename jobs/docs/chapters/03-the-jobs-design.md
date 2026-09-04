@@ -187,6 +187,18 @@ category's default → the department's → the property's; the resolved
 `concern_policy_id` is stamped on `job_concern_history`'s first row so a
 later edit never rewrites this job's past.
 
+**Who else reads it.** GuestOps and Room Care raise jobs against catalogue
+items, and they read the catalogue the way every cross-application question
+is answered on this platform: **through Context**, never a copy and never a
+call into Jobs. Jobs answers Context's catalogue queries (`category`, `item`,
+`item_alias`, `property_item_policy.active_here`) for the property; a
+consumer holds the `category_id` / `item_id` it was shown and nothing else.
+Without Jobs installed there is no catalogue to show, and the consumer's
+own record stands alone until Jobs arrives and replays it (JOBS-Q1 (5)).
+Owner confirmation 2026-09-04, after the register entry was re-read: the
+catalogue stays Jobs' own; the earlier "keep it in Core" reading in the
+walkthrough's S1-D6 is withdrawn.
+
 ---
 
 ## 3 · Events — domain `job`
