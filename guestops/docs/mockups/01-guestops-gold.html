@@ -125,6 +125,11 @@
   .tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
   .tr .nm b{font-weight:600}
   .tr .nm span{font-size:10.5px;color:var(--faint)}
+  /* A frame drawn short says so, in the list, rather than letting the pager
+     and the visible rows disagree. The drawing is a specification, so an
+     elision it does not state reads as the screen's own answer. */
+  .tr.more{grid-template-columns:1fr}
+  .tr.more>div{color:var(--faint);font-style:italic;font-size:11.5px;padding:6px 12px}
   .tr.sel{background:rgba(129,140,248,.07);box-shadow:inset 2.5px 0 0 var(--indigo)}
   .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
   .un{color:var(--faint);font-style:italic}
@@ -133,18 +138,26 @@
      has_more and nothing else, so "page 3 of 12" cannot be computed and a
      count there would be fiction. Previous is a client-held stack of cursors,
      so it is dim until you have been somewhere to go back to. */
-  /* The pager, generic — docs/working/64 §4. EVERY list screen gets this one;
-     a pager invented per screen is four pagers by the fourth screen. Its
-     controls are .btn.sm, because a pager button is a button.
-     No page numbers and no total. ListStays pages on the platform's opaque
-     cursor — PageRequest{cursor,limit}, PageResponse{next_cursor,has_more} —
-     which carries neither an ordinal nor a count, so "Page 3 of 12" and "247
-     stays" would both be fiction. Jobs draws both honestly because jobs/v1
-     paginates by page number and returns a total; that the two applications
-     paginate differently at all is the open ruling in §4. */
+  /* The pager, generic and NUMBERED — CORE-Q13, ruled 2026-09-04.
+     EVERY list screen gets this one; a pager invented per screen is four
+     pagers by the fourth screen.
+     "showing 1-25 of N" is honest here because N exists: stays moved from the
+     platform's opaque cursor to its paged pair (PagedRequest{page,page_size}
+     -> PagedResponse{page,page_size,total}), so both the ordinal and the count
+     are on the wire. The Previous/Next drawing this replaces was correct for
+     the cursor and was superseded by the ruling, not by a redesign.
+     Drawn to Jobs' board, which the owner's choice made canonical: the range
+     on the left, the numbers on the right, the current page carrying the brand
+     border. Matches components/design/pager.tsx rather than importing it — a
+     hosted module is styled by tokens, never by importing components. */
   .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
          padding:10px 4px 0;font-size:12px;color:var(--faint)}
-  .pager .pnav{display:flex;gap:6px;align-items:center}
+  .pager .pnav{display:flex;align-items:center}
+  .pager .pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);
+             border-radius:6px;margin-left:4px;color:var(--dim)}
+  .pager .pg.on{color:var(--text);border-color:var(--color-brand)}
+  .pager .pg.off{color:var(--faint);opacity:.45}
+  .pager .gap{margin-left:4px;color:var(--faint)}
   .link{color:var(--indigo)}
   /* banner */
   .ban{display:flex;gap:11px;align-items:center;border-radius:12px;padding:10px 14px;font-size:12.5px;border:1px solid}
@@ -343,8 +356,8 @@
         </div>
       </div>
       <div class="pager">
-        <span>showing 1–14 · 14 rows at this height; a maximised window shows 28</span>
-        <span class="pnav"><span class="btn sm off">‹ Previous</span><span class="btn sm">Next ›</span></span>
+        <span>showing 1–14 of 14 · 14 rows at this height; a maximised window shows 28</span>
+        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg off">›</span></span>
       </div>
       <div class="note"><b>Six of fourteen arrivals have no room, and that is the ordinary case.</b> The stay's anchor is the room <b>type</b>; the room number is an assignment, chosen the night before or at the desk (GUEST-Q2 addendum, S8). The list is built to be worked in that state — <b>＋ assign</b> is inline, and check-in is the one action that refuses to proceed without a room.</div>
     </div>
@@ -427,13 +440,13 @@
         </div>
       </div>
       <div class="pager">
-        <span>showing 1–8 · pages forward on a cursor, never a page number that shifts while you read it</span>
-        <span class="pnav"><span class="btn sm off">‹ Previous</span><span class="btn sm">Next ›</span></span>
+        <span>showing 1–8 of 218 · 8 rows at this height; a maximised window shows 16</span>
+        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">4</span><span class="pg">5</span><span class="gap">…</span><span class="pg">28</span><span class="pg">›</span></span>
       </div>
     </div>
   </div>
 </div>
-<div class="cap"><b>The list is where a guest at the counter is found</b>, so the search covers what a guest can actually say: their name, the number they booked with, or the confirmation number Opera gave them. <b>A booking's row shows its stays, not a room</b> — BK-4471 says <i>1 of 3 known</i> and BK-4506 says <i>2</i>, because a booking is a group and the room is a fact about a stay inside it (GUEST-Q2). <b>Cancelled and no-show rows stay in the list</b>: a cancelled reservation exists, its penalty may be chargeable, and a no-show is reportable — neither is a deletion (S25, S27, ADR 0062). <b>Waitlisted is shown as waitlisted</b> (GUEST-Q9): a first-class state in every major PMS, and the desk must be able to see it as one rather than as a confirmed booking. It <b>holds no room</b> — a waitlist is a queue position, so counting it against inventory would make a full hotel look oversold and hide the room a cancellation gives back. <b>Every row carries its provenance</b>: from Opera, created here, overridden, disagreeing. <b>Cursor paging</b>, per the platform's API standard — a page number would move under the reader as new bookings arrive.</div>
+<div class="cap"><b>The list is where a guest at the counter is found</b>, so the search covers what a guest can actually say: their name, the number they booked with, or the confirmation number Opera gave them. <b>A booking's row shows its stays, not a room</b> — BK-4471 says <i>1 of 3 known</i> and BK-4506 says <i>2</i>, because a booking is a group and the room is a fact about a stay inside it (GUEST-Q2). <b>Cancelled and no-show rows stay in the list</b>: a cancelled reservation exists, its penalty may be chargeable, and a no-show is reportable — neither is a deletion (S25, S27, ADR 0062). <b>Waitlisted is shown as waitlisted</b> (GUEST-Q9): a first-class state in every major PMS, and the desk must be able to see it as one rather than as a confirmed booking. It <b>holds no room</b> — a waitlist is a queue position, so counting it against inventory would make a full hotel look oversold and hide the room a cancellation gives back. <b>Every row carries its provenance</b>: from Opera, created here, overridden, disagreeing. <b>Numbered paging</b> — <b>CORE-Q13</b>, ruled 2026-09-04. This caption argued the opposite until that ruling: <i>cursor paging, because a page number would move under the reader as new bookings arrive</i>. The platform now carries <b>both</b> patterns in <code>common.v1</code> and one test picks between them — <b>is the count a fact, or a moving target?</b> A property's bookings are bounded and countable, so <b>218</b> is a fact and <i>showing 1–8 of 218</i> is something the wire can actually answer. The cursor is kept for feeds that rotate <i>while</i> they are read, where an offset would skip rather than merely mislead — the Logs pane is the worked case, not this list.</div>
 
 <div class="sub">One stay, in depth — the same guest across six tabs</div>
 
@@ -966,10 +979,11 @@
           <div>BK-4488</div><div>Deluxe Twin</div><div>309</div><div>31 Aug · day use</div>
           <div><span class="sh pms"><i></i>from Opera</span></div>
         </div>
+        <div class="tr more"><div>⋯ ten more arrivals, drawn short so this frame can explain provenance</div></div>
       </div>
       <div class="pager">
-        <span>showing 1–4 · this frame draws four rows to explain provenance, not a full page</span>
-        <span class="pnav"><span class="btn sm off">‹ Previous</span><span class="btn sm">Next ›</span></span>
+        <span>showing 1–14 of 14 · 14 rows at this height; a maximised window shows 28</span>
+        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg off">›</span></span>
       </div>
       <div class="note"><b>Meera's row is the ruling that keeps this screen usable.</b> The desk checked her into 506 at 11:20 while the feed was down; at 15:44 Opera said 506 too. That is agreement arriving late, not work — it settled <b>silently as confirmed</b>, and it is shown here only because this frame is explaining itself. Twenty such rows would be twenty non-events; only <b>differing</b> values become a disagreement.</div>
     </div>
