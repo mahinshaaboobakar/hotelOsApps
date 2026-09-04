@@ -2,12 +2,57 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Workforce Flows</title>
 <style>
+  /* # The palette is the shell’s, and this drawing no longer has one
+     `docs/working/64` §1. This file declared its own `:root` — `--bg`, `--text`,
+     `--dim`, `--indigo` — and every one of those names carried a value the shell
+     does not ship. A mock that invents a colour teaches a vocabulary that cannot
+     reach a running module: the drawing was the specification, and the drawing
+     had no way to say *the shell’s brand colour*.
+     What follows is the published set at the shell’s own values, read from
+     `apps/desktop/src/styles.css`. The corrections are visible: the ground was
+     #0a0c12 and ships #0b0d14, ink was #eef1f8 and ships #e8ebf4, the rules were
+     .08/.16 and ship .07/.14. */
   :root{
-    --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
-    --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
-    --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;--grad:linear-gradient(120deg,#7dd3fc,#818cf8 55%,#c084fc);
-    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--duty:#fbbf24;
+    --color-surface:#0b0d14;--color-surface-raised:#11141f;
+    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
+    --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
+    --color-ink-on-accent:#0b0d14;
+    --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+    --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);
+    --color-bad-soft:rgb(248 113 113 / 0.12);
+    --radius-panel:1rem;
+    --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+
+    /* Derived, never declared — a derived colour still follows the theme where a
+       hex stops following it the day the theme changes. The accent’s stops are
+       the ones Jobs and GuestOps reached independently, down to the 62%; 135deg
+       is the settled angle. */
+    --accent:linear-gradient(135deg,var(--color-brand),
+             color-mix(in srgb, var(--color-brand) 62%, var(--color-bad)));
+    --second:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --brand-wash:color-mix(in srgb, var(--color-brand) 18%, transparent);
+    --brand-edge:color-mix(in srgb, var(--color-brand) 50%, transparent);
+    --bad-edge:color-mix(in srgb, var(--color-bad) 45%, transparent);
+    --sunken:color-mix(in srgb, #000 26%, transparent);
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+
+    /* The drawing’s older names, pointed at the published ones — GuestOps’
+       pattern. A selector not yet migrated cannot drift back to a private
+       colour, and the conversion is one block rather than a sweep over four
+       hundred var() uses. */
+    --bg:var(--color-surface);--text:var(--color-ink);--dim:var(--color-ink-muted);
+    --faint:var(--color-ink-faint);--line:var(--color-line);--line2:var(--color-line-strong);
+    --indigo:var(--color-brand);--ok:var(--color-ok);--warn:var(--color-warn);
+    --bad:var(--color-bad);--grad:var(--accent);--glass:var(--color-surface-raised);
+    --duty:var(--color-warn);
+    /* The shift chips need hues the published four do not carry, and §1 is
+       explicit: derive, never declare. Pointing --cyan at the brand collided
+       with the afternoon chip, which already used it — two shift types the
+       same colour, which the first capture showed and nothing else would have.
+       Mixed instead, so all five stay distinguishable and all five still
+       follow the theme. */
+    --cyan:color-mix(in srgb, var(--color-brand) 45%, var(--color-ok));
+    --violet:var(--second);
   }
   *{box-sizing:border-box;margin:0}
   ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}

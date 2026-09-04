@@ -2,12 +2,57 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Workforce Gold Mockup</title>
 <style>
+  /* # The palette is the shell’s, and this drawing no longer has one
+     `docs/working/64` §1. This file declared its own `:root` — `--bg`, `--text`,
+     `--dim`, `--indigo` — and every one of those names carried a value the shell
+     does not ship. A mock that invents a colour teaches a vocabulary that cannot
+     reach a running module: the drawing was the specification, and the drawing
+     had no way to say *the shell’s brand colour*.
+     What follows is the published set at the shell’s own values, read from
+     `apps/desktop/src/styles.css`. The corrections are visible: the ground was
+     #0a0c12 and ships #0b0d14, ink was #eef1f8 and ships #e8ebf4, the rules were
+     .08/.16 and ship .07/.14. */
   :root{
-    --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
-    --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
-    --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;--grad:linear-gradient(120deg,#7dd3fc,#818cf8 55%,#c084fc);
-    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--duty:#fbbf24;
+    --color-surface:#0b0d14;--color-surface-raised:#11141f;
+    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
+    --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
+    --color-ink-on-accent:#0b0d14;
+    --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+    --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);
+    --color-bad-soft:rgb(248 113 113 / 0.12);
+    --radius-panel:1rem;
+    --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+
+    /* Derived, never declared — a derived colour still follows the theme where a
+       hex stops following it the day the theme changes. The accent’s stops are
+       the ones Jobs and GuestOps reached independently, down to the 62%; 135deg
+       is the settled angle. */
+    --accent:linear-gradient(135deg,var(--color-brand),
+             color-mix(in srgb, var(--color-brand) 62%, var(--color-bad)));
+    --second:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --brand-wash:color-mix(in srgb, var(--color-brand) 18%, transparent);
+    --brand-edge:color-mix(in srgb, var(--color-brand) 50%, transparent);
+    --bad-edge:color-mix(in srgb, var(--color-bad) 45%, transparent);
+    --sunken:color-mix(in srgb, #000 26%, transparent);
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+
+    /* The drawing’s older names, pointed at the published ones — GuestOps’
+       pattern. A selector not yet migrated cannot drift back to a private
+       colour, and the conversion is one block rather than a sweep over four
+       hundred var() uses. */
+    --bg:var(--color-surface);--text:var(--color-ink);--dim:var(--color-ink-muted);
+    --faint:var(--color-ink-faint);--line:var(--color-line);--line2:var(--color-line-strong);
+    --indigo:var(--color-brand);--ok:var(--color-ok);--warn:var(--color-warn);
+    --bad:var(--color-bad);--grad:var(--accent);--glass:var(--color-surface-raised);
+    --duty:var(--color-warn);
+    /* The shift chips need hues the published four do not carry, and §1 is
+       explicit: derive, never declare. Pointing --cyan at the brand collided
+       with the afternoon chip, which already used it — two shift types the
+       same colour, which the first capture showed and nothing else would have.
+       Mixed instead, so all five stay distinguishable and all five still
+       follow the theme. */
+    --cyan:color-mix(in srgb, var(--color-brand) 45%, var(--color-ok));
+    --violet:var(--second);
   }
   *{box-sizing:border-box;margin:0}
   ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
@@ -21,28 +66,67 @@
   .lead b{color:var(--text)}
   .win{max-width:1220px;margin:0 auto;border-radius:18px;position:relative;overflow:hidden;
        background:radial-gradient(900px 420px at 10% 118%, rgba(79,70,229,.28), transparent 60%),radial-gradient(700px 360px at 94% 106%, rgba(8,145,178,.20), transparent 55%),var(--bg);
-       border:1px solid var(--line2);box-shadow:var(--shadow);display:grid;grid-template-columns:240px 1fr}
-  .rail{border-right:1px solid var(--line);padding:20px 12px;background:rgba(10,12,18,.35);display:flex;flex-direction:column;gap:1px}
-  .app{display:flex;gap:11px;align-items:center;font-weight:600;font-size:14.5px;padding:0 10px 18px}
-  .mark{width:26px;height:26px;border-radius:8px;background:linear-gradient(120deg,rgba(125,211,252,.25),rgba(192,132,252,.25));border:1px solid var(--line2);display:grid;place-items:center;font-size:12px}
-  .ri{display:flex;gap:11px;align-items:center;padding:8px 12px;border-radius:10px;color:var(--dim);font-size:13.5px}
-  .ri.on{background:linear-gradient(90deg,rgba(129,140,248,.18),rgba(129,140,248,.05));color:var(--text);box-shadow:inset 2.5px 0 0 var(--indigo)}
-  .ri .cnt{margin-left:auto;font-size:11px;color:var(--faint)}
-  .me{margin-top:auto;padding:12px;border-top:1px solid var(--line);font-size:12px;color:var(--faint);line-height:1.5}
-  .me b{display:block;color:var(--dim);font-weight:500}
-  .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
-  .head{display:flex;align-items:center;gap:10px;padding:15px 24px 11px}
-  .ht{font-size:17px;font-weight:600;letter-spacing:-.01em}
+       border:1px solid var(--line2);box-shadow:var(--shadow);display:flex;flex-direction:column}
+
+  /* # The app bar — §3, and the 240px rail is gone
+     An INSTALLED application navigates from the top. The platform’s own four
+     keep the left rail, because they are the desktop’s own furniture; an
+     installed application is a guest in that shell, and a guest that draws its
+     own 240px rail competes with the desktop’s chrome for the same edge of the
+     same screen. Geometry is Jobs’: 56px, `0 22px`, one bottom rule, the mark
+     and name first, sections as tabs with a 2px brand underline, the person
+     pushed right. No search box — this application has none, and inventing one
+     to match Jobs would draw a control nobody designed. */
+  .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;
+        border-bottom:1px solid var(--line);flex:0 0 auto}
+  .app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
+  .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);
+        display:grid;place-items:center;font-size:11px;font-weight:700;
+        color:var(--color-ink-on-accent)}
+  /* Scoped to the bar, because `.tab` already means the body’s view switcher on
+     this drawing too — GuestOps hit the same collision, and specificity is what
+     keeps the two meanings apart. */
+  .head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;
+             font-size:13px;color:var(--dim);border-bottom:2px solid transparent;
+             font-weight:400}
+  .head .tab.on{color:var(--text);border-bottom-color:var(--color-brand)}
+  .head .tab .n{margin-left:0;font-size:11px;color:var(--faint)}
+  .who{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
+  .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+  /* The page’s own title row — renamed from `.head`, which the bar now owns. A
+     screen does not print its own section name; what survives here names a
+     record the bar cannot say, or a sub-page the bar has no tab for. */
+  /* Not a title row any more — the controls row Jobs draws above its table,
+     carrying the context line and the screen’s actions with no name above
+     them. `.title` survives for the one screen that still names something. */
+  .acts{display:flex;align-items:center;gap:10px;padding:22px 26px 0}
+  .title{display:flex;align-items:center;gap:10px;padding:22px 26px 14px}
+  .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
   .hsub{color:var(--faint);font-size:12px;margin-top:2px}
   .grow{margin-left:auto}
-  .btn2{display:flex;gap:6px;align-items:center;border:1px solid var(--line2);border-radius:9px;padding:5px 11px;font-size:12px;color:var(--dim);white-space:nowrap}
-  .create{display:flex;gap:6px;align-items:center;background:var(--grad);color:#0a0c12;font-weight:600;padding:6px 13px;border-radius:9px;font-size:12.5px;white-space:nowrap;box-shadow:0 4px 14px rgba(129,140,248,.3)}
+  /* # One control vocabulary — §2, at Jobs’ geometry
+     This drawing carried `.btn2` and `.create` at two geometries while the built
+     module carried `.btn`, `.btn.go` and `.btn.danger` at a third. A second base
+     class is a second geometry within a week. `font:inherit` is load-bearing:
+     without it a control leaves --font-sans for the UA’s. */
+  .btn{display:inline-flex;gap:8px;align-items:center;white-space:nowrap;
+       border:1px solid var(--color-line-strong);border-radius:8px;
+       padding:7px 14px;font:inherit;font-size:13px;color:var(--color-ink);background:none}
+  .btn.pri{border-color:transparent;color:var(--color-ink-on-accent);
+           font-weight:600;background:var(--accent)}
+  .btn.off{color:var(--color-ink-faint);border-style:dashed}
+  .btn.danger{border-color:var(--bad-edge);color:var(--color-bad)}
+  .btn.sm{padding:2px 8px;font-size:11px;gap:6px}
   .sel{display:flex;gap:8px;align-items:center;justify-content:space-between;background:var(--glass);border:1px solid var(--line);border-radius:9px;padding:5px 11px;font-size:12.5px;color:var(--text);min-width:150px}
   .sel span{color:var(--faint)}
   .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
   .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
   .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:rgba(255,255,255,.06);color:var(--dim)}
-  .body{padding:0 24px 20px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+  /* Padded on all four sides. It was `0 24px 20px` — a deliberate zero on top,
+     because the page-title row above supplied it — so removing that row leaves
+     the first element flush against the bar’s rule. §3’s trap, and every app
+     doing this removal has the same zero waiting for it. */
+  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px}
   /* summary strip */
   .strip{display:flex;gap:10px}
   .stat{flex:1;background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
@@ -130,12 +214,14 @@
   .tab{padding:8px 4px;margin-right:18px;color:var(--dim);font-size:13px;border-bottom:2px solid transparent}
   .tab.on{color:var(--text);border-color:var(--indigo)}
   .tab .cnt{margin-left:6px;font-size:10.5px;padding:1px 7px;border-radius:99px;background:rgba(129,140,248,.18);color:var(--indigo)}
-  .card{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .lrow{display:grid;grid-template-columns:1fr 130px 120px 110px;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
-  .lrow:last-child{border-bottom:none}
-  .lrow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  /* §4 · a list is a table, not a card. This was a fill, a 1px border and a
+     14px radius wrapped round every list, with the header row filled again
+     inside it — which is why the same screen fits fewer rows than Jobs'. */
+  .card{background:none;border:0;border-radius:0}
+  .lrow{display:grid;grid-template-columns:1fr 130px 120px 110px;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+  .lrow.hd{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint);font-weight:500;align-items:center;padding:8px 18px}
   .lrow .sub{color:var(--faint);font-size:11.5px;display:block}
-  .lrow.on{background:rgba(129,140,248,.08);box-shadow:inset 2.5px 0 0 var(--indigo)}
+  .lrow.on{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
   .split{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;min-height:0}
   .detail{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:12px}
   .kv{display:flex;justify-content:space-between;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line)}
@@ -164,9 +250,8 @@
   .pp .dep{margin-left:auto}
   .dep{font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--dim)}
   /* people table */
-  .prow{display:grid;grid-template-columns:1.3fr 120px 1fr 1fr 90px;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
-  .prow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
-  .prow:last-child{border-bottom:none}
+  .prow{display:grid;grid-template-columns:1.3fr 120px 1fr 1fr 90px;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+  .prow.hd{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint);font-weight:500;align-items:center;padding:8px 18px}
   .prow .sub{color:var(--faint);font-size:11.5px;display:block}
   .crown{color:var(--duty);font-size:11px;margin-left:6px}
   /* empty */
@@ -219,9 +304,8 @@
   .nowc b{display:block;font-size:14px;font-weight:600;margin-top:3px}
   .nowc span{font-size:11.5px;color:var(--faint)}
   /* attendance */
-  .arow{display:grid;grid-template-columns:1.25fr 120px 110px 110px 1fr;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
-  .arow:last-child{border-bottom:none}
-  .arow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .arow{display:grid;grid-template-columns:1.25fr 120px 110px 110px 1fr;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+  .arow.hd{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint);font-weight:500;align-items:center;padding:8px 18px}
   .arow .sub{color:var(--faint);font-size:11.5px;display:block}
   .tm{font-variant-numeric:tabular-nums;font-size:13px}
   .tm.miss{color:var(--faint)}
@@ -232,18 +316,16 @@
   .flag.in{background:rgba(52,211,153,.12);color:var(--ok)}
   .src{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
   /* policy */
-  .polrow{display:grid;grid-template-columns:1.1fr 130px 130px 1fr;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
-  .polrow:last-child{border-bottom:none}
-  .polrow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .polrow{display:grid;grid-template-columns:1.1fr 130px 130px 1fr;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:flex-start;font-size:13px}
+  .polrow.hd{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint);font-weight:500;align-items:center;padding:8px 18px}
   .ro{display:inline-flex;gap:6px;align-items:center;font-size:10.5px;color:var(--faint);border:1px dashed var(--line2);border-radius:6px;padding:2px 8px}
   .sect{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:700;margin:2px 0 -2px}
   /* report */
   .rep{width:100%;border-collapse:collapse;font-size:12.5px}
-  .rep th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;text-align:right;padding:9px 12px;background:rgba(10,12,18,.3);border-bottom:1px solid var(--line)}
+  .rep th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint);font-weight:500;text-align:right;padding:8px 10px;border-bottom:1px solid var(--line)}
   .rep th:first-child{text-align:left}
   .rep td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
   .rep td:first-child{text-align:left}
-  .rep tr:last-child td{border-bottom:none}
   .rep .nm b{font-weight:500}
   .rep .nm span{display:block;color:var(--faint);font-size:11px}
   .rep .ot{color:var(--warn);font-weight:600}
@@ -286,26 +368,26 @@
 <!-- 1 · Staff Schedule -->
 <h1 style="margin-top:38px">1 · <b>Staff Schedule</b> — one person's month, chosen from a picker. Workforce is a <i>manager's</i> application, not one every staff member opens</h1>
 <div class="win" style="height:640px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri on">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab on">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
-      <div class="ht">Staff Schedule</div>
+    <div class="tabs"><div class="tab">Team rota</div><div class="tab on">Staff schedule</div></div>
+    <div class="acts">
+      
       <div class="sel" style="margin-left:12px;min-width:190px"><span style="display:flex;gap:8px;align-items:center"><span class="av" style="width:20px;height:20px;font-size:9px">AM</span>Anjali Menon</span> <span>▾</span></div>
       <div class="grow"></div>
-      <div class="btn2">‹</div><div class="btn2">August 2026</div><div class="btn2">›</div>
-      <div class="btn2">⇄ &nbsp;Propose swap</div>
-      <div class="create">＋ Request leave</div>
+      <div class="btn">‹</div><div class="btn">August 2026</div><div class="btn">›</div>
+      <div class="btn">⇄ &nbsp;Propose swap</div>
+      <div class="btn pri">＋ Request leave</div>
     </div>
     <div class="body">
       <div class="meta"><i>22</i>shifts <i>2</i>days leave <i>1</i>MOD duty · Fri 28, 20:00–08:00 <span style="margin-left:auto"><i>4 / 8</i>casual remaining</span></div>
@@ -368,28 +450,28 @@
 <!-- 2 · Team Rota -->
 <h1>2 · <b>Team Rota</b> — three changes in one frame: the chip is data, the MOD ribbon is a timeline, and the zone is visible</h1>
 <div class="win" style="height:660px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri on">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab on">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head">
-      <div><div class="ht">Team Rota</div><div class="hsub">6 people · 27 shifts · 1 on leave · 1 slot uncovered</div></div>
+    <div class="tabs"><div class="tab on">Team rota</div><div class="tab">Staff schedule</div></div>
+    <div class="acts">
+      <div class="hsub">6 people · 27 shifts · 1 on leave · 1 slot uncovered</div>
       <div class="sel" style="margin-left:14px">Front Office <span>▾</span></div>
       <div class="grow"></div>
-      <div class="btn2">‹</div><div class="btn2">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Week</span></div><div class="btn2">›</div>
-      <div class="btn2">⧉ &nbsp;Copy last week</div>
-      <div class="btn2">⇄ &nbsp;Swap</div>
-      <div class="btn2">⎙ &nbsp;Print</div>
-      <div class="create">＋ Assign shift</div>
+      <div class="btn">‹</div><div class="btn">24 – 30 Aug &nbsp;<span style="color:var(--faint)">Week</span></div><div class="btn">›</div>
+      <div class="btn">⧉ &nbsp;Copy last week</div>
+      <div class="btn">⇄ &nbsp;Swap</div>
+      <div class="btn">⎙ &nbsp;Print</div>
+      <div class="btn pri">＋ Assign shift</div>
     </div>
     <div class="body">
       <div class="rota">
@@ -445,7 +527,7 @@
         <div class="opt"><span>Custom hours…</span><small>this day only</small></div>
       </div>
       <div class="hint">The property's own catalogue — <b style="color:var(--dim)">Policy → Shifts</b> adds to this list.</div>
-      <div class="pf" style="margin-top:12px"><div class="ghost" style="padding:7px 14px">Clear</div><div class="create" style="box-shadow:none;padding:7px 16px">Save</div></div>
+      <div class="pf" style="margin-top:12px"><div class="btn" style="padding:7px 14px">Clear</div><div class="btn pri" style="box-shadow:none;padding:7px 16px">Save</div></div>
     </div>
   </div>
 </div>
@@ -454,20 +536,19 @@
 <!-- 3 · Leave · my requests -->
 <h1>3 · <b>Leave — My requests</b> — three fields, the balance on the sheet where the decision is made, and a balance that survives a minus sign</h1>
 <div class="win" style="height:580px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri on">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab on">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Leave &amp; Requests</div><div class="hsub">Requests · 1 pending</div></div><div class="grow"></div><div class="create">＋ Request leave</div></div>
+    <div class="acts"><div class="hsub">Requests · 1 pending</div><div class="grow"></div><div class="btn pri">＋ Request leave</div></div>
     <div class="tabs"><div class="tab on">Requests</div><div class="tab">Approvals <span class="cnt">3</span></div></div>
     <div class="body" style="padding-top:14px">
       <div class="strip">
@@ -497,7 +578,7 @@
         <div class="hint">3 days. 2 of your team are already away on the 15th.</div>
         <label>Note</label><div class="in" style="height:76px;color:var(--faint)">Brother's wedding — travelling on the 13th.</div>
       </div>
-      <div class="sf"><div class="ghost">Cancel</div><div class="create">Raise request</div></div>
+      <div class="sf"><div class="btn">Cancel</div><div class="btn pri">Raise request</div></div>
     </div>
   </div>
 </div>
@@ -506,20 +587,19 @@
 <!-- 4 · Approvals -->
 <h1>4 · <b>Approvals</b> — one queue, two kinds: leave requests and swap proposals, both landing with the manager the posting resolves</h1>
 <div class="win" style="height:610px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri on">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab on">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Approvals</div><div class="hsub">3 waiting · 2 leave · 1 swap</div></div><div class="grow"></div><div class="sel">All kinds <span>▾</span></div></div>
+    <div class="acts"><div class="hsub">3 waiting · 2 leave · 1 swap</div><div class="grow"></div><div class="sel">All kinds <span>▾</span></div></div>
     <div class="tabs"><div class="tab">Requests</div><div class="tab on">Approvals <span class="cnt">3</span></div></div>
     <div class="body" style="padding-top:14px">
       <div class="split">
@@ -544,7 +624,7 @@
             <div>Also on duty</div><div>Priya</div><div>Joseph</div><div>—</div><div>—</div>
           </div>
           <div class="hint">Approving writes <b style="color:var(--dim)">both</b> rota cells together. Declining leaves the rota untouched and tells both people.</div>
-          <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:auto"><div class="ghost">Decline…</div><div class="create">Approve swap</div></div>
+          <div style="display:flex;gap:9px;justify-content:flex-end;margin-top:auto"><div class="btn">Decline…</div><div class="btn pri">Approve swap</div></div>
         </div>
       </div>
     </div>
@@ -555,20 +635,19 @@
 <!-- 5 · Duty Register -->
 <h1>5 · <b>Duty Register</b> — the register stops being a month of day cells, because a duty that runs 20:00→08:00 does not fit in one</h1>
 <div class="win" style="height:600px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri on">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab on">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Duty Register</div><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2">24 – 30 Aug</div><div class="btn2">›</div><div class="create">＋ Assign duty</div></div>
+    <div class="acts"><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div><div class="grow"></div><div class="btn">‹</div><div class="btn">24 – 30 Aug</div><div class="btn">›</div><div class="btn pri">＋ Assign duty</div></div>
     <div class="body" style="padding-top:16px">
       <div class="nowrow">
         <div class="nowc on"><div class="mod">NOW</div><div><b>Anjali Menon</b><span>Front Office · since 20:00 · ends 08:00 tomorrow</span></div></div>
@@ -615,7 +694,7 @@
       </div>
       <label>Handover note <span style="color:var(--faint);font-weight:400">— optional</span></label>
       <div class="in" style="height:52px;color:var(--faint);font-size:12.5px">Banquet finishes 23:30 — lobby staffing until then.</div>
-      <div class="pf" style="margin-top:12px"><div class="ghost" style="padding:7px 14px">Cancel</div><div class="create" style="box-shadow:none;padding:7px 16px">Assign</div></div>
+      <div class="pf" style="margin-top:12px"><div class="btn" style="padding:7px 14px">Cancel</div><div class="btn pri" style="box-shadow:none;padding:7px 16px">Assign</div></div>
     </div>
   </div>
 </div>
@@ -624,20 +703,20 @@
 <!-- 6 · People -->
 <h1>6 · <b>People</b> — postings, and the zone that makes a posting complete</h1>
 <div class="win" style="height:560px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri on">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab on">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">People</div><div class="hsub">42 posted · 6 in Front Office · 2 certifications expiring</div></div><div class="sel" style="margin-left:14px">All departments <span>▾</span></div><div class="grow"></div><div class="create">＋ Post a staff member</div></div>
+    <div class="tabs"><div class="tab on">Postings</div><div class="tab">Teams</div></div>
+    <div class="acts"><div class="hsub">42 posted · 6 in Front Office · 2 certifications expiring</div><div class="sel" style="margin-left:14px">All departments <span>▾</span></div><div class="grow"></div><div class="btn pri">＋ Post a staff member</div></div>
     <div class="body" style="padding-top:14px">
       <div class="card">
         <div class="prow hd" style="grid-template-columns:1.25fr 116px 96px 1fr 1fr 96px"><div>Person</div><div>Department</div><div>Zone</div><div>Job role</div><div>Reports to</div><div>Capability</div></div>
@@ -657,20 +736,19 @@
 <!-- 7 · Attendance -->
 <h1>7 · <b>Attendance</b> — new. Who was posted, who actually came, and the lateness that is kept rather than noticed</h1>
 <div class="win" style="height:600px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri on">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab on">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Attendance</div><div class="hsub">Friday 28 August · business day</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">‹</div><div class="btn2">Fri 28 Aug</div><div class="btn2">›</div><div class="create">＋ Mark attendance</div></div>
+    <div class="acts"><div class="hsub">Friday 28 August · business day</div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn">‹</div><div class="btn">Fri 28 Aug</div><div class="btn">›</div><div class="btn pri">＋ Mark attendance</div></div>
     <div class="body" style="padding-top:14px">
       <div class="strip">
         <div class="stat"><b>5 <span style="font-size:11px;color:var(--faint)">of 6</span></b><span>present against posted</span></div>
@@ -696,20 +774,19 @@
 <!-- 8 · Policy -->
 <h1>8 · <b>Policy</b> — new. The four things a property configures, on one screen, and the one it does not</h1>
 <div class="win" style="height:640px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri on">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab on">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Workforce policy</div><div class="hsub">Kochi Beach Resort · applies to every department</div></div><div class="grow"></div><div class="create">Save changes</div></div>
+    <div class="acts"><div class="hsub">Kochi Beach Resort · applies to every department</div><div class="grow"></div><div class="btn pri">Save changes</div></div>
     <div class="body" style="padding-top:16px">
       <div class="sect">Shifts — the property's own catalogue</div>
       <div class="card">
@@ -746,20 +823,19 @@
 <!-- 9 · Creating a shift -->
 <h1>9 · <b>Creating a shift</b> — the page the whole catalogue rests on: a property invents the shifts it actually runs</h1>
 <div class="win" style="height:660px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri on">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab on">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Shifts</div><div class="hsub">Kochi Beach Resort · 6 shifts · shared by every department</div></div><div class="grow"></div><div class="create">＋ New shift</div></div>
+    <div class="title"><div><div class="ht">Shifts</div><div class="hsub">Kochi Beach Resort · 6 shifts · shared by every department</div></div><div class="grow"></div><div class="btn pri">＋ New shift</div></div>
     <div class="body" style="padding-top:14px">
       <div class="card">
         <div class="polrow hd" style="grid-template-columns:1.15fr 110px 150px 110px 1fr"><div>Shift</div><div>Short code</div><div>Times</div><div>Colour</div><div>In use</div></div>
@@ -812,7 +888,7 @@
           </div>
         </div>
       </div>
-      <div class="sf"><div class="ghost">Cancel</div><div class="create">Create shift</div></div>
+      <div class="sf"><div class="btn">Cancel</div><div class="btn pri">Create shift</div></div>
     </div>
   </div>
 </div>
@@ -821,20 +897,19 @@
 <!-- 9 · Reports -->
 <h1>10 · <b>Reports</b> — new. Correct numbers, handed over. Workforce never calculates pay</h1>
 <div class="win" style="height:580px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests <span class="cnt">3</span></div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri">◎ &nbsp;People</div>
-    <div class="ri on">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor<br>Head of Front Office</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab">People</div>
+    <div class="tab on">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">Month-end summary</div><div class="hsub">August 2026 · Front Office · 6 people · business days 1–31</div></div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn2">⎙ &nbsp;Print</div><div class="create">↓ &nbsp;Export CSV</div></div>
+    <div class="acts"><div class="hsub">August 2026 · Front Office · 6 people · business days 1–31</div><div class="sel" style="margin-left:14px">Front Office <span>▾</span></div><div class="grow"></div><div class="btn">⎙ &nbsp;Print</div><div class="btn pri">↓ &nbsp;Export CSV</div></div>
     <div class="body" style="padding-top:14px">
       <div class="card" style="overflow:auto">
         <table class="rep">
@@ -857,9 +932,9 @@
 
 <!-- 10 · The printed week -->
 <h1>11 · <b>The printed week</b> — new. How the rota actually reaches staff in v1: on paper, through a photocopier, in black and white</h1>
-<div class="win" style="height:700px;grid-template-columns:1fr">
+<div class="win" style="height:700px">
   <div class="main">
-    <div class="head" style="border-bottom:1px solid var(--line)"><div><div class="ht">Print preview</div><div class="hsub">Front Office · 24 – 30 August 2026 · A4 landscape</div></div><div class="grow"></div><div class="btn2">Page setup</div><div class="create">⎙ &nbsp;Print</div></div>
+    <div class="title" style="border-bottom:1px solid var(--line)"><div><div class="ht">Print preview</div><div class="hsub">Front Office · 24 – 30 August 2026 · A4 landscape</div></div><div class="grow"></div><div class="btn">Page setup</div><div class="btn pri">⎙ &nbsp;Print</div></div>
     <div class="body" style="padding:20px 26px 22px">
       <div class="paper">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -902,27 +977,27 @@
 <!-- 11 · First run -->
 <h1>12 · <b>First run</b> — Workforce starts with people, and says what it will unlock</h1>
 <div class="win" style="height:470px">
-  <div class="rail">
+  <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
-    <div class="ri">◫ &nbsp;Staff Schedule</div>
-    <div class="ri">▦ &nbsp;Team Rota</div>
-    <div class="ri">◷ &nbsp;Leave &amp; Requests</div>
-    <div class="ri">◉ &nbsp;Attendance</div>
-    <div class="ri">★ &nbsp;Duty Register</div>
-    <div class="ri on">◎ &nbsp;People</div>
-    <div class="ri">▤ &nbsp;Reports</div>
-    <div class="ri">⚙ &nbsp;Policy</div>
-    <div class="me"><b>Priya Thomas</b>Front Office · Supervisor</div>
+    <div class="tab">Rota</div>
+    <div class="tab">Leave &amp; Requests<span class="n">3</span></div>
+    <div class="tab">Attendance</div>
+    <div class="tab">Duty</div>
+    <div class="tab on">People</div>
+    <div class="tab">Reports</div>
+    <div class="tab">Policy</div>
+    <div class="who">Priya Thomas · Front Office</div>
   </div>
   <div class="main">
-    <div class="head"><div><div class="ht">People</div><div class="hsub">Nobody is posted yet</div></div></div>
+    <div class="tabs"><div class="tab on">Postings</div><div class="tab">Teams</div></div>
+    <div class="acts"><div class="hsub">Nobody is posted yet</div></div>
     <div class="body" style="justify-content:center">
       <div class="void">
         <div class="big">◎</div>
         <div style="font-size:15px;font-weight:600">Post your first staff member</div>
         <p>A posting says where a person works and as what. Everything else in Workforce is built on it — the rota, leave, the duty roster and attendance all need somebody posted first.</p>
         <p style="color:var(--faint);font-size:12px">It also opens the department folders in My Hotel: until a property has postings, department-based document access has nobody to resolve to.</p>
-        <div class="create" style="margin-top:4px">＋ Post a staff member</div>
+        <div class="btn pri" style="margin-top:4px">＋ Post a staff member</div>
       </div>
     </div>
   </div>
