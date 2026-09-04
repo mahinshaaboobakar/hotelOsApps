@@ -9,6 +9,7 @@ using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Summaries;
 using HotelOS.Workforce.Application.Swaps;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Domain;
 using Xunit;
 
@@ -501,5 +502,6 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         StaffDirectoryDouble directory,
         TimeProvider clock) =>
         new(db, authorizer, directory,
-            new PostingAnnouncer(new RecordingEventAppender(), directory), clock);
+            new PostingAnnouncer(new RecordingEventAppender(), directory),
+            new TeamService(db, authorizer, directory, clock), clock);
 }

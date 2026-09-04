@@ -3,6 +3,7 @@ using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Domain;
 using Xunit;
 
@@ -461,6 +462,8 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
             directory,
             new PostingService(
                 db, authorizer, directory,
-                new PostingAnnouncer(new RecordingEventAppender(), directory), TimeProvider.System));
+                new PostingAnnouncer(new RecordingEventAppender(), directory),
+                new TeamService(db, authorizer, directory, TimeProvider.System),
+                TimeProvider.System));
     }
 }

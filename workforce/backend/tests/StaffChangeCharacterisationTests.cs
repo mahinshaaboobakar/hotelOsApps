@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using Xunit;
 
 namespace HotelOS.Workforce.Tests;
@@ -218,7 +219,10 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
 
         return new World(
             new PostingService(
-                db, new RecordingAuthorizer(), directory, announcer, TimeProvider.System),
+                db, new RecordingAuthorizer(), directory, announcer,
+                new TeamService(
+                    db, new RecordingAuthorizer(), directory, TimeProvider.System),
+                TimeProvider.System),
             new StaffChangeConsumer(db, announcer, TimeProvider.System),
             directory,
             events);

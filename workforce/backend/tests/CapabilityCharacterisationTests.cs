@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Domain;
 using Xunit;
 
@@ -331,6 +332,8 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
             new PostingService(
                 db, authorizer, new StaffDirectoryDouble(),
                 new PostingAnnouncer(new RecordingEventAppender(), new StaffDirectoryDouble()),
+                new TeamService(
+                    db, authorizer, new StaffDirectoryDouble(), TimeProvider.System),
                 TimeProvider.System));
     }
 }

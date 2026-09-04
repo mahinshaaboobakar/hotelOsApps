@@ -12,6 +12,7 @@ using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Swaps;
 using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Summaries;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Grpc;
 using HotelOS.Workforce.Infrastructure;
@@ -148,6 +149,17 @@ builder.Services.AddScoped<PostingAnnouncer>();
 builder.Services.AddScoped<StaffChangeConsumer>();
 builder.Services.AddScoped<PeriodService>();
 builder.Services.AddScoped<AssignmentAdvisor>();
+
+// Teams — Jobs' `S3-D1`, ruled Workforce's whole on 2026-09-04. `PostingService`
+// holds it, because ending a posting has to end the memberships it supported in
+// the same transaction.
+builder.Services.AddScoped<TeamService>();
+
+// The shift fan-out — Jobs' `S5-D13`. This is the *looking*; the tick that calls
+// it is the platform's sweep host, and the scope it acts under is the SDK's
+// service-identity constructor. Registered now so both arrive to something that
+// already exists.
+builder.Services.AddScoped<ShiftBoundaryAnnouncer>();
 
 // The five reads behind this application's dock widgets — `SHELL-Q35`. Each is
 // a view over rows this application already owns, and each is registered

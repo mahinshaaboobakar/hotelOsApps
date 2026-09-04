@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
@@ -519,7 +520,9 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         return (
             new PostingService(
                 fixture.Context(), authorizer, directory,
-                new PostingAnnouncer(events, directory), TimeProvider.System),
+                new PostingAnnouncer(events, directory),
+                new TeamService(fixture.Context(), authorizer, directory, TimeProvider.System),
+                TimeProvider.System),
             authorizer,
             directory,
             events);

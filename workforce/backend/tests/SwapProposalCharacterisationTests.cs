@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Swaps;
@@ -288,7 +289,8 @@ public class SwapProposalCharacterisationTests(WorkforceFixture fixture)
         var rota = new RotaService(db, authorizer, clock);
         var postings = new PostingService(
             db, authorizer, directory,
-            new PostingAnnouncer(new RecordingEventAppender(), directory), clock);
+            new PostingAnnouncer(new RecordingEventAppender(), directory),
+            new TeamService(db, authorizer, directory, clock), clock);
         var swaps = new SwapProposalService(db, authorizer, new ApproverResolver(db), clock);
 
         var scope = fixture.Scope();

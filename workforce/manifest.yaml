@@ -127,17 +127,34 @@ events:
   # version. The domain and the aggregate differ on purpose, and the Kernel's
   # `GrantKind` names them separately for exactly this reason.
   #
-  # **What is NOT here, and honestly:** `shift`, `leave`, `duty` and
-  # `attendance` are pre-named in the Kernel's stream routing for this
-  # application (`PKG-Q39`, four domains), and **nothing publishes them yet**.
-  # The rota, leave, duty and attendance slices shipped without event
-  # publication — it was in no slice — so declaring subjects here would claim a
-  # ceiling the code never reaches. They are declared when they are published.
+  # **What is NOT here, and honestly:** `leave`, `duty` and `attendance` are
+  # pre-named in the Kernel's stream routing for this application (`PKG-Q39`,
+  # four domains) and **nothing publishes them yet**. Those slices shipped
+  # without event publication — it was in no slice — so declaring subjects here
+  # would claim a ceiling the code never reaches. They are declared when they
+  # are published, which is what `shift` has now done.
   publishes:
     - user.posted
     - user.posting_ended
     - user.headship_started
     - user.headship_ended
+
+    # **The shift fan-out** — Jobs' `S5-D13`, ruled 2026-09-04. Every
+    # application that needs to know whether a department is staffed subscribes
+    # to these two; Jobs keeps a `department_presence` row from them.
+    #
+    # `property.*.shift.>` was already routed in the Kernel's OPERATIONAL
+    # stream, pre-named for this application before it existed — so unlike a
+    # `team` domain these need no platform change to reach a consumer. Declared
+    # here because `publishes:` is the whole of the permission: ADR 0093's
+    # addendum lets an application publish only what it lists.
+    #
+    # Both carry `on_now_after`, so a consumer sets presence from the count and
+    # never from the verb: at a 15:00 handover the ended and started events
+    # arrive at one instant, and the boolean has to land correctly whichever is
+    # delivered last.
+    - shift.started
+    - shift.ended
 
   # Master Data's staff facts, which this application reconciles against its own
   # postings — chapter 04 §6.

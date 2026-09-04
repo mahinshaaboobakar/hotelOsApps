@@ -5,6 +5,7 @@ using HotelOS.Workforce.Application.Assignment;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
+using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Application.Rota;
 using HotelOS.Workforce.Application.Shifts;
 using Xunit;
@@ -354,7 +355,8 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
             new AssignmentAdvisor(db, authorizer),
             new PostingService(
                 db, authorizer, directory,
-                new PostingAnnouncer(new RecordingEventAppender(), directory), clock),
+                new PostingAnnouncer(new RecordingEventAppender(), directory),
+                new TeamService(db, authorizer, directory, clock), clock),
             new CapabilityService(db, authorizer, clock),
             new LeaveService(db, authorizer, new ApproverResolver(db), clock),
             new LeaveTypeService(db, authorizer, directory, clock),

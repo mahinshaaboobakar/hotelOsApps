@@ -33,6 +33,7 @@ public class PostingService(
     IKernelAuthorizer authorizer,
     IStaffDirectory directory,
     PostingAnnouncer announcer,
+    Teams.TeamService teams,
     TimeProvider clock)
 {
     /// <summary>Post a person to a department.</summary>
@@ -186,6 +187,23 @@ public class PostingService(
         // ran.
         await announcer.AnnounceEndedAsync(
             scope, posting, posting.UpdatedAt, cancellationToken);
+
+        // **And every team membership it supported closes with it, here.** A
+        // team routes work to its members, and a member who no longer holds a
+        // posting in the team's department cannot be assigned there — so a
+        // membership left standing routes work to somebody who left last month,
+        // with nothing anywhere saying so.
+        //
+        // In this transaction, not in a nightly job: the two facts commit
+        // together or neither does. This is the direction the dependency has to
+        // run — the rule is about teams and the trigger is a posting, and only
+        // the posting's own transaction can hold both.
+        await teams.EndMembershipsForPostingAsync(
+            scope.PropertyId,
+            posting.StaffId,
+            posting.DepartmentCode,
+            command.EffectiveTo,
+            cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return posting;

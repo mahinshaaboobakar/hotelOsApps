@@ -1,10 +1,10 @@
 # 05 · Two requests from Jobs — the team object, and the shift fan-out
 
-**Status:** proposal, 2026-09-04. Stream GG. **Nothing here is built**, and
-nothing here is ruled: the questions at the end are for the architect to number
-and the owner to decide. Written because HH's design asks Workforce for two
-things it does not have, and *"asked, not assumed"* is the right shape — this is
-the answer half of that sentence.
+**Status:** **ruled and built, 2026-09-04.** Stream GG. Written first as a
+proposal with eight open questions; all eight were answered the same day and the
+build followed. The design below is unchanged from the proposal except where the
+rulings changed it, and §"The questions" now records the answers — kept as one
+page rather than split, so the reasoning and its ruling are read together.
 
 **What was asked**, both `RULED, owner 2026-09-03` inside Jobs' own design of
 record (`jobs/docs/chapters/02`, JOBS-Q1 makes it the design of record):
@@ -383,25 +383,42 @@ that door is open when the design is.
 
 ---
 
-## The questions
+## The questions — all eight answered, 2026-09-04
 
-For the architect to number and the owner to rule. Nothing is built until they
-are answered.
+| | Question | Ruling |
+|---|---|---|
+| **1** | Is the team Workforce's, whole? | **Yes.** The zone-vs-team distinction is recorded against the precedent that looks decisive, so nobody re-derives it |
+| **2** | One department per team? | **Yes, v1** |
+| **3** | `posting.assign`, or a thirteenth permission? | **Reuse `posting.assign`** |
+| **4** | Team events in v1? | **None.** Their eventual arrival is `PKG-Q39`'s mechanism, never a third pre-name |
+| **5** | Does the event carry `on_now_after`? | **Yes, on both** — it *removes the class rather than mitigating it* |
+| **6** | A sweep, or a schedule per boundary? | **A sweep** — and the two rulings never disagreed. Under the locked boundary test they are the same shape: the rota row already holds the boundary instant, exactly Jobs' `due_at` case, so a schedule per boundary is the per-job-timer trap wearing a rota. Temporal holds the recurring tick — *the future that is the thing* is **every minute, look** |
+| **7** | How does Jobs establish presence at startup? | **State by read, changes by event.** HH's stubbed Workforce client is the named dependency |
+| **8** | What scope does a package's worker carry? | **The application's own service identity** — `CallerKind::Service`, its principal, its installation's property. `AUTHZ-Q18`'s removal means packages are **services, not a third kind** |
 
-| | Question |
+**§B3's mechanism is ratified as the platform pattern for every scheduled
+announcement**: *the announcement becomes the fact* — one row, one unique index,
+inserted and appended together.
+
+## What was built
+
+| | |
 |---|---|
-| **1** | **Is the team Workforce's, whole?** §A2 argues yes on ADR 0051's test, and argues that ADR 0063 §Q4's Zone precedent does not transfer because a zone is a place and a team is people. If the answer is the split shape instead, Master Data gains a `Team` and Workforce gains only the membership |
-| **2** | **One department per team?** §A4. A cross-department task force is refused for v1 |
-| **3** | **`posting.assign`, or a thirteenth permission?** §A4 |
-| **4** | **Team events in v1 — none, a routed `team` domain, or PKG-Q39?** §A6. A subject that is not routed dead-letters silently |
-| **5** | **Does `shift.started` carry `on_now_after`?** §B2. Without it the 15:00 handover leaves presence order-dependent; with it the hazard is gone rather than mitigated |
-| **6** | **A sweep per property, or a schedule per boundary?** §B4 — and the two same-day rulings that disagree about it. Reported, not resolved |
-| **7** | **How does Jobs establish `department_presence` at startup?** §B5. HH removed the fallback; an event stream has no initial state |
-| **8** | **What `RequestScope` does a package's own background worker carry?** §B3. `CallerKind` is `User` or `Service`, and `AUTHZ-Q18` deliberately removed the application member; no installed application constructs a scope today. Platform-wide the moment any package does work on a timer — Jobs' 60-second sweep meets it too |
+| `Domain/Team.cs` · `Domain/TeamMember.cs` | the object, with the placement argument beside the type |
+| `Application/Teams/` | form, rename, stand down and back up, add and remove members, list, and the membership-ending consequence |
+| `PostingService.EndAsync` | **calls it in its own transaction** — the invariant, where it belongs |
+| `Domain/ShiftBoundary.cs` | the announcement row and its unique key |
+| `Application/Shifts/ShiftBoundaryAnnouncer.cs` | the *looking*: which boundaries have fallen, which are unannounced, one row and one event each |
+| `Application/Shifts/ShiftAnnouncements.cs` | the payload, with every wire name stated |
+| `manifest.yaml` | `shift.started` and `shift.ended` declared — `publishes:` is the whole of the permission |
+| migration `TeamsAndShiftBoundaries` | three tables, proven head → base → head on a real PostgreSQL |
+| 17 new tests | 182 in the suite, 0 warnings |
 
-## What this changes today
+**Two things wait on II's round, by the ruling's own sequencing**: the SDK's
+service-identity constructor (`AnnounceDueAsync` takes the scope, so it is
+testable without one and consumes it unchanged), and the sweep host beside
+`ConcernSweepHost` (this class is the looking; the tick is the platform's).
 
-Nothing. No table, no event, no manifest line, no code. Jobs' day one is
-unaffected — presence runs on service hours, and assignment to a person works
-without a team. The two requests are answered as designs, and the answers wait
-for a ruling.
+**And one thing waits on nobody**: Jobs' day one is unaffected. Presence runs on
+service hours, person assignment works without a team, and the events flow the
+moment a tick exists to call the announcer.
