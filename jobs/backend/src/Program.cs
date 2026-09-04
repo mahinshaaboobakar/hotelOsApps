@@ -27,6 +27,10 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Assigned the moment the host is built, and read only from inside a running
+// activity — the sweep is declared before there is a provider to sweep with.
+WebApplication? started = null;
+
 // `dotnet HotelOS.Jobs.dll migrate` — install step 6; before the host is built.
 if (args is ["migrate", ..])
 {
@@ -139,7 +143,19 @@ builder.Services.AddScoped<Nudger>();
 builder.Services.AddScoped<ConcernSweep>();
 builder.Services.AddScoped<DayStart>();
 builder.Services.AddScoped<AutoClose>();
+
+// The tick, twice over, deliberately — TEMPORAL-Q1, page 62a's order. The
+// Schedule is the trigger from now on; the timer stays until this installation
+// is confirmed firing it, because until INSTALL-Q69 closes a property may have
+// no Temporal, where the reconciler correctly does nothing. Both run the same
+// object, so they cannot come to mean different things.
+var sweepActivities = new ConcernActivities(() => started!.Services);
+builder.Services.AddSingleton(sweepActivities);
 builder.Services.AddHostedService<ConcernSweepHost>();
+builder.Services.AddTemporal(temporal => temporal
+    .Workflow<ConcernSweepWorkflow>()
+    .Activities(sweepActivities)
+    .Schedule(ConcernSweepWorkflow.ScheduleId, ConcernSweepHost.Interval, nameof(ConcernSweepWorkflow)));
 
 // The listener resolves this application's identity eagerly and refuses to
 // start without one — the property worth having: an installed package with no
@@ -149,6 +165,7 @@ builder.Host.UsePlatformListener(
     platform.CertificateDirectory);
 
 var app = builder.Build();
+started = app;
 
 app.MapGrpcService<JobsGrpcService>();
 app.MapHealthChecks("/health");

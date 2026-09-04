@@ -14,15 +14,16 @@ namespace HotelOS.Jobs.Application.Concerns;
 /// </summary>
 public class AutoClose(JobsDbContext db, JobAnnouncer announcer, JobRecords records)
 {
-    public async Task<int> RunAsync(Guid propertyId, CancellationToken cancellationToken)
+    /// <summary>Close what the policy makes due at one property. Returns how many.</summary>
+    /// <remarks>The scope is the tick's, and names the property — see <see cref="ConcernSweep"/>.</remarks>
+    public async Task<int> RunAsync(RequestScope scope, CancellationToken cancellationToken)
     {
-        var policies = await db.ClosingPolicies.Where(p => p.PropertyId == propertyId).ToListAsync(cancellationToken);
+        var policies = await db.ClosingPolicies.Where(p => p.PropertyId == scope.PropertyId).ToListAsync(cancellationToken);
         var resolved = await db.Jobs
-            .Where(j => j.PropertyId == propertyId && j.DeletedAt == null && j.JobStatus == JobStatus.Resolved)
+            .Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null && j.JobStatus == JobStatus.Resolved)
             .ToListAsync(cancellationToken);
         if (resolved.Count == 0) return 0;
 
-        var scope = new RequestScope { Caller = CallerKind.Service, ServiceName = "jobs", PropertyId = propertyId };
         var now = records.Now;
         var closed = 0;
         foreach (var job in resolved)

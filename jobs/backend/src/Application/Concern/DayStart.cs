@@ -19,16 +19,17 @@ public class DayStart(
     JobAnnouncer announcer,
     JobRecords records)
 {
-    public async Task<int> RunAsync(Guid propertyId, CancellationToken cancellationToken)
+    /// <summary>Raise the day's scheduled jobs at one property. Returns how many.</summary>
+    /// <remarks>The scope is the tick's, and names the property — see <see cref="ConcernSweep"/>.</remarks>
+    public async Task<int> RunAsync(RequestScope scope, CancellationToken cancellationToken)
     {
-        var today = await TodayAsync(propertyId, cancellationToken);
+        var today = await TodayAsync(scope.PropertyId, cancellationToken);
         var due = await db.Jobs
-            .Where(j => j.PropertyId == propertyId && j.DeletedAt == null)
+            .Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null)
             .Where(j => j.JobStatus == JobStatus.Scheduled && j.ScheduledFor != null && j.ScheduledFor <= today)
             .ToListAsync(cancellationToken);
         if (due.Count == 0) return 0;
 
-        var scope = new RequestScope { Caller = CallerKind.Service, ServiceName = "jobs", PropertyId = propertyId };
         foreach (var job in due)
         {
             records.Move(scope, job, JobStatus.Raised, byWhat: "SWEEP", note: $"day {job.ScheduledFor:yyyy-MM-dd} began");

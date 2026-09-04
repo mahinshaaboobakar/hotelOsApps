@@ -19,11 +19,21 @@ public sealed class DirectoryDouble : IPropertyDirectory
 
     public List<string> RoleLookups { get; } = [];
 
+    /// <summary>Properties Master Data cannot answer for — a real outage, for one property.</summary>
+    /// <remarks>
+    /// The sweep's tick is required to carry on past a property it cannot
+    /// serve, and this is the failure that actually happens: Master Data
+    /// unreachable while the row is fine.
+    /// </remarks>
+    public HashSet<Guid> Unreachable { get; } = [];
+
     public Task<string?> FindPropertyCodeAsync(Guid propertyId, CancellationToken cancellationToken) =>
         Task.FromResult(PropertyCode);
 
     public Task<string?> FindTimezoneAsync(Guid propertyId, CancellationToken cancellationToken) =>
-        Task.FromResult(Timezone);
+        Unreachable.Contains(propertyId)
+            ? throw new InvalidOperationException($"master data is unreachable for {propertyId}")
+            : Task.FromResult(Timezone);
 
     public Task<Guid?> FindDepartmentIdAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken) =>
         Task.FromResult<Guid?>(Departments.Contains(departmentCode.ToUpperInvariant()) ? Guid.NewGuid() : null);

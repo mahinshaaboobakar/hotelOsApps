@@ -129,7 +129,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
         Assert.Equal(new DateTimeOffset(2026, 9, 3, 0, 40, 0, TimeSpan.Zero), job.DueAt);
 
         h.Clock.Set(new DateTimeOffset(2026, 9, 2, 21, 30, 0, TimeSpan.Zero)); // 3 Sep 00:30 in Asia/Qatar (UTC+3), still 2 Sep in UTC
-        Assert.Equal(1, await h.DayStart.RunAsync(h.PropertyId, default));
+        Assert.Equal(1, await h.DayStart.RunAsync(h.Sweeping, default));
         Assert.Equal(JobStatus.Raised, (await h.Db.Jobs.FirstAsync(j => j.Id == job.Id)).JobStatus);
     }
 

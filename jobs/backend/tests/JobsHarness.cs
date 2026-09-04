@@ -112,6 +112,15 @@ public sealed class JobsHarness
 
     public Guid Room1204 { get; } = Guid.CreateVersion7();
 
+    /// <summary>The scope the sweep's three passes run in — the tick's, not a user's.</summary>
+    /// <remarks>
+    /// <c>RequestScope.ForBackgroundWork</c>, exactly as <see cref="ConcernActivities"/>
+    /// mints it per property per tick: Jobs' own service identity, this
+    /// property, and no user — nobody asked, so nobody is recorded as having
+    /// asked (<c>WF-Q11</c> (8)).
+    /// </remarks>
+    public RequestScope Sweeping => RequestScope.ForBackgroundWork(new ServiceIdentity("jobs"), PropertyId);
+
     /// <summary>A user scope at the fixture's property, with the organisation for curating.</summary>
     public RequestScope Scope(Guid? user = null) => new()
     {

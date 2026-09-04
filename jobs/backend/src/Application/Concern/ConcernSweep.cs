@@ -23,18 +23,23 @@ public class ConcernSweep(
     TimeProvider clock)
 {
     /// <summary>Sweep one property. Returns how many jobs changed state.</summary>
-    public async Task<int> RunAsync(Guid propertyId, CancellationToken cancellationToken)
+    /// <remarks>
+    /// The scope carries the property, so the two can never disagree, and it is
+    /// the tick's — <c>RequestScope.ForBackgroundWork</c>, minted once per
+    /// property per tick (<c>WF-Q11</c> (8)) — rather than one invented here.
+    /// Inventing it at the call site is what that factory exists to prevent.
+    /// </remarks>
+    public async Task<int> RunAsync(RequestScope scope, CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow();
-        var scope = new RequestScope { Caller = CallerKind.Service, ServiceName = "jobs", PropertyId = propertyId };
         var jobs = await db.Jobs
-            .Where(j => j.PropertyId == propertyId && j.DeletedAt == null)
+            .Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null)
             .Where(j => JobStatus.Open.Contains(j.JobStatus))
             .ToListAsync(cancellationToken);
         if (jobs.Count == 0) return 0;
 
-        var policies = await PoliciesAsync(propertyId, cancellationToken);
-        var presence = await db.Presence.Where(p => p.PropertyId == propertyId)
+        var policies = await PoliciesAsync(scope.PropertyId, cancellationToken);
+        var presence = await db.Presence.Where(p => p.PropertyId == scope.PropertyId)
             .ToDictionaryAsync(p => p.DepartmentCode, cancellationToken);
         var ids = jobs.Select(j => j.Id).ToList();
         var assignments = await db.Assignments.Where(a => ids.Contains(a.JobId) && a.EndedAt == null)

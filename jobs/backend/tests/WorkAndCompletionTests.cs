@@ -115,14 +115,14 @@ public class WorkAndCompletionTests(JobsFixture fixture)
         job = await h.Completion.ResolveAsync(h.Scope(arjun), new ResolveCommand { JobId = job.Id, ExpectedVersion = job.Version, ResolutionId = h.RefrigerantToppedUp.Id }, default);
 
         h.Clock.Advance(TimeSpan.FromHours(3));
-        Assert.Equal(0, await h.AutoClose.RunAsync(h.PropertyId, default));
+        Assert.Equal(0, await h.AutoClose.RunAsync(h.Sweeping, default));
         job = await h.Completion.ReopenAsync(h.Scope(arjun), job.Id, job.Version, "still warm", default);
         Assert.Equal(JobStatus.Accepted, job.JobStatus);
         Assert.Contains(EventTypes.JobReopened, h.Events.Types);
 
         job = await h.Completion.ResolveAsync(h.Scope(arjun), new ResolveCommand { JobId = job.Id, ExpectedVersion = job.Version, ResolutionId = h.RefrigerantToppedUp.Id }, default);
         h.Clock.Advance(TimeSpan.FromHours(4));
-        Assert.Equal(1, await h.AutoClose.RunAsync(h.PropertyId, default));
+        Assert.Equal(1, await h.AutoClose.RunAsync(h.Sweeping, default));
         job = await h.Db.Jobs.FirstAsync(j => j.Id == job.Id);
         Assert.Equal(JobStatus.Closed, job.JobStatus);
         Assert.Null(await h.Records.CurrentAssignmentAsync(job.Id, default));

@@ -26,12 +26,12 @@ public class SweepCharacterisationTests(JobsFixture fixture)
         var announced = h.Events.Types.Count(t => t == EventTypes.JobConcernChanged);
 
         h.Clock.Advance(TimeSpan.FromMinutes(20));
-        Assert.Equal(0, await h.Sweep.RunAsync(h.PropertyId, default));
+        Assert.Equal(0, await h.Sweep.RunAsync(h.Sweeping, default));
         h.Clock.Advance(TimeSpan.FromMinutes(11));
-        Assert.Equal(1, await h.Sweep.RunAsync(h.PropertyId, default));
-        Assert.Equal(0, await h.Sweep.RunAsync(h.PropertyId, default));
+        Assert.Equal(1, await h.Sweep.RunAsync(h.Sweeping, default));
+        Assert.Equal(0, await h.Sweep.RunAsync(h.Sweeping, default));
         h.Clock.Advance(TimeSpan.FromMinutes(10));
-        Assert.Equal(1, await h.Sweep.RunAsync(h.PropertyId, default));
+        Assert.Equal(1, await h.Sweep.RunAsync(h.Sweeping, default));
 
         var rows = await h.Db.ConcernHistory.Where(c => c.JobId == job.Id).OrderBy(c => c.Since).ToListAsync();
         Assert.Equal([Concern.OnTrack, Concern.AtRisk, Concern.Breached], rows.Select(r => r.Concern));
@@ -59,19 +59,19 @@ public class SweepCharacterisationTests(JobsFixture fixture)
         await h.Work.StartAsync(h.Scope(arjun), job.Id, default);
 
         h.Clock.Advance(TimeSpan.FromMinutes(31));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         h.Clock.Advance(TimeSpan.FromMinutes(3));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         Assert.Equal(1, await h.Db.Nudges.CountAsync(n => n.JobId == job.Id && n.ToUserId == arjun));
         h.Clock.Advance(TimeSpan.FromMinutes(3));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         Assert.Equal(2, await h.Db.Nudges.CountAsync(n => n.JobId == job.Id && n.ToUserId == arjun && n.Concern == Concern.AtRisk));
 
         h.Clock.Advance(TimeSpan.FromMinutes(10));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         var toPriya = Assert.Single(await h.Db.Nudges.Where(n => n.JobId == job.Id && n.ToUserId == priya).ToListAsync());
         Assert.Equal((Concern.Breached, LadderRole.Supervisor), (toPriya.Concern, toPriya.AsRole));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         Assert.Equal(1, await h.Db.Nudges.CountAsync(n => n.JobId == job.Id && n.ToUserId == priya));
     }
 
@@ -93,11 +93,11 @@ public class SweepCharacterisationTests(JobsFixture fixture)
         await h.Presence.ShiftEndedAsync(h.PropertyId, "ENG", h.Clock.GetUtcNow(), default);
 
         h.Clock.Advance(TimeSpan.FromMinutes(45));
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         Assert.Equal(Concern.OnTrack, (await Latest(h, job.Id)).Concern);
 
         await h.Presence.ShiftStartedAsync(h.PropertyId, "ENG", 4, h.Clock.GetUtcNow(), default);
-        await h.Sweep.RunAsync(h.PropertyId, default);
+        await h.Sweep.RunAsync(h.Sweeping, default);
         Assert.Equal(Concern.Breached, (await Latest(h, job.Id)).Concern);
     }
 
