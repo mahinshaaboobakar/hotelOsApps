@@ -122,7 +122,7 @@ ul.flows b{color:var(--text)}
 <div class="intro">
   <h1>Jobs · the settings</h1>
   <p>Companion to <code>01-the-jobs-screens.html</code>, split out on the owner's leave (2026-09-04) when the concern-policy flow made one page too long. Same palette authority — the ADR 0106 tokens, no hex of its own — and the same chrome. Dark frames first.</p>
-  <p><b>Part A</b> is the Settings tab of the app, one frame per sub-tab, each with its purpose stated. <b>Part B</b> is the three-step flow that creates a concern policy, ending in the ladder builder.</p>
+  <p><b>Part A</b> is the Settings tab of the app, one frame per sub-tab, each with its purpose stated. <b>Part B</b> is the policies list for two departments, the three-step flow that creates one — scope picked as department › category › item — and the table of how a job finds its policy.</p>
 </div>
 
 <h2 class="sec">A · the settings tabs</h2>
@@ -283,36 +283,65 @@ ul.flows b{color:var(--text)}
 <div class="note fix"><b>Redline folded (2026-09-04, second pass).</b> Each settings tab is now its own frame with its purpose stated. <b>Numbering is no longer a tab</b>: nothing on it was configurable — the property code is Master Data's, the department part and the counter are fixed by S1 D3 — so it is one read-only line in the sub-nav, and a tab that only displays is not built.</div>
 <div class="note stop"><b>No notification settings exist</b> (S9 D10: in-app only, no config). "Who is told" chooses <i>which role hears which concern</i>, never <i>how</i>.</div>
 
-<h2 class="sec">B · creating a concern policy — the ladder, step by step</h2>
+<h2 class="sec">B · policies — one property, two departments, different promises per category</h2>
 
-<h1 class="frame">7 · <b>New concern policy · 1 of 3 · Name and scope</b>.</h1>
-<div class="win" style="max-width:820px">
+<h1 class="frame">7 · <b>Policies</b>. Every policy this property has, and where each sits.</h1>
+<div class="win">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div class="on">Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <div style="margin-bottom:10px"><span class="btn pri">＋ New policy</span><span class="mono">7 policies · a job uses the most specific one that matches it</span></div>
+    <table>
+      <tr><th>Scope</th><th>Policy name</th><th>Due · P1 / P2 / P3</th><th>At risk</th><th>Ladder (P1)</th><th>Used by</th><th></th></tr>
+      <tr><td><span class="pill">property</span> Marina Bay</td><td>Property default</td><td>60 min / 4 h / same shift</td><td>75 %</td><td>assignee → supervisor → manager</td><td>FO, F&amp;B and anything else</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td><span class="pill">department</span> Engineering</td><td>Engineering</td><td>40 min / 2 h / same shift</td><td>75 %</td><td>assignee → supervisor → manager → jobs manager</td><td>ENG jobs with no category policy</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td style="padding-left:28px"><span class="pill run">category</span> Engineering › AC not working</td><td>AC — guest in room</td><td>30 min / 90 min / 4 h</td><td>70 %</td><td>assignee → supervisor → manager → jobs manager</td><td>every AC item, unless the item has its own</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td style="padding-left:46px"><span class="pill ok">item</span> › Water dropping from unit</td><td>AC leak — ceiling risk</td><td>20 min / 60 min / —</td><td>60 %</td><td>assignee → supervisor → manager → jobs manager</td><td>this item only</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td><span class="pill">department</span> Housekeeping</td><td>Housekeeping</td><td>45 min / 2 h / same shift</td><td>75 %</td><td>assignee → supervisor</td><td>HK jobs with no category policy</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td style="padding-left:28px"><span class="pill run">category</span> Housekeeping › Cleaning</td><td>Cleaning</td><td>30 min / 60 min / same shift</td><td>75 %</td><td>assignee → supervisor</td><td>every cleaning item</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+      <tr><td style="padding-left:28px"><span class="pill run">category</span> Housekeeping › Bottle of water</td><td>Water — 10 minutes</td><td>10 min / 20 min / —</td><td>50 %</td><td>assignee → supervisor → manager</td><td>every item of that category</td><td><span class="btn" style="padding:2px 8px;font-size:11px">Edit</span></td></tr>
+    </table>
+    <div class="pager"><span>7 of 7</span><span></span></div>
+  </div>
+</div>
+<div class="note fix"><b>Redline folded (2026-09-04, fifth pass) — two departments, drawn.</b> Engineering and Housekeeping are <b>departments</b>; <i>AC not working</i> and <i>Cleaning</i> and <i>Bottle of water</i> are <b>categories</b>; <i>Water dropping from unit</i> is an <b>item</b>. A policy is created at any of the four levels, and the list shows them nested. The property default is the floor; each level below it changes only what it needs to — Housekeeping's water category promises 10 minutes and climbs to the manager, its cleaning category promises 30 and stops at the supervisor, and neither touches Engineering.</div>
+<div class="note"><b>Draws S5 D1–D3, §2.3.</b> Table <code>concern_policy</code> with a scope column (property · department_code · category_id · item_id); one row per policy; the ladder rows hang off it. "Used by" is derived — how many jobs resolved to this policy this month — so an unused policy is visible.</div>
+
+<h1 class="frame">8 · <b>New policy · 1 of 3 · Name and scope</b>. Pick the level: department, then category, then item.</h1>
+<div class="win">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
   <div class="body">
     <div class="subnav"><div class="on">1 · Name and scope</div><div>2 · The clock</div><div>3 · The ladder</div></div>
     <div class="cols">
-      <div>
-        <label>Name</label><div class="field">Engineering · guest-facing</div>
-        <label>Applies to</label><div class="field">Department · Engineering</div>
-        <label>Start from</label><div class="field">Copy of "Marina Bay · property default"</div>
+      <div class="card">
+        <h3>Sample A · Engineering, one category</h3>
+        <label>Department</label><div class="field">Engineering ▾</div>
+        <label>Category · optional</label><div class="field">AC not working ▾ <span class="mono" style="float:right">6 items</span></div>
+        <label>Item · optional</label><div class="field ph">— all items of the category ▾</div>
+        <label>Name</label><div class="field">AC — guest in room</div>
+        <label>Start from</label><div class="field">Copy of "Engineering" (department) ▾</div>
+        <div class="mono">Applies to: every AC job at Marina Bay, unless the item has its own policy.</div>
       </div>
       <div class="card">
-        <h3>Where a policy can sit</h3>
-        <div class="kv" style="grid-template-columns:120px 1fr">
-          <div>Property</div><div>the default for every job here</div>
-          <div>Department</div><div>overrides the property for that department's jobs</div>
-          <div>Category</div><div>overrides the department for every item of that category — Cleaning 30 min, Bottle of water 10 min</div>
-          <div>Catalogue item</div><div>overrides all three, for one item, from the item's property policy</div>
-        </div>
-        <div class="mono" style="margin-top:8px">Resolution order for a job: item → category → department → property (§2.3).</div>
+        <h3>Sample B · Housekeeping, one category</h3>
+        <label>Department</label><div class="field">Housekeeping ▾</div>
+        <label>Category · optional</label><div class="field">Bottle of water ▾ <span class="mono" style="float:right">2 items</span></div>
+        <label>Item · optional</label><div class="field ph">— all items of the category ▾</div>
+        <label>Name</label><div class="field">Water — 10 minutes</div>
+        <label>Start from</label><div class="field">Copy of "Housekeeping" (department) ▾</div>
+        <div class="mono">Applies to: Still water · Sparkling water — the two items of the category.</div>
       </div>
     </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Sample C · one item, narrower still</h3>
+      <div class="kv" style="grid-template-columns:130px 1fr"><div>Department</div><div>Engineering</div><div>Category</div><div>AC not working</div><div>Item</div><div><b>Water dropping from unit</b></div><div>Name</div><div>AC leak — ceiling risk</div><div>Start from</div><div>Copy of "AC — guest in room" (category)</div></div>
+    </div>
+    <div class="mono" style="margin-top:12px">The pickers are the catalogue's own lists for this property (page 01, frame 7). Leave category empty for a department policy; leave item empty for a category policy. One policy per scope — creating a second for the same scope opens the first.</div>
     <div style="margin-top:12px"><span class="btn pri">Next · the clock</span><span class="btn">Cancel</span></div>
   </div>
 </div>
-<div class="note"><b>Draws S5 D1–D3, §2.3.</b> A policy is a named row of <code>concern_policy</code> with a scope. Starting from a copy is the normal case; a property has one default and a few department overrides, never a policy per job.</div>
-
-<h1 class="frame">8 · <b>New concern policy · 2 of 3 · The clock</b>. What "on time" means for each priority.</h1>
+<div class="note"><b>Draws S5 D1–D3, §2.3.</b> Scope is three pickers that narrow: department, category within it, item within that. The name is for the list; the scope is what the sweep matches on. "Start from" copies another policy's clock and ladder so the next two steps are edits, not blank forms.</div>
+<h1 class="frame">9 · <b>New policy · 2 of 3 · The clock</b>. What "on time" means for each priority.</h1>
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
   <div class="body">
@@ -330,14 +359,14 @@ ul.flows b{color:var(--text)}
 </div>
 <div class="note"><b>Draws S5 D1.</b> Four thresholds per priority: due, the at-risk point as a share of due, and the two stuck tests (not accepted; accepted but never started). "Outside presence" is fixed by 8b's rule, shown for the reader. The sweep computes ON_TRACK / AT_RISK / BREACHED / STUCK from these and nothing else.</div>
 
-<h1 class="frame">9 · <b>New concern policy · 3 of 3 · The ladder</b>. Who becomes accountable, in what order.</h1>
+<h1 class="frame">10 · <b>New policy · 3 of 3 · The ladder</b>. Who becomes accountable, in what order.</h1>
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
   <div class="body">
     <div class="subnav"><div>1 · Name and scope</div><div>2 · The clock</div><div class="on">3 · The ladder</div></div>
     <div class="cols" style="grid-template-columns:1fr 1fr 1fr">
       <div class="card">
-        <h3>P1 <span class="mono">4 steps</span></h3>
+        <h3>P1 <span class="mono">4 steps · sample A, AC — guest in room</span></h3>
         <div class="wrow"><span>1 · Assignee</span><span class="mono">at risk</span></div>
         <div class="wrow"><span>2 · Department supervisor</span><span class="mono">breached</span></div>
         <div class="wrow"><span>3 · Department manager</span><span class="mono">breached + 15 min</span></div>
@@ -373,6 +402,24 @@ ul.flows b{color:var(--text)}
 </div>
 <div class="note"><b>Draws S5 D2–D3 and §6's sweep.</b> A ladder is an ordered list of <b>roles</b>, not people — assignee, department supervisor, department manager, property jobs manager, GM — each with the concern state and delay at which it becomes accountable. Roles resolve to today's people through Context (Workforce postings and headships; the Identity grant), so a roster change never edits a policy. Per priority, because a P3 need not reach a manager. The "manager from at risk" toggle is the owner's ask, per priority.</div>
 <div class="note fix"><b>Redline folded (2026-09-04, third pass).</b> "How do we set the ladder" — drawn as the third step of creating a policy: roles in order, each with its trigger, an add-step dialog, drag to reorder. Saving writes one <code>concern_policy</code> row with its ladder rows; the sweep uses it from the next minute.</div>
+
+<h1 class="frame">11 · <b>How a job finds its policy</b>. Two jobs, one minute of the sweep.</h1>
+<div class="win" style="max-width:1000px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">read-only · what the sweep computed</div></div>
+  <div class="body">
+    <table>
+      <tr><th>Job</th><th>Department › category › item</th><th>Item policy?</th><th>Category policy?</th><th>Department policy?</th><th>Resolved to</th><th>Due</th><th>Ladder</th></tr>
+      <tr><td class="num">MRN-ENG-146</td><td>Engineering › AC not working › Water dropping from unit</td><td><span class="pill ok">yes</span> AC leak — ceiling risk</td><td class="dimtd">not consulted</td><td class="dimtd">not consulted</td><td><b>AC leak — ceiling risk</b> (item)</td><td>P1 · 20 min</td><td>assignee → supervisor → manager → jobs manager</td></tr>
+      <tr><td class="num">MRN-ENG-147</td><td>Engineering › AC not working › Not cooling</td><td class="dimtd">none</td><td><span class="pill ok">yes</span> AC — guest in room</td><td class="dimtd">not consulted</td><td><b>AC — guest in room</b> (category)</td><td>P1 · 30 min</td><td>assignee → supervisor → manager → jobs manager</td></tr>
+      <tr><td class="num">MRN-HK-410</td><td>Housekeeping › Bottle of water › Still water</td><td class="dimtd">none</td><td><span class="pill ok">yes</span> Water — 10 minutes</td><td class="dimtd">not consulted</td><td><b>Water — 10 minutes</b> (category)</td><td>P2 · 10 min</td><td>assignee → supervisor → manager</td></tr>
+      <tr><td class="num">MRN-HK-411</td><td>Housekeeping › Cleaning › Room refresh</td><td class="dimtd">none</td><td><span class="pill ok">yes</span> Cleaning</td><td class="dimtd">not consulted</td><td><b>Cleaning</b> (category)</td><td>P3 · 30 min</td><td>assignee → supervisor</td></tr>
+      <tr><td class="num">MRN-HK-412</td><td>Housekeeping › Lost &amp; found › Item returned</td><td class="dimtd">none</td><td class="dimtd">none</td><td><span class="pill ok">yes</span> Housekeeping</td><td><b>Housekeeping</b> (department)</td><td>P3 · same shift</td><td>assignee → supervisor</td></tr>
+      <tr><td class="num">MRN-FO-58</td><td>Front Office › Guest request › Late checkout</td><td class="dimtd">none</td><td class="dimtd">none</td><td class="dimtd">none</td><td><b>Property default</b></td><td>P2 · 4 h</td><td>assignee → supervisor → manager</td></tr>
+    </table>
+    <div class="mono" style="margin-top:10px">Most specific wins: item, else category, else department, else property. The policy id is stamped on the job's first concern row, so editing a policy later never rewrites a job already running.</div>
+  </div>
+</div>
+<div class="note"><b>Draws §2.3 and §6.</b> The resolution is one lookup per job, done when the job is raised and re-done only if its item changes; the sweep reads the stamped policy, never the chain. This frame is not a screen anyone opens — it is the rule, drawn as the table the sweep would log, so the two departments' different promises can be checked against it.</div>
 
 <h2 class="sec">Deliberately not drawn</h2>
 <ul class="flows">
