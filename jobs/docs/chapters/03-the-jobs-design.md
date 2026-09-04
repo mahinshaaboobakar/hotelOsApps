@@ -194,9 +194,20 @@ different promises: Housekeeping › *Cleaning* 30 minutes, Housekeeping ›
 of `concern_policy`, else the property's. A category may carry its own
 `concern_policy_id` for the same reason (owner's question, 2026-09-04).
 
-**Timestamps** everywhere are stored UTC and shown as date *and* time; the
-form — 24-hour or AM/PM, day-month or month-day — is the property's Core
-setting, read through Context. Jobs configures none of it (owner, 2026-09-04).
+**Timestamps** everywhere are stored UTC and shown as date *and* time, in
+the property's zone. **What the documents actually give us** (checked
+2026-09-04, after the owner's correction): the property carries
+`timezone` and `locale` — ADR 0075 lists both on `GetProperty`; the
+`CORE-Q16` owner ruling of 2026-08-28 made them writable from Core
+Administration; ADR 0123 builds the timezone as a select over the IANA
+list and has both confirm on save. **No document defines an hour format
+(24-hour vs AM/PM) or a date order as a setting of its own.** The
+nearest reading is that `locale` decides both through `Intl` formatting
+(`en-GB` → 24-hour, day-month; `en-US` → 12-hour, month-day), and Jobs
+will render that way through Context. Whether that reading stands, or
+Core gains explicit `hour_format` / `date_order` fields on the property,
+is the architect's — carried in §9 as a question, not assumed. Jobs
+configures none of it either way (owner, 2026-09-04).
 
 **Who else reads it.** GuestOps and Room Care raise jobs against catalogue
 items, and they read the catalogue the way every cross-application question
@@ -653,6 +664,7 @@ for two departments.
 | **`property#jobs_manager` in the registry** | route ruled; the row is the architect's | the grant kind materialising at install |
 | **`shift.started` / `shift.ended`** | requested of Workforce | `department_presence` runs on the roster fallback until then |
 | **A `team` object** | requested of Workforce (ADR 0063's test) | `assigned_to_team_id` waits for it; person assignment is unaffected |
+| **Time and date format** | `timezone` and `locale` exist on the property (ADR 0075, CORE-Q16, ADR 0123); no explicit hour-format or date-order setting does. Question to the architect: does `locale` decide, or does Core add the two fields? | nothing at build — Jobs renders from `locale` through Context until ruled otherwise |
 | **The 19 place kinds · a `Property.Code` shape rule** | requested of Master Data | nothing — a job for the gym is a job at a `back_of_house` node until then |
 | **`guestops.request.raised`** | GuestOps' to name | the replay subscription's subject |
 | **What a QR authenticates** | the guest-app round's | nothing in Jobs |
