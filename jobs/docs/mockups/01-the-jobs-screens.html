@@ -124,7 +124,7 @@ ul.flows b{color:var(--text)}
   <p><b>Palette authority:</b> the tokens in <code>apps/desktop/src/styles.css</code> (ADR 0106). Every colour on this page is one of those tokens; no frame names a hex of its own. Chrome is the current era — one window, top tabs — copied from <code>55-the-marketplace-round.html</code>; notes and structure follow <code>pms-oracle/docs/mockups/01-oracle-connector.html</code>.</p>
   <p><b>Design of record:</b> <code>02-the-jobs-walkthrough-and-sign-off.md</code> (locked 2026-09-03) and <code>03-the-jobs-design.md</code>. Each frame's caption names the walkthrough section (S1–S10) or survey requirement (R-row) it draws.</p>
   <p><b>The property:</b> The Marina Bay, code <code>mrn</code>, three departments in play — Engineering (ENG), Housekeeping (HK), Front Office (FO). Numbers are the numbers those screens would show on a Tuesday afternoon; none is lorem.</p>
-  <p><b>Owner redline of 2026-09-04 folded</b> — frames 1, 2, 5, 6, 7, 8 redrawn; each carries a green "Redline folded" note saying what changed. The one open point, the catalogue's home, was settled on 2026-09-04 (frame 7).</p>
+  <p><b>Owner redline of 2026-09-04 folded</b> — frames 1, 2, 5, 6, 7, 8 redrawn; each carries a green "Redline folded" note saying what changed. The one open point, the catalogue's home, was settled on 2026-09-04 (frame 7). Second pass the same day: the job view is tabbed (frames 2, 2b) and each settings tab is its own frame (8a–8f).</p>
 <p>Dark frames first. Every state that exists is drawn below or listed under <i>Deliberately not drawn</i>. No control on this page pretends to a feature the design does not have.</p>
 </div>
 
@@ -167,7 +167,7 @@ ul.flows b{color:var(--text)}
 <div class="note fix"><b>Redline folded (2026-09-04).</b> Today's numbers are a small strip on top; <b>Raised by</b> (<code>raised_kind</code> + <code>raised_by_id</code>, or the stay for a guest) and <b>Assigned to</b> (the current <code>job_assignment</code> — person or team; "AUTO · pending" while the flow has not picked yet) are separate columns; the table fills the window height — 12 rows here, about 24 maximised — and pages server-side, 1–12 of 47.</div>
 <div class="note"><b>Filters are the access model, not a preference.</b> "My departments" is what <code>job.viewer</code> from department membership shows; "All departments" appears only for <code>property#jobs_manager</code> and the GM (S8 D1). "Restricted" is the catalogue-defaulted flag (S8 D4); "Closed" is where CLOSED and CANCELLED rows live.</div>
 <div class="note hold"><b>MRN-HK-388 is Housekeeping's job on the ENG board</b> because it is <i>linked</i> to 142 (water then towel, same room — S1 D2 group link). It shows here read-only; ENG cannot act on it. <b>MRN-ENG-130</b> is 142's child step, blocked until its parent resolves, so its clock is stopped (S1 D2).</div>
-<h1 class="frame">2 · <b>One job</b>. MRN-ENG-142, mid-work, breached — everything the record holds.</h1>
+<h1 class="frame">2 · <b>One job · Overview</b>. MRN-ENG-142 — the header is always there; the tabs hold the rest.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">⚒</div>Jobs</div>
@@ -182,9 +182,10 @@ ul.flows b{color:var(--text)}
       <span class="pill p1">P1</span><span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED · 14m over</span>
       <span style="margin-left:auto" class="timer"><i></i>00:23:41</span>
     </div>
-    <div class="mono" style="margin-bottom:6px">running · Arjun Menon · session 2 of 2 started 14:06 · total work today 00:31:12 · due 14:10 · accountable now <b>Priya Nair</b> (department supervisor, ladder step 2)</div>
-    <div style="margin:10px 0 18px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span><span class="btn">Put on hold…</span><span class="btn">Reassign…</span><span class="btn">Set priority…</span><span class="btn">Link a job…</span><span class="btn">Add a child step…</span><span class="btn">Remind me…</span><span class="btn off">Cancel job…</span></div>
-    <div class="cols3">
+    <div class="mono" style="margin-bottom:6px">Arjun Menon working · due 14:10 · accountable now <b>Priya Nair</b> (supervisor, ladder step 2) · raised 13:31 by the guest of stay 7F2A</div>
+    <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span><span class="btn">Put on hold…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
+    <div class="subnav"><div class="on">Overview</div><div>Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Record</div></div>
+    <div class="cols">
       <div>
         <div class="card">
           <h3>What and where</h3>
@@ -195,104 +196,86 @@ ul.flows b{color:var(--text)}
             <div>Location</div><div>Room 1204 · Floor 12 · Tower B</div>
             <div>Asset</div><div>FCU-12-04 · Daikin FXFQ · filter changed 11 weeks ago · 2 earlier jobs</div>
             <div>Department</div><div>Engineering (ENG)</div>
-            <div>Restricted</div><div>No (catalogue default)</div>
+            <div>Restricted</div><div>No</div>
           </div>
         </div>
         <div class="card" style="margin-top:14px">
           <h3>Who asked</h3>
           <div class="kv">
-            <div>Raised via</div><div>GUEST_APP</div>
-            <div>Raised kind</div><div>GUEST</div>
+            <div>Raised</div><div>GUEST · via the guest app · 13:31</div>
             <div>Stay</div><div>7F2A · Mr. Okafor · 1204 · in-house, departs Thu 4 Sep</div>
-            <div>Raised at</div><div>Tue 2 Sep 13:31</div>
             <div>Rating</div><div>— asked after close</div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Priority and time</h3>
-          <div class="kv">
-            <div>Priority</div><div>P1 · decided by <b>flow</b> (guest in room, PMS occupied) · catalogue said P2</div>
-            <div>Scheduled for</div><div>— raised now</div>
-            <div>Due at</div><div>14:10 · policy P1 = 40 min from raise</div>
-            <div>Hold</div><div>— not on hold</div>
-            <div>Cycle</div><div>— one-off</div>
           </div>
         </div>
       </div>
       <div>
         <div class="card">
+          <h3>Priority and time</h3>
+          <div class="kv">
+            <div>Priority</div><div>P1 · decided by <b>flow</b> (guest in room) · catalogue said P2</div>
+            <div>Scheduled for</div><div>— raised now</div>
+            <div>Due at</div><div>14:10 · policy P1 = 40 min</div>
+            <div>Hold</div><div>—</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
           <h3>Assignment</h3>
           <div class="kv">
             <div>Current</div><div><b>Arjun Menon</b> · ENG technician · shift 14:00–22:00</div>
             <div>Accepted</div><div>13:47 · 14 min after assignment</div>
             <div>How</div><div>AUTO · on shift on the execution date, fewest open P1</div>
-            <div>Before</div><div>— first assignment</div>
           </div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Work sessions · 2</h3>
-          <table>
-            <tr><th>#</th><th>Started</th><th>Paused</th><th>Resumed</th><th>Stopped</th><th>Worked</th></tr>
-            <tr><td>1</td><td>13:52</td><td>14:02 · fetch gauge</td><td>—</td><td>14:02</td><td>00:10:00</td></tr>
-            <tr><td>2</td><td>14:06</td><td>—</td><td>—</td><td><span class="pill run">running</span></td><td>00:23:41</td></tr>
-          </table>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Concern history</h3>
-          <div class="tl">
-            <div><b>BREACHED</b><span>14:10 · sweep · accountable → Priya Nair (step 2) · nudge in-app</span></div>
-            <div><b>AT_RISK</b><span>14:00 · sweep · 75 % of 40 min · nudge to Arjun Menon</span></div>
-            <div><b>ON_TRACK</b><span>13:31 · raised</span></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Links and steps</h3>
-          <div class="kv"><div class="num">MRN-HK-388</div><div>linked · Housekeeping › Extra towels · RESOLVED</div>
-          <div class="num">MRN-ENG-130</div><div>child 1/2 · Leak test · blocked until this resolves</div>
-          <div class="num">MRN-ENG-144</div><div>child 2/2 · Filter replace · SCHEDULED Wed</div></div>
-        </div>
-      </div>
-      <div>
-        <div class="card">
-          <h3>Status history</h3>
-          <div class="tl">
-            <div><b>IN_PROGRESS</b><span>13:52 · Arjun Menon</span></div>
-            <div><b>ACCEPTED</b><span>13:47 · Arjun Menon</span></div>
-            <div><b>ASSIGNED</b><span>13:33 · AUTO</span></div>
-            <div><b>RAISED</b><span>13:31 · GUEST_APP · stay 7F2A</span></div>
-          </div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Notes · 2 &nbsp; Photos · 1</h3>
-          <div class="tl">
-            <div><b>Arjun Menon · 14:07</b><span>Suction pressure low, likely refrigerant. 📷 gauge.jpg</span></div>
-            <div><b>Sana Rahman (FO) · 13:40</b><span>Guest called too; offered fan meanwhile.</span></div>
-          </div>
-          <div class="field ph" style="margin-top:10px">Add a note or photo…</div>
-        </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Reminders</h3>
-          <div class="mono">None set. "Remind me…" adds a date and a note for you (S9 D3).</div>
         </div>
         <div class="card" style="margin-top:14px">
           <h3>Resolution</h3>
           <div class="mono">— open. Filled by the Resolve step (frame 4).</div>
         </div>
-        <div class="card" style="margin-top:14px">
-          <h3>Record</h3>
-          <div class="kv" style="grid-template-columns:110px 1fr">
-            <div>Created</div><div>13:31 · guest (stay 7F2A)</div>
-            <div>Updated</div><div>14:07 · Arjun Menon · v9</div>
-            <div>Deleted</div><div>—</div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </div>
-<div class="note"><b>Draws S1.18 whole, S2, S4, S5, S8, S9.</b> Every one of the lean job's columns is on the page — <code>category_id</code>/<code>item_id</code>, <code>location_id</code>, <code>asset_id</code>, <code>department_code</code>, <code>summary</code>, <code>details</code>, <code>priority</code> + <code>priority_decided_by</code>, <code>raised_via</code>/<code>raised_kind</code>/<code>raised_by_id</code>/<code>stay_id</code>, <code>scheduled_for</code>, <code>due_at</code>, <code>job_status</code>, <code>cycle</code>, <code>restricted</code>, <code>hold_reason</code>/<code>hold_until</code>, and the audit five — and every satellite has a card: assignment, work sessions, status history, concern history, links and steps, notes, attachments, reminders, resolution, rating.</div>
-<div class="note fix"><b>Redline folded (2026-09-04).</b> The detail view shows all of the record, not a summary; and IN PROGRESS means a session is running, so the <b>timer</b> sits in the header, live, with the session table beneath it (S4 — work sessions carry start / pause / resume / stop; PAUSED is never a job status, S2 D2).</div>
-<div class="note"><b>The accountable line is the ladder, not a field</b> (S5 D1–D3): derived from the property's concern policy, shown with its step; the table stores only the transitions. <b>Buttons are the permission set</b> — Pause/Stop/Resolve are <code>job.execute</code>; hold, reassign, priority, cancel are <code>job.manage</code> (§4). A user with neither sees the page without the button row.</div>
+<div class="note fix"><b>Redline folded (2026-09-04, second pass).</b> One screen held everything and read as a wall. Now the <b>header</b> — number, title, priority, status, concern, the live timer, one line of who/when, the action row — is always visible, and six <b>tabs</b> below it each hold one kind of thing. Overview is what you need to act; the counts on the tab labels say what else there is.</div>
+<div class="note"><b>Draws S1.18, S2, S5, S8.</b> Overview shows the lean job's descriptive columns (category › item, summary, details, location, asset, department, restricted, priority + decided-by, scheduled/due/hold, raised via/kind/stay) and the current <code>job_assignment</code>. "More ▾" holds the rarer manage actions — set priority, link, add a child step, remind me, cancel — so the row stays short.</div>
+
+<h1 class="frame">2b · <b>One job · Work</b>. The clock and the sessions.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head">
+    <div class="app"><div class="mark">⚒</div>Jobs</div>
+    <div class="tab on">Board</div>
+    <div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div>
+  </div>
+  <div class="body">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
+      <span class="num" style="font-size:14px">MRN-ENG-142</span><span style="font-size:16px;font-weight:600">Air conditioning › Not cooling — Room 1204</span>
+      <span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED</span>
+      <span style="margin-left:auto" class="timer"><i></i>00:23:41</span>
+    </div>
+    <div class="subnav"><div>Overview</div><div class="on">Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Record</div></div>
+    <div class="cols" style="grid-template-columns:1fr 2fr">
+      <div class="card">
+        <h3>Now</h3>
+        <div class="kv" style="grid-template-columns:100px 1fr">
+          <div>Working</div><div>Arjun Menon · since 14:06</div>
+          <div>This session</div><div>00:23:41</div>
+          <div>All sessions</div><div>00:31:12</div>
+          <div>Promise</div><div>due 14:10 · <span style="color:var(--bad)">14 min over</span></div>
+        </div>
+        <div style="margin-top:12px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span></div>
+      </div>
+      <div class="card">
+        <h3>Sessions</h3>
+        <table>
+          <tr><th>#</th><th>Who</th><th>Started</th><th>Paused · why</th><th>Resumed</th><th>Stopped</th><th>Worked</th></tr>
+          <tr><td>1</td><td>Arjun Menon</td><td>13:52</td><td>14:02 · fetch gauge</td><td>—</td><td>14:02</td><td>00:10:00</td></tr>
+          <tr><td>2</td><td>Arjun Menon</td><td>14:06</td><td>—</td><td>—</td><td><span class="pill run">running</span></td><td>00:23:41</td></tr>
+        </table>
+        <div class="mono" style="margin-top:8px">A pause keeps the session; a stop ends it. Resolve stops the running one.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S4, S2 D2.</b> Work is <code>job_work_session</code>: start / pause / resume / stop, one row per session, the timer counting the running one. PAUSED lives here, never as a job status.</div>
+<div class="note hold"><b>The other four tabs, listed not drawn</b> — each is one satellite table as a list: <b>History</b> is <code>job_status_history</code> and <code>job_concern_history</code> interleaved (RAISED 13:31 → ASSIGNED 13:33 → ACCEPTED 13:47 → IN_PROGRESS 13:52; AT_RISK 14:00 → BREACHED 14:10, accountable → Priya Nair, nudge in-app); <b>Notes &amp; photos</b> is <code>job_note</code> + <code>job_attachment</code> with the add field; <b>Links &amp; steps</b> is <code>job_link</code> and the parent › child steps with their blocked/stopped-clock state (S1 D2); <b>Record</b> is the audit five (created/updated by and at, version), reminders (S9 D3), the guest rating once given (S10 D2), and <code>deleted_*</code> if any. Their shape is the timeline and table idioms already on this page.</div>
 <!-- ===================================================================== -->
 <h2 class="sec">B · raising and resolving</h2>
 
@@ -496,7 +479,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Draws S1 D5–D7, D12.</b> Three levels, each made on this screen by an organisation admin: <b>category</b> (name + department code), <b>item</b> (name, default priority, due-within, restricted default, aliases, starting resolutions), <b>resolution</b> (a phrase, added inline). The property tab holds <code>property_item_policy</code> — activation, priority and due overrides for one property (S1 D12). Import / export is a CSV of the same three levels, for the org that already has a list.</div>
 <div class="note fix"><b>Redline folded (2026-09-04).</b> "How does the org create it" — drawn: the New-item dialog, the inline resolution field, the ＋ New category. The catalogue reaches the property as organisation master data; the property activates and overrides, never invents a parallel list (S1 D6, "are your hotels' service lists the same").</div>
 <div class="note fix"><b>Catalogue home — settled 2026-09-04.</b> The redline first put the catalogue in Core because GuestOps and Room Care use it; the register's JOBS-Q1 (3) had ruled it Jobs' own, and no document recorded a re-plan. Re-read together, the owner confirmed the ruling: <b>the catalogue stays in Jobs</b>. GuestOps and Room Care read it <b>through Context</b>, the platform's answer to every cross-application question — no copy in Core, no call into Jobs — and hold only the item id they were shown. The walkthrough's S1-D6 "keep it in Core" reading is withdrawn; the chapter's §2.3 says so.</div>
-<h1 class="frame">8 · <b>Settings</b>. Every policy the design has, in one place.</h1>
+<h1 class="frame">8a · <b>Settings · Concern policy</b>. The promise clock, per priority.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">⚒</div>Jobs</div>
@@ -505,7 +488,7 @@ ul.flows b{color:var(--text)}
     <div class="who">Rohan Desai · property jobs manager</div>
   </div>
   <div class="body">
-    <div class="subnav"><div class="on">Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Numbering</div><div>Access</div></div>
+    <div class="subnav"><div class="on">Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div><div style="margin-left:auto;color:var(--faint)">Numbering · <code>MRN-ENG-…</code> · next 145 · property code from Master Data</div></div>
     <div class="cols" style="grid-template-columns:220px 1fr">
       <div class="card">
         <h3>Scope</h3>
@@ -516,81 +499,138 @@ ul.flows b{color:var(--text)}
         <div class="wrow"><span>Food &amp; Beverage</span><span class="pill">override</span></div>
         <div class="mono" style="margin-top:8px">Property first; a department overrides only the rows it changes.</div>
       </div>
-      <div>
-        <div class="card">
-          <h3>Concern policy · Engineering <span class="mono">(overrides the property default)</span></h3>
-          <table>
-            <tr><th>Priority</th><th>Due within</th><th>At risk at</th><th>Stuck: not accepted</th><th>Stuck: no session</th><th>Ladder</th><th>Manager at risk</th></tr>
-            <tr><td><span class="pill p1">P1</span></td><td>40 min</td><td>75 %</td><td>8 min</td><td>15 min</td><td>assignee → supervisor → manager → jobs manager</td><td><span class="tog on"><i></i></span>yes</td></tr>
-            <tr><td><span class="pill p2">P2</span></td><td>2 h</td><td>75 %</td><td>20 min</td><td>45 min</td><td>assignee → supervisor → manager</td><td><span class="tog"><i></i></span>no</td></tr>
-            <tr><td><span class="pill p3">P3</span></td><td>same shift</td><td>80 %</td><td>60 min</td><td>—</td><td>assignee → supervisor</td><td><span class="tog"><i></i></span>no</td></tr>
-            <tr><td><span class="pill nt">NT</span></td><td colspan="6" class="dimtd">Not triaged: no clock. Stuck after 15 min untriaged → supervisor</td></tr>
-          </table>
-          <div class="mono" style="margin-top:8px">Clock outside presence: P1 keeps running · P2 and P3 pause until the department is present.</div>
-        </div>
-        <div class="cols" style="margin-top:14px">
-          <div class="card">
-            <h3>Shifts &amp; presence</h3>
-            <div class="kv">
-              <div>ENG</div><div><span class="tog on"><i></i></span>follow Workforce shifts · fallback 07:00–23:00</div>
-              <div>HK</div><div><span class="tog on"><i></i></span>follow Workforce shifts · fallback 07:00–22:00</div>
-              <div>FO</div><div><span class="tog"><i></i></span>off — property clock</div>
-              <div>F&amp;B</div><div><span class="tog"><i></i></span>service hours only · 06:00–00:00</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Who is told</h3>
-            <div class="kv">
-              <div>Assignee</div><div>at risk · breached · reassigned</div>
-              <div>Supervisor</div><div>breached · stuck · untriaged</div>
-              <div>Manager</div><div>breached P1 · stuck &gt; 30 min</div>
-              <div>Jobs manager</div><div>breached P1 · anything on the ladder's last step</div>
-            </div>
-            <div class="mono" style="margin-top:8px">In-app only. No channels, no quiet hours (S9 D10).</div>
-          </div>
-          <div class="card">
-            <h3>Holds &amp; reminders</h3>
-            <div class="kv">
-              <div>Hold needs</div><div>reason · <code>hold_until</code> date</div>
-              <div>Warn before</div><div>1 day · to supervisor</div>
-              <div>Warn again</div><div>on the day · to assignee</div>
-              <div>Manual reminders</div><div>anyone, on their own jobs</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Closing &amp; rating</h3>
-            <div class="kv">
-              <div>Auto-close</div><div>4 h after RESOLVED · ENG 4 h · HK 1 h</div>
-              <div>Reopen window</div><div>until auto-close</div>
-              <div>Guest rating</div><div>asked on close of guest-raised jobs · via the guest app</div>
-              <div>Resolution note</div><div>required when "Other"</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Numbering</h3>
-            <div class="kv">
-              <div>Shape</div><div><code>MRN-ENG-142</code></div>
-              <div>Property code</div><div><code>mrn</code> · from Master Data, read-only here</div>
-              <div>Department part</div><div>root department of the category</div>
-              <div>Counter</div><div>one per property · next 145</div>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Access</h3>
-            <div class="kv">
-              <div>Jobs managers</div><div>Rohan Desai · granted by GM 2026-08-28</div>
-              <div>Departments</div><div>membership and headship from Workforce</div>
-            </div>
-            <div class="mono" style="margin-top:8px">Shown, not edited: the GM grants <code>property#jobs_manager</code> in Identity.</div>
-          </div>
-        </div>
+      <div class="card">
+        <h3>Engineering <span class="mono">overrides the property default</span> <span class="btn" style="float:right;padding:2px 8px;font-size:11px">Reset to property</span></h3>
+        <table>
+          <tr><th>Priority</th><th>Due within</th><th>At risk at</th><th>Stuck: not accepted</th><th>Stuck: no session</th><th>Ladder</th><th>Manager at risk</th></tr>
+          <tr><td><span class="pill p1">P1</span></td><td>40 min</td><td>75 %</td><td>8 min</td><td>15 min</td><td>assignee → supervisor → manager → jobs manager</td><td><span class="tog on"><i></i></span>yes</td></tr>
+          <tr><td><span class="pill p2">P2</span></td><td>2 h</td><td>75 %</td><td>20 min</td><td>45 min</td><td>assignee → supervisor → manager</td><td><span class="tog"><i></i></span>no</td></tr>
+          <tr><td><span class="pill p3">P3</span></td><td>same shift</td><td>80 %</td><td>60 min</td><td>—</td><td>assignee → supervisor</td><td><span class="tog"><i></i></span>no</td></tr>
+          <tr><td><span class="pill nt">NT</span></td><td colspan="6" class="dimtd">Not triaged: no clock · stuck after 15 min untriaged → supervisor</td></tr>
+        </table>
+        <div class="mono" style="margin-top:8px">Outside presence: P1 keeps running · P2 and P3 pause until the department is present.</div>
+        <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
       </div>
     </div>
   </div>
 </div>
-<div class="note"><b>Draws S5 D1–D3, S7 D8, S8 D1, S9 D2/D3/D10, S10 D2, S2 D3, S1 D3.</b> Seven groups, each a table the design already has: <code>concern_policy</code> (per priority, per department override — the "manager at risk" column is the owner's flexibility ask as a policy line), <code>department_presence</code> + <code>service_hours</code>, <code>concern_subscription</code> per role, hold-reminder policy on <code>hold_until</code>, auto-close hours and the guest rating on close, <code>property_job_sequence</code> (property code from Master Data, read-only), and the Identity grants displayed.</div>
-<div class="note fix"><b>Redline folded (2026-09-04).</b> Settings now shows every policy the walkthrough locked, with the property → department scope on the left; the first-cut frame had three of the seven.</div>
-<div class="note stop"><b>No notification settings exist</b> (S9 D10: in-app only, no config) — "Who is told" chooses <i>which role hears which concern</i>, never <i>how</i>. Nothing on this tab is a control for a feature the design lacks.</div>
+<div class="note"><b>Purpose:</b> this is the whole escalation design (S5 D1–D3) as one table — how long a job of each priority has, when it turns AT_RISK, what counts as STUCK, who becomes accountable at each step, and whether a manager hears of a P1 already at risk (the owner's flexibility ask). Table <code>concern_policy</code>; property default with per-department override. Everything the 60-second sweep decides, it decides from this table.</div>
+
+<h1 class="frame">8b · <b>Settings · Shifts &amp; presence</b>. When a department's clock runs.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div class="on">Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <table>
+      <tr><th>Department</th><th>Presence</th><th>Follow Workforce shifts</th><th>Service hours (fallback)</th><th>Now</th></tr>
+      <tr><td>Engineering</td><td><span class="pill ok">on</span></td><td><span class="tog on"><i></i></span>yes</td><td>07:00 – 23:00</td><td>present · day shift since 07:00</td></tr>
+      <tr><td>Housekeeping</td><td><span class="pill ok">on</span></td><td><span class="tog on"><i></i></span>yes</td><td>07:00 – 22:00</td><td>present · since 07:00</td></tr>
+      <tr><td>Food &amp; Beverage</td><td><span class="pill ok">on</span></td><td><span class="tog"><i></i></span>no · hours only</td><td>06:00 – 00:00</td><td>present · by hours</td></tr>
+      <tr><td>Front Office</td><td><span class="pill">off</span></td><td class="dimtd">—</td><td class="dimtd">—</td><td>property clock · always running</td></tr>
+    </table>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> the owner's on/off (S7 D8) — a property with no staff on a shift should not be breaching promises nobody could keep. "Follow Workforce shifts" makes presence come from <code>shift.started</code> / <code>shift.ended</code>; service hours are the fallback when Workforce has no roster for that department; off means the property clock. Tables <code>department_presence</code>, <code>service_hours</code>. The "Now" column is read-only and shows what the fan-out last said.</div>
+
+<h1 class="frame">8c · <b>Settings · Who is told</b>. Which role hears which concern.</h1>
+<div class="win" style="max-width:900px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div class="on">Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <table>
+      <tr><th>Role</th><th>At risk</th><th>Breached</th><th>Stuck</th><th>Not triaged</th><th>Repeat every</th><th>Departments</th></tr>
+      <tr><td>Assignee</td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td class="dimtd">—</td><td class="dimtd">—</td><td>10 min</td><td>own jobs</td></tr>
+      <tr><td>Department supervisor</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td><span class="tog on"><i></i></span></td><td>15 min</td><td>own department</td></tr>
+      <tr><td>Department manager</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span> P1 only</td><td><span class="tog on"><i></i></span> &gt; 30 min</td><td><span class="tog"><i></i></span></td><td>30 min</td><td>own department</td></tr>
+      <tr><td>Property jobs manager</td><td><span class="tog"><i></i></span></td><td><span class="tog on"><i></i></span> P1 only</td><td><span class="tog on"><i></i></span> ladder's last step</td><td><span class="tog"><i></i></span></td><td>30 min</td><td>all</td></tr>
+    </table>
+    <div class="mono" style="margin-top:8px">In-app only. There is no channel, no quiet hours, no per-person setting — the role decides (S9 D10).</div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> escalation without this table would nudge everyone about everything. "Who is told" is <code>concern_subscription</code> (S5 D3): for each role, which concern states reach it, how often the nudge repeats while the state lasts, and for which departments. It is separate from the ladder in 8a — the ladder says who is <i>accountable</i>; this says who <i>hears</i>. A manager can be told of a breach without being accountable for it yet.</div>
+
+<h1 class="frame">8d · <b>Settings · Holds &amp; reminders</b>. Waiting with a date, and being warned before it.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div class="on">Holds &amp; reminders</div><div>Closing &amp; rating</div><div>Access</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Putting a job on hold</h3>
+        <div class="kv" style="grid-template-columns:130px 1fr">
+          <div>Requires</div><div>a reason and a <code>hold_until</code> date</div>
+          <div>Clock</div><div>stopped while on hold</div>
+          <div>Longest hold</div><div>30 days · then STUCK → supervisor</div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Warn before the date</h3>
+        <table>
+          <tr><th>When</th><th>Who</th></tr>
+          <tr><td>1 day before</td><td>department supervisor</td></tr>
+          <tr><td>on the day, 08:00</td><td>assignee</td></tr>
+          <tr><td>date passed, still on hold</td><td>supervisor · repeat daily</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="mono" style="margin-top:12px">Manual reminders (S9 D3) need no setting: anyone can set one on a job they can see, for themselves, from the job's "More ▾".</div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> the owner's example — "AC filter needs to be bought, set a time" (S9 D2). A hold is a promise to come back on a date; this tab says what a hold must carry and who is warned, how far ahead, so the date is not missed. Table <code>job_reminder</code> policy rows at property level; the per-job rows are made when the hold is set.</div>
+
+<h1 class="frame">8e · <b>Settings · Closing &amp; rating</b>. From RESOLVED to CLOSED, and what the guest is asked.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div class="on">Closing &amp; rating</div><div>Access</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Auto-close after RESOLVED</h3>
+        <table>
+          <tr><th>Scope</th><th>Hours</th></tr>
+          <tr><td>Property default</td><td>4 h</td></tr>
+          <tr><td>Housekeeping</td><td>1 h</td></tr>
+          <tr><td>Engineering</td><td>4 h</td></tr>
+        </table>
+        <div class="mono" style="margin-top:8px">Until then the raiser may reopen; after, it is CLOSED and the resolution stands.</div>
+      </div>
+      <div class="card">
+        <h3>Resolving and rating</h3>
+        <div class="kv" style="grid-template-columns:150px 1fr">
+          <div>Note required</div><div>when the resolution is "Other"</div>
+          <div>Photo</div><div>as the catalogue item says: none · optional · required</div>
+          <div>Guest rating</div><div><span class="tog on"><i></i></span>ask on close of guest-raised jobs, in the guest app</div>
+          <div>Rating scale</div><div>1–5 and a line of text</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:12px"><span class="btn pri">Save</span><span class="btn">Discard</span></div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> S2 D3's "auto close after n hours" needs the <i>n</i> somewhere, per department if the work differs (a towel does not need a four-hour reopen window; a compressor might). The rating half is S10 D2: a guest who raised a job through their stay link is asked once it closes. The photo rule is the catalogue item's; it is shown here so the property sees the whole closing story in one place, but it is edited in the catalogue.</div>
+
+<h1 class="frame">8f · <b>Settings · Access</b>. Who holds what — shown, not edited.</h1>
+<div class="win" style="max-width:820px">
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
+  <div class="body">
+    <div class="subnav"><div>Concern policy</div><div>Shifts &amp; presence</div><div>Who is told</div><div>Holds &amp; reminders</div><div>Closing &amp; rating</div><div class="on">Access</div></div>
+    <table>
+      <tr><th>Label</th><th>Who</th><th>Comes from</th></tr>
+      <tr><td>Property jobs manager</td><td>Rohan Desai</td><td>granted by the GM in Identity · 2026-08-28</td></tr>
+      <tr><td>Department manager · ENG</td><td>Kiran Bhat</td><td>Workforce headship</td></tr>
+      <tr><td>Department supervisor · ENG</td><td>Priya Nair</td><td>Workforce headship</td></tr>
+      <tr><td>Department member · ENG</td><td>9 people</td><td>Workforce posting</td></tr>
+      <tr><td>Department manager · HK</td><td>Anjali Rao</td><td>Workforce headship</td></tr>
+    </table>
+    <div class="mono" style="margin-top:12px">To change any of this: postings and headships in Workforce; the jobs-manager grant in Identity (GM only). Jobs has no editor because it owns none of these facts.</div>
+  </div>
+</div>
+<div class="note"><b>Purpose:</b> a jobs manager asked "who else can do what here?" needs one place to look (S8 D1: the two axes realised by four labels). This tab is that answer and nothing more — a read-only view of Workforce postings and headships and the Identity grant of <code>property#jobs_manager</code> (AUTHZ-Q25). It is a tab rather than a note because the question is asked often and the answer changes with every roster.</div>
+<div class="note fix"><b>Redline folded (2026-09-04, second pass).</b> Each settings tab is now its own frame with its purpose stated. <b>Numbering is no longer a tab</b>: nothing on it was configurable — the property code is Master Data's, the department part and the counter are fixed by S1 D3 — so it is one read-only line in the sub-nav, and a tab that only displays is not built.</div>
+<div class="note stop"><b>No notification settings exist</b> (S9 D10: in-app only, no config). "Who is told" chooses <i>which role hears which concern</i>, never <i>how</i>.</div>
 <!-- ===================================================================== -->
 <h2 class="sec">E · the widget</h2>
 
