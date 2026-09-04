@@ -143,16 +143,25 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    refused candidate is drawn rather than filtered out. */
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed;cursor:default}
 .btn.sm{padding:2px 8px;font-size:11px;gap:6px}
-/* The destructive twin. Here in the chrome rather than in a screen, because a
-   confirm that looked different on two screens would teach a person two things
-   — and the second one they meet is the one they misread.
+/* The destructive twin, and it SPLITS — the standard moved on this round's own
+   redline, 2026-09-04. An outline danger button sitting where a person has
+   already decided to delete something is quieter than the Cancel beside it,
+   which inverts the weight of the choice. So:
 
-   **Outline, not filled.** This module drew it filled from its own frames; the
-   standard rules it an outline and the frames amended to match. That it makes
-   the most consequential control the quietest is a redline to FF, raised rather
-   than answered by keeping a private fill. */
-.btn.danger{color:var(--color-bad,#f87171);
+     inline affordance   outline   a row's remove, a cancel-this link
+     the confirm step    FILLED    the button in the dialog that does it
+
+   Filling every destructive control would shout on a screen where deletion is
+   one affordance among many; leaving the confirm an outline whispers at the
+   exact moment weight is wanted. This module drew the confirm filled from the
+   start and the standard came to it. Both live in the chrome rather than in a
+   screen, because a confirm that looked different on two screens would teach a
+   person two things, and the second one they meet is the one they misread. */
+.btn.danger{color:var(--color-bad,#f87171);background:none;
             border-color:color-mix(in srgb, var(--color-bad) 45%, transparent)}
+.btn.danger.confirm{background:var(--color-bad,#f87171);
+                    color:var(--color-ink-on-accent,#0b0d14);
+                    border-color:transparent;font-weight:600}
 /* The table row, used by six screens. A row that opens something is a real
    <button>, so the reset is on the class rather than on a second one: a
    button carries the UA's border, centred text and its own font family, and a
@@ -227,11 +236,16 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
    next one to put an avatar in a picker would inherit a size nobody chose. */
 .sel .av{width:20px;height:20px;font-size:9px}
 
+/* The published tints, with the old local mix kept as the fallback — aliased
+   rather than replaced, because a host that has not published the tones yet
+   still has to render. §1, amended 2026-09-04: every application was mixing
+   its own tint of the same colour, and a published one is the shell's to
+   change once. */
 .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;
       width:fit-content;white-space:nowrap}
-.pill.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);color:var(--color-ok,#34d399)}
-.pill.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
-.pill.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent);color:var(--color-bad,#f87171)}
+.pill.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));color:var(--color-ok,#34d399)}
+.pill.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
+.pill.bad{background:var(--color-bad-soft,color-mix(in srgb, var(--color-bad) 13%, transparent));color:var(--color-bad,#f87171)}
 /* A TRANSLUCENT ground, never the raised surface. The raised one is the ground
    a card already has, so a neutral pill on a card renders as the plain text it
    was written to replace — the zone-chip defect, and only a capture can see
@@ -266,9 +280,9 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
               font-size:11px;font-weight:600}
 .legend .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
                     color:var(--color-brand,#818cf8)}
-.legend .code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+.legend .code.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));
                  color:var(--color-ok,#34d399)}
-.legend .code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+.legend .code.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));
                    color:var(--color-warn,#fbbf24)}
 .legend .code.neutral{color:var(--color-ink-faint,#5a6172)}
 .lnote{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
@@ -278,11 +292,11 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
       padding:2px 6px;font-size:11.5px;font-weight:600;letter-spacing:.02em}
 .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
             color:var(--color-brand,#818cf8)}
-.code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+.code.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));
          color:var(--color-ok,#34d399)}
-.code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+.code.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));
            color:var(--color-warn,#fbbf24)}
-.code.bad{background:color-mix(in srgb, var(--color-bad) 13%, transparent);
+.code.bad{background:var(--color-bad-soft,color-mix(in srgb, var(--color-bad) 13%, transparent));
           color:var(--color-bad,#f87171)}
 /* Same defect, same fix: the department chip sits on a card. */
 .code.neutral{background:color-mix(in srgb, var(--color-ink) 7%, transparent);

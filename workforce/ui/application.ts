@@ -176,7 +176,8 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
 /** Who is signed in, drawn at the rail's foot. */
 const OPERATOR: Operator = {
   name: "Priya Thomas",
-  where: "Front Office · Supervisor",
+  department: "Front Office",
+  property: "Kochi Beach Resort",
   role: "Head of Front Office",
 };
 

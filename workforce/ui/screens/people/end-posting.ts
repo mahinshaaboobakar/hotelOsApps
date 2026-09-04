@@ -98,7 +98,7 @@ function actions(close: () => void): HTMLElement {
   cancel.setAttribute("type", "button");
   cancel.addEventListener("click", close);
 
-  const confirm = el("button", "btn danger", "End posting");
+  const confirm = el("button", "btn danger confirm", "End posting");
   confirm.setAttribute("type", "button");
 
   return fill(row, el("div", "grow"), cancel, confirm);

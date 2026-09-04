@@ -30,10 +30,26 @@ export interface Section {
   count?: string;
 }
 
-/** Who is signed in, drawn at the bar's right. */
+/**
+ * Who is signed in, drawn at the bar's right.
+ *
+ * **Three clauses, not two** — `name · department · property`, owner ruling,
+ * 2026-09-04. The property looks redundant on a single-property desk and stops
+ * looking redundant the day an organization has two, which the corporate model
+ * already allows for. A desk machine is shared and every write on these screens
+ * is attributed, so the bar says *who*, *for which department*, *at which
+ * hotel*.
+ */
 export interface Operator {
   name: string;
-  where: string;
+
+  /** Which department they are working in. */
+  department: string;
+
+  /** Which hotel. */
+  property: string;
+
+  /** Their role, which the bar has no room for and the rail used to show. */
   role: string;
 }
 
@@ -71,9 +87,8 @@ export function bar(
     head.append(tab);
   }
 
-  // The person, and where they sit — one line, because the bar is 56px and the
-  // rail's three-line block had a column to spend that this does not.
-  head.append(el("div", "who", `${operator.name} · ${operator.where}`));
+  head.append(el("div", "who",
+    `${operator.name} · ${operator.department} · ${operator.property}`));
 
   return head;
 }
