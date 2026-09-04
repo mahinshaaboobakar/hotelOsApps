@@ -80,6 +80,13 @@
   .tr.sel{background:rgba(129,140,248,.07);box-shadow:inset 2.5px 0 0 var(--indigo)}
   .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
   .un{color:var(--faint);font-style:italic}
+  /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
+     No page numbers and no total: PageResponse carries next_cursor and
+     has_more and nothing else, so "page 3 of 12" cannot be computed and a
+     count there would be fiction. Previous is a client-held stack of cursors,
+     so it is dim until you have been somewhere to go back to. */
+  .pager{display:flex;align-items:center;gap:9px;padding:2px 2px 0}
+  .pager .pshow{margin-left:auto;color:var(--faint);font-size:11.5px}
   .link{color:var(--indigo)}
   /* banner */
   .ban{display:flex;gap:11px;align-items:center;border-radius:12px;padding:10px 14px;font-size:12.5px;border:1px solid}
@@ -233,6 +240,11 @@
           <div>BK-4490</div><div>Deluxe King</div><div>402</div><div>31 Aug → 4 Sep</div>
           <div></div>
         </div>
+      </div>
+      <div class="pager">
+        <div class="btn2 dis">← Previous</div>
+        <div class="btn2">Next →</div>
+        <span class="pshow">showing 1–25</span>
       </div>
       <div class="note"><b>Six of fourteen arrivals have no room, and that is the ordinary case.</b> The stay's anchor is the room <b>type</b>; the room number is an assignment, chosen the night before or at the desk (GUEST-Q2 addendum, S8). The list is built to be worked in that state — <b>＋ assign</b> is inline, and check-in is the one action that refuses to proceed without a room.</div>
     </div>
