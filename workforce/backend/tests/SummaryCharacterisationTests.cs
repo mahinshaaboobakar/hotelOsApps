@@ -59,7 +59,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var night = await Shift(shifts, scope, "N", 23, 7);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         // Yesterday's rota, because a night shift belongs to the date it starts.
         await rota.AssignAsync(scope, Assign(staff, day.AddDays(-1), night), default);
@@ -80,7 +80,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var split = await Split(shifts, scope);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, split), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, split), default);
 
         // 10–14 and 18–22: at four o'clock nobody on this shift is working, and
         // `start <= now < end` over the outer bounds would say otherwise.
@@ -95,7 +95,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var split = await Split(shifts, scope);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, split), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, split), default);
 
         var change = (await board.ReadAsync(scope, default)).NextChange;
 
@@ -118,7 +118,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         Assert.Null((await board.ReadAsync(scope, default)).NextChange);
 
         var morning = await Shift(shifts, scope, "M", 7, 15);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning), default);
 
         // And when there is one, it is the end of the shift being worked.
         var change = (await board.ReadAsync(scope, default)).NextChange;
@@ -135,8 +135,8 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var morning = await Shift(shifts, scope, "M", 7, 15);
-        var rostered = Uuid7.NewUuid7();
-        var unplanned = Uuid7.NewUuid7();
+        var rostered = Guid.CreateVersion7();
+        var unplanned = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Assign(rostered, day, morning), default);
         await marks.RecordAsync(scope, Mark(rostered, day, 7, 15), default);
@@ -163,8 +163,8 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var morning = await Shift(shifts, scope, "M", 7, 15);
-        var known = Uuid7.NewUuid7();
-        var stranger = Uuid7.NewUuid7();
+        var known = Guid.CreateVersion7();
+        var stranger = Guid.CreateVersion7();
 
         directory.WithName(known, "S. Kumar");
 
@@ -201,7 +201,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var casual = await Type(types, scope, $"CL{Interlocked.Increment(ref code)}");
-        var raiser = Uuid7.NewUuid7();
+        var raiser = Guid.CreateVersion7();
         await postings.CreateAsync(scope, Post(raiser, "HK"), default);
 
         // Raised six days ago, and nobody has answered.
@@ -209,7 +209,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         await leave.RaiseAsync(scope, Raise(raiser, casual, day.AddDays(20), day.AddDays(21)), default);
 
         clock.Now = At(day.AddDays(-2), 9, 0).Now;
-        var second = Uuid7.NewUuid7();
+        var second = Guid.CreateVersion7();
         await postings.CreateAsync(scope, Post(second, "KIT"), default);
         await leave.RaiseAsync(scope, Raise(second, casual, day.AddDays(30), day.AddDays(30)), default);
 
@@ -249,7 +249,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var casual = await Type(types, scope, $"CU{Interlocked.Increment(ref code)}");
-        var team = new[] { Uuid7.NewUuid7(), Uuid7.NewUuid7(), Uuid7.NewUuid7() };
+        var team = new[] { Guid.CreateVersion7(), Guid.CreateVersion7(), Guid.CreateVersion7() };
 
         // **A department this test owns.** `Posted` counts everybody posted
         // there, and the suite shares one property in one scratch database — so
@@ -294,8 +294,8 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var casual = await Type(types, scope, $"OL{Interlocked.Increment(ref code)}");
-        var granted = Uuid7.NewUuid7();
-        var waiting = Uuid7.NewUuid7();
+        var granted = Guid.CreateVersion7();
+        var waiting = Guid.CreateVersion7();
 
         await postings.CreateAsync(scope, Post(granted, "HK"), default);
         await postings.CreateAsync(scope, Post(waiting, "HK"), default);

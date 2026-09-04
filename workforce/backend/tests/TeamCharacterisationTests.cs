@@ -71,7 +71,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         var elsewhere = Somewhere();
 
         var team = await teams.FormAsync(scope, Form(here, "Team A"), default);
-        var person = Uuid7.NewUuid7();
+        var person = Guid.CreateVersion7();
 
         await postings.CreateAsync(scope, Post(person, elsewhere), default);
 
@@ -89,7 +89,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var team = await teams.FormAsync(scope, Form(department, "Next Week"), default);
-        var person = Uuid7.NewUuid7();
+        var person = Guid.CreateVersion7();
 
         await postings.CreateAsync(
             scope, Post(person, department) with { EffectiveFrom = Today.AddDays(7) }, default);
@@ -114,7 +114,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var team = await teams.FormAsync(scope, Form(department, "Team A"), default);
-        var person = Uuid7.NewUuid7();
+        var person = Guid.CreateVersion7();
 
         await postings.CreateAsync(scope, Post(person, department), default);
         await teams.AddMemberAsync(scope, Membership(team.Id, person), default);
@@ -133,7 +133,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var team = await teams.FormAsync(scope, Form(department, "Team A"), default);
-        var person = Uuid7.NewUuid7();
+        var person = Guid.CreateVersion7();
 
         var posting = await postings.CreateAsync(scope, Post(person, department), default);
         await teams.AddMemberAsync(scope, Membership(team.Id, person), default);
@@ -169,7 +169,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         var elsewhere = Somewhere();
 
         var team = await teams.FormAsync(scope, Form(here, "Team A"), default);
-        var person = Uuid7.NewUuid7();
+        var person = Guid.CreateVersion7();
 
         await postings.CreateAsync(scope, Post(person, here), default);
         var second = await postings.CreateAsync(scope, Post(person, elsewhere), default);

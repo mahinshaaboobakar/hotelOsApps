@@ -146,7 +146,7 @@ public sealed class WorkforceFixture : IAsyncLifetime
         // than after — and reproducing that ordering is the point of deriving
         // the convention instead of improvising one.
 
-        PropertyId = Uuid7.NewUuid7();
+        PropertyId = Guid.CreateVersion7();
     }
 
     /// <summary>A context over the scratch database, as the application role.</summary>
@@ -166,7 +166,7 @@ public sealed class WorkforceFixture : IAsyncLifetime
     {
         Caller = CallerKind.User,
         PropertyId = PropertyId,
-        UserId = Uuid7.NewUuid7(),
+        UserId = Guid.CreateVersion7(),
     };
 
     /// <summary>A caller at a different property, for isolation tests.</summary>
@@ -178,8 +178,8 @@ public sealed class WorkforceFixture : IAsyncLifetime
     public RequestScope OtherPropertyScope() => new()
     {
         Caller = CallerKind.User,
-        PropertyId = Uuid7.NewUuid7(),
-        UserId = Uuid7.NewUuid7(),
+        PropertyId = Guid.CreateVersion7(),
+        UserId = Guid.CreateVersion7(),
     };
 
     private static InvalidOperationException NotInitialised() => new(

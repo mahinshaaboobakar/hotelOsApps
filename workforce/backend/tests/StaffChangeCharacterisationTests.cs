@@ -28,7 +28,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         // Two postings, made while the person had no account. Both are complete
         // and correct, and neither announced anything.
@@ -37,7 +37,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
 
         Assert.Empty(world.Events.Events);
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
         var announced = await world.Consumer.IdentityLinkGainedAsync(scope, staff, default);
 
         // Nothing about the postings changed. What was missing was only ever the
@@ -51,12 +51,12 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await world.Postings.CreateAsync(
             scope, Post(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
         await world.Consumer.IdentityLinkGainedAsync(scope, staff, default);
 
         // Both grant kinds, because both were true before the account existed.
@@ -68,7 +68,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var posting = await world.Postings.CreateAsync(
             scope, Post(staff, OwnDepartment()), default);
@@ -83,7 +83,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
             },
             default);
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
         var announced = await world.Consumer.IdentityLinkGainedAsync(scope, staff, default);
 
         // It grants nothing, and announcing it would write a tuple whose
@@ -97,7 +97,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await world.Postings.CreateAsync(
             scope,
@@ -107,7 +107,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
             },
             default);
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
 
         // Open, not started. The tuple is what makes next Monday work, and
         // waiting for Monday needs a scheduler nobody has asked for.
@@ -119,12 +119,12 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await world.Postings.CreateAsync(
             scope, Post(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
         await world.Consumer.IdentityLinkGainedAsync(scope, staff, default);
         await world.Consumer.IdentityLinkRemovedAsync(scope, staff, default);
 
@@ -141,9 +141,9 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
-        world.Directory.WithLogin(staff, Uuid7.NewUuid7());
+        world.Directory.WithLogin(staff, Guid.CreateVersion7());
 
         var posting = await world.Postings.CreateAsync(
             scope, Post(staff, OwnDepartment()), default);
@@ -165,7 +165,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var posting = await world.Postings.CreateAsync(
             scope, Post(staff, OwnDepartment()), default);
@@ -185,7 +185,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
     {
         var world = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await world.Postings.CreateAsync(scope, Post(staff, OwnDepartment()), default);
 

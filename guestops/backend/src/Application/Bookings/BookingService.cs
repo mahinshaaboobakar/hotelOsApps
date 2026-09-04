@@ -90,7 +90,7 @@ public sealed class BookingService(
 
         var booking = new Booking
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
 
             // Zero means the caller did not say, which is a different state
@@ -144,7 +144,7 @@ public sealed class BookingService(
 
         var stay = new RoomStay
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             BookingId = booking.Id,
             PropertyId = scope.PropertyId,
             RoomTypeId = request.RoomTypeId,
@@ -246,7 +246,7 @@ public sealed class BookingService(
 
         var guest = new GuestIdentity
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             NameAsGiven = request.NameAsGiven,
             NameGiven = request.NameGiven,
@@ -258,7 +258,7 @@ public sealed class BookingService(
 
         foreach (var contact in contacts.Protect(request))
         {
-            contact.Id = Uuid7.NewUuid7();
+            contact.Id = Guid.CreateVersion7();
             contact.GuestId = guest.Id;
             guest.Contacts.Add(contact);
         }
@@ -298,7 +298,7 @@ public sealed class BookingService(
     private static StayAbsence Absent(Guid stayId, string field, DateTimeOffset now)
         => new()
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stayId,
             Field = field,
             Reason = AbsenceReason.NotSupplied,

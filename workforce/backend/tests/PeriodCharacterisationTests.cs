@@ -35,7 +35,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var month = SomeMonth();
         var shift = await Shift(w, scope, 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         // Four days rostered.
         for (var d = 0; d < 4; d++)
@@ -74,7 +74,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var month = SomeMonth();
         var working = await Shift(w, scope, 7, 15);
         var off = await OffShift(w, scope);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Rota.AssignAsync(scope, Cell(staff, month, working), default);
         await w.Rota.AssignAsync(scope, Cell(staff, month.AddDays(1), off), default);
@@ -93,7 +93,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var month = SomeMonth();
         var shift = await Shift(w, scope, 6, 18);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Policy.SetOvertimeAsync(
             scope, new SetOvertimeThresholdCommand { DailyHours = 9m }, default);
@@ -119,7 +119,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.OtherPropertyScope();
         var month = SomeMonth();
         var shift = await Shift(w, scope, 6, 22);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Rota.AssignAsync(scope, Cell(staff, month, shift), default);
         await w.Attendance.RecordAsync(scope, Day(staff, month, 6, 22), default);
@@ -139,7 +139,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var w = Build();
         var scope = fixture.Scope();
         var month = SomeMonth();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var type = await LeaveType(w, scope);
 
         // Ten days, of which four fall inside the window this report covers.
@@ -173,7 +173,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var w = Build();
         var scope = fixture.Scope();
         var month = SomeMonth();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Attendance.RecordAsync(scope, Day(staff, month, 9, 17), default);
 
@@ -194,7 +194,7 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var month = SomeMonth();
         var shift = await Shift(w, scope, 8, 16);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Policy.SetOvertimeAsync(
             scope, new SetOvertimeThresholdCommand { DailyHours = 9m }, default);

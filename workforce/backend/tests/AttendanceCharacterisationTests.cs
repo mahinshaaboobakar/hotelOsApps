@@ -32,7 +32,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var record = await attendance.RecordAsync(
-            scope, Day(Uuid7.NewUuid7(), SomeDay(), 7, 15), default);
+            scope, Day(Guid.CreateVersion7(), SomeDay(), 7, 15), default);
 
         // The provenance obligation's fourth surface, and the one where it
         // matters most: this record is what a wage is eventually computed from.
@@ -48,7 +48,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
 
         var record = await attendance.RecordAsync(
             scope,
-            Day(Uuid7.NewUuid7(), SomeDay(), 7, 15) with
+            Day(Guid.CreateVersion7(), SomeDay(), 7, 15) with
             {
                 Source = AttendanceSource.Device,
                 ExternalReference = "turnstile-3/8891",
@@ -72,7 +72,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => attendance.RecordAsync(
                 fixture.Scope(),
-                Day(Uuid7.NewUuid7(), SomeDay(), 7, 15) with
+                Day(Guid.CreateVersion7(), SomeDay(), 7, 15) with
                 {
                     Source = AttendanceSource.Device,
                 },
@@ -85,7 +85,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var (attendance, _, _, _) = Build();
 
         var record = await attendance.RecordAsync(
-            fixture.Scope(), Day(Uuid7.NewUuid7(), SomeDay(), 23, 7), default);
+            fixture.Scope(), Day(Guid.CreateVersion7(), SomeDay(), 23, 7), default);
 
         // The same arithmetic the rota plans with, reused exactly as WF-Q17
         // anticipated.
@@ -98,7 +98,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var (attendance, _, _, _) = Build();
 
         var record = await attendance.RecordAsync(
-            fixture.Scope(), Day(Uuid7.NewUuid7(), SomeDay(), 9, 9), default);
+            fixture.Scope(), Day(Guid.CreateVersion7(), SomeDay(), 9, 9), default);
 
         // WF-Q17, and this aggregate is the reason for it: twenty-four would put
         // a day of pay behind a typo.
@@ -114,7 +114,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
 
         var record = await attendance.RecordAsync(
             scope,
-            Day(Uuid7.NewUuid7(), day, 7, 15) with { OutAt = null },
+            Day(Guid.CreateVersion7(), day, 7, 15) with { OutAt = null },
             default);
 
         Assert.True(record.StillIn);
@@ -131,7 +131,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
 
         var record = await attendance.RecordAsync(
             fixture.Scope(),
-            Day(Uuid7.NewUuid7(), SomeDay(), 7, 15) with { InAt = null, OutAt = null },
+            Day(Guid.CreateVersion7(), SomeDay(), 7, 15) with { InAt = null, OutAt = null },
             default);
 
         // Somebody looked, and they were not there. Deleting the record would say
@@ -148,7 +148,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => attendance.RecordAsync(
                 fixture.Scope(),
-                Day(Uuid7.NewUuid7(), SomeDay(), 7, 15) with { InAt = null },
+                Day(Guid.CreateVersion7(), SomeDay(), 7, 15) with { InAt = null },
                 default));
     }
 
@@ -157,7 +157,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
     {
         var (attendance, _, _, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var day = SomeDay();
 
         await attendance.RecordAsync(scope, Day(staff, day, 7, 15), default);
@@ -178,7 +178,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var record = await attendance.RecordAsync(
-            scope, Day(Uuid7.NewUuid7(), SomeDay(), 7, 15), default);
+            scope, Day(Guid.CreateVersion7(), SomeDay(), 7, 15), default);
 
         // Null already means "leave it alone" on the two time fields, so without
         // an explicit clear a mistaken arrival could never be undone except by
@@ -206,7 +206,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var record = await attendance.RecordAsync(
-            scope, Day(Uuid7.NewUuid7(), SomeDay(), 7, 15), default);
+            scope, Day(Guid.CreateVersion7(), SomeDay(), 7, 15), default);
 
         var amended = await attendance.AmendAsync(
             scope,
@@ -231,8 +231,8 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var morning = await Shift(shifts, scope, 7, 15);
-        var rostered = Uuid7.NewUuid7();
-        var walkedIn = Uuid7.NewUuid7();
+        var rostered = Guid.CreateVersion7();
+        var walkedIn = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Cell(rostered, day, morning), default);
         await attendance.RecordAsync(
@@ -258,7 +258,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var morning = await Shift(shifts, scope, 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Cell(staff, day, morning), default);
         await attendance.RecordAsync(
@@ -282,7 +282,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var morning = await Shift(shifts, scope, 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Cell(staff, day, morning), default);
         await attendance.RecordAsync(
@@ -306,7 +306,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var morning = await Shift(shifts, scope, 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(
             scope,
@@ -340,7 +340,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var day = SomeDay();
         var later = day.AddDays(60);
         var shift = await Shift(shifts, scope, 8, 16);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Cell(staff, day, shift), default);
         await attendance.RecordAsync(
@@ -382,7 +382,7 @@ public class AttendanceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var record = await attendance.RecordAsync(
-            scope, Day(Uuid7.NewUuid7(), SomeDay(), 7, 15), default);
+            scope, Day(Guid.CreateVersion7(), SomeDay(), 7, 15), default);
         await attendance.AmendAsync(
             scope,
             new AmendAttendanceCommand

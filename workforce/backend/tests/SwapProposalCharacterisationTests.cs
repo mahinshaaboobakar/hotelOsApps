@@ -295,9 +295,9 @@ public class SwapProposalCharacterisationTests(WorkforceFixture fixture)
 
         var scope = fixture.Scope();
         var day = SomeDay();
-        var anjali = Uuid7.NewUuid7();
-        var sneha = Uuid7.NewUuid7();
-        var head = Uuid7.NewUuid7();
+        var anjali = Guid.CreateVersion7();
+        var sneha = Guid.CreateVersion7();
+        var head = Guid.CreateVersion7();
 
         if (withHead)
         {

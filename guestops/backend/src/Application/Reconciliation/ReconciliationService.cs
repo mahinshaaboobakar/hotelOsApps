@@ -188,7 +188,7 @@ public sealed class ReconciliationService(
         {
             db.StayExternalRefs.Add(new StayExternalRef
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 StayId = stay.Id,
                 IntegrationId = reference.IntegrationId,
                 IdentifierKind = reference.IdentifierKind,

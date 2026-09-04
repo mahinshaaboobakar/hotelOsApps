@@ -194,7 +194,7 @@ public sealed class InboundFactService(
 
         var stay = new RoomStay
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             BookingId = booking.Id,
             PropertyId = fact.PropertyId,
             RoomTypeId = fact.RoomTypeId,
@@ -219,7 +219,7 @@ public sealed class InboundFactService(
         {
             stay.ExternalRefs.Add(new StayExternalRef
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 StayId = stay.Id,
                 IntegrationId = reference.IntegrationId,
                 IdentifierKind = reference.IdentifierKind,
@@ -229,7 +229,7 @@ public sealed class InboundFactService(
 
         foreach (var absence in fact.Absences)
         {
-            absence.Id = Uuid7.NewUuid7();
+            absence.Id = Guid.CreateVersion7();
             absence.StayId = stay.Id;
             absence.RecordedAt = now;
             stay.Absences.Add(absence);
@@ -312,7 +312,7 @@ public sealed class InboundFactService(
 
         var booking = new Booking
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = fact.PropertyId,
             ExpectedStayCount = fact.ExpectedStayCount,
             IsComplete = fact.IsComplete,
@@ -325,7 +325,7 @@ public sealed class InboundFactService(
         {
             booking.ExternalRefs.Add(new BookingExternalRef
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 BookingId = booking.Id,
                 IntegrationId = reference.IntegrationId,
                 IdentifierKind = reference.IdentifierKind,
@@ -347,7 +347,7 @@ public sealed class InboundFactService(
 
         var held = new HeldFact
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = fact.PropertyId,
             IntegrationId = fact.IntegrationId,
             Payload = JsonSerializer.Serialize(fact),
@@ -369,7 +369,7 @@ public sealed class InboundFactService(
 
             db.LinkCandidates.Add(new StayLinkCandidate
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 LocalStayId = candidate.Id,
                 HeldFactId = held.Id,
 
@@ -434,7 +434,7 @@ public sealed class InboundFactService(
     {
         db.Disagreements.Add(new StayDisagreement
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             Aspect = DisagreementAspect.Lifecycle,
             OurValue = stay.Lifecycle.ToString(),
@@ -447,7 +447,7 @@ public sealed class InboundFactService(
     private static StayAbsence Absent(Guid stayId, string field, DateTimeOffset now)
         => new()
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stayId,
             Field = field,
             Reason = AbsenceReason.NotSupplied,

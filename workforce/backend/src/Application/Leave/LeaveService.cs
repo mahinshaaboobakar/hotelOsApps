@@ -48,7 +48,7 @@ public class LeaveService(
         var now = clock.GetUtcNow();
         var request = new LeaveRequest
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             StaffId = command.StaffId,
             LeaveTypeId = command.LeaveTypeId,
@@ -199,7 +199,7 @@ public class LeaveService(
         var now = clock.GetUtcNow();
         var entry = new LeaveLedgerEntry
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             StaffId = command.StaffId,
             LeaveTypeId = command.LeaveTypeId,
@@ -289,7 +289,7 @@ public class LeaveService(
         LeaveRequest request, decimal days, LeaveLedgerKind kind, DateOnly on, DateTimeOffset now) =>
         db.LeaveLedger.Add(new LeaveLedgerEntry
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = request.PropertyId,
             StaffId = request.StaffId,
             LeaveTypeId = request.LeaveTypeId,

@@ -66,7 +66,7 @@ public class RotaService(
 
         var assignment = new ShiftAssignment
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             StaffId = command.StaffId,
             Date = command.Date,
@@ -160,7 +160,7 @@ public class RotaService(
 
             db.ShiftAssignments.Add(new ShiftAssignment
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 PropertyId = scope.PropertyId,
                 StaffId = cell.StaffId,
                 Date = date,

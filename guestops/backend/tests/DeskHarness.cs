@@ -118,7 +118,7 @@ public sealed class DeskHarness : IAsyncDisposable
     {
         var booking = new Booking
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = Property,
             Origin = RecordOrigin.Staff,
             CreatedAt = Clock.GetUtcNow(),
@@ -127,7 +127,7 @@ public sealed class DeskHarness : IAsyncDisposable
 
         var stay = new RoomStay
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             BookingId = booking.Id,
             PropertyId = Property,
             RoomTypeId = RoomType,

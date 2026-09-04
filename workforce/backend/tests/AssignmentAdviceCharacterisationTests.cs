@@ -37,7 +37,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -55,8 +55,8 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var onLeave = Uuid7.NewUuid7();
-        var awaiting = Uuid7.NewUuid7();
+        var onLeave = Guid.CreateVersion7();
+        var awaiting = Guid.CreateVersion7();
         var type = await LeaveType(w, scope);
 
         await w.Postings.CreateAsync(scope, Post(onLeave, department), default);
@@ -85,7 +85,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var w = Build();
         var scope = fixture.Scope();
         var day = SomeDay();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, OwnDepartment()), default);
 
@@ -103,7 +103,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -134,7 +134,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -160,7 +160,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -181,7 +181,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -207,7 +207,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var day = SomeDay();
         var department = OwnDepartment();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await w.Postings.CreateAsync(scope, Post(staff, department), default);
 
@@ -236,7 +236,7 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var w = Build();
         var scope = fixture.Scope();
         var day = SomeDay();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var type = await LeaveType(w, scope);
 
         await w.Postings.CreateAsync(scope, Post(staff, OwnDepartment()), default);

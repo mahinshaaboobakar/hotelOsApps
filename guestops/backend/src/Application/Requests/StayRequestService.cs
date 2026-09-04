@@ -66,7 +66,7 @@ public sealed class StayRequestService(
 
         var request = new StayRequest
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             Text = text,
             LoggedBy = scope.UserId,
@@ -182,7 +182,7 @@ public sealed class StayRequestService(
 
         var note = new StayNote
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             Text = text,
             Author = scope.UserId,

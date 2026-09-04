@@ -47,7 +47,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var monday = Monday();
         var morning = await Shift(shifts, scope, "M", 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var cell = await rota.AssignAsync(scope, Assign(staff, monday, morning), default);
 
@@ -64,7 +64,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var monday = Monday();
         var morning = await Shift(shifts, scope, "M", 7, 15);
         var afternoon = await Shift(shifts, scope, "A", 15, 23);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Assign(staff, monday, morning), default);
         var replaced = await rota.AssignAsync(scope, Assign(staff, monday, afternoon), default);
@@ -88,7 +88,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var next = monday.AddDays(7);
         var morning = await Shift(shifts, scope, "M", 7, 15);
         var night = await Shift(shifts, scope, "N", 23, 7);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(scope, Assign(staff, monday, morning), default);
         await rota.AssignAsync(scope, Assign(staff, monday.AddDays(1), morning), default);
@@ -118,7 +118,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var monday = Monday();
         var morning = await Shift(shifts, scope, "M", 7, 15);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await rota.AssignAsync(
             scope,
@@ -167,8 +167,8 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var monday = Monday();
         var morning = await Shift(shifts, scope, "M", 7, 15);
         var afternoon = await Shift(shifts, scope, "A", 15, 23);
-        var anjali = Uuid7.NewUuid7();
-        var sneha = Uuid7.NewUuid7();
+        var anjali = Guid.CreateVersion7();
+        var sneha = Guid.CreateVersion7();
 
         var hers = await rota.AssignAsync(scope, Assign(anjali, monday, afternoon), default);
         var his = await rota.AssignAsync(scope, Assign(sneha, monday, morning), default);
@@ -196,7 +196,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var morning = await Shift(shifts, scope, "M", 7, 15);
 
         var cell = await rota.AssignAsync(
-            scope, Assign(Uuid7.NewUuid7(), monday, morning), default);
+            scope, Assign(Guid.CreateVersion7(), monday, morning), default);
 
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => rota.SwapAsync(
@@ -212,7 +212,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var monday = Monday();
         var old = await Shift(shifts, scope, "OLD", 9, 17);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var worked = await rota.AssignAsync(scope, Assign(staff, monday, old), default);
 
@@ -241,7 +241,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         // Not an error: a manager's double-click must not be a failure dialog.
         await rota.ClearAsync(
             fixture.Scope(),
-            new ClearShiftCommand { StaffId = Uuid7.NewUuid7(), Date = Monday() },
+            new ClearShiftCommand { StaffId = Guid.CreateVersion7(), Date = Monday() },
             default);
     }
 
@@ -265,7 +265,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
         var monday = Monday();
         var longDay = await Shift(shifts, scope, "LNG", 6, 18);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await policy.SetOvertimeAsync(
             scope, new SetOvertimeThresholdCommand { DailyHours = 9m, WeeklyHours = 48m }, default);
@@ -307,7 +307,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var longDay = await Shift(shifts, scope, "LNG2", 6, 22);
 
         await rota.AssignAsync(
-            scope, Assign(Uuid7.NewUuid7(), monday, longDay), default);
+            scope, Assign(Guid.CreateVersion7(), monday, longDay), default);
 
         var warnings = await overtime.CheckAsync(
             scope, new RotaQuery { From = monday, To = monday.AddDays(6) }, default);
@@ -326,7 +326,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var monday = Monday();
         var later = monday.AddDays(14);
         var shift = await Shift(shifts, scope, "RS", 8, 16);
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await policy.SetOvertimeAsync(
             scope, new SetOvertimeThresholdCommand { DailyHours = 9m }, default);
@@ -387,7 +387,7 @@ public class RotaCharacterisationTests(WorkforceFixture fixture)
         var rota = new RotaService(fixture.Context(), authorizer, TimeProvider.System);
 
         await rota.AssignAsync(
-            scope, Assign(Uuid7.NewUuid7(), Monday(), morning), default);
+            scope, Assign(Guid.CreateVersion7(), Monday(), morning), default);
 
         Assert.Equal("roster.plan", Assert.Single(authorizer.Checks).Permission);
     }

@@ -122,7 +122,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN1");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var from = SomeMonday();
 
         var request = await leave.RaiseAsync(
@@ -150,7 +150,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN2");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var from = SomeMonday();
 
         var request = await leave.RaiseAsync(
@@ -180,7 +180,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN3");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var from = SomeMonday();
 
         var request = await leave.RaiseAsync(scope, Raise(staff, type, from, from), default);
@@ -204,7 +204,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN4");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var from = SomeMonday();
 
         await leave.AdjustAsync(
@@ -240,9 +240,9 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, postings) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN5");
-        var staff = Uuid7.NewUuid7();
-        var manager = Uuid7.NewUuid7();
-        var head = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
+        var manager = Guid.CreateVersion7();
+        var head = Guid.CreateVersion7();
         var from = SomeMonday();
 
         await postings.CreateAsync(scope, Post(head, "HK", isHead: true), default);
@@ -262,8 +262,8 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, postings) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN6");
-        var staff = Uuid7.NewUuid7();
-        var head = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
+        var head = Guid.CreateVersion7();
         var from = SomeMonday();
 
         await postings.CreateAsync(scope, Post(head, "SPA", isHead: true), default);
@@ -282,7 +282,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, postings) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN7");
-        var head = Uuid7.NewUuid7();
+        var head = Guid.CreateVersion7();
         var from = SomeMonday();
 
         await postings.CreateAsync(scope, Post(head, "ENG", isHead: true), default);
@@ -301,7 +301,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANN8");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         var from = SomeMonday();
 
         await leave.RaiseAsync(scope, Raise(staff, type, from, from.AddDays(3)), default);
@@ -322,7 +322,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var from = SomeMonday();
 
         var request = await leave.RaiseAsync(
-            scope, Raise(Uuid7.NewUuid7(), type, from, from), default);
+            scope, Raise(Guid.CreateVersion7(), type, from, from), default);
 
         var approved = await leave.ApproveAsync(
             scope,
@@ -342,7 +342,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var (leave, types, _, _) = Build();
         var scope = fixture.Scope();
         var type = await Type(types, scope, "ANNA");
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => leave.AdjustAsync(
@@ -381,7 +381,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var from = SomeMonday();
 
         var request = await leave.RaiseAsync(
-            scope, Raise(Uuid7.NewUuid7(), type, from, from), default);
+            scope, Raise(Guid.CreateVersion7(), type, from, from), default);
 
         // WF-Q9(b)'s provenance obligation at its third surface: without it the
         // record quietly claims a staff member raised what a supervisor raised
@@ -399,7 +399,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
 
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => leave.RaiseAsync(
-                scope, Raise(Uuid7.NewUuid7(), type, from, from.AddDays(-1)), default));
+                scope, Raise(Guid.CreateVersion7(), type, from, from.AddDays(-1)), default));
     }
 
     [Fact]
@@ -412,7 +412,7 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var seen = authorizer.Checks.Count;
 
         var request = await leave.RaiseAsync(
-            scope, Raise(Uuid7.NewUuid7(), type, from, from), default);
+            scope, Raise(Guid.CreateVersion7(), type, from, from), default);
         await leave.ApproveAsync(
             scope,
             new DecideLeaveCommand { Id = request.Id, ExpectedVersion = request.Version },

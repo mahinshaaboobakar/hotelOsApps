@@ -39,7 +39,7 @@ public class DutyService(
         var now = clock.GetUtcNow();
         var duty = new DutyAssignment
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             StaffId = command.StaffId,
             DutyType = DutyTypes.ManagerOnDuty,

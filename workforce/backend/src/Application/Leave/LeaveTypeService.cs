@@ -62,7 +62,7 @@ public class LeaveTypeService(
 
             db.LeaveTypes.Add(new LeaveType
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 PropertyId = scope.PropertyId,
                 Code = proposed.Code,
                 Name = proposed.Name,
@@ -111,7 +111,7 @@ public class LeaveTypeService(
 
             var created = new LeaveType
             {
-                Id = Uuid7.NewUuid7(),
+                Id = Guid.CreateVersion7(),
                 PropertyId = scope.PropertyId,
                 Code = code,
                 Name = name,

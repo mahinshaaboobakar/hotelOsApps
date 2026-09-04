@@ -103,7 +103,7 @@ public class DutyCharacterisationTests(WorkforceFixture fixture)
         var (service, _) = Build();
         var friday = FridayEvening();
         var scope = fixture.Scope();
-        var holder = Uuid7.NewUuid7();
+        var holder = Guid.CreateVersion7();
 
         await service.AssignAsync(
             scope,
@@ -125,8 +125,8 @@ public class DutyCharacterisationTests(WorkforceFixture fixture)
         var (service, _) = Build();
         var friday = FridayEvening();
         var scope = fixture.Scope();
-        var first = Uuid7.NewUuid7();
-        var second = Uuid7.NewUuid7();
+        var first = Guid.CreateVersion7();
+        var second = Guid.CreateVersion7();
 
         var night = await service.AssignAsync(
             scope, Assign(friday, friday.AddHours(12)) with { StaffId = first }, default);
@@ -151,8 +151,8 @@ public class DutyCharacterisationTests(WorkforceFixture fixture)
         var (service, _) = Build();
         var friday = FridayEvening();
         var scope = fixture.Scope();
-        var onNow = Uuid7.NewUuid7();
-        var onNext = Uuid7.NewUuid7();
+        var onNow = Guid.CreateVersion7();
+        var onNext = Guid.CreateVersion7();
 
         var current = await service.AssignAsync(
             scope, Assign(friday, friday.AddHours(12)) with { StaffId = onNow }, default);
@@ -292,7 +292,7 @@ public class DutyCharacterisationTests(WorkforceFixture fixture)
     }
 
     private static AssignDutyCommand Assign(DateTimeOffset starts, DateTimeOffset ends) =>
-        new() { StaffId = Uuid7.NewUuid7(), StartsAt = starts, EndsAt = ends };
+        new() { StaffId = Guid.CreateVersion7(), StartsAt = starts, EndsAt = ends };
 
     private (DutyService Service, RecordingAuthorizer Authorizer) Build()
     {

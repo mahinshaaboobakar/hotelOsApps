@@ -64,11 +64,11 @@ public class AnnouncementWireTests
     private static PostingAnnouncement Announcement() => new()
     {
         UserId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-        StaffId = Uuid7.NewUuid7(),
+        StaffId = Guid.CreateVersion7(),
         DepartmentId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
         DepartmentCode = "FO",
-        PostingId = Uuid7.NewUuid7(),
-        PropertyId = Uuid7.NewUuid7(),
+        PostingId = Guid.CreateVersion7(),
+        PropertyId = Guid.CreateVersion7(),
         OccurredAt = DateTimeOffset.UtcNow,
     };
 }

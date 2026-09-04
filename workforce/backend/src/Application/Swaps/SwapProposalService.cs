@@ -49,7 +49,7 @@ public class SwapProposalService(
         var now = clock.GetUtcNow();
         var proposal = new SwapProposal
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             ProposerStaffId = mine.StaffId,
             ColleagueStaffId = theirs.StaffId,

@@ -59,7 +59,7 @@ public class AttendanceService(
 
         var record = new AttendanceRecord
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             StaffId = command.StaffId,
             BusinessDate = command.BusinessDate,

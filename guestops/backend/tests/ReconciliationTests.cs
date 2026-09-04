@@ -288,7 +288,7 @@ public class ReconciliationTests
 
         harness.Db.Disagreements.Add(new StayDisagreement
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             Aspect = DisagreementAspect.Lifecycle,
             OurValue = ours.ToString(),

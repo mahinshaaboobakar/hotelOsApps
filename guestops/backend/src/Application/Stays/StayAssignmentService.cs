@@ -91,7 +91,7 @@ public sealed class StayAssignmentService(
 
         db.Assignments.Add(new Assignment
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             RoomId = roomId,
             AssignedAt = now,

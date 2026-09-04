@@ -50,7 +50,7 @@ public class ShiftCatalogueService(
         var now = clock.GetUtcNow();
         var entry = new ShiftCatalogueEntry
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             Name = name,
             ShortCode = shortCode,
@@ -244,7 +244,7 @@ public class ShiftCatalogueService(
         DateOnly from,
         DateTimeOffset now) => new()
     {
-        Id = Uuid7.NewUuid7(),
+        Id = Guid.CreateVersion7(),
         PropertyId = entry.PropertyId,
         CatalogueEntryId = entry.Id,
         StartsAt = hours.StartsAt,

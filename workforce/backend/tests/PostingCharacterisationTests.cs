@@ -27,7 +27,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, authorizer, _, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var posting = await service.CreateAsync(scope, Command(staff), default);
 
@@ -48,7 +48,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var (service, _, directory, _) = Build();
 
         var posting = await service.CreateAsync(
-            fixture.Scope(), Command(Uuid7.NewUuid7(), department: "  fo  "), default);
+            fixture.Scope(), Command(Guid.CreateVersion7(), department: "  fo  "), default);
 
         // The canon code is the identity — ADR 0119 — so it is stored in one
         // form. Two postings written `FO` and `fo` would be two departments to
@@ -65,7 +65,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
 
         var refusal = await Assert.ThrowsAsync<InvalidRequestException>(
             () => service.CreateAsync(
-                fixture.Scope(), Command(Uuid7.NewUuid7(), department: "CASINO"), default));
+                fixture.Scope(), Command(Guid.CreateVersion7(), department: "CASINO"), default));
 
         Assert.Contains("CASINO", refusal.Message, StringComparison.Ordinal);
     }
@@ -75,7 +75,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.CreateAsync(scope, Command(staff), default);
 
@@ -88,7 +88,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var first = await service.CreateAsync(scope, Command(staff), default);
         await service.EndAsync(
@@ -117,14 +117,14 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
 
         await Assert.ThrowsAsync<InvalidRequestException>(
             () => service.CreateAsync(
-                fixture.Scope(), Command(Uuid7.NewUuid7(), role: "   "), default));
+                fixture.Scope(), Command(Guid.CreateVersion7(), role: "   "), default));
     }
 
     [Fact]
     public async Task Create_resolves_the_identity_link_and_tolerates_its_absence()
     {
         var (service, _, directory, _) = Build();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.CreateAsync(fixture.Scope(), Command(staff), default);
 
@@ -141,7 +141,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
-        var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
+        var posting = await service.CreateAsync(scope, Command(Guid.CreateVersion7()), default);
         var ended = await service.EndAsync(
             scope,
             new EndPostingCommand
@@ -167,7 +167,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
-        var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
+        var posting = await service.CreateAsync(scope, Command(Guid.CreateVersion7()), default);
 
         // WF-Q16: a window that ends before it starts cannot be true, so it is
         // refused rather than warned.
@@ -189,7 +189,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
 
-        var posting = await service.CreateAsync(scope, Command(Uuid7.NewUuid7()), default);
+        var posting = await service.CreateAsync(scope, Command(Guid.CreateVersion7()), default);
 
         await Assert.ThrowsAsync<ConcurrencyException>(
             () => service.UpdateAsync(
@@ -208,10 +208,10 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
-        var zone = Uuid7.NewUuid7();
+        var zone = Guid.CreateVersion7();
 
         var posting = await service.CreateAsync(
-            scope, Command(Uuid7.NewUuid7()) with { ZoneId = zone }, default);
+            scope, Command(Guid.CreateVersion7()) with { ZoneId = zone }, default);
 
         // Absent: the zone survives an unrelated edit.
         var renamed = await service.UpdateAsync(
@@ -247,7 +247,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var (service, _, _, _) = Build();
 
         var posting = await service.CreateAsync(
-            fixture.Scope(), Command(Uuid7.NewUuid7()), default);
+            fixture.Scope(), Command(Guid.CreateVersion7()), default);
 
         // NotFound, not PermissionDenied: a cross-property read must not confirm
         // that the id exists.
@@ -260,7 +260,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, _, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         // Started and ended in the past. An end date in the *future* leaves the
         // posting in force until it arrives — which is the service being right
@@ -301,7 +301,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     public async Task A_refused_permission_stops_the_write()
     {
         var (service, authorizer, _, _) = Build();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
         authorizer.Deny.Add("posting.assign");
 
         await Assert.ThrowsAsync<PermissionDeniedException>(
@@ -345,8 +345,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, directory, events) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
-        directory.WithLogin(staff, Uuid7.NewUuid7());
+        var staff = Guid.CreateVersion7();
+        directory.WithLogin(staff, Guid.CreateVersion7());
 
         var posting = await service.CreateAsync(scope, Command(staff, "FO"), default);
 
@@ -366,8 +366,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, directory, events) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
-        var user = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
+        var user = Guid.CreateVersion7();
         directory.WithLogin(staff, user);
 
         await service.CreateAsync(scope, Command(staff, "HK"), default);
@@ -389,7 +389,7 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, _, events) = Build();
 
-        await service.CreateAsync(fixture.Scope(), Command(Uuid7.NewUuid7(), "FO"), default);
+        await service.CreateAsync(fixture.Scope(), Command(Guid.CreateVersion7(), "FO"), default);
 
         // Most of the workforce has no account. The posting is complete and
         // correct, and there is no principal for a tuple to name — writing one
@@ -401,8 +401,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     public async Task Posting_a_department_head_announces_both_facts()
     {
         var (service, _, directory, events) = Build();
-        var staff = Uuid7.NewUuid7();
-        directory.WithLogin(staff, Uuid7.NewUuid7());
+        var staff = Guid.CreateVersion7();
+        directory.WithLogin(staff, Guid.CreateVersion7());
 
         await service.CreateAsync(
             fixture.Scope(), Command(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
@@ -418,8 +418,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, directory, events) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
-        directory.WithLogin(staff, Uuid7.NewUuid7());
+        var staff = Guid.CreateVersion7();
+        directory.WithLogin(staff, Guid.CreateVersion7());
 
         var posting = await service.CreateAsync(
             scope, Command(staff, OwnDepartment()) with { IsDepartmentHead = true }, default);
@@ -447,8 +447,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, directory, events) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
-        directory.WithLogin(staff, Uuid7.NewUuid7());
+        var staff = Guid.CreateVersion7();
+        directory.WithLogin(staff, Guid.CreateVersion7());
 
         var posting = await service.CreateAsync(scope, Command(staff, OwnDepartment()), default);
 
@@ -487,8 +487,8 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _, directory, events) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
-        directory.WithLogin(staff, Uuid7.NewUuid7());
+        var staff = Guid.CreateVersion7();
+        directory.WithLogin(staff, Guid.CreateVersion7());
 
         var posting = await service.CreateAsync(scope, Command(staff, "FO"), default);
 

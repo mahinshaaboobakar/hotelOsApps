@@ -75,7 +75,7 @@ public class TeamService(
         var now = clock.GetUtcNow();
         var team = new Team
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             DepartmentCode = code,
             Name = name,
@@ -272,7 +272,7 @@ public class TeamService(
         var now = clock.GetUtcNow();
         var member = new TeamMember
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             TeamId = command.TeamId,
             StaffId = command.StaffId,

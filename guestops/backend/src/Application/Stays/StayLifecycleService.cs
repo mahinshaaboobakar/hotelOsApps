@@ -303,7 +303,7 @@ public sealed class StayLifecycleService(
 
         db.Disagreements.Add(new StayDisagreement
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             StayId = stay.Id,
             Aspect = DisagreementAspect.Lifecycle,
 

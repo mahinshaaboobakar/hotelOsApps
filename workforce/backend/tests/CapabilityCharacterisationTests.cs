@@ -25,7 +25,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         var (service, _) = Build();
 
         var capability = await service.RecordAsync(
-            fixture.Scope(), Record(Uuid7.NewUuid7(), "Speaks Arabic"), default);
+            fixture.Scope(), Record(Guid.CreateVersion7(), "Speaks Arabic"), default);
 
         Assert.False(capability.Lapses);
         Assert.Equal(ExpiryBand.DoesNotLapse, service.BandOf(capability));
@@ -38,7 +38,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
 
         var capability = await service.RecordAsync(
             fixture.Scope(),
-            Record(Uuid7.NewUuid7(), "Fire warden", Today().AddYears(1)),
+            Record(Guid.CreateVersion7(), "Fire warden", Today().AddYears(1)),
             default);
 
         // The date is the discriminator — there is no `kind` to set, and so no
@@ -71,7 +71,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.RecordAsync(scope, Record(staff, "Food handling", Today()), default);
 
@@ -92,7 +92,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
 
         var capability = await service.RecordAsync(
             scope,
-            Record(Uuid7.NewUuid7(), "Pool lifeguard", Today().AddDays(3)),
+            Record(Guid.CreateVersion7(), "Pool lifeguard", Today().AddDays(3)),
             default);
 
         Assert.Equal(ExpiryBand.Within7Days, service.BandOf(capability));
@@ -118,7 +118,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         var scope = fixture.Scope();
 
         var capability = await service.RecordAsync(
-            scope, Record(Uuid7.NewUuid7(), "Forklift", Today().AddDays(10)), default);
+            scope, Record(Guid.CreateVersion7(), "Forklift", Today().AddDays(10)), default);
 
         var corrected = await service.AmendAsync(
             scope,
@@ -141,7 +141,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         var expiry = Today().AddDays(10);
 
         var capability = await service.RecordAsync(
-            scope, Record(Uuid7.NewUuid7(), "First aid", expiry), default);
+            scope, Record(Guid.CreateVersion7(), "First aid", expiry), default);
 
         var renamed = await service.AmendAsync(
             scope,
@@ -164,7 +164,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.RecordAsync(scope, Record(staff, "Lapsed card", Today().AddDays(-2)), default);
         await service.RecordAsync(scope, Record(staff, "Soon card", Today().AddDays(5)), default);
@@ -184,8 +184,8 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, postings) = Build();
         var scope = fixture.Scope();
-        var posted = Uuid7.NewUuid7();
-        var unposted = Uuid7.NewUuid7();
+        var posted = Guid.CreateVersion7();
+        var unposted = Guid.CreateVersion7();
 
         await postings.CreateAsync(
             scope,
@@ -215,7 +215,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.RecordAsync(scope, Record(staff, "Boiler ticket", Today().AddDays(90)), default);
         await service.RecordAsync(scope, Record(staff, "Speaks Hindi"), default);
@@ -233,7 +233,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, postings) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         await service.RecordAsync(scope, Record(staff, "Expired warden", Today().AddDays(-30)), default);
 
@@ -259,7 +259,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _) = Build();
         var scope = fixture.Scope();
-        var staff = Uuid7.NewUuid7();
+        var staff = Guid.CreateVersion7();
 
         var capability = await service.RecordAsync(
             scope, Record(staff, "Recorded in error"), default);
@@ -284,7 +284,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         var (service, _) = Build(out var authorizer);
 
-        await service.RecordAsync(fixture.Scope(), Record(Uuid7.NewUuid7(), "Anything"), default);
+        await service.RecordAsync(fixture.Scope(), Record(Guid.CreateVersion7(), "Anything"), default);
         await service.RegisterAsync(fixture.Scope(), default);
 
         Assert.Equal(
@@ -298,7 +298,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         var (service, _) = Build();
 
         var capability = await service.RecordAsync(
-            fixture.Scope(), Record(Uuid7.NewUuid7(), "Elsewhere"), default);
+            fixture.Scope(), Record(Guid.CreateVersion7(), "Elsewhere"), default);
 
         await Assert.ThrowsAsync<NotFoundException>(
             () => service.AmendAsync(

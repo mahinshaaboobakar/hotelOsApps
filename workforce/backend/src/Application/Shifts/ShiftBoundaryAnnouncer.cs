@@ -186,7 +186,7 @@ public class ShiftBoundaryAnnouncer(
 
         var boundary = new ShiftBoundary
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             DepartmentCode = due.DepartmentCode,
             CatalogueEntryId = due.CatalogueEntryId,

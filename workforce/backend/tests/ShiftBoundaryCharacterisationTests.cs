@@ -44,7 +44,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var morning = await Shift(shifts, scope, 7, 15);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
 
         var first = await announcer.AnnounceDueAsync(scope, default);
         var second = await announcer.AnnounceDueAsync(scope, default);
@@ -69,7 +69,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var morning = await Shift(shifts, scope, 7, 15);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
 
         await announcer.AnnounceDueAsync(scope, default);
 
@@ -96,8 +96,8 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var morning = await Shift(shifts, scope, 7, 15);
         var afternoon = await Shift(shifts, scope, 15, 23);
 
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, afternoon, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, afternoon, department), default);
 
         await announcer.AnnounceDueAsync(scope, default);
 
@@ -126,7 +126,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var morning = await Shift(shifts, scope, 7, 15);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
 
         await announcer.AnnounceDueAsync(scope, default);
 
@@ -145,7 +145,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var night = await Shift(shifts, scope, 23, 7);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, night, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, night, department), default);
 
         await announcer.AnnounceDueAsync(scope, default);
 
@@ -169,7 +169,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var split = await Split(shifts, scope);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, split, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, split, department), default);
 
         await announcer.AnnounceDueAsync(scope, default);
 
@@ -194,7 +194,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         for (var i = 0; i < 9; i++)
         {
             await rota.AssignAsync(
-                scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
+                scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
         }
 
         Assert.Equal(1, await announcer.AnnounceDueAsync(scope, default));
@@ -213,7 +213,7 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var department = Somewhere();
 
         var morning = await Shift(shifts, scope, 7, 15);
-        await rota.AssignAsync(scope, Assign(Uuid7.NewUuid7(), day, morning, department), default);
+        await rota.AssignAsync(scope, Assign(Guid.CreateVersion7(), day, morning, department), default);
         await announcer.AnnounceDueAsync(scope, default);
 
         var appended = Assert.Single(events.Events);

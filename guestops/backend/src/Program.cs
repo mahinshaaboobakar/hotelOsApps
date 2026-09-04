@@ -62,49 +62,25 @@ builder.Services.AddDbContext<GuestOpsDbContext>(options => options
 // reimplemented here — two event appenders drift, and one of them stops writing
 // the queue row.
 //
-// # What the Kernel told this application, read from the SDK
-//
-// Three facts arrive in the environment when the Kernel starts an installed
-// package (`packages/process.rs`), and none of them is configuration this
-// application chose:
-//
-//   HOTELOS_CERTIFICATE_DIR   install step 4 wrote client.crt/.key and ca.crt
-//   HOTELOS_KERNEL_ENDPOINT   the one peer an application is told
-//   HOTELOS_PROPERTY_ID       which property this installation serves
-//
-// `PlatformEnvironment.Read()` is where those names live — one place, because
-// they are a contract with the Kernel and a second copy is the copy that stops
-// matching. It returns `null` when this process was **not** started by a
-// Kernel, which is how a developer runs it from a checkout; the configured
-// development endpoint carries that case and nothing else does.
-//
-// **`Platform:CertificateDirectory` is gone, and it was a ghost.** It was read
-// from `builder.Configuration` and no `appsettings.json` has ever defined it,
-// so it was `null` on every path this application has ever taken — which made
-// the plaintext fallback below look like a configurable choice when it was
-// unconditional. Under the Kernel it now resolves to a real directory, and
-// that is the difference between this application launching and failing inside
-// the first TLS handshake.
-//
 // **`certificateDirectory` is the seam — `AUTHZ-Q16`.** For a platform service
 // it is where `hotelos-kernel enroll <service>` wrote an identity at
 // provisioning. An *installed* application arrives later, from a package, and
-// when nothing has given it one the channel falls back to plaintext and every
-// authorized RPC fails closed. The fallback is evidence for that row, not a
-// workaround.
+// nothing enrolls it — so this reads a configured path and, when none holds a
+// certificate, the channel falls back to plaintext and every authorized RPC
+// fails closed. The fallback is evidence for that row, not a workaround.
 //
 // That is the correct behaviour and it is **not** worked around here: the
 // Kernel refuses any request naming an application identity outright, because
 // an unauthenticated package claim must not be honoured either way round —
 // trusting it would let a package assert any id, and ignoring it would let a
-// package inherit its user's full authority.
-var platform = PlatformEnvironment.Read();
-
+// package inherit its user's full authority. `AUTHZ-Q16` answers identity at
+// install; until it lands, this application can migrate, start, and serve
+// nothing that requires a decision.
 builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
     serviceName: "guestops",
-    kernelEndpoint: platform?.KernelEndpoint
-        ?? new Uri(builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:15051"),
-    certificateDirectory: platform?.CertificateDirectory);
+    kernelEndpoint: new Uri(
+        builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:15051"),
+    certificateDirectory: builder.Configuration["Platform:CertificateDirectory"]);
 
 builder.Services.AddGuestOpsApplication();
 
