@@ -28,7 +28,7 @@ public partial class GuestOpsGrpcService
             [.. request.RoomTypeIds.Select(id => ParseRequired(id, "room_type_id"))],
             context.CancellationToken);
 
-        var response = new GetAvailabilityResponse();
+        var response = new GetAvailabilityResponse { Meta = Meta(request.Context) };
 
         foreach (var row in answer)
         {

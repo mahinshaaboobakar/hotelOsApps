@@ -45,12 +45,28 @@ public partial class GuestOpsGrpcService(
     BookingService bookings,
     StayLifecycleService lifecycle,
     StayAssignmentService assignment,
+    StayListService stays,
     AvailabilityService availability,
     RegistrationService registrations,
     ReportingService reporting,
     StayRequestService requests,
     SettingsService settings) : GuestOpsService.GuestOpsServiceBase
 {
+    /// <summary>Correlation, echoed back.</summary>
+    /// <remarks>
+    /// The same id the caller sent, so a support conversation about one request
+    /// has one identifier on both sides of the wire.
+    /// <para>
+    /// <b>Added because eight responses declared <c>meta</c> and nothing set
+    /// any of them</b> — CORE-Q13's original complaint, one repository over: a
+    /// declared field that is never populated is worse than an absent one,
+    /// because a client reads the schema and believes the capability exists.
+    /// </para>
+    /// </remarks>
+    private static HotelOS.Contracts.Common.V1.ResponseMeta Meta(
+        HotelOS.Contracts.Common.V1.RequestContext? context)
+        => new() { RequestId = context?.RequestId ?? string.Empty };
+
     // --- parsing ----------------------------------------------------------
 
     private static Guid ParseRequired(string value, string field)

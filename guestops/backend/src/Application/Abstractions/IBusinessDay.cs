@@ -40,7 +40,45 @@ public interface IBusinessDay
     /// <summary>A date, at the property's check-out hour, in its zone.</summary>
     Task<StayTime> AtCheckOutAsync(
         RequestScope scope, DateOnly date, CancellationToken cancellationToken);
+
+    /// <summary>The instants a business day begins and ends at.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Implementation choice, not a ruling</b> — Stream FF, 2026-09-04, and
+    /// it may be reversed. The departures list selects stays whose departure
+    /// falls inside a business day, and a departure is stored <i>only</i> as a
+    /// timestamp: there is no departure-date column, and
+    /// <see cref="StayTime.Date"/> is computed in C# so it cannot be translated
+    /// to SQL. A half-open instant range is the only shape that query can take.
+    /// </para>
+    /// <para>
+    /// It belongs here rather than in a service for the reason the rest of this
+    /// port exists: the roll time and the zone are the property's
+    /// configuration, and turning them into instants is the <b>adapter's</b>
+    /// conversion — the same one <see cref="AtCheckInAsync"/> already makes. A
+    /// service deriving the boundary itself would be computing the operating
+    /// day, which the paragraph opening this interface forbids in as many
+    /// words.
+    /// </para>
+    /// <para>
+    /// <c>null</c> when the property has no usable boundary or zone. A caller
+    /// returns nothing rather than guessing a whole day — a guessed window is
+    /// wrong by a day near midnight and looks like correct data.
+    /// </para>
+    /// </remarks>
+    Task<DayBounds?> BoundsAsync(
+        RequestScope scope, DateOnly date, CancellationToken cancellationToken);
 }
+
+/// <summary>A business day, as a half-open instant range.</summary>
+/// <param name="Start">The roll time on the day itself, inclusive.</param>
+/// <param name="End">The roll time on the next day, exclusive.</param>
+/// <remarks>
+/// Half-open so consecutive days neither overlap nor leave a gap: a departure
+/// recorded exactly at the roll time belongs to the day starting then, and to
+/// exactly one day.
+/// </remarks>
+public sealed record DayBounds(DateTimeOffset Start, DateTimeOffset End);
 
 /// <summary>Turns a guest's contact details into what is stored.</summary>
 /// <remarks>

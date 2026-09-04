@@ -41,7 +41,7 @@ public partial class GuestOpsGrpcService
             ParseDate(request.AsOf, "as_of"),
             context.CancellationToken);
 
-        var response = new ListOutstandingFilingsResponse();
+        var response = new ListOutstandingFilingsResponse { Meta = Meta(request.Context) };
         response.Filings.AddRange(filings.Select(ToProto));
         return response;
     }

@@ -30,6 +30,7 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<BookingService>();
         services.AddScoped<StayLifecycleService>();
         services.AddScoped<StayAssignmentService>();
+        services.AddScoped<StayListService>();
         services.AddScoped<AvailabilityService>();
 
         // The inbound half — the Hub's deferred facts, and the two flows a

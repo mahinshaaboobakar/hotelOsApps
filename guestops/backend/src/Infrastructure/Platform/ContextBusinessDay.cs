@@ -52,6 +52,49 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         RequestScope scope, DateOnly date, CancellationToken cancellationToken)
         => AtAsync(scope, date, checkIn: false, cancellationToken);
 
+    /// <summary>The day's instants, from the roll time Context already returns.</summary>
+    /// <remarks>
+    /// <para>
+    /// <c>GetOperatingDay</c> echoes <c>boundary</c> and <c>timezone</c>
+    /// alongside the date — the proto says the roll time is echoed so a caller
+    /// "can show its working". That is exactly what this needs, so the boundary
+    /// is <b>read</b> here and never assumed to be midnight.
+    /// </para>
+    /// <para>
+    /// <b>The end is computed from the next date, not by adding 24 hours.</b> On
+    /// the two days a zone changes offset a business day is 23 or 25 hours long,
+    /// and a fixed addition would drop or double an hour of departures once a
+    /// year — silently, and in a way that looks like a quiet morning.
+    /// </para>
+    /// </remarks>
+    public async Task<DayBounds?> BoundsAsync(
+        RequestScope scope, DateOnly date, CancellationToken cancellationToken)
+    {
+        var day = await context.GetOperatingDayAsync(
+            new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            cancellationToken: cancellationToken);
+
+        // A property that has not configured a boundary is not one that rolls at
+        // midnight, and a zone that is absent is not UTC. Both produce "no
+        // answer" rather than a default that would be wrong by hours.
+        if (!TimeOnly.TryParse(day.Boundary, out var roll)
+            || string.IsNullOrWhiteSpace(day.Timezone))
+        {
+            return null;
+        }
+
+        var zone = TimeZoneInfo.FindSystemTimeZoneById(day.Timezone);
+
+        return new DayBounds(At(zone, date, roll), At(zone, date.AddDays(1), roll));
+    }
+
+    /// <summary>A local date and time, as the instant the property saw.</summary>
+    private static DateTimeOffset At(TimeZoneInfo zone, DateOnly date, TimeOnly hour)
+    {
+        var local = date.ToDateTime(hour);
+        return new DateTimeOffset(local, zone.GetUtcOffset(local));
+    }
+
     private async Task<StayTime> AtAsync(
         RequestScope scope, DateOnly date, bool checkIn, CancellationToken cancellationToken)
     {
