@@ -14,8 +14,13 @@
     --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
     --color-ink-on-accent:#0b0d14;
     --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+    /* The three soft tones, published 2026-09-04 (894e230). Tints, so that
+       three apps stop hand-mixing three different greens. */
+    --color-ok-soft:rgb(52 211 153 / 0.12);
+    --color-warn-soft:rgb(251 191 36 / 0.12);
+    --color-bad-soft:rgb(248 113 113 / 0.12);
     --radius-panel:1rem;
-    --font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+    --font-sans:system-ui, -apple-system, "Segoe UI", sans-serif;
 
     /* Derived, never declared — mirrors guestops/ui/chrome/styles.ts stop for
        stop, so the drawing and the module cannot disagree about a colour. */

@@ -48,9 +48,15 @@ const DERIVED = `
   --go-override:color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171));
   --go-pms-wash:color-mix(in srgb, var(--color-brand,#818cf8) 13%, transparent);
   --go-override-wash:color-mix(in srgb, var(--go-override) 15%, transparent);
-  --go-warn-wash:color-mix(in srgb, var(--color-warn,#fbbf24) 14%, transparent);
-  --go-ok-wash:color-mix(in srgb, var(--color-ok,#34d399) 12%, transparent);
-  --go-bad-wash:color-mix(in srgb, var(--color-bad,#f87171) 10%, transparent);
+  /* The three state tints are PUBLISHED now — 894e230, docs/working/64 §1.
+     These were hand-mixed at 14%, 12% and 10%: three numbers nobody chose
+     together, in an application that is one of three doing the same thing.
+     Aliased rather than deleted, because ten selectors name them and the
+     shell's tone is the value either way; the fallback is the old mix, so a
+     host that has not published the tones yet still renders. */
+  --go-warn-wash:var(--color-warn-soft, color-mix(in srgb, var(--color-warn,#fbbf24) 14%, transparent));
+  --go-ok-wash:var(--color-ok-soft, color-mix(in srgb, var(--color-ok,#34d399) 12%, transparent));
+  --go-bad-wash:var(--color-bad-soft, color-mix(in srgb, var(--color-bad,#f87171) 10%, transparent));
   --go-brand-wash:color-mix(in srgb, var(--color-brand,#818cf8) 18%, transparent);
   --go-brand-edge:color-mix(in srgb, var(--color-brand,#818cf8) 50%, transparent);
   --go-bad-edge:color-mix(in srgb, var(--color-bad,#f87171) 45%, transparent);
@@ -118,6 +124,13 @@ const SHELL = `
   color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent)}
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed}
 .btn.danger{border-color:var(--go-bad-edge);color:var(--color-bad,#f87171)}
+/* The confirm step of a destructive flow is FILLED — docs/working/64 §2,
+   amended 2026-09-04. An outline danger button sitting where a person has
+   already decided to delete something is quieter than the Cancel beside it,
+   which inverts the weight of the choice. Outline stays for the inline
+   affordance that STARTS the flow; this is the one that performs it. */
+.btn.danger.confirm{background:var(--color-bad,#f87171);border-color:transparent;
+  color:var(--color-ink-on-accent,#0b0d14);font-weight:600}
 .btn.sm{padding:2px 8px;font-size:11px;gap:6px}
 .btn.sm.pri{background:var(--go-brand-wash);border-color:var(--go-brand-edge);
   color:var(--color-ink,#e8ebf4);font-weight:500}
