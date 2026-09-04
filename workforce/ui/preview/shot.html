@@ -41,8 +41,22 @@
   frame.height = height;
   frame.src = "./frame.html?" + (params.get("q") || "");
 
-  const scale = Math.min(window.innerWidth / width, window.innerHeight / height, 1);
+  /*
+   * The scale may be given rather than derived, and for a capture pass it
+   * should be. Deriving it from `innerHeight` makes every screenshot depend on
+   * a window height that moves on its own — an extension panel opening is
+   * enough — so two halves of one pair end up photographed at two scales, and
+   * a frame taller than the viewport at the moment of the shot is silently
+   * clipped instead of fitted.
+   */
+  const given = Number(params.get("k") || 0);
+  const scale = given > 0
+    ? given
+    : Math.min(window.innerWidth / width, window.innerHeight / height, 1);
+
   document.getElementById("stage").style.transform = "scale(" + scale + ")";
+  window.__rect = () => [Math.round(width * scale * devicePixelRatio),
+                         Math.round(height * scale * devicePixelRatio)].join("x");
 
   /*
    * The realm raises `data-ready` on its own root when its screen has settled.
