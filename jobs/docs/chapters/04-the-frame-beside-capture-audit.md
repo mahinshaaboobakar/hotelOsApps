@@ -6,6 +6,12 @@ against these exact frames."* The precedent for how is `OPS-Q11` — the locked
 drawing beside the shipping surface, **both sides photographs in one browser at
 one width**.
 
+> **The whole surface, side by side:** `docs/mockups/03-the-jobs-audit.html` —
+> every one of the twenty-six locked frames beside its build, with a verdict on
+> each element, assembled for the owner's adjudication after this first pass.
+> That page supersedes this chapter's table as the record of coverage; this
+> chapter remains the account of the two findings that changed the design.
+
 ## How it was run
 
 One Chromium window at 1400 × 1000. Both sides served from one origin
