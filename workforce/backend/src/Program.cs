@@ -30,6 +30,18 @@ using Serilog;
 // *into* a property that already exists, so its certificate exists before it
 // does.
 
+// The connection name the platform hands **every** package — a convention, not
+// a manifest field, exactly as `dotnet <assembly> migrate` is (ADR 0092 §Q11).
+// Install steps 6 and 8 set `ConnectionStrings__HotelOS` in the child's
+// environment and ASP.NET maps it here.
+//
+// This file asked for `Workforce`, which nothing anywhere sets — the same
+// defect as the certificate directory above, one layer down: the application
+// would have launched and then answered every request with a null connection
+// string. `packages/process.rs` holds the name as a constant; hello-hotel reads
+// it; GuestOps reads it. This is the third reader, not a fourth spelling.
+const string PlatformConnection = "HotelOS";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // `dotnet HotelOS.Workforce.dll migrate` — ADR 0039, and install step 6.
@@ -44,7 +56,7 @@ if (args is ["migrate", ..])
 {
     return await SchemaMigration.RunAsync(
         builder.Configuration,
-        connectionName: "Workforce",
+        connectionName: PlatformConnection,
         schema: WorkforceDbContext.Schema,
         create: connection => new WorkforceDbContext(
             new DbContextOptionsBuilder<WorkforceDbContext>()
@@ -56,6 +68,35 @@ if (args is ["migrate", ..])
                 .Options),
         args);
 }
+
+// # What the platform told this application, when it started it — `PKG-Q46` (1)
+//
+// Three facts arrive in the environment, written by `packages/process.rs` at
+// install step 8, and **not one of them is configuration this package chose**:
+//
+//   HOTELOS_CERTIFICATE_DIR   install step 4 wrote client.crt/.key and ca.crt
+//   HOTELOS_KERNEL_ENDPOINT   the one peer an application is told
+//   HOTELOS_PROPERTY_ID       which property this installation serves
+//
+// This file read `Service:CertificateDirectory` and `Kernel:Endpoint` instead —
+// the **platform-service** convention, which is right for a service the
+// installer configures and wrong for a package the Kernel launches. Nothing
+// sets those keys for an application, and there is no `appsettings.json` here
+// to carry a default, so the throw below fired on every real launch: *this
+// application had never once started under a Kernel*. `AUTHZ-Q21` is why an
+// application ships no endpoint configuration at all — peers come from
+// discovery, and the Kernel's own address is the one thing discovery cannot
+// answer, so it is handed over.
+//
+// Read once, through the SDK, because a second copy of a contract is the copy
+// that stops matching on the day somebody renames a variable in `process.rs`.
+var platform = PlatformEnvironment.Read()
+    ?? throw new InvalidOperationException(
+        "HOTELOS_CERTIFICATE_DIR, HOTELOS_KERNEL_ENDPOINT and HOTELOS_PROPERTY_ID are "
+        + "all required: the Kernel sets them when it starts an installed application. "
+        + "Every surface here authenticates its caller by client certificate, so there "
+        + "is no honest half-configured mode — run this through an install rather than "
+        + "from a checkout. `migrate` above needs none of them and runs either way.");
 
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
@@ -78,7 +119,7 @@ builder.Services.AddDbContext<WorkforceDbContext>(options =>
     options
         .UseSnakeCaseNamingConvention()
         .UseNpgsql(
-            builder.Configuration.GetConnectionString("Workforce"),
+            builder.Configuration.GetConnectionString(PlatformConnection),
             npgsql =>
             {
                 // This application's own schema, and its migrations history with
@@ -105,9 +146,13 @@ builder.Services.AddHealthChecks()
 // exception for an installed application.
 builder.Services.AddHotelOsPlatform<WorkforceDbContext>(
     serviceName: "workforce",
-    kernelEndpoint: new Uri(
-        builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:50051"),
-    certificateDirectory: builder.Configuration["Service:CertificateDirectory"]);
+    kernelEndpoint: platform.KernelEndpoint,
+    certificateDirectory: platform.CertificateDirectory);
+
+// Which property this installation serves. Registered rather than looked up:
+// an application serves exactly one, and the shift fan-out's sweep acts under
+// this application's own service identity, which has no request to take it from.
+builder.Services.AddSingleton(platform);
 
 // Master Data, read-only — CLAUDE.md: *"applications may read master data"*.
 //
@@ -177,10 +222,7 @@ builder.Services.AddScoped<OnLeaveSummary>();
 // authenticate nobody.
 builder.Host.UsePlatformListener(
     builder.Configuration.GetValue("Service:Port", 50061),
-    builder.Configuration["Service:CertificateDirectory"]
-        ?? throw new InvalidOperationException(
-            "Service:CertificateDirectory is required; an installed application "
-            + "is enrolled before it starts"));
+    platform.CertificateDirectory);
 
 var app = builder.Build();
 
