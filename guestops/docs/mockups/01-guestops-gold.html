@@ -103,7 +103,11 @@
   .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
   .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
   .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:rgba(255,255,255,.06);color:var(--dim)}
-  .body{padding:0 26px 22px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+  /* Top padding restored. It was 0 because the page-title row above supplied
+     it — `22px 26px 14px` — so removing that row left the numbers strip flush
+     against the app bar's rule. Jobs pads its body evenly on all four sides,
+     which is what a body with nothing above it needs. */
+  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px}
   /* summary strip */
   /* One thin bar, not four cards — Jobs' board, docs/working/64 §3.
      Four stat cards cost ~68px at the top of every list screen, which is two
@@ -113,10 +117,23 @@
          font-size:12px;color:var(--dim);padding:8px 12px;
          border:1px solid var(--line);border-radius:8px}
   .strip b{color:var(--text);font-size:14px;font-weight:600;margin-right:5px}
+  /* The day's context, pushed right — Jobs' board carries "ENG · Tue 2 Sep ·
+     02 Sep 14:24" in exactly this slot. It used to be a `.hsub` under a page
+     heading that repeated the section name already in the top bar. */
+  .strip .ctx{margin-left:auto;color:var(--faint)}
+  .strip .ctx b{font-size:12px;color:var(--dim);margin-right:0}
   .strip .on b{color:var(--indigo)}
   .strip .on{color:var(--text)}
   /* tabs */
-  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:2px;flex-wrap:wrap}
+  /* The view switcher, and the screen's actions on the same line — Jobs puts
+     its primary action at the right of the filter row rather than in a page
+     header, and with the section named in the top bar there is no header left
+     to put it in. */
+  .tabs{display:flex;gap:4px;align-items:center;border-bottom:1px solid var(--line);
+        margin-top:2px;flex-wrap:wrap}
+  .tabs .btn{margin-bottom:6px}
+  /* Where a screen has no view switcher to hang its actions on. */
+  .acts{display:flex;gap:9px;justify-content:flex-end;margin-top:12px}
   .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border-bottom:2px solid transparent;white-space:nowrap}
   .tab.on{color:var(--text);border-bottom-color:var(--indigo);font-weight:600}
   .tab.gone{opacity:.38}
@@ -150,7 +167,12 @@
   .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;border-bottom:1px solid var(--line)}
   /* Jobs keeps the rule on every row, including the last: with no card around
      the list, that final line is what closes it. */
-  .tr>div{padding:6px 10px;display:flex;align-items:center;gap:7px;min-width:0}
+  /* `align-items:flex-start` is Jobs' `td{vertical-align:top}`. It matters
+     here more than it does there: a GuestOps row's first cell is two lines,
+     so centring pushed every other cell down against the guest's name — the
+     booking number sat between the two lines rather than beside the name. */
+  .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+  .tr.hd>div{align-items:center}
   .tr.hd>div{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
              color:var(--faint);padding:8px 10px}
   .tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
@@ -296,24 +318,22 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title">
-      <div><div class="ht">Today</div><div class="hsub">Business day <b style="color:var(--dim)">Tue 31 Aug</b> · rolls at 04:00 · standalone — this property is the book</div></div>
-      <div class="grow"></div>
-      <div class="btn">Walk-in</div>
-      <div class="btn pri">＋ New booking</div>
-    </div>
     <div class="body">
       <div class="strip">
         <span class="on"><b>14</b>arrivals · 6 unassigned</span>
         <span><b>42</b>in house</span>
         <span><b>11</b>departures · 3 gone</span>
         <span><b>4</b>attention</span>
+        <span class="ctx">Business day <b>Tue 31 Aug</b> · rolls at 04:00 · standalone — this property is the book</span>
       </div>
       <div class="tabs">
         <div class="tab on">Arrivals<span class="n">14</span></div>
         <div class="tab">In house<span class="n">42</span></div>
         <div class="tab">Departures<span class="n">11</span></div>
         <div class="tab">Attention<span class="n">4</span></div>
+        <div class="grow"></div>
+        <div class="btn">Walk-in</div>
+        <div class="btn pri">＋ New booking</div>
       </div>
       <div class="tbl">
         <div class="tr hd"><div>Guest</div><div>Booking</div><div>Room type</div><div>Room</div><div>Nights</div><div></div></div>
@@ -410,18 +430,14 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title">
-      <div><div class="ht">Bookings</div><div class="hsub">218 with a stay in the next 30 days</div></div>
-      <div class="grow"></div>
-      <div class="btn">Walk-in</div>
-      <div class="btn pri">＋ New booking</div>
-    </div>
     <div class="body">
-      <div style="display:flex;gap:10px">
+      <div style="display:flex;gap:10px;align-items:center">
         <div class="inp" style="flex:2">🔍 <span style="color:var(--faint)">Name, phone, email, confirmation number…</span></div>
         <div class="inp" style="flex:1">Arriving · next 30 days <span class="grow">▾</span></div>
         <div class="inp" style="flex:1">Any status <span class="grow">▾</span></div>
         <div class="inp" style="flex:1">Any source <span class="grow">▾</span></div>
+        <div class="btn">Walk-in</div>
+        <div class="btn pri">＋ New booking</div>
       </div>
       <div class="tbl">
         <div class="tr list hd"><div>Guest</div><div>Booking</div><div>Rooms</div><div>Dates</div><div>Status</div><div></div></div>
@@ -935,8 +951,8 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug · standalone</div></div><div class="grow"></div><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div>
-    <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span></div></div>
+    <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span><span class="ctx">Business day <b>Tue 31 Aug</b> · standalone</span></div>
+      <div class="acts"><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div></div>
     <div class="scrim">
       <div class="sheet">
         <div class="sh_h"><b>Walk-in</b><span>Creates the stay and checks it in — one action, one business day</span></div>
@@ -976,12 +992,6 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title">
-      <div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug · Opera connected</div></div>
-      <div class="grow"></div>
-      <div class="btn">Walk-in</div>
-      <div class="btn pri">＋ New booking</div>
-    </div>
     <div class="body">
       <div class="ban stale"><div><b>PMS feed silent since 09:00 — your entries stand.</b> <span style="color:var(--faint)">Check-ins have not arrived for 5 h 12 m. Bookings and room status are still arriving.</span></div></div>
       <div class="strip">
@@ -989,7 +999,9 @@
         <span><b>42</b>in house</span>
         <span><b>11</b>departures</span>
         <span><b>2</b>attention · 1 outage batch</span>
+        <span class="ctx">Business day <b>Tue 31 Aug</b> · Opera connected</span>
       </div>
+      <div class="acts"><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div>
       <div class="tbl">
         <div class="tr hd"><div>Guest</div><div>Booking</div><div>Room type</div><div>Room</div><div>Nights</div><div></div></div>
         <div class="tr">
@@ -1036,8 +1048,8 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">Attention</div><div class="hsub">Four things a person has to decide — nothing here decides itself</div></div></div>
     <div class="body">
+      <div class="hint" style="margin:0">Four things a person has to decide — nothing here decides itself.</div>
       <div class="card">
         <div class="ch">Same stay, or two? <div class="grow"><span class="sh unk">Opera doesn't know</span></div></div>
         <div class="cb">
@@ -1086,7 +1098,6 @@
     <div class="who">Anitha Menon · Front Office</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">Today</div><div class="hsub">Business day Tue 31 Aug</div></div></div>
     <div class="empty">
       <div class="ic">⌛</div>
       <b>Bringing in what Opera already sent</b>
@@ -1241,9 +1252,8 @@
     <div class="who">Rakesh Varma · General Manager</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">Setup</div><div class="hsub">GuestOps's own settings for this property</div></div><div class="grow"></div><div class="btn">Discard</div><div class="btn pri">Save</div></div>
     <div class="body">
-      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stop-sell</div><div class="tab">Stay defaults</div></div>
+      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stop-sell</div><div class="tab">Stay defaults</div><div class="grow"></div><div class="btn">Discard</div><div class="btn pri">Save</div></div>
       <div class="card">
         <div class="ch">Stop-sell <div class="grow">the seller's control — not an inventory fact</div></div>
         <div class="cb">
