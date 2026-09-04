@@ -32,4 +32,4 @@ const rows: JobRow[] = [
   { id: "j388", number: "MRN-HK-388", where: "Room 1204", what: "Housekeeping › Extra towels", priority: "P3", status: "RESOLVED", raisedBy: "Guest · stay 7F2A", assignedTo: "Meera Krishnan (HK)", concern: "ON_TRACK", concernDetail: "auto-close 18:00", dueAt: null, tags: ["linked"], viewerIsAssignee: false },
 ];
 
-export const recordedBoard: BoardPage = { rows, total: 47, page: 0, pageSize: 12 };
+export const recordedBoard: BoardPage = { rows, paging: { page: 0, pageSize: 12, total: 47 } };

@@ -11,10 +11,19 @@ public partial class JobsGrpcService
     public override async Task<ListJobsResponse> ListJobs(ListJobsRequest r, ServerCallContext context)
     {
         var scope = r.Context.ToScope(CallerContext.Get(context));
-        var (rows, total) = await queries.ListAsync(scope, new JobFilter(
+        // CORE-Q13: the platform's paged pair, and the reply echoes the page and
+        // the size the service actually applied.
+        var asked = r.Paging ?? new HotelOS.Contracts.Common.V1.PagedRequest();
+        var (rows, total, applied) = await queries.ListAsync(scope, new JobFilter(
             Blank(r.DepartmentCode)?.ToUpperInvariant(), r.Statuses.ToList(), r.ScheduledOnly,
-            ParseOptionalId(r.AssigneeUserId, "assignee_user_id"), r.PageSize, r.Page), context.CancellationToken);
-        var response = new ListJobsResponse { Total = total };
+            ParseOptionalId(r.AssigneeUserId, "assignee_user_id"), asked.PageSize, asked.Page), context.CancellationToken);
+        var response = new ListJobsResponse
+        {
+            Paging = new HotelOS.Contracts.Common.V1.PagedResponse
+            {
+                Page = Math.Max(0, asked.Page), PageSize = applied, Total = total,
+            },
+        };
         response.Jobs.AddRange(rows.Select(row => Views.Job(row, scope.UserId)));
         return response;
     }

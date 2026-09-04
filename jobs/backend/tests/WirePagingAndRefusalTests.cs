@@ -39,7 +39,9 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
     private static ListJobsRequest Page(WireHarness h, int page, int size) => new()
     {
-        Context = h.Context(), Page = page, PageSize = size,
+        Context = h.Context(),
+        // CORE-Q13: the platform's pair, not this service's own numbers.
+        Paging = new HotelOS.Contracts.Common.V1.PagedRequest { Page = page, PageSize = size },
     };
 
     [Fact]
@@ -50,7 +52,10 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         var first = await h.Client.ListJobsAsync(Page(h, 0, 12));
 
         Assert.Empty(first.Jobs);
-        Assert.Equal(0, first.Total);
+        Assert.Equal(0, first.Paging.Total);
+        // The reply echoes the size it applied, so a pager never divides by a guess.
+        Assert.Equal(12, first.Paging.PageSize);
+        Assert.Equal(0, first.Paging.Page);
     }
 
     [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
@@ -65,13 +70,14 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         var boundary = await h.Client.ListJobsAsync(Page(h, 2, 12));
         var past = await h.Client.ListJobsAsync(Page(h, 3, 12));
 
-        Assert.Equal(25, first.Total);
+        Assert.Equal(25, first.Paging.Total);
         Assert.Equal(12, first.Jobs.Count);
         Assert.Equal(12, second.Jobs.Count);
         // The exact boundary: 25 rows, twelve to a page, one left over.
         Assert.Single(boundary.Jobs);
         Assert.Empty(past.Jobs);
-        Assert.Equal(25, past.Total);
+        Assert.Equal(25, past.Paging.Total);
+        Assert.Equal(3, past.Paging.Page);
         // No row appears twice across the pages.
         var seen = first.Jobs.Concat(second.Jobs).Concat(boundary.Jobs).Select(j => j.Id).ToList();
         Assert.Equal(25, seen.Distinct().Count());
@@ -85,12 +91,12 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         for (var i = 1; i <= 14; i += 1) await RaiseAsync(h, itemId, $"job {i}");
 
         var second = await h.Client.ListJobsAsync(Page(h, 1, 12));
-        Assert.Equal((14, 2), (second.Total, second.Jobs.Count));
+        Assert.Equal((14, 2), (second.Paging.Total, second.Jobs.Count));
 
         await RaiseAsync(h, itemId, "raised while you were reading page two");
 
         var again = await h.Client.ListJobsAsync(Page(h, 1, 12));
-        Assert.Equal(15, again.Total);
+        Assert.Equal(15, again.Paging.Total);
         Assert.Equal(3, again.Jobs.Count);
     }
 
@@ -108,7 +114,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
         Assert.Single(engineering.Jobs);
         Assert.Empty(housekeeping.Jobs);
-        Assert.Equal(0, housekeeping.Total);
+        Assert.Equal(0, housekeeping.Paging.Total);
         Assert.Empty(closed.Jobs);
         Assert.Empty(scheduled.Jobs);
     }

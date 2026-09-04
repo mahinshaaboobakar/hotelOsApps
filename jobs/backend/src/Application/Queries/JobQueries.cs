@@ -15,8 +15,21 @@ namespace HotelOS.Jobs.Application.Queries;
 /// </summary>
 public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProvider clock)
 {
-    /// <summary>A page of the board, or of Scheduled — frames 1 and 6.</summary>
-    public async Task<(IReadOnlyList<JobRow> Rows, int Total)> ListAsync(
+    /// <summary>The largest page this service will serve, whatever is asked for.</summary>
+    public const int MaxPageSize = 100;
+
+    /// <summary>The page size when a caller expresses no preference.</summary>
+    public const int DefaultPageSize = 24;
+
+    /// <summary>
+    /// A page of the board, or of Scheduled — frames 1 and 6.
+    /// </summary>
+    /// <returns>
+    /// The rows, the count matching the query, and <b>the page size actually
+    /// applied</b> — CORE-Q13: a caller that asked for five hundred and quietly
+    /// got a hundred would otherwise compute every page number wrongly.
+    /// </returns>
+    public async Task<(IReadOnlyList<JobRow> Rows, int Total, int PageSize)> ListAsync(
         RequestScope scope, JobFilter filter, CancellationToken cancellationToken)
     {
         await ReaderAsync(scope, cancellationToken);
@@ -29,10 +42,11 @@ public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProv
         if (filter.DepartmentCode is { } code) query = query.Where(j => j.DepartmentCode == code);
 
         var total = await query.CountAsync(cancellationToken);
-        var size = filter.PageSize <= 0 ? 24 : filter.PageSize;
+        var size = filter.PageSize <= 0 ? DefaultPageSize : Math.Min(filter.PageSize, MaxPageSize);
+        var page = Math.Max(0, filter.Page);
         var jobs = await query
             .OrderBy(j => j.ScheduledFor).ThenBy(j => j.DueAt ?? DateTimeOffset.MaxValue).ThenBy(j => j.CreatedAt)
-            .Skip(filter.Page * size).Take(size)
+            .Skip(page * size).Take(size)
             .ToListAsync(cancellationToken);
         var rows = await DecorateAsync(jobs, cancellationToken);
         if (filter.AssigneeUserId is { } assignee)
@@ -40,7 +54,7 @@ public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProv
             rows = rows.Where(r => r.Assignment?.AssigneeUserId == assignee).ToList();
         }
 
-        return (rows, total);
+        return (rows, total, size);
     }
 
     /// <summary>One job with every satellite — frames 2 to 2g.</summary>

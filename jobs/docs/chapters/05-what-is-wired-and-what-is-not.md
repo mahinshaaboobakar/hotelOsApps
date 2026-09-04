@@ -74,10 +74,17 @@ form; the form's own button closes it again without sending anything.
   filter and on every page.** Pressing "2" changes the highlighted button and
   nothing else.
 * Even with a client, that request would not work: `ListJobsRequest` takes
-  `department_code`, `statuses`, `scheduled_only`, `assignee_user_id`,
-  `page_size` and `page`. The seam sends a single opaque `filter` string. **The
-  two shapes have to be reconciled**, and the chips' meanings decided —
-  "Restricted" and "Raised by guests" have no field in the request at all.
+  `department_code`, `statuses`, `scheduled_only`, `assignee_user_id` and — since
+  **CORE-Q13**, ruled 2026-09-04 — the platform's `common.v1.PagedRequest`
+  rather than the `page`/`page_size` this service had minted privately. The seam
+  sends a single opaque `filter` string beside a paging pair. **The filter
+  shapes have to be reconciled**, and the chips' meanings decided — "Restricted"
+  and "Raised by guests" have no field in the request at all.
+
+  The paging half is now settled: the module mirrors `PagedResponse` field for
+  field, and the reply carries **the page size the service actually applied**
+  after its clamp, which this service previously never sent. The numbered pager
+  the screens draw is unchanged, and is BB's shared component to render.
 * The Live tab's *"6 of 9 · more load as you scroll"* has **no scroll handler**.
   The caption describes an intention; the card scrolls its six and stops.
 

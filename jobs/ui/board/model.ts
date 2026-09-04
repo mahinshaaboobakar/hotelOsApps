@@ -28,12 +28,23 @@ export interface JobRow {
   viewerIsAssignee: boolean;
 }
 
+/**
+ * What a page of a list carries — CORE-Q13's <code>PagedResponse</code>, field
+ * for field. The shape was minted in Jobs and is now the platform's; the
+ * module mirrors it so that when a client lands the mapping is one field to
+ * one, and so the numbered pager divides by the size the service <b>applied</b>
+ * rather than the one it was asked for.
+ */
+export interface Paging {
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
 /** A page of the board. */
 export interface BoardPage {
   rows: readonly JobRow[];
-  total: number;
-  page: number;
-  pageSize: number;
+  paging: Paging;
 }
 
 /** Today's strip above the board. */

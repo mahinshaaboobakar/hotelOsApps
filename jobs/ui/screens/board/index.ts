@@ -29,7 +29,11 @@ const FILTERS = ["My departments · ENG", "All departments", "Assigned to me", "
 
 export async function board(host: HostApi, main: HTMLElement, place: BoardPlace): Promise<void> {
   const today = await load(host, JOB_READ, "today", recordedToday);
-  const page = await load(host, JOB_READ, "board", recordedBoard, { filter: place.filter, page: place.page });
+  const page = await load(host, JOB_READ, "board", recordedBoard, {
+    filter: place.filter,
+    // CORE-Q13's request half, sent as the platform shapes it.
+    paging: { page: place.page, pageSize: 12 },
+  });
 
   const body = el("div", "body");
   body.append(strip(host, today.value), filters(place, may(host, JOB_CREATE)), table(host, page.value.rows, place), pages(page.value, place));
@@ -86,8 +90,9 @@ function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
 }
 
 function pages(page: BoardPage, place: BoardPlace): HTMLElement {
-  const from = page.page * page.pageSize + 1;
-  const to = Math.min(page.total, from + page.rows.length - 1);
-  const count = Math.max(1, Math.ceil(page.total / page.pageSize));
-  return pager(`${String(from)}–${String(to)} of ${String(page.total)} · ${String(page.pageSize)} per page at this height`, page.page, count, place.onPage);
+  const { page: at, pageSize, total } = page.paging;
+  const from = at * pageSize + 1;
+  const to = Math.min(total, from + page.rows.length - 1);
+  const count = Math.max(1, Math.ceil(total / pageSize));
+  return pager(`${String(from)}–${String(to)} of ${String(total)} · ${String(pageSize)} per page at this height`, at, count, place.onPage);
 }

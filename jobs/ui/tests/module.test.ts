@@ -72,6 +72,7 @@ describe("the Jobs module", () => {
   it("draws the board's twelve rows, the strip and the pager", async () => {
     await settle();
     expect(root.querySelectorAll("tbody tr, table tr").length).toBe(recordedBoard.rows.length + 1);
+    expect(recordedBoard.paging.total).toBe(47);
     expect(root.querySelector(".strip")?.textContent).toContain("11open");
     expect(root.querySelector(".pager")?.textContent).toContain("1–12 of 47");
   });

@@ -68,13 +68,22 @@ message ListJobsRequest {
   repeated string statuses = 3;    // empty: the open ones
   bool   scheduled_only = 4;
   string assignee_user_id = 5;
-  int32  page_size = 6;            // 0: 24
-  int32  page = 7;                 // 0-based
+
+  // CORE-Q13: this shape was minted here and is now the platform's. The two
+  // numbers are unchanged; only their home is. The old field numbers are
+  // reserved so no later field can quietly inherit a paging value on the wire.
+  reserved 6, 7;
+  hotelos.common.v1.PagedRequest paging = 8;
 }
 
 message ListJobsResponse {
   repeated JobView jobs = 1;
-  int32 total = 2;
+
+  // CORE-Q13. `paging.page_size` is the size ACTUALLY APPLIED after the
+  // service clamps it, so a numbered pager never divides by a size it only
+  // asked for — which this service used not to send at all.
+  reserved 2;
+  hotelos.common.v1.PagedResponse paging = 3;
 }
 
 message GetJobRequest {
