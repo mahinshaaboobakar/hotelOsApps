@@ -144,7 +144,10 @@ ul.flows b{color:var(--text)}
         <div class="wrow"><span>Housekeeping</span><span class="mono">inherits</span></div>
         <div class="wrow"><span>Front Office</span><span class="mono">inherits</span></div>
         <div class="wrow"><span>Food &amp; Beverage</span><span class="pill">override</span></div>
-        <div class="mono" style="margin-top:8px">Property first; a department overrides only the rows it changes.</div>
+        <div class="wrow" style="padding-left:14px"><span>Housekeeping › Cleaning</span><span class="mono">due 30 min</span></div>
+        <div class="wrow" style="padding-left:14px"><span>Housekeeping › Bottle of water</span><span class="mono">due 10 min</span></div>
+        <div class="wrow" style="padding-left:28px"><span>› Deep clean (item)</span><span class="mono">due 90 min</span></div>
+        <div class="mono" style="margin-top:8px">Property → department → category → item. Each level overrides only the rows it changes.</div>
       </div>
       <div class="card">
         <h3>Engineering <span class="mono">overrides the property default</span> <span class="btn" style="float:right;padding:2px 8px;font-size:11px">Reset to property</span></h3>
@@ -161,6 +164,7 @@ ul.flows b{color:var(--text)}
     </div>
   </div>
 </div>
+<div class="note fix"><b>Redline folded (2026-09-04, fourth pass) — one department, different promises per category.</b> Housekeeping › Cleaning in 30 minutes but › Bottle of water in 10: the "due within" of a job is <b>not</b> a department number. It resolves <b>item → category → department → property</b> (chapter §2.3): the catalogue item's own due-within first (Deep clean 90 min), else its category's (Bottle of water 10 min, Cleaning 30 min), else the department's row here, else the property's. The same chain picks the concern policy — at-risk point, stuck tests, ladder — so a category can carry its own ladder too (a guest-request category may reach the manager where a cleaning category never does). The scope rail on the left is that chain, and a category or item row is added from the catalogue page (frame 7 of page 01: "Due within", and "Concern policy" beside it), not here.</div>
 <div class="note"><b>Purpose:</b> this is the whole escalation design (S5 D1–D3) as one table — how long a job of each priority has, when it turns AT_RISK, what counts as STUCK, who becomes accountable at each step, and whether a manager hears of a P1 already at risk (the owner's flexibility ask). Table <code>concern_policy</code>; property default with per-department override. Everything the 60-second sweep decides, it decides from this table.</div>
 
 <h1 class="frame">2 · <b>Settings · Shifts &amp; presence</b>. When a department's clock runs.</h1>
@@ -297,9 +301,10 @@ ul.flows b{color:var(--text)}
         <div class="kv" style="grid-template-columns:120px 1fr">
           <div>Property</div><div>the default for every job here</div>
           <div>Department</div><div>overrides the property for that department's jobs</div>
-          <div>Catalogue item</div><div>overrides both, for one item, from the item's property policy</div>
+          <div>Category</div><div>overrides the department for every item of that category — Cleaning 30 min, Bottle of water 10 min</div>
+          <div>Catalogue item</div><div>overrides all three, for one item, from the item's property policy</div>
         </div>
-        <div class="mono" style="margin-top:8px">Resolution order for a job: item → department → property (§2.3).</div>
+        <div class="mono" style="margin-top:8px">Resolution order for a job: item → category → department → property (§2.3).</div>
       </div>
     </div>
     <div style="margin-top:12px"><span class="btn pri">Next · the clock</span><span class="btn">Cancel</span></div>
@@ -319,7 +324,7 @@ ul.flows b{color:var(--text)}
       <tr><td><span class="pill p3">P3</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">same shift</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">80 %</span> of due</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">60 min</span></td><td>—</td><td>pauses</td></tr>
       <tr><td><span class="pill nt">NT</span></td><td class="dimtd">no clock</td><td class="dimtd">—</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">15 min</span> untriaged</td><td class="dimtd">—</td><td class="dimtd">—</td></tr>
     </table>
-    <div class="mono" style="margin-top:10px">Example, P1 raised 13:31: at risk from 14:00 (75 % of 40 min) · breached from 14:10 · stuck at 13:39 if nobody has accepted, or at 14:02 if accepted but nobody has started.</div>
+    <div class="mono" style="margin-top:10px">Example, P1 raised 13:31: at risk from 02 Sep 14:00 (75 % of 40 min) · breached from 02 Sep 14:10 · stuck at 02 Sep 13:39 if nobody has accepted, or at 02 Sep 14:02 if accepted but nobody has started.</div>
     <div style="margin-top:12px"><span class="btn pri">Next · the ladder</span><span class="btn">Back</span></div>
   </div>
 </div>

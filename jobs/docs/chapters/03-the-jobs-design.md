@@ -187,6 +187,17 @@ category's default → the department's → the property's; the resolved
 `concern_policy_id` is stamped on `job_concern_history`'s first row so a
 later edit never rewrites this job's past.
 
+The same chain carries **due time**, and it is why one department can keep
+different promises: Housekeeping › *Cleaning* 30 minutes, Housekeeping ›
+*Bottle of water* 10 minutes, and *Deep clean* 90 — the item's own
+`standard_minutes` first, else the category's, else the department's row
+of `concern_policy`, else the property's. A category may carry its own
+`concern_policy_id` for the same reason (owner's question, 2026-09-04).
+
+**Timestamps** everywhere are stored UTC and shown as date *and* time; the
+form — 24-hour or AM/PM, day-month or month-day — is the property's Core
+setting, read through Context. Jobs configures none of it (owner, 2026-09-04).
+
 **Who else reads it.** GuestOps and Room Care raise jobs against catalogue
 items, and they read the catalogue the way every cross-application question
 is answered on this platform: **through Context**, never a copy and never a
