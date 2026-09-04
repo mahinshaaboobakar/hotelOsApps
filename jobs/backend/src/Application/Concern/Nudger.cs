@@ -37,7 +37,7 @@ public class Nudger(JobsDbContext db, IPropertyDirectory directory)
                 {
                     db.Nudges.Add(new JobNudge
                     {
-                        Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId, ToUserId = user,
+                        Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId, ToUserId = user,
                         Concern = verdict.Concern, AsRole = subscription.Role, SentAt = now,
                     });
                 }

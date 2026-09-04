@@ -32,7 +32,7 @@ public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, Tim
             h => h.PropertyId == scope.PropertyId && h.DepartmentCode == code, cancellationToken);
         if (hours is null)
         {
-            hours = new ServiceHours { Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId, DepartmentCode = code };
+            hours = new ServiceHours { Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId, DepartmentCode = code };
             db.ServiceHours.Add(hours);
         }
 
@@ -87,7 +87,7 @@ public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, Tim
         {
             presence = new DepartmentPresence
             {
-                Id = Uuid7.NewUuid7(), PropertyId = propertyId, DepartmentCode = code, Since = clock.GetUtcNow(),
+                Id = Guid.CreateVersion7(), PropertyId = propertyId, DepartmentCode = code, Since = clock.GetUtcNow(),
             };
             db.Presence.Add(presence);
         }

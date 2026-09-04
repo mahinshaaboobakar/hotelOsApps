@@ -30,7 +30,7 @@ public class PropertyCatalogueService(JobsDbContext db, IKernelAuthorizer author
             p => p.PropertyId == scope.PropertyId && p.ItemId == command.ItemId, cancellationToken);
         if (policy is null)
         {
-            policy = new PropertyItemPolicy { Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId, ItemId = command.ItemId };
+            policy = new PropertyItemPolicy { Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId, ItemId = command.ItemId };
             db.ItemPolicies.Add(policy);
         }
 

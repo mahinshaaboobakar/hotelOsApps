@@ -30,7 +30,7 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
         db.Subscriptions.RemoveRange(await db.Subscriptions.Where(s => s.PropertyId == scope.PropertyId).ToListAsync(cancellationToken));
         var rows = commands.Select(c => new ConcernSubscription
         {
-            Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId, Role = c.Role, Concern = c.Concern,
+            Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId, Role = c.Role, Concern = c.Concern,
             OnlyPriority = c.OnlyPriority, DepartmentCode = c.DepartmentCode?.Trim().ToUpperInvariant(),
             RepeatMinutes = c.RepeatMinutes,
         }).ToList();
@@ -49,7 +49,7 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
             p => p.PropertyId == scope.PropertyId && p.DepartmentCode == code, cancellationToken);
         if (policy is null)
         {
-            policy = new ClosingPolicy { Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId, DepartmentCode = code };
+            policy = new ClosingPolicy { Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId, DepartmentCode = code };
             db.ClosingPolicies.Add(policy);
         }
 
@@ -68,7 +68,7 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
         var policy = await db.HoldPolicies.FirstOrDefaultAsync(p => p.PropertyId == scope.PropertyId, cancellationToken);
         if (policy is null)
         {
-            policy = new HoldPolicy { Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId };
+            policy = new HoldPolicy { Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId };
             db.HoldPolicies.Add(policy);
         }
 

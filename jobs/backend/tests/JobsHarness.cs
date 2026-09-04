@@ -56,7 +56,7 @@ public sealed class JobsHarness
     public JobsFixture Fixture { get; }
 
     /// <summary>A property of this harness's own — tests share one database, never one property.</summary>
-    public Guid PropertyId { get; } = Uuid7.NewUuid7();
+    public Guid PropertyId { get; } = Guid.CreateVersion7();
 
     public JobsDbContext Db { get; }
 
@@ -100,7 +100,7 @@ public sealed class JobsHarness
 
     public DayStart DayStart { get; }
 
-    public Guid OrganizationId { get; } = Uuid7.NewUuid7();
+    public Guid OrganizationId { get; } = Guid.CreateVersion7();
 
     public Item NotCooling { get; private set; } = null!;
 
@@ -110,27 +110,27 @@ public sealed class JobsHarness
 
     public Resolution Other { get; private set; } = null!;
 
-    public Guid Room1204 { get; } = Uuid7.NewUuid7();
+    public Guid Room1204 { get; } = Guid.CreateVersion7();
 
     /// <summary>A user scope at the fixture's property, with the organisation for curating.</summary>
     public RequestScope Scope(Guid? user = null) => new()
     {
-        Caller = CallerKind.User, PropertyId = PropertyId, OrganizationId = OrganizationId, UserId = user ?? Uuid7.NewUuid7(),
+        Caller = CallerKind.User, PropertyId = PropertyId, OrganizationId = OrganizationId, UserId = user ?? Guid.CreateVersion7(),
     };
 
     /// <summary>Seed the two-department catalogue the frames draw.</summary>
     public async Task SeedCatalogueAsync()
     {
         var now = Clock.GetUtcNow();
-        var ac = new Category { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, Code = "AC", Name = "Air conditioning", DepartmentCode = "ENG", CreatedAt = now, UpdatedAt = now, Version = 1 };
-        var water = new Category { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, Code = "WATER", Name = "Bottle of water", DepartmentCode = "HK", CreatedAt = now, UpdatedAt = now, Version = 1 };
-        NotCooling = new Item { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, CategoryId = ac.Id, Code = "AC_NOT_COOLING", Name = "Not cooling", DefaultPriority = Priority.P2, DueWithinMinutes = 40, CreatedAt = now, UpdatedAt = now, Version = 1 };
-        StillWater = new Item { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, CategoryId = water.Id, Code = "WATER_STILL", Name = "Still water", DefaultPriority = Priority.P3, DueWithinMinutes = 10, CreatedAt = now, UpdatedAt = now, Version = 1 };
-        RefrigerantToppedUp = new Resolution { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, CategoryId = ac.Id, Name = "Refrigerant topped up" };
-        Other = new Resolution { Id = Uuid7.NewUuid7(), OrganizationId = OrganizationId, Name = "Other", NoteRequired = true };
+        var ac = new Category { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, Code = "AC", Name = "Air conditioning", DepartmentCode = "ENG", CreatedAt = now, UpdatedAt = now, Version = 1 };
+        var water = new Category { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, Code = "WATER", Name = "Bottle of water", DepartmentCode = "HK", CreatedAt = now, UpdatedAt = now, Version = 1 };
+        NotCooling = new Item { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, CategoryId = ac.Id, Code = "AC_NOT_COOLING", Name = "Not cooling", DefaultPriority = Priority.P2, DueWithinMinutes = 40, CreatedAt = now, UpdatedAt = now, Version = 1 };
+        StillWater = new Item { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, CategoryId = water.Id, Code = "WATER_STILL", Name = "Still water", DefaultPriority = Priority.P3, DueWithinMinutes = 10, CreatedAt = now, UpdatedAt = now, Version = 1 };
+        RefrigerantToppedUp = new Resolution { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, CategoryId = ac.Id, Name = "Refrigerant topped up" };
+        Other = new Resolution { Id = Guid.CreateVersion7(), OrganizationId = OrganizationId, Name = "Other", NoteRequired = true };
         Db.Categories.AddRange(ac, water);
         Db.Items.AddRange(NotCooling, StillWater);
-        Db.ItemAliases.Add(new ItemAlias { Id = Uuid7.NewUuid7(), ItemId = NotCooling.Id, Alias = "AC not working" });
+        Db.ItemAliases.Add(new ItemAlias { Id = Guid.CreateVersion7(), ItemId = NotCooling.Id, Alias = "AC not working" });
         Db.CatalogueResolutions.AddRange(RefrigerantToppedUp, Other);
         await Db.SaveChangesAsync();
     }
@@ -138,18 +138,18 @@ public sealed class JobsHarness
     /// <summary>The Engineering policy of settings frame 1: P1 40 min at 75 %, stuck 8 / 15, the four-step ladder.</summary>
     public async Task<ConcernPolicy> SeedEngineeringPolicyAsync()
     {
-        var policy = new ConcernPolicy { Id = Uuid7.NewUuid7(), PropertyId = PropertyId, Name = "Engineering", DepartmentCode = "ENG", CreatedAt = Clock.GetUtcNow(), UpdatedAt = Clock.GetUtcNow(), Version = 1 };
+        var policy = new ConcernPolicy { Id = Guid.CreateVersion7(), PropertyId = PropertyId, Name = "Engineering", DepartmentCode = "ENG", CreatedAt = Clock.GetUtcNow(), UpdatedAt = Clock.GetUtcNow(), Version = 1 };
         Db.ConcernPolicies.Add(policy);
-        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = Priority.P1, DueWithinMinutes = 40, AtRiskPercent = 75, NotAcceptedMinutes = 8, NoSessionMinutes = 15, ManagerAtRisk = true, RunsOutsidePresence = true });
-        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = Priority.P2, DueWithinMinutes = 120, AtRiskPercent = 75, NotAcceptedMinutes = 20, NoSessionMinutes = 45 });
-        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = Priority.P3, AtRiskPercent = 80, NotAcceptedMinutes = 60 });
+        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = Priority.P1, DueWithinMinutes = 40, AtRiskPercent = 75, NotAcceptedMinutes = 8, NoSessionMinutes = 15, ManagerAtRisk = true, RunsOutsidePresence = true });
+        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = Priority.P2, DueWithinMinutes = 120, AtRiskPercent = 75, NotAcceptedMinutes = 20, NoSessionMinutes = 45 });
+        Db.ConcernRules.Add(new ConcernPolicyRule { Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = Priority.P3, AtRiskPercent = 80, NotAcceptedMinutes = 60 });
         foreach (var (step, role, trigger, delay) in new[]
         {
             (1, LadderRole.Assignee, Concern.AtRisk, 0), (2, LadderRole.Supervisor, Concern.Breached, 0),
             (3, LadderRole.Manager, Concern.Breached, 15), (4, LadderRole.JobsManager, Concern.Breached, 45),
         })
         {
-            Db.LadderSteps.Add(new ConcernLadderStep { Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = Priority.P1, StepNo = step, Role = role, Trigger = trigger, DelayMinutes = delay });
+            Db.LadderSteps.Add(new ConcernLadderStep { Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = Priority.P1, StepNo = step, Role = role, Trigger = trigger, DelayMinutes = delay });
         }
 
         await Db.SaveChangesAsync();
@@ -162,7 +162,7 @@ public sealed class JobsHarness
         {
             ItemId = NotCooling.Id, LocationId = Room1204, Summary = "Room feels warm since noon",
             FlowPriority = Priority.P1, RaisedVia = RaisedVia.GuestApp, RaisedKind = RaisedKind.Guest,
-            StayId = stay ?? Uuid7.NewUuid7(), AssignToUserId = assignTo, ScheduledFor = scheduledFor,
+            StayId = stay ?? Guid.CreateVersion7(), AssignToUserId = assignTo, ScheduledFor = scheduledFor,
         }, default);
 }
 

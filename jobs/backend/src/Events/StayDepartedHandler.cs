@@ -30,7 +30,7 @@ public sealed class StayDepartedHandler(JobsDbContext db, TimeProvider clock) : 
 
             db.Notes.Add(new JobNote
             {
-                Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+                Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
                 AuthorKind = RaisedKind.Application, Text = $"Guest departed {envelope.OccurredAt:yyyy-MM-dd HH:mm} UTC; the room may be empty.",
                 Internal = true, At = now,
             });

@@ -61,11 +61,39 @@ builder.Services.AddDbContext<JobsDbContext>(options => options
 
 builder.Services.AddHealthChecks().AddDbContextCheck<JobsDbContext>("postgresql");
 
+// What the Kernel told this installation when it started it — the certificate
+// directory, where the Kernel answers, and which property this serves. Read in
+// one place, from the SDK, because the three names are a contract with
+// `packages/process.rs` and a second copy of a contract is the copy that stops
+// matching (WF-Q11 (8)).
+//
+// This service used to read `Service:CertificateDirectory` and
+// `Kernel:Endpoint` from configuration. The Kernel sets neither: it sets the
+// three environment variables below. So the application threw on the line that
+// demanded the certificate directory and never reached its first request —
+// which read as the platform refusing it rather than as this service asking
+// the wrong question.
+//
+// Null is a state and partial is a defect, and the SDK keeps them apart: null
+// means nobody started this with a Kernel, which is legitimate for `migrate`
+// above and for a checkout, and is not legitimate for serving. An application
+// with no certificate authenticates nobody, so it says so and stops.
+var platform = PlatformEnvironment.Read()
+    ?? throw new InvalidOperationException(
+        "Jobs was not started by a Kernel. HOTELOS_CERTIFICATE_DIR, "
+        + "HOTELOS_KERNEL_ENDPOINT and HOTELOS_PROPERTY_ID are how the platform "
+        + "tells an installed application where its identity is, where the Kernel "
+        + "answers and which property it serves; without them it can open a port "
+        + "but authenticate nobody. `dotnet HotelOS.Jobs.dll migrate` needs none "
+        + "of them and runs before this line.");
+
+builder.Services.AddSingleton(platform);
+
 // The Kernel client, the authorizer, the event appender bound to this context.
 builder.Services.AddHotelOsPlatform<JobsDbContext>(
     serviceName: "jobs",
-    kernelEndpoint: new Uri(builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:50051"),
-    certificateDirectory: builder.Configuration["Service:CertificateDirectory"]);
+    kernelEndpoint: platform.KernelEndpoint,
+    certificateDirectory: platform.CertificateDirectory);
 
 // Master Data, read-only, over the canonical transport (ADR 0040).
 var masterData = PlatformEndpoint.For(
@@ -113,11 +141,12 @@ builder.Services.AddScoped<DayStart>();
 builder.Services.AddScoped<AutoClose>();
 builder.Services.AddHostedService<ConcernSweepHost>();
 
+// The listener resolves this application's identity eagerly and refuses to
+// start without one — the property worth having: an installed package with no
+// certificate must not open a port and authenticate nobody.
 builder.Host.UsePlatformListener(
     builder.Configuration.GetValue("Service:Port", 50064),
-    builder.Configuration["Service:CertificateDirectory"]
-        ?? throw new InvalidOperationException(
-            "Service:CertificateDirectory is required; an installed application is enrolled before it starts"));
+    platform.CertificateDirectory);
 
 var app = builder.Build();
 

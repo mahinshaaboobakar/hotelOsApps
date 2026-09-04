@@ -30,7 +30,7 @@ public class WorkSessionService(JobsDbContext db, JobAnnouncer announcer, JobRec
         var now = records.Now;
         var session = new JobWorkSession
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId, UserId = actor, StartedAt = now,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId, UserId = actor, StartedAt = now,
         };
         db.WorkSessions.Add(session);
 
@@ -79,7 +79,7 @@ public class WorkSessionService(JobsDbContext db, JobAnnouncer announcer, JobRec
         session.Stop(now);
         var next = new JobWorkSession
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId, UserId = session.UserId, StartedAt = now,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId, UserId = session.UserId, StartedAt = now,
         };
         db.WorkSessions.Add(next);
         job.Touch(scope.UserId, now);

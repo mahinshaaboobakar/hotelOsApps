@@ -46,7 +46,7 @@ public class JobRecords(JobsDbContext db, TimeProvider clock)
         job.MoveTo(to, scope.UserId, now);
         db.StatusHistory.Add(new JobStatusHistory
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             JobId = job.Id,
             PropertyId = job.PropertyId,
             FromStatus = from,

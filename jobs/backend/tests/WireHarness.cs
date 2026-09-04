@@ -79,9 +79,9 @@ public sealed class WireHarness : IAsyncDisposable
     public RecordingAuthorizer Authorizer { get; }
 
     /// <summary>This run's property — one per harness, so two runs never share rows.</summary>
-    public Guid PropertyId { get; } = Uuid7.NewUuid7();
+    public Guid PropertyId { get; } = Guid.CreateVersion7();
 
-    public Guid OrganizationId { get; } = Uuid7.NewUuid7();
+    public Guid OrganizationId { get; } = Guid.CreateVersion7();
 
     /// <summary>The request context every call carries.</summary>
     public HotelOS.Contracts.Common.V1.RequestContext Context() => new()
@@ -93,7 +93,7 @@ public sealed class WireHarness : IAsyncDisposable
     /// <summary>A context for a different property, to prove one cannot read another's.</summary>
     public HotelOS.Contracts.Common.V1.RequestContext OtherProperty() => new()
     {
-        PropertyId = Uuid7.NewUuid7().ToString(),
+        PropertyId = Guid.CreateVersion7().ToString(),
         OrganizationId = OrganizationId.ToString(),
     };
 

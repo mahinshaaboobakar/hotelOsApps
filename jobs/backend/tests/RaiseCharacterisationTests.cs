@@ -21,7 +21,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
         var second = await h.Jobs.RaiseAsync(h.Scope(), new RaiseJobCommand
         {
             ItemId = h.StillWater.Id, LocationId = h.Room1204, Summary = "Two bottles please",
-            RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = Uuid7.NewUuid7(),
+            RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = Guid.CreateVersion7(),
         }, default);
 
         Assert.Equal("ENG", first.DepartmentCode);
@@ -61,7 +61,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
             h.Scope(), Staff(h) with { RaisedKind = RaisedKind.Guest, RaisedById = null, StayId = null }, default));
         Assert.Contains("stay_id", refusal.Message, StringComparison.Ordinal);
 
-        var stay = Uuid7.NewUuid7();
+        var stay = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), stay);
         Assert.Equal(stay, job.StayId);
         Assert.Null(job.RaisedById);
@@ -102,8 +102,8 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
-        h.Directory.OnShift.Add(new(Uuid7.NewUuid7(), "Deepak Rao", 3));
+        var arjun = Guid.CreateVersion7();
+        h.Directory.OnShift.Add(new(Guid.CreateVersion7(), "Deepak Rao", 3));
         h.Directory.OnShift.Add(new(arjun, "Arjun Menon", 1));
 
         var job = await h.RaiseNotCoolingAsync(h.Scope());
@@ -119,7 +119,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        h.Directory.OnShift.Add(new(Uuid7.NewUuid7(), "Arjun Menon", 0));
+        h.Directory.OnShift.Add(new(Guid.CreateVersion7(), "Arjun Menon", 0));
         var wednesday = new DateOnly(2026, 9, 3);
 
         var job = await h.RaiseNotCoolingAsync(h.Scope(), scheduledFor: wednesday);
@@ -152,7 +152,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        h.Db.ItemPolicies.Add(new Domain.Policy.PropertyItemPolicy { Id = Uuid7.NewUuid7(), PropertyId = h.PropertyId, ItemId = h.NotCooling.Id, ActiveHere = false });
+        h.Db.ItemPolicies.Add(new Domain.Policy.PropertyItemPolicy { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, ItemId = h.NotCooling.Id, ActiveHere = false });
         await h.Db.SaveChangesAsync();
 
         var refusal = await Assert.ThrowsAsync<InvalidRequestException>(() => h.RaiseNotCoolingAsync(h.Scope()));
@@ -162,6 +162,6 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
     private static RaiseJobCommand Staff(JobsHarness h) => new()
     {
         ItemId = h.NotCooling.Id, LocationId = h.Room1204, Summary = "Bedside lamp dead",
-        RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = Uuid7.NewUuid7(),
+        RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = Guid.CreateVersion7(),
     };
 }

@@ -84,7 +84,7 @@ public class ConcernSweep(
 
         db.ConcernHistory.Add(new JobConcernHistory
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             Concern = verdict.Concern, AccountableRole = verdict.Role, LadderStep = verdict.LadderStep,
             AccountableUserId = accountable == Guid.Empty ? null : accountable, Since = now,
             Reason = verdict.Reason, ConcernPolicyId = job.ConcernPolicyId,

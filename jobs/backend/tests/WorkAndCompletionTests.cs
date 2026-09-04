@@ -16,7 +16,7 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
 
         await Assert.ThrowsAsync<PermissionDeniedException>(() => h.Assignment.AcceptAsync(h.Scope(), job.Id, job.Version, default));
@@ -35,7 +35,7 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         job = await h.Assignment.AcceptAsync(h.Scope(arjun), job.Id, job.Version, default);
         await h.Work.StartAsync(h.Scope(arjun), job.Id, default);
@@ -61,7 +61,7 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         job = await h.Assignment.AcceptAsync(h.Scope(arjun), job.Id, job.Version, default);
         await h.Work.StartAsync(h.Scope(arjun), job.Id, default);
@@ -90,10 +90,10 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         job = await h.Assignment.AcceptAsync(h.Scope(arjun), job.Id, job.Version, default);
-        var delivered = new Domain.Catalogue.Resolution { Id = Uuid7.NewUuid7(), OrganizationId = h.OrganizationId, CategoryId = h.StillWater.CategoryId, Name = "Delivered" };
+        var delivered = new Domain.Catalogue.Resolution { Id = Guid.CreateVersion7(), OrganizationId = h.OrganizationId, CategoryId = h.StillWater.CategoryId, Name = "Delivered" };
         h.Db.CatalogueResolutions.Add(delivered);
         await h.Db.SaveChangesAsync();
 
@@ -107,9 +107,9 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        h.Db.ClosingPolicies.Add(new Domain.Policy.ClosingPolicy { Id = Uuid7.NewUuid7(), PropertyId = h.PropertyId, DepartmentCode = "ENG", AutoCloseHours = 4 });
+        h.Db.ClosingPolicies.Add(new Domain.Policy.ClosingPolicy { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, DepartmentCode = "ENG", AutoCloseHours = 4 });
         await h.Db.SaveChangesAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         job = await h.Assignment.AcceptAsync(h.Scope(arjun), job.Id, job.Version, default);
         job = await h.Completion.ResolveAsync(h.Scope(arjun), new ResolveCommand { JobId = job.Id, ExpectedVersion = job.Version, ResolutionId = h.RefrigerantToppedUp.Id }, default);
@@ -134,7 +134,7 @@ public class WorkAndCompletionTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: Uuid7.NewUuid7());
+        var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: Guid.CreateVersion7());
 
         await Assert.ThrowsAsync<ConcurrencyException>(() => h.Completion.CloseAsync(h.Scope(), job.Id, job.Version + 5, default));
     }

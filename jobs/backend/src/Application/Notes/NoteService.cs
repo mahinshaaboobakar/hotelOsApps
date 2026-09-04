@@ -21,7 +21,7 @@ public class NoteService(JobsDbContext db, IKernelAuthorizer authorizer, JobReco
 
         var note = new JobNote
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             AuthorKind = scope.Caller == CallerKind.User ? RaisedKind.Staff : RaisedKind.Application,
             AuthorId = scope.UserId, Text = text.Trim(), Internal = internalOnly, At = records.Now,
         };
@@ -37,7 +37,7 @@ public class NoteService(JobsDbContext db, IKernelAuthorizer authorizer, JobReco
 
         var attachment = new JobAttachment
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             MediaId = mediaId, Name = name.Trim(), Bytes = bytes, AddedBy = scope.UserId, At = records.Now,
         };
         db.Attachments.Add(attachment);
@@ -54,7 +54,7 @@ public class NoteService(JobsDbContext db, IKernelAuthorizer authorizer, JobReco
 
         var reminder = new JobReminder
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId, ForUserId = user,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId, ForUserId = user,
             RemindAt = at, Note = note.Trim(), Kind = ReminderKind.Manual,
         };
         db.Reminders.Add(reminder);

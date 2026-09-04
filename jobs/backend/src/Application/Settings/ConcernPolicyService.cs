@@ -23,7 +23,7 @@ public class ConcernPolicyService(JobsDbContext db, IKernelAuthorizer authorizer
         var policy = command.Id is { } id
             ? await db.ConcernPolicies.FirstOrDefaultAsync(p => p.Id == id && p.PropertyId == scope.PropertyId, cancellationToken)
               ?? throw new NotFoundException("concern_policy", id)
-            : new ConcernPolicy { Id = Uuid7.NewUuid7(), PropertyId = scope.PropertyId, CreatedAt = now };
+            : new ConcernPolicy { Id = Guid.CreateVersion7(), PropertyId = scope.PropertyId, CreatedAt = now };
         if (command.Id is not null && policy.Version != command.ExpectedVersion)
         {
             throw new ConcurrencyException("concern_policy", policy.Id, command.ExpectedVersion ?? 0);
@@ -75,7 +75,7 @@ public class ConcernPolicyService(JobsDbContext db, IKernelAuthorizer authorizer
         {
             db.ConcernRules.Add(new ConcernPolicyRule
             {
-                Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = rule.Priority,
+                Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = rule.Priority,
                 DueWithinMinutes = rule.DueWithinMinutes, AtRiskPercent = rule.AtRiskPercent,
                 NotAcceptedMinutes = rule.NotAcceptedMinutes, NoSessionMinutes = rule.NoSessionMinutes,
                 ManagerAtRisk = rule.ManagerAtRisk, RunsOutsidePresence = rule.RunsOutsidePresence,
@@ -86,7 +86,7 @@ public class ConcernPolicyService(JobsDbContext db, IKernelAuthorizer authorizer
         {
             db.LadderSteps.Add(new ConcernLadderStep
             {
-                Id = Uuid7.NewUuid7(), PolicyId = policy.Id, Priority = step.Priority, StepNo = step.StepNo,
+                Id = Guid.CreateVersion7(), PolicyId = policy.Id, Priority = step.Priority, StepNo = step.StepNo,
                 Role = step.Role, Trigger = step.Trigger, DelayMinutes = step.DelayMinutes,
             });
         }

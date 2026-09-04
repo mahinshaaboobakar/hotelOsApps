@@ -33,7 +33,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
     private static async Task<JobView> RaiseAsync(WireHarness h, string itemId, string summary)
         => await h.Client.RaiseJobAsync(new RaiseJobRequest
         {
-            Context = h.Context(), ItemId = itemId, LocationId = Uuid7.NewUuid7().ToString(), Summary = summary,
+            Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = summary,
             RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = h.PropertyId.ToString(),
         });
 
@@ -127,7 +127,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
         var refusal = await Assert.ThrowsAsync<RpcException>(() => h.Client.RaiseJobAsync(new RaiseJobRequest
         {
-            Context = h.Context(), ItemId = itemId, LocationId = Uuid7.NewUuid7().ToString(), Summary = "  ",
+            Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = "  ",
             RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff,
         }).ResponseAsync);
 
@@ -136,7 +136,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
         var guest = await Assert.ThrowsAsync<RpcException>(() => h.Client.RaiseJobAsync(new RaiseJobRequest
         {
-            Context = h.Context(), ItemId = itemId, LocationId = Uuid7.NewUuid7().ToString(), Summary = "warm",
+            Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = "warm",
             RaisedVia = RaisedVia.GuestApp, RaisedKind = RaisedKind.Guest,
         }).ResponseAsync);
         Assert.Contains("stay_id", guest.Status.Detail, StringComparison.Ordinal);
@@ -176,7 +176,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
         var missing = await Assert.ThrowsAsync<RpcException>(() => h.Client.GetJobAsync(new GetJobRequest
         {
-            Context = h.Context(), Id = Uuid7.NewUuid7().ToString(),
+            Context = h.Context(), Id = Guid.CreateVersion7().ToString(),
         }).ResponseAsync);
         Assert.Equal(StatusCode.NotFound, missing.StatusCode);
 
@@ -196,7 +196,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
 
         var refusal = await Assert.ThrowsAsync<RpcException>(() => h.Client.RaiseJobAsync(new RaiseJobRequest
         {
-            Context = h.Context(), ItemId = itemId, LocationId = Uuid7.NewUuid7().ToString(), Summary = "denied",
+            Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = "denied",
             RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff,
         }).ResponseAsync);
 

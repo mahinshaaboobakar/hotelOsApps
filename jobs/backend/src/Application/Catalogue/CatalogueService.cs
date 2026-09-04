@@ -26,7 +26,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         var category = command.Id is { } id
             ? await db.Categories.FirstOrDefaultAsync(c => c.Id == id && c.OrganizationId == organization, cancellationToken)
               ?? throw new NotFoundException("category", id)
-            : new Category { Id = Uuid7.NewUuid7(), OrganizationId = organization, CreatedAt = now };
+            : new Category { Id = Guid.CreateVersion7(), OrganizationId = organization, CreatedAt = now };
         if (command.Id is not null && category.Version != command.ExpectedVersion)
         {
             throw new ConcurrencyException("category", category.Id, command.ExpectedVersion ?? 0);
@@ -61,7 +61,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         var item = command.Id is { } id
             ? await db.Items.FirstOrDefaultAsync(i => i.Id == id && i.OrganizationId == organization, cancellationToken)
               ?? throw new NotFoundException("item", id)
-            : new Item { Id = Uuid7.NewUuid7(), OrganizationId = organization, CreatedAt = now };
+            : new Item { Id = Guid.CreateVersion7(), OrganizationId = organization, CreatedAt = now };
         if (command.Id is not null && item.Version != command.ExpectedVersion)
         {
             throw new ConcurrencyException("item", item.Id, command.ExpectedVersion ?? 0);
@@ -105,7 +105,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
 
         var resolution = new Resolution
         {
-            Id = Uuid7.NewUuid7(), OrganizationId = organization,
+            Id = Guid.CreateVersion7(), OrganizationId = organization,
             CategoryId = command.CategoryId ?? (command.ItemId is { } i
                 ? (await db.Items.FirstAsync(x => x.Id == i, cancellationToken)).CategoryId : null),
             ItemId = command.ItemId, Name = command.Name.Trim(), NoteRequired = command.NoteRequired,
@@ -121,7 +121,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         db.ItemAliases.RemoveRange(existing);
         foreach (var alias in aliases.Select(a => a.Trim()).Where(a => a.Length > 0).Distinct(StringComparer.OrdinalIgnoreCase))
         {
-            db.ItemAliases.Add(new ItemAlias { Id = Uuid7.NewUuid7(), ItemId = item.Id, Alias = alias });
+            db.ItemAliases.Add(new ItemAlias { Id = Guid.CreateVersion7(), ItemId = item.Id, Alias = alias });
         }
     }
 

@@ -16,7 +16,7 @@ public class CourseAndCancellationTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         job = await h.Assignment.AcceptAsync(h.Scope(arjun), job.Id, job.Version, default);
         await h.Work.StartAsync(h.Scope(arjun), job.Id, default);
@@ -93,7 +93,7 @@ public class CourseAndCancellationTests(JobsFixture fixture)
         var step = await h.Jobs.RaiseAsync(h.Scope(), new RaiseJobCommand
         {
             ItemId = h.NotCooling.Id, LocationId = h.Room1204, Summary = "Leak test", RaisedVia = RaisedVia.App,
-            RaisedKind = RaisedKind.Staff, RaisedById = Uuid7.NewUuid7(), ParentJobId = parent.Id,
+            RaisedKind = RaisedKind.Staff, RaisedById = Guid.CreateVersion7(), ParentJobId = parent.Id,
         }, default);
         var linked = await h.RaiseNotCoolingAsync(h.Scope());
         await h.Course.AmendAsync(h.Scope(), new AmendCommand { JobId = parent.Id, ExpectedVersion = parent.Version, LinkJobId = linked.Id }, default);
@@ -119,12 +119,12 @@ public class CourseAndCancellationTests(JobsFixture fixture)
     {
         var h = new JobsHarness(fixture);
         await h.SeedCatalogueAsync();
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var parent = await h.RaiseNotCoolingAsync(h.Scope(), assignTo: arjun);
         var step = await h.Jobs.RaiseAsync(h.Scope(), new RaiseJobCommand
         {
             ItemId = h.NotCooling.Id, LocationId = h.Room1204, Summary = "Leak test", RaisedVia = RaisedVia.App,
-            RaisedKind = RaisedKind.Staff, RaisedById = Uuid7.NewUuid7(), ParentJobId = parent.Id,
+            RaisedKind = RaisedKind.Staff, RaisedById = Guid.CreateVersion7(), ParentJobId = parent.Id,
         }, default);
         parent = await h.Assignment.AcceptAsync(h.Scope(arjun), parent.Id, parent.Version, default);
         parent = await h.Completion.ResolveAsync(h.Scope(arjun), new ResolveCommand { JobId = parent.Id, ExpectedVersion = parent.Version, ResolutionId = h.RefrigerantToppedUp.Id }, default);

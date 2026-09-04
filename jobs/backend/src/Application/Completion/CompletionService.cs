@@ -39,7 +39,7 @@ public class CompletionService(
 
         db.Resolutions.Add(new JobResolution
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             ResolutionId = command.ResolutionId, Note = command.Note?.Trim(),
             ResolvedBy = scope.UserId ?? Guid.Empty, ResolvedAt = now,
         });
@@ -133,7 +133,7 @@ public class CompletionService(
         next.Touch(scope.UserId, records.Now);
         db.ConcernHistory.Add(new JobConcernHistory
         {
-            Id = Uuid7.NewUuid7(), JobId = next.Id, PropertyId = next.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = next.Id, PropertyId = next.PropertyId,
             Concern = Concern.OnTrack, AccountableRole = LadderRole.Assignee, LadderStep = 0,
             Since = records.Now, Reason = $"unblocked: step {next.StepNo} after {parent.JobNumber} resolved",
             ConcernPolicyId = next.ConcernPolicyId,

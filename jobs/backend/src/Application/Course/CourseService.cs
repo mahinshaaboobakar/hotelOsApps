@@ -127,7 +127,7 @@ public class CourseService(
 
         db.Links.Add(new JobLink
         {
-            Id = Uuid7.NewUuid7(), PropertyId = job.PropertyId, JobId = job.Id,
+            Id = Guid.CreateVersion7(), PropertyId = job.PropertyId, JobId = job.Id,
             LinkedJobId = otherId, LinkedBy = scope.UserId, At = records.Now,
         });
     }

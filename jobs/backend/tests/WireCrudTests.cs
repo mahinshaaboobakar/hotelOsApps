@@ -36,7 +36,7 @@ public class WireCrudTests(JobsFixture fixture)
 
     private static RaiseJobRequest Raise(WireHarness h, string itemId, string summary = "Room feels warm since noon") => new()
     {
-        Context = h.Context(), ItemId = itemId, LocationId = Uuid7.NewUuid7().ToString(), Summary = summary,
+        Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = summary,
         RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = h.PropertyId.ToString(),
     };
 
@@ -93,7 +93,7 @@ public class WireCrudTests(JobsFixture fixture)
     {
         await using var h = await WireHarness.StartAsync(fixture);
         var (_, itemId, resolutionId) = await CatalogueAsync(h);
-        var arjun = Uuid7.NewUuid7();
+        var arjun = Guid.CreateVersion7();
         var job = await h.Client.RaiseJobAsync(Raise(h, itemId));
 
         job = await h.Client.AssignJobAsync(new AssignJobRequest
@@ -149,8 +149,8 @@ public class WireCrudTests(JobsFixture fixture)
     {
         await using var h = await WireHarness.StartAsync(fixture);
         var (_, itemId, resolutionId) = await CatalogueAsync(h);
-        var stay = Uuid7.NewUuid7();
-        var arjun = Uuid7.NewUuid7();
+        var stay = Guid.CreateVersion7();
+        var arjun = Guid.CreateVersion7();
         var request = Raise(h, itemId);
         request.RaisedKind = RaisedKind.Guest;
         request.RaisedById = string.Empty;

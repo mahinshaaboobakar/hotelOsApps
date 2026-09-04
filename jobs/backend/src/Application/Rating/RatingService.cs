@@ -36,7 +36,7 @@ public class RatingService(JobsDbContext db, JobAnnouncer announcer, JobRecords 
 
         var rating = new JobRating
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId, StayId = stayId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId, StayId = stayId,
             Stars = stars, Text = text?.Trim(), RatedAt = records.Now,
         };
         db.Ratings.Add(rating);

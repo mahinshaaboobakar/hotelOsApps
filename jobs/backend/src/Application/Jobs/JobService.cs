@@ -70,7 +70,7 @@ public class JobService(
         var (priority, decidedBy) = Prioritise(command, resolved);
         var job = new Job
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             PropertyId = scope.PropertyId,
             CategoryId = item.CategoryId,
             ItemId = item.Id,
@@ -106,18 +106,18 @@ public class JobService(
     {
         db.StatusHistory.Add(new JobStatusHistory
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             FromStatus = string.Empty, ToStatus = job.JobStatus, ByUserId = scope.UserId,
             ByWhat = command.RaisedKind == RaisedKind.Staff ? null : command.RaisedKind, At = now,
         });
         db.Notes.Add(new JobNote
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             AuthorKind = command.RaisedKind, AuthorId = command.RaisedById, Text = job.Summary, At = now,
         });
         db.ConcernHistory.Add(new JobConcernHistory
         {
-            Id = Uuid7.NewUuid7(), JobId = job.Id, PropertyId = job.PropertyId,
+            Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
             Concern = Concern.OnTrack, AccountableRole = LadderRole.Assignee, LadderStep = 0,
             Since = now, Reason = "raised", ConcernPolicyId = job.ConcernPolicyId,
         });

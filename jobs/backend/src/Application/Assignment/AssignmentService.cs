@@ -119,7 +119,7 @@ public class AssignmentService(
     private void Open(Job job, Guid? user, Guid? team, string how, Guid? by) =>
         db.Assignments.Add(new JobAssignment
         {
-            Id = Uuid7.NewUuid7(),
+            Id = Guid.CreateVersion7(),
             JobId = job.Id,
             PropertyId = job.PropertyId,
             AssigneeUserId = user,
