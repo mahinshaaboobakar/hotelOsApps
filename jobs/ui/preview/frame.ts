@@ -106,8 +106,14 @@ async function drive(): Promise<void> {
   const tab = params.get("tab");
   if (tab !== null) { click(".tab", tab); await settle(); }
 
+  // The policy flow is reached the way a person reaches it: the clock, then
+  // the list, then New policy.
   const view = params.get("view");
-  if (view !== null) { click(".btn", view === "list" ? "All policies" : view === "flow" ? "＋ New policy" : view); await settle(); }
+  if (view !== null) {
+    click(".btn", "All policies");
+    await settle();
+    if (view === "flow") { click(".btn", "＋ New policy"); await settle(); }
+  }
 
   const step = params.get("step");
   if (step !== null) { click(".tab", step); await settle(); }
