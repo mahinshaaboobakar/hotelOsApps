@@ -202,13 +202,22 @@ message ListStaysRequest {
   // Context Service for — it never computes one.
   string business_date = 3;
 
-  hotelos.common.v1.PageRequest page = 10;
+  // Paged, not cursored — CORE-Q13, ruled 2026-09-04. A business day's stays
+  // are a bounded list whose count is a FACT: the desk expects "showing 1-25
+  // of 47", and a cursor can express neither the ordinal nor the total. Tag 10
+  // held `common.v1.PageRequest` and the screens could therefore draw only
+  // Previous/Next.
+  hotelos.common.v1.PagedRequest page = 11;
+
+  reserved 10;
 }
 
 message ListStaysResponse {
   repeated RoomStay stays = 1;
-  hotelos.common.v1.PageResponse page = 2;
+  hotelos.common.v1.PagedResponse page = 4;
   hotelos.common.v1.ResponseMeta meta = 3;
+
+  reserved 2;
 }
 
 message AssignRoomRequest {
