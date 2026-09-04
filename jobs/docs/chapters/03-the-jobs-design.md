@@ -195,19 +195,14 @@ of `concern_policy`, else the property's. A category may carry its own
 `concern_policy_id` for the same reason (owner's question, 2026-09-04).
 
 **Timestamps** everywhere are stored UTC and shown as date *and* time, in
-the property's zone. **What the documents actually give us** (checked
-2026-09-04, after the owner's correction): the property carries
-`timezone` and `locale` — ADR 0075 lists both on `GetProperty`; the
-`CORE-Q16` owner ruling of 2026-08-28 made them writable from Core
-Administration; ADR 0123 builds the timezone as a select over the IANA
-list and has both confirm on save. **No document defines an hour format
-(24-hour vs AM/PM) or a date order as a setting of its own.** The
-nearest reading is that `locale` decides both through `Intl` formatting
-(`en-GB` → 24-hour, day-month; `en-US` → 12-hour, month-day), and Jobs
-will render that way through Context. Whether that reading stands, or
-Core gains explicit `hour_format` / `date_order` fields on the property,
-is the architect's — carried in §9 as a question, not assumed. Jobs
-configures none of it either way (owner, 2026-09-04).
+the property's zone. **Ruled by the architect, 2026-09-04** (after the
+owner's correction that no document named an hour format): the host hands
+a module `locale` + `timezone` (Z is adding them to what the host passes);
+**the formatting utility lives in `@hotelos/sdk`**, the shared home every
+app's UI already imports, deriving date order and hour cycle from those two;
+**Jobs builds it, as the first screen that renders a timestamp**, and
+GuestOps, Workforce and every later app import it rather than writing their
+own. Jobs configures none of it (owner, 2026-09-04).
 
 **Who else reads it.** GuestOps and Room Care raise jobs against catalogue
 items, and they read the catalogue the way every cross-application question
@@ -275,60 +270,55 @@ idempotent on `event_id`, `DeliverPolicy: New` with the store as the archive
 
 ## 4 · Permissions and the one grant kind
 
-### 4.1 · Permissions — concrete verbs, no tiers (architect, 2026-09-04)
+### 4.1 · Permissions — eight concrete verbs (architect, ruled 2026-09-04)
 
 > **Architect's correction, 2026-09-04:** *manage* and *administer* are the
 > generic-verb class the permission registry's parser refuses — the
 > platform already paid for it when `integration.manage` could not be
 > registered and became `integration.configure`. Three rules: (1) concrete
 > verbs naming the operation the screen gates, in the registry's live
-> `domain.verb` idiom; (2) tiers are FGA relations, not permissions — the
-> bundling lives in `model.fga`; (3) a name changes when the capability
-> changes, never the implementation — name the operation, not the screen.
+> `domain.verb` idiom; (2) tiers are FGA relations, not permissions; (3) a
+> name changes when the capability changes, never the implementation.
+>
+> **Ruled the same day, one pass, both flagged splits taken:** eight rows.
+> `job.cancel` is split out — *"a terminal outcome with a reason is
+> complete's sibling rather than a course change, and a supervisor who may
+> reschedule but not cancel is a policy the vocabulary must be able to
+> express (folded in, it becomes inexpressible forever)"*. `job.curate` is
+> split from `job.configure` — *"two scopes are two administrative
+> decisions, and a property manager configuring their ladders must not
+> thereby edit the group's catalogue."*
 
-`infrastructure/openfga/permissions.yaml` already declares five on
-`type job`; the registry's verb census (read 20 · create 15 · update 14 ·
-configure 8 · assign 4 · amend 2 · record 2 …) is the idiom matched below.
+`infrastructure/openfga/permissions.yaml` already declares the first four
+(and `job.approve_cost`); the census of its live verbs (read 20 · create 15
+· update 14 · configure 8 · assign 4 · amend 2) is the idiom matched.
 
 | Permission | Exists | The operation it gates | Screen |
 |---|---|---|---|
 | `job.read` | yes · `job#viewer` | open the board and a job in my department, my own jobs anywhere | 1, 2–2g, 5, 6 |
 | `job.create` | yes · `job#can_create` | raise a job — now, or for a day (`scheduled_for`) | 3 |
 | `job.assign` | yes · `job#can_assign` | assign or reassign a job to a person or a team; accept AUTO's pick | 2 Reassign, 3 Assign to |
-| `job.complete` | yes · `job#can_close` | resolve a job with a resolution, and close it; reopen inside the window | 4 |
-| `job.amend` | **new** | change a job's course after it exists: hold and resume, reschedule, re-prioritise, restrict / unrestrict, link, add a step, cancel with a reason | 2 More ▾, hold, priority, cancel |
-| `job.configure` | **new** | the catalogue (categories, items, aliases, resolutions, property activation), concern policies and their ladders, presence and service hours, who is told, holds, closing and rating rules | 7 and page 02 |
+| `job.complete` | yes · `job#can_close` | resolve a job with a resolution, close it, reopen inside the window | 4 |
+| `job.cancel` | **new** · `job#can_cancel` | end a job as CANCELLED with a reason; cascades to its steps | 2 More ▾ › Cancel |
+| `job.amend` | **new** · `job#can_amend` | change a job's course: hold and resume, reschedule, re-prioritise, restrict / unrestrict, link, add a step | 2 More ▾, hold, priority |
+| `job.configure` | **new** · `property#can_configure_jobs` | this property's concern policies and ladders, presence and service hours, who is told, holds, closing and rating rules, item activation and overrides | page 02 |
+| `job.curate` | **new** · `organization#can_curate_jobs` | the organisation's catalogue: categories, items, aliases, resolutions | page 01 frame 7 |
 
-Registered and **not requested**: `job.approve_cost` — no cost exists on a
-job in this design (§7); it stays in the registry untouched until one does.
+Registered and **not requested**: `job.approve_cost` — the name survives,
+the capability is not claimed; no cost exists on a job in this design (§7).
 
 **The work-session verbs** — accept, start, pause, resume, stop — are not
 permissions. They are the assignee's acts on their own job and ride on the
-`job#assignee` relation, exactly as `can_close` already does; a supervisor
-stopping someone else's session is `job.assign` (a reassignment) or
-`job.amend` (a hold), never a sixth verb.
+`job#assignee` relation; an assignee acting on their own job needs no grant.
+A supervisor stopping someone else's session is `job.assign` (a
+reassignment) or `job.amend` (a hold), never a ninth verb.
 
-**Tiers dissolve into relations** (`model.fga`, §4.2): the walkthrough's
-*execute* is `viewer or assignee`; *manage* is `supervisor from department`;
-*everything, anyone's* is `jobs_manager from property` — a relation that the
-four `can_*` and the two new `can_amend` / `can_configure` each name with
-`or jobs_manager from property`. No permission is called a tier.
+**Tiers dissolve into relations** (`model.fga`, §4.2): *execute* is
+`viewer or assignee`; *manage* is `supervisor from department`; *everything,
+anyone's* is `jobs_manager from property`, named with `or jobs_manager from
+property` across the job set. No permission is called a tier.
 
-**Flagged for the architect's one-pass confirm-or-correct:**
-
-1. `job.amend` folds *cancel* in. If cancelling deserves its own row
-   (an outcome with a reason, S2), it is `job.cancel` and `amend` keeps the rest.
-2. `job.configure` covers the catalogue and the policies together. If the
-   catalogue's organisation-level editing (page 01 frame 7, an org admin)
-   is a different capability from a property's policy editing, it splits as
-   `job.configure` (property) and `job.curate` (organisation catalogue) —
-   `curate` is not yet in the census and would be a new verb.
-3. The permission that lets a GM grant `property#jobs_manager` is
-   Identity's, not this domain's — ADR 0125 §6's one-permission-both-ways
-   pattern — and is declared by the manifest's grant kind (§4.2), so no
-   `job.*` row is proposed for it.
-
-The manifest (§5) requests the six above.
+The manifest (§5) requests the eight.
 
 ### 4.2 · The grant kind — `property#jobs_manager` (S9-D7, ruling 4)
 
@@ -351,10 +341,12 @@ authorization:
       relation: jobs_manager
 ```
 
-`model.fga` gains, on `type property`, `define jobs_manager: [user]`; on
-`type job`, `can_amend: supervisor from department` and
-`can_configure: manager from department` are added, and all six `can_*`
-relations gain `or jobs_manager from property`.
+`model.fga` gains, on `type property`, `define jobs_manager: [user]` and
+`define can_configure_jobs: manager from department or jobs_manager`; on
+`type organization`, `define can_curate_jobs: [user]` (the org admin);
+on `type job`, `can_cancel: supervisor from department` and
+`can_amend: supervisor from department` are added, and every `can_*` on
+`type job` gains `or jobs_manager from property`.
 **The registry entry is the architect's** (ruling 4 confirms the route; the
 row itself is written there, not here). Jobs never writes the tuple.
 
@@ -396,7 +388,7 @@ resources:
   db_connections: 4                     # the board, a technician resolving, the sweep, migrate
   event_rate: 200
 
-permissions:                            # six concrete verbs — §4.1; approve_cost not requested
+permissions:                            # eight concrete verbs — §4.1; approve_cost not requested
   - id: job.read
     reason: "See jobs — your own, your department's, or the property's, as your posting allows"
   - id: job.create
@@ -405,10 +397,14 @@ permissions:                            # six concrete verbs — §4.1; approve_
     reason: "Assign or reassign a job to a person or a team"
   - id: job.complete
     reason: "Resolve a job, and close or reopen it"
+  - id: job.cancel
+    reason: "Cancel a job with a reason"
   - id: job.amend
-    reason: "Hold, reschedule, re-prioritise, restrict, link, add steps to, or cancel a job"
+    reason: "Hold, reschedule, re-prioritise, restrict, link or add steps to a job"
   - id: job.configure
-    reason: "Set up the catalogue, concern policies and ladders, presence and closing rules"
+    reason: "Set this property's concern policies, ladders, presence and closing rules"
+  - id: job.curate
+    reason: "Edit the organisation's job catalogue — categories, items, resolutions"
 
 events:
   publishes:
@@ -687,11 +683,11 @@ for two departments.
 
 | | State | What it blocks |
 |---|---|---|
-| **The permission vocabulary** (§4.1) | parked for the owner's discussion; this draft is the input | the exact `permissions:` block at packaging |
+| **The permission vocabulary** (§4.1) | **ruled 2026-09-04** — eight concrete verbs, in the manifest | nothing |
 | **`property#jobs_manager` in the registry** | route ruled; the row is the architect's | the grant kind materialising at install |
 | **`shift.started` / `shift.ended`** | requested of Workforce | `department_presence` runs on the roster fallback until then |
 | **A `team` object** | requested of Workforce (ADR 0063's test) | `assigned_to_team_id` waits for it; person assignment is unaffected |
-| **Time and date format** | `timezone` and `locale` exist on the property (ADR 0075, CORE-Q16, ADR 0123); no explicit hour-format or date-order setting does. Question to the architect: does `locale` decide, or does Core add the two fields? | nothing at build — Jobs renders from `locale` through Context until ruled otherwise |
+| **Time and date format** | **ruled 2026-09-04**: `locale` + `timezone` from the host; the formatter in `@hotelos/sdk`, built by Jobs as the first screen that needs it (§2.3) | nothing — it is part of this build |
 | **The 19 place kinds · a `Property.Code` shape rule** | requested of Master Data | nothing — a job for the gym is a job at a `back_of_house` node until then |
 | **`guestops.request.raised`** | GuestOps' to name | the replay subscription's subject |
 | **What a QR authenticates** | the guest-app round's | nothing in Jobs |
