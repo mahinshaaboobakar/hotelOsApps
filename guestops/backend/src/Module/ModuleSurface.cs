@@ -11,8 +11,8 @@ namespace HotelOS.GuestOps.Module;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The composition root and nothing else: it names the capability, resolves a
-/// scope, and dispatches on the method. Every projection lives in its own file
+/// The composition root and nothing else: it names the capability and
+/// dispatches on the method. Every projection lives in its own file
 /// beside this one, because a screen's view model is its own subject and a
 /// dispatcher that also built one would be the file everything accretes onto
 /// (ADR 0038, ADR 0042).
@@ -37,23 +37,19 @@ public static class ModuleSurface
     /// <summary>Serve this application's bundles.</summary>
     /// <param name="app">The application being built.</param>
     /// <remarks>
-    /// A scope per call, from the factory, because the handler runs outside
-    /// the request's own container: the projections take a
-    /// <c>DbContext</c> and an authorizer, and a singleton holding either
-    /// would serve one property's connection to the next property's call.
+    /// <b>The provider comes from the request, not from a scope opened here</b>
+    /// — <c>SHELL-Q38</c>. This used to build its own scope from
+    /// <c>IServiceScopeFactory</c>, which worked but duplicated what the
+    /// envelope now hands over; taking <c>request.Services</c> means the
+    /// projections resolve in the same scope the guards authenticated in, and
+    /// there is one answer to "which container is this call in" rather than
+    /// two.
     /// </remarks>
     public static void MapGuestOpsModule(this WebApplication app)
-    {
-        var scopes = app.Services.GetRequiredService<IServiceScopeFactory>();
-
-        app.MapModuleCapability(
+        => app.MapModuleCapability(
             Application.Abstractions.Permissions.ReservationRead,
-            async (request, cancellationToken) =>
-            {
-                using var scope = scopes.CreateScope();
-                return await AnswerAsync(scope.ServiceProvider, request, cancellationToken);
-            });
-    }
+            (request, cancellationToken) =>
+                AnswerAsync(request.Services, request, cancellationToken));
 
     /// <summary>The method, to the projection that answers it.</summary>
     /// <remarks>

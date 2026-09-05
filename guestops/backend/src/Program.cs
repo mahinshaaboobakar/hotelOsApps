@@ -107,6 +107,31 @@ builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
         ?? new Uri(builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:15051"),
     certificateDirectory: platform?.CertificateDirectory);
 
+// **The authentication half, which serving a UI requires** — `SHELL-Q38`.
+// `AddHotelOsPlatform` binds `IKernelAuthorizer`; it does NOT register
+// `JwtCallerAuthenticator`, which lives only in `AddPlatformAuthentication` —
+// so an application that wired the platform and stopped there could map a
+// module capability and fail at boot. That refusal is the fix working: the
+// envelope resolves its guards at map time precisely so a missing registration
+// says so at start-up, naming the call to add, rather than throwing on the
+// first button a person presses.
+//
+// Guarded on having an identity for the same reason the route below is. The
+// validator authenticates its own JWKS fetch with this application's
+// certificate, so without one there is nothing to fetch keys with.
+if (platform is not null)
+{
+    builder.Services.AddPlatformAuthentication(
+        serviceRoot: platform.CertificateDirectory,
+        identityEndpoint: new Uri(
+            builder.Configuration["Services:Identity:Endpoint"]
+                ?? throw new InvalidOperationException(
+                    "Services:Identity:Endpoint is required: a validator with no authority "
+                    + "endpoint cannot refresh signing keys")),
+        natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:24222",
+        configuration: builder.Configuration);
+}
+
 builder.Services.AddGuestOpsApplication();
 
 // Receive what the manifest declared — `EVT-Q4`. The Kernel read
@@ -138,7 +163,16 @@ app.MapGrpcService<GuestOpsGrpcService>();
 // and the capability checked inside `MapModuleCapability`, not beside it:
 // an application that had to remember either would work perfectly on the desk
 // it was written at, which is the failure with no error anywhere.
-app.MapGuestOpsModule();
+// **Mapped only when the platform gave this application an identity.** An
+// installed one always has: install step 4 issues it and Kernel start-up heals
+// a missing one (`AUTHZ-Q16`). Run from a checkout there is no certificate and
+// no Kernel, and a surface that answered every call with a handshake failure
+// would be worse than one honestly absent — hello-hotel's own reasoning, and
+// it is the same surface.
+if (platform is not null)
+{
+    app.MapGuestOpsModule();
+}
 
 // What install step 8 probes. Plain HTTP rather than gRPC health, because the
 // probe runs before the Kernel has any reason to trust this process and a
