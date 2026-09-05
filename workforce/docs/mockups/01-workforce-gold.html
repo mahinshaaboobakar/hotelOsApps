@@ -2,6 +2,13 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Workforce Gold Mockup</title>
 <style>
+  /* Amended 2026-09-05, APPS-Q4 Part A: every rendered duty instant is the
+     property's own clock. `en-IN` is a 12-hour locale, and PKG-Q46(4) has
+     operational data render in the property's form wherever it appears — so
+     20–08 was this author's convention rather than a design decision, and a
+     GCC property will read its own. A shift's hours stay 24-hour: a Morning
+     shift starts at 07:00 wherever the property is, so it is a wall clock
+     with no zone and no locale to render in. Owner ruling, build stands. */
   /* Amended 2026-09-05, APPS-Q4 Part A: every list row takes §64's licensed
      two-line variant `6px 10px` and every header its `8px 10px`. These drawings
      predated the standard and carried 11–12px vertical with an 18px horizontal
@@ -422,7 +429,7 @@
       <div class="btn pri">＋ Request leave</div>
     </div>
     <div class="body">
-      <div class="meta"><i>22</i>shifts <i>2</i>days leave <i>1</i>MOD duty · Fri 28, 20:00–08:00 <span style="margin-left:auto"><i>4 / 8</i>casual remaining</span></div>
+      <div class="meta"><i>22</i>shifts <i>2</i>days leave <i>1</i>MOD duty · Fri, 28 Aug, 08:00 pm → 08:00 am <span style="margin-left:auto"><i>4 / 8</i>casual remaining</span></div>
       <div class="month">
         <div class="dow"><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div><div>Sun</div></div>
         <div class="cells">
@@ -461,7 +468,7 @@
           <div class="c"><span class="d">25</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
           <div class="c"><span class="d">26</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
           <div class="c"><span class="d">27</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span></div>
-          <div class="c today"><span class="d">28</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span><span class="mod">MOD 20:00→08:00</span></div>
+          <div class="c today"><span class="d">28</span><span class="sh d" style="--c:#7dd3fc"><i></i>M</span><span class="mod">MOD 08:00 pm→08:00 am</span></div>
           <div class="c"><span class="d">29</span><span class="sh off">OFF</span><span class="mod" style="opacity:.55">…08:00</span></div>
           <div class="c we"><span class="d">30</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
           <div class="c we"><span class="d">31</span><span class="sh d" style="--c:#818cf8"><i></i>A</span></div>
@@ -522,7 +529,7 @@
             <div class="bar" style="left:47.62%;width:7.14%"><b>Priya T.</b></div>
             <div class="bar" style="left:54.76%;width:7.14%"><b>Rahul N.</b><em>SEC</em></div>
             <div class="bar" style="left:61.90%;width:7.14%"><b>Priya T.</b></div>
-            <div class="bar" style="left:69.05%;width:7.14%"><b>Anjali M.</b><em>20:00→08:00</em></div>
+            <div class="bar" style="left:69.05%;width:7.14%"><b>Anjali M.</b><em>08:00 pm→08:00 am</em></div>
             <div class="bar" style="left:76.19%;width:7.14%"><b>Vishnu D.</b></div>
             <div class="bar gap" style="left:83.33%;width:7.14%">no MOD</div>
             <div class="bar" style="left:90.48%;width:7.14%"><b>Priya T.</b></div>
@@ -682,8 +689,8 @@
     <div class="acts"><div class="hsub">Manager on Duty · property-wide · 13 duties this week</div><div class="grow"></div><div class="btn">‹</div><div class="btn">24 – 30 Aug</div><div class="btn">›</div><div class="btn pri">＋ Assign duty</div></div>
     <div class="body" style="padding-top:16px">
       <div class="nowrow">
-        <div class="nowc on"><div class="mod">NOW</div><div><b>Anjali Menon</b><span>Front Office · since 20:00 · ends 08:00 tomorrow</span></div></div>
-        <div class="nowc"><div class="lab">Next</div><div><b>Vishnu Das</b><span>Front Office · Sat 29, 08:00 → 20:00</span></div></div>
+        <div class="nowc on"><div class="mod">NOW</div><div><b>Anjali Menon</b><span>Front Office · Fri, 28 Aug, 08:00 pm → Sat, 29 Aug, 08:00 am</span></div></div>
+        <div class="nowc"><div class="lab">Next</div><div><b>Vishnu Das</b><span>Front Office · Sat, 29 Aug, 08:00 am → 08:00 pm</span></div></div>
       </div>
       <div class="rota" style="margin-top:4px">
         <div class="rrow hd" style="grid-template-columns:190px repeat(7,1fr)"><div style="font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)">This week</div><div><span class="dn">Mon</span><span class="dd">24</span></div><div><span class="dn">Tue</span><span class="dd">25</span></div><div><span class="dn">Wed</span><span class="dd">26</span></div><div><span class="dn">Thu</span><span class="dd">27</span></div><div class="today"><span class="dn">Fri</span><span class="dd">28</span></div><div><span class="dn">Sat</span><span class="dd">29</span></div><div><span class="dn">Sun</span><span class="dd">30</span></div></div>
@@ -691,19 +698,19 @@
           <div class="tlgrid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
           <div class="tllab">★ Duty</div>
           <div class="bars">
-            <div class="bar" style="left:4.76%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
-            <div class="bar" style="left:11.90%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
-            <div class="bar" style="left:19.05%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
-            <div class="bar" style="left:26.19%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
-            <div class="bar" style="left:33.33%;width:7.14%;top:0;height:32px"><b>Anjali M.</b><em>08–20</em></div>
-            <div class="bar" style="left:40.48%;width:7.14%;top:38px;height:32px"><b>Vishnu D.</b><em>20–08</em></div>
-            <div class="bar" style="left:47.62%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
-            <div class="bar" style="left:54.76%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b><em>20–08</em></div>
-            <div class="bar" style="left:61.90%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
-            <div class="bar" style="left:69.05%;width:7.14%;top:38px;height:32px;border-color:rgba(251,191,36,.85);box-shadow:0 0 0 2px rgba(251,191,36,.18)"><b>Anjali M.</b><em>20–08</em></div>
-            <div class="bar" style="left:76.19%;width:7.14%;top:0;height:32px"><b>Vishnu D.</b><em>08–20</em></div>
-            <div class="bar gap" style="left:83.33%;width:7.14%;top:38px;height:32px">no MOD · 20–08</div>
-            <div class="bar" style="left:90.48%;width:7.14%;top:0;height:32px"><b>Priya T.</b><em>08–20</em></div>
+            <div class="bar" style="left:4.76%;width:7.14%;top:0;height:32px"><b>Priya T.</b></div>
+            <div class="bar" style="left:11.90%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b></div>
+            <div class="bar" style="left:19.05%;width:7.14%;top:0;height:32px"><b>Priya T.</b></div>
+            <div class="bar" style="left:26.19%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b></div>
+            <div class="bar" style="left:33.33%;width:7.14%;top:0;height:32px"><b>Anjali M.</b></div>
+            <div class="bar" style="left:40.48%;width:7.14%;top:38px;height:32px"><b>Vishnu D.</b></div>
+            <div class="bar" style="left:47.62%;width:7.14%;top:0;height:32px"><b>Priya T.</b></div>
+            <div class="bar" style="left:54.76%;width:7.14%;top:38px;height:32px"><b>Rahul N.</b></div>
+            <div class="bar" style="left:61.90%;width:7.14%;top:0;height:32px"><b>Priya T.</b></div>
+            <div class="bar" style="left:69.05%;width:7.14%;top:38px;height:32px;border-color:rgba(251,191,36,.85);box-shadow:0 0 0 2px rgba(251,191,36,.18)"><b>Anjali M.</b></div>
+            <div class="bar" style="left:76.19%;width:7.14%;top:0;height:32px"><b>Vishnu D.</b></div>
+            <div class="bar gap" style="left:83.33%;width:7.14%;top:38px;height:32px">no MOD · 08:00 pm–08:00 am</div>
+            <div class="bar" style="left:90.48%;width:7.14%;top:0;height:32px"><b>Priya T.</b></div>
           </div>
         </div>
       </div>
@@ -717,7 +724,7 @@
     <div class="pop" style="left:610px;top:250px;width:330px">
       <div class="pt">Assign Manager on Duty</div>
       <div class="ps">Friday 28 August</div>
-      <label style="margin-top:12px">From</label><div class="two"><div class="in f">Fri 28 · 20:00</div><div class="in">Sat 29 · 08:00</div></div>
+      <label style="margin-top:12px">From</label><div class="two"><div class="in f">Fri 28 · 08:00 pm</div><div class="in">Sat 29 · 08:00 am</div></div>
       <div class="hint">12 hours, crossing midnight. Both dates carry the duty.</div>
       <div class="plist">
         <div class="pp on"><div class="av">AM</div><div><b>Anjali Menon</b><span>Receptionist</span></div><span class="dep">FO</span></div>
@@ -977,7 +984,7 @@
         </div>
         <table class="ptab">
           <tr><th style="width:150px">Staff</th><th>Mon 24</th><th>Tue 25</th><th>Wed 26</th><th>Thu 27</th><th>Fri 28</th><th>Sat 29</th><th>Sun 30</th></tr>
-          <tr class="duty"><td class="nm" style="font-size:10px">MANAGER ON DUTY</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>A.Menon 08–20<br>V.Das 20–08</td><td>P.Thomas 08–20<br>R.Nair 20–08</td><td>P.Thomas 08–20<br>A.Menon 20–08</td><td>V.Das 08–20<br>— 20–08</td><td>P.Thomas 08–20</td></tr>
+          <tr class="duty"><td class="nm" style="font-size:10px">MANAGER ON DUTY</td><td>P.Thomas 08:00 am–08:00 pm<br>R.Nair 08:00 pm–08:00 am</td><td>P.Thomas 08:00 am–08:00 pm<br>R.Nair 08:00 pm–08:00 am</td><td>A.Menon 08:00 am–08:00 pm<br>V.Das 08:00 pm–08:00 am</td><td>P.Thomas 08:00 am–08:00 pm<br>R.Nair 08:00 pm–08:00 am</td><td>P.Thomas 08:00 am–08:00 pm<br>A.Menon 08:00 pm–08:00 am</td><td>V.Das 08:00 am–08:00 pm<br>— 08:00 pm–08:00 am</td><td>P.Thomas 08:00 am–08:00 pm</td></tr>
           <tr><td class="nm">Priya Thomas<span>Supervisor · Zone 1</span></td><td>M</td><td>M</td><td>M</td><td>M</td><td>M</td><td class="off">OFF</td><td class="off">OFF</td></tr>
           <tr><td class="nm">Anjali Menon<span>Receptionist · Zone 3</span></td><td>M</td><td>M</td><td>M</td><td>A</td><td>M</td><td>M</td><td class="off">OFF</td></tr>
           <tr><td class="nm">Vishnu Das<span>Night auditor · Zone 1</span></td><td>N</td><td>N</td><td>N</td><td>N</td><td>N</td><td class="off">OFF</td><td>N</td></tr>
