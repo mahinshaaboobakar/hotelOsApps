@@ -24,7 +24,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
 | `RC-Q1(7)` reconciliation policy · the PMS-only hotel | **S4 SIGNED OFF — owner, 2026-09-05:** one per-property switch in Room Care's setup, **Room Care leads by default**; an observation is applied unless it contradicts a later deliberate act recorded here | — |
 | `RC-Q1(8)` CONN-Q11 | **accepted provisionally** — the scenario pass (S0) is the final check | S0 |
-| `RC-Q1(9)` guest preference | | **S5** |
+| `RC-Q1(9)` guest preference | **S5 SIGNED OFF — owner, 2026-09-05**, case by case (thirteen cases, rulings in the section); the cross-application asks are in *The note to the architect* below S5 | — |
 | `RC-Q1(10)` `events.proto:95` | **routed to CC** — not this round's | — |
 | `RC-Q1(11)` diagram 42's permission name | **verified, S6:** the registry has `room.clean` and `room.inspect`; `masterdata.room.update_status` is an illustration and `can_update_status` is by design never an application-facing name | — |
 | `RC-Q1(12)` permissions | | **S6** |
@@ -667,11 +667,79 @@ three-DND security rule counts cards, not preferences.
 | 12 | The desk sees what happened | Room Care's outcome per room per day through Context — a read view this round delivers (CTX-Q4) | proposed |
 | 13 | GuestOps has no cleaning preference on a stay today | an ask to FF — sent after the ruling, as a requirement | **open, on the ruling** |
 
-**For the owner to rule, in a sentence:** *The preference is GuestOps's
-stay fact, Room Care consumes it with a per-property precedence and records
-the outcome; a guest asking for more is a Jobs request; a supervisor's
-override is recorded under amend; the DND card is Room Care's own
-exception — yes?*
+### The rulings, case by case — owner, 2026-09-05
+
+| # | Ruling |
+|---|---|
+| 1 | Four ways, four records: **at the desk** → GuestOps records *no service today* on the stay → SKIPPED; **at the door, declined** → the attendant taps *Declined* → DECLINED; **at the door, partial** → *Partial* and what was done (bathroom · towels · rubbish · bed) → PARTIAL; **the DND board** → *DND*, the room stays on the list, re-checked through the window (spacing per property), then the guest's answer, or DND for the window. Turndown is a fresh attempt. Nothing is ever just "not done" |
+| 2 | **No whole-stay opt-out** — a guest cannot refuse cleaning for a stay; every day is a fresh attempt in each window |
+| 3 | A timing wish ("not before 12:00") is recorded at the desk **for a day or for the stay**, the desk chooses; outside the window the room shows *waiting*; missed → NOT REACHED |
+| 4 | "Light — no bed change": recorded at the desk or at the door; the standard is not lowered. The **linen rule is the property's**, two shapes: *every N nights, guest may defer* or *must be changed by day N* — Room Care works whichever the property set |
+| 5 | **Towels are a property rule, not a guest choice** — replace daily, or the green programme; nothing recorded from the guest |
+| 6 | Falls away — deep clean is a planned project (S0) |
+| 7 | The DND board — case 1's fourth way |
+| 8 | **A request is Jobs' — Room Care has no role in raising or doing it** (a spill, a bottle of water, an extra towel, "clean now"). Room Care **hears `job.closed`** for jobs against a room and writes it into the room's day history — "extra service 16:50 · J-1183" — so the day reads whole |
+| 9 | **After two DND days (property setting, default 2) the supervisor must go on day three and decide; the decision is final and the supervisor owns the record** — DND approved → no cleaning needed; or cleaned. **From then on every DND day on that room is the supervisor's decision** — the count never restarts, the attendant never takes the call again. A Room Care act, never a Jobs request |
+| 10 | A changed wish applies **the same day if told inside the window**, otherwise from the next attempt; both wishes kept with their times |
+| 11 | The wish travels with the **stay** (room move → the new room shows it; the old room becomes a departure clean, priced by whether it is sold tonight; an out-of-order for the tap drops it from the day). **The linen date is the room's** — "linen last changed", reset by every departure clean; nights empty do not count |
+| 12 | The desk sees the room's **day history only**, in GuestOps, through Context (Room Care's read view + RPC, this round's delivery, display-only) — plus **a link into Room Care at that room** for users holding `roomcare.read`; the live board stays in Room Care |
+| 13 | The cross-application asks are sent through the architect — the note below |
+
+**Ruling — owner, 2026-09-05: "yes."** **SIGNED OFF.**
+
+---
+
+## The note to the architect — everything Room Care depends on, and the assignment flow it owns
+
+Requested by the owner on signing S5 off: *"you took more features that
+depend on other applications — Jobs and GuestOps, and also Workforce (you
+didn't ask anything) — how a room cleaning flows, who is going to clean, the
+assignment flow — Room Care is the owner of it. Give a full note to the
+architect."*
+
+### 1 · The assignment flow — Room Care owns it, end to end
+
+```text
+BEFORE THE WINDOW   the policy has produced today's rooms: departure cleans, daily services, refreshes,
+                    each with a service, minutes and priority (sold tonight first) — Room Care's
+WHO IS HERE         Room Care asks CONTEXT, never Workforce: who is posted to the Housekeeping
+                    department today, in which ZONE, on which shift (start–end), and whether they
+                    have clocked in — Workforce's facts, read; Room Care rosters nobody
+THE PROPOSAL        the strategy the property picked (continuity · same zone · lowest load) matches
+                    rooms to the attendants on shift in each zone, within their shift's minutes;
+                    "nobody available" for a room is an explicit outcome on the board
+THE SUPERVISOR      sees the proposal on the board, accepts or moves rooms (roomcare.assign) — the
+                    decision is the supervisor's, the proposal is only a proposal
+THE ATTENDANT       sees MY ROOMS in priority order; works them; each ends Done · Partial · Declined ·
+                    DND; reassignments during the day are the supervisor's, recorded
+THE RECORD          who was assigned what, by whom, when; who did what, when — Room Care's, per day
+NOT OURS            shifts, attendance, leave, who is posted where — Workforce; the people — Identity /
+                    Master Data; requests — Jobs; the room — Master Data
+```
+
+### 2 · What Room Care needs from each application — the asks
+
+| Application | Room Care needs | Status |
+|---|---|---|
+| **Workforce (GG)** — *not yet asked* | (a) the **zone on the posting** — Workforce's own §3.8 Z1 (proposed IN v1 there): confirm it is in Workforce's plan of record; (b) a **Context read** *"who is on shift now, in the Housekeeping department, by zone, with shift start–end and clocked-in"* — the resolver Workforce's round delivers (CTX-Q4's shape: view + RPC, by the contributing domain); (c) confirmation that **Room Care never writes anything Workforce owns** — no WorkersStats, no capacity table; an attendant's available minutes are the shift's | **new ask** |
+| **GuestOps (FF)** | (a) a **cleaning wish on the stay** — *no service today* · *earliest time* — with a scope (a day / the stay) and who recorded it, published as a stay fact (S5 cases 1, 3, 10, 11); (b) the **"Housekeeping today" panel** — the room's day history read through Context, plus the link into Room Care for users holding `roomcare.read` (case 12); (c) already there and relied on: `stay.arrived` / `stay.departed`, room moves as events, the standing-override rule (GUEST-Q3) that S4 mirrors | **new ask (a, b)** |
+| **Jobs (HH)** | (a) **`JOBS-Q2`** — the multi-day deep-clean job with changing hands, registered, post-certification; (b) **requests are Jobs'** — no ask, a boundary: a spill, water, towels, "clean now" are raised and done in Jobs; (c) Room Care **consumes `job.closed`** against a room for its day history — exists; (d) Room Care **raises** a deep-clean job by event with a correlation id and keeps the `job_id` from `job.created` — EVT-Q3, exists | registered / boundary |
+| **The inspection application** (`RC-Q1(6)`) | the request event with a correlation id; the outcome event (passed / failed with reason); `room.inspect` held by its inspector; the checklist per service × room type that Room Care points at | **its brief** |
+| **Inventory** (`RC-Q2`) | as registered — catalogue via Context, par, `roomcare.room.restocked` consumed, `inventory.charge_due` published | registered |
+| **EngineeringOps / the out-of-order owner** | the **block request** for a deep-clean window: Room Care requests (reason, dates); the owner of room out-of-order state applies it and the PMS / GuestOps is told; Room Care hears the block and the lift. **Open against ADR 0051/0056** — whether Room Care may place one directly | **open — the architect's** |
+| **Context (platform)** | Room Care delivers: the **room's day** read view + RPC (display-only), and fills `RoomContext.room_condition`; Room Care reads: `GetRoomContext`, `GetOperatingDay`, the Workforce resolver above, the stay's wish | this round delivers / asks above |
+| **The Hub / connector** | `room.state_observed` as the inbound truth (HUB-Q4) — exists; `CONN-Q11` provisionally closed (`RC-Q1(8)`) | exists |
+| **Desktop shell** | verify: opening a module **at a record** (GuestOps → Room Care › room 305). Ask only if absent | verify |
+| **Temporal (II)** | Schedules for service windows, re-check spacing, the day roll — `AddTemporal`, `TEMPORAL-Q1` | exists |
+
+### 3 · What Room Care will not build, by these rulings
+
+A roster, a shift, an attendance record, a capacity table (Workforce); a
+request queue (Jobs); a preference store (GuestOps); a catalogue, a price or a
+stock (Inventory); a checklist or an inspection (the inspection app); an
+out-of-order state (its owner); a room (Master Data); a multi-day assignment
+(JOBS-Q2). Each is a port with no adapter until its round lands, and Room
+Care's screens say *not installed* rather than pretending.
 
 **Ruling:** —
 
