@@ -359,9 +359,16 @@
      scrolls and the pager does not move. Drawn inside the body it was below
      the fold on a full page, which is the control a reader most needs to
      reach. */
+  /* Amended 2026-09-05, §64 §6 (FF, f2f406d): the pager is the list's floor.
+     It sits INSIDE the body as the list's sibling, the list grows into the free
+     space, and the strip sticks so a full page does not hide it behind a
+     scroll. This drawing had it outside the body and static, which is the
+     arrangement the build carried until this rule landed. */
+  .rows:has(~ .pager),.card:has(~ .pager){flex:1 0 auto;min-height:0}
   .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
-         flex:0 0 auto;padding:11px 26px;font-size:12px;color:var(--faint);
-         border-top:1px solid var(--line)}
+         position:sticky;bottom:-22px;flex:0 0 auto;background:var(--bg);
+         margin:0 -26px -22px;padding:10px 30px 22px;font-size:12px;
+         color:var(--faint);border-top:1px solid var(--line)}
   .pager .showing{color:var(--dim)}
   .pnav{display:flex;align-items:center}
   .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
@@ -768,8 +775,8 @@
         <div class="prow" style="color:var(--faint);font-size:11.5px"><div>… 19 more on this page</div><div></div><div></div><div>25 per page · 6 clear of the fold at this height, 12 in a normal window, 16 maximised — measured: a 52.8px row under 199px of fixed chrome</div><div></div></div>
       </div>
       <div class="not" style="margin:0;max-width:none"><b>Identity is Master Data's and read-only here.</b> Name, employee number, contact and photograph belong to the person and are edited in Core Administration. This screen owns what is <i>operational</i> — the posting, the job role, the reporting line, the zone and the department head — which is the half ADR 0063 §Q5 moved out of Core, and the reason Core Administration's Staff section deliberately no longer shows it.</div>
-    </div>
       <div class="pager"><div class="showing">Showing 1–25 of 42 · <span style="color:var(--faint)">6 of the 25 drawn</span></div><div class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">›</span></div></div>
+    </div>
   </div>
 </div>
 <div class="cap"><b>The zone is on the posting, not beside it.</b> <i>"Anjali has zone 3"</i> is an incomplete fact; <i>"Anjali has zone 3 <b>as Front Office</b>"</i> is complete — so the zone lives on the posting that already carries the department, which makes the incomplete state impossible to write rather than merely discouraged (<b>WF-Q7</b>). It is <b>optional</b>: most postings have none, and a receptionist posted to Front Office and to no area is the ordinary case. It is <b>durable until changed</b> — a standing arrangement edited here or on the rota, not re-decided each morning — and it inherits the posting's effective dating. <b>Rajan carries two postings</b> (<b>WF-Q3</b>) and one <b>expired</b> certification, which is shown and named and blocks nothing (<b>WF-Q16</b>). <b>This screen is why Room Care can ask "who has zone 3"</b> — through the Context Service, never by reading this application's tables (<b>CTX-Q4</b>, <b>WF-Q6</b>).</div>
