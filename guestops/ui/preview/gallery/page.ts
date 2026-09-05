@@ -4,6 +4,7 @@
 
 import type { Pair } from "./frames";
 import { PROPERTIES, script } from "./measure";
+import { TABLES, pagination, widgets } from "./tables";
 
 /** One pair, ready to draw. */
 export interface Built {
@@ -36,6 +37,7 @@ export function page(
   goldCss: string,
   tokenCss: string,
   realmCss: string,
+  captures: readonly { entry: string; html: string }[],
 ): string {
   const sections = pairs.map((one) => section(one, goldCss, tokenCss, realmCss)).join("\n");
 
@@ -44,7 +46,7 @@ export function page(
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
-<style>${PAGE}</style>
+<style>${PAGE}${TABLES}</style>
 
 <header>
   <p class="eyebrow">GuestOps &middot; APPS-Q4 Part A</p>
@@ -98,6 +100,10 @@ export function page(
 </header>
 
 ${sections}
+
+${pagination()}
+
+${widgets(captures, tokenCss, realmCss)}
 <script>${script(PROPERTIES)}</script>`;
 }
 

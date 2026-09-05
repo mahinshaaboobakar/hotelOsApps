@@ -15,7 +15,8 @@ import { join } from "node:path";
 
 import { frame, goldStyle, heading, PAIRS } from "./frames";
 import { page, type Built } from "./page";
-import { render } from "./realm";
+import { render, widget } from "./realm";
+import { WIDGETS } from "./conformance";
 
 /**
  * Where this package is, not where this file is.
@@ -68,7 +69,27 @@ for (const pair of PAIRS) {
   });
 }
 
-const out = join(root, "gallery.html");
-writeFileSync(out, page(built, goldStyle(source), tokenCss, REALM), "utf8");
+// The five widgets, connected the way the shell connects them. A widget that
+// is not properly connected renders a styled, silent, empty card, so an empty
+// capture here is refused rather than published — it is indistinguishable from
+// a capture of a quiet hotel.
+const captures = [];
 
-process.stdout.write(`${built.length} pairs → ${out}\n`);
+for (const one of WIDGETS) {
+  const html = await widget(one.entry);
+
+  if (html.replace(/<style[^>]*>[\s\S]*?<\/style>/gu, "").trim() === "") {
+    throw new Error(
+      `widget ${one.entry} rendered nothing — it drew no card, and a blank pane `
+      + "in the certificate would say it had",
+    );
+  }
+
+  captures.push({ entry: one.entry, html });
+}
+
+const out = join(root, "gallery.html");
+writeFileSync(out, page(built, goldStyle(source), tokenCss, REALM, captures), "utf8");
+
+process.stdout.write(
+  `${built.length} pairs, ${captures.length} widget captures → ${out}\n`);
