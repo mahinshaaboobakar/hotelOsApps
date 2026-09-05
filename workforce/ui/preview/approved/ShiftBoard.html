@@ -2,7 +2,6 @@
 <html>
 <head>
   <meta charset="utf-8">
-  
 </head>
 <body>
 
@@ -55,7 +54,17 @@
       </div>
     </div>
 <div style="border-top: 1px solid rgb(255 255 255 / 0.07); padding-top: 9px;">
-        <div style="font-size: 10px; color: #8b93a7; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;">Next change · 15:00</div>
+<!-- Amended 2026-09-05, APPS-Q4 Part A (GG): the changeover is an instant, so it
+     renders in the property's own clock. The duty-instants ruling covered this
+     class; the screen frames took it and these widget frames were simply never
+     visited. `en-IN` is a 12-hour locale and PKG-Q46(4) has operational data
+     render in the property's form wherever it appears. The literal is the SDK's
+     own output — `formatInstant(at, property, "time")` yields lowercase, and the
+     label's `text-transform: uppercase` renders it `03:00 PM`, which is what the
+     build shows. The shift hours above are NOT touched: a Morning shift starts
+     at 07:00 wherever the property is, so those are wall clocks with no zone and
+     no locale to render in — the same ruling, drawing the same line. -->
+        <div style="font-size: 10px; color: #8b93a7; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;">Next change · 03:00 pm</div>
         <div style="display: flex; gap: 10px;">
           <span style="font-size: 11.5px; color: #34d399;">14 on</span>
           <span style="font-size: 11.5px; color: #8b93a7;">14 off</span>
@@ -113,7 +122,7 @@
       </div>
     </div>
 <div style="border-top: 1px solid rgb(26 32 53 / 0.10); padding-top: 9px;">
-        <div style="font-size: 10px; color: #5b6480; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;">Next change · 15:00</div>
+        <div style="font-size: 10px; color: #5b6480; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 5px;">Next change · 03:00 pm</div>
         <div style="display: flex; gap: 10px;">
           <span style="font-size: 11.5px; color: #059669;">14 on</span>
           <span style="font-size: 11.5px; color: #5b6480;">14 off</span>
