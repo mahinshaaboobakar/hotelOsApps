@@ -26,8 +26,20 @@ import { stylesheet } from "../chrome/styles";
 const CSS = (stylesheet().textContent ?? "").replace(/\s+/g, " ");
 
 describe("the pager's placement", () => {
-  it("makes a list with a pager take the free space", () => {
-    expect(CSS).toContain(".tbl:has(~ .pager){flex:1 1 auto;min-height:0}");
+  /**
+   * **Grow only.** `1 0 auto`, and no `min-height:0`.
+   *
+   * The shrink half was in the first draft and GG's port measured what it does
+   * in a body that is itself a constrained scroll container: the list shrinks
+   * *below its content*, `.tbl` does not clip, and the rows render through
+   * whatever follows — 304px of list against 1353px of content, 1048px drawn
+   * under the note and the pager. `min-height:0` is what permits that shrink,
+   * so it goes with it.
+   */
+  it("makes a list with a pager grow, and never shrink below its rows", () => {
+    expect(CSS).toContain(".tbl:has(~ .pager){flex:1 0 auto}");
+    expect(CSS).not.toMatch(/\.tbl:has\(~ \.pager\)\{[^}]*min-height:0/);
+    expect(CSS).not.toMatch(/\.tbl:has\(~ \.pager\)\{[^}]*flex:1 1/);
   });
 
   /**
@@ -42,9 +54,21 @@ describe("the pager's placement", () => {
     expect(CSS).not.toMatch(/[^:]\.tbl\{[^}]*flex:1/);
   });
 
-  it("sticks the pager to the bottom of the list it belongs to", () => {
+  /**
+   * **The offset is the body's bottom padding, negated.**
+   *
+   * Sticky resolves against the scrollport's *padding* box, so `bottom:0` in a
+   * body padded 22px parks the strip 22px short and rows scroll through the
+   * gap — GG measured 598 against a scrollport bottom of 620. The negative
+   * bottom *margin* does not fix it: that moves the flow position, not the
+   * offset sticky resolves, so the strip was flush at rest and high while
+   * stuck, which is the jump the margin exists to prevent arriving from the
+   * other side.
+   */
+  it("sticks the pager flush with the bottom, past the body's own padding", () => {
     expect(CSS).toMatch(/\.pager\{[^}]*position:sticky/);
-    expect(CSS).toMatch(/\.pager\{[^}]*bottom:0/);
+    expect(CSS).toMatch(/\.pager\{[^}]*bottom:-22px/);
+    expect(CSS).not.toMatch(/\.pager\{[^}]*bottom:0/);
   });
 
   /**

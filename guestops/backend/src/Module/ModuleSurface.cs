@@ -43,7 +43,13 @@ namespace HotelOS.GuestOps.Module;
 public static class ModuleSurface
 {
     /// <summary>Serve this application's bundles.</summary>
-    /// <param name="app">The application being built.</param>
+    /// <param name="app">
+    /// The door these routes belong on — <c>IEndpointRouteBuilder</c> rather
+    /// than <c>WebApplication</c>, because `SHELL-Q40` §4·3 binds each surface
+    /// to its own listener's pipeline. Taking the whole application would map
+    /// the bundle route onto <b>both</b> doors, which is the mutual-TLS one
+    /// answering a route only the Shell's plaintext hop should reach.
+    /// </param>
     /// <remarks>
     /// <b>The provider comes from the request, not from a scope opened here</b>
     /// — <c>SHELL-Q38</c>. This used to build its own scope from
@@ -53,7 +59,7 @@ public static class ModuleSurface
     /// there is one answer to "which container is this call in" rather than
     /// two.
     /// </remarks>
-    public static void MapGuestOpsModule(this WebApplication app)
+    public static void MapGuestOpsModule(this IEndpointRouteBuilder app)
     {
         app.MapModuleCapability(
             Application.Abstractions.Permissions.ReservationRead,

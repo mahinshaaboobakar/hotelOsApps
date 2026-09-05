@@ -101,7 +101,7 @@ builder.Services.AddDbContext<GuestOpsDbContext>(options => options
 // package inherit its user's full authority.
 var platform = PlatformEnvironment.Read();
 
-// **The bus the Kernel actually publishes to, when it told us.**
+// **The bus, and it is the one the Kernel told us about.**
 //
 // Both consumers below read `Events:NatsUrl` from configuration and fell back
 // to a literal — one to 24222 and the other to 4222, which are the development
@@ -116,35 +116,35 @@ var natsUrl = builder.Configuration["Events:NatsUrl"]
     ?? platform?.NatsUrl
     ?? "nats://127.0.0.1:24222";
 
-builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
-    serviceName: "guestops",
-    kernelEndpoint: platform?.KernelEndpoint
-        ?? new Uri(builder.Configuration["Kernel:Endpoint"] ?? "https://127.0.0.1:15051"),
-    certificateDirectory: platform?.CertificateDirectory);
-
-// **The authentication half, which serving a UI requires** — `SHELL-Q38`.
-// `AddHotelOsPlatform` binds `IKernelAuthorizer`; it does NOT register
-// `JwtCallerAuthenticator`, which lives only in `AddPlatformAuthentication` —
-// so an application that wired the platform and stopped there could map a
-// module capability and fail at boot. That refusal is the fix working: the
-// envelope resolves its guards at map time precisely so a missing registration
-// says so at start-up, naming the call to add, rather than throwing on the
-// first button a person presses.
+// **One call, and its only argument is what the Kernel said** — `SHELL-Q40`
+// §3·3, `ed38380`.
 //
-// Guarded on having an identity for the same reason the route below is. The
-// validator authenticates its own JWKS fetch with this application's
-// certificate, so without one there is nothing to fetch keys with.
+// This was two calls and five arguments: a service name, a Kernel endpoint
+// with a hardcoded fallback, a certificate directory, an Identity endpoint read
+// from configuration, and a bus. The Identity endpoint is why this application
+// shipped an `appsettings.json` carrying platform topology — the thing the
+// comment beside it said a package must not do. It is discovered now
+// (`DiscoverService`, AUTHZ-Q21), the issuer and audience are the platform's
+// fixed pair, and the bus is told.
+//
+//   Installed applications never define their own topology, listener ports, or
+//   platform service addresses — the Kernel composes topology; the SDK
+//   materializes it.
+//
+// The generic argument binds the event appender to **this** context, so an
+// event is appended in the transaction that made the change rather than in one
+// of its own.
 if (platform is not null)
 {
-    builder.Services.AddPlatformAuthentication(
-        serviceRoot: platform.CertificateDirectory,
-        identityEndpoint: new Uri(
-            builder.Configuration["Services:Identity:Endpoint"]
-                ?? throw new InvalidOperationException(
-                    "Services:Identity:Endpoint is required: a validator with no authority "
-                    + "endpoint cannot refresh signing keys")),
-        natsUrl: natsUrl,
-        configuration: builder.Configuration);
+    builder.Services.AddHotelOsApplication<GuestOpsDbContext>(platform);
+}
+else
+{
+    // Running from a checkout: no Kernel, no certificate, no identity to answer
+    // authorization with. `migrate` is what this mode is for, and it needs the
+    // context and nothing else.
+    builder.Services.AddDbContext<GuestOpsDbContext>(options => options.UseNpgsql(
+        builder.Configuration.GetConnectionString("HotelOS")));
 }
 
 builder.Services.AddGuestOpsApplication();
@@ -168,31 +168,54 @@ builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration, platform);
 builder.Services.AddGrpc(options =>
     options.Interceptors.Add<DomainExceptionInterceptor>());
 
-var app = builder.Build();
-
-app.MapGrpcService<GuestOpsGrpcService>();
-
-// The one route this application's own bundles reach — `SHELL-Q37`. Their
-// realm has `default-src 'none'`, so a screen's `host.call` travels over a
-// MessagePort to the Shell and arrives here. The session token is validated
-// and the capability checked inside `MapModuleCapability`, not beside it:
-// an application that had to remember either would work perfectly on the desk
-// it was written at, which is the failure with no error anywhere.
-// **Mapped only when the platform gave this application an identity.** An
-// installed one always has: install step 4 issues it and Kernel start-up heals
-// a missing one (`AUTHZ-Q16`). Run from a checkout there is no certificate and
-// no Kernel, and a surface that answered every call with a handshake failure
-// would be worse than one honestly absent — hello-hotel's own reasoning, and
-// it is the same surface.
 if (platform is not null)
 {
-    app.MapGuestOpsModule();
+    // The two doors the Kernel chose and probed — `SHELL-Q40` §3·1. An
+    // application does not pick its own ports: the authority that already
+    // chose one chooses both, and holds the probes open together because the
+    // OS re-offers an ephemeral port the moment the first closes.
+    builder.Host.UseApplicationListeners(platform);
 }
 
-// What install step 8 probes. Plain HTTP rather than gRPC health, because the
-// probe runs before the Kernel has any reason to trust this process and a
-// liveness check should need nothing but a socket.
-app.MapGet("/health", () => Results.Ok("healthy"));
+var app = builder.Build();
+
+if (platform is null)
+{
+    // Running from a checkout: no certificate, no Kernel, and therefore no
+    // mutual-TLS door to put anything behind. `migrate` is what this mode is
+    // for, and a surface that answered every call with a handshake failure
+    // would be worse than one honestly absent.
+    app.MapGet("/health", () => Results.Ok("healthy"));
+}
+else
+{
+    // **Each surface into its own door's pipeline** — `SHELL-Q40` §4·3,
+    // ADR 0133. Not a route constraint: the pipeline is bound to the listener,
+    // so the platform-facing API does not *exist* on the plaintext door rather
+    // than existing there and being refused. This file could not put it on the
+    // wrong one, because the builder each delegate receives is the other
+    // branch's.
+    app.MapApplicationDoors(
+        platform,
+        platformApi: door => door.MapGrpcService<GuestOpsGrpcService>(),
+        packagedUi: door =>
+        {
+            // The one route this application's own bundles reach —
+            // `SHELL-Q37`. Their realm has `default-src 'none'`, so a screen's
+            // `host.call` travels over a MessagePort to the Shell and arrives
+            // here. The session token is validated and the capability checked
+            // inside `MapModuleCapability`, not beside it: an application that
+            // had to remember either would work perfectly on the desk it was
+            // written at, which is the failure with no error anywhere.
+            door.MapGuestOpsModule();
+
+            // What install step 8 probes, on the door it probes. Plain HTTP
+            // rather than gRPC health, because the probe runs before the Kernel
+            // has any reason to trust this process and a liveness check should
+            // need nothing but a socket.
+            door.MapGet("/health", () => Results.Ok("healthy"));
+        });
+}
 
 await app.RunAsync();
 

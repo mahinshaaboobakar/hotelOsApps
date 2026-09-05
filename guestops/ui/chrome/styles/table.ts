@@ -85,14 +85,35 @@ export const TABLE = `
  * not "a table".
  *
  * The negative margins cancel the body's own padding so the strip spans the
- * full width and sits flush with the bottom edge while it is stuck; the padding
- * puts it back, so nothing touches the strip and the pager does not jump when
- * the list reaches its end. The background must be opaque or rows scroll
- * through it — and that opacity is the one cost of sticking: the last row is
- * behind the strip until you reach it.
+ * full width; the padding puts it back, so nothing touches the strip. The
+ * background must be opaque or rows scroll through it — and that opacity is the
+ * one cost of sticking: the last row is behind the strip until you reach it.
+ *
+ * # Two corrections from GG's port, measured — ruled 2026-09-05
+ *
+ * **1 0 auto, not 1 1 auto, and no min-height:0.** The shrink half was
+ * mine and it was wrong: in a body that is itself a constrained scroll
+ * container, flex-shrink:1 lets the list shrink *below its content*, and
+ * min-height:0 is what permits it. .tbl does not clip, so the rows then
+ * render straight through whatever follows. GG measured a list collapsed to
+ * 304px against 1353px of content, with 1048px drawn under the note and the
+ * pager. **Grow only is what the ruling's prose always said** — *the list takes
+ * the free space* — and the shrink was a habit written into the shorthand.
+ *
+ * **bottom:-22px, not bottom:0.** Sticky resolves its offsets against the
+ * scrollport's *padding* box, so in a body padded 22px the strip parks 22px
+ * short of the edge and rows scroll through the gap. GG measured 598 against a
+ * scrollport bottom of 620. The negative bottom *margin* does not fix this: it
+ * moves the element's flow position, not the offset sticky resolves — so the
+ * strip was flush at rest and 22px high while stuck, which is the jump the
+ * margin was added to prevent, arriving from the other side.
+ *
+ * The number is the body's own bottom padding, negated. It is written out
+ * rather than derived because there is no variable to derive it from; the
+ * standard states the rule so the third application does not rediscover it.
  */
-.tbl:has(~ .pager){flex:1 1 auto;min-height:0}
-.pager{position:sticky;bottom:0;z-index:2;
+.tbl:has(~ .pager){flex:1 0 auto}
+.pager{position:sticky;bottom:-22px;z-index:2;
   display:flex;justify-content:space-between;align-items:center;gap:9px;
   margin:0 -26px -22px;padding:10px 30px 22px;
   font-size:12px;color:var(--color-ink-faint,#5a6172);
