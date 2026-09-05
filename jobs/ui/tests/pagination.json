@@ -1,0 +1,166 @@
+{
+  "rule": "The standard's §6: the pager is the list's floor, and it draws on a single page. A list bounded by a natural key needs none — a pager there would invent a page count for a set with no second page.",
+  "surfaces": [
+    {
+      "screen": "Board",
+      "open": [
+        "Board"
+      ],
+      "draws": "numbered",
+      "what": "A numbered pager over the service's own paging — page, pageSize, total, and the size the service applied rather than the one asked for",
+      "pair": "1",
+      "rule": "§6 floor · CORE-Q13's paged pair"
+    },
+    {
+      "screen": "Scheduled",
+      "open": [
+        "Scheduled"
+      ],
+      "draws": "single-page",
+      "what": "A real pager on one page — 1–4 of 4, both arrows disabled",
+      "pair": "6",
+      "rule": "§6 single page"
+    },
+    {
+      "screen": "Live",
+      "open": [
+        "Live"
+      ],
+      "draws": "none",
+      "what": "Departments and the sweep's concern table. No pager: the departments are the property's, the concern rows are the sweep's own verdicts, and a note says ON TRACK rows are not listed",
+      "pair": "5",
+      "rule": "bounded by the property · a caveat is not a control"
+    },
+    {
+      "screen": "Catalogue",
+      "open": [
+        "Catalogue"
+      ],
+      "draws": "none",
+      "what": "The organisation's categories and the items under one of them — a set a person curates, not a list that grows on its own",
+      "pair": "7",
+      "rule": "bounded by the catalogue"
+    },
+    {
+      "screen": "Settings · Concern policy",
+      "open": [
+        "Settings"
+      ],
+      "draws": "none",
+      "what": "One row per priority in the department's policy, and its ladder",
+      "pair": "02-1",
+      "rule": "bounded by the four priorities"
+    },
+    {
+      "screen": "Settings · Policies",
+      "open": [
+        "Settings",
+        "All policies"
+      ],
+      "draws": "single-page",
+      "what": "A real pager over the property's policies — 1–7 of 7",
+      "pair": "02-7",
+      "rule": "§6 single page"
+    },
+    {
+      "screen": "Settings · Shifts & presence",
+      "open": [
+        "Settings",
+        "Shifts & presence"
+      ],
+      "draws": "none",
+      "what": "One row per department this property has",
+      "pair": "02-2",
+      "rule": "bounded by the property's departments"
+    },
+    {
+      "screen": "Settings · Who is told",
+      "open": [
+        "Settings",
+        "Who is told"
+      ],
+      "draws": "none",
+      "what": "One row per role that hears a concern",
+      "pair": "02-3",
+      "rule": "bounded by the ladder's roles"
+    },
+    {
+      "screen": "Settings · Holds & reminders",
+      "open": [
+        "Settings",
+        "Holds & reminders"
+      ],
+      "draws": "none",
+      "what": "The ten nearest holds with a date, and the card says which of the two it is showing",
+      "pair": "02-4",
+      "rule": "a truncated list admits it"
+    },
+    {
+      "screen": "Settings · Closing & rating",
+      "open": [
+        "Settings",
+        "Closing & rating"
+      ],
+      "draws": "none",
+      "what": "The property's closing rule and any department that overrides it",
+      "pair": "02-5",
+      "rule": "bounded by the property's departments"
+    },
+    {
+      "screen": "Settings · Access",
+      "open": [
+        "Settings",
+        "Access"
+      ],
+      "draws": "none",
+      "what": "Three lines saying where each grant comes from — Jobs stores none of them",
+      "pair": "02-6",
+      "rule": "not a list that varies"
+    },
+    {
+      "screen": "One job · Work",
+      "open": [
+        "job",
+        "Work"
+      ],
+      "draws": "none",
+      "what": "The work sessions of one job",
+      "pair": "2b",
+      "rule": "bounded by the job"
+    },
+    {
+      "screen": "One job · History",
+      "open": [
+        "job",
+        "History"
+      ],
+      "draws": "none",
+      "what": "Status, concern and work for one job, newest first",
+      "pair": "2c",
+      "rule": "bounded by the job"
+    },
+    {
+      "screen": "One job · Notes & photos",
+      "open": [
+        "job",
+        "Notes & photos"
+      ],
+      "draws": "none",
+      "what": "The notes on one job, with the raising text among them",
+      "pair": "2d",
+      "rule": "bounded by the job"
+    },
+    {
+      "screen": "One job · Links & steps",
+      "open": [
+        "job",
+        "Links & steps"
+      ],
+      "draws": "none",
+      "what": "This job's steps and the jobs linked to it",
+      "pair": "2e",
+      "rule": "bounded by the job"
+    }
+  ],
+  "note": "One job · Record is deliberately absent: it draws a key/value grid of the row as stored, not a list. The walker found it declared and listless, which is the finder correcting the table rather than the other way round."
+}
