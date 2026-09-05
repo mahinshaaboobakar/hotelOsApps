@@ -1,0 +1,3 @@
+# The package payload: `dotnet publish` output and the staged UI, signed into
+# the registry by `hopkg`. A build artefact, and 185 MB of it.
+.build/

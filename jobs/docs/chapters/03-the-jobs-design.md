@@ -715,7 +715,10 @@ for two departments.
 | | State | What it blocks |
 |---|---|---|
 | **The permission vocabulary** (§4.1) | **ruled 2026-09-04** — eight concrete verbs, in the manifest | nothing |
-| **`property#jobs_manager` in the registry** | route ruled; the row is the architect's | the grant kind materialising at install |
+| **`property#jobs_manager` in the registry** | route ruled; the row is the architect's. **Proven blocking, 2026-09-05**: the Kernel refuses the install outright — *"this package declares a grant that writes property#jobs_manager, which installed applications may not establish"* | the whole install, not just the grant |
+| **Four of the eight verbs are not in the permission registry** | `job.cancel`, `job.amend`, `job.configure`, `job.curate`. The registry carries read · create · assign · complete · approve_cost; the vocabulary ruled 2026-09-04 was never written into it. **Proven blocking, 2026-09-05** | the install, and any grant of those four |
+| **The suite's cluster roles collide with the installer's** | Jobs' test convention creates `hotelos_owner_jobs` and `hotelos_app_jobs` on the shared development cluster, and the installer then refuses to take them over. **Ours to fix** — the suite should not hold the names a real install wants | a real install on any machine the suite has run on |
+| **`AddPlatformAuthentication` has no endpoints to pass** | The Kernel's environment contract carries the certificate directory, the Kernel endpoint, the property, the package id and the subscriptions — **no Identity endpoint and no NATS url**, which is what that call takes. An application that maps a module capability therefore cannot start (`SHELL-Q40`) | every installed application's boot |
 | **`shift.started` / `shift.ended`** | requested of Workforce | `department_presence` runs on the roster fallback until then |
 | **A `team` object** | requested of Workforce (ADR 0063's test) | `assigned_to_team_id` waits for it; person assignment is unaffected |
 | **Time and date format** | **ruled 2026-09-04**: `locale` + `timezone` from the host; the formatter in `@hotelos/sdk`, built by Jobs as the first screen that needs it (§2.3) | nothing — it is part of this build |
