@@ -77,7 +77,13 @@ const SHELL = `
    because they are the desktop's own furniture and a guest application
    drawing its own 212px rail competes with the shell's chrome for the same
    edge of the same screen. */
-.go{display:flex;flex-direction:column;height:100vh;font-size:13px;line-height:1.55;
+/* 13.5/1.55 — the frame's own computed values, adjudicated 2026-09-05. The
+   drawing's window sets no size; it inherits font:13.5px/1.55 from the mockup
+   page. Taking the leading from that declaration and refusing the size would be
+   incoherent, so both are the frame's. The font FAMILY in the same shorthand
+   stays overridden: a module is typed by --font-sans, never by a stack a
+   drawing happened to name. */
+.go{display:flex;flex-direction:column;height:100vh;font-size:13.5px;line-height:1.55;
   color:var(--color-ink,#e8ebf4);
   font-family:var(--font-sans,system-ui,sans-serif);background:var(--color-surface,#0b0d14)}
 .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;

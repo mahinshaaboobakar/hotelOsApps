@@ -119,8 +119,8 @@ describe("what the module hardcodes", () => {
  * correct until `894e230` published three more, at which point it was one set
  * *behind* and captures showed the module rendering its own fallbacks.
  *
- * Both directions are the same defect: a harness that does not match the
- * contract photographs something no property will ever run. Derived from
+ * **A harness ahead of the contract and one behind it are the same defect** —
+ * both photograph something no property will ever run. Derived from
  * `TOKEN_NAMES` rather than a copied list, so the day an eighteenth token lands
  * this fails until the harness carries it.
  */

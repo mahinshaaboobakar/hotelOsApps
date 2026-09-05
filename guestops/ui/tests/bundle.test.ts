@@ -37,6 +37,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { beforeEach, describe, expect, it } from "vitest";
+import { HOST_CONTRACT_RANGE } from "@hotelos/sdk";
 
 /**
  * Resolved from the vitest root, not `import.meta.url`: the test is transformed
@@ -128,8 +129,19 @@ function host(
         new MessageEvent("message", {
           data: {
             type: "hotelos.connect",
-            contract: 1,
+            // Both halves of the range, from the SDK rather than as literals —
+            // `isConnect` requires `minContract` to be a number, so a message
+            // missing it is not recognised as a connect AT ALL and the module
+            // waits forever for a handshake that never arrives. Written as
+            // literals this fixture would go stale the next time the contract
+            // moves, and would fail as "the bundle never connected" rather
+            // than as "this test is out of date".
+            contract: HOST_CONTRACT_RANGE.current,
+            minContract: HOST_CONTRACT_RANGE.min,
             module: { id: "guestops", version: "0.1.0", capabilities: announced },
+            // What a real host sends. Null on both, deliberately: the SDK types
+            // them nullable because an unconfigured property is a real state.
+            property: { timezone: null, locale: null },
           },
           ports: [channel.port2],
         }),
