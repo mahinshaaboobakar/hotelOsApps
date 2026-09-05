@@ -44,6 +44,21 @@ export interface Moment {
 export interface Tab {
   label: string;
   count?: string;
+
+  /**
+   * Dimmed, because the application whose subject it shows is not installed.
+   *
+   * **Dimmed, not removed.** Which tabs a stay has is itself information: a
+   * property looking at a greyed Servicing learns that servicing is something
+   * HotelOS can show them, and an absent tab teaches them nothing.
+   *
+   * This was written by `screens/stay` and read by nobody for the length of one
+   * edit — `Tab` had no such field, `tabs()` ignored it, and **the typecheck
+   * passed**, because a `{ ...tab, gone: true }` spread is not a fresh object
+   * literal and so escapes excess-property checking. A dead feature behind a
+   * green build; `tests/tabs.test.ts` is what can now fail on it.
+   */
+  gone?: boolean;
 }
 
 /** The stay page — gold frame 3. */

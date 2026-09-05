@@ -80,7 +80,7 @@ export function tabs(
 
   for (const tab of list) {
     const button = control(
-      tab.label === current ? "tab on" : "tab",
+      `${tab.label === current ? "tab on" : "tab"}${tab.gone === true ? " gone" : ""}`,
       tab.label,
       () => go(tab.label),
     );

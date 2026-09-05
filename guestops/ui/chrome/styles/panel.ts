@@ -28,9 +28,56 @@ export const PANEL = `
 .note{border:1px dashed var(--color-line-strong,rgba(255,255,255,.16));border-radius:12px;
   padding:10px 12px;font-size:12px;line-height:1.65;color:var(--color-ink-muted,#8b93a7)}
 .note b{color:var(--color-ink,#e8ebf4)}
+/* A note about a refusal rather than about a rule — frame 7 s folio. */
+.note.no{border-color:var(--go-bad-edge);background:var(--go-bad-wash)}
+.note.no b{color:var(--color-bad,#f87171)}
 .hint{font-size:12px;line-height:1.65;color:var(--color-ink-faint,#5a6172)}
 .hint b{color:var(--color-ink-muted,#8b93a7)}
+/* A hint pushed to the end of a control row — frame 4 states the list order
+   and whose clock the times are on, beside the source filters. */
+.hint.grow{margin-left:auto;display:block}
 .acts{display:flex;gap:9px}
+/* Two equal columns, where neither side is the subordinate one — frames 5
+   and 7 put a panel we own beside a panel we only report. */
+.cols.even{grid-template-columns:1fr 1fr}
+/* A panel whose subject is not here: dashed, and washed back. */
+.card.ghost{border-style:dashed;
+  background:color-mix(in srgb, var(--color-ink,#e8ebf4) 1.5%, transparent)}
+.ch.no{color:var(--color-bad,#f87171)}
+.fr.big .v b{font-size:15px}
+/* A tab whose subject needs an application this property has not installed.
+   Dimmed, never removed: which tabs a stay HAS is itself information. */
+.tab.gone{opacity:.38}
+/* Something read from elsewhere, stated as such — frame 6's band. Brand-toned
+   rather than warn: it is not a problem, it is an attribution. */
+.ban.info{border-color:var(--go-brand-edge);background:var(--go-brand-wash);
+  color:var(--color-ink,#e8ebf4)}
+/* The invitation shown where a neighbour would be — ADR 0106 §4. */
+.empty{margin:auto;max-width:480px;text-align:center;padding:26px 20px;
+  display:flex;flex-direction:column;align-items:center;gap:10px}
+.empty .ic{width:52px;height:52px;display:grid;place-items:center;font-size:20px;
+  border-radius:16px;color:var(--color-ink-faint,#5a6172);
+  border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
+  background:color-mix(in srgb, var(--color-ink,#e8ebf4) 3%, transparent)}
+.empty b{font-size:13.5px}
+.empty p{margin:0;font-size:12.5px;line-height:1.7;color:var(--color-ink-faint,#5a6172)}
+.empty p b{color:var(--color-ink-muted,#8b93a7)}
+/* One cell per night — frame 6. \`grid-auto-columns\`, not the drawing's
+   \`repeat(5,1fr)\`: five is that stay's night count plus its arrival, not a
+   constant, and a two-night stay laid out in five columns would leave three
+   empty ones. */
+.nights{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;overflow:hidden;
+  border:1px solid var(--color-line,rgba(255,255,255,.08));
+  border-radius:var(--radius-panel,14px);
+  background:var(--color-surface-raised,#11141f)}
+.ng{padding:11px 12px;min-height:104px;display:flex;flex-direction:column;gap:7px;
+  border-right:1px solid var(--color-line,rgba(255,255,255,.08))}
+.ng:last-child{border-right:none}
+.ng .dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--color-ink-faint,#5a6172)}
+.ng .dt b{color:var(--color-ink-muted,#8b93a7);font-weight:600}
+.ng .st{font-size:12px;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.ng.now{box-shadow:inset 0 0 0 1.5px var(--go-brand-edge)}
 .tl{display:flex;flex-direction:column}
 .te{display:grid;grid-template-columns:58px 16px 1fr;font-size:12.5px}
 .te .t{color:var(--color-ink-faint,#5a6172);padding:7px 0;font-size:11.5px}

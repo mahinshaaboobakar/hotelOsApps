@@ -44,6 +44,7 @@ public static class PlatformAdapters
                 configuration["Context:Endpoint"] ?? "https://127.0.0.1:20054"));
 
         services.AddScoped<IBusinessDay, ContextBusinessDay>();
+        services.AddScoped<INeighbours, ContextNeighbours>();
 
         services.AddSingleton<IContactProtector>(_ => new ContactProtector(
             RequiredKey(configuration, "Pii:FieldKey"),

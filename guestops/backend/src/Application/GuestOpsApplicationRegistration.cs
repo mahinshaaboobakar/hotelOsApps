@@ -44,6 +44,10 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.CancelPlanView>();
         services.AddScoped<Module.WalkInCommand>();
         services.AddScoped<Module.CancelCommand>();
+        services.AddScoped<Module.ActivityView>();
+        services.AddScoped<Module.RequestsView>();
+        services.AddScoped<Module.ServicingView>();
+        services.AddScoped<Module.PaymentView>();
         services.AddScoped<AvailabilityService>();
 
         // The inbound half — the Hub's deferred facts, and the two flows a

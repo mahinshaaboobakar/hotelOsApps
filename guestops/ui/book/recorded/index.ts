@@ -18,3 +18,4 @@ export * from "./availability";
 export * from "./booking";
 export * from "./day";
 export * from "./stay";
+export * from "./tabs";

@@ -31,6 +31,8 @@ export const FORMS = `
 .inp .ph{color:var(--color-ink-faint,#5a6172)}
 .inp .grow{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:11.5px}
 .inp b{font-weight:600}
+/* A field holding prose rather than a value — frame 5's detail box. */
+.inp.tall{min-height:64px;align-items:flex-start}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 /* The filter row — frame 2. The search takes twice the width of a select,
    because what a guest at the counter says is longer than any of the three

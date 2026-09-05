@@ -23,11 +23,17 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
 import {
+  recordedActivity,
   recordedAttention,
   recordedAvailability,
   recordedBooking,
   recordedBookings,
   recordedCancelPlan,
+  recordedPayment,
+  recordedRequests,
+  recordedRequestsAlone,
+  recordedServicing,
+  recordedServicingAlone,
   recordedStay,
   recordedToday,
 } from "../book";
@@ -58,6 +64,16 @@ function host(granted: readonly string[]): HostApi {
         booking: recordedBooking,
         cancelPlan: recordedCancelPlan,
         availability: recordedAvailability,
+        activity: recordedActivity,
+        payment: recordedPayment,
+
+        // The two neighbour-dependent tabs answer differently for the frames
+        // that draw their ABSENT state. `?alone` is the harness's way of
+        // reaching 5b — the module cannot be put into that state from the
+        // outside, because whether Jobs is installed is a fact about the
+        // property rather than a route.
+        requests: alone ? recordedRequestsAlone : recordedRequests,
+        servicing: alone ? recordedServicingAlone : recordedServicing,
       };
 
       return method in answers
@@ -73,6 +89,9 @@ function host(granted: readonly string[]): HostApi {
 
 const params = new URLSearchParams(location.search);
 const screen = params.get("screen") ?? "today";
+
+/** Frames 5b and 6's absent state — see the answers above. */
+const alone = params.get("alone") === "true";
 
 const granted = params.get("granted") === "none"
   ? []
@@ -146,6 +165,26 @@ interface Step {
 const PATHS: Record<string, readonly Step[]> = {
   attention: [{ selector: ".head .tab", text: "Attention" }],
   stay: [{ selector: ".tr.act", text: "Rajesh Pillai" }],
+
+  activity: [
+    { selector: ".tr.act", text: "Rajesh Pillai" },
+    { selector: ".tabs .tab", text: "Activity" },
+  ],
+
+  requests: [
+    { selector: ".tr.act", text: "Rajesh Pillai" },
+    { selector: ".tabs .tab", text: "Requests" },
+  ],
+
+  servicing: [
+    { selector: ".tr.act", text: "Rajesh Pillai" },
+    { selector: ".tabs .tab", text: "Servicing" },
+  ],
+
+  payment: [
+    { selector: ".tr.act", text: "Rajesh Pillai" },
+    { selector: ".tabs .tab", text: "Payment" },
+  ],
   bookings: [{ selector: ".head .tab", text: "Bookings" }],
   walkin: [{ selector: ".tabs .btn", text: "Walk-in" }],
 

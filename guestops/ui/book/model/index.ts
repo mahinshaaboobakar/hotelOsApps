@@ -16,3 +16,4 @@ export * from "./booking";
 export * from "./attention";
 export * from "./day";
 export * from "./stay";
+export * from "./tabs";

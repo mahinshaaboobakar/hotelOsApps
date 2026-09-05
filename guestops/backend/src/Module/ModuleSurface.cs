@@ -113,6 +113,21 @@ public static class ModuleSurface
 
             "availability" => Availability(services, request, cancellationToken),
 
+            "activity" => services.GetRequiredService<ActivityView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
+            "requests" => services.GetRequiredService<RequestsView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
+            "payment" => services.GetRequiredService<PaymentView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
+            // The only one of the stay's tabs that needs no stay: what it
+            // answers is whether Room Care is here at all, which is a fact
+            // about the property.
+            "servicing" => services.GetRequiredService<ServicingView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
             // `stay` is declared by the bundle and not served here. It needs the
             // stay's id from the body and a projection of the whole page —
             // banner, timeline, six tabs — which is its own round. The bundle
@@ -177,6 +192,20 @@ public static class ModuleSurface
 
         return services.GetRequiredService<AvailabilityView>()
             .AnswerAsync(request.Scope, from, to, cancellationToken);
+    }
+
+    /// <summary>Which stay the bundle is asking about.</summary>
+    private static Guid Stay(JsonElement? body)
+    {
+        if (body is not { ValueKind: JsonValueKind.Object } request
+            || !request.TryGetProperty("stayId", out var value)
+            || value.ValueKind != JsonValueKind.String
+            || !Guid.TryParse(value.GetString(), out var id))
+        {
+            throw new InvalidRequestException("this method needs a stay");
+        }
+
+        return id;
     }
 
     /// <summary>Which booking the bundle is asking about.</summary>

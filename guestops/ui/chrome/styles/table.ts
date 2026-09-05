@@ -34,6 +34,29 @@ export const TABLE = `
 .tr .n{font-size:15px}
 .tr .n.ok{color:var(--color-ok,#34d399)}
 .tr .n.none{color:var(--color-ink-faint,#5a6172)}
+/* The activity list — frame 4. Three fixed columns rather than the list's
+   proportional six, because when/who/what have known widths and the third
+   is prose. It is \`.ev\`, not the drawing's \`.act\`: in this module \`.tr.act\`
+   already means a row you can click, and one class meaning two things is
+   ADR 0037's collision by another door. */
+.ev{display:grid;grid-template-columns:118px 118px 1fr;font-size:12.5px;
+  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+.ev:last-child{border-bottom:none}
+.ev>div{padding:10px 14px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+/* NOT filled — docs/working/64 §4. The drawing fills this one header and
+   leaves every other table's bare; the standard is what three apps read, so
+   the outlier conforms rather than the rule bending. */
+.ev.hd>div{padding:8px 14px;font-size:10.5px;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--color-ink-faint,#5a6172)}
+.ev .tm{flex-direction:column;align-items:flex-start;gap:1px;font-size:11.5px;
+  color:var(--color-ink-faint,#5a6172)}
+.ev .tm b{color:var(--color-ink-muted,#8b93a7);font-weight:600}
+.ev .w{flex-direction:column;align-items:flex-start;gap:3px}
+.ev .w span{color:var(--color-ink-faint,#5a6172);font-size:11.5px}
+/* A disagreement is a row like any other, in place and in time — washed rather
+   than lifted out into a banner that vanishes when it is cleared. Clearing
+   adds a row; it never removes one. */
+.ev.disagrees{background:color-mix(in srgb, var(--color-warn,#fbbf24) 5%, transparent)}
 /* The pager — §6, numbered because the wire now carries a total.
    \`ListStays\` pages on \`PagedRequest\`/\`PagedResponse\`, so an ordinal and a
    count both exist and "showing 1-25 of 47" is something the service can
