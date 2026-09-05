@@ -791,6 +791,16 @@ edge from Room Care to another application. The two lines that do not match
 are reported, not reinterpreted: diagram 42's permission name (`RC-Q1(11)`,
 an illustration) and `events.proto:95` (`RC-Q1(10)`, CC's).
 
+### The mockups are locked — owner, 2026-09-05
+
+`docs/mockups/01-the-roomcare-screens.html` (ten frames) and
+`02-the-roomcare-setup.html` (seven) were redlined three times on
+2026-09-05 — Setup split into seven frames; inspection made visible on the
+room page and "found an issue" raising a job; the areas list paged and the
+GM-only access tab kept and renamed — and locked by the owner the same day
+on the confirmation that pagination follows page 64 (§5, §6, §8). They are
+the frames the build is audited against, frame beside capture.
+
 ### The gate, written down
 
 > **Code starts when the owner has redlined `docs/mockups/01-the-roomcare-screens.html`

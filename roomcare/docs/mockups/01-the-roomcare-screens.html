@@ -122,7 +122,8 @@ ul.flows b{color:var(--text)}
 
 <div class="intro">
   <h1>Room Care · the screens</h1>
-  <p><b>FOR THE OWNER'S AUDIT — not locked.</b> These are the frames chapter 03 §8 names, drawn for redline. A change from here is a redline recorded on this page with its date, never a silent edit; the build is audited against the frames as locked, frame beside capture.</p>
+  <p><b>LOCKED by the owner, 2026-09-05</b>, after three redline passes the same day (the log at the foot). These frames, with <code>02-the-roomcare-setup.html</code>, are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page with its date, never a silent edit.</p>
+  <p><b>Pagination, confirmed at the lock:</b> page 64 §6 — paged-with-total (<code>CORE-Q13</code>), a numbered pager, "1–12 of N" honest because N is on the wire; §5 — the list scrolls within the screen and the pager stays at the bottom, always visible; §8 — every list states its rows per page.</p>
   <p><b>Palette authority:</b> the seventeen tokens in <code>apps/desktop/src/styles.css</code> at the shell's own values (ADR 0106, page 64 §1). Every colour on this page is one of them; no frame names a hex of its own. Chrome is the current era — one window, a 56 px top bar, no left rail (page 64 §3); lists are bare tables with a numbered pager on <code>common.v1</code> paged-with-total (§4, §6); one <code>.btn</code> vocabulary (§2). Scaffold copied from Jobs' locked mockup.</p>
   <p><b>Design of record:</b> <code>02-the-roomcare-walkthrough-and-sign-off.md</code> (locked 2026-09-05) and <code>03-the-roomcare-design.md</code>. Each frame's caption names the walkthrough section (S0–S7) or the guest case (c1–c13) it draws.</p>
   <p><b>The property:</b> The Marina Bay, code <code>mrn</code>, 180 rooms on 12 floors, four Housekeeping zones. <b>Saturday 5 September 2026, 09:12</b> — morning window 08:00–15:00, turndown 18:00–21:00, <i>Prepare the day</i> pressed at 08:00 by the executive housekeeper. People: Rekha Sinha (executive housekeeper), Meera Krishnan (HK floor supervisor), Anita Pillai and Priya Das (attendants, zone 3), Sana Rahman (front office). Numbers are the numbers those screens would show; none is lorem.</p>
@@ -535,6 +536,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-05 · LOCKED</b> — owner: <i>"the pagination is based on page 64 — the pager always at the bottom — if that confirms we can lock it."</i> Confirmed (§5, §6, §8); locked with <code>02-the-roomcare-setup.html</code>.</li>
   <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
   <li><b>2026-09-05 · redline 1 folded</b> — frame 7 (Setup) had three tabs on one screen; now the first tab here and all seven on <code>02-the-roomcare-setup.html</code>.</li>
   <li><b>2026-09-05 · redline 2 folded</b> — inspection was invisible on the room page: an <i>Inspection — today</i> card on frame 4 and a new frame 4b (room 401, requested and passed; what failure does). An attendant can raise a job from the room — "Found an issue…" on 3b and "Raise a job for this room…" on 4/4b — recorded here, published with a correlation id, created by Jobs; shown only when Jobs is installed and the person holds <code>job.create</code>. Chapter 03 gains <code>task_issue</code> and <code>roomcare.issue.found</code>.</li>
