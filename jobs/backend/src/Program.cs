@@ -20,6 +20,7 @@ using HotelOS.Jobs.Module;
 using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 
 // Jobs — repairs and tasks, as an installable application (ADR 0122). It is
@@ -58,7 +59,16 @@ if (args is ["migrate", ..])
         args);
 }
 
-builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+// A console sink first, then whatever configuration adds.
+//
+// It read configuration alone until the first real install, where a package
+// ships no `appsettings.json` — so Serilog found no sinks, the application
+// logged **nothing**, and the Kernel's capture of a failed start was an empty
+// file. A process that cannot say why it stopped is one nobody can fix from
+// the outside, which is the whole purpose of that capture.
+builder.Host.UseSerilog((context, configuration) => configuration
+    .WriteTo.Console()
+    .ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddGrpc(options =>
 {
@@ -75,7 +85,11 @@ builder.Services.AddDbContext<JobsDbContext>(options => options
         npgsql.EnableRetryOnFailure(maxRetryCount: 3, TimeSpan.FromSeconds(2), null);
     }));
 
-builder.Services.AddHealthChecks().AddDbContextCheck<JobsDbContext>("postgresql");
+// Not `AddDbContextCheck`: it calls `CanConnectAsync`, which swallows the
+// provider's exception and answers `false`, so an unhealthy application logs
+// "with message 'null'" and an installer reports only that it never answered.
+// The first Kernel-launched install spent its whole budget saying exactly that.
+builder.Services.AddHealthChecks().AddCheck<DatabaseReachable>("postgresql");
 
 // What the Kernel told this installation when it started it — the certificate
 // directory, where the Kernel answers, and which property this serves. Read in
@@ -96,20 +110,24 @@ builder.Services.AddHealthChecks().AddDbContextCheck<JobsDbContext>("postgresql"
 // with no certificate authenticates nobody, so it says so and stops.
 var platform = PlatformEnvironment.Read()
     ?? throw new InvalidOperationException(
-        "Jobs was not started by a Kernel. HOTELOS_CERTIFICATE_DIR, "
-        + "HOTELOS_KERNEL_ENDPOINT and HOTELOS_PROPERTY_ID are how the platform "
+        "Jobs was not started by a Kernel. HOTELOS_PACKAGE_ID, HOTELOS_CERTIFICATE_DIR, "
+        + "HOTELOS_KERNEL_ENDPOINT, HOTELOS_PROPERTY_ID, HOTELOS_GRPC_URL and "
+        + "HOTELOS_NATS_URL are how the platform "
         + "tells an installed application where its identity is, where the Kernel "
         + "answers and which property it serves; without them it can open a port "
         + "but authenticate nobody. `dotnet HotelOS.Jobs.dll migrate` needs none "
         + "of them and runs before this line.");
 
-builder.Services.AddSingleton(platform);
-
-// The Kernel client, the authorizer, the event appender bound to this context.
-builder.Services.AddHotelOsPlatform<JobsDbContext>(
-    serviceName: "jobs",
-    kernelEndpoint: platform.KernelEndpoint,
-    certificateDirectory: platform.CertificateDirectory);
+// The Kernel client, the authorizer, the authentication an installed
+// application's module surface needs, and the event appender bound to this
+// context — one call, whose only argument is what the Kernel said.
+//
+// SHELL-Q40 §3, ratified 2026-09-05: an installed application never defines its
+// own topology, listener ports or platform addresses. This replaces
+// `AddHotelOsPlatform`, which a *platform service* calls and which left an
+// application with no `JwtCallerAuthenticator` — the refusal the first
+// Kernel-launched boot of Jobs died on.
+builder.Services.AddHotelOsApplication<JobsDbContext>(platform);
 
 // Master Data, read-only, over the canonical transport (ADR 0040).
 var masterData = PlatformEndpoint.For(
@@ -122,7 +140,7 @@ builder.Services
 // The events this application consumes — the manifest's `subscribes`, one
 // durable consumer, ack after commit, idempotent on the row (EVT-Q4).
 builder.Services.AddApplicationEventConsumer(
-    natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:4222",
+    natsUrl: platform.NatsUrl,
     declare: events => events
         .Consume<PpmDue, PpmDueHandler>(EventTypes.PpmDue)
         .Consume<ShiftStarted, ShiftStartedHandler>(EventTypes.ShiftStarted)
@@ -169,12 +187,14 @@ builder.Services.AddTemporal(temporal => temporal
     .Activities(sweepActivities)
     .Schedule(ConcernSweepWorkflow.ScheduleId, ConcernSweepWorkflow.Cadence, nameof(ConcernSweepWorkflow)));
 
-// The listener resolves this application's identity eagerly and refuses to
-// start without one — the property worth having: an installed package with no
-// certificate must not open a port and authenticate nobody.
-builder.Host.UsePlatformListener(
-    builder.Configuration.GetValue("Service:Port", 50064),
-    platform.CertificateDirectory);
+// Both doors, from what the Kernel said: the plaintext loopback port it probes
+// and forwards module calls to, and the mutual-TLS port platform callers use.
+//
+// Not `UsePlatformListener`, which is a platform *service*'s call and binds a
+// port from configuration — an explicit `Listen` makes Kestrel ignore
+// `ASPNETCORE_URLS`, so an application calling it listens somewhere the Kernel
+// is not probing. Neither port is this application's to choose.
+builder.Host.UseApplicationListeners(platform);
 
 var app = builder.Build();
 started = app;
@@ -186,7 +206,19 @@ app.MapGrpcService<JobsGrpcService>();
 // The token check and the capability guard are inside MapModuleCapability, so
 // they cannot be forgotten here, only removed on purpose.
 app.MapJobsModule();
-app.MapHealthChecks("/health");
+// The probe answers with what it found, not merely whether it was well.
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "text/plain";
+        var lines = report.Entries.Select(entry =>
+            $"{entry.Key}: {entry.Value.Status}"
+            + (entry.Value.Description is { } said ? $" — {said}" : string.Empty));
+        await context.Response.WriteAsync(
+            $"{report.Status}{Environment.NewLine}{string.Join(Environment.NewLine, lines)}");
+    },
+});
 
 app.Run();
 
