@@ -10,7 +10,15 @@
 
 ## Status
 
-**Phase 2 opened 2026-09-05.** Phase 1 (the survey) was ratified whole by the
+> **LOCKED — owner, 2026-09-05: "Lock the page."** S0–S7 signed off, the
+> scenario pass held on all thirteen, `CONN-Q11` closed. This page is the
+> input to the design chapter (03); it is not edited further — a change is a
+> new dated addendum with the owner's ruling, never a rewrite. Open elsewhere:
+> the out-of-order placement (the architect's, against ADR 0051/0056); the
+> register rows and the asks to Workforce, GuestOps and the inspection app
+> (the architect's to carry).
+
+**Phase 2 opened 2026-09-05** and closed the same day. Phase 1 (the survey) was ratified whole by the
 architect the same day; the register row is **`RC-Q1`**, and the survey's
 fourteen questions are `RC-Q1(1)–(14)` in survey order.
 
@@ -23,7 +31,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(5)` public areas | **S3 SIGNED OFF — owner, 2026-09-05:** Room Care's, one task model with rooms, scheduled; requests are Jobs'. **Rider, now a page-wide rule:** every schedule and policy is configured per property | — |
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
 | `RC-Q1(7)` reconciliation policy · the PMS-only hotel | **S4 SIGNED OFF — owner, 2026-09-05:** one per-property switch in Room Care's setup, **Room Care leads by default**; an observation is applied unless it contradicts a later deliberate act recorded here | — |
-| `RC-Q1(8)` CONN-Q11 | **accepted provisionally** — the scenario pass (S0) is the final check | S0 |
+| `RC-Q1(8)` CONN-Q11 | **closed by the scenario pass** — every arrival-sensitive scenario answered from `next_sold_at` and the stay list; no room-level arrival flag | — |
 | `RC-Q1(9)` guest preference | **S5 SIGNED OFF — owner, 2026-09-05**, case by case (thirteen cases, rulings in the section); the cross-application asks are in *The note to the architect* below S5 | — |
 | `RC-Q1(10)` `events.proto:95` | **routed to CC** — not this round's | — |
 | `RC-Q1(11)` diagram 42's permission name | **verified, S6:** the registry has `room.clean` and `room.inspect`; `masterdata.room.update_status` is an illustration and `can_update_status` is by design never an application-facing name | — |
