@@ -106,6 +106,47 @@ function made(calls: readonly Made[], method: string): Made {
   return call;
 }
 
+describe("the pager, as the standard has it", () => {
+  it("draws on a single page, with both arrows disabled", async () => {
+    const { host } = watching();
+    const root = mount(host);
+    await settle();
+    press(root, "Scheduled");
+    await settle();
+
+    // The count is the information — it says the list in front of you is the
+    // whole list, which a list that simply stops cannot (standard §6).
+    const pager = root.querySelector(".pager");
+    expect(pager?.textContent).toContain("of");
+
+    const arrows = Array.from(root.querySelectorAll<HTMLButtonElement>(".pager .pg"))
+      .filter((button) => button.textContent === "‹" || button.textContent === "›");
+    expect(arrows).toHaveLength(2);
+    for (const arrow of arrows) expect(arrow.hasAttribute("disabled")).toBe(true);
+  });
+
+  it("is the list's next sibling, which is what the growth rule depends on", async () => {
+    const { host } = watching();
+    const root = mount(host);
+    await settle();
+
+    const pager = root.querySelector(".pager");
+    expect(pager?.previousElementSibling?.tagName).toBe("TABLE");
+    expect(pager?.parentElement?.classList.contains("body")).toBe(true);
+  });
+
+  it("leaves a caveat as a caveat — Live's note is not a pager", async () => {
+    const { host } = watching();
+    const root = mount(host);
+    await settle();
+    press(root, "Live");
+    await settle();
+
+    expect(root.textContent).toContain("ON TRACK rows are not listed here");
+    expect(root.querySelector(".pager")).toBeNull();
+  });
+});
+
 describe("the controls that act", () => {
   it("raises a job with what the person typed", async () => {
     const { host, calls } = watching();

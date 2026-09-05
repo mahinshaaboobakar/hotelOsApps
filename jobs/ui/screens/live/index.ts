@@ -62,5 +62,9 @@ function table(host: HostApi, l: Live): HTMLElement {
     );
     t.append(tr);
   }
-  return fill(el("div"), t, el("div", "pager", `${String(l.concern.length)} of ${String(l.concern.length)} in concern · ON TRACK rows are not listed here`));
+  // A note about what the table leaves out — not a pager, and it stops
+  // borrowing that class now the pager sticks to the list's floor: a caveat
+  // that held station at the bottom of the screen would be a control that is
+  // not one.
+  return fill(el("div"), t, el("div", "mono", `${String(l.concern.length)} in concern · ON TRACK rows are not listed here`));
 }

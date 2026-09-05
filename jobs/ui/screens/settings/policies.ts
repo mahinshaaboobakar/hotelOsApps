@@ -5,6 +5,7 @@
  */
 
 import { control, el, fill } from "../../chrome/element";
+import { pager } from "../../chrome/tabs";
 import { priority } from "../../chrome/marks";
 import type { PolicyRow, Settings } from "../../board";
 
@@ -59,7 +60,8 @@ export function policies(s: Settings, configure: boolean, onView: (view: string)
   for (const h of ["Scope", "Policy name", "Due · P1 / P2 / P3", "At risk", "Ladder (P1)", "Used by", ""]) head.append(el("th", undefined, h));
   t.append(head);
   for (const p of s.policies) t.append(policyLine(p, configure));
-  return fill(root, top, t, el("div", "pager", `${String(s.policies.length)} of ${String(s.policies.length)}`));
+  return fill(root, top, t, pager(
+    `1–${String(s.policies.length)} of ${String(s.policies.length)}`, 0, 1, () => {}));
 }
 
 function policyLine(p: PolicyRow, configure: boolean): HTMLElement {

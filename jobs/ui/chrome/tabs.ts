@@ -49,11 +49,23 @@ export function subnav(tabs: readonly Tab[], current: string, go: (label: string
 export function pager(shown: string, page: number, pages: number, go: (page: number) => void): HTMLElement {
   const line = el("div", "pager");
   const buttons = el("span");
-  buttons.append(control("pg", "‹", () => go(Math.max(0, page - 1))));
+
+  // An arrow with nowhere to go is disabled rather than absent: a pager that
+  // changes shape between one page and two is two controls, and the count is
+  // the information a one-page list carries — it says the list in front of you
+  // is the whole list, which a list that simply stops cannot (standard §6).
+  const arrow = (text: string, to: number, dead: boolean): HTMLElement => {
+    const button = control("pg", text, () => go(to));
+    if (dead) button.setAttribute("disabled", "true");
+    return button;
+  };
+
+  buttons.append(arrow("‹", Math.max(0, page - 1), page === 0));
   for (let i = 0; i < pages; i += 1) {
     buttons.append(control(i === page ? "pg on" : "pg", String(i + 1), () => go(i)));
   }
-  buttons.append(control("pg", "›", () => go(Math.min(pages - 1, page + 1))));
+
+  buttons.append(arrow("›", Math.min(pages - 1, page + 1), page >= pages - 1));
   line.append(el("span", undefined, shown), buttons);
   return line;
 }

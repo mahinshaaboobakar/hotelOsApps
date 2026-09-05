@@ -70,10 +70,26 @@ tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transpare
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .dim{color:var(--color-ink-faint,#5a6172)}
 table+.mono,.kv+.mono{margin-top:8px}
-.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-ink-faint,#5a6172);padding:10px 4px 0}
+/* The pager is the list's floor — the standard's §6, ported 2026-09-05.
+   Two halves, and neither works alone: the list grows so a short one still
+   puts the pager at the bottom, and the pager sticks so a full page does not
+   hide it behind a scroll. The growth is scoped to a list that HAS a pager,
+   never to every table — a table that grew on the Live tab would push the
+   concern note off the screen.
+   The negative margins cancel .body's own 22px and re-supply it here, so the
+   strip is full-width while stuck instead of inset and then jumping when the
+   list ends. The ground is the published surface, never a literal: a hardcoded
+   colour is a dark-theme decision frozen into a module a light property runs.
+   The cost, stated: an opaque strip covers the last rows while scrolling. */
+.body:has(> .pager){display:flex;flex-direction:column}
+table:has(~ .pager){flex:1 1 auto;min-height:0}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;
+       color:var(--color-ink-faint,#5a6172);position:sticky;bottom:0;
+       background:var(--color-surface,#0b0d14);margin:0 -22px -22px;padding:10px 22px 22px}
 .pg{background:none;border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:6px;padding:2px 8px;margin-left:4px;
     font:inherit;font-size:12px;color:var(--color-ink-muted,#8b93a7);cursor:pointer}
 .pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
+.pg[disabled]{color:var(--color-ink-faint,#5a6172);cursor:default;opacity:.5}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .card{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:var(--radius-panel,1rem);padding:16px;
