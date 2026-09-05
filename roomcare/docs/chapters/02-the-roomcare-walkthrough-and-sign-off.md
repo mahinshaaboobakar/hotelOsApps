@@ -268,7 +268,7 @@ needed anywhere (`CONN-Q11`).
 | 4 | Arrival at 06:00, window opens 08:00 | `next_sold_at` 06:00 | "arrival before window" on the supervisor's board; assignment outside the window is a property setting | S0 |
 | 5 | Stay-over, linen due, "leave the bed" | occupancy; the wish (GuestOps) or the door | daily service without the bed; linen stays due, or *must* by day N — the property's rule | S5 c4 |
 | 6 | DND all morning, board gone at 14:00 | — (the attendant's observation) | re-checked through the window at the property's spacing; window still open at 14:00 → knock → the guest's answer; closed → DND for the morning, turndown a fresh attempt | S5 c1 |
-| 7 | Declined at the door day 1; DND days 2–3 | — | day 1 DECLINED; days 2–3 DND; the supervisor steps in after the property's N (default 2) and decides from then on | S5 c1, c9 — **one clarity, below** |
+| 7 | Declined at the door day 1; DND days 2–3 | — | day 1 DECLINED; day 2 DND — two days without service of either kind → the supervisor decides on day 3 and from then on | S5 c1, c9 · clarified below |
 | 8 | PMS says dirty after the attendant marked clean | `room.state_observed`, `occurred_at` | applied unless it contradicts a later act here; newer → a DISAGREEMENT flag (Room Care leads) or applied with provenance (PMS leads) | S4 |
 | 9 | Room move at 09:15 | GuestOps' room-move event; the stay's wish | old room → departure clean; new room → daily service with the wish; the linen date stays with each room | S5 c11 |
 | 10 | Turndown on a room that was DND all morning | the evening window | a fresh attempt; recorded again; both windows DND = a day without service | S5 c1, c2 |
@@ -280,10 +280,11 @@ needed anywhere (`CONN-Q11`).
 answered from `next_sold_at` and the `stay_statuses` list; nothing asks the
 room whether an in-house entry is an arrival or a stayover.
 
-**One clarity for the owner (row 7):** does a day the guest *declined at
-the door* count toward the supervisor's threshold the same as a DND-board
-day — two days without service of either kind, then the supervisor — or
-only DND-board days?
+**Row 7, clarified — owner, 2026-09-05: "declined day will count."** A day
+without service of either kind — declined at the door or the DND board
+through both windows — counts toward the supervisor's threshold; after the
+property's N such days (default 2) the supervisor decides, and keeps
+deciding. The pass holds on all thirteen.
 
 ---
 
@@ -734,7 +735,9 @@ three-DND security rule counts cards, not preferences.
 | 12 | The desk sees the room's **day history only**, in GuestOps, through Context (Room Care's read view + RPC, this round's delivery, display-only) — plus **a link into Room Care at that room** for users holding `roomcare.read`; the live board stays in Room Care |
 | 13 | The cross-application asks are sent through the architect — the note below |
 
-**Ruling — owner, 2026-09-05: "yes."** **SIGNED OFF.**
+**Ruling — owner, 2026-09-05: "yes."** **SIGNED OFF.** *Clarified on the
+scenario pass: a declined day counts toward the supervisor's threshold like
+a DND day.*
 
 ---
 
