@@ -138,8 +138,15 @@ DEEP CLEAN — a planned room project (owner's input, 2026-09-05; proposal, awai
           (owner, 2026-09-05: "staff one works Monday, another the next day because staff one goes
           to another shift"): the supervisor assigns each day's session in Jobs from Workforce's
           postings; each person's session and steps are recorded under their name; the steps done
-          carry to the next hands. Room Care assigns nobody for it. → a requirement for Jobs (HH),
-          through the architect
+          carry to the next hands. Room Care assigns nobody for it.
+  ASK TO JOBS (HH), through the architect — checked against jobs/docs/chapters/03, 2026-09-05:
+          Jobs already has one assignment row per hand-over (job_assignment, end_reason REASSIGNED),
+          one work session per person's stretch (job_work_session), job.assign to reassign, hold
+          and resume, steps on a job. What it does not have: a job PLANNED to run over days or
+          weeks with a different person each day or shift — an assignment plan (day/shift → person,
+          from Workforce's postings) the supervisor fills ahead and the job follows, the steps done
+          carrying across hands, progress readable by a consumer (Room Care's blocked lane).
+          If Jobs' round does not take it, it is a gap to be built there, not worked around here.
   RETURN  job closes → dirty → departure clean + inspection → INSPECTED → block lifted → sold;
           "deep clean done" recorded, next due computed
   OPEN — for the architect, not decided here: ADR 0051/0056 give room out-of-order STATE to
@@ -194,6 +201,19 @@ per-stay cadence, no fixed unit per attendant, no long-stay kind as a
 special case — not as a switch, not as a default. The reference's long-stay
 profile and fixed-room criteria are in the not-carried list for this reason.
 If a serviced-apartment product is ever wanted, it is its own brief.
+
+### The rule for concepts that land on another application — owner, 2026-09-05
+
+> *"Any new concept that comes, we need to ask its own architect; and if it is
+> missing there, we need to build it."*
+
+When a Room Care scenario needs something of Jobs, GuestOps, Inventory, the
+inspection application or the platform, this page **does not assume it
+exists**: the stream checks that application's design of record, states
+what is there and what is not, and the ask goes to that application's
+architect through ours. What is missing is that round's to build, and Room
+Care designs against the ask, not around it. The first instance is the
+deep-clean job's per-day hands — the request is under *Deep clean* below.
 
 ### What the reference proved, by failing
 
