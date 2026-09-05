@@ -649,9 +649,29 @@ deferred is the answer to it. Keeping the card-at-the-door separate matters:
 it is an observation by an attendant, not a request by a guest, and the
 three-DND security rule counts cards, not preferences.
 
+### The cases, checked before the ruling — owner asked "is S5 all cases resolved?", 2026-09-05
+
+| # | Case | Lands | State |
+|---|---|---|---|
+| 1 | "No service today" | preference → skipped, recorded *skipped by guest* | proposed |
+| 2 | "No service, whole stay" | as 1, daily; after N days the welfare/security check is raised in Jobs | proposed |
+| 3 | "After 2 pm" / "not before 11" | preference → earliest start moves | proposed |
+| 4 | "Light service, no bed change" | preference → daily service without linen change, recorded *light* | proposed |
+| 5 | "Keep my towels" (green programme) | preference → the linen rule suspended for the stay | proposed |
+| 6 | A booked paid deep clean | falls away — deep clean is a planned project (S0); a guest's extra clean is 8 | resolved by S0 |
+| 7 | The DND card | Room Care's own exception; retried per rule, else *refused*; counts toward N | proposed |
+| 8 | **Guest asks for MORE** — clean now, a second service, fresh sheets, more towels | **was missing** — a request, not a preference → **Jobs** (S3's line); same attendant may take it | added |
+| 9 | **Supervisor overrides the guest** — welfare, a smell, a VIP arrival | **was missing** — `roomcare.amend` (S6) records the decision with its reason; the preference is not edited | added |
+| 10 | Preference changes mid-stay | GuestOps updates the stay fact; the day's decision re-runs; both versions kept | proposed |
+| 11 | A room move mid-stay | the preference follows the stay — why it is GuestOps's | proposed |
+| 12 | The desk sees what happened | Room Care's outcome per room per day through Context — a read view this round delivers (CTX-Q4) | proposed |
+| 13 | GuestOps has no cleaning preference on a stay today | an ask to FF — sent after the ruling, as a requirement | **open, on the ruling** |
+
 **For the owner to rule, in a sentence:** *The preference is GuestOps's
 stay fact, Room Care consumes it with a per-property precedence and records
-the outcome; the DND card is Room Care's own exception — yes?*
+the outcome; a guest asking for more is a Jobs request; a supervisor's
+override is recorded under amend; the DND card is Room Care's own
+exception — yes?*
 
 **Ruling:** —
 
