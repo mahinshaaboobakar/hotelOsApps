@@ -22,7 +22,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(4)` amenities · linen · carts | **S2 SIGNED OFF — owner, 2026-09-05**, as one decision with S1; **the request to the planner for the Inventory application is under S2** | — |
 | `RC-Q1(5)` public areas | **S3 SIGNED OFF — owner, 2026-09-05:** Room Care's, one task model with rooms, scheduled; requests are Jobs'. **Rider, now a page-wide rule:** every schedule and policy is configured per property | — |
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
-| `RC-Q1(7)` reconciliation policy · the PMS-only hotel | | **S4** |
+| `RC-Q1(7)` reconciliation policy · the PMS-only hotel | **S4 SIGNED OFF — owner, 2026-09-05:** one per-property switch in Room Care's setup, **Room Care leads by default**; an observation is applied unless it contradicts a later deliberate act recorded here | — |
 | `RC-Q1(8)` CONN-Q11 | **accepted provisionally** — the scenario pass (S0) is the final check | S0 |
 | `RC-Q1(9)` guest preference | | **S5** |
 | `RC-Q1(10)` `events.proto:95` | **routed to CC** — not this round's | — |
@@ -473,16 +473,96 @@ arriving from outside — which is exactly what applying an observation is —
 and making that a property setting is what lets a hotel start on paper and
 move to devices without changing anything but a switch.
 
-**For the owner to rule, in a sentence:** *Room Care leads where attendants
-use the app, the PMS leads where they don't — a per-property setting, both
-with Room Care announcing, disagreements flagged and cleared by a supervisor
-— yes?*
+### The ordering clause — added after the owner asked how a checkout is handled
 
-**Ruling:** —
+*"If a checkout happens, the PMS sends an event that the room is dirty — if
+Room Care leads, how is this handled?"* The switch does not mean Room Care
+ignores the PMS. The rule is one line:
+
+> **An observation is applied unless it contradicts a later deliberate act
+> recorded in Room Care; only then is it a disagreement.**
+
+```text
+11:02  checkout at the desk → stay.departed + room.state_observed {214: vacant, dirty, sold 15:00}
+       any act on 214's condition after 11:02 in Room Care?  no  → APPLIED, provenance "PMS checkout"
+       → the policy runs (sold at 15:00 → a task, high priority — or PENDING, per the property)
+12:40  attendant ends the clean → 214 clean, provenance "attendant" — a deliberate ACT
+12:41  a late/replayed PMS message: dirty, occurred_at 11:02 → older than the act → not applied,
+       kept as history; no flag
+12:45  the desk sets 214 dirty in the PMS, occurred_at 12:45 → newer than the act → DISAGREEMENT:
+       Room Care leads → flagged, a supervisor clears it, recorded
+       PMS leads       → applied, provenance "from the desk"; the attendant's act is overwritten
+                         and the overwrite is recorded
+```
+
+Checkouts, arrivals, room moves and EngineeringOps's out-of-order are all
+simply applied — Room Care has no competing claim about a room nobody has
+touched since. And *"on departure the room becomes dirty"* is itself a line
+on the property's setup with that default, not a constant (S3's rule).
+
+**Where the switch lives:** Room Care › Setup › Room state — *who decides a
+room's condition?* — because with every application uninstalled there is no
+condition to decide (ADR 0051's test); it belongs to the application that
+owns the state it governs.
+
+**Ruling — owner, 2026-09-05: agreed — "Room Care leads by default, configure
+per property."** **SIGNED OFF.**
 
 ## S5 · The guest's cleaning preference — `RC-Q1(9)`
 
-*Opened after S4.*
+### The scenario
+
+The guest in 312 hangs the *no service today* card at 08:00. The guest in
+415 tells the desk at check-in: "please clean after 2 pm, every day". The
+guest in 118 asks reception for towels only, no bed change, for the whole
+stay — the hotel's green programme. The guest in 220 books the paid deep
+clean the hotel offers on its app for Thursday. At 10:30 the attendant knocks
+at 312, sees the card, and marks *do not disturb*; at 16:00 the card is gone.
+
+### The proposal
+
+**A guest's preference is a fact about the stay, owned by GuestOps; Room Care
+consumes it as a policy input and records what it did about it.**
+
+```text
+GuestOps      owns the preference — it is something the guest said, about their stay:
+              "no service today" · "after 14:00" · "towels only" · "no bed change" · a booked
+              deep clean on Thursday — with the guest, the stay, the date range, who recorded it
+              (desk, guest app, a card scanned by the attendant) → published as a stay fact
+Room Care     consumes it on the stay's room and the policy takes it as an INPUT with a stated
+              precedence, per property:
+                 a guest's "no service" beats the default kind → the task is SKIPPED, recorded
+                 "after 14:00" → the task's earliest start moves; priority unchanged
+                 "towels only" → the kind becomes the property's light kind for that stay
+                 a booked deep clean → that day's kind is deep, priority per the booking
+              and records the OUTCOME on the task: served · skipped by guest · refused at the
+              door (the card) · deferred — which GuestOps and the desk can read back via Context
+the card      the attendant sees a DND card and marks it in the app: that is an EXCEPTION on
+at the door   the task (S0), Room Care's own act — not a preference, because the guest did not
+              tell anyone; three of them in a row is the security event (S0)
+```
+
+### The reasoning
+
+The old system kept a guest's chosen cleaning profile in the housekeeping
+database, resolved the room by name, raised the request as a work order in a
+third system, and then ignored the preference whenever the room carried any
+special status (survey F20, F33) — three homes for one sentence a guest said.
+The sentence is about the stay: it starts and ends with it, it moves with a
+room move, it is what the desk reads when the guest calls, and GuestOps
+already owns what the guest said (`GUEST-Q1`: *all guest operations are done
+here*). Room Care's job is to *act* on it and to say what it did, which is the
+one thing the desk cannot see today — a guest who asked for 2 pm and was
+cleaned at 11 is a complaint, and the record that Room Care skipped or
+deferred is the answer to it. Keeping the card-at-the-door separate matters:
+it is an observation by an attendant, not a request by a guest, and the
+three-DND security rule counts cards, not preferences.
+
+**For the owner to rule, in a sentence:** *The preference is GuestOps's
+stay fact, Room Care consumes it with a per-property precedence and records
+the outcome; the DND card is Room Care's own exception — yes?*
+
+**Ruling:** —
 
 ## S6 · Permissions — `RC-Q1(12)`, and diagram 42's name — `RC-Q1(11)`
 
