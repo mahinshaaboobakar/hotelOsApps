@@ -42,7 +42,15 @@ function department(d: LiveDepartment): HTMLElement {
     list.append(row);
   }
   box.append(list);
-  if (d.people.length < d.peopleTotal) box.append(el("div", "more", `${String(d.people.length)} of ${String(d.peopleTotal)} · more load as you scroll`));
+  // Says what the two numbers are, and promises nothing. It read "more load as
+  // you scroll" until the pagination conformance pass, and nothing scrolled:
+  // the service returns everyone working, and the second number is the
+  // department's on-shift count, so there is no more to load (standard §6 — a
+  // list says what it is showing, and a caption that describes a behaviour the
+  // screen does not have is worse than no caption).
+  if (d.people.length < d.peopleTotal) {
+    box.append(el("div", "more", `${String(d.people.length)} working of ${String(d.peopleTotal)} on shift`));
+  }
   const bar = fill(el("div", "bar"), el("i", d.breached > 0 ? "bad" : ""));
   (bar.firstElementChild as HTMLElement).style.width = `${String(Math.min(100, Math.round((d.open / 20) * 100)))}%`;
   box.append(bar, el("div", "mono", `${String(d.open)} open · ${String(d.breached)} breached`));

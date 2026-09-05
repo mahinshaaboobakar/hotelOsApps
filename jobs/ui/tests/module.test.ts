@@ -158,7 +158,11 @@ describe("the Jobs module", () => {
     click(root, ".head .tab", "Live");
     await settle();
     expect(root.textContent).toContain("no presence");
-    expect(root.textContent).toContain("more load as you scroll");
+    // The caption says what the two numbers are and promises nothing: it read
+    // "more load as you scroll" and nothing scrolled, which the pagination
+    // conformance pass caught.
+    expect(root.textContent).toContain("working of");
+    expect(root.textContent).not.toContain("more load as you scroll");
     expect(root.textContent).toContain("ON TRACK rows are not listed here");
   });
 

@@ -123,7 +123,17 @@ export function holds(s: Settings, configure: boolean, save: Saving, discard: ()
   const grid = el("div", "cols");
   grid.append(
     fill(el("div", "card"), el("h3", undefined, "Putting a job on hold"), kv(s.holds)),
-    fill(el("div", "card"), el("h3", undefined, "Warn before the date"), table(["When", "Who"], s.holdWarnings.map((w) => [w.when, w.who]))),
+    fill(
+      el("div", "card"),
+      el("h3", undefined, "Warn before the date"),
+      table(["When", "Who"], s.holdWarnings.map((w) => [w.when, w.who])),
+      // The read returns the ten nearest, so the card says so rather than
+      // looking like the whole set — a truncated list that does not admit it is
+      // the defect the conformance pass looks for.
+      el("div", "mono", s.holdWarnings.length < 10
+        ? `${String(s.holdWarnings.length)} hold(s) with a date`
+        : "the ten nearest holds with a date"),
+    ),
   );
   const form = el("div", "cols");
   form.append(

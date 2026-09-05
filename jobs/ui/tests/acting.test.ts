@@ -125,6 +125,20 @@ describe("the pager, as the standard has it", () => {
     for (const arrow of arrows) expect(arrow.hasAttribute("disabled")).toBe(true);
   });
 
+  it("gives the policies list a pager too, on its single page", async () => {
+    const { host } = watching();
+    const root = mount(host);
+    await settle();
+    press(root, "Settings");
+    await settle();
+    press(root, "All policies");
+    await settle();
+
+    const pager = root.querySelector(".pager");
+    expect(pager?.textContent).toContain("of");
+    expect(pager?.previousElementSibling?.tagName).toBe("TABLE");
+  });
+
   it("is the list's next sibling, which is what the growth rule depends on", async () => {
     const { host } = watching();
     const root = mount(host);
