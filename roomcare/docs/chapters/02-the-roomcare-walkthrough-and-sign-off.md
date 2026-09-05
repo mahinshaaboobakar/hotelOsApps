@@ -92,26 +92,39 @@ WHAT ROOM CARE HEARS
 WHAT ROOM CARE OWNS
   the room's CONDITION — dirty · clean · inspected — set by Room Care, announced by Room Care
   the room's exceptions — do-not-disturb · service refused · sleep-out · strip linen · long stay …
-  the property's CLEANING POLICY
+  the property's SERVICE STANDARD — what each service is, when, and how it is inspected
   the room TASK and its phases, the attendant's time on it, its history
 
-THE POLICY, per property, per service
-  services: morning service · turn-down · night — each a time range (may cross midnight)
-  cleaning kinds: the property's own list (touch-up · light · full · deep · long-stay · skip …)
-  per room type × kind: minutes · credits · inspection required? · which checklist
-  which kinds run on which weekdays · rooms with a fixed kind · the guest's own preference
-  priority: SOLD TONIGHT first, then due-out, then stay-over — configurable
+THE SERVICES — a hotel's, in our words (the reference's five kinds-by-weekday were RULED OUT,
+  owner, 2026-09-05: "in a hotel every day the same cleaning"; and its names are not kept)
+  departure clean   the guest checked out → full turnover, 30–45 min
+  daily service     every occupied room, every day, in the morning window; linen changed only when
+                    DUE by the property's linen rule (every N nights) or on request, 15–25 min
+  turndown          evening, if the property offers it
+  refresh           a vacant clean room unsold N days, or a day-use pickup
+  deep clean        periodic per room type — every N nights or on the supervisor's call — never by weekday
+  per room type × service: minutes · credits · inspection rule · which checklist (inspection app)
+
+THE STANDARD IS THE PROPERTY'S; THE GUEST MAY ONLY REDUCE IT — all recorded
+  "light service" → no linen/bed change · "no service today" → skipped by guest · DND card → refused
+  for that attempt, retried in the window per rule · N days without service → supervisor told,
+  a welfare/security check raised in Jobs (N per property, default 3)
+  every room, every day, has an OUTCOME: serviced · light · skipped · refused · deferred · not reached
+
+PRIORITY — sold tonight first, then departures unsold, then daily service by zone, refreshes last;
+  turndown its own window — per property
 
 THE DECISION — one function, its inputs and its answer always recorded
-  room state + exceptions + operating day + service  →  a task (kind · phases · priority · minutes)
-                                                     or  PENDING — visible, "tomorrow" or one click
+  room state + stay + guest's reduction + operating day + service  →  a task (service · phases ·
+  priority · minutes)   or   PENDING — visible, "tomorrow" or one click
   nothing is ever dropped; a room outside every rule is a room the supervisor can see
 
-THE TASK — one per room per operating day per service
-  phases in order: [pre-clean] → clean → [post-clean] → inspection (requested from the inspection app)
+THE TASK — one per room per operating day per service, its phases the property's per service:
+  departure clean:  STRIP → CLEAN → MAKE UP → DONE (room CLEAN, announced) → INSPECT if the rule says
+                    (all / arrivals only / every Nth / VIP) — requested from the inspection app;
+                    PASSED = INSPECTED, FAILED = dirty again with the reason
+  daily service:    CLEAN → MAKE UP (lighter) → DONE; inspection as a spot-check rule
   one state per phase, one declared set of moves; the attendant's timer accumulates across pauses
-  exceptions are outcomes: refused / DND / sleep-out end the task honestly, with the reason
-  three DND days in a row → an event; Jobs raises the security job on it
 
 ASSIGNMENT
   candidates = attendants posted to the room's zone today · capacity from Workforce
@@ -524,6 +537,15 @@ per property."** **SIGNED OFF.**
 
 ## S5 · The guest's cleaning preference — `RC-Q1(9)`
 
+### Redesigned on the hotel model — owner, 2026-09-05
+
+*"In a hotel every day the same cleaning… when a guest checks out, needs
+full clean; if a guest stays 7 days, by rule the staff must clean properly
+but the guest can say just do a light clean, don't change the bedsheet; the
+guest can refuse cleaning — but all must be recorded. I don't want the naming
+conventions from Java."* S0's services, phases, outcomes and names are
+rewritten to that; this section is the guest's part of it.
+
 ### The scenario
 
 The guest in 312 hangs the *no service today* card at 08:00. The guest in
@@ -549,8 +571,11 @@ Room Care     consumes it on the stay's room and the policy takes it as an INPUT
                  "after 14:00" → the task's earliest start moves; priority unchanged
                  "towels only" → the kind becomes the property's light kind for that stay
                  a booked deep clean → that day's kind is deep, priority per the booking
-              and records the OUTCOME on the task: served · skipped by guest · refused at the
-              door (the card) · deferred — which GuestOps and the desk can read back via Context
+              "no service, whole stay" → skipped every day, recorded every day
+              and records the OUTCOME on the task: serviced · light · skipped by guest · refused at
+              the door · deferred · not reached — which GuestOps and the desk read back via Context
+              the standard never drops: a 7-night guest is serviced daily to the same checklist;
+              only the guest can reduce a day, and the reduction is the record
               (a preferred attendant and a per-stay cadence were proposed here and RULED OUT —
               apartment logic, S0)
 the card      the attendant sees a DND card and marks it in the app: that is an EXCEPTION on
