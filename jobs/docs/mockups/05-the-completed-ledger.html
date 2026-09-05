@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs · 05 · the completed wired ledger</title>
+<style>
+:root{
+  --bg:#0b0d14;--panel:rgba(255,255,255,.03);--line:rgba(255,255,255,.09);
+  --text:#e9ecf5;--dim:#9aa3b8;--faint:#5d657a;
+  --indigo:#6b7cff;--ok:#3ecf8e;--warn:#f5b53f;--bad:#ff5c7a;--violet:#a06bff;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 Inter,system-ui,sans-serif;padding:40px 44px 120px}
+code{font:12px ui-monospace,Menlo,monospace;color:#3fd0e0}
+.intro{max-width:1020px;color:var(--dim)}
+.intro h1{color:var(--text);font-size:27px;margin:0 0 10px}
+.intro p{margin:8px 0}
+.done{border-left:3px solid var(--ok);background:color-mix(in srgb,var(--ok) 7%,transparent);
+      padding:14px 18px;margin:18px 0;border-radius:0 10px 10px 0;max-width:1020px}
+.note{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,transparent);
+      padding:14px 18px;margin:18px 0;border-radius:0 10px 10px 0;max-width:1020px}
+.done b,.note b{color:var(--text)}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);
+       margin:56px 0 16px;border-top:1px solid var(--line);padding-top:18px}
+h3.sub{font-size:14px;color:var(--text);margin:26px 0 8px}
+table{border-collapse:collapse;width:100%;max-width:1400px}
+th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+   font-weight:500;padding:9px 12px;border-bottom:1px solid var(--line)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);color:var(--dim);font-size:13.5px;vertical-align:top}
+td.s{color:var(--text);font-weight:500;width:150px}
+td.op{width:230px;color:var(--text)}
+td.v{width:150px}
+table.summary{max-width:940px;margin:18px 0}
+table.summary td.n{color:var(--text);font:600 16px ui-monospace,Menlo,monospace;width:70px}
+.v{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;
+   border:1px solid var(--line);white-space:nowrap}
+.v.ok{color:var(--ok);border-color:var(--ok)}
+.v.held{color:var(--warn);border-color:var(--warn)}
+.v.wire{color:var(--violet);border-color:var(--violet)}
+.v.bridge{color:var(--bad);border-color:var(--bad)}
+ul{max-width:1020px;color:var(--dim)}
+li{margin:6px 0}
+</style>
+</head>
+<body>
+
+<div class="intro">
+<h1>Jobs · the completed wired ledger</h1>
+<p>Stream HH, 5 September 2026. The round the held ledger could not finish: every control, every read,
+every refusal, driven against the real backend. Commits <code>649772f</code> (the surface and the round)
+and <code>8c6ae3e</code> (the controls that act), on <code>ddbe5c8</code>.</p>
+</div>
+
+<div class="done">
+<b>Both walls are down.</b> The bridge exists — the platform's <code>MapModuleCapability</code> arrived with
+<code>4d74978</code>, so a bundle's <code>host.call</code> reaches this application's own service. And
+<code>SHELL-Q37</code>'s outbox wall is gone without being worked around: this suite runs <b>the Kernel's own
+<code>event_store</code> migrations</b>, read from the platform checkout and applied as the provisioner before the
+application's own migration. Not a table shaped like it — the platform's DDL, so what is proved here is proved
+against the schema a property will have.
+</div>
+
+<h2 class="sec">The count</h2>
+
+<table class="summary">
+<tr><th>Verdict</th><th>Count</th><th>What it means</th></tr>
+<tr><td><span class="v ok">verified</span></td><td class="n">126</td>
+    <td>driven for real and checked afterwards — a call over a socket or a click that made one</td></tr>
+<tr><td><span class="v held">open</span></td><td class="n">4</td>
+    <td>named below, each with what it waits on and why it was not half-built</td></tr>
+<tr><td><span class="v bridge">blocked</span></td><td class="n">0</td>
+    <td>nothing is drawn that cannot be driven</td></tr>
+<tr><td><span class="v wire">no message</span></td><td class="n">0</td>
+    <td>the nine reads that had no RPC are answered; the envelope carries the application's own JSON</td></tr>
+</table>
+
+<p class="intro">126 is 78 backend tests and 48 UI tests, each of which is a row of this ledger or a
+guard on one. The previous round's four verdicts were 4 verified, 10 held, 28 blocked at the bridge and
+9 with no message that could carry them.</p>
+
+<h2 class="sec">A · what is real in this round, and what stands in</h2>
+
+<p class="intro"><b>Real:</b> this application's own <code>Program</code> registrations, its services, Entity
+Framework, a real PostgreSQL on a scratch database provisioned the installer's way, the platform SDK's own
+<code>MapModuleCapability</code> — envelope, both guards and its status table, unmodified — its own
+<code>JwtCallerAuthenticator</code> performing all five checks ADR 0013 §3 requires, its own
+<code>KernelAuthorizer</code> asking with ADR 0014's envelope, a real Kestrel socket, and the event appended in
+the transaction that caused the change, into the platform's own <code>event_store</code>.</p>
+
+<p class="intro"><b>Stood in, and named on every row that leans on one:</b> Identity is not running, so this suite
+mints the signing key and serves it — the token is verified by the platform's real validation against a key the
+suite owns. The Kernel is not running, so its <i>reply</i> comes from a set each test states; the authorizer, the
+call and the failure path are the platform's. Master Data is not running, so the property's code, a location's
+name and the organisation come from the directory double. Nothing else: no fixture reaches a handler, and every
+figure a passing row asserts came back from the database.</p>
+
+<h2 class="sec">B · the reads — every screen, over the wire</h2>
+
+<table>
+<tr><th>Screen</th><th>What it asks</th><th>Observed</th><th>Verdict</th></tr>
+<tr><td class="s">Board</td><td class="op">job.read / board</td>
+    <td>Rows with the place named from Master Data, the paging pair, and the judgments already made. Twelve rows of 25, then 12, then 1, then an empty page keeping the total; no row twice</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Board · strip</td><td class="op">job.read / today</td>
+    <td>Open, breached, stuck, running, closed today and the average to resolve — counted at the moment of the call, not cached</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Board · empty</td><td class="op">job.read / board</td>
+    <td>A property with nothing in it reads as an empty list and a total of zero — the first-run state, not an error</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">One job</td><td class="op">job.read / job</td>
+    <td>All seven tabs, the raising parts, the sessions, the history, the record — and <b>running seconds as of the service's reply</b>, which is the audit's timer finding closed on the wire</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Scheduled</td><td class="op">job.read / scheduled</td>
+    <td>The day and nothing about cycles — the field is absent, not empty</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Catalogue</td><td class="op">job.read / catalogue</td>
+    <td>Categories, items with their aliases, and resolutions <b>with their ids</b>, so resolving can name one</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Settings</td><td class="op">job.read / settings</td>
+    <td>All six tabs in one read — policies, presence, who is told, holds, closing, access, numbering</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Live</td><td class="op">job.read / live</td>
+    <td>Departments with their presence, who is working from the running sessions, and the sweep's concern table</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Widget</td><td class="op">job.read / jobsNow</td>
+    <td>Its numbers, the worst rows and the unread nudges — counted from the same rows as the board, and proved to agree with it</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Chrome</td><td class="op">job.read / me</td>
+    <td>Where the caller is signed in. Their <i>name</i> is Workforce's and is not invented</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+</table>
+
+<h2 class="sec">C · the controls — every button, and what it wrote</h2>
+
+<table>
+<tr><th>Screen</th><th>Control</th><th>Observed</th><th>Verdict</th></tr>
+<tr><td class="s">Raise</td><td class="op">Raise it</td>
+    <td>The job stored with its number <code>MRN-ENG-n</code>, the raiser from the token, its three birth rows, and <code>job.created</code> in the platform's event store</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job</td><td class="op">Take it · Accept</td>
+    <td>Assigned, then accepted; the assignment row opens and the version moves. "Take it" takes the person from the token, never from the body</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job</td><td class="op">Start · Pause · Resume · Stop</td>
+    <td>Two sessions stored — resuming closes the paused one and opens a new one — with the pause reason and the worked seconds</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Resolve</td><td class="op">Resolve</td>
+    <td>The resolution the chips picked, by id, and the status at RESOLVED; then Close moves it to CLOSED</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job</td><td class="op">Put on hold · Take off hold</td>
+    <td>The reason stored, the status ON_HOLD and back. A hold with no reason never leaves the screen</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job</td><td class="op">Cancel job</td>
+    <td>CANCELLED with the reason the person gave</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Notes</td><td class="op">Add note</td>
+    <td>The note stored beside the raising text, which stays marked as such</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job · record</td><td class="op">Remind me</td>
+    <td>The reminder stored against the job for the person who set it</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Board</td><td class="op">Six filter chips</td>
+    <td>Each chip is a question the service answers: department, mine, statuses, guest-raised, restricted. "Mine" carries no user id — whose jobs those are comes from the token</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Board</td><td class="op">The pager</td>
+    <td>Pages walk the boundary and off the end, the total holds on every page, and the size is <b>the one the service applied</b> — 500 asked for comes back as 100</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Catalogue</td><td class="op">New category · Create item · Add resolution</td>
+    <td>All three written at the organisation, with the aliases; the organisation is asked of Master Data rather than named by the bundle</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Settings</td><td class="op">Save · Discard</td>
+    <td>Presence, service hours, holds, closing and rating saved and read back on the next draw. Discard re-reads rather than resetting</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Settings</td><td class="op">Concern policy · save and delete</td>
+    <td>A policy with its rules and its ladder, stored and listed; delete removes it</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Widget</td><td class="op">Tap through</td>
+    <td>Asks the shell to open the board; its counts and the board's agree, because both are counted in one place</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+</table>
+
+<h2 class="sec">D · what happens when something is wrong</h2>
+
+<table>
+<tr><th>Case</th><th>Expected</th><th>Observed</th><th>Verdict</th></tr>
+<tr><td class="s">No token</td><td class="op">401, and no reason</td>
+    <td>Exactly that — an unauthenticated caller learns nothing about why</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A token signed by the wrong key</td><td class="op">401</td>
+    <td>401 — after the platform's real signature check refused it. Reaching that status needed one line in Jobs; see the findings</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">No property named</td><td class="op">400</td>
+    <td>400. A property guessed here would be a call authorized somewhere the person may not be</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A permission not held</td><td class="op">403, and nothing written</td>
+    <td>403, the Kernel asked by name, and the board still empty afterwards — the guard is before the handler</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">Two edits to one row</td><td class="op">The second refused, the first standing</td>
+    <td>409, and the first edit is what the job still shows. Never a silent win</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job that is not there</td><td class="op">404</td><td>404</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A job at another property</td><td class="op">404, not 403</td>
+    <td>404 — a property learns nothing about another's rows, including that they exist</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A refusal a person can act on</td><td class="op">The service's own sentence</td>
+    <td>"job MRN-ENG-1 is RAISED and cannot be held" crosses the wire and is drawn where the person is looking</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A denial</td><td class="op">"permission denied" and nothing more</td>
+    <td>Neither the permission nor the resource is named — they are what an attacker probes for</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A method that does not exist</td><td class="op">400, naming the capability</td><td>400</td><td class="v"><span class="v ok">verified</span></td></tr>
+<tr><td class="s">A form with a field missing</td><td class="op">Refused on the screen, no call made</td>
+    <td>"a job needs one line saying what is wrong" — and the wire is not touched, because the person can fix it where they stand</td>
+    <td class="v"><span class="v ok">verified</span></td></tr>
+</table>
+
+<h2 class="sec">E · what this round found</h2>
+
+<h3 class="sub">In Jobs, and fixed in the round</h3>
+<ul>
+<li><b>The organisation was nowhere.</b> A module call names a property and never an organisation, and the
+catalogue is the organisation's. Curating now asks Master Data which organisation the property is in, rather
+than letting a bundle say whose catalogue it edits.</li>
+<li><b>A denial said too much.</b> The module surface answered a <code>PermissionDeniedException</code> with the
+service's own sentence, which names the permission and the resource that the gRPC surface deliberately
+withholds. It says "permission denied" now.</li>
+<li><b>Resolutions had no ids.</b> The catalogue read carried names, and resolving names an id — so the screen
+could not have sent what the service stores.</li>
+<li><b>A held row's own expectation was wrong.</b> One of the ten wanted the refused permission named in the
+message; the platform withholds it on purpose. That is what a row held on the fourth verdict costs: it was
+never run, so nobody found out.</li>
+</ul>
+
+<h3 class="sub">In the platform, reported — and one closed the same day</h3>
+<ul>
+<li><b>A denied capability arrived as 500.</b> The envelope answers with <code>Results.Forbid()</code>, which
+needs an ASP.NET authentication scheme that neither the SDK nor <code>hello-hotel</code> registers — so a person
+who simply lacks a permission was told the system was broken. Never met before, because the exemplar's proof
+stubbed the .NET side. Jobs registers a scheme that authenticates nobody so a forbid has somewhere to go.</li>
+<li><b>An invalid token still arrives as 500.</b> <code>JwtCallerAuthenticator</code> throws
+<code>AuthenticationFailedException</code>, and the envelope's <code>catch</code> is around the handler only,
+not around authentication — while its own table already says 401 for exactly that. Mapped in Jobs, reported
+there.</li>
+<li><b>A body sent chunked is read as no body at all.</b> The envelope decides whether parameters were sent by
+reading <code>Content-Length</code>. A caller that streams its JSON loses every parameter silently. Jobs' round
+sends a length, as the Shell does; reported so a bundle that does not is not the way it is found.</li>
+<li><b>Closed at the source while this round ran:</b> <code>755ee02</code> gave the envelope the interceptor's
+status table, so an application's refusals cross that hop as themselves. Jobs' own mapping middleware was
+deleted the day it landed rather than left to disagree with it.</li>
+</ul>
+
+<h2 class="sec">F · the four that are open, and what each waits on</h2>
+
+<div class="note">
+<b>None of these is half-built.</b> Each is drawn or absent, and says which — a control that looks alive and does
+nothing is the thing this round existed to end.
+</div>
+
+<table>
+<tr><th>What</th><th>State</th><th>Waits on</th></tr>
+<tr><td class="s">People's names</td>
+    <td>A row says "Staff member", a guest says "Guest · stay 7F2A", and the header says where the caller is
+    signed in rather than who they are</td>
+    <td>A Workforce read. No client exists in the application SDK, and a plausible name shown to a real person
+    is the fabricated identity the audit already caught once</td></tr>
+<tr><td class="s">Attach photo</td>
+    <td>Drawn <b>disabled</b>, on the notes tab and the resolve screen</td>
+    <td>A media client. Nothing in an application reaches one</td></tr>
+<tr><td class="s">Who is told · editing</td>
+    <td>The tab draws the subscriptions; the editor is not built, and says so on the screen</td>
+    <td>One read change: the tab groups rows by role to draw them and saving replaces the whole set, so an
+    editor needs the rows as stored. Reported rather than half-wired</td></tr>
+<tr><td class="s">Where · the location picker</td>
+    <td>Raise takes a location id, named as what it is</td>
+    <td>Master Data's location tree, which no module client reaches. A chooser that cannot choose would be
+    worse than an honest field</td></tr>
+</table>
+
+<h2 class="sec">G · one thing for the owner to rule on</h2>
+
+<div class="note">
+<b>A form that acts looks different from a form that was drawn.</b> The locked frames show every field already
+filled with an example — a summary written, a room chosen, a resolution picked — which is how a drawing says
+what a field is <i>for</i>. A form a person fills in starts empty. The labels, the hints, the controls and the
+order are the frame's; the example values are gone, replaced by placeholders in the frame's own words where the
+frame had them. This is the only place the build now departs from the drawings on purpose, and it is put here
+rather than absorbed quietly.
+</div>
+
+<h2 class="sec">H · verified against the architecture</h2>
+
+<p class="intro">Read again for this round: <code>00-master-architecture-v3.md</code>. The chain this ledger
+describes is the one v3 lays down — a packaged UI in a realm with no network, reaching its own service through
+the Shell and the Kernel's envelope; the service behind the platform's authentication and authorization; Master
+Data read through the platform, never embedded; events appended in the caller's transaction and relayed
+afterwards, never COMMIT-then-publish. The one reconciliation still owed is the v3 comment already reported in
+the design chapter's §9 — <i>"a <code>.hopkg</code> has no database role, so the Kernel appends on its
+behalf"</i> — which this round makes concrete: the application appends in its own transaction, holding the
+appender role the installer grants it.</p>
+
+</body>
+</html>
