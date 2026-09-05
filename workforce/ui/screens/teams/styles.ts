@@ -15,10 +15,11 @@ button.tgrid:hover,button.tnarrow:hover{
   background:color-mix(in srgb, var(--color-brand) 6%, transparent)}
 button.tgrid:focus-visible,button.tnarrow:focus-visible{
   outline:2px solid var(--color-brand,#818cf8);outline-offset:-2px}
-.tgrid.hd{align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-          color:var(--color-ink-faint,#5a6172);padding:8px 18px;font-weight:500}
-.tgrid.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent);
-           box-shadow:inset 2.5px 0 0 var(--color-brand,#818cf8)}
+.tgrid.hd{align-items:center;font-size:11px;font-weight:500;letter-spacing:.08em;
+          text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:8px 10px}
+/* **A tint and nothing else** — §64 §4, which names the 2.5px inset brand bar
+   as GuestOps' own invention. This module had reproduced it, twice. */
+.tgrid.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
 /* A team stood down reads one step quieter, which is the whole difference
    between "not offered" and "gone". */
 .tgrid.down{color:var(--color-ink-faint,#5a6172)}
@@ -35,12 +36,11 @@ button.tgrid:focus-visible,button.tnarrow:focus-visible{
          padding:11px 16px;width:100%;text-align:left;background:transparent;
          color:inherit;font-family:inherit;font-size:13px;border:0;
          border-bottom:1px solid var(--color-line,rgb(255 255 255/.07))}
-.tnarrow.hd{align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-            color:var(--color-ink-faint,#5a6172);padding:8px 16px;font-weight:500}
+.tnarrow.hd{align-items:center;font-size:11px;font-weight:500;letter-spacing:.08em;
+            text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:8px 10px}
 /* The formed date. Tabular, and one step quieter than the name beside it. */
 .tm{font-variant-numeric:tabular-nums;color:var(--color-ink-muted,#8b93a7)}
-.tnarrow.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent);
-             box-shadow:inset 2.5px 0 0 var(--color-brand,#818cf8)}
+.tnarrow.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
 .tnarrow.down b{color:var(--color-ink-faint,#5a6172)}
 
 .tdetail{display:flex;flex-direction:column;gap:11px}
