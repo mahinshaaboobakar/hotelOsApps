@@ -30,6 +30,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(12)` permissions | | **S6** |
 | `RC-Q1(13)` escalation | **parked with Jobs' twin** — one answer will serve both | — |
 | `RC-Q1(14)` AI allocation | | **S7** |
+| **`JOBS-Q2`** the multi-day job with changing hands | **registered — planner, 2026-09-05**; Jobs builds it in its post-certification round; Room Care's blocked lane consumes its progress events as a port with no adapter, marked `JOBS-Q2` | — |
 | **`RC-Q2`** the Inventory dependency | **recorded — architect, 2026-09-05** (register row `a32da90`): the S2 contract table as tabled; `APPS-Q1`'s addendum adds **the inspection application and Inventory** to the suite; *Inventory* is the presumptive name, confirmed at its brief (APPS-Q3); the non-blocking shape ratified (restock step absent until installed, events replayable — `EVT-Q3/Q4`); `inventory-dev.txt` classed as concepts only; FF noted on `inventory.charge_due` → folio | — |
 
 ### The method ruling that binds this page — owner, 2026-09-05
@@ -147,6 +148,14 @@ DEEP CLEAN — a planned room project (owner's input, 2026-09-05; proposal, awai
           from Workforce's postings) the supervisor fills ahead and the job follows, the steps done
           carrying across hands, progress readable by a consumer (Room Care's blocked lane).
           If Jobs' round does not take it, it is a gap to be built there, not worked around here.
+  REGISTERED — planner, 2026-09-05, as **JOBS-Q2**, boundary confirmed verbatim: Jobs builds it,
+          Room Care never works around it (a second multi-day assignment mechanism here would be
+          the app-inventing-a-platform-concept defect the pagination round closed). Queued as the
+          first item of Jobs' post-certification round — new scope does not enter the certificate
+          mid-run. MEANWHILE, the house pattern — a port with no adapter: Room Care's blocked lane
+          CONSUMES the job-progress events JOBS-Q2 will publish, designed against the ask as
+          registered; nothing is built that assumes their shape beyond the event boundary; the
+          lane carries the dependency mark **JOBS-Q2**.
   RETURN  job closes → dirty → departure clean + inspection → INSPECTED → block lifted → sold;
           "deep clean done" recorded, next due computed
   OPEN — for the architect, not decided here: ADR 0051/0056 give room out-of-order STATE to
