@@ -27,7 +27,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(9)` guest preference | **S5 SIGNED OFF — owner, 2026-09-05**, case by case (thirteen cases, rulings in the section); the cross-application asks are in *The note to the architect* below S5 | — |
 | `RC-Q1(10)` `events.proto:95` | **routed to CC** — not this round's | — |
 | `RC-Q1(11)` diagram 42's permission name | **verified, S6:** the registry has `room.clean` and `room.inspect`; `masterdata.room.update_status` is an illustration and `can_update_status` is by design never an application-facing name | — |
-| `RC-Q1(12)` permissions | | **S6** |
+| `RC-Q1(12)` permissions | **S6 SIGNED OFF — owner, 2026-09-05 ("yes — S6 locked")**: `room.clean` and `room.inspect` as they exist, plus `roomcare.read` · `assign` · `amend` · `configure` · `plan`; the attendant's acts ride the assignment; the architect mints the rows | — |
 | `RC-Q1(13)` escalation | **parked with Jobs' twin** — one answer will serve both | — |
 | `RC-Q1(14)` AI allocation | | **S7** |
 | **`JOBS-Q2`** the multi-day job with changing hands | **registered — planner, 2026-09-05**; Jobs builds it in its post-certification round; Room Care's blocked lane consumes its progress events as a port with no adapter, marked `JOBS-Q2` | — |
@@ -826,7 +826,10 @@ inspect as they exist, plus read, assign, amend, configure, plan — with the
 attendant's acts riding the assignment — yes, before the architect mints
 them?*
 
-**Ruling:** —
+**Ruling — owner, 2026-09-05: "yes — S6 locked."** **SIGNED OFF.** The
+`roomcare.amend` row also carries the day-3 DND decision (S5 case 9) and the
+trigger mode joins `roomcare.configure` (S0). For the architect: the four
+new rows and `property#roomcare_manager` to mint, by AUTHZ-Q25's mechanism.
 
 ## S7 · AI-assisted allocation — `RC-Q1(14)`
 
