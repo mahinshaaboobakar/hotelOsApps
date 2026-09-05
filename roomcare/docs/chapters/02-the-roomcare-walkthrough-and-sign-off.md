@@ -26,7 +26,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(8)` CONN-Q11 | **accepted provisionally** — the scenario pass (S0) is the final check | S0 |
 | `RC-Q1(9)` guest preference | | **S5** |
 | `RC-Q1(10)` `events.proto:95` | **routed to CC** — not this round's | — |
-| `RC-Q1(11)` diagram 42's permission name | **verify here before anything cites it** | S6 |
+| `RC-Q1(11)` diagram 42's permission name | **verified, S6:** the registry has `room.clean` and `room.inspect`; `masterdata.room.update_status` is an illustration and `can_update_status` is by design never an application-facing name | — |
 | `RC-Q1(12)` permissions | | **S6** |
 | `RC-Q1(13)` escalation | **parked with Jobs' twin** — one answer will serve both | — |
 | `RC-Q1(14)` AI allocation | | **S7** |
@@ -657,7 +657,68 @@ the outcome; the DND card is Room Care's own exception — yes?*
 
 ## S6 · Permissions — `RC-Q1(12)`, and diagram 42's name — `RC-Q1(11)`
 
-*Opened after S5.*
+### `RC-Q1(11)` — verified against the registry, 2026-09-05
+
+`infrastructure/openfga/permissions.yaml` names the operations, not the
+field: **`room.clean`** (*mark a room clean*) and **`room.inspect`** (*inspect
+a room and sign off its cleaning*) at lines 189–201, beside `room.read`,
+`room.create`, `room.update_metadata`, `room.place_out_of_order` and
+`room.return_to_service` (the last two annotated *→ Maintenance*). The
+file's own head (lines 26–30, 143–150) says why there is no
+`update_status`: renaming a room and marking it clean are different
+capabilities held by different people, and `can_update_status` *"never
+appears in an application, a manifest, or an API."* So diagram 42's
+`masterdata.room.update_status` is an **illustration**, and nothing cites
+it; the attendant's *done* is `room.clean`.
+
+### The scenario
+
+A room attendant ends the clean of 214 — she may mark her own room done and
+nobody else's. Her floor supervisor reassigns 216 to her, clears the
+disagreement on 214 when the desk marks it dirty, and records that the guest
+in 312 refused. The executive housekeeper changes the morning window, the
+linen rule and who leads. The desk reads the board and nothing more. An
+inspector — the inspection application's user — signs off 214.
+
+### The proposal — the vocabulary, for the architect to mint after the owner reads it
+
+| Capability | Held by | What it gates |
+|---|---|---|
+| `room.clean` — **exists** | the assigned attendant, on their own task | *done*: the room becomes clean; rides the assignment, as Jobs' work-session verbs ride `job#assignee` — start, pause, end, photo, "ask for extra time" are the assignee's acts, not permissions |
+| `room.inspect` — **exists** | the inspection application's inspector | the outcome that makes a room *inspected*; Room Care applies it, never grants it |
+| `roomcare.read` | attendants, supervisors, the desk, managers | the board, a room's history, the pending queue |
+| `roomcare.assign` | floor supervisors | assign, reassign, take a room off someone, accept the strategy's pick |
+| `roomcare.amend` | floor supervisors | skip, defer or reduce a room's service on the guest's behalf; re-prioritise; record an exception for a room not their own; **clear a disagreement** (S4) |
+| `roomcare.configure` | the executive housekeeper / property manager | the property's standard: services and windows, kinds per room type, minutes, linen rule, inspection rule, priority ladder, *who leads*, the N-days-without-service threshold |
+| `roomcare.plan` | the executive housekeeper | schedule a deep clean: pick the window, request the block, raise the job (S0) |
+| `room.place_out_of_order` — exists, → Maintenance | **not** Room Care's to hold — the block for a deep clean is *requested*; the owner of the state applies it (S0's open point) |
+
+Tiers are FGA relations, as Jobs' are: the attendant's acts ride the task's
+assignment; `roomcare.amend` and `roomcare.assign` from *supervisor of the
+department*; `roomcare.configure` and `roomcare.plan` from its manager;
+`property#roomcare_manager` across all of them, declared in the manifest by
+`AUTHZ-Q25`'s mechanism. Six names, two of them already in the registry.
+
+### The reasoning
+
+The old system had no caller: every write carried the tenant, the actor and
+the assignee as whatever the request said, and its one check compared two
+client-supplied strings (survey F6). The platform's vocabulary is
+capabilities, not roles (ADR 0007), and the registry already holds the two
+that matter most — an attendant marking clean and an inspector signing off
+— on *"the same footing"* by its own comment; Room Care adds only what a
+supervisor and a manager do that nobody else may, and keeps the attendant's
+own acts as acts. Two things are deliberately not permissions: the guest's
+refusal (a fact the attendant records on her own room) and a work session
+(the assignee's). Jobs took the same eight-row shape and the owner confirmed
+it; this is that shape at Room Care's size.
+
+**For the owner to rule, in a sentence:** *six capabilities — clean and
+inspect as they exist, plus read, assign, amend, configure, plan — with the
+attendant's acts riding the assignment — yes, before the architect mints
+them?*
+
+**Ruling:** —
 
 ## S7 · AI-assisted allocation — `RC-Q1(14)`
 
