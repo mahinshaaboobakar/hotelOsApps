@@ -61,8 +61,8 @@ public static class DutyView
             days = Enumerable.Range(0, 7)
                 .Select(offset => monday.AddDays(offset).ToString("ddd d"))
                 .ToList(),
-            now = Standing(holder, names, "since ", now),
-            next = Standing(next, names, string.Empty, now),
+            now = Standing(holder, names),
+            next = Standing(next, names),
             duties = Bands(week, monday, names),
         };
     }
@@ -154,9 +154,14 @@ public static class DutyView
                         ? null
                         : names.TryGetValue(covering.StaffId, out var name) ? name : null,
                     where = (string?)null,
-                    hours = covering is null
-                        ? "—"
-                        : covering.StartsAt.ToString("HH") + "–" + covering.EndsAt.ToString("HH"),
+                    // **The span as instants, never as rendered hours.** These
+                    // are stored as `DateTimeOffset` and were being written out
+                    // with `ToString("HH")`, which renders in the offset the row
+                    // carries — UTC. A Kochi property would read 20:00 for a
+                    // handover that happens at 01:30 its own time, and nothing
+                    // on the screen would say which clock it meant.
+                    from = covering?.StartsAt.ToString("O"),
+                    to = covering?.EndsAt.ToString("O"),
                     day = offset,
                     band,
                 });
@@ -166,12 +171,15 @@ public static class DutyView
         return bands;
     }
 
-    /// <summary>Who holds it, and the sentence under their name.</summary>
+    /// <summary>Who holds it, and the span they hold it for.</summary>
+    /// <remarks>
+    /// The words are the screen's. This used to compose "since 20:00 · ends
+    /// 08:00 tomorrow" here, which put three decisions in the service that only
+    /// the reader's property can make: the clock, the locale, and whether the
+    /// end is tomorrow — and "tomorrow" is a different day in two timezones.
+    /// </remarks>
     private static object? Standing(
-        DutyAssignment? duty,
-        IReadOnlyDictionary<Guid, string> names,
-        string prefix,
-        DateTimeOffset now)
+        DutyAssignment? duty, IReadOnlyDictionary<Guid, string> names)
     {
         if (duty is null)
         {
@@ -180,20 +188,12 @@ public static class DutyView
 
         var name = names.TryGetValue(duty.StaffId, out var found) ? found : null;
 
-        if (name is null)
-        {
-            // Master Data did not answer for this person. The band is still
-            // drawn — the duty exists — but the card that names somebody is not,
-            // because it would be naming nobody.
-            return null;
-        }
-
-        var detail = prefix.Length > 0
-            ? prefix + duty.StartsAt.ToString("HH:mm") + " · ends "
-              + duty.EndsAt.ToString("HH:mm") + (duty.EndsAt.Date > now.Date ? " tomorrow" : "")
-            : duty.StartsAt.ToString("ddd d, HH:mm") + " → " + duty.EndsAt.ToString("HH:mm");
-
-        return new { who = name, detail };
+        // Master Data did not answer for this person. The band is still drawn —
+        // the duty exists — but the card that names somebody is not, because it
+        // would be naming nobody.
+        return name is null
+            ? null
+            : new { who = name, from = duty.StartsAt.ToString("O"), to = duty.EndsAt.ToString("O") };
     }
 
     /// <summary>An instant on the wire, in the form the SDK's formatter reads.</summary>

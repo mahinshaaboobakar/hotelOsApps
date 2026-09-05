@@ -12,7 +12,7 @@
  * widget, not by the shell*.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { el, fill } from "../../chrome/element";
@@ -39,7 +39,7 @@ export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
     ]),
     section("On now"),
     rows(board.rows, host),
-    changeover(board.nextChange),
+    changeover(board.nextChange, host.property),
   ]);
 }
 
@@ -53,7 +53,9 @@ export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
  * @param change when the next set comes on, or null
  * @returns the block, or null
  */
-function changeover(change: Changeover | null): HTMLElement | null {
+function changeover(
+  change: Changeover | null, property: PropertyEnvironment,
+): HTMLElement | null {
   if (change === null) return null;
 
   const block = el("div", "wchange");
@@ -64,5 +66,12 @@ function changeover(change: Changeover | null): HTMLElement | null {
     el("span", "muted", `${String(change.off)} off`),
   );
 
-  return fill(block, section(`Next change · ${change.at}`), switching);
+  // **The property's clock, not the server's.** `at` arrives as an
+  // instant; a service that had already written "15:00" would be
+  // asserting a timezone nobody established, and a Gulf property would
+  // read a Kochi hour.
+  return fill(
+    block,
+    section(`Next change · ${formatInstant(change.at, property, "time")}`),
+    switching);
 }

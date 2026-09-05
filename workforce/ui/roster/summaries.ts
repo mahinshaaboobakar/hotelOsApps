@@ -63,7 +63,11 @@ export const recordedShiftBoard: ShiftBoard = {
     row("Kitchen", "06:00–14:00", "6", "muted", "rota?department=KIT"),
     row("Engineering", "08:00–17:00", "4", "muted", "rota?department=ENG"),
   ],
-  nextChange: { at: "15:00", on: 14, off: 14 },
+  // **An instant, in the form the service sends.** The fixture carries what
+  // the wire carries, so the recorded card and the live one render through
+  // the same formatter — a fixture holding "15:00" would look right offline
+  // and be the one thing never checked against the property's zone.
+  nextChange: { at: "2026-09-05T09:30:00Z", on: 14, off: 14 },
 };
 
 /** Attendance Today — the rota against who came. */
@@ -112,14 +116,18 @@ export const recordedComingUp: ComingUp = {
     { value: "3", label: "overlapping leave", tone: "warn" },
     { value: "2", label: "certs expiring", tone: "warn" },
   ],
+  // **The wire's shape, not the frame's.** The day is an ISO date in `meta`
+  // and the panel says it in the property's form — a fixture that carried
+  // "Thu 11" would look right offline and be the one card never checked
+  // against a property's own zone and locale.
   overlaps: [
-    row("Housekeeping · Thu 11", "3 away", "of 11", "warn", "leave?department=HK"),
-    row("Kitchen · Fri 12", "2 away", "of 8", "warn", "leave?department=KIT"),
-    row("Front Office · Sat 13", "2 away", "of 6", "warn", "leave?department=FO"),
+    row("HK", "2026-09-11", "3 of 11", "warn", "leave?department=HK"),
+    row("KIT", "2026-09-12", "2 of 8", "warn", "leave?department=KIT"),
+    row("FO", "2026-09-13", "2 of 6", "warn", "leave?department=FO"),
   ],
   expiring: [
-    row("Fire warden · S. Kumar", null, "4d", "warn", "people?capability=expiring"),
-    row("Food safety · T. Abraham", null, "6d", "warn", "people?capability=expiring"),
+    row("S. Kumar", "Fire warden", "4d", "warn", "people?capability=expiring"),
+    row("T. Abraham", "Food safety", "6d", "warn", "people?capability=expiring"),
   ],
 };
 

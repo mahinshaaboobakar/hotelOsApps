@@ -16,6 +16,8 @@
  * second when it is the first.
  */
 
+import { formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
+
 import { el } from "../../chrome/element";
 import type { DutySpan } from "../../roster";
 
@@ -25,13 +27,15 @@ import type { DutySpan } from "../../roster";
  * @param spans the week's duties, in order
  * @returns the ribbon element
  */
-export function ribbon(spans: readonly DutySpan[]): HTMLElement {
+export function ribbon(
+  spans: readonly DutySpan[], property: PropertyEnvironment,
+): HTMLElement {
   const row = el("div", "ribbon");
   const label = el("div", "rlab", "★ MOD");
   const bars = el("div", "bars");
 
   for (const span of spans) {
-    bars.append(bar(span));
+    bars.append(bar(span, property));
   }
 
   row.append(label, bars);
@@ -39,7 +43,7 @@ export function ribbon(spans: readonly DutySpan[]): HTMLElement {
 }
 
 /** One stretch, positioned as a fraction of the week. */
-function bar(span: DutySpan): HTMLElement {
+function bar(span: DutySpan, property: PropertyEnvironment): HTMLElement {
   const element = el("div", span.who === null ? "bar none" : "bar");
 
   element.style.left = `${(span.from * 100).toFixed(3)}%`;
@@ -58,8 +62,10 @@ function bar(span: DutySpan): HTMLElement {
 
   // The hours appear only when the span is not a plain day — which is exactly
   // when a reader needs them, and never as decoration on the six that are.
-  if (span.hours !== null) {
-    element.append(el("s", undefined, span.hours));
+  if (span.startsAt !== null && span.endsAt !== null) {
+    element.append(el("s", undefined,
+      `${formatInstant(span.startsAt, property, "time")}`
+      + `–${formatInstant(span.endsAt, property, "time")}`));
   }
 
   return element;

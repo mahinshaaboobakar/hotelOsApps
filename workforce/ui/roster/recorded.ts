@@ -41,6 +41,21 @@ function away(leave: string): Week["people"][number]["week"][number] {
   return { shift: null, override: null, leave, gap: false };
 }
 
+/**
+ * A recorded duty instant, at the PROPERTY's hour.
+ *
+ * The frames draw a duty running 20:00→08:00 at a hotel in Kochi, so the
+ * fixture holds the instant that IS 20:00 there — not `20:00Z`, which is 01:30
+ * the next morning. Writing a local hour into a UTC field renders convincingly
+ * and is wrong by five and a half hours, which is exactly how long it takes
+ * nobody to notice.
+ */
+function spanAt(day: number, localHour: number): string {
+  return new Date(
+    Date.UTC(2026, 7, 24 + day, localHour, 0) - (5 * 60 + 30) * 60_000,
+  ).toISOString();
+}
+
 export const recordedWeek: Week = {
   department: "Front Office",
   label: "24 – 30 Aug",
@@ -52,13 +67,13 @@ export const recordedWeek: Week = {
   // drawn rather than left blank: "nobody" and "not entered yet" are different
   // answers, and only one of them is safe to assume.
   duty: [
-    { who: "Priya T.", department: null, hours: null, from: 0, span: 1 / 7, overnight: false },
-    { who: "Rahul N.", department: "SEC", hours: null, from: 1 / 7, span: 1 / 7, overnight: false },
-    { who: "Priya T.", department: null, hours: null, from: 2 / 7, span: 1 / 7, overnight: false },
-    { who: "Anjali M.", department: null, hours: "20:00→08:00", from: 3 / 7, span: 1.5 / 7, overnight: true },
-    { who: "Vishnu D.", department: null, hours: null, from: 4.5 / 7, span: 0.5 / 7, overnight: false },
-    { who: null, department: null, hours: null, from: 5 / 7, span: 1 / 7, overnight: false },
-    { who: "Priya T.", department: null, hours: null, from: 6 / 7, span: 1 / 7, overnight: false },
+    { who: "Priya T.", department: null, startsAt: null, endsAt: null, from: 0, span: 1 / 7, overnight: false },
+    { who: "Rahul N.", department: "SEC", startsAt: null, endsAt: null, from: 1 / 7, span: 1 / 7, overnight: false },
+    { who: "Priya T.", department: null, startsAt: null, endsAt: null, from: 2 / 7, span: 1 / 7, overnight: false },
+    { who: "Anjali M.", department: null, startsAt: spanAt(3, 20), endsAt: spanAt(4, 8), from: 3 / 7, span: 1.5 / 7, overnight: true },
+    { who: "Vishnu D.", department: null, startsAt: null, endsAt: null, from: 4.5 / 7, span: 0.5 / 7, overnight: false },
+    { who: null, department: null, startsAt: null, endsAt: null, from: 5 / 7, span: 1 / 7, overnight: false },
+    { who: "Priya T.", department: null, startsAt: null, endsAt: null, from: 6 / 7, span: 1 / 7, overnight: false },
   ],
 
   people: [

@@ -383,7 +383,17 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         // The night nobody covers is a row with a null holder, never an omitted
         // row: an absent band reads as a night somebody has not got to yet.
         Assert.Equal(JsonValueKind.Null, bands[1].GetProperty("who").ValueKind);
-        Assert.Equal("—", bands[1].GetProperty("hours").GetString());
+
+        // Null instants rather than a rendered em-dash: the WORDS for an
+        // uncovered band are the screen's, and a service that wrote one would
+        // have chosen a language for it.
+        Assert.Equal(JsonValueKind.Null, bands[1].GetProperty("from").ValueKind);
+        Assert.Equal(JsonValueKind.Null, bands[1].GetProperty("to").ValueKind);
+
+        // The covered band carries instants, never hours: a duty is stored as a
+        // DateTimeOffset and rendering it here would publish this server's
+        // offset as the property's clock.
+        Assert.True(DateTimeOffset.TryParse(bands[0].GetProperty("from").GetString(), out _));
     }
 
     [Fact]
@@ -429,6 +439,76 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         // wrong person.
         Assert.Empty(answer.GetProperty("waiting").EnumerateArray());
         Assert.Equal(JsonValueKind.Null, answer.GetProperty("swap").ValueKind);
+    }
+
+    [Fact]
+    public async Task Every_widget_answers_its_own_read()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        foreach (var method in new[]
+        {
+            "shiftBoard", "attendanceToday", "pendingRequests", "comingUp", "onLeave",
+        })
+        {
+            var answer = await harness.CallAsync(ReadViews.Answer, scope, method);
+
+            // A widget with nothing to show answers its shape with zeroes, not
+            // an error and not an empty object: the card draws its figures from
+            // these, and a missing field is a card that renders "undefined".
+            Assert.Equal(JsonValueKind.Object, answer.ValueKind);
+        }
+    }
+
+    [Fact]
+    public async Task A_widget_row_carries_the_filter_its_tap_through_needs()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        var staff = await Post(harness, scope, "Priya Thomas", "FO", "Supervisor");
+        var shift = await DefineShift(harness, scope, "Morning", "M");
+
+        await harness.CallAsync(RotaView.Write, scope, "assign", new
+        {
+            staffId = staff,
+            date = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"),
+            shiftId = shift,
+            department = "FO",
+        });
+
+        var board = await harness.CallAsync(ReadViews.Answer, scope, "shiftBoard");
+        var rows = board.GetProperty("rows").EnumerateArray().ToList();
+
+        // The whole point of the tap-through: it lands on the screen FILTERED as
+        // the widget was. An `opens` naming the bare screen would send somebody
+        // from one department's row to every department's list.
+        foreach (var row in rows)
+        {
+            Assert.Contains("?department=", row.GetProperty("opens").GetString()!,
+                StringComparison.Ordinal);
+        }
+    }
+
+    [Fact]
+    public async Task A_widget_sends_an_instant_and_never_a_rendered_time()
+    {
+        var harness = new ModuleHarness(fixture);
+
+        var board = await harness.CallAsync(
+            ReadViews.Answer, ModuleHarness.Property(), "shiftBoard");
+
+        var change = board.GetProperty("nextChange");
+
+        // Null on an empty property, and where it is present it must parse as an
+        // instant. A service that sent "15:00" would have chosen a timezone on
+        // the property's behalf, and a Gulf property would read a Kochi hour.
+        if (change.ValueKind != JsonValueKind.Null)
+        {
+            Assert.True(DateTimeOffset.TryParse(
+                change.GetProperty("at").GetString(), out _));
+        }
     }
 
     // ── the writes ─────────────────────────────────────────────────────────

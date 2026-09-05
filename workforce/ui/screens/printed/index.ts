@@ -17,12 +17,12 @@
  * printer code.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load, recordedWeek, type Week } from "../../roster";
-import { recordedRegister, type Register } from "../../roster/duty";
+import { recordedRegister, type Duty, type Register } from "../../roster/duty";
 
 /**
  * Draw the preview into `root`, replacing the module's chrome entirely.
@@ -34,11 +34,21 @@ import { recordedRegister, type Register } from "../../roster/duty";
 export async function printed(
   host: HostApi, root: HTMLElement, back: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "week", recordedWeek);
-  const week = got.value;
+  // **Both reads, because the sheet shows both.** The week was already read
+  // here; the Manager-on-Duty band was taken from a recorded fixture whatever
+  // the service said, so a printed rota could carry a real week over invented
+  // duty rows — and paper is exactly where nobody would notice, because there
+  // is no live screen beside it to disagree.
+  const [gotWeek, gotDuty] = await Promise.all([
+    load(host, ROSTER_READ, "week", recordedWeek),
+    load(host, ROSTER_READ, "register", recordedRegister),
+  ]);
+
+  const week = gotWeek.value;
 
   const sheet = el("div", "sheet");
-  sheet.append(masthead(week), grid(week, recordedRegister), legend(week), changes());
+  sheet.append(
+    masthead(week), grid(week, gotDuty.value, host.property), legend(week), changes());
 
   const paper = el("div", "paper");
   paper.append(sheet);
@@ -91,7 +101,9 @@ function masthead(week: Week): HTMLElement {
 }
 
 /** The grid, in ink only. */
-function grid(week: Week, register: Register): HTMLElement {
+function grid(
+  week: Week, register: Register, property: PropertyEnvironment,
+): HTMLElement {
   const table = el("div", "pgrid");
 
   table.append(el("div", "pcell ph", "Staff"));
@@ -106,8 +118,11 @@ function grid(week: Week, register: Register): HTMLElement {
     const cell = el("div", "pcell pmod");
 
     for (const item of register.duties.filter((duty) => duty.day === day)) {
+      // The printed sheet says the hours in the property's clock too. Paper is
+      // where a wrong timezone survives longest: there is no live screen beside
+      // it to disagree, and somebody acts on it hours later.
       cell.append(el("div", undefined,
-        `${item.who ?? "—"} ${item.hours}`));
+        `${item.who ?? "—"} ${hours(item, property)}`));
     }
 
     table.append(cell);
@@ -188,4 +203,11 @@ function changes(): HTMLElement {
 
   box.append(list);
   return box;
+}
+
+/** A duty band's hours on paper, in the property's clock. */
+function hours(duty: Duty, property: PropertyEnvironment): string {
+  return duty.from === null || duty.to === null
+    ? "—"
+    : `${formatInstant(duty.from, property, "time")}–${formatInstant(duty.to, property, "time")}`;
 }

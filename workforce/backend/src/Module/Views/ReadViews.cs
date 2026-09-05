@@ -34,6 +34,15 @@ public static class ReadViews
             ["register"] = DutyView.Register,
             ["month"] = ReportsView.Month,
             ["policy"] = PolicyView.Read,
+
+            // The five dock widgets — SHELL-Q35. Same capability, same door,
+            // because a widget asks this application the same kind of question
+            // a screen does and is handed the same HostApi to ask it with.
+            ["shiftBoard"] = WidgetViews.ShiftBoard,
+            ["attendanceToday"] = WidgetViews.AttendanceToday,
+            ["pendingRequests"] = WidgetViews.PendingRequests,
+            ["comingUp"] = WidgetViews.ComingUp,
+            ["onLeave"] = WidgetViews.OnLeave,
         };
 
     /// <summary>Answer one read.</summary>

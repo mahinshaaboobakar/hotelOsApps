@@ -39,7 +39,7 @@ export async function rota(
   const view = el("div", "rota");
 
   view.append(
-    ribbon(week.duty),
+    ribbon(week.duty, host.property),
     grid(week.days, week.people, (person, day) => onPick(person.id, day)),
   );
   body.append(view, legend(week.catalogue, "edit a shift → effective forward only"));

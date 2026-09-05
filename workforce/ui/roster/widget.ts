@@ -63,7 +63,13 @@ export interface SummaryRow {
 
 /** When the next set of people comes on, and how many change over. */
 export interface Changeover {
-  /** The time, as the frame writes it. */
+  /**
+   * When it happens — an **ISO instant**, never a rendered time.
+   *
+   * The card formats it with the property's zone and locale. A service that
+   * sent "15:00" would have chosen a timezone on the property's behalf, and a
+   * Gulf property would read a Kochi hour with nothing anywhere saying so.
+   */
   at: string;
 
   /** How many start. */

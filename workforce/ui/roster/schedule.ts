@@ -21,12 +21,15 @@ export interface ScheduleDay {
   tone: "brand" | "ok" | "warn" | "neutral" | "leave" | null;
 
   /**
-   * The duty this person holds that day, as its span reads.
+   * The duty this person holds that day, as **ISO instants**.
    *
-   * The span, not a flag: the frame prints "MOD 20:00→08:00" in the cell,
-   * because a duty crossing midnight is the one a person needs the hours of.
+   * The span, not a flag: the frame prints the hours in the cell, because a
+   * duty crossing midnight is the one a person needs the hours of — and the
+   * screen says them in the property's clock, because a duty rendered in the
+   * server's would put a handover on the wrong side of midnight.
    */
-  duty?: string;
+  dutyFrom?: string;
+  dutyTo?: string;
 
   /** The day the register is being read on, drawn with an emphasised border. */
   today?: boolean;
@@ -49,11 +52,29 @@ export interface Schedule {
   /** The four figures above the grid. */
   shifts: number;
   leaveDays: number;
-  duty: string;
+
+  /** How many duties this month, and when the first begins. */
+  duty: number;
+  dutyFrom: string | null;
+  dutyTo: string | null;
+
   balance: string;
 
   /** Six weeks of seven, Monday first, with blanks at both ends. */
   days: readonly ScheduleDay[];
+}
+
+/**
+ * A recorded instant at the PROPERTY's hour — Kochi, +05:30.
+ *
+ * The frames draw 20:00→08:00 at that hotel, so the fixture holds the instant
+ * that IS 20:00 there. `20:00Z` would be 01:30 the next morning and would look
+ * entirely convincing on the screen.
+ */
+function at(dayOfAugust: number, localHour: number): string {
+  return new Date(
+    Date.UTC(2026, 7, dayOfAugust, localHour, 0) - (5 * 60 + 30) * 60_000,
+  ).toISOString();
 }
 
 /** A working day. */
@@ -73,7 +94,9 @@ export const recordedSchedule: Schedule = {
 
   shifts: 22,
   leaveDays: 2,
-  duty: "1 MOD duty · Fri 28, 20:00–08:00",
+  duty: 1,
+  dutyFrom: at(28, 20),
+  dutyTo: at(29, 8),
   balance: "4 / 8 casual remaining",
 
   days: [
@@ -93,7 +116,10 @@ export const recordedSchedule: Schedule = {
     // its span here, and the 29th carries the tail. A duty running 20:00→08:00
     // genuinely belongs to two dates (WF-Q8), and a month grid that showed it on
     // one would be the per-day shape the ruling refused.
-    { date: 28, mark: "M", tone: "brand", duty: "MOD 20:00→08:00", today: true },
+    {
+      date: 28, mark: "M", tone: "brand", today: true,
+      dutyFrom: at(28, 20), dutyTo: at(29, 8),
+    },
     { date: 29, mark: "OFF", tone: "neutral", tail: "…08:00" },
     work(30, "A", "ok"), work(31, "A", "ok"),
   ],

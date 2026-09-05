@@ -13,13 +13,13 @@
  * backend refused for the same reason.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
 import { assignDuty } from "./dialog";
-import { recordedRegister, type Duty, type Register } from "../../roster/duty";
+import { recordedRegister, type Duty, type Holder, type Register } from "../../roster/duty";
 
 /** Draw the screen. */
 export async function duty(
@@ -33,7 +33,7 @@ export async function duty(
   const register = got.value;
 
   const body = el("div", "body");
-  body.append(nowNext(register), week(register), reading());
+  body.append(nowNext(register, host.property), week(register, host.property), reading());
 
   main.replaceChildren(header(register, open), body);
 
@@ -66,18 +66,31 @@ function assign(open: () => void): HTMLElement {
 }
 
 /** The two lines a duty manager opens this screen for. */
-function nowNext(register: Register): HTMLElement {
+function nowNext(register: Register, property: PropertyEnvironment): HTMLElement {
   const row = el("div", "nn");
 
   if (register.now !== null) {
-    row.append(line("NOW", register.now.who, register.now.detail, true));
+    row.append(line("NOW", register.now.who, held(register.now, property), true));
   }
 
   if (register.next !== null) {
-    row.append(line("Next", register.next.who, register.next.detail, false));
+    row.append(line("Next", register.next.who, held(register.next, property), false));
   }
 
   return row;
+}
+
+/**
+ * The sentence under a name — composed here, in the property's own clock.
+ *
+ * The service used to write "since 20:00 · ends 08:00 tomorrow", which put
+ * three decisions where only the reader's property can make them: the clock,
+ * the locale, and whether the end is *tomorrow* — and tomorrow is a different
+ * day in two timezones.
+ */
+function held(holder: Holder, property: PropertyEnvironment): string {
+  return `${formatInstant(holder.from, property, "weekday-time")}`
+    + ` → ${formatInstant(holder.to, property, "weekday-time")}`;
 }
 
 function line(label: string, who: string, detail: string, live: boolean): HTMLElement {
@@ -90,7 +103,7 @@ function line(label: string, who: string, detail: string, live: boolean): HTMLEl
 }
 
 /** The week, two bands deep. */
-function week(register: Register): HTMLElement {
+function week(register: Register, property: PropertyEnvironment): HTMLElement {
   const grid = el("div", "dgrid");
 
   grid.append(el("div", "rhd", "This week"));
@@ -100,14 +113,14 @@ function week(register: Register): HTMLElement {
 
   grid.append(el("div", "rlab", "★ Duty"));
   for (let day = 0; day < register.days.length; day += 1) {
-    grid.append(cell(register.duties.filter((d) => d.day === day)));
+    grid.append(cell(register.duties.filter((d) => d.day === day), property));
   }
 
   return grid;
 }
 
 /** One day's pair of bands. */
-function cell(duties: readonly Duty[]): HTMLElement {
+function cell(duties: readonly Duty[], property: PropertyEnvironment): HTMLElement {
   const stack = el("div", "dstack");
 
   for (const item of duties) {
@@ -115,7 +128,7 @@ function cell(duties: readonly Duty[]): HTMLElement {
 
     band.append(
       el("b", undefined, item.who ?? "no MOD"),
-      el("s", undefined, item.hours),
+      el("s", undefined, span(item, property)),
     );
 
     stack.append(band);
@@ -139,4 +152,14 @@ function reading(): HTMLElement {
 
   panel.append(note);
   return panel;
+}
+
+/**
+ * A band's hours, in the property's clock — or the em-dash for a band nobody
+ * covers, which is a fact rather than a blank.
+ */
+function span(duty: Duty, property: PropertyEnvironment): string {
+  return duty.from === null || duty.to === null
+    ? "—"
+    : `${formatInstant(duty.from, property, "time")}–${formatInstant(duty.to, property, "time")}`;
 }

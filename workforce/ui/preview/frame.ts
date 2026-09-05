@@ -45,7 +45,12 @@ function host(granted: readonly string[]): HostApi {
 
     // What the host tells a module at connect — `JOBS-Q1(8)`. The harness has
     // to hand it too, or the panes run against a contract no property serves.
-    property: { timezone: "Asia/Kolkata", locale: null },
+    // **A real property, because the frames are drawn for one.** `locale: null`
+    // is a state the SDK renders honestly — ISO date, 24-hour, marked as not
+    // the property's — and it is a case worth testing, not the default every
+    // capture should be taken under: a screenshot in the neutral form shows an
+    // operator something no property ever sees.
+    property: { timezone: "Asia/Kolkata", locale: "en-IN" },
 
     /**
      * Answer every method a screen asks for.

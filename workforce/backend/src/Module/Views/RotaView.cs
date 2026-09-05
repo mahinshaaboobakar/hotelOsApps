@@ -276,7 +276,15 @@ public static class RotaView
         {
             who = names.TryGetValue(duty.StaffId, out var name) ? name : null,
             department = (string?)null,
-            hours = duty.StartsAt.ToString("HH") + "–" + duty.EndsAt.ToString("HH"),
+            // Instants, like the duty register's — the ribbon and the register
+            // draw the same spans, and one of them rendering UTC hours while the
+            // other rendered the property's would be the same fact told two ways
+            // on two screens.
+            // Named for what they are: `from` on this shape is already the day
+            // COLUMN the span starts in, and two different meanings under one
+            // name is the collision this caught at compile time.
+            startsAt = duty.StartsAt.ToString("O"),
+            endsAt = duty.EndsAt.ToString("O"),
             from,
             span = Math.Max(1, end.DayNumber - start.DayNumber),
             overnight = end > start,

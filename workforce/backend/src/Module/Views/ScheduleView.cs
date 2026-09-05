@@ -75,9 +75,12 @@ public static class ScheduleView
             month = first.ToString("MMMM yyyy"),
             shifts = cells.Count,
             leaveDays = (int)mine.Sum(one => one.Days),
-            duty = held.Count == 0
-                ? "—"
-                : held.Count + " MOD duty · " + held[0].StartsAt.ToString("ddd d, HH:mm"),
+            // The count is a fact; the instant is the screen's to say. A
+            // sentence composed here would carry this server's clock into a
+            // header a property reads.
+            duty = held.Count,
+            dutyFrom = held.Count == 0 ? null : held[0].StartsAt.ToString("O"),
+            dutyTo = held.Count == 0 ? null : held[0].EndsAt.ToString("O"),
             // The balance sentence belongs to Leave and is read there. Absent
             // rather than recomputed here: two answers to "how much casual is
             // left" would eventually disagree, and this is the one nobody would
@@ -132,10 +135,8 @@ public static class ScheduleView
                 tone = leave is not null
                     ? "leave"
                     : entry is null ? null : Wording.Tone(entry.Colour),
-                duty = duty is null
-                    ? null
-                    : "MOD " + duty.StartsAt.ToString("HH:mm")
-                      + "→" + duty.EndsAt.ToString("HH:mm"),
+                dutyFrom = duty?.StartsAt.ToString("O"),
+                dutyTo = duty?.EndsAt.ToString("O"),
             });
         }
 

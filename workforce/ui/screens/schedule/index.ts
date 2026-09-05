@@ -9,7 +9,7 @@
  * rather than *"Request leave for them"*.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -26,7 +26,10 @@ export async function schedule(host: HostApi, main: HTMLElement): Promise<void> 
   const month = got.value;
 
   const body = el("div", "body");
-  body.append(figures(month), calendar(month), legend(recordedWeek.catalogue));
+  body.append(
+    figures(month, host.property),
+    calendar(month, host.property),
+    legend(recordedWeek.catalogue));
 
   if (!got.live) {
     body.append(standIn("month", got.because));
@@ -63,7 +66,7 @@ function header(month: Schedule): HTMLElement {
  * height of the month's first week push the grid down and make the month the
  * second thing on the screen. The month is what this screen is.
  */
-function figures(month: Schedule): HTMLElement {
+function figures(month: Schedule, property: PropertyEnvironment): HTMLElement {
   const strip = el("div", "meta");
 
   const shifts = month.days.filter(
@@ -73,7 +76,10 @@ function figures(month: Schedule): HTMLElement {
   strip.append(
     fig(String(shifts), "shifts"),
     fig(String(leaveDays), "days leave"),
-    fig("1", month.duty),
+    // The count is the service's; the sentence beside it is composed here, in
+    // the property's clock. A service that wrote "1 MOD duty · Fri 28,
+    // 20:00–08:00" would have chosen the reader's locale and hour cycle.
+    fig(String(month.duty), duties(month, property)),
   );
 
   const balance = el("div", "mpush");
@@ -93,7 +99,7 @@ function fig(figure: string, label: string): HTMLElement {
 }
 
 /** The month grid, Monday first. */
-function calendar(month: Schedule): HTMLElement {
+function calendar(month: Schedule, property: PropertyEnvironment): HTMLElement {
   const grid = el("div", "cal");
 
   for (const day of WEEKDAYS) {
@@ -101,13 +107,13 @@ function calendar(month: Schedule): HTMLElement {
   }
 
   for (const day of month.days) {
-    grid.append(cell(day));
+    grid.append(cell(day, property));
   }
 
   return grid;
 }
 
-function cell(day: ScheduleDay): HTMLElement {
+function cell(day: ScheduleDay, property: PropertyEnvironment): HTMLElement {
   const box = el("div", day.tone === null ? "cday out" : day.today === true ? "cday today" : "cday");
 
   box.append(el("s", undefined, day.date === null ? "" : String(day.date)));
@@ -120,8 +126,10 @@ function cell(day: ScheduleDay): HTMLElement {
   // of it — MOD is property-wide and the person keeps their own posting — and it
   // prints its span, because a duty crossing midnight is the one whose hours a
   // person actually needs.
-  if (day.duty !== undefined) {
-    box.append(el("div", "cduty", day.duty));
+  if (day.dutyFrom !== undefined && day.dutyTo !== undefined) {
+    box.append(el("div", "cduty",
+      `MOD ${formatInstant(day.dutyFrom, property, "time")}`
+      + `→${formatInstant(day.dutyTo, property, "time")}`));
   }
 
   // The next day carries the tail, quieter: the duty ends there.
@@ -130,4 +138,20 @@ function cell(day: ScheduleDay): HTMLElement {
   }
 
   return box;
+}
+
+/**
+ * "MOD duty · Fri, 28 Aug, 08:00 pm → 08:00 am", in the property's form.
+ *
+ * The SPAN, not just its start: a duty crossing midnight is the one whose end a
+ * person needs, and the frame shows both. The end is drawn as a time alone
+ * because the weekday beside it would repeat the day the span already names.
+ */
+function duties(month: Schedule, property: PropertyEnvironment): string {
+  if (month.duty === 0 || month.dutyFrom === null || month.dutyTo === null) {
+    return "MOD duty";
+  }
+
+  return `MOD duty · ${formatInstant(month.dutyFrom, property, "weekday-time")}`
+    + ` → ${formatInstant(month.dutyTo, property, "time")}`;
 }

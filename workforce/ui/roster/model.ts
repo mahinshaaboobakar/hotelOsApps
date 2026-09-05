@@ -89,8 +89,21 @@ export interface DutySpan {
   /** A department code shown beside the name, when there is one. */
   department: string | null;
 
-  /** The hours, when the span is not a whole day. */
-  hours: string | null;
+  /**
+   * The span, as **ISO instants** — null when it is a whole day.
+   *
+   * The ribbon and the duty register draw the same spans, so both take
+   * instants and both say them in the property's clock. One rendering the
+   * server's hours while the other rendered the property's would be the same
+   * fact told two ways on two screens.
+   *
+   * A shift's `hours` above is deliberately NOT this: a Morning shift starts
+   * at 07:00 wherever the property is, so it is a wall clock with no zone, and
+   * putting it through an instant formatter would attach a timezone to
+   * something that never had one.
+   */
+  startsAt: string | null;
+  endsAt: string | null;
 
   /** Where the span starts, as a fraction of the week. */
   from: number;

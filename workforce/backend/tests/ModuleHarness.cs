@@ -9,6 +9,7 @@ using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Periods;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Rota;
+using HotelOS.Workforce.Application.Summaries;
 using HotelOS.Workforce.Application.Shifts;
 using HotelOS.Workforce.Application.Swaps;
 using HotelOS.Workforce.Application.Teams;
@@ -82,6 +83,17 @@ public sealed class ModuleHarness
         services.AddScoped<DayComparison>();
         services.AddScoped<PeriodService>();
         services.AddScoped<PostingAnnouncer>();
+
+        // The five dock summaries. Registered here because `Program.cs`
+        // registers them: a harness whose container is a subset of the
+        // application's lets a view resolve in production and throw in a test,
+        // or the reverse — which is how a missing registration hides, and the
+        // whole shape of SHELL-Q38 one layer down.
+        services.AddScoped<ShiftBoardSummary>();
+        services.AddScoped<AttendanceTodaySummary>();
+        services.AddScoped<PendingRequestsSummary>();
+        services.AddScoped<ComingUpSummary>();
+        services.AddScoped<OnLeaveSummary>();
 
         _provider = services.BuildServiceProvider();
     }
