@@ -133,8 +133,13 @@ DEEP CLEAN — a planned room project (owner's input, 2026-09-05; proposal, awai
   BLOCK   the room is OUT OF ORDER for the window — blocked from sale in the PMS / GuestOps, reason
           "deep clean", from–to; Room Care hears it: no daily service, a "blocked" lane with the
           reason and the return date. The same shape serves any major works on the room
-  DO      a JOBS job — multi-day, steps, assigned to staff or a contractor — raised by Room Care's
-          due event with a correlation id; the job id kept from job.created; progress on the lane
+  DO      a JOBS job — multi-day, steps, raised by Room Care's due event with a correlation id; the
+          job id kept from job.created; progress on the lane. THE ASSIGNEE CHANGES BY DAY/SHIFT
+          (owner, 2026-09-05: "staff one works Monday, another the next day because staff one goes
+          to another shift"): the supervisor assigns each day's session in Jobs from Workforce's
+          postings; each person's session and steps are recorded under their name; the steps done
+          carry to the next hands. Room Care assigns nobody for it. → a requirement for Jobs (HH),
+          through the architect
   RETURN  job closes → dirty → departure clean + inspection → INSPECTED → block lifted → sold;
           "deep clean done" recorded, next due computed
   OPEN — for the architect, not decided here: ADR 0051/0056 give room out-of-order STATE to
