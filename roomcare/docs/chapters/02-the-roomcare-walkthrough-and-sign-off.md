@@ -18,7 +18,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 |---|---|---|
 | `RC-Q1(1)` design of record | **yes** — survey + this walkthrough + the design chapter (the `JOBS-Q1(1)` shape) | — |
 | `RC-Q1(2)` page 48 vs the brief | **the brief governs**; page 48 amended to match; the owner's scenario study is this page's spine | — |
-| `RC-Q1(3)` minibar | **S1 signed off, 2026-09-05** — a Minibar application when needed; Room Care records the act only | — |
+| `RC-Q1(3)` minibar | decision proposed under the owner's delegation (a Minibar application when needed; Room Care records the act only) — **awaiting the owner's approval** | **S1** |
 | `RC-Q1(4)` amenities · linen · carts | | **S2** |
 | `RC-Q1(5)` public areas | | **S3** |
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
@@ -215,7 +215,10 @@ specialty, they talk by event with a correlation id.
 (name minted at its brief); a note to FF that GuestOps consumes
 `minibar.charge_due` as a folio posting.
 
-**Ruling:** decided as above under the owner's delegation — **SIGNED OFF, 2026-09-05.**
+**Ruling:** — *(the decision above is the architect-stream's, made under the
+owner's delegation; it is a proposal until the owner approves it. It was
+briefly marked signed off on 2026-09-05 without that approval and rolled
+back the same day — sign-off is the owner's alone.)*
 
 ---
 
