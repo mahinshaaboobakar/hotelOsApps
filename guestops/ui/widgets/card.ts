@@ -177,8 +177,12 @@ export function stylesheet(): HTMLStyleElement {
     .sv.warn{color:var(--color-warn,#fbbf24)}
     .sv.bad{color:var(--color-bad,#f87171)}
     .sl{font-size:10.5px;color:var(--color-ink-faint,#5a6172)}
+    /* No margin: the body is a flex column with gap:10px, and a margin on top
+       of that is double-spacing the canvas pays for twice on the one widget
+       that carries two labels. Business Mix overflowed by exactly the 4px
+       these two margins added. */
     .wl{font-size:10px;letter-spacing:.07em;text-transform:uppercase;
-      color:var(--color-ink-faint,#5a6172);margin-top:2px}
+      color:var(--color-ink-faint,#5a6172)}
     .wr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
       padding:7px 0;background:none;border:0;border-bottom:1px solid
       var(--color-line,rgba(255,255,255,.07));font:inherit;color:inherit;cursor:pointer}

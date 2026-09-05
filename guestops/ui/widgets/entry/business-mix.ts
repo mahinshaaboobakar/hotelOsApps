@@ -34,6 +34,23 @@ interface Mix {
   markets: readonly Line[];
 }
 
+/**
+ * How many of each list the canvas fits.
+ *
+ * **Three, because three fits** — page 56's rule, and the reason it is a
+ * constant rather than the length of whatever the domain returned. This widget
+ * drew every channel and every market and let `overflow:hidden` swallow the
+ * remainder: seven rows into a body that holds five, the last two cut with
+ * nothing to say they had been. A row a person cannot see is worse than a row
+ * not drawn, because only one of them is honest about being absent.
+ *
+ * **The cut is stated on each label** — `top 3` — rather than in the footnote
+ * below both lists. A footnote covering two lists is a footnote a reader has to
+ * carry back up to them; the label is on the thing it applies to, and it leaves
+ * the footnote free for what the widget is actually about.
+ */
+const SHOWN = 3;
+
 connectToHost((host: HostApi) => {
   let root: HTMLElement | null = null;
   let stop: (() => void) | null = null;
@@ -45,8 +62,8 @@ connectToHost((host: HostApi) => {
 
     const { root: frame, body } = card("Business Mix");
 
-    body.append(label("Today's arrivals by channel"));
-    for (const line of mix.channels) {
+    body.append(label(`Arrivals by channel · top ${String(SHOWN)}`));
+    for (const line of mix.channels.slice(0, SHOWN)) {
       body.append(row(
         [line.name, el("span", "rc t", String(line.count))],
         `arrivals/channel/${line.name.toLowerCase()}`,
@@ -54,8 +71,8 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(label("By market code"));
-    for (const line of mix.markets) {
+    body.append(label(`By market code · top ${String(SHOWN)}`));
+    for (const line of mix.markets.slice(0, SHOWN)) {
       body.append(row(
         [line.name, el("span", "rc t", String(line.count))],
         `arrivals/market/${line.name.toLowerCase()}`,
@@ -64,8 +81,8 @@ connectToHost((host: HostApi) => {
     }
 
     body.append(note(answer.live
-      ? "From StaySource — the source's own channel and market code, unaltered."
-      : "Example figures — this desk has no GuestOps data yet."));
+      ? "In the source's own words, never normalised."
+      : "Example figures — no GuestOps data on this desk yet."));
 
     into.replaceChildren(stylesheet(), frame);
   }

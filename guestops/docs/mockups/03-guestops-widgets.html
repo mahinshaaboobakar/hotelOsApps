@@ -170,7 +170,7 @@
         <div><b>27</b><span>free</span></div>
         <div><b>81</b><span>tonight</span></div>
       </div>
-      <div class="wl">By room type</div>
+      <div class="wl">The 3 largest room types</div>
       <div class="wr"><span class="rs">Standard</span><span class="rc">31 / 44</span></div>
       <div class="wr"><span class="rs">Deluxe</span><span class="rc">24 / 32</span></div>
       <div class="wr"><span class="rs">Suite</span><span class="rc">8 / 14</span></div>
@@ -257,16 +257,15 @@
   <div class="canvas">
     <div class="wh">Business Mix <span>GuestOps</span></div>
     <div class="wb">
-      <div class="wl">Today's arrivals by channel</div>
+      <div class="wl">Arrivals by channel &middot; top 3</div>
       <div class="wr"><span class="rs">Direct</span><span class="rc t">7</span></div>
       <div class="wr"><span class="rs">OTA</span><span class="rc t">6</span></div>
       <div class="wr"><span class="rs">Corporate</span><span class="rc t">3</span></div>
-      <div class="wr"><span class="rs">Travel agent</span><span class="rc t">2</span></div>
-      <div class="wl">By market code</div>
+      <div class="wl">By market code &middot; top 3</div>
       <div class="wr"><span class="rs">LEIS</span><span class="rc t">9</span></div>
       <div class="wr"><span class="rs">CORP</span><span class="rc t">5</span></div>
       <div class="wr"><span class="rs">GRP</span><span class="rc t">4</span></div>
-      <div class="wn">Both in the source's own words.</div>
+      <div class="wn">In the source's own words, never normalised.</div>
     </div>
   </div>
   <dl class="facts">
@@ -279,7 +278,7 @@
       survives the journey unaltered.</dd>
   </dl>
 </div>
-<div class="cap"><b>Two lists rather than one</b>, because a channel and a market code are different questions a revenue manager asks in the same breath — where the booking came <i>from</i>, and what kind of business it <i>is</i>. Folding them into one segment is exactly the normalisation the reference system did, and it is why its own reports could not be reconciled with the PMS's.</div>
+<div class="cap"><b>Three of each, and the labels say so.</b> The canvas holds six rows and two labels; a seventh row would be drawn and then cut by <code>overflow:hidden</code>, which is a row a person cannot see and cannot know is missing. The cut is stated on each label rather than in a footnote under both, so it is read on the list it applies to. <b>Two lists rather than one</b>, because a channel and a market code are different questions a revenue manager asks in the same breath — where the booking came <i>from</i>, and what kind of business it <i>is</i>. Folding them into one segment is exactly the normalisation the reference system did, and it is why its own reports could not be reconciled with the PMS's.</div>
 
 <div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What these five deliberately do not do.</b> <b>No writes</b> — v1 widgets take no action: no check-in, no approve, no assign (page 56). <b>No number the backend cannot honestly compute</b> — a row the domain cannot answer is not drawn at all, which is why the contact never appears on any of them (GUEST-Q12) and why <i>free</i> is a remainder rather than a stored figure. <b>No sizing</b> — the frame is the guaranteed size and the widget does the cutting. <b>And no second opinion</b>: every count here is the same number the application's own screens carry, read from the same projection, so a widget and a screen cannot disagree about the day.</div>
 

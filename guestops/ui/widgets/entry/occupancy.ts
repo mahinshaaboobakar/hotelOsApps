@@ -34,6 +34,18 @@ interface Occupancy {
   types: readonly TypeRow[];
 }
 
+/**
+ * How many room types the canvas fits below the counts and the bar.
+ *
+ * **A bound, because `now.types` has none.** Room types are configured by the
+ * property: three on the fixture desk, and a resort with eight would have had
+ * five rows drawn into a body that holds three and cut by `overflow:hidden` —
+ * invisibly, since a widget has no scrollbar to hint that something is below.
+ * The label carries the cut, so what is shown reads as *the largest three*
+ * rather than as every type the hotel has.
+ */
+const SHOWN = 3;
+
 connectToHost((host: HostApi) => {
   let root: HTMLElement | null = null;
   let stop: (() => void) | null = null;
@@ -68,9 +80,9 @@ connectToHost((host: HostApi) => {
       body.append(bar);
     }
 
-    body.append(label("By room type"));
+    body.append(label(`The ${String(SHOWN)} largest room types`));
 
-    for (const type of now.types) {
+    for (const type of now.types.slice(0, SHOWN)) {
       body.append(row(
         [type.name, el("span", "rc", `${type.rooms} rooms`), el("span", "rc t", String(type.sold))],
         `rooms/${type.name.toLowerCase()}`,

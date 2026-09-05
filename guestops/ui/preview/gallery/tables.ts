@@ -2,7 +2,7 @@
  * The two conformance tables, drawn.
  */
 
-import { PAGINATION, WIDGETS, WIDGET_FINDING } from "./conformance";
+import { PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
 
 /** Attribute- and text-safe. */
 function escaped(text: string): string {
@@ -57,12 +57,19 @@ export function widgets(captures: readonly { entry: string; html: string }[],
   const cards = WIDGETS.map((widget) => {
     const html = drawn.get(widget.entry) ?? "";
 
+    // **No padding, and the frame is exactly the canvas.**
+    //
+    // A widget sets `height:100vh` and clips its own content, which is page
+    // 56's rule — the shell gives it a guaranteed size and the widget does the
+    // cutting. Padding the capture's body put a 420px-tall widget inside a
+    // 420px frame plus 28px of padding, so the *capture* overflowed and drew a
+    // scrollbar the product never has. The widget was never wrong; the frame
+    // around it was.
     const document_ = `<!doctype html><html><head><meta charset="utf-8"><style>${tokenCss}
-      ${realmCss} body{padding:14px;display:grid;place-items:start center}</style>`
-      + `</head><body>${html}</body></html>`;
+      ${realmCss}</style></head><body>${html}</body></html>`;
 
     return `<figure class="widget">
-      <iframe loading="lazy" srcdoc="${escaped(document_)}"></iframe>
+      <div class="canvas"><iframe loading="lazy" srcdoc="${escaped(document_)}"></iframe></div>
       <figcaption>
         <b>${escaped(widget.name)}</b>
         <p class="ask">${escaped(widget.answers)}</p>
@@ -79,6 +86,12 @@ export function widgets(captures: readonly { entry: string; html: string }[],
 
   return `<section class="conform">
   <h2><span class="n">5</span><span class="t">Widget conformance</span></h2>
+
+  <div class="finding">
+    <p class="lead">${escaped(WIDGET_CANVAS.title)}</p>
+    <p>${rich(WIDGET_CANVAS.body)}</p>
+    <p>${rich(WIDGET_CANVAS.consequence)}</p>
+  </div>
 
   <div class="finding">
     <p class="lead">${escaped(WIDGET_FINDING.title)}</p>
@@ -115,7 +128,10 @@ td.e{white-space:nowrap}
 .widgets{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
 .widget{margin:0;border:1px solid var(--edge);border-radius:12px;overflow:hidden;
   background:var(--raised)}
-.widget iframe{display:block;width:100%;height:420px;border:0;background:#0b0d14}
+/* The canvas, at its guaranteed size — 320 x 384, page 56. */
+.widget .canvas{padding:18px 0;background:#0b0d14}
+.widget iframe{display:block;width:320px;height:384px;border:0;background:#0b0d14;
+  margin:0 auto}
 .widget figcaption{padding:14px 16px;border-top:1px solid var(--edge)}
 .widget figcaption b{font-size:13.5px}
 .widget .ask{margin:5px 0 12px;color:var(--muted);font-size:12.5px;font-style:italic}

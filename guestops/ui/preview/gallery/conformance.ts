@@ -136,6 +136,36 @@ export const WIDGETS: readonly WidgetRow[] = [
 ];
 
 /**
+ * What the canvas measurement found, and what now guards it.
+ *
+ * Recorded because the owner asked the question the suite could not answer:
+ * *"i can see a scroll bar near widget thats in design?"*
+ */
+export const WIDGET_CANVAS = {
+  title: "The canvas holds what is drawn in it — measured, both sides",
+
+  body:
+    "A widget's canvas is **320×384 and does not scroll**. Page 56 gives it a "
+    + "guaranteed size and the widget does its own cutting; ADR 0111's scrollbar "
+    + "rule leaves it nothing to hint with. So a body that overflows is cut "
+    + "**silently** — the rows are drawn, nobody sees them, and nothing on screen "
+    + "says they exist. All ten panes above, five drawn and five built, now "
+    + "measure `scrollHeight === clientHeight` on the canvas and on the body "
+    + "inside it.",
+
+  consequence:
+    "**Two real clips were found this way and neither was visible to the suite.** "
+    + "Business Mix drew every channel and every market — seven rows into a body "
+    + "holding five, **44px cut**. Occupancy drew `now.types` entire, bounded by "
+    + "nothing but how many room types a property configured: three on this desk, "
+    + "and a resort with eight would have clipped in production while every test "
+    + "stayed green. Both are bounded now, each label carries its own cut "
+    + "(*top 3*), and `tests/widget-bounds.test.ts` walks `widgets/entry/` and "
+    + "fails on any list drawn without a bound — so the sixth widget is covered "
+    + "the day somebody writes it, not the day somebody remembers to look.",
+};
+
+/**
  * The finding that covers all five, stated once.
  *
  * It is the **inverse** of the one HH is reconciling for Jobs, and worth
