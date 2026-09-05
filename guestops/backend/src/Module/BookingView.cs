@@ -35,6 +35,7 @@ public sealed class BookingView(
     {
         var record = await bookings.GetAsync(scope, bookingId, cancellationToken);
         var types = await TypesAsync(record, cancellationToken);
+        var rooms = await RoomsAsync(scope, record, cancellationToken);
 
         return new
         {
@@ -49,10 +50,60 @@ public sealed class BookingView(
             // would be an attribution to a system nobody installed.
             managedBy = record.Reference is null ? null : "Opera manages this booking",
 
-            stays = record.Stays.Select(stay => Stay(stay, types)).ToArray(),
+            stays = record.Stays.Select(stay => Stay(stay, types, rooms)).ToArray(),
+
             incomplete = Incomplete(record),
+
+            // The same fact under the table, answering the other question —
+            // not *what am I looking at* but *why are the missing ones not
+            // rows*. Frame 9 says it in both places on purpose.
+            incompleteDetail = Incomplete(record) is null ? null : Elsewhere,
+
+            // **Sayable, not queryable** (S4, S32). Nothing in this
+            // installation can find another property's legs of a group: the
+            // identifier is carried so a chain-level journey needs no
+            // migration, and no cross-installation query is built. Null until
+            // something can establish it, never a sentence about a property
+            // this application has not heard from.
+            elsewhere = (string?)null,
+
+            facts = Facts(record),
         };
     }
+
+    /// <summary>Why the missing stays are not rows, said under the table.</summary>
+    private const string Elsewhere =
+        "They are described here in words and nowhere else: no empty rows, no "
+        + "“TBA” guests, and they count towards nothing — not occupancy, not the "
+        + "arrivals figure, not the group's status. A group has no single "
+        + "arrival state; what you see above is per stay, and any summary is a "
+        + "count.";
+
+    /// <summary>
+    /// How this group behaves — frame 9's three cards.
+    /// </summary>
+    /// <remarks>
+    /// Only the one this projection can state from the record in front of it.
+    /// The design's other two — that a group identifier is carried from day one
+    /// and that check-in is partial — are properties of the model rather than
+    /// of this booking, and a projection asserting them would be a comment
+    /// wearing a data field.
+    /// </remarks>
+    private static object[] Facts(BookingRecord record)
+        => record.Expected is not { } expected
+            ? []
+            :
+            [
+                new
+                {
+                    title = "Expected count",
+                    key = "The source says",
+                    value = $"{expected} · {record.Stays.Count} known",
+                    hint = "“Three expected, one known” and “one known, "
+                        + "expectation unstated” are different states, and the "
+                        + "model keeps them apart.",
+                },
+            ];
 
     /// <summary>`Two stays · 3 Sep → 7 Sep`.</summary>
     /// <remarks>
@@ -82,7 +133,9 @@ public sealed class BookingView(
 
     /// <summary>One stay, as the design draws it.</summary>
     private static object Stay(
-        BookingStayRow stay, IReadOnlyDictionary<string, string> types)
+        BookingStayRow stay,
+        IReadOnlyDictionary<string, string> types,
+        IReadOnlyDictionary<Guid, string> rooms)
         => new
         {
             id = stay.Id.ToString(),
@@ -96,6 +149,14 @@ public sealed class BookingView(
 
             roomType = stay.RoomTypeId is { } id && types.TryGetValue(id, out var name)
                 ? name
+                : null,
+
+            // Null before one is chosen, which is the ordinary state of a
+            // booked stay: the anchor is the room TYPE and the number is an
+            // assignment made the night before or at the desk (GUEST-Q2
+            // addendum, S8).
+            room = stay.RoomId is { } assigned && rooms.TryGetValue(assigned, out var number)
+                ? number
                 : null,
 
             dates = Dates(stay),
@@ -194,6 +255,32 @@ public sealed class BookingView(
             + (missing == 1 ? "is not a row" : "are not rows")
             + " — not a placeholder, and not counted. They appear when the "
             + "source sends them.";
+    }
+
+    /// <summary>The room numbers, read from Master Data and never copied.</summary>
+    /// <remarks>
+    /// Scoped to the property as well as to the ids: a room id that belongs to
+    /// another property must not resolve here, and the filter is what makes
+    /// that impossible rather than unlikely.
+    /// </remarks>
+    private async Task<IReadOnlyDictionary<Guid, string>> RoomsAsync(
+        RequestScope scope, BookingRecord record, CancellationToken cancellationToken)
+    {
+        var ids = record.Stays
+            .Select(stay => stay.RoomId)
+            .Where(id => id is not null)
+            .Select(id => id!.Value)
+            .Distinct()
+            .ToArray();
+
+        if (ids.Length == 0)
+        {
+            return new Dictionary<Guid, string>();
+        }
+
+        return await db.Set<MasterDataRoom>()
+            .Where(room => room.PropertyId == scope.PropertyId && ids.Contains(room.Id))
+            .ToDictionaryAsync(room => room.Id, room => room.RoomNumber, cancellationToken);
     }
 
     /// <summary>The room type names for this booking's stays.</summary>

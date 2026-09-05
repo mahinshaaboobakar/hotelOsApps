@@ -14,9 +14,17 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { load, perform, recordedBooking, recordedCancelPlan } from "../../book";
+import {
+  load,
+  perform,
+  recordedBooking,
+  recordedCancelPlan,
+  type BookingDetail,
+  type GroupFact,
+} from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { mark, standIn } from "../../chrome/marks";
+import { card } from "../../chrome/panel";
 import { cancel } from "./cancel";
 import { table } from "./table";
 
@@ -55,10 +63,7 @@ export async function booking(
     subtitle.append(mark({ mark: "pms", text: record.managedBy }));
   }
 
-  heading.append(
-    el("div", "ht", `${record.guest} · ${record.reference}`),
-    subtitle,
-  );
+  heading.append(el("div", "ht", names(record)), subtitle);
 
   title.append(
     heading,
@@ -72,8 +77,21 @@ export async function booking(
   fill(
     body,
     loaded.live ? null : standIn(loaded.because),
+
+    // **Above the table, because it explains why there is one row.** A person
+    // meeting a single row under a booking reference reads it as the whole
+    // booking unless something says otherwise first.
+    record.incomplete === null ? null : says(record.incomplete),
+
     table(record.stays),
-    record.incomplete === null ? null : el("div", "note", record.incomplete),
+
+    // The same fact under the table, answering the other question: not *what
+    // am I looking at* but *why are the missing two not here*. Frame 9 says it
+    // twice on purpose.
+    record.incompleteDetail === null ? null : el("div", "note", record.incompleteDetail),
+
+    record.elsewhere === null ? null : says(record.elsewhere),
+    record.facts.length === 0 ? null : facts(record.facts),
   );
 
   // The scrim is a sibling of the body, not a child of it. `.body` scrolls, so
@@ -97,6 +115,63 @@ export async function booking(
     close,
     (reason: string) => confirm(host, id, reason, done, into),
   ));
+}
+
+/**
+ * What to call this booking.
+ *
+ * **A complete booking is named after its guest; an incomplete one is not.**
+ * Frame 8 titles itself `Fatima Sheikh · BK-4506` and frame 9 titles itself
+ * `Booking BK-4471` — and that is not the drawing being loose. A group whose
+ * source has sent one of three rooms has no single guest, and naming the page
+ * after the one who happens to have arrived would state something about the
+ * booking that only holds for a third of it.
+ */
+function names(record: BookingDetail): string {
+  return record.incomplete === null
+    ? `${record.guest} · ${record.reference}`
+    : `Booking ${record.reference}`;
+}
+
+/**
+ * A statement about the booking, in the design's info band.
+ *
+ * Info-toned rather than warning: an incomplete group is an ordinary condition
+ * of running a hotel with a PMS, and a group with legs at another property is
+ * simply a fact. Neither is a problem to be resolved, so neither takes a colour
+ * that asks somebody to act.
+ */
+function says(text: string): HTMLElement {
+  const banner = el("div", "ban info");
+  const body = el("div");
+  const [lead, ...rest] = text.split(". ");
+
+  body.append(
+    el("b", undefined, `${lead ?? ""}.`),
+    document.createTextNode(` ${rest.join(". ")}`),
+  );
+
+  banner.append(body);
+  return banner;
+}
+
+/** How a group behaves, as three peer cards — frame 9. */
+function facts(list: readonly GroupFact[]): HTMLElement {
+  const grid = el("div", "grid3");
+
+  for (const fact of list) {
+    const { root, body } = card(fact.title);
+    const row = el("div", "fr");
+    const value = el("div", "v");
+
+    value.append(document.createTextNode(fact.value));
+    row.append(el("div", "k", fact.key), value);
+
+    fill(body, row, el("div", "hint", fact.hint));
+    grid.append(root);
+  }
+
+  return grid;
 }
 
 /**

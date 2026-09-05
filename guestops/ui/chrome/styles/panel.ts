@@ -40,6 +40,17 @@ export const PANEL = `
 /* Two equal columns, where neither side is the subordinate one — frames 5
    and 7 put a panel we own beside a panel we only report. */
 .cols.even{grid-template-columns:1fr 1fr}
+/* Three equal cards — frame 9's facts about a group. Not the two-column
+   grid, because these are peers with no principal among them: that grid is
+   1.55fr/1fr and says one side is the subject. */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+/* A card whose subject came from somewhere else — frame 15's foreign-national
+   block. It shares the info banner's tone for the same reason: it is an
+   attribution, not a warning. */
+.card.info{border-color:var(--go-brand-edge);
+  background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
+.ch.info{color:var(--color-brand,#818cf8)}
+.ch.info .grow{color:var(--color-ink-faint,#5a6172)}
 /* A panel whose subject is not here: dashed, and washed back. */
 .card.ghost{border-style:dashed;
   background:color-mix(in srgb, var(--color-ink,#e8ebf4) 1.5%, transparent)}

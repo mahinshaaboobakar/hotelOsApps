@@ -111,16 +111,19 @@ export const recordedBooking: BookingDetail = {
   summary: "Two stays · 3 Sep → 7 Sep",
   managedBy: "Opera manages this booking",
   incomplete: null,
+  incompleteDetail: null,
+  elsewhere: null,
+  facts: [],
 
   stays: [
     {
       id: "s1", guest: "Fatima Sheikh", unnamed: false, stayId: "01J9M…22B1",
-      roomType: "Executive Suite", dates: "3 Sep → 7 Sep",
+      roomType: "Executive Suite", room: null, dates: "3 Sep → 7 Sep",
       status: "Booked", statusTone: "neutral", chips: [],
     },
     {
       id: "s2", guest: "Not yet named", unnamed: true, stayId: "01J9M…22B2",
-      roomType: "Deluxe King", dates: "3 Sep → 7 Sep",
+      roomType: "Deluxe King", room: null, dates: "3 Sep → 7 Sep",
       status: "Booked", statusTone: "neutral",
       chips: [{ mark: "missing", text: "party unnamed" }],
     },
@@ -171,4 +174,73 @@ export const recordedCancelPlan: CancelPlan = {
     + "live until somebody cancels it there too.",
 
   reasons: ["Guest cancelled — flight changed"],
+};
+
+/**
+ * Frame 9's booking — three rooms claimed, one sent.
+ *
+ * **The frame that will be wrong first if it is drawn dishonestly.** The
+ * reference system met this exact source shape — three rooms in a header, one
+ * room in the payload — and minted sibling identifiers by string concatenation
+ * that always produced `-1` (R9). The honest form is a sentence and a number.
+ */
+export const recordedGroup: BookingDetail = {
+  id: "b1",
+  guest: "Rajesh Pillai",
+  reference: "BK-4471",
+  summary: "Group 84119377 · from Opera · booked 28 Aug",
+  managedBy: null,
+
+  incomplete:
+    "1 of 3 rooms known. Opera says this booking is for three rooms and has "
+    + "sent one. The other two have not arrived — they may arrive in minutes, "
+    + "tomorrow, or never.",
+
+  incompleteDetail:
+    "Two rooms expected and not received. They are described here in words and "
+    + "nowhere else: no empty rows, no “TBA” guests, and they count towards "
+    + "nothing — not occupancy, not the arrivals figure, not the group's "
+    + "status. A group has no single arrival state; what you see above is per "
+    + "stay, and any summary is a count.",
+
+  elsewhere:
+    "This booking continues elsewhere. Group 84119377 also has legs at Avenue "
+    + "Regent, Kochi. Those stays live in that property's GuestOps — this "
+    + "installation holds only its own, and asks no one for the rest.",
+
+  facts: [
+    {
+      title: "Partial check-in",
+      key: "BK-4402",
+      value: "2 of 3 arrived",
+      hint: "Departure is per stay too — two rooms leave Thursday, one stays "
+        + "until Saturday. There is no such thing as checking out a group.",
+    },
+    {
+      title: "Group identifier",
+      key: "Carried",
+      value: "from day one",
+      hint: "Carried from the first fact so a chain-level journey needs no "
+        + "migration later — and no cross-installation query is built now.",
+    },
+    {
+      title: "Expected count",
+      key: "Opera says",
+      value: "3 · one known",
+      hint: "“Three expected, one known” and “one known, expectation "
+        + "unstated” are different states, and the model keeps them apart.",
+    },
+  ],
+
+  stays: [
+    {
+      id: "g1", guest: "Rajesh Pillai", unnamed: false, stayId: "01J9K…7F3A",
+      roomType: "Deluxe King", room: "214", dates: "31 Aug → 4 Sep",
+      status: "In house", statusTone: "ok",
+      chips: [
+        { mark: "override", text: "override" },
+        { mark: "disagrees", text: "disagrees" },
+      ],
+    },
+  ],
 };

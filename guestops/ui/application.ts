@@ -47,7 +47,9 @@
 
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
-import { recordedAttention, recordedToday, recordedWalkIn } from "./book";
+import {
+  recordedAttention, recordedRegistration, recordedToday, recordedWalkIn,
+} from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
@@ -55,6 +57,7 @@ import { attention } from "./screens/attention";
 import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
+import { registration } from "./screens/registration";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
 import { walkIn } from "./screens/walkin";
@@ -91,7 +94,7 @@ interface Place {
    * 10 draws the day behind the walk-in sheet and frame 8 draws the booking's
    * stays behind the cancellation.
    */
-  overlay: "walkin" | "cancel" | null;
+  overlay: "walkin" | "cancel" | "registration" | null;
 
   /**
    * Which page of the list, 0-based.
@@ -107,8 +110,33 @@ interface Place {
 /** Who is signed in, drawn at the right of the bar. */
 const OPERATOR = { name: "Anitha Menon", where: "Front Office · Avenue Regent" };
 
-/** Rendered by the host into the module's own document. */
-export const activate: Activate = (host: HostApi): HostedModule => {
+/**
+ * Where the module starts.
+ *
+ * A parameter so the preview harness can place the module in a state the
+ * product does not yet have a route to — frame 15's registration card, which
+ * the design opens from a check-in and which nothing in the built screens
+ * offers. **The gap is the route, not the card**: the card is built and the
+ * affordance that would open it is not drawn in any approved frame, so
+ * inventing one would be richer than the design rather than faithful to it.
+ *
+ * It is deliberately not a router. There is exactly one state expressible this
+ * way and it exists so a capture photographs the built card rather than
+ * nothing.
+ */
+export interface Opening {
+  overlay?: "registration" | undefined;
+}
+
+/**
+ * The module, opened at a given state.
+ *
+ * `activate` below is the **contract** — `Activate` takes a host and nothing
+ * else, and widening it here would make this module the one that does not fit
+ * the SDK's shape. So the extra state is a second entry point rather than a
+ * second parameter on the first.
+ */
+export function start(host: HostApi, opening?: Opening): HostedModule {
   let root: HTMLElement | null = null;
 
   // Held, not appended once. `show` replaces the root's children on every
@@ -123,7 +151,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     tab: "Overview",
     page: 0,
     bookingId: "",
-    overlay: null,
+    overlay: opening?.overlay ?? null,
   };
 
   function show(next: Partial<Place>): void {
@@ -155,6 +183,13 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     const overlay = (): void => {
       if (where.overlay === "walkin") {
         main.append(walkIn(recordedWalkIn, () => show({ overlay: null })));
+      }
+
+      // The card stands over the day, because that is where a check-in starts:
+      // a receptionist opens it from the arrival they are looking at, and the
+      // list stays behind it.
+      if (where.overlay === "registration") {
+        main.append(registration(recordedRegistration, () => show({ overlay: null })));
       }
     };
 
@@ -233,7 +268,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       root = null;
     },
   };
-};
+}
+
+/** Rendered by the host into the module's own document. */
+export const activate: Activate = (host: HostApi): HostedModule => start(host);
 
 /**
  * The bar's entries and their counts.

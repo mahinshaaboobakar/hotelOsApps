@@ -145,4 +145,29 @@ describe("the capture harness", () => {
 
     expect(injected(css)).toEqual([...TOKEN_NAMES].sort());
   });
+
+  /**
+   * The stylesheet is CSS, not a template that half-closed.
+   *
+   * Every block is a template literal, and **an unescaped backtick inside a CSS
+   * comment closes it** — the rest of the block then parses as TypeScript. It
+   * has happened three times in this file's history; twice the compiler caught
+   * it because the escaped text happened to be an invalid expression, and there
+   * is no reason the third would be. A comment reading `x.y` where `x` is a
+   * real binding would interpolate silently and ship a stylesheet with a hole
+   * in it.
+   *
+   * Braces are the cheap invariant: a truncated block loses its closers.
+   */
+  it("composes to balanced CSS with nothing interpolated into it", () => {
+    const opens = (CSS.match(/{/g) ?? []).length;
+    const closes = (CSS.match(/}/g) ?? []).length;
+
+    expect(opens).toBe(closes);
+    expect(opens).toBeGreaterThan(50);
+
+    // What a half-closed literal or a bad interpolation leaves behind.
+    expect(CSS).not.toContain("undefined");
+    expect(CSS).not.toContain("[object Object]");
+  });
 });

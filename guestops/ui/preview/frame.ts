@@ -21,7 +21,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { activate } from "../application";
+import { start } from "../application";
 import {
   recordedActivity,
   recordedAttention,
@@ -29,6 +29,7 @@ import {
   recordedBooking,
   recordedBookings,
   recordedCancelPlan,
+  recordedGroup,
   recordedPayment,
   recordedRequests,
   recordedRequestsAlone,
@@ -61,7 +62,10 @@ function host(granted: readonly string[]): HostApi {
         attention: recordedAttention,
         stay: recordedStay,
         bookings: recordedBookings,
-        booking: recordedBooking,
+        // `?group` is frame 9 — the same screen, a booking whose source
+        // claimed more rooms than it has sent. Not a route: whether a booking
+        // is complete is a fact about the booking.
+        booking: group ? recordedGroup : recordedBooking,
         cancelPlan: recordedCancelPlan,
         availability: recordedAvailability,
         activity: recordedActivity,
@@ -93,11 +97,20 @@ const screen = params.get("screen") ?? "today";
 /** Frames 5b and 6's absent state — see the answers above. */
 const alone = params.get("alone") === "true";
 
+/** Frame 9's incomplete booking. */
+const group = params.get("group") === "true";
+
 const granted = params.get("granted") === "none"
   ? []
   : ["reservation.read", "stay.override", "registration.capture", "request.handle"];
 
-activate(host(granted)).mount(document.body);
+// The one state with no built route — see `Opening`. Everything else is
+// reached by clicking, because a capture of a state the application cannot be
+// put into would be a photograph of nothing a property will ever see.
+start(
+  host(granted),
+  screen === "registration" ? { overlay: "registration" } : {},
+).mount(document.body);
 
 /** Click the first element matching `selector` whose text contains `text`. */
 function click(selector: string, text: string): void {

@@ -100,6 +100,18 @@ export interface BookingStay {
   stayId: string;
 
   roomType: string;
+
+  /**
+   * The room, where one is assigned.
+   *
+   * Frame 8 draws no room column and frame 9 draws no stay column, on what is
+   * one screen. **Reported as a frame-to-frame divergence and built as the
+   * union**: a receptionist looking at a booking wants the room, and the
+   * cancellation dialog needs to name individual stays. Neither frame loses
+   * anything it drew; each shows one more column than it happened to include.
+   */
+  room: string | null;
+
   dates: string;
   status: string;
   statusTone: StatusTone;
@@ -126,8 +138,51 @@ export interface BookingDetail {
    * Null when the booking is complete. When it is not, the missing stays are
    * **not rows**: an unsent stay has no room type, no dates and no guest, and
    * a placeholder row would be a stay nobody booked.
+   *
+   * The reference system met this exact shape — three rooms claimed, one room
+   * described — and answered it by minting sibling identifiers by string
+   * concatenation that always produced `-1` (R9). **Two grey placeholder rows
+   * are the same mistake in a nicer font**: they invent stays the source never
+   * sent, and every count downstream inherits them.
    */
   incomplete: string | null;
+
+  /**
+   * The same fact, said again where the design says it twice.
+   *
+   * Frame 9 opens with a banner and repeats it under the table as a note,
+   * because the two answer different questions — *what am I looking at* and
+   * *why is there one row*. Null when the booking is complete.
+   */
+  incompleteDetail: string | null;
+
+  /**
+   * Other properties this group has legs at — frame 9.
+   *
+   * **Sayable, not queryable** (S4, S32). A group identifier is carried from
+   * the first fact, so a chain-level journey needs no migration later; what is
+   * deliberately not built is a cross-installation query. This installation
+   * holds only its own stays and asks nobody for the rest, and the sentence
+   * says exactly that rather than implying a total.
+   */
+  elsewhere: string | null;
+
+  /**
+   * The three cards under the table — frame 9.
+   *
+   * Each is a fact about how a *group* behaves rather than about this booking:
+   * check-in is per stay, the identifier is carried from day one, and an
+   * expected count that is stated is a different thing from one that is not.
+   */
+  facts: readonly GroupFact[];
+}
+
+/** One card of frame 9's three. */
+export interface GroupFact {
+  title: string;
+  key: string;
+  value: string;
+  hint: string;
 }
 
 /**

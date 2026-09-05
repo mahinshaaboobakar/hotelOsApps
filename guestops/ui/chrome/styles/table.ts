@@ -27,6 +27,10 @@ export const TABLE = `
    and nothing else: two \`.tr\` rules with two sets of padding is how two
    lists in one application stop lining up. */
 .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
+/* A booking's own stays — frames 8 and 9's union, so seven. The stay id is
+   fixed-width because it is elided to a constant shape, and the room is narrow
+   because it is a number. */
+.tr.stays{grid-template-columns:1.4fr .9fr 1fr .5fr 1fr .8fr 1.1fr}
 /* The row a dialog is about, still readable behind the scrim. */
 .tr.sel{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 /* The one number on an availability row nobody stores — frame 14 sets it 15px

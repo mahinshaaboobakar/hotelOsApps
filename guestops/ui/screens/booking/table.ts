@@ -6,7 +6,16 @@ import type { BookingStay } from "../../book";
 import { el, fill } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
-const COLUMNS = ["Guest", "Stay", "Room type", "Dates", "Status", ""] as const;
+/**
+ * The union of frames 8 and 9.
+ *
+ * Frame 8 draws no room and frame 9 draws no stay id, on one screen. Reported
+ * as a frame-to-frame divergence rather than resolved by picking: a
+ * receptionist looking at a booking wants the room, and the cancellation dialog
+ * has to name individual stays. Each frame gains one column it did not draw and
+ * loses none.
+ */
+const COLUMNS = ["Guest", "Stay", "Room type", "Room", "Dates", "Status", ""] as const;
 
 /**
  * Draw the stays.
@@ -26,7 +35,7 @@ export function table(
   selected?: string,
 ): HTMLElement {
   const element = el("div", "tbl");
-  const head = el("div", "tr list hd");
+  const head = el("div", "tr list stays hd");
 
   for (const column of COLUMNS) {
     head.append(el("div", undefined, column));
@@ -42,7 +51,7 @@ export function table(
 }
 
 function line(stay: BookingStay, selected?: string): HTMLElement {
-  const element = el("div", `tr list${stay.id === selected ? " sel" : ""}`);
+  const element = el("div", `tr list stays${stay.id === selected ? " sel" : ""}`);
 
   const name = el("div", "nm");
   name.append(stay.unnamed ? el("b", "un", stay.guest) : el("b", undefined, stay.guest));
@@ -57,6 +66,12 @@ function line(stay: BookingStay, selected?: string): HTMLElement {
     name,
     el("div", undefined, stay.stayId),
     el("div", undefined, stay.roomType),
+
+    // Absent rather than a dash: a stay whose room has not been chosen is the
+    // ordinary case before arrival, and a placeholder in the column would read
+    // as a room called "—".
+    el("div", undefined, stay.room ?? ""),
+
     el("div", undefined, stay.dates),
     status,
     chips,
