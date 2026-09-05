@@ -116,7 +116,7 @@ THE STANDARD IS THE PROPERTY'S; THE GUEST MAY ONLY REDUCE IT — all recorded
 PRIORITY — sold tonight first, then departures unsold, then daily service by zone, refreshes last;
   turndown its own window — per property
 
-THE TRIGGER — a property setting (owner's direction, 2026-09-05; proposal awaiting the ruling)
+THE TRIGGER — a property setting — RULED, owner, 2026-09-05 ("approved")
   in both modes every room change is APPLIED as it arrives — Room Care collects and keeps calm
   MANUAL (default)  nothing is created from a change; when the window starts the housekeeping
                     manager PREPARES THE DAY — a button, or HosPilot by voice — and that is the
@@ -125,6 +125,13 @@ THE TRIGGER — a property setting (owner's direction, 2026-09-05; proposal awai
                     re-proposes unassigned work only — never takes a room off an attendant
   AUTOMATIC         the decision runs on every change and places the work in the next window
   AI is not a mode — always enabled: it presses the button in manual, answers "what changed" in both
+  the two presses: the FIRST press builds the day from every room as it stands; every LATER press
+  only reconciles — adds new rooms, updates open unstarted tasks whose facts changed (priority, a
+  wish, an earliest time), never removes a room from an attendant, never reshuffles what the
+  supervisor accepted; a task already started is the attendant's at the door; between presses
+  nothing is created, only counted ("N changes since 08:00"). Automatic = this reconcile running
+  by itself on every change; the modes differ only in who presses. HosPilot: "prepare the day" /
+  "anything new?" / "add the new rooms" are the same three things, spoken
   midnight case: a 03:00 checkout sold at 15:00 is dirty from 03:00 either way; the work is placed
   in the next window, first (sold tonight); an arrival before the window raises "arrival before
   window" for the supervisor (assignment outside the window: a property setting)
