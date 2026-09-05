@@ -77,7 +77,7 @@ const SHELL = `
    because they are the desktop's own furniture and a guest application
    drawing its own 212px rail competes with the shell's chrome for the same
    edge of the same screen. */
-.go{display:flex;flex-direction:column;height:100vh;font-size:13px;
+.go{display:flex;flex-direction:column;height:100vh;font-size:13px;line-height:1.55;
   color:var(--color-ink,#e8ebf4);
   font-family:var(--font-sans,system-ui,sans-serif);background:var(--color-surface,#0b0d14)}
 .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;
@@ -90,7 +90,8 @@ const SHELL = `
    that would say the same word twice. */
 .head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;font-size:13px;
   font-weight:400;color:var(--color-ink-muted,#8b93a7);border-bottom:2px solid transparent;
-  border-left:0;border-right:0;border-top:0;background:none;font-family:inherit;cursor:pointer}
+  border-left:0;border-right:0;border-top:0;background:none;font-family:inherit;
+  line-height:inherit;cursor:pointer}
 .head .tab:hover{color:var(--color-ink,#e8ebf4)}
 .head .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
 .head .tab .n{margin-left:0;font-size:11px;color:var(--color-ink-faint,#5a6172)}
@@ -116,7 +117,13 @@ const SHELL = `
 /* ONE control, modified — §2. This was four base classes at three geometries
    (.btn2 .create .danger .mini); a second base class is a second geometry
    within a week. Geometry is Jobs', colour is the shell's. */
-.btn{font-family:inherit;cursor:pointer;white-space:nowrap;display:inline-flex;gap:8px;
+/* line-height:inherit is the FOURTH UA reset, and the one docs/working/64 §2
+   lists three of. A button carries the UA's border, centred text and its own
+   font family — and the UA's font shorthand also resets line-height to normal,
+   so a control that inherited family and size still sat 2.5px shorter than the
+   same control drawn as a div in the gold. Measured, not eyeballed. */
+.btn{font-family:inherit;line-height:inherit;cursor:pointer;white-space:nowrap;
+  display:inline-flex;gap:8px;
   align-items:center;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
   border-radius:8px;padding:7px 14px;font-size:13px;color:var(--color-ink,#e8ebf4);
   background:none}
@@ -146,13 +153,18 @@ const SHELL = `
 /* The day's context, pushed right — Jobs' board carries its date here. */
 .strip .ctx{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
 .strip .ctx b{font-size:12px;color:var(--color-ink-muted,#8b93a7);margin-right:0}
-.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;
+.tabs{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:2px;
   border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
 .tab{padding:8px 14px;font-size:12.5px;color:var(--color-ink-faint,#5a6172);
-  border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;cursor:pointer}
+  border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;
+  line-height:inherit;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);font-weight:600;
   border-bottom-color:var(--color-brand,#818cf8)}
 .tab .n{color:var(--color-ink-faint,#5a6172);font-weight:400;margin-left:5px;font-size:11px}
+/* The actions sharing the view-switcher row sit clear of its rule. Present in
+   the gold and missing here — found by measuring the row's height, not by
+   looking at it. */
+.tabs .btn{margin-bottom:6px}
 .stand{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;font-size:11.5px;
   border:1px dashed var(--color-line-strong,rgba(255,255,255,.16));
   color:var(--color-ink-faint,#5a6172)}
