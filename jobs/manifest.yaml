@@ -92,9 +92,20 @@ ui:
   module: jobs
   icon: ui/icon.svg
   widgets:
+    # Six, and the sixth is ruled: `jobs-now` is this design's own widget and
+    # stays beside the approved five — JOBS-Q3, the owner's ruling of
+    # 2026-09-05. The other four of the five are drawn and approved but not
+    # built: three of them ask for figures this design cannot compute, and the
+    # reasons are in the chapter's §9 rather than approximated here.
     - id: jobs-now
       name: Jobs Now
       file: ui/widgets/jobs-now.js
+    - id: the-board
+      name: The Board
+      file: ui/widgets/the-board.js
+    - id: blocked
+      name: Blocked
+      file: ui/widgets/blocked.js
 
 authorization:
   # Design §4.2, ruling (4) of 2026-09-03: `property#jobs_manager` joins the
@@ -114,3 +125,5 @@ files:
   "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/widgets/jobs-now.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/the-board.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/blocked.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

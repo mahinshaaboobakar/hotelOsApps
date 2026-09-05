@@ -282,6 +282,38 @@ export interface Settings {
   numbering: string;
 }
 
+/** One row of a dock widget — what it is, how long it has been, its tone. */
+export interface WidgetRow {
+  id: string;
+  number: string;
+  what: string;
+  since: string;
+  tone: "warn" | "hold" | "run" | "bad";
+}
+
+/**
+ * <i>The Board</i> — the shape of the work right now, and what has waited
+ * longest unclaimed. Z's canvas, owner-approved 2026-09-03.
+ */
+export interface BoardNow {
+  raised: number;
+  running: number;
+  onHold: number;
+  doneToday: number;
+  longestWaiting: readonly WidgetRow[];
+}
+
+/**
+ * <i>Blocked</i> — two states, because whose delay it is decides whose clock
+ * runs: a held job's concern clock is stopped, a paused session's is not.
+ */
+export interface BlockedNow {
+  onHold: number;
+  pausedCount: number;
+  held: readonly WidgetRow[];
+  paused: readonly WidgetRow[];
+}
+
 /** The widget's three numbers and the worst rows — the manifest's `jobs-now`. */
 export interface JobsNow {
   scope: string;

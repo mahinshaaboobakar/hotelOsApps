@@ -58,6 +58,15 @@ public static class ReadCapability
             "jobsNow" => await services.GetRequiredService<LiveProjection>()
                 .NowAsync(scope, body.OptionalText("department"), cancellationToken),
 
+            // The dock widgets, one read each — a widget answers one question
+            // whole, and one fed from a screen's payload would show whatever
+            // that screen happened to be holding (SHELL-Q35).
+            "widgetBoard" => await services.GetRequiredService<WidgetProjection>()
+                .BoardAsync(scope, cancellationToken),
+
+            "widgetBlocked" => await services.GetRequiredService<WidgetProjection>()
+                .BlockedAsync(scope, cancellationToken),
+
             "me" => await MeAsync(services, request, cancellationToken),
 
             _ => throw new InvalidRequestException($"job.read has no method '{request.Method}'"),

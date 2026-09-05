@@ -1,7 +1,7 @@
 {
   "name": "@hotelos-apps/jobs-ui",
   "version": "0.1.0",
-  "description": "Jobs' packaged desktop module — the board, a job, raising, resolving, the live tab, the catalogue and the settings.",
+  "description": "Jobs' packaged desktop module \u2014 the board, a job, raising, resolving, the live tab, the catalogue and the settings.",
   "type": "module",
   "private": true,
   "license": "UNLICENSED",
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run build:module && npm run build:widgets",
     "build:module": "node ../../scripts/build-module.mjs",
-    "build:widgets": "node ../../scripts/build-module.mjs widgets/jobs-now.js widgets/entry/jobs-now.ts",
+    "build:widgets": "node ../../scripts/build-module.mjs widgets/jobs-now.js widgets/entry/jobs-now.ts && node ../../scripts/build-module.mjs widgets/the-board.js widgets/entry/the-board.ts && node ../../scripts/build-module.mjs widgets/blocked.js widgets/entry/blocked.ts",
     "test": "npm run build && vitest run",
     "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
   },

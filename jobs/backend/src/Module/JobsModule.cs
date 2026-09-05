@@ -35,6 +35,7 @@ public static class JobsModule
         services.AddScoped<JobProjection>();
         services.AddScoped<SettingsProjection>();
         services.AddScoped<LiveProjection>();
+        services.AddScoped<WidgetProjection>();
         return services;
     }
 

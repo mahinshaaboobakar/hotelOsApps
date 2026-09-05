@@ -170,4 +170,22 @@ public static class ModuleViews
 
     /// <summary>One of the widget's worst rows.</summary>
     public sealed record WorstRowView(string Number, string Line, string Tone);
+
+    /// <summary>A row in a dock widget — what it is, how long, and its tone.</summary>
+    public sealed record WidgetRowView(string Id, string Number, string What, string Since, string Tone);
+
+    /// <summary><i>The Board</i> — the shape of the work, and the longest unclaimed.</summary>
+    public sealed record BoardWidgetView(
+        int Raised,
+        int Running,
+        int OnHold,
+        int DoneToday,
+        IReadOnlyList<WidgetRowView> LongestWaiting);
+
+    /// <summary><i>Blocked</i> — two states, because whose delay it is decides whose clock runs.</summary>
+    public sealed record BlockedWidgetView(
+        int OnHold,
+        int PausedCount,
+        IReadOnlyList<WidgetRowView> Held,
+        IReadOnlyList<WidgetRowView> Paused);
 }
