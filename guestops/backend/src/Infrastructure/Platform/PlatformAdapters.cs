@@ -32,9 +32,16 @@ public static class PlatformAdapters
         // exists to answer. **This line is removed in the same change that
         // wires the app's Kernel channel** — it is an interim with an expiry
         // rather than a configuration option.
+        // **20054, the DEVELOPMENT port.** This said 15053, which is a number
+        // this platform defines nowhere — not `INSTALLED_PORTS`, not
+        // `dev_settings`, nothing — so the Context Service has never been
+        // reachable from this application in development, and every call
+        // through `IBusinessDay` has been failing to a fallback since it was
+        // written. ADR 0104: development never shares a port with the installed
+        // product, and it does not invent a third number either.
         services.AddGrpcClient<ContextService.ContextServiceClient>(client =>
             client.Address = new Uri(
-                configuration["Context:Endpoint"] ?? "https://127.0.0.1:15053"));
+                configuration["Context:Endpoint"] ?? "https://127.0.0.1:20054"));
 
         services.AddScoped<IBusinessDay, ContextBusinessDay>();
 
