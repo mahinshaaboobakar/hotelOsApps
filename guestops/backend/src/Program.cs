@@ -101,6 +101,21 @@ builder.Services.AddDbContext<GuestOpsDbContext>(options => options
 // package inherit its user's full authority.
 var platform = PlatformEnvironment.Read();
 
+// **The bus the Kernel actually publishes to, when it told us.**
+//
+// Both consumers below read `Events:NatsUrl` from configuration and fell back
+// to a literal — one to 24222 and the other to 4222, which are the development
+// and the *installed* product's ports (ADR 0104). A package started by a Kernel
+// is handed `HOTELOS_NATS_URL` and was ignoring it: the two fallbacks meant a
+// process could subscribe to a bus nobody was publishing on, or worse, to a
+// real property's while a suite ran.
+//
+// Configuration still wins where it is set, because a developer running this
+// from a checkout has no Kernel to be told by.
+var natsUrl = builder.Configuration["Events:NatsUrl"]
+    ?? platform?.NatsUrl
+    ?? "nats://127.0.0.1:24222";
+
 builder.Services.AddHotelOsPlatform<GuestOpsDbContext>(
     serviceName: "guestops",
     kernelEndpoint: platform?.KernelEndpoint
@@ -128,7 +143,7 @@ if (platform is not null)
                 ?? throw new InvalidOperationException(
                     "Services:Identity:Endpoint is required: a validator with no authority "
                     + "endpoint cannot refresh signing keys")),
-        natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:24222",
+        natsUrl: natsUrl,
         configuration: builder.Configuration);
 }
 
@@ -144,7 +159,7 @@ builder.Services.AddGuestOpsApplication();
 // `RoomStayFactMapper` and never restated, so a field DD changes is a compile
 // error in one file.
 builder.Services.AddApplicationEventConsumer(
-    natsUrl: builder.Configuration["Events:NatsUrl"] ?? "nats://127.0.0.1:4222",
+    natsUrl: natsUrl,
     declare: events => events
         .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
         .Consume<JobCreated, JobCreatedHandler>("job.created"));
