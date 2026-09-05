@@ -45,13 +45,19 @@ export interface Loaded<T> {
  * @param capability the permission the manifest requested
  * @param method the operation within it
  * @param recorded what to show when the platform cannot answer
+ * @param params the application's own JSON body — the page, a stay's id
  * @returns the value, and whether it is real
+ *
+ * `params` is this application's vocabulary, not the platform's: the envelope
+ * defines the path and the status codes and nothing inside them, so a screen
+ * and its backend agree on the body between themselves.
  */
 export async function load<T>(
   host: HostApi,
   capability: string,
   method: string,
   recorded: T,
+  params?: Record<string, unknown>,
 ): Promise<Loaded<T>> {
   // Asking for a capability that was not granted is not worth a round trip, and
   // the refusal would read as an outage rather than as a permission a property
@@ -61,7 +67,11 @@ export async function load<T>(
   }
 
   try {
-    return { value: (await host.call(capability, method)) as T, live: true, because: null };
+    return {
+      value: (await host.call(capability, method, params)) as T,
+      live: true,
+      because: null,
+    };
   } catch (error) {
     if (error instanceof HostCallError) {
       // ADR 0041, asked by the SDK so a package does not rediscover the rule:

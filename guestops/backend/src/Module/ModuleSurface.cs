@@ -70,6 +70,27 @@ public static class ModuleSurface
             "today" => services.GetRequiredService<TodayView>()
                 .AnswerAsync(request.Scope, Page(request.Body), cancellationToken),
 
+            "attention" => services.GetRequiredService<AttentionView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
+            "occupancy" => services.GetRequiredService<OccupancyView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
+            "feed" => services.GetRequiredService<FeedView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
+            "mix" => services.GetRequiredService<MixView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
+            "watchlist" => services.GetRequiredService<WatchlistView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
+            // `stay` is declared by the bundle and not served here. It needs the
+            // stay's id from the body and a projection of the whole page —
+            // banner, timeline, six tabs — which is its own round. The bundle
+            // falls back to its recorded facts and says so on screen, which is
+            // the honest state; answering with a half-built page would put a
+            // stay in front of a receptionist with pieces silently missing.
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };

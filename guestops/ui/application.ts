@@ -60,6 +60,16 @@ interface Place {
   screen: "Today" | "Bookings" | "Guests" | "Attention" | "Stay";
   list: string;
   tab: string;
+
+  /**
+   * Which page of the list, 0-based.
+   *
+   * Part of *where you are* rather than state the screen keeps to itself: it
+   * has to survive a redraw, and choosing another list has to reset it — page
+   * four of Arrivals is not page four of Departures, and carrying it across
+   * would land a person on an empty page of a shorter list.
+   */
+  page: number;
 }
 
 /** Who is signed in, drawn at the right of the bar. */
@@ -75,7 +85,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // the type-check nor the suite can see it.
   const style = stylesheet();
 
-  let where: Place = { screen: "Today", list: "Arrivals", tab: "Overview" };
+  let where: Place = { screen: "Today", list: "Arrivals", tab: "Overview", page: 0 };
 
   function show(next: Partial<Place>): void {
     if (root === null) return;
@@ -110,7 +120,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
         host,
         main,
         where.list,
-        (list) => show({ list }),
+        where.page,
+        // Another list starts at its own beginning.
+        (list) => show({ list, page: 0 }),
+        (page) => show({ page }),
         () => show({ screen: "Stay", tab: "Overview" }),
       );
       return;

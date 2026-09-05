@@ -17,7 +17,17 @@ import { load, recordedToday, type DayRow, type Stat, type Today } from "../../b
 import { control, el, fill } from "../../chrome/element";
 import { standIn } from "../../chrome/marks";
 import { tabs } from "../../chrome/panel";
+import { pager } from "../../chrome/pager";
 import { table } from "./table";
+
+/**
+ * How many rows a page of the day holds.
+ *
+ * The server clamps whatever it is sent, so this is a request rather than a
+ * promise — but it is the number the pager divides the total by, so it has to
+ * be the number that was actually asked for.
+ */
+const PAGE = 25;
 
 /**
  * Render the day.
@@ -25,17 +35,27 @@ import { table } from "./table";
  * @param host the bridge — the only route out of this realm
  * @param into the element this screen owns
  * @param list which tab is showing
+ * @param page which page of that list, 0-based
  * @param go what to do when another list is chosen
+ * @param turn what to do when another page is chosen
  * @param open what to do when a stay is picked
  */
 export async function today(
   host: HostApi,
   into: HTMLElement,
   list: string,
+  page: number,
   go: (list: string) => void,
+  turn: (page: number) => void,
   open: (row: DayRow) => void,
 ): Promise<void> {
-  const loaded = await load(host, "reservation.read", "today", recordedToday);
+  // The page travels as this application's own body — `{page, pageSize}` — and
+  // comes back clamped by the same `Paging.Of` the gRPC surface uses, so the
+  // module route and the wire cannot disagree about what page 0 means.
+  const loaded = await load(host, "reservation.read", "today", recordedToday, {
+    page,
+    pageSize: PAGE,
+  });
   const day = loaded.value;
 
   const showing = day.lists.find((one) => one.label === list) ?? day.lists[0];
@@ -62,6 +82,7 @@ export async function today(
     strip(day.stats, showing?.label ?? "", day),
     views,
     table(showing?.rows ?? [], open),
+    pager(Number(showing?.count ?? 0), page, PAGE, turn),
   );
 
   // No page heading. It said "Today", which the bar already says — the same
