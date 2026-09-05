@@ -46,6 +46,9 @@ interface Place {
   tab: string;
   /** Set while a job is open over the Board tab. */
   jobId: string | null;
+
+  /** The job most recently opened — the board keeps its row marked. */
+  lastOpened: string | null;
   jobTab: string;
   /** "board" | "raise" | "resolve" — what the Board tab is showing. */
   mode: string;
@@ -68,7 +71,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let operator: Operator | null = null;
 
   const place: Place = {
-    tab: "Board", jobId: null, jobTab: "Overview", mode: "board",
+    tab: "Board", jobId: null, lastOpened: null, jobTab: "Overview", mode: "board",
     boardFilter: "My departments · ENG", boardPage: 0,
     settingsTab: "Concern policy", settingsView: "engineering",
   };
@@ -114,10 +117,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
         }
 
         return board(host, main, {
-          filter: place.boardFilter, page: place.boardPage,
+          filter: place.boardFilter, page: place.boardPage, opened: place.lastOpened,
           onFilter: (label) => { place.boardFilter = label; place.boardPage = 0; show(); },
           onPage: (n) => { place.boardPage = n; show(); },
-          onOpen: (id) => { place.jobId = id; place.jobTab = "Overview"; show(); },
+          onOpen: (id) => { place.jobId = id; place.lastOpened = id; place.jobTab = "Overview"; show(); },
           onRaise: () => { place.mode = "raise"; show(); },
         });
     }

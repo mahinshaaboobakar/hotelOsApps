@@ -12,11 +12,33 @@
    (copied from 55-the-marketplace-round.html). Dark frames first.
    =========================================================================== */
 :root{
-  --bg:#0b0d14;--glass:rgba(255,255,255,.035);--line:rgba(255,255,255,.09);
-  --text:#e9ecf5;--dim:#9aa3b8;--faint:#5d657a;
-  --indigo:#6b7cff;--cyan:#3fd0e0;--violet:#a06bff;
+  /*
+   * The published tokens, at the shell's own values — ADR 0106, seventeen
+   * names. Re-tokenised 2026-09-05 on the owner's disposition: this page is
+   * the appearance authority, and it was teaching a palette the platform had
+   * replaced. An audit against an un-retokenised drawing measures the
+   * drawing's debt, not the build's.
+   */
+  --color-surface:#0b0d14;--color-surface-raised:#11141f;
+  --color-line:rgb(255 255 255 / .07);--color-line-strong:rgb(255 255 255 / .14);
+  --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;--color-ink-on-accent:#0b0d14;
+  --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+  --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);--color-bad-soft:rgb(248 113 113 / 0.12);
+  --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+
+  /* This page's own names, kept as aliases so no selector drifts back. */
+  --bg:var(--color-surface);--glass:rgba(255,255,255,.035);--line:var(--color-line);
+  --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
+  --indigo:var(--color-brand);
+  /*
+   * The timer's cyan and the gradient's violet were never published. The
+   * drawing taught two colours a module may not use, so both now resolve
+   * through the brand — the build had already made this correction, and the
+   * measurement is what found the drawing had not.
+   */
+  --cyan:var(--color-brand);--violet:color-mix(in srgb,var(--color-brand) 62%,var(--color-bad));
   --grad:linear-gradient(135deg,var(--indigo),var(--violet));
-  --ok:#3ecf8e;--warn:#f5b53f;--bad:#ff5c7a;--defer:#8d96ad;
+  --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);--defer:var(--color-ink-muted);
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
@@ -42,7 +64,7 @@ h1.frame b{color:var(--text);font-weight:600}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
-tr.sel td{background:rgba(107,124,255,.08)}
+tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
 .pill.ok{color:var(--ok);border-color:var(--ok)}
@@ -56,14 +78,16 @@ tr.sel td{background:rgba(107,124,255,.08)}
 .pill.nt{border-style:dashed}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.card{border:1px solid var(--line);border-radius:12px;padding:16px;background:rgba(0,0,0,.18)}
+.card{border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
 .card h3{margin:0 0 10px;font-size:13px;font-weight:600}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
 .kv div:nth-child(odd){color:var(--faint)}
 .btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--line);color:var(--text);margin-right:8px}
-.btn.pri{background:var(--grad);border-color:transparent}
+/* Text on an accent fill is what --color-ink-on-accent is published for; this
+   page taught ordinary ink there until the 5 September measurement. */
+.btn.pri{background:var(--grad);border-color:transparent;color:var(--color-ink-on-accent)}
 .btn.off{color:var(--faint);border-style:dashed}
-.field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:rgba(0,0,0,.2)}
+.field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:var(--color-surface)}
 .field.ph{color:var(--faint)}
 label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase}
 .tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
@@ -95,7 +119,7 @@ label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppe
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
 .subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
 .subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
-.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:rgba(107,124,255,.06)}
+.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
 td.dimtd{color:var(--faint)}
 /* widget */
 .widget{max-width:360px;border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
@@ -104,7 +128,7 @@ td.dimtd{color:var(--faint)}
 .wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
 .wrow:last-child{border:0}
 /* notes under frames */
-.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:rgba(107,124,255,.05)}
+.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
 .note b{color:var(--text)}
 .note.stop{border-color:var(--bad);background:rgba(255,92,122,.05)}
 .note.hold{border-color:var(--warn);background:rgba(245,181,63,.05)}

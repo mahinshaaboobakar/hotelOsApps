@@ -19,6 +19,9 @@ import { recordedBoard, recordedToday } from "../../board/recorded/board";
 export interface BoardPlace {
   filter: string;
   page: number;
+
+  /** The job last opened from this board, which the row keeps marked. */
+  opened: string | null;
   onFilter: (label: string) => void;
   onPage: (page: number) => void;
   onOpen: (jobId: string) => void;
@@ -95,7 +98,7 @@ function table(host: HostApi, rows: readonly JobRow[], place: BoardPlace): HTMLE
 }
 
 function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
-  const tr = el("tr", "pick");
+  const tr = el("tr", row.id === place.opened ? "pick sel" : "pick");
   tr.addEventListener("click", () => place.onOpen(row.id));
   const what = el("td", undefined, row.what);
   for (const t of row.tags) what.append(tag(t));

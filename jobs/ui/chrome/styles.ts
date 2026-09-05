@@ -61,6 +61,11 @@ th{text-align:left;color:var(--color-ink-faint,#5a6172);font-weight:500;font-siz
 td{padding:10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));vertical-align:top}
 tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 tr.pick{cursor:pointer}
+/* The row you came back from, tinted as frame 1 tints it — a person returning
+   to the board should not have to find their place again. Mixed from the
+   published brand rather than written as a colour: a module may not invent
+   one. Measured finding, 2026-09-05. */
+tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7);white-space:nowrap}
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .dim{color:var(--color-ink-faint,#5a6172)}

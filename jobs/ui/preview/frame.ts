@@ -93,6 +93,19 @@ async function drive(): Promise<void> {
   const screen = params.get("screen");
   if (screen !== null && screen !== "Board") { click(".tab", screen); await settle(); }
 
+  // Frame 1 draws the board of somebody who has been into MRN-ENG-142 and come
+  // back — that is why its row is tinted. The capture is driven to the same
+  // state the way a person reaches it, rather than the state being set behind
+  // the screen's back.
+  if (screen === null || screen === "Board") {
+    if (params.get("open") === null) {
+      click(".num", "MRN-ENG-142");
+      await settle();
+      click(".btn", "‹ Board");
+      await settle();
+    }
+  }
+
   // The states a top tab cannot reach are opened the way a person opens them —
   // by clicking the control the approved frame draws.
   const open = params.get("open");
