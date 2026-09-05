@@ -4,9 +4,15 @@
  * # Why exactly, and not the shell's whole palette
  *
  * `apps/desktop/src/shell/module-host/tokens.ts` reads **`TOKEN_NAMES` and
- * nothing else** from the shell's root and hands those across. Fourteen names
- * reach a module; every other variable in `styles.css` stops at the realm
+ * nothing else** from the shell's root and hands those across. Seventeen names
+ * reach a module — fourteen, plus the three soft tints published once the
+ * shell defined them; every other variable in `styles.css` stops at the realm
  * boundary.
+ *
+ * The set is checked against `TOKEN_NAMES` by a test rather than kept in step
+ * by hand: a harness that injected one name too many would photograph a colour
+ * no property will ever get, which is worse than auditing against fallbacks
+ * because the capture would look *better* than the product.
  *
  * A harness that injected more would show colours no property will ever get —
  * the inverse of auditing against fallbacks, and a worse error, because the
@@ -30,6 +36,9 @@
   --color-ok: #34d399;
   --color-warn: #fbbf24;
   --color-bad: #f87171;
+  --color-ok-soft: rgb(52 211 153 / 0.12);
+  --color-warn-soft: rgb(251 191 36 / 0.12);
+  --color-bad-soft: rgb(248 113 113 / 0.12);
   --radius-panel: 1rem;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

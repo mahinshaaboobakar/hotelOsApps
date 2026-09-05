@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Jobs — frame beside capture</title>
+<!--
+  One pane of the record: the approved drawing on the left, the running module
+  on the right, photographed together so the pair cannot drift apart between
+  two screenshots.
+
+  The drawing is the real mockup document, scrolled so the named frame fills
+  the window — not a cropped image of it, so what is photographed is what the
+  approved page renders today.
+-->
+<style>
+  body { margin: 0; background: #07090f; font: 12px/1.5 system-ui, sans-serif; color: #8b93a7; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px; }
+  h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #5a6172; }
+  .port { position: relative; width: 100%; height: 700px; overflow: hidden;
+          border: 1px solid rgb(255 255 255 / .1); border-radius: 10px; background: #0b0d14; }
+  .port iframe { position: absolute; border: 0; left: 0; }
+</style>
+</head><body>
+<div class="pair">
+  <div><h3 id="ln">the approved frame</h3><div class="port" id="left"></div></div>
+  <div><h3 id="rn">the module at HEAD</h3><div class="port" id="right"></div></div>
+</div>
+
+<script type="module">
+const PANES = {
+  "1":    { page: "01", frame: 1,  capture: "frame.html?screen=Board", name: "1 · The board" },
+  "2":    { page: "01", frame: 2,  capture: "frame.html?open=job", name: "2 · One job · Overview" },
+  "2b":   { page: "01", frame: 3,  capture: "frame.html?open=job&tab=Work", name: "2b · One job · Work" },
+  "2c":   { page: "01", frame: 4,  capture: "frame.html?open=job&tab=History", name: "2c · One job · History" },
+  "2d":   { page: "01", frame: 5,  capture: "frame.html?open=job&tab=Notes", name: "2d · One job · Notes & photos" },
+  "2e":   { page: "01", frame: 6,  capture: "frame.html?open=job&tab=Links", name: "2e · One job · Links & steps" },
+  "2f":   { page: "01", frame: 7,  capture: "frame.html?open=job&job=rated&tab=Rating", name: "2f · One job · Rating" },
+  "2g":   { page: "01", frame: 8,  capture: "frame.html?open=job&tab=Record", name: "2g · One job · Record" },
+  "3":    { page: "01", frame: 9,  capture: "frame.html?open=raise", name: "3 · Raise a job" },
+  "4":    { page: "01", frame: 10, capture: "frame.html?open=resolve", name: "4 · Resolve" },
+  "5":    { page: "01", frame: 11, capture: "frame.html?screen=Live", name: "5 · Live" },
+  "6":    { page: "01", frame: 12, capture: "frame.html?screen=Scheduled", name: "6 · Scheduled" },
+  "7":    { page: "01", frame: 13, capture: "frame.html?screen=Catalogue", name: "7 · Catalogue" },
+  "02-1": { page: "02", frame: 1,  capture: "frame.html?screen=Settings", name: "02-1 · Settings · Concern policy" },
+  "02-2": { page: "02", frame: 2,  capture: "frame.html?screen=Settings&tab=Shifts %26 presence", name: "02-2 · Settings · Shifts & presence" },
+  "02-3": { page: "02", frame: 3,  capture: "frame.html?screen=Settings&tab=Who is told", name: "02-3 · Settings · Who is told" },
+  "02-4": { page: "02", frame: 4,  capture: "frame.html?screen=Settings&tab=Holds %26 reminders", name: "02-4 · Settings · Holds & reminders" },
+  "02-5": { page: "02", frame: 5,  capture: "frame.html?screen=Settings&tab=Closing %26 rating", name: "02-5 · Settings · Closing & rating" },
+  "02-6": { page: "02", frame: 6,  capture: "frame.html?screen=Settings&tab=Access", name: "02-6 · Settings · Access" },
+  "02-7": { page: "02", frame: 7,  capture: "frame.html?screen=Settings&view=list", name: "02-7 · Settings · Policies" },
+};
+
+const pane = PANES[new URLSearchParams(location.search).get("pane") ?? "1"];
+document.title = pane.name;
+document.querySelector("#ln").textContent = `${pane.name} — as approved`;
+document.querySelector("#rn").textContent = `${pane.name} — as built, at HEAD`;
+
+function put(host, src, width) {
+  return new Promise((done) => {
+    const frame = document.createElement("iframe");
+    frame.style.width = `${width}px`;
+    frame.style.height = "1600px";
+    frame.src = src;
+    frame.addEventListener("load", () => setTimeout(() => done(frame), 400));
+    host.append(frame);
+  });
+}
+
+const file = pane.page === "01" ? "01-the-jobs-screens.html" : "02-the-jobs-settings.html";
+const left = await put(document.querySelector("#left"), `../../docs/mockups/${file}`, 1240);
+const win = left.contentDocument.querySelectorAll(".win")[pane.frame - 1];
+if (win !== undefined) {
+  // Scrolled by offset rather than cropped: the drawing is the live document,
+  // so what is photographed is what the approved page renders today.
+  left.style.top = `${-win.getBoundingClientRect().top - left.contentWindow.scrollY + 8}px`;
+  left.style.left = `${-win.getBoundingClientRect().left + 8}px`;
+}
+
+await put(document.querySelector("#right"), pane.capture, 1200);
+document.documentElement.setAttribute("data-ready", "true");
+</script>
+</body></html>

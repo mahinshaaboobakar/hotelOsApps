@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Jobs — the measured comparison</title>
+<!--
+  The frame beside the capture, measured rather than asserted.
+
+  Both sides are loaded as real documents in this page's own origin: the
+  approved drawing on the left, the running module — token-injected, driven to
+  ready — on the right. For every selector both sides use, the same computed
+  properties are read from each and compared. What comes out is a divergence
+  list, not an impression.
+
+  It reports into a <pre>, because that is what `--dump-dom` can carry back out
+  of headless Chrome.
+-->
+</head><body>
+<pre id="out">measuring…</pre>
+
+<script type="module">
+/** The properties that decide whether two drawings look alike. */
+const PROPERTIES = [
+  "color", "background-color", "border-top-color", "border-top-width", "border-radius",
+  "font-size", "font-weight", "line-height", "letter-spacing", "text-transform",
+  "padding-top", "padding-right", "padding-bottom", "padding-left",
+  "margin-top", "margin-bottom", "gap", "display",
+];
+
+/**
+ * One pane: an approved frame, and the module screen it is read beside.
+ *
+ * The `frame` selector names the drawing's own section — the mockups are one
+ * document per page, so each frame is a `.win` inside it — and `capture` is the
+ * harness URL that drives the module to the same screen.
+ */
+const PANES = [
+  { id: "1", name: "The board", page: "01", frame: 1, capture: "frame.html?screen=Board" },
+  { id: "2", name: "One job · Overview", page: "01", frame: 2, capture: "frame.html?open=job" },
+  { id: "2b", name: "One job · Work", page: "01", frame: 3, capture: "frame.html?open=job&tab=Work" },
+  { id: "2c", name: "One job · History", page: "01", frame: 4, capture: "frame.html?open=job&tab=History" },
+  { id: "2d", name: "One job · Notes", page: "01", frame: 5, capture: "frame.html?open=job&tab=Notes" },
+  { id: "2e", name: "One job · Links & steps", page: "01", frame: 6, capture: "frame.html?open=job&tab=Links" },
+  { id: "2f", name: "One job · Rating", page: "01", frame: 7, capture: "frame.html?open=job&job=rated&tab=Rating" },
+  { id: "2g", name: "One job · Record", page: "01", frame: 8, capture: "frame.html?open=job&tab=Record" },
+  { id: "3", name: "Raise a job", page: "01", frame: 9, capture: "frame.html?open=raise" },
+  { id: "4", name: "Resolve", page: "01", frame: 10, capture: "frame.html?open=resolve" },
+  { id: "5", name: "Live", page: "01", frame: 11, capture: "frame.html?screen=Live" },
+  { id: "6", name: "Scheduled", page: "01", frame: 12, capture: "frame.html?screen=Scheduled" },
+  { id: "7", name: "Catalogue", page: "01", frame: 13, capture: "frame.html?screen=Catalogue" },
+  { id: "02-1", name: "Settings · Concern policy", page: "02", frame: 1, capture: "frame.html?screen=Settings" },
+  { id: "02-2", name: "Settings · Shifts & presence", page: "02", frame: 2, capture: "frame.html?screen=Settings&tab=Shifts %26 presence" },
+  { id: "02-3", name: "Settings · Who is told", page: "02", frame: 3, capture: "frame.html?screen=Settings&tab=Who is told" },
+  { id: "02-4", name: "Settings · Holds & reminders", page: "02", frame: 4, capture: "frame.html?screen=Settings&tab=Holds %26 reminders" },
+  { id: "02-5", name: "Settings · Closing & rating", page: "02", frame: 5, capture: "frame.html?screen=Settings&tab=Closing %26 rating" },
+  { id: "02-6", name: "Settings · Access", page: "02", frame: 6, capture: "frame.html?screen=Settings&tab=Access" },
+  { id: "02-7", name: "Settings · Policies", page: "02", frame: 7, capture: "frame.html?screen=Settings&view=list" },
+];
+
+/**
+ * The class vocabulary both the drawings and the module use.
+ *
+ * Every selector here names <b>one</b> kind of element. A bare `.btn` would
+ * match whichever button came first on each side — a plain one in the drawing,
+ * the primary one in the build — and report a difference that is only the
+ * comparison picking two unlike things.
+ */
+const SELECTORS = [
+  ".body", ".sect", ".strip", ".chips", ".chip:not(.on)", ".chip.on",
+  ".btn:not(.pri):not(.sm)", ".btn.pri", ".btn.sm",
+  "table", "th", "td", "tr.pick",
+  ".pill.ok", ".pill.warn", ".pill.bad", ".tag",
+  ".card", ".card h3", ".kv", ".kv .k", ".field", "label.lbl", ".mono", ".hint",
+  ".subnav", ".tab:not(.on)", ".tab.on", ".pager", ".row", ".cols", ".tl", ".ev",
+  ".num", ".timer", ".dlg", ".wrow", ".stars", ".dim", ".tog", ".big", ".note",
+];
+
+function load(src, width, height) {
+  return new Promise((done) => {
+    const frame = document.createElement("iframe");
+    frame.style.cssText = `width:${width}px;height:${height}px;border:0;position:absolute;left:-9999px`;
+    frame.src = src;
+    frame.addEventListener("load", () => setTimeout(() => done(frame), 350));
+    document.body.append(frame);
+  });
+}
+
+function read(root, selector) {
+  const found = root.querySelector(selector);
+  if (found === null) return null;
+  // The drawing's side is an element (one `.win` of a page that holds many),
+  // the module's side is a whole document — so the window comes from whichever
+  // one owns the node rather than from the root that was passed in.
+  const view = (root.ownerDocument ?? root).defaultView;
+  const style = view.getComputedStyle(found);
+  const values = {};
+  for (const property of PROPERTIES) values[property] = style.getPropertyValue(property);
+  return values;
+}
+
+const out = document.querySelector("#out");
+window.addEventListener("error", (e) => { out.textContent = "ERROR " + e.message; });
+window.addEventListener("unhandledrejection", (e) => { out.textContent = "REJECT " + e.reason; });
+
+const report = { readings: 0, panes: [], selectors: 0 };
+
+const drawings = {};
+for (const page of ["01", "02"]) {
+  const file = page === "01" ? "01-the-jobs-screens.html" : "02-the-jobs-settings.html";
+  drawings[page] = await load(`../../docs/mockups/${file}`, 1320, 900);
+}
+
+for (const pane of PANES) {
+  const drawing = drawings[pane.page].contentDocument;
+  const windows = drawing.querySelectorAll(".win");
+  const scope = windows[pane.frame - 1];
+  const module = (await load(pane.capture, 1220, 760)).contentDocument;
+
+  const row = { id: pane.id, name: pane.name, drawn: scope !== undefined, compared: 0, diverged: [] };
+
+  if (scope !== undefined) {
+    for (const selector of SELECTORS) {
+      const left = read(scope, selector);
+      const right = read(module, selector);
+      if (left === null || right === null) continue;
+
+      row.compared += 1;
+      for (const property of PROPERTIES) {
+        report.readings += 2;
+        if (left[property] !== right[property]) {
+          row.diverged.push({ selector, property, drawn: left[property], built: right[property] });
+        }
+      }
+    }
+  }
+
+  report.panes.push(row);
+  out.textContent = `measuring… ${report.panes.length}`;
+}
+
+report.selectors = SELECTORS.length;
+out.textContent = `<<${JSON.stringify(report)}>>`;
+</script>
+</body></html>

@@ -33,6 +33,22 @@ describe("the module's token references", () => {
     return names;
   }
 
+  it("injects exactly what the host injects — the published set, no more", () => {
+    // Set-checked rather than counted: a capture harness with one extra name
+    // photographs a colour no property will ever get, and one missing name
+    // photographs a fallback the property would never fall back to. Either way
+    // the frame beside the capture stops meaning what it claims.
+    const css = readFileSync(join(root, "preview", "tokens.css"), "utf8");
+    const injected = new Set<string>();
+    for (const match of css.matchAll(/^\s*--([a-z0-9-]+)\s*:/gm)) {
+      const name = match[1];
+      if (name !== undefined) injected.add(name);
+    }
+
+    expect([...injected].sort()).toEqual([...TOKEN_NAMES].sort());
+    expect(injected.size).toBe(17);
+  });
+
   it("names only tokens the shell publishes", () => {
     const published = new Set<string>([...TOKEN_NAMES, "font-sans"]);
     const unknown = [...referenced()].filter((name) => !published.has(name));
