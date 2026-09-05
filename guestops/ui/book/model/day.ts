@@ -55,7 +55,15 @@ export interface Chip {
  */
 export interface Tag {
   kind: "mark" | "lock" | "pill" | "link" | "text";
-  tone: Mark | "ok" | "warn" | "neutral";
+
+  /**
+   * `bad` is here because two things need it and they are not the same thing:
+   * a **pill** for a state that is over or overdue, and a **lock** for a value
+   * the platform cannot establish. Both are refusals of a kind, and giving them
+   * one tone keeps a screen from having two reds that mean different things.
+   */
+  tone: Mark | "ok" | "warn" | "neutral" | "bad";
+
   text: string;
 }
 
@@ -101,7 +109,16 @@ export interface DayRow {
   /** `31 Aug → 2 Sep`, or the day-use form `31 Aug · day use`. */
   nights: string;
 
-  chips: readonly Chip[];
+  /**
+   * What the row carries at its right.
+   *
+   * `Tag`, not `Chip`, because frame 11 mixes them: `override` is a **mark**
+   * saying where a value came from, and `confirmed 15:44` is a **pill** saying
+   * what state the row is in. They are drawn differently on purpose
+   * (`chrome/marks.ts`), and a single kind here would force one to wear the
+   * other's shape.
+   */
+  chips: readonly Tag[];
 }
 
 /** One tab of the day, with the count the tab carries. */
@@ -118,14 +135,60 @@ export interface Stat {
   label: string;
 }
 
-/** The front desk day — gold frame 1. */
+/**
+ * Something that has stopped arriving — gold frame 11.
+ *
+ * **Per capability, and it gates nothing.** A connector can be authenticated,
+ * polling and green while check-ins specifically have stopped (R27), so the
+ * banner names *what* is late rather than declaring the feed down. And it
+ * changes no rule: the property is PMS-writes-first at all times, so an
+ * override means one thing in every condition and the screen always says the
+ * same true thing — **your action stands** (S36, GUEST-Q4).
+ */
+export interface Staleness {
+  /** `PMS feed silent since 09:00 — your entries stand.` */
+  headline: string;
+
+  /** What is late, and what is still arriving. */
+  detail: string;
+}
+
+/** The front desk day — gold frames 1 and 11. */
 export interface Today {
   businessDate: string;
   rollsAt: string;
+
+  /** Null when everything the property expects is arriving. */
+  stale: Staleness | null;
 
   /** Decides the mode sentence: Opera writes the lifecycle, or this is the book. */
   connected: boolean;
 
   stats: readonly Stat[];
   lists: readonly DayList[];
+}
+
+/**
+ * The book being filled for the first time — gold frame 13.
+ *
+ * **GuestOps's first day is not an empty book.** The Integration Hub has been
+ * normalising reservation and guest facts since the connector shipped and
+ * holding them *deferred*, with their business date and provenance, precisely
+ * because this domain did not exist to own them (ADR 0128). Installing this
+ * application is what turns that queue on.
+ *
+ * **The empty state that would be wrong here is the usual one** — *no
+ * reservations yet, create your first booking* — on a property with two
+ * thousand of them waiting.
+ */
+export interface FirstRun {
+  /** `Bringing in what Opera already sent`. */
+  headline: string;
+
+  /** `2 314 reservations and 1 806 guests`, and since when. */
+  what: string;
+  since: string;
+
+  /** What the desk may do while it runs. */
+  reassurance: string;
 }

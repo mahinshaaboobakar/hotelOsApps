@@ -22,7 +22,7 @@
 
 import type { DayRow } from "../../book/model";
 import { control, el, fill } from "../../chrome/element";
-import { mark } from "../../chrome/marks";
+import { tags } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const;
 
@@ -82,7 +82,7 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
   );
 
   const chips = el("div");
-  fill(chips, ...row.chips.map(mark));
+  fill(chips, ...tags(row.chips));
 
   element.append(
     name,

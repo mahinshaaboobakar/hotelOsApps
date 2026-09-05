@@ -60,7 +60,10 @@ function one(tag: Tag): HTMLElement {
   }
 
   if (tag.kind === "lock") {
-    return el("span", "lock", tag.text);
+    // A lock naming something the platform cannot do is bad-toned — frames 4,
+    // 6, 7 and 16. It is still a lock rather than a pill, because what it says
+    // is *how this value was established*: by nothing.
+    return el("span", tag.tone === "bad" ? "lock no" : "lock", tag.text);
   }
 
   if (tag.kind === "pill") {

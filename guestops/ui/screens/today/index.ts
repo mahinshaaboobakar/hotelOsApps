@@ -13,7 +13,9 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { load, recordedToday, type DayRow, type Stat, type Today } from "../../book";
+import {
+  load, recordedToday, type DayRow, type Stat, type Staleness, type Today,
+} from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { standIn } from "../../chrome/marks";
 import { tabs } from "../../chrome/panel";
@@ -83,6 +85,13 @@ export async function today(
   fill(
     body,
     loaded.live ? null : standIn(loaded.because),
+
+    // **Above everything, and it gates nothing** (S36, GUEST-Q4, R27). It says
+    // what is late rather than declaring the feed down, because a connector can
+    // be authenticated, polling and green while one capability has stopped —
+    // and it changes no rule on the screen below it.
+    day.stale === null ? null : stale(day.stale),
+
     strip(day.stats, showing?.label ?? "", day),
     views,
     table(showing?.rows ?? [], open),
@@ -120,6 +129,26 @@ function strip(stats: readonly Stat[], showing: string, day: Today): HTMLElement
 
   element.append(context(day));
   return element;
+}
+
+/**
+ * What has stopped arriving.
+ *
+ * Warning-toned, which is this application's plain `.ban`: it is a condition to
+ * be aware of and not a refusal. The desk's entries stand either way, and the
+ * headline says so before it says anything about the feed.
+ */
+function stale(what: Staleness): HTMLElement {
+  const banner = el("div", "ban");
+  const text = el("div");
+
+  text.append(
+    el("b", undefined, what.headline),
+    el("span", "why", what.detail),
+  );
+
+  banner.append(text);
+  return banner;
 }
 
 /** The business day, pushed right — Jobs' board carries its date here. */

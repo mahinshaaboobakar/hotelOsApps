@@ -48,16 +48,22 @@
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import {
-  recordedAttention, recordedRegistration, recordedToday, recordedWalkIn,
+  recordedAttention,
+  recordedFirstRun,
+  recordedRegistration,
+  recordedToday,
+  recordedWalkIn,
 } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
+import { firstRun } from "./screens/firstrun";
 import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
 import { registration } from "./screens/registration";
+import { setup } from "./screens/setup";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
 import { walkIn } from "./screens/walkin";
@@ -78,13 +84,27 @@ interface Place {
     | "Attention"
     | "Stay"
     | "Booking"
-    | "NewBooking";
+    | "NewBooking"
+    | "Setup";
 
   list: string;
   tab: string;
 
   /** Which booking the Booking screen is showing. */
   bookingId: string;
+
+  /** Which section of Setup is showing. */
+  section: string;
+
+  /**
+   * True while the property's book is being brought in — frame 13.
+   *
+   * A **state of the installation**, not a screen: it replaces the whole main
+   * area whatever the bar says, because there is nothing else to look at until
+   * the replay has produced today's arrivals. It is here rather than in a
+   * screen for that reason.
+   */
+  filling: boolean;
 
   /**
    * The overlay standing over whatever screen is drawn, if any.
@@ -126,6 +146,12 @@ const OPERATOR = { name: "Anitha Menon", where: "Front Office · Avenue Regent" 
  */
 export interface Opening {
   overlay?: "registration" | undefined;
+
+  /**
+   * Frame 13, which the product reaches by being installed on a property whose
+   * Hub is holding a queue — a condition no click produces.
+   */
+  filling?: boolean | undefined;
 }
 
 /**
@@ -151,7 +177,9 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     tab: "Overview",
     page: 0,
     bookingId: "",
+    section: "Registration",
     overlay: opening?.overlay ?? null,
+    filling: opening?.filling ?? false,
   };
 
   function show(next: Partial<Place>): void {
@@ -162,7 +190,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     const main = el("div", "main");
 
     frame.append(
-      bar(items(), lit(where.screen), OPERATOR, (label) =>
+      bar(items(where.filling), lit(where.screen), OPERATOR, (label) =>
         show({
           screen: label as Place["screen"],
           list: "Arrivals",
@@ -177,6 +205,19 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
   }
 
   function draw(main: HTMLElement): void {
+    // Before anything else: until the book is in, every screen would be a
+    // truthful drawing of an empty hotel, which is the one wrong thing to show
+    // a property with two thousand reservations waiting.
+    if (where.filling) {
+      main.replaceChildren(firstRun(recordedFirstRun));
+      return;
+    }
+
+    if (where.screen === "Setup") {
+      void setup(host, main, where.section, (section) => show({ section }));
+      return;
+    }
+
     // The sheet stands over whatever screen is drawn, so it is appended after
     // the screen rather than instead of it — frame 10 is the day, dimmed, with
     // the walk-in on top of it.
@@ -280,12 +321,37 @@ export const activate: Activate = (host: HostApi): HostedModule => start(host);
  * claim a number the list does not show. When the client lands they arrive
  * through the same seam.
  */
-function items(): readonly BarItem[] {
+function items(filling: boolean): readonly BarItem[] {
+  if (filling) {
+    // **Every count is `—` while the book is being brought in**, and that dash
+    // is not decoration. On install day nothing has been counted yet, so a real
+    // figure would be a number nobody produced — and a `0` would be worse,
+    // because it says the hotel is empty. The dash says *this counts something
+    // and the number is not established*, which is exactly the state.
+    //
+    // Setup keeps no count at all, because it counts nothing in any condition.
+    return [
+      { label: "Today", count: "—" },
+      { label: "Bookings", count: "—" },
+      { label: "Guests", count: "—" },
+      { label: "Attention", count: "—" },
+      { label: "Setup" },
+    ];
+  }
+
   return [
     { label: "Today", count: recordedToday.businessDate.split(" ").slice(1).join(" ") },
     { label: "Bookings", count: "218" },
     { label: "Guests", count: "1 904" },
     { label: "Attention", count: String(recordedAttention.length), attention: true },
+
+    // **Five entries, where frame 16 draws four.** That frame shows Setup in
+    // Attention's place, which no other frame does — it is the only one drawn
+    // for a general manager, and dropping Attention to match it would remove
+    // the entry every other frame carries. Added rather than swapped, and
+    // reported: a bar whose entries change with who is signed in is a real
+    // design question and not one this build should answer by inference.
+    { label: "Setup" },
   ];
 }
 

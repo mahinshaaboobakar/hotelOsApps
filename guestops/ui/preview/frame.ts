@@ -35,8 +35,10 @@ import {
   recordedRequestsAlone,
   recordedServicing,
   recordedServicingAlone,
+  recordedSetup,
   recordedStay,
   recordedToday,
+  recordedTodayConnected,
 } from "../book";
 
 /**
@@ -58,7 +60,10 @@ function host(granted: readonly string[]): HostApi {
 
     call(capability: string, method: string): Promise<unknown> {
       const answers: Record<string, unknown> = {
-        today: recordedToday,
+        // `?connected` is frame 11 — the same screen with a late feed, which
+        // is a fact about the property rather than a route.
+        today: connected ? recordedTodayConnected : recordedToday,
+        setup: recordedSetup,
         attention: recordedAttention,
         stay: recordedStay,
         bookings: recordedBookings,
@@ -100,16 +105,24 @@ const alone = params.get("alone") === "true";
 /** Frame 9's incomplete booking. */
 const group = params.get("group") === "true";
 
+/** Frame 11 — PMS-connected, with check-ins late. */
+const connected = params.get("connected") === "true";
+
 const granted = params.get("granted") === "none"
   ? []
-  : ["reservation.read", "stay.override", "registration.capture", "request.handle"];
+  : ["reservation.read", "stay.override", "registration.capture", "request.handle",
+    "desk.configure"];
 
 // The one state with no built route — see `Opening`. Everything else is
 // reached by clicking, because a capture of a state the application cannot be
 // put into would be a photograph of nothing a property will ever see.
 start(
   host(granted),
-  screen === "registration" ? { overlay: "registration" } : {},
+  screen === "registration"
+    ? { overlay: "registration" }
+    : screen === "firstrun"
+      ? { filling: true }
+      : {},
 ).mount(document.body);
 
 /** Click the first element matching `selector` whose text contains `text`. */
@@ -199,6 +212,7 @@ const PATHS: Record<string, readonly Step[]> = {
     { selector: ".tabs .tab", text: "Payment" },
   ],
   bookings: [{ selector: ".head .tab", text: "Bookings" }],
+  setup: [{ selector: ".head .tab", text: "Setup" }],
   walkin: [{ selector: ".tabs .btn", text: "Walk-in" }],
 
   newbooking: [

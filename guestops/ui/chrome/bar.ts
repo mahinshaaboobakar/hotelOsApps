@@ -27,7 +27,15 @@ import { control, el } from "./element";
 /** One bar entry: what it says, and what it counts. */
 export interface BarItem {
   label: string;
-  count: string;
+
+  /**
+   * What the section holds, where that is a number.
+   *
+   * Optional, because Setup counts nothing — it is configuration, not a list.
+   * A `0` or a `—` there would be a figure nobody produced, in the one place a
+   * receptionist glances to see whether anything needs them.
+   */
+  count?: string;
 
   /** True for Attention, which counts in the warning colour. */
   attention?: boolean;
@@ -67,7 +75,10 @@ export function bar(
       () => go(item.label),
     );
 
-    button.append(el("span", item.attention === true ? "n att" : "n", item.count));
+    if (item.count !== undefined) {
+      button.append(el("span", item.attention === true ? "n att" : "n", item.count));
+    }
+
     element.append(button);
   }
 

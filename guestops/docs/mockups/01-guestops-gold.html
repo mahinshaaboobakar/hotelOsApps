@@ -197,6 +197,9 @@
      that used to be here was this application's own invention. */
   .tr.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
   .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
+  /* Added 2026-09-05, APPS-Q4 group 3: the seven-column stays grid the union
+     above needs. Matches the module's own `.tr.stays` exactly. */
+  .tr.stays{grid-template-columns:1.4fr .9fr 1fr .5fr 1fr .8fr 1.1fr}
   .un{color:var(--faint);font-style:italic}
   /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
      No page numbers and no total: PageResponse carries next_cursor and
@@ -887,9 +890,16 @@
     </div>
     <div class="body">
       <div class="tbl">
-        <div class="tr list hd"><div>Guest</div><div>Stay</div><div>Room type</div><div>Dates</div><div>Status</div><div></div></div>
-        <div class="tr list sel"><div class="nm"><b>Fatima Sheikh</b></div><div>01J9M…22B1</div><div>Executive Suite</div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div></div></div>
-        <div class="tr list"><div class="nm"><b class="un">Not yet named</b></div><div>01J9M…22B2</div><div>Deluxe King</div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div><span class="sh miss">party unnamed</span></div></div>
+        <!-- Amended 2026-09-05, APPS-Q4 group 3: the STAYS table takes the union of
+             frames 8 and 9. This frame drew no Room column and the other drew no
+             Stay, on what is one screen — the drawing contradicting itself rather
+             than the build diverging from it. Architect ruling: the union is the
+             honest reading, because a receptionist wants the room and the
+             cancellation dialog has to name individual stays, and each frame gains a
+             column while losing none. Seven columns, and .tr.stays is the grid. -->
+        <div class="tr list stays hd"><div>Guest</div><div>Stay</div><div>Room type</div><div>Room</div><div>Dates</div><div>Status</div><div></div></div>
+        <div class="tr list stays sel"><div class="nm"><b>Fatima Sheikh</b></div><div>01J9M…22B1</div><div>Executive Suite</div><div></div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div></div></div>
+        <div class="tr list stays"><div class="nm"><b class="un">Not yet named</b></div><div>01J9M…22B2</div><div>Deluxe King</div><div></div><div>3 Sep → 7 Sep</div><div><span class="pill neu">Booked</span></div><div><span class="sh miss">party unnamed</span></div></div>
       </div>
       <div class="scrim mid">
         <div class="dlg">
@@ -934,10 +944,17 @@
     <div class="body">
       <div class="ban info"><div><b>1 of 3 rooms known.</b> Opera says this booking is for three rooms and has sent one. The other two have not arrived — they may arrive in minutes, tomorrow, or never.</div></div>
       <div class="tbl">
-        <div class="tr hd"><div>Guest</div><div>Room type</div><div>Room</div><div>Dates</div><div>Status</div><div></div></div>
-        <div class="tr sel">
+        <!-- Amended 2026-09-05, APPS-Q4 group 3: the STAYS table takes the union of
+             frames 8 and 9. This frame drew no Stay column and the other drew no
+             Room, on what is one screen — the drawing contradicting itself rather
+             than the build diverging from it. Architect ruling: the union is the
+             honest reading, because a receptionist wants the room and the
+             cancellation dialog has to name individual stays, and each frame gains a
+             column while losing none. Seven columns, and .tr.stays is the grid. -->
+        <div class="tr list stays hd"><div>Guest</div><div>Stay</div><div>Room type</div><div>Room</div><div>Dates</div><div>Status</div><div></div></div>
+        <div class="tr list stays sel">
           <div class="nm"><b>Rajesh Pillai</b><span>party of 2</span></div>
-          <div>Deluxe King</div><div>214</div><div>31 Aug → 4 Sep</div><div><span class="pill ok">In house</span></div>
+          <div>01J9K…7F3A</div><div>Deluxe King</div><div>214</div><div>31 Aug → 4 Sep</div><div><span class="pill ok">In house</span></div>
           <div><span class="sh ovr"><i></i>override</span><span class="sh dis"><i></i>disagrees</span></div>
         </div>
       </div>

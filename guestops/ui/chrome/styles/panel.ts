@@ -40,6 +40,8 @@ export const PANEL = `
 /* Two equal columns, where neither side is the subordinate one — frames 5
    and 7 put a panel we own beside a panel we only report. */
 .cols.even{grid-template-columns:1fr 1fr}
+/* A column of rows inside a card body that is itself two columns. */
+.stack{display:flex;flex-direction:column;gap:11px}
 /* Three equal cards — frame 9's facts about a group. Not the two-column
    grid, because these are peers with no principal among them: that grid is
    1.55fr/1fr and says one side is the subject. */
@@ -73,6 +75,12 @@ export const PANEL = `
 .empty b{font-size:13.5px}
 .empty p{margin:0;font-size:12.5px;line-height:1.7;color:var(--color-ink-faint,#5a6172)}
 .empty p b{color:var(--color-ink-muted,#8b93a7)}
+/* The second paragraph, which is reassurance rather than fact. */
+.empty p.quiet{color:var(--color-ink-faint,#5a6172);opacity:.85}
+/* Frame 13 fills the window: the book is being built and there is nothing
+   else to look at. */
+.main>.empty{margin:auto;padding:60px 20px;gap:14px}
+.main>.empty b{font-size:16px}
 /* One cell per night — frame 6. \`grid-auto-columns\`, not the drawing's
    \`repeat(5,1fr)\`: five is that stay's night count plus its arrival, not a
    constant, and a two-night stay laid out in five columns would leave three

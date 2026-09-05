@@ -18,5 +18,7 @@ export * from "./availability";
 export * from "./booking";
 export * from "./day";
 export * from "./registration";
+export * from "./connected";
+export * from "./setup";
 export * from "./stay";
 export * from "./tabs";
