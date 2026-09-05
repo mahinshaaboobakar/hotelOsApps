@@ -22,6 +22,12 @@
  * control names come from `PAGER_LABELS` so two realms cannot name them
  * differently.
  *
+ * # It is the list's floor, and it draws on one page
+ *
+ * §6 as ruled 2026-09-05: the list grows and the strip sticks, so the control
+ * is at the bottom whether the list is three rows or a full page. The
+ * placement is in `chrome/styles.ts`; what is here is what it says.
+ *
  * # One drawing, because Workforce has one pattern
  *
  * Only the paged one is here. The cursor drawings — *Previous · Next* and
@@ -39,21 +45,43 @@ import { el } from "./element";
  * Draw the pager, or nothing when there is nothing to page.
  *
  * @param paging the server's own numbers — page, the size applied, the total
+ * @param shown how many rows the screen actually received
  * @param go called with a 0-based page
- * @returns the row, or null when the list fits on one page
+ * @returns the row, or null when the list is empty
  */
-export function pager(paging: Paging, go: (page: number) => void): HTMLElement | null {
-  const view = pagedView(paging);
+export function pager(
+  paging: Paging, shown: number, go: (page: number) => void,
+): HTMLElement | null {
+  // **The range counts the rows that ARE there** — §6, and the reason the SDK
+  // takes `shown`: `(page + 1) * pageSize` agrees on every full page and lies
+  // exactly where it matters. A short page — the last one, a server that
+  // clamped, a fixture that samples — was described by the size that had been
+  // ASKED for. GuestOps said "showing 1–25 of 218" over nine visible rows.
+  const view = pagedView(paging, shown);
 
-  // **Absent, not disabled.** A pager over a list that fits is a control that
-  // cannot be operated and a row of space that says nothing — and on the first
-  // run it would sit under an empty state promising pages of nothing.
-  if (view.empty || view.pages <= 1) return null;
+  // **It draws on a single page too** — §64 §6, ruled 2026-09-05, and this
+  // module had the behaviour that ruling rejects.
+  //
+  // The old argument here was that a disabled page button can never do
+  // anything. True of the BUTTONS and false of the COUNT, and the count is the
+  // information: *showing 1–14 of 14* tells a supervisor the list in front of
+  // them is the whole list, which they cannot infer from a list that simply
+  // stops. The buttons stay, disabled, because a pager that changes shape
+  // between one page and two is two controls.
+  //
+  // An EMPTY property is still nothing: `view.empty` is total zero, where the
+  // screen draws its first run and a pager would sit under an empty state
+  // promising pages of nothing. §6's empty case is an empty PAGE of a list that
+  // has rows elsewhere, which is a different sentence.
+  if (view.empty) return null;
 
   const row = el("div", "pager");
 
-  row.append(el("div", "showing",
-    `Showing ${view.from}–${view.to} of ${paging.total}`));
+  // A page of a non-empty list that holds nothing says so, rather than
+  // describing rows that are not there.
+  row.append(el("div", "showing", view.barren
+    ? `No rows on this page · ${paging.total} in the list`
+    : `Showing ${view.from}–${view.to} of ${paging.total}`));
 
   const nav = el("div", "pnav");
   nav.append(step("‹", PAGER_LABELS.previousPage, view.hasPrevious,

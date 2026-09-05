@@ -264,8 +264,42 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 /* Pinned under the list rather than inside it — §5. The body scrolls; this
    does not, so the control that turns the page is never the thing a reader has
    to scroll to the bottom to find. */
+/* **The pager is the list's floor** — §64 §6, ruled 2026-09-05.
+   Both halves, because neither works alone: the list GROWS to take the free
+   space so a short list still puts the pager at the bottom, and the pager
+   STICKS so a full page does not hide it behind a scroll. Growth alone
+   distributes free space and a full page has none.
+   Scoped with :has(~ .pager) — a list WITH a pager — and never .rows{flex:1},
+   which would say something else and be wrong on the next screen that puts a
+   note under its table. */
+/* **GROW, never shrink** — and this is one token off section 6 snippet, reported to
+   FF rather than forked quietly.
+   §6 writes flex:1 1 auto;min-height:0. The shrink half does none of the work
+   the prose describes (*the list GROWS to take the free space*), and in a body
+   that is itself a constrained scroll container it does harm: measured here,
+   a full page shrank the list to 304px against 1353px of content, and .rows
+   does not clip — so 1048px of rows rendered underneath the note and the pager.
+   flex:1 0 auto grows into free space and refuses to shrink below the content,
+   which is what the ruling says in words. */
+.rows:has(~ .pager){flex:1 0 auto;min-height:0}
+/* The negative margins are not a flourish: a sticky footer inside a body with
+   its own padding sits inset while stuck and jumps back when the list ends.
+   These cancel .body's 22px 26px and re-supply it here, so the strip is
+   full-width and still. The background is the published token and never a
+   literal — a hardcoded colour is a dark-theme decision frozen into a module a
+   light property also runs (§1). The cost, stated: an opaque strip covers the
+   last ~34px of the list while scrolling, which is the trade for never hunting
+   for the control. */
 .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
-       flex:0 0 auto;padding:11px 26px;font-size:12px;
+       /* bottom matches the negative bottom margin — the second token off
+          section 6 snippet, and the same report to FF. Sticky resolves bottom
+          against the container PADDING box, so with .body padded 22px the
+          strip parks 22px short of the floor and rows scroll through the
+          gap: measured, pager bottom 598 against a body bottom of 620. Matching
+          the inset to the margin puts the border box flush at 620. */
+       position:sticky;bottom:-22px;flex:0 0 auto;
+       background:var(--color-surface,#0b0d14);
+       margin:0 -26px -22px;padding:10px 30px 22px;font-size:12px;
        border-top:1px solid var(--color-line,rgb(255 255 255/.07));
        color:var(--color-ink-faint,#5a6172)}
 .pager .pnav{display:flex;align-items:center}

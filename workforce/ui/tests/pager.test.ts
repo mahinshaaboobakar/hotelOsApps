@@ -90,11 +90,60 @@ describe("the People pager", () => {
     expect(arrows.map((one) => one.hasAttribute("disabled"))).toEqual([true, false]);
   });
 
-  it("is absent over a list that fits", async () => {
+  it("draws on a single page, with the arrows disabled", async () => {
+    // §6, ruled 2026-09-05. This module returned nothing for one page, on the
+    // argument that a disabled button can never do anything — true of the
+    // BUTTONS and false of the COUNT. "Showing 1–6 of 6" tells a supervisor the
+    // list in front of them is the whole list, which they cannot infer from a
+    // list that simply stops.
+    const root = await people({
+      ...recordedPeople,
+      postings: recordedPeople.postings.slice(0, 6),
+      paging: { page: 0, pageSize: 25, total: 6 },
+    });
+
+    expect(root.querySelector(".pager .showing")?.textContent)
+      .toBe("Showing 1–6 of 6");
+
+    const arrows = Array.from(root.querySelectorAll<HTMLElement>(".pager .pg"))
+      .filter((one) => one.hasAttribute("aria-label"));
+
+    expect(arrows).toHaveLength(2);
+    expect(arrows.every((one) => one.hasAttribute("disabled"))).toBe(true);
+  });
+
+  it("counts the rows that are there, not the size that was asked for", async () => {
+    // The defect the rule was written from: a page that comes back SHORT was
+    // described by the size requested. GuestOps said "showing 1–25 of 218" over
+    // nine visible rows — a range nobody could check by counting.
+    const root = await people({
+      ...recordedPeople,
+      postings: recordedPeople.postings.slice(0, 9),
+      paging: { page: 0, pageSize: 25, total: 218 },
+    });
+
+    expect(root.querySelector(".pager .showing")?.textContent)
+      .toBe("Showing 1–9 of 218");
+  });
+
+  it("says so on a page of a full list that holds nothing", async () => {
+    const root = await people({
+      ...recordedPeople,
+      postings: [],
+      paging: { page: 3, pageSize: 25, total: 42 },
+    });
+
+    // Not a range over rows that are not there.
+    expect(root.querySelector(".pager .showing")?.textContent)
+      .toBe("No rows on this page · 42 in the list");
+  });
+
+  it("is absent over an EMPTY property", async () => {
     const root = await people(recordedFirstRun);
 
-    // Not a disabled row of one under an empty state promising pages of
-    // nothing. The screen draws its first run and the pager draws nothing.
+    // §6's single-page rule is about a list of rows; this is a property with
+    // none. The screen draws its first run, and a pager promising pages of
+    // nothing would be furniture under it.
     expect(root.querySelector(".pager")).toBeNull();
     expect(root.querySelector(".first")).not.toBeNull();
   });

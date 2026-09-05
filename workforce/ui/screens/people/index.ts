@@ -55,17 +55,17 @@ export async function people(
 
   body.append(ownership());
 
-  // **Outside the body, which scrolls.** §5: the list viewport scrolls within
-  // the screen and the pager does not move. Inside it, the control that turns
-  // the page is the one thing a reader has to scroll to the bottom to reach —
-  // and on a full page it is off the screen entirely, which is how the first
-  // capture of this found it.
+  // **Inside the body, as the list's floor** — §6 as ruled 2026-09-05.
   //
-  // It draws nothing when the list fits, rather than a disabled row of one.
-  const pages = pager(board.paging, onPage);
+  // This was a sibling of the body, pinned below the scroll, which kept it in
+  // view and cost the strip its place in the list. The ruled treatment gets the
+  // same outcome from the list growing and the strip sticking, and it is the
+  // one every application now draws: `.rows:has(~ .pager)` needs the two to be
+  // siblings, which is what putting it here is for.
+  const pages = pager(board.paging, board.postings.length, onPage);
+  if (pages !== null) body.append(pages);
 
-  main.replaceChildren(
-    ...[header(board, ending), body, pages].filter((one) => one !== null));
+  main.replaceChildren(header(board, ending), body);
 
   // Ending a posting closes team memberships with it, and until this dialog
   // existed nothing said so — the round's finding, drawn.
