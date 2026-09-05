@@ -145,29 +145,24 @@ builder.Services.AddHealthChecks()
 // the interceptor that maps a domain failure to a status code. None of it is
 // reimplemented here — CLAUDE.md §"No duplicated shared code" makes no
 // exception for an installed application.
-// The token validator the module envelope needs — SHELL-Q38, and the idiom
-// hello-hotel demonstrates. Without it `MapWorkforceModule` refuses to start,
-// which is the fix behaving correctly: a missing registration is a boot fault
-// and not a per-request one.
-builder.Services.AddPlatformAuthentication(
-    serviceRoot: platform.CertificateDirectory,
-    identityEndpoint: new Uri(
-        builder.Configuration["Services:Identity:Endpoint"]
-            ?? throw new InvalidOperationException(
-                "Services:Identity:Endpoint is required: a validator with no authority "
-                + "endpoint cannot refresh signing keys")),
-    natsUrl: builder.Configuration["Nats:Url"] ?? "nats://127.0.0.1:4222",
-    configuration: builder.Configuration);
-
-builder.Services.AddHotelOsPlatform<WorkforceDbContext>(
-    serviceName: "workforce",
-    kernelEndpoint: platform.KernelEndpoint,
-    certificateDirectory: platform.CertificateDirectory);
-
-// Which property this installation serves. Registered rather than looked up:
-// an application serves exactly one, and the shift fan-out's sweep acts under
-// this application's own service identity, which has no request to take it from.
-builder.Services.AddSingleton(platform);
+// **One call, from what the Kernel told this application** — SHELL-Q40 §3 and
+// ADR 0133, whose closing invariant is the whole reason this file no longer
+// names a port, an endpoint, an issuer or a bus:
+//
+//   *installed applications never define their own topology, listener ports, or
+//   platform service addresses — the Kernel composes topology; the SDK
+//   materializes it.*
+//
+// This file used to reach for `Services:Identity:Endpoint` and `Nats:Url` out of
+// configuration nothing sets for a package, which is the boot GG measured and
+// SHELL-Q40 closed. Identity is now DISCOVERED through the Kernel, the bus and
+// both doors are TOLD in the environment, and issuer and audience are platform
+// constants rather than anything an application carries.
+//
+// It also registers `platform` itself, which the shift fan-out's sweep needs:
+// it acts under this application's own service identity and has no request to
+// take a property from.
+builder.Services.AddHotelOsApplication<WorkforceDbContext>(platform);
 
 // Master Data, read-only — CLAUDE.md: *"applications may read master data"*.
 //
@@ -231,28 +226,38 @@ builder.Services.AddScoped<PendingRequestsSummary>();
 builder.Services.AddScoped<ComingUpSummary>();
 builder.Services.AddScoped<OnLeaveSummary>();
 
-// The listener resolves this application's identity eagerly and refuses to
-// start without one. That is the property worth having: an installed package
-// with no certificate must not open a port at all, rather than open one and
-// authenticate nobody.
-builder.Host.UsePlatformListener(
-    builder.Configuration.GetValue("Service:Port", 50061),
-    platform.CertificateDirectory);
+// **Two doors, and the SDK binds both from the environment** — SHELL-Q40 §4,
+// ADR 0133. It still resolves this application's identity eagerly and refuses
+// to start without one, which is the property worth having: an installed
+// package with no certificate must not open a port at all.
+builder.Host.UseApplicationListeners(platform);
 
 var app = builder.Build();
 
-app.MapGrpcService<WorkforceGrpcService>();
+// **Which surface answers is decided by which door a connection arrived at**,
+// not by its path — SHELL-Q40 §3's sharpening, and the reason this is a
+// structural call rather than two `Map` lines. ASP.NET routes by path across
+// every listener, so an unbranched mapping would publish the whole gRPC API on
+// the plaintext loopback door. Neither pin is this file's to remember.
+app.MapApplicationDoors(
+    platform,
+    platformApi: door => door.MapGrpcService<WorkforceGrpcService>(),
+    packagedUi: door =>
+    {
+        // **The surface this application serves to its own packaged UI** —
+        // design page 63 §3, one `MapModuleCapability` per capability the
+        // screens call. The Shell forwards a bundle's `host.call` to
+        // `/module/{capability}/{method}`; the SDK validates the person's token
+        // and checks they hold the capability in this property before any
+        // handler runs.
+        door.MapWorkforceModule();
 
-// **The surface this application serves to its own packaged UI** — design page
-// 63 §3, and the one line per capability the envelope asks for.
-//
-// The Shell forwards a bundle's `host.call` to `/module/{capability}/{method}`;
-// the SDK validates the person's token and checks they hold the capability in
-// this property before any handler runs. Neither check is this application's to
-// remember, which is what the envelope carrying them is for.
-app.MapWorkforceModule();
-
-app.MapHealthChecks("/health");
+        // What install step 8 probes, on the door the Kernel actually dials.
+        // Plain HTTP rather than gRPC health, because the probe runs before the
+        // Kernel has reason to trust this process and a liveness check should
+        // need nothing but a socket.
+        door.MapHealthChecks("/health");
+    });
 
 app.Run();
 

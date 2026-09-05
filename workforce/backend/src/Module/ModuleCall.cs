@@ -8,26 +8,18 @@ namespace HotelOS.Workforce.Module;
 /// What every capability handler is given: the call, and a scope to serve it in.
 /// </summary>
 /// <remarks>
-/// <para>
-/// <b>The envelope hands a handler no service provider.</b>
-/// <c>ModuleEnvelope.MapModuleCapability</c> passes the method, the body, the
-/// caller and the request scope — everything about the <i>call</i> and nothing
-/// about the <i>container</i>. So an application that needs a DbContext has to
-/// capture the root provider and open a scope of its own, and every application
-/// will write that same line. It is written once here.
-/// </para>
-/// <para>
-/// This is reported as a redline rather than worked around quietly: the
-/// envelope's own reasoning is that a check an author must remember is a check
-/// that will be forgotten, and <i>resolving a scoped service from the root
-/// provider</i> is exactly that shape — it works on the desk it was written at
-/// and leaks a DbContext across requests in production.
-/// </para>
+/// <b>The scope is the request's, handed over by the envelope</b> —
+/// <c>SHELL-Q40</c> §3. This record used to carry a provider this application
+/// had opened itself, because the envelope passed none and an application that
+/// resolved a scoped <c>DbContext</c> from the root would work on the desk it
+/// was written at and share one context across every concurrent request. That
+/// is the platform's again, so <see cref="Services"/> is simply what the call
+/// arrived with.
 /// </remarks>
 /// <param name="Method">The application's own verb.</param>
 /// <param name="Body">The bundle's JSON, or null when it sent none.</param>
 /// <param name="Scope">Who is asking, and where. Never read from the body.</param>
-/// <param name="Services">This call's own container scope.</param>
+/// <param name="Services">The request's own scope.</param>
 public sealed record ModuleCall(
     string Method,
     JsonElement? Body,
