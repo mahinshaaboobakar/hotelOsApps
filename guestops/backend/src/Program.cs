@@ -1,6 +1,7 @@
 using HotelOS.GuestOps.Application;
 using HotelOS.GuestOps.Grpc;
 using HotelOS.GuestOps.Infrastructure;
+using HotelOS.GuestOps.Module;
 using HotelOS.GuestOps.Infrastructure.Platform;
 using Wire = HotelOS.Contracts.Integration.V1;
 using HotelOS.GuestOps.Events;
@@ -130,6 +131,14 @@ builder.Services.AddGrpc(options =>
 var app = builder.Build();
 
 app.MapGrpcService<GuestOpsGrpcService>();
+
+// The one route this application's own bundles reach — `SHELL-Q37`. Their
+// realm has `default-src 'none'`, so a screen's `host.call` travels over a
+// MessagePort to the Shell and arrives here. The session token is validated
+// and the capability checked inside `MapModuleCapability`, not beside it:
+// an application that had to remember either would work perfectly on the desk
+// it was written at, which is the failure with no error anywhere.
+app.MapGuestOpsModule();
 
 // What install step 8 probes. Plain HTTP rather than gRPC health, because the
 // probe runs before the Kernel has any reason to trust this process and a
