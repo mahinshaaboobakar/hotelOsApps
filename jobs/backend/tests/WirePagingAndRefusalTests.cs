@@ -58,7 +58,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Equal(0, first.Paging.Page);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task Pagination_walks_past_the_first_page_lands_on_the_boundary_and_ends_empty()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -83,7 +83,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Equal(25, seen.Distinct().Count());
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_list_that_grows_while_you_are_on_page_two_reports_the_new_total()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -100,7 +100,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Equal(3, again.Jobs.Count);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_filter_that_matches_nothing_returns_nothing_and_says_so_in_the_total()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -142,7 +142,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Contains("stay_id", guest.Status.Detail, StringComparison.Ordinal);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task Two_edits_to_one_job_and_the_second_surfaces_the_conflict()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -167,7 +167,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Equal("P1", after.Job.Priority);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_job_that_does_not_exist_and_one_of_another_property_are_both_not_found()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -187,7 +187,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         Assert.Equal(StatusCode.NotFound, elsewhere.StatusCode);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_permission_the_caller_does_not_hold_is_refused_by_the_service()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -201,10 +201,16 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         }).ResponseAsync);
 
         Assert.Equal(StatusCode.PermissionDenied, refusal.StatusCode);
-        Assert.Contains("job.create", refusal.Status.Detail, StringComparison.Ordinal);
+
+        // "permission denied", and deliberately not which permission or which
+        // resource — the interceptor withholds both, because they are what an
+        // attacker probes for. This row expected the name until it was first
+        // run, which is what a held row costs.
+        Assert.Equal("permission denied", refusal.Status.Detail);
+        Assert.DoesNotContain("job.create", refusal.Status.Detail, StringComparison.Ordinal);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_restart_loses_nothing_the_backend_owned()
     {
         var propertyJobs = new List<string>();

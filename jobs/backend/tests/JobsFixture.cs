@@ -1,3 +1,4 @@
+using Npgsql;
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Jobs.Infrastructure;
@@ -137,6 +138,13 @@ public sealed class JobsFixture : IAsyncLifetime
         // it — not `EnsureCreated`. A schema built from the model rather than
         // from the migration is a schema no property will ever have, and it
         // would hide precisely the defect a migration review looks for.
+        // The platform's shared outbox, from the Kernel's own migrations. An
+        // installed application cannot provision this and does not try; the
+        // suite does, because a job that is raised appends an event in the same
+        // transaction and a round that could not write one would be proving
+        // half of every operation. SHELL-Q37 held ten rows on exactly this.
+        await InstallerConvention.ProvisionEventStoreAsync(ProvisionerConnection(_database.Name));
+
         await using var migrator = Context(_database.MigratorConnectionFor(JobsDbContext.Schema));
         await migrator.Database.MigrateAsync();
 
@@ -164,6 +172,27 @@ public sealed class JobsFixture : IAsyncLifetime
                 connection,
                 npgsql => npgsql.MigrationsHistoryTable("__migrations", JobsDbContext.Schema))
             .Options);
+
+    /// <summary>What this aggregate announced, in the platform's own store, in order.</summary>
+    /// <remarks>
+    /// Read with the application's own connection, which holds the appender
+    /// role and nothing more — so a row counted here is one the application was
+    /// entitled to write, in the schema the Kernel owns.
+    /// </remarks>
+    public async Task<IReadOnlyList<string>> EventsForAsync(Guid aggregateId)
+    {
+        await using var connection = new NpgsqlConnection(ApplicationConnection);
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            "SELECT event_type FROM event_store.events WHERE aggregate_id = @id ORDER BY entity_version";
+        command.Parameters.AddWithValue("id", aggregateId);
+
+        var types = new List<string>();
+        await using var reader = await command.ExecuteReaderAsync();
+        while (await reader.ReadAsync()) types.Add(reader.GetString(0));
+        return types;
+    }
 
     /// <summary>A caller scoped to this suite's property.</summary>
     public RequestScope Scope() => new()

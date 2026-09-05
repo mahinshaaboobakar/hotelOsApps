@@ -41,6 +41,18 @@ public sealed class DirectoryDouble : IPropertyDirectory
     public Task<bool> LocationExistsAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken) =>
         Task.FromResult(Locations.Count == 0 || Locations.Contains(locationId));
 
+    /// <summary>The organisation the property belongs to, as Master Data would say.</summary>
+    public Guid? Organization { get; set; }
+
+    public Task<Guid?> FindOrganizationAsync(Guid propertyId, CancellationToken cancellationToken) =>
+        Task.FromResult(Organization);
+
+    /// <summary>What the property calls a place — the test's own map, else null.</summary>
+    public Dictionary<Guid, string> Places { get; } = [];
+
+    public Task<string?> FindLocationNameAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken) =>
+        Task.FromResult(Places.GetValueOrDefault(locationId));
+
     public Task<IReadOnlyList<OnShiftPerson>> OnShiftAsync(Guid propertyId, string departmentCode, DateOnly on, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<OnShiftPerson>>(OnShift.ToList());
 

@@ -60,7 +60,7 @@ public class WireCrudTests(JobsFixture fixture)
         Assert.Contains("AC not working", back.Aliases);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_job_is_raised_over_the_wire_numbered_stored_and_read_back_whole()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -88,7 +88,7 @@ public class WireCrudTests(JobsFixture fixture)
         Assert.Single(detail.ConcernHistory);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task The_whole_life_of_a_job_crosses_the_wire_and_the_database_agrees()
     {
         await using var h = await WireHarness.StartAsync(fixture);
@@ -144,7 +144,7 @@ public class WireCrudTests(JobsFixture fixture)
         Assert.True(await db.Set<HotelOS.Platform.StoredEvent>().CountAsync(e => e.AggregateId == stored.Id) >= 6);
     }
 
-    [Fact(Skip = "Held on SHELL-Q37, the wall FF met: the platform's `event_store` tables are provisioned by deployment SQL, not by any migration or test convention an installed application can run, so the real event appender cannot write on a scratch database and every operation that announces an event stops at `relation \"event_store.events\" does not exist`. Reported, not worked around — a double here would be the green over an absent dependency ADR 0053 forbids.")]
+    [Fact]
     public async Task A_note_a_reminder_and_a_rating_are_written_and_read_back()
     {
         await using var h = await WireHarness.StartAsync(fixture);

@@ -34,6 +34,7 @@ public sealed class JobsHarness
         Authorizer = new RecordingAuthorizer();
         Events = new RecordingEventAppender();
         Directory = new DirectoryDouble();
+        Directory.Organization = OrganizationId;
         Records = new JobRecords(Db, Clock);
         Announcer = new JobAnnouncer(Events);
         Assignment = new AssignmentService(Db, Authorizer, Directory, Announcer, Records);

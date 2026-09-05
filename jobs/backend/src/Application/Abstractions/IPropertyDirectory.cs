@@ -20,6 +20,23 @@ public interface IPropertyDirectory
     /// <summary>Whether the location is a node of this property's tree.</summary>
     Task<bool> LocationExistsAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken);
 
+    /// <summary>Which organisation this property belongs to, or null when Master Data cannot say.</summary>
+    /// <remarks>
+    /// The catalogue is the organisation's, and a call from a screen names only
+    /// the property — the module envelope carries <c>property_id</c> and
+    /// nothing else, by design. So curating asks Master Data which organisation
+    /// the property is in rather than trusting a bundle to say.
+    /// </remarks>
+    Task<Guid?> FindOrganizationAsync(Guid propertyId, CancellationToken cancellationToken);
+
+    /// <summary>What the property calls the place — "Room 1204" — or null when it cannot say.</summary>
+    /// <remarks>
+    /// A screen draws the name and the job row holds only the id. Null rather
+    /// than the id: an identifier shown where a room number belongs is worse
+    /// than an honest blank, because it reads as data.
+    /// </remarks>
+    Task<string?> FindLocationNameAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken);
+
     /// <summary>People of the department on shift on <paramref name="on"/> — the assignment list (S3 D1).</summary>
     Task<IReadOnlyList<OnShiftPerson>> OnShiftAsync(
         Guid propertyId, string departmentCode, DateOnly on, CancellationToken cancellationToken);

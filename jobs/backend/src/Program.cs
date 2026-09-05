@@ -16,6 +16,7 @@ using HotelOS.Jobs.Application.Work;
 using HotelOS.Jobs.Events;
 using HotelOS.Jobs.Grpc;
 using HotelOS.Jobs.Infrastructure;
+using HotelOS.Jobs.Module;
 using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using Microsoft.EntityFrameworkCore;
@@ -137,6 +138,8 @@ builder.Services.AddScoped<PropertyCatalogueService>();
 builder.Services.AddScoped<ConcernPolicyService>();
 builder.Services.AddScoped<PresenceService>();
 builder.Services.AddScoped<ClosingHoldService>();
+builder.Services.AddJobsModule();
+builder.Services.AddModuleRefusals();
 
 // The sweep — S5 D1: every sixty seconds, overlap SKIP.
 builder.Services.AddScoped<Nudger>();
@@ -165,7 +168,13 @@ builder.Host.UsePlatformListener(
 var app = builder.Build();
 started = app;
 
+app.UseModuleRefusals();
 app.MapGrpcService<JobsGrpcService>();
+
+// The one surface this application's own screens reach — design page 63 §3.
+// The token check and the capability guard are inside MapModuleCapability, so
+// they cannot be forgotten here, only removed on purpose.
+app.MapJobsModule();
 app.MapHealthChecks("/health");
 
 app.Run();

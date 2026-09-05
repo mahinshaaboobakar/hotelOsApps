@@ -43,6 +43,36 @@ public class MasterDataPropertyDirectory(MasterDataService.MasterDataServiceClie
         return match is not null && Guid.TryParse(match.Id, out var id) ? id : null;
     }
 
+    public async Task<Guid?> FindOrganizationAsync(Guid propertyId, CancellationToken cancellationToken)
+    {
+        var property = await GetPropertyAsync(propertyId, cancellationToken);
+        return Guid.TryParse(property.OrganizationId, out var organization) ? organization : null;
+    }
+
+    public async Task<string?> FindLocationNameAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var location = await masterData.GetLocationAsync(
+                new GetLocationRequest
+                {
+                    Context = RequestContextFactory.ForService(Service, propertyId),
+                    Id = locationId.ToString(),
+                },
+                cancellationToken: cancellationToken);
+            return Guid.TryParse(location.PropertyId, out var owner) && owner == propertyId
+                && !string.IsNullOrWhiteSpace(location.Name)
+                    ? location.Name
+                    : null;
+        }
+        catch (global::Grpc.Core.RpcException)
+        {
+            // Master Data down or the node gone: the screen says the place is
+            // not named here rather than showing an id, and nothing fails.
+            return null;
+        }
+    }
+
     public async Task<bool> LocationExistsAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken)
     {
         try

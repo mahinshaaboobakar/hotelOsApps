@@ -142,6 +142,71 @@ public static class InstallerConvention
         }
     }
 
+    /// <summary>
+    /// The platform's own event store, on a scratch database — what an
+    /// installed application cannot provision and must not invent.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <c>event_store</c> belongs to the Kernel: <c>03-schemas.sql</c> creates
+    /// it and the Kernel's own migrations fill it, and neither is something a
+    /// package runs. The wired round nevertheless has to write events — a job
+    /// that is raised announces one in the same transaction — so this runs
+    /// <b>the Kernel's own migration text, read from the platform checkout</b>,
+    /// rather than a table shaped like it. A hand-written copy would be a
+    /// second definition of the platform's most shared table, and the round
+    /// would be proving Jobs against a schema no property has.
+    /// </para>
+    /// <para>
+    /// The event appender role is the one the application already holds by
+    /// <c>AUTHZ-Q23</c>; what it gains here is the schema to use it on.
+    /// </para>
+    /// </remarks>
+    /// <param name="databaseConnection">The provisioner's connection to the scratch database.</param>
+    /// <exception cref="InvalidOperationException">The platform checkout was not found.</exception>
+    public static async Task ProvisionEventStoreAsync(string databaseConnection)
+    {
+        var migrations = PlatformMigrations();
+        await using var connection = new NpgsqlConnection(databaseConnection);
+        await connection.OpenAsync();
+
+        await ExecuteAsync(connection, "CREATE SCHEMA IF NOT EXISTS event_store");
+
+        foreach (var file in migrations.GetFiles("*.sql").OrderBy(f => f.Name))
+        {
+            await ExecuteAsync(connection, await File.ReadAllTextAsync(file.FullName));
+        }
+
+        foreach (var statement in new[]
+        {
+            $"GRANT USAGE ON SCHEMA event_store TO {EventAppender}",
+            $"GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA event_store TO {EventAppender}",
+        })
+        {
+            await ExecuteAsync(connection, statement);
+        }
+    }
+
+    /// <summary>The Kernel's event-store migrations, found by walking up to the platform checkout.</summary>
+    private static DirectoryInfo PlatformMigrations()
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            var candidate = new DirectoryInfo(Path.Combine(
+                directory.FullName, "HosPilotOS", "services", "kernel", "crates", "kernel",
+                "migrations", "event_store"));
+            if (candidate.Exists) return candidate;
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException(
+            "the platform checkout was not found beside this one, so the Kernel's event-store "
+            + "migrations cannot be read. The wired round needs them: an application may not "
+            + "invent event_store, and a suite that substituted a table shaped like it would be "
+            + "proving Jobs against a schema no property has.");
+    }
+
     /// <summary>Step 4's statements, in the one order that works.</summary>
     /// <param name="database">The database the application role must reach.</param>
     /// <returns>The statements.</returns>
