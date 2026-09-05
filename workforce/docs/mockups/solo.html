@@ -68,6 +68,12 @@
     }
 
     win.style.margin = "0";
+
+    // Named so a measuring pass can scope its queries to THIS frame. The other
+    // frames are hidden and still in the document, so an unscoped
+    // `querySelector` reads whichever one comes first in source order — which
+    // produced a divergence that was the probe's fault and not the build's.
+    win.id = "shown";
     d.documentElement.setAttribute("data-ready", "true");
     document.documentElement.setAttribute("data-ready", "true");
   });

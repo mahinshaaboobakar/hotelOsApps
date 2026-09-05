@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Drawn beside built, in numbers</title>
+<style>html,body{margin:0;background:#07090f}iframe{border:0;width:1220px;height:900px;position:absolute;left:-4000px}</style>
+</head><body>
+<iframe id="drawn"></iframe><iframe id="built"></iframe>
+<script>
+/*
+ * APPS-Q4 Part A: fidelity measured against the drawing's OWN CSS values.
+ *
+ * Both realms are same-origin, so this reads `getComputedStyle` from each and
+ * reports the numbers rather than an impression. An audit done by eye cannot
+ * distinguish 56px from 58px, and cannot see a colour that is one token off —
+ * both of which are divergences a person would eventually notice and nobody
+ * could name.
+ *
+ *   ?n=<frame>&src=<mockup>&q=<the built screen's query>
+ */
+const p = new URLSearchParams(location.search);
+
+/* What is measured, and why each one. Every entry names a rule in §64. */
+const PROBES = [
+  ["bar.height",      ".head",            "height"],
+  ["bar.padding",     ".head",            "paddingLeft"],
+  ["bar.font",        ".head .tab",       "fontSize"],
+  ["bar.gap",         ".head",            "columnGap"],
+  ["tabs.height",     ".tabs",            "height"],
+  ["tab.font",        ".tabs .tab",       "fontSize"],
+  ["row.padTop",      "@row",             "paddingTop"],
+  ["row.padLeft",     "@row",             "paddingLeft"],
+  ["row.font",        "@row",             "fontSize"],
+  ["row.rule",        "@row",             "borderBottomColor"],
+  ["btn.height",      ".btn",             "height"],
+  ["btn.padding",     ".btn",             "paddingLeft"],
+  ["btn.radius",      ".btn",             "borderRadius"],
+  ["btn.font",        ".btn",             "fontSize"],
+  ["btn.weight",      ".btn",             "fontWeight"],
+  ["pri.background",  ".btn.pri",         "backgroundColor"],
+  ["pill.radius",     ".pill",            "borderRadius"],
+  ["pill.font",       ".pill",            "fontSize"],
+  ["sub.font",        ".hsub",            "fontSize"],
+  ["sub.colour",      ".hsub",            "color"],
+  ["colhead.font",    ".hd",              "fontSize"],
+  ["colhead.spacing", ".hd",              "letterSpacing"],
+];
+
+function read(doc, rootSelector, rowSelector) {
+  /* **Scoped to the frame being shown.** A mockup holds twelve frames and the
+     eleven hidden ones are still in the document, so an unscoped query reads
+     whichever comes first in source order. That reported a button weight of 400
+     against 600 and the difference was entirely the probe's. */
+  const root = doc.querySelector(rootSelector);
+  const out = {};
+  for (const [name, selector, property] of PROBES) {
+    const resolved = selector === "@row" ? rowSelector : selector;
+    const node = resolved === null ? null : root.querySelector(resolved);
+    /* Absent is null and never a default: a probe that answered 0px for a
+       missing element would report agreement between a drawing that has the
+       thing and a build that does not. */
+    out[name] = node === null ? null : getComputedStyle(node)[property];
+  }
+  return out;
+}
+
+/*
+ * Wait for a realm, and give up rather than hang.
+ *
+ * The capture harness withholds `data-ready` when a step found nothing — which
+ * is correct, and means an unbounded wait here would stop the whole pass on one
+ * frame with no output at all. A bounded wait turns that into a named failure
+ * on that frame's row.
+ */
+function ready(frame) {
+  return new Promise((resolve, reject) => {
+    let waited = 0;
+    const tick = setInterval(() => {
+      const d = frame.contentDocument;
+      const flag = d && d.documentElement.getAttribute("data-ready");
+
+      if (flag === "true") { clearInterval(tick); resolve(d); return; }
+
+      waited += 80;
+      if (waited > 12000) {
+        clearInterval(tick);
+        reject(new Error("never became ready (data-ready=" + flag + ")"));
+      }
+    }, 80);
+  });
+}
+
+const drawn = document.getElementById("drawn");
+const built = document.getElementById("built");
+
+/*
+ * Every frame in one load.
+ *
+ * The realms are reused rather than rebuilt per frame: the point of measuring
+ * is that both sides are read under one browser, one device ratio and one
+ * stylesheet load, and nineteen separate page loads would reintroduce exactly
+ * the variability the numbers are meant to remove.
+ */
+function load(frame, url) {
+  // Resolve on load OR on a deadline: a src that never fires onload would stop
+  // the pass with no output, which is the failure mode this whole pass exists
+  // to avoid reproducing.
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => { if (!done) { done = true; resolve(); } };
+    frame.onload = finish;
+    setTimeout(finish, 8000);
+    frame.src = url;
+  });
+}
+
+async function measure(entry) {
+  await load(drawn, "./solo.html?bust=" + Date.now()
+    + "&k=1&w=1220&h=900&n=" + entry.n + "&src=" + entry.src);
+  await load(built, "../../ui/preview/shot.html?k=1&w=1220&h=900&build=" + Date.now()
+    + "&q=" + encodeURIComponent(entry.q));
+
+  const a = await ready(drawn);
+  const b = await ready(built);
+  const inner = (doc) => doc.querySelector("iframe").contentDocument;
+
+  return {
+    no: entry.no,
+    drawn: read(inner(a), "#shown", entry.drow),
+    built: read(inner(b), ".wf", entry.brow),
+  };
+}
+
+(async () => {
+  const plan = await (await fetch("./plan.json?bust=" + Date.now())).json();
+  const out = [];
+
+  for (const entry of plan) {
+    window.__at = entry.no;
+    try {
+      out.push(await measure(entry));
+    } catch (failure) {
+      // A frame that could not be measured says so and does not silently
+      // become an agreement.
+      out.push({ no: entry.no, error: String(failure) });
+    }
+  }
+
+  window.__measured = JSON.stringify(out);
+  document.documentElement.setAttribute("data-ready", "true");
+})();
+</script></body></html>

@@ -145,6 +145,20 @@ builder.Services.AddHealthChecks()
 // the interceptor that maps a domain failure to a status code. None of it is
 // reimplemented here — CLAUDE.md §"No duplicated shared code" makes no
 // exception for an installed application.
+// The token validator the module envelope needs — SHELL-Q38, and the idiom
+// hello-hotel demonstrates. Without it `MapWorkforceModule` refuses to start,
+// which is the fix behaving correctly: a missing registration is a boot fault
+// and not a per-request one.
+builder.Services.AddPlatformAuthentication(
+    serviceRoot: platform.CertificateDirectory,
+    identityEndpoint: new Uri(
+        builder.Configuration["Services:Identity:Endpoint"]
+            ?? throw new InvalidOperationException(
+                "Services:Identity:Endpoint is required: a validator with no authority "
+                + "endpoint cannot refresh signing keys")),
+    natsUrl: builder.Configuration["Nats:Url"] ?? "nats://127.0.0.1:4222",
+    configuration: builder.Configuration);
+
 builder.Services.AddHotelOsPlatform<WorkforceDbContext>(
     serviceName: "workforce",
     kernelEndpoint: platform.KernelEndpoint,
