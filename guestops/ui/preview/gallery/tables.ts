@@ -67,7 +67,9 @@ export function widgets(captures: readonly { entry: string; html: string }[],
         <b>${escaped(widget.name)}</b>
         <p class="ask">${escaped(widget.answers)}</p>
         <dl>
-          <dt>Approved frame</dt><dd class="none">none — see the finding</dd>
+          <dt>Proposed frame</dt><dd>frame ${escaped(widget.frame)} of
+            <code>03-guestops-widgets.html</code> <span class="none">not yet approved</span></dd>
+          <dt>Stacks</dt><dd>${escaped(widget.stacks)}</dd>
           <dt>Taps through to</dt><dd>${escaped(widget.target)}</dd>
           <dt>Carrying</dt><dd><code>${escaped(widget.filter)}</code></dd>
         </dl>

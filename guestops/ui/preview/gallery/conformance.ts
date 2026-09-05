@@ -72,6 +72,12 @@ export interface WidgetRow {
   answers: string;
   target: string;
   filter: string;
+
+  /** The frame's number in `03-guestops-widgets.html`. */
+  frame: string;
+
+  /** Whether the shell may bury it under another — page 56's stack rule. */
+  stacks: string;
 }
 
 /**
@@ -84,6 +90,8 @@ export interface WidgetRow {
 export const WIDGETS: readonly WidgetRow[] = [
   {
     name: "Today at the Desk",
+    frame: "1",
+    stacks: "Yes — glanced at between guests",
     entry: "today",
     answers: "What is the shape of the shift, and who walks in next?",
     target: "the stay",
@@ -91,6 +99,8 @@ export const WIDGETS: readonly WidgetRow[] = [
   },
   {
     name: "Occupancy",
+    frame: "2",
+    stacks: "Yes — you go and look at it",
     entry: "occupancy",
     answers: "How full is the hotel tonight, and where?",
     target: "the rooms of one type",
@@ -98,6 +108,8 @@ export const WIDGETS: readonly WidgetRow[] = [
   },
   {
     name: "From the PMS",
+    frame: "3",
+    stacks: "No — stackable: false; it makes silence visible",
     entry: "from-the-pms",
     answers: "Is the feed still sending, and what could it not place?",
     target: "Attention",
@@ -105,6 +117,8 @@ export const WIDGETS: readonly WidgetRow[] = [
   },
   {
     name: "Business Mix",
+    frame: "5",
+    stacks: "Yes — a manager goes and looks",
     entry: "business-mix",
     answers: "Where did today's arrivals come from?",
     target: "the day's arrivals",
@@ -112,6 +126,8 @@ export const WIDGETS: readonly WidgetRow[] = [
   },
   {
     name: "Watchlist",
+    frame: "4",
+    stacks: "No — stackable: false; it has to catch you",
     entry: "watchlist",
     answers: "What was nobody thinking about?",
     target: "the stay",
@@ -129,20 +145,22 @@ export const WIDGETS: readonly WidgetRow[] = [
  * drawing anybody audited.
  */
 export const WIDGET_FINDING = {
-  title: "Five built, none drawn — a design gap, and it is mine",
+  title: "Five built, then drawn — the design gate taken late",
 
   body:
-    "No approved frame draws any of these. The gold mockup has seventeen frames "
-    + "and not one of them is a widget; `docs/chapters/` carries none either. They "
-    + "were built to the mechanism — design page 56's canvas, 320×384, no "
-    + "self-sizing, no network — and to the SDK's contract, both of which they "
-    + "satisfy. What they were never built to is a drawing the owner audited.",
+    "These five were **built before they were drawn**. Every other GuestOps "
+    + "surface went through a frame the owner audited; the widgets went through "
+    + "design page 56's mechanism and the SDK's contract instead — both of which "
+    + "they satisfy, and neither of which is a drawing anybody looked at. Five "
+    + "frames now exist in `docs/mockups/03-guestops-widgets.html` and are "
+    + "offered as one audit, drawn on page 56's own canvas from the same fixture "
+    + "facts these captures use.",
 
   consequence:
-    "So the captures below are the only record of what these five look like, and "
-    + "they are evidence of what was built rather than of conformance to anything. "
-    + "Part A's whole method is a frame beside a build; for the widgets there is "
-    + "no left-hand pane, and putting the captures up alone would imply one. "
-    + "**They need frames and the owner's audit before this row can say anything "
-    + "else.**",
+    "**The frames are not approved yet, so this stays a finding.** And the honest "
+    + "risk in them is circularity: drawn from what exists, they invite approval "
+    + "of what exists. They were drawn anyway because the alternative — five "
+    + "fictions, then a reconciliation — audits nothing real. **If a frame is "
+    + "wrong, the build changes**; from the moment they are approved they are the "
+    + "specification, exactly as the seventeen are.",
 };

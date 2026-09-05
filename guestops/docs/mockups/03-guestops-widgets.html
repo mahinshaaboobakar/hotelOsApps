@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>GuestOps widgets — the five frames</title>
+<style>
+  /*
+   * Drawn 2026-09-05, APPS-Q4. The palette is the gold file's, copied stop for
+   * stop, so these frames and the seventeen cannot disagree about a colour.
+   */
+  :root{
+    --color-surface:#0b0d14;--color-surface-raised:#11141f;
+    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
+    --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
+    --color-ink-on-accent:#0b0d14;
+    --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+    --color-ok-soft:rgb(52 211 153 / 0.12);
+    --color-warn-soft:rgb(251 191 36 / 0.12);
+    --color-bad-soft:rgb(248 113 113 / 0.12);
+    --radius-panel:1rem;
+    --font-sans:system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --ovr:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --accent:linear-gradient(135deg,var(--color-brand),var(--ovr));
+    --brand-wash:color-mix(in srgb, var(--color-brand) 18%, transparent);
+    --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+
+    --bg:var(--color-surface);--text:var(--color-ink);--dim:var(--color-ink-muted);
+    --faint:var(--color-ink-faint);--line:var(--color-line);--line2:var(--color-line-strong);
+    --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);
+    --glass:var(--color-surface-raised);
+  }
+
+  body{background:#04050a;color:var(--text);padding:26px;
+       font:13.5px/1.55 var(--font-sans);font-variant-numeric:tabular-nums}
+  h1{font-size:16px;font-weight:600;max-width:1220px;margin:38px auto 12px;
+     color:var(--dim);text-wrap:balance}
+  h1 b{color:var(--text)}
+  .lede{max-width:1220px;margin:0 auto 26px;color:var(--dim);font-size:13px;line-height:1.75}
+  .lede b{color:var(--text)}
+  .warn{max-width:1220px;margin:0 auto 30px;padding:15px 18px;border-radius:12px;
+        border:1px solid rgb(251 191 36 / .3);background:rgb(251 191 36 / .06);
+        color:var(--dim);font-size:12.5px;line-height:1.75}
+  .warn b{color:var(--warn)}
+  .cap{max-width:1220px;margin:10px auto 0;color:var(--dim);font-size:12.5px;line-height:1.7}
+  .cap b{color:var(--text)}
+  .sub{max-width:1220px;margin:34px auto 0;color:var(--faint);font-size:11.5px;
+       letter-spacing:.06em;text-transform:uppercase}
+
+  /*
+   * THE CANVAS — design page 56. 320 x 384, and the shell does not resize to
+   * content: a widget that could size itself would make the dock's popovers
+   * ragged. Content that does not fit is cut BY THE WIDGET, which is why every
+   * frame below shows a fixed number of rows rather than "all of them".
+   */
+  .stage{max-width:1220px;margin:0 auto;display:flex;gap:26px;align-items:flex-start;
+         flex-wrap:wrap}
+  .canvas{width:320px;height:384px;flex:none;border-radius:14px;overflow:hidden;
+          border:1px solid var(--line2);background:var(--glass);
+          box-shadow:var(--shadow);display:flex;flex-direction:column}
+  .facts{flex:1;min-width:260px;color:var(--dim);font-size:12.5px;line-height:1.8}
+  .facts dt{color:var(--faint);font-size:10.5px;letter-spacing:.09em;
+            text-transform:uppercase;margin-top:12px}
+  .facts dt:first-child{margin-top:0}
+  .facts dd{margin:2px 0 0;color:var(--text)}
+  .facts code{font:11.5px ui-monospace,monospace;color:#a8b0c4}
+  .no{color:var(--bad)}
+
+  /* The widget's own chrome — mirrors ui/widgets/card.ts. */
+  .wh{display:flex;align-items:baseline;justify-content:space-between;
+      padding:14px 16px 0;font-size:13px;font-weight:600}
+  .wh span{color:var(--faint);font-size:11px;font-weight:400}
+  .wb{padding:12px 16px 14px;display:flex;flex-direction:column;gap:9px;
+      overflow:hidden}
+  .wl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+      color:var(--faint)}
+  .ws{display:flex;gap:16px;flex-wrap:wrap}
+  .ws div{display:flex;flex-direction:column}
+  .ws b{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .ws span{font-size:10.5px;color:var(--faint)}
+  .wr{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px;
+      border-bottom:1px solid var(--line)}
+  .wr:last-of-type{border-bottom:0}
+  .wr .rs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .wr .rc{color:var(--dim);white-space:nowrap}
+  .wr .t{color:var(--faint);font-size:11px}
+  .miss{color:var(--faint);font-style:italic}
+  .wn{margin-top:auto;padding-top:8px;color:var(--faint);font-size:11px;line-height:1.55}
+  .pill{padding:2px 8px;border-radius:99px;font-size:10.5px;font-weight:600;
+        white-space:nowrap}
+  .pill.warn{background:var(--color-warn-soft);color:var(--warn)}
+  .pill.bad{background:var(--color-bad-soft);color:var(--bad)}
+  .pill.ok{background:var(--color-ok-soft);color:var(--ok)}
+</style>
+</head><body>
+
+<h1><b>GuestOps widgets</b> — the five frames, drawn late and offered as one audit</h1>
+
+<div class="warn">
+  <b>Read this before approving anything below.</b> These five widgets were
+  <b>built before they were drawn</b>. That is the gap: every other GuestOps
+  surface went through a frame the owner audited, and the widgets went through
+  design page 56's mechanism and the SDK's contract instead — both of which they
+  satisfy, and neither of which is a drawing anybody looked at.
+  <br><br>
+  So these frames are a proposal made after the fact, and the honest risk is
+  <b>circularity</b>: drawn from what exists, they invite approval of what
+  exists. They are offered anyway because the alternative — drawing five
+  fictions and then reconciling — audits nothing real. <b>If a frame here is
+  wrong, the build changes.</b> The frames are the specification from the moment
+  they are approved, exactly as the seventeen are.
+</div>
+
+<div class="lede">
+  <b>The canvas is 320 × 384 and the shell does not resize to content</b>
+  (page 56). A widget that could size itself would make the dock's popovers
+  ragged. So content that does not fit is cut <b>by the widget</b>: every frame
+  below shows a fixed number of rows because that is what fits, never because a
+  query returned that many.
+  <br><br>
+  <b>Three rules every frame obeys.</b> No writes — a widget is a question
+  answered, and v1 takes no action. No number the backend cannot honestly
+  compute — absent, never approximate. And touching an answer opens the
+  application at the screen showing the same rows.
+</div>
+
+<div class="sub">The shift</div>
+
+<h1>1 · <b>Today at the Desk</b> — “what is the shape of the shift, and who walks in next?”</h1>
+<div class="stage">
+  <div class="canvas">
+    <div class="wh">Today at the Desk <span>GuestOps</span></div>
+    <div class="wb">
+      <div class="ws">
+        <div><b>18</b><span>due in</span></div>
+        <div><b>11</b><span>arrived</span></div>
+        <div><b>14</b><span>due out</span></div>
+        <div><b>12</b><span>departed</span></div>
+      </div>
+      <div class="wl">Next arrivals</div>
+      <div class="wr"><span class="rs">Anand Menon</span><span class="rc">Dlx 402</span><span class="rc t">14:20</span></div>
+      <div class="wr"><span class="rs">Priya Nair</span><span class="rc">Std 217</span><span class="rc t">14:45</span></div>
+      <div class="wr"><span class="rs">R. Balakrishnan</span><span class="rc">Ste 601</span><span class="rc t">15:00</span></div>
+      <div class="wr"><span class="rs">Fatima Al Zahra</span><span class="rc">Dlx 408</span><span class="rc t">15:30</span></div>
+      <div class="wr"><span class="rs">Joseph Thomas</span><span class="rc miss">— unassigned</span><span class="rc t">16:10</span></div>
+      <div class="wn">Arrivals without a room show the gap rather than a guess.</div>
+    </div>
+  </div>
+  <dl class="facts">
+    <dt>Answers</dt><dd>What is the shape of the shift, and who walks in next.</dd>
+    <dt>Taps through to</dt><dd>the stay · <code>stay/{stayId}</code></dd>
+    <dt>Stacks</dt><dd>Yes — a person glances at it between guests and can flip to it.</dd>
+    <dt>Five rows, not six</dt><dd>Five is what fits. A sixth would push the fifth out of a
+      frame that has one size.</dd>
+    <dt>The unassigned row</dt><dd>Drawn, not filtered. A stay's anchor is the room
+      <b>type</b> and the number is an assignment (GUEST-Q2's addendum), so this is
+      the ordinary morning case and the row a person acts on.</dd>
+  </dl>
+</div>
+<div class="cap"><b>The one widget a receptionist glances at between guests.</b> Four counts and five rows, and nothing else — a widget is a question answered, and this one answers two that are really one. <b>The counts are the four lists' totals</b>, which is the same number the application's own strip and tabs carry, so the widget and the screen cannot disagree.</div>
+
+<div class="sub">Selling the room</div>
+
+<h1>2 · <b>Occupancy</b> — “how full is the hotel tonight, and where?”</h1>
+<div class="stage">
+  <div class="canvas">
+    <div class="wh">Occupancy <span>GuestOps</span></div>
+    <div class="wb">
+      <div class="ws">
+        <div><b>63</b><span>in house</span></div>
+        <div><b>63</b><span>occupied</span></div>
+        <div><b>27</b><span>free</span></div>
+        <div><b>81</b><span>tonight</span></div>
+      </div>
+      <div class="wl">By room type</div>
+      <div class="wr"><span class="rs">Standard</span><span class="rc">31 / 44</span></div>
+      <div class="wr"><span class="rs">Deluxe</span><span class="rc">24 / 32</span></div>
+      <div class="wr"><span class="rs">Suite</span><span class="rc">8 / 14</span></div>
+      <div class="wn">Free is what remains — nobody stores it.</div>
+    </div>
+  </div>
+  <dl class="facts">
+    <dt>Answers</dt><dd>How full the hotel is tonight, and where the room is.</dd>
+    <dt>Taps through to</dt><dd>the rooms of one type · <code>rooms/{roomType}</code></dd>
+    <dt>Stacks</dt><dd>Yes — you go and look at it when deciding whether to sell another
+      room. Missing it for an hour costs nothing.</dd>
+    <dt>Every number's owner</dt><dd>Rooms are Master Data's, sold is ours, out-of-order is
+      EngineeringOps's heard as an event, stop-sell is ours. <b>Free is the only one
+      nobody stores</b> (GUEST-Q7).</dd>
+  </dl>
+</div>
+<div class="cap"><b>The same computation as frame 14's availability table</b>, at a glance rather than in full. A lagging out-of-order projection makes this answer <b>conservative</b> and no number wrong, which is the difference between an event-derived read model and a copy of somebody else's table.</div>
+
+<div class="sub">What went wrong quietly</div>
+
+<h1>3 · <b>From the PMS</b> — “is the feed still sending, and what could it not place?”</h1>
+<div class="stage">
+  <div class="canvas">
+    <div class="wh">From the PMS <span>GuestOps</span></div>
+    <div class="wb">
+      <div class="ws">
+        <div><b>23</b><span>new today</span></div>
+        <div><b>2</b><span>held</span></div>
+      </div>
+      <div class="wr"><span class="rs">Last fact</span><span class="rc">09:41</span><span class="pill warn">4 h ago</span></div>
+      <div class="wl">Held facts — nothing else could place them</div>
+      <div class="wr"><span class="rs">Unmatched stay reference</span><span class="rc t">OHIP · 09:12</span></div>
+      <div class="wr"><span class="rs">Rate code not known here</span><span class="rc t">OHIP · 07:48</span></div>
+      <div class="wn">A held fact is kept, never dropped and never guessed at.</div>
+    </div>
+  </div>
+  <dl class="facts">
+    <dt>Answers</dt><dd>Whether the feed is still sending, and what it sent that we could
+      not place.</dd>
+    <dt>Taps through to</dt><dd>Attention · <code>attention/{stayId}</code></dd>
+    <dt>Stacks</dt><dd class="no">No — <code>stackable: false</code> in the manifest.</dd>
+    <dt>Why it can never be underneath</dt><dd><b>It exists to make silence visible</b>, and
+      silence is precisely what nobody goes looking for. A warning behind a flip
+      only works when somebody already suspected something, which is exactly when
+      they did not.</dd>
+  </dl>
+</div>
+<div class="cap"><b>Staleness is stated, never enforced</b> — the same rule frame 11's banner follows. A connector can be authenticated, polling and green while check-ins specifically have stopped (R27), so this names <i>what</i> is late rather than declaring the feed down, and nothing on any screen is gated on it.</div>
+
+<h1>4 · <b>Watchlist</b> — “what was nobody thinking about?”</h1>
+<div class="stage">
+  <div class="canvas">
+    <div class="wh">Watchlist <span>GuestOps</span></div>
+    <div class="wb">
+      <div class="ws">
+        <div><b>3</b><span>overdue out</span></div>
+        <div><b>1</b><span>no room</span></div>
+        <div><b>5</b><span>not checked out</span></div>
+      </div>
+      <div class="wl">Overdue departures</div>
+      <div class="wr"><span class="rs">Suite 601 · R. Balakrishnan</span><span class="pill bad">+3h</span></div>
+      <div class="wr"><span class="rs">Dlx 305 · Meera Iyer</span><span class="pill bad">+3h</span></div>
+      <div class="wr"><span class="rs">Std 118 · K. Varghese</span><span class="pill bad">+2h</span></div>
+      <div class="wl">Arriving with no room</div>
+      <div class="wr"><span class="rs">Joseph Thomas</span><span class="rc">Deluxe</span><span class="rc t">16:10</span></div>
+    </div>
+  </div>
+  <dl class="facts">
+    <dt>Answers</dt><dd>What nobody was thinking about.</dd>
+    <dt>Taps through to</dt><dd>the stay · <code>stay/{stayId}</code></dd>
+    <dt>Stacks</dt><dd class="no">No — <code>stackable: false</code> in the manifest, and the
+      shell honours it: nobody can bury this by dragging it into a stack.</dd>
+    <dt>Two lists, one job</dt><dd>An overdue departure and an arrival with no room are the
+      two things a desk discovers too late. Neither is an error — both are
+      ordinary, and both are invisible until somebody looks.</dd>
+  </dl>
+</div>
+<div class="cap"><b>The one widget that has to catch you.</b> Its job is telling a receptionist about the overdue departure they were <i>not</i> considering — so the stack rule excludes it by its own test: <i>you go and look at it</i> stacks, <i>it has to catch you</i> cannot.</div>
+
+<div class="sub">Where the business came from</div>
+
+<h1>5 · <b>Business Mix</b> — “where did today's arrivals come from?”</h1>
+<div class="stage">
+  <div class="canvas">
+    <div class="wh">Business Mix <span>GuestOps</span></div>
+    <div class="wb">
+      <div class="wl">Today's arrivals by channel</div>
+      <div class="wr"><span class="rs">Direct</span><span class="rc t">7</span></div>
+      <div class="wr"><span class="rs">OTA</span><span class="rc t">6</span></div>
+      <div class="wr"><span class="rs">Corporate</span><span class="rc t">3</span></div>
+      <div class="wr"><span class="rs">Travel agent</span><span class="rc t">2</span></div>
+      <div class="wl">By market code</div>
+      <div class="wr"><span class="rs">LEIS</span><span class="rc t">9</span></div>
+      <div class="wr"><span class="rs">CORP</span><span class="rc t">5</span></div>
+      <div class="wr"><span class="rs">GRP</span><span class="rc t">4</span></div>
+      <div class="wn">Both in the source's own words.</div>
+    </div>
+  </div>
+  <dl class="facts">
+    <dt>Answers</dt><dd>Where today's arrivals came from.</dd>
+    <dt>Taps through to</dt><dd>the day's arrivals, filtered ·
+      <code>arrivals/channel/{name}</code> and <code>arrivals/market/{code}</code></dd>
+    <dt>Stacks</dt><dd>Yes — a manager goes and looks at it.</dd>
+    <dt>Nothing is normalised</dt><dd>Channel and market code are shown <b>in the source's
+      own words</b>. The segment every hotel reports on is only reportable if it
+      survives the journey unaltered.</dd>
+  </dl>
+</div>
+<div class="cap"><b>Two lists rather than one</b>, because a channel and a market code are different questions a revenue manager asks in the same breath — where the booking came <i>from</i>, and what kind of business it <i>is</i>. Folding them into one segment is exactly the normalisation the reference system did, and it is why its own reports could not be reconciled with the PMS's.</div>
+
+<div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What these five deliberately do not do.</b> <b>No writes</b> — v1 widgets take no action: no check-in, no approve, no assign (page 56). <b>No number the backend cannot honestly compute</b> — a row the domain cannot answer is not drawn at all, which is why the contact never appears on any of them (GUEST-Q12) and why <i>free</i> is a remainder rather than a stored figure. <b>No sizing</b> — the frame is the guaranteed size and the widget does the cutting. <b>And no second opinion</b>: every count here is the same number the application's own screens carry, read from the same projection, so a widget and a screen cannot disagree about the day.</div>
+
+</body></html>
