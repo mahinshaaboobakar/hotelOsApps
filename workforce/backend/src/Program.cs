@@ -16,6 +16,7 @@ using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Grpc;
 using HotelOS.Workforce.Infrastructure;
+using HotelOS.Workforce.Module;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -227,6 +228,16 @@ builder.Host.UsePlatformListener(
 var app = builder.Build();
 
 app.MapGrpcService<WorkforceGrpcService>();
+
+// **The surface this application serves to its own packaged UI** — design page
+// 63 §3, and the one line per capability the envelope asks for.
+//
+// The Shell forwards a bundle's `host.call` to `/module/{capability}/{method}`;
+// the SDK validates the person's token and checks they hold the capability in
+// this property before any handler runs. Neither check is this application's to
+// remember, which is what the envelope carrying them is for.
+app.MapWorkforceModule();
+
 app.MapHealthChecks("/health");
 
 app.Run();

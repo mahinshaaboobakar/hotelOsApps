@@ -76,6 +76,25 @@ public class MasterDataStaffDirectory(
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyDictionary<string, string>> FindDepartmentNamesAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+    {
+        var departments = await masterData.ListDepartmentsAsync(
+            new ListDepartmentsRequest
+            {
+                Context = RequestContextFactory.ForService("workforce", propertyId),
+            },
+            cancellationToken: cancellationToken);
+
+        // Keyed on the code and upper-cased once here, because a posting stores
+        // the canon form and a lookup that differed in case would miss silently
+        // — the caller would render a blank name and nothing would say why.
+        return departments.Departments.ToDictionary(
+            department => department.Code.ToUpperInvariant(),
+            department => department.Name);
+    }
+
+    /// <inheritdoc />
     public async Task<string?> FindPropertyCountryAsync(
         Guid propertyId, CancellationToken cancellationToken)
     {

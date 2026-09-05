@@ -124,4 +124,23 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
 
         return Task.FromResult(found);
     }
+
+    /// <summary>What this property calls a canon department.</summary>
+    /// <param name="code">The canon code, as a posting stores it.</param>
+    /// <param name="displayName">What Master Data would answer.</param>
+    public void WithDepartmentName(string code, string displayName)
+        => _departmentNames[code.ToUpperInvariant()] = displayName;
+
+    /// <inheritdoc />
+    /// <remarks>
+    /// Empty by default, for the reason names are unknown by default: a caller
+    /// has to render a department whose name this directory does not know, and
+    /// a double that always answered would hide that path forever.
+    /// </remarks>
+    public Task<IReadOnlyDictionary<string, string>> FindDepartmentNamesAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+        => Task.FromResult<IReadOnlyDictionary<string, string>>(
+            new Dictionary<string, string>(_departmentNames));
+
+    private readonly Dictionary<string, string> _departmentNames = [];
 }

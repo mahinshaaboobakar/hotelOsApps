@@ -127,4 +127,26 @@ public interface IStaffDirectory
     /// </remarks>
     Task<IReadOnlyDictionary<Guid, string>> FindNamesAsync(
         Guid propertyId, IReadOnlyCollection<Guid> staffIds, CancellationToken cancellationToken);
+
+    /// <summary>What the canon departments on this property are called.</summary>
+    /// <param name="propertyId">Whose property is asking.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>Display name by canon code — <c>HK</c> to <i>Housekeeping</i>.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>The whole set rather than one code</b>, for the reason
+    /// <see cref="FindNamesAsync"/> takes a set: a screen showing five teams
+    /// spans three departments, and a per-code port would make that three calls
+    /// at every call site.
+    /// </para>
+    /// <para>
+    /// <b>Why it is a port at all, rather than a table here.</b> The canon ships
+    /// compiled into Master Data (ADR 0119) and its display name is Master
+    /// Data's to state. A local map of code to name would be this application
+    /// owning a name it does not own — and it would be wrong in whichever
+    /// language a property configured that Workforce had not heard about.
+    /// </para>
+    /// </remarks>
+    Task<IReadOnlyDictionary<string, string>> FindDepartmentNamesAsync(
+        Guid propertyId, CancellationToken cancellationToken);
 }

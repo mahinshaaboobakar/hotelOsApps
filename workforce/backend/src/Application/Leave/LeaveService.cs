@@ -239,6 +239,40 @@ public class LeaveService(
     }
 
     /// <summary>The requests waiting on one approver.</summary>
+    /// <summary>Approved leave overlapping a window, for every person.</summary>
+    /// <param name="scope">Who is asking, and where.</param>
+    /// <param name="from">First day of the window.</param>
+    /// <param name="to">Last day of the window.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>Every approved request that touches the window.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>Overlapping, not contained.</b> A five-day leave that starts on the
+    /// Saturday before the week still puts somebody away on the Monday, and a
+    /// query that asked for requests <i>inside</i> the window would draw that
+    /// person as available on a day they are not.
+    /// </para>
+    /// <para>
+    /// It exists because the rota needs it: a cell is empty for two different
+    /// reasons, and an unfinished rota and an approved absence must not look
+    /// the same on the grid.
+    /// </para>
+    /// </remarks>
+    public async Task<IReadOnlyList<LeaveRequest>> ApprovedBetweenAsync(
+        RequestScope scope, DateOnly from, DateOnly to, CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
+
+        return await db.LeaveRequests
+            .Where(one => one.PropertyId == scope.PropertyId
+                          && one.State == LeaveRequestState.Approved
+                          && one.From <= to
+                          && from <= one.To)
+            .OrderBy(one => one.From)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<IReadOnlyList<LeaveRequest>> QueueAsync(
         RequestScope scope, Guid approverStaffId, CancellationToken cancellationToken)
     {
