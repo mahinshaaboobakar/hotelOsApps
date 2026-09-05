@@ -81,13 +81,27 @@ function click(selector: string, text: string): void {
  * photographs well.
  */
 function drive(): void {
-  if (screen === "attention") click(".ri", "Attention");
+  // `.head .tab`, not `.ri`. The rail became the top bar (docs/working/64 §3)
+  // and this driver kept the old class, so every `?screen=attention` capture
+  // since then has quietly photographed Today. A harness that cannot reach a
+  // screen reports nothing — it just shows a different one, convincingly.
+  if (screen === "attention") click(".head .tab", "Attention");
   if (screen === "stay") click(".tr.act", "Rajesh Pillai");
 
-  // Two frames: one for the click's own render, one for the screen it opened.
-  requestAnimationFrame(() =>
-    requestAnimationFrame(() =>
-      setTimeout(() => document.documentElement.setAttribute("data-ready", "true"), 40)));
+  // Two frames: one for the click's own render, one for the screen it opened —
+  // RACED AGAINST A TIMER, because a hidden tab paints no frames at all.
+  //
+  // `requestAnimationFrame` does not fire while `document.hidden` is true, and
+  // an automated capture runs the tab in the background more often than not. So
+  // the flag this whole discipline waits on could never arrive, and the obvious
+  // way out — give up and screenshot on a timer — is the exact thing the flag
+  // exists to replace. The race keeps the frame-accurate path when there are
+  // frames and still settles when there are none: the DOM is updated
+  // synchronously either way, so there is nothing left to wait for.
+  const settle = () => document.documentElement.setAttribute("data-ready", "true");
+
+  requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(settle, 40)));
+  setTimeout(settle, 400);
 }
 
 setTimeout(drive, 60);

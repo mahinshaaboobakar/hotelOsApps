@@ -1,3 +1,4 @@
+import { HOST_CONTRACT_RANGE } from "@hotelos/sdk";
 /**
  * The five widgets, side by side, at the popover's size.
  *
@@ -67,8 +68,15 @@ for (const name of drawn) {
 
     frame.contentWindow?.postMessage({
       type: "hotelos.connect",
-      contract: 1,
+      // Both halves, from the SDK — `isConnect` requires `minContract` to be a
+      // number, and a message without it is not recognised as a connect at all.
+      // Sent as a literal `1`, every widget in this harness rendered an EMPTY
+      // CARD: connected to nothing, styled correctly, and silent about why.
+      // Only a capture shows that; a suite that does not mount widgets cannot.
+      contract: HOST_CONTRACT_RANGE.current,
+      minContract: HOST_CONTRACT_RANGE.min,
       module: { id: "guestops", version: "0.1.0", capabilities: ["reservation.read"] },
+      property: { timezone: null, locale: null },
     }, "*", [channel.port2]);
   });
 }

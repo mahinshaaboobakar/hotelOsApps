@@ -30,20 +30,22 @@ import { actions, card, detail } from "../../chrome/panel";
 export async function attention(host: HostApi, into: HTMLElement): Promise<void> {
   const loaded = await load(host, "reservation.read", "attention", recordedAttention);
 
-  const head = el("div", "head");
-  const title = el("div");
-  title.append(
-    el("div", "ht", "Attention"),
+  // No page heading, and no `.head` — docs/working/64 §3. This built
+  // `<div class="head">` holding `<div class="ht">Attention</div>`, which was
+  // wrong twice after the rail became the top bar: it printed the section name
+  // the bar already says, and it claimed the class that now MEANS the bar. The
+  // sentence underneath is the screen's own and survives, as the drawing keeps
+  // it — a hint, not a title.
+  const body = el("div", "body");
+  if (!loaded.live) body.append(standIn(loaded.because));
+
+  body.append(
     el(
       "div",
-      "hsub",
+      "hint",
       `${count(loaded.value.length)} a person has to decide — nothing here decides itself`,
     ),
   );
-  head.append(title);
-
-  const body = el("div", "body");
-  if (!loaded.live) body.append(standIn(loaded.because));
 
   if (loaded.value.length === 0) {
     const clear = card("Nothing waiting");
@@ -55,7 +57,7 @@ export async function attention(host: HostApi, into: HTMLElement): Promise<void>
     body.append(one(item));
   }
 
-  into.replaceChildren(head, body);
+  into.replaceChildren(body);
 }
 
 /** One card: the band, the two sides, why it is here, and the ways out. */

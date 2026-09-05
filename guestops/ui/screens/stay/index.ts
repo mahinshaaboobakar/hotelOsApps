@@ -65,8 +65,15 @@ export async function stay(
 }
 
 /** Title, identifiers, who manages the stay, and the three actions. */
+/*
+ * `.title`, not `.head` — docs/working/64 §3. This heading STAYS, because it
+ * names a record rather than a section: no menu carries "Rajesh Pillai · Room
+ * 214", and Jobs keeps the same thing on its own detail screen. What was wrong
+ * was the class: `.head` now means the app bar, so a record title was claiming
+ * the chrome's own selector.
+ */
 function header(page: StayPage): HTMLElement {
-  const head = el("div", "head");
+  const head = el("div", "title");
   const title = el("div");
 
   const room = page.room === null ? "" : ` · Room ${page.room}`;
