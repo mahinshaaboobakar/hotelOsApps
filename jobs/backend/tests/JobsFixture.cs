@@ -32,14 +32,19 @@ namespace HotelOS.Jobs.Tests;
 /// </remarks>
 public sealed class JobsFixture : IAsyncLifetime
 {
-    /// <summary>The role this application's runtime connects as.</summary>
+    /// <summary>This run's convention — the installer's shape, under this run's names.</summary>
     /// <remarks>
-    /// <c>hotelos_app_jobs</c> — <b>the installer's own name</b>, derived
-    /// from <c>naming.rs:45-48</c> rather than chosen here. The suite provisions
-    /// it to the installer's convention (see <see cref="InstallerConvention"/>),
-    /// because a role invented for the tests would be a role no property has.
+    /// The suffix is the same one the scratch database carries, so everything a
+    /// run leaves behind is identifiable as that run's, and nothing it leaves
+    /// behind is standing where a real install wants to stand.
     /// </remarks>
-    private const string ApplicationRole = InstallerConvention.AppRole;
+    private readonly InstallerConvention _convention = new(Run);
+
+    /// <summary>What names this run's roles and its database alike.</summary>
+    private static string Run => Guid.NewGuid().ToString("n")[..8];
+
+    /// <summary>The role this application's runtime connects as.</summary>
+    private string ApplicationRole => _convention.AppRole;
 
     /// <summary>The provisioner, which is also the harness's admin role.</summary>
     /// <remarks>
@@ -105,7 +110,7 @@ public sealed class JobsFixture : IAsyncLifetime
     {
         // The cluster roles first: they are cluster-scoped, so they must exist
         // before the scratch database can grant either of them CONNECT.
-        await InstallerConvention.EnsureRolesAsync(
+        await _convention.EnsureRolesAsync(
             ProvisionerConnection("postgres"), _password);
 
         _database = await ScratchDatabase.CreateAsync(
@@ -131,7 +136,7 @@ public sealed class JobsFixture : IAsyncLifetime
         // exists, which is true for a platform service and false for an
         // installed application. This runs the installer's step 4 instead —
         // F7, ruled 2026-08-31.
-        await InstallerConvention.ProvisionSchemaAsync(
+        await _convention.ProvisionSchemaAsync(
             ProvisionerConnection(_database.Name), _database.Name);
 
         // The application's own migration, applied exactly as `migrate` applies
@@ -145,7 +150,7 @@ public sealed class JobsFixture : IAsyncLifetime
         // half of every operation. SHELL-Q37 held ten rows on exactly this.
         await InstallerConvention.ProvisionEventStoreAsync(ProvisionerConnection(_database.Name));
 
-        await using var migrator = Context(_database.MigratorConnectionFor(JobsDbContext.Schema));
+        await using var migrator = Context(_convention.MigratorConnectionFor(_database.Name));
         await migrator.Database.MigrateAsync();
 
         // No grant pass here. Step 4's `ALTER DEFAULT PRIVILEGES FOR ROLE
@@ -221,10 +226,16 @@ public sealed class JobsFixture : IAsyncLifetime
     /// <inheritdoc />
     public async Task DisposeAsync()
     {
-        if (_database is not null)
-        {
-            await _database.DisposeAsync();
-        }
+        if (_database is null) return;
+
+        // The roles go before the database, because DROP OWNED needs the
+        // database they own things in to still be there. Roles are cluster-wide
+        // and a scratch database is not, so this is the only cleanup that has
+        // to be asked for rather than falling out of dropping the database.
+        await _convention.DropRolesAsync(
+            ProvisionerConnection("postgres"), ProvisionerConnection(_database.Name));
+
+        await _database.DisposeAsync();
     }
 }
 

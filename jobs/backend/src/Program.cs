@@ -28,6 +28,17 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// The connection name the platform hands every package — a convention rather
+// than a manifest field, exactly as `dotnet <assembly> migrate` is (ADR 0092
+// §Q11). Install step 8 sets `ConnectionStrings__HotelOS` in the child's
+// environment and ASP.NET maps it here.
+//
+// It said "Jobs" until the first real install, which stopped at step 6 with
+// `ConnectionStrings:Jobs is not configured` — a name no installer sets, and a
+// name nothing in this repository could have caught, because every test
+// supplies its own connection string directly.
+const string PlatformConnection = "HotelOS";
+
 // Assigned the moment the host is built, and read only from inside a running
 // activity — the sweep is declared before there is a provider to sweep with.
 WebApplication? started = null;
@@ -37,7 +48,7 @@ if (args is ["migrate", ..])
 {
     return await SchemaMigration.RunAsync(
         builder.Configuration,
-        connectionName: "Jobs",
+        connectionName: PlatformConnection,
         schema: JobsDbContext.Schema,
         create: connection => new JobsDbContext(
             new DbContextOptionsBuilder<JobsDbContext>()
@@ -58,7 +69,7 @@ builder.Services.AddGrpc(options =>
 
 builder.Services.AddDbContext<JobsDbContext>(options => options
     .UseSnakeCaseNamingConvention()
-    .UseNpgsql(builder.Configuration.GetConnectionString("Jobs"), npgsql =>
+    .UseNpgsql(builder.Configuration.GetConnectionString(PlatformConnection), npgsql =>
     {
         npgsql.MigrationsHistoryTable("__migrations", JobsDbContext.Schema);
         npgsql.EnableRetryOnFailure(maxRetryCount: 3, TimeSpan.FromSeconds(2), null);

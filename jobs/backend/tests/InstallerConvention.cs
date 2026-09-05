@@ -1,3 +1,5 @@
+using HotelOS.Platform;
+using HotelOS.Platform.TestSupport;
 using Npgsql;
 
 namespace HotelOS.Jobs.Tests;
@@ -34,16 +36,28 @@ namespace HotelOS.Jobs.Tests;
 /// would be testing the installer — which is the E2E suite's job.
 /// </para>
 /// </remarks>
-public static class InstallerConvention
+public sealed class InstallerConvention(string run)
 {
     /// <summary>The schema this application's manifest declares.</summary>
     public const string Schema = "jobs";
 
-    /// <summary><c>NOLOGIN</c>. Owns the schema; migrations assume it — ADR 0029.</summary>
-    public const string OwnerRole = "hotelos_owner_jobs";
+    /// <summary>
+    /// <c>NOLOGIN</c>. Owns the schema; migrations assume it — ADR 0029.
+    /// </summary>
+    /// <remarks>
+    /// <b>Suffixed per run, and that is the whole point of this class taking a
+    /// run id.</b> The installer's own name is <c>hotelos_owner_jobs</c>, and a
+    /// suite that took it stands exactly where a real install wants to stand:
+    /// on 2026-09-05 the Kernel refused to install Jobs on the development
+    /// machine with <i>"role hotelos_owner_jobs already exists; installing
+    /// would take it over"</i>, because this suite had made it. Roles are
+    /// cluster-wide and a scratch database is not, so the isolation the
+    /// database gives has to be spelled into the names as well.
+    /// </remarks>
+    public string OwnerRole { get; } = $"hotelos_owner_jobs_{run}";
 
-    /// <summary><c>LOGIN</c>. What the running application connects as.</summary>
-    public const string AppRole = "hotelos_app_jobs";
+    /// <summary><c>LOGIN</c>. What the running application connects as — this run's.</summary>
+    public string AppRole { get; } = $"hotelos_app_jobs_{run}";
 
     /// <summary>The role a migration runs as — <c>store/mod.rs:53</c>.</summary>
     public const string MigrationRole = "hotelos_migrator";
@@ -68,13 +82,16 @@ public static class InstallerConvention
     /// at creation, so a second run does not authenticate with the first run's.
     /// </para>
     /// <para>
-    /// <b>This cannot collide with an installed property.</b> ADR 0104 puts the
-    /// development cluster on 25432 and the installed product's on 15432, and
-    /// they are separate clusters — which is exactly the separation that ruling
-    /// exists to buy.
+    /// <b>It used to say this could not collide with an installed property</b>,
+    /// on the grounds that ADR 0104 separates the installed cluster (15432) from
+    /// the development one (25432). That is true of an installed <i>property</i>
+    /// and false of the <i>development installation</i>, which runs its Kernel
+    /// against 25432 — and on 2026-09-05 a real <c>package install</c> was
+    /// refused because these roles were already there. The names are per run
+    /// now, and <see cref="DropRolesAsync"/> takes them away again.
     /// </para>
     /// </remarks>
-    public static async Task EnsureRolesAsync(string adminConnection, string password)
+    public async Task EnsureRolesAsync(string adminConnection, string password)
     {
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
@@ -131,7 +148,7 @@ public static class InstallerConvention
     /// <param name="databaseConnection">A connection to the scratch database, as the provisioner.</param>
     /// <param name="databaseName">That database, for the CONNECT grant.</param>
     /// <returns>When the application role can reach its schema.</returns>
-    public static async Task ProvisionSchemaAsync(string databaseConnection, string databaseName)
+    public async Task ProvisionSchemaAsync(string databaseConnection, string databaseName)
     {
         await using var connection = new NpgsqlConnection(databaseConnection);
         await connection.OpenAsync();
@@ -210,7 +227,7 @@ public static class InstallerConvention
     /// <summary>Step 4's statements, in the one order that works.</summary>
     /// <param name="database">The database the application role must reach.</param>
     /// <returns>The statements.</returns>
-    private static IEnumerable<string> Statements(string database) =>
+    private IEnumerable<string> Statements(string database) =>
     [
         // PostgreSQL 16 grants a CREATEROLE role ADMIN on the roles it creates
         // but **not SET**, and `CREATE SCHEMA … AUTHORIZATION` requires the
@@ -247,5 +264,68 @@ public static class InstallerConvention
     {
         await using var command = new NpgsqlCommand(sql, connection);
         await command.ExecuteNonQueryAsync();
+    }
+    /// <summary>
+    /// Take this run's roles away again.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A killed run leaves them, which is why the names carry the run id: a
+    /// leftover is identifiable, harmless, and — unlike the installer's own
+    /// names — in nobody's way. Dropping is best-effort for the same reason.
+    /// </para>
+    /// <para>
+    /// <c>DROP OWNED</c> first, because a role that has been granted anything
+    /// anywhere cannot be dropped, and the grants this suite made are in a
+    /// database that is about to be dropped anyway.
+    /// </para>
+    /// </remarks>
+    /// <param name="adminConnection">A connection to the cluster, as the provisioner.</param>
+    /// <param name="databaseConnection">A connection to this run's database, as the provisioner.</param>
+    /// <returns>When both roles are gone, or when they could not be.</returns>
+    public async Task DropRolesAsync(string adminConnection, string databaseConnection)
+    {
+        try
+        {
+            await using (var database = new NpgsqlConnection(databaseConnection))
+            {
+                await database.OpenAsync();
+                await ExecuteAsync(database, $"DROP OWNED BY {AppRole}, {OwnerRole} CASCADE");
+            }
+
+            await using var cluster = new NpgsqlConnection(adminConnection);
+            await cluster.OpenAsync();
+            await ExecuteAsync(cluster, $"DROP ROLE IF EXISTS {AppRole}");
+            await ExecuteAsync(cluster, $"DROP ROLE IF EXISTS {OwnerRole}");
+        }
+        catch (PostgresException)
+        {
+            // Best effort. The run id in the name is what makes a leftover
+            // findable, and a failure to tidy must not fail a suite that passed.
+        }
+    }
+
+    /// <summary>
+    /// The connection a migration runs on, as this run's owner.
+    /// </summary>
+    /// <remarks>
+    /// <b>Not <c>ScratchDatabase.MigratorConnectionFor</c></b>, which derives the
+    /// owner from the schema — <c>hotelos_owner_{schema}</c> — and so can only
+    /// ever name the installer's role. The shape is the SDK's, verbatim: the
+    /// role and the search path travel as libpq options, so the session has
+    /// assumed the owner before the first statement and no migration can forget
+    /// a <c>SET ROLE</c>.
+    /// </remarks>
+    /// <param name="database">This run's scratch database.</param>
+    /// <returns>The connection string.</returns>
+    public string MigratorConnectionFor(string database)
+    {
+        var host = ScratchDatabase.Target.Split(':')[0];
+        var port = ScratchDatabase.Target.Split(':')[1];
+        var password = Environment.GetEnvironmentVariable(SchemaMigration.PasswordVariable) ?? "devmigrator";
+
+        return $"Host={host};Port={port};Database={database};Username={MigrationRole};"
+            + $"Password={password};Options=-c role={OwnerRole} -c search_path={Schema};"
+            + "Pooling=false;Include Error Detail=true";
     }
 }
