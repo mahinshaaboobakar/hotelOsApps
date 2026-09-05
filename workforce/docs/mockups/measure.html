@@ -130,7 +130,13 @@ async function measure(entry) {
 }
 
 (async () => {
-  const plan = await (await fetch("./plan.json?bust=" + Date.now())).json();
+  const all = await (await fetch("./plan.json?bust=" + Date.now())).json();
+
+  /* `?only=6,13` measures those frames and nothing else. Nineteen mockups
+     re-parsed under cache-busting is enough work to bog the renderer down, and
+     confirming one amendment does not need the whole set. */
+  const only = (p.get("only") || "").split(",").filter(Boolean).map(Number);
+  const plan = only.length === 0 ? all : all.filter((e) => only.includes(e.no));
   const out = [];
 
   for (const entry of plan) {

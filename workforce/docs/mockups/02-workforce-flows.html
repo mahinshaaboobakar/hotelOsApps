@@ -2,6 +2,11 @@
 <html lang="en"><head><meta charset="utf-8">
 <title>Workforce Flows</title>
 <style>
+  /* Amended 2026-09-05, APPS-Q4 Part A: every list row takes §64's licensed
+     two-line variant `6px 10px` and every header its `8px 10px`. These drawings
+     predated the standard and carried 11–12px vertical with an 18px horizontal
+     that appears in neither of §4's variants — owner ruling, build stands,
+     drawings amended, so the next audit is not arguing with a stale mock. */
   /* # The palette is the shell’s, and this drawing no longer has one
      `docs/working/64` §1. This file declared its own `:root` — `--bg`, `--text`,
      `--dim`, `--indigo` — and every one of those names carried a value the shell
@@ -176,9 +181,9 @@
   .tab.on{color:var(--text);border-color:var(--indigo)}
   .tab .cnt{margin-left:6px;font-size:10.5px;padding:1px 7px;border-radius:99px;background:rgba(129,140,248,.18);color:var(--indigo)}
   .card{background:var(--glass);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-  .lrow{display:grid;grid-template-columns:1fr 130px 120px 110px;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
+  .lrow{display:grid;grid-template-columns:1fr 130px 120px 110px;gap:12px;padding:6px 10px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
   .lrow:last-child{border-bottom:none}
-  .lrow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .lrow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 10px}
   .lrow .sub{color:var(--faint);font-size:11.5px;display:block}
   .lrow.on{background:rgba(129,140,248,.08);box-shadow:inset 2.5px 0 0 var(--indigo)}
   .split{display:grid;grid-template-columns:1fr 1.15fr;gap:14px;min-height:0}
@@ -209,8 +214,8 @@
   .pp .dep{margin-left:auto}
   .dep{font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--dim)}
   /* people table */
-  .prow{display:grid;grid-template-columns:1.3fr 120px 1fr 1fr 90px;gap:12px;padding:11px 18px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
-  .prow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 18px}
+  .prow{display:grid;grid-template-columns:1.3fr 120px 1fr 1fr 90px;gap:12px;padding:6px 10px;border-bottom:1px solid var(--line);align-items:center;font-size:13px}
+  .prow.hd{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);background:rgba(10,12,18,.3);padding:8px 10px}
   .prow:last-child{border-bottom:none}
   .prow .sub{color:var(--faint);font-size:11.5px;display:block}
   .crown{color:var(--duty);font-size:11px;margin-left:6px}
@@ -284,9 +289,9 @@
   .sect{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--faint);font-weight:700;margin:2px 0 -2px}
   /* report */
   .rep{width:100%;border-collapse:collapse;font-size:12.5px}
-  .rep th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;text-align:right;padding:9px 12px;background:rgba(10,12,18,.3);border-bottom:1px solid var(--line)}
+  .rep th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600;text-align:right;padding:8px 10px;background:rgba(10,12,18,.3);border-bottom:1px solid var(--line)}
   .rep th:first-child{text-align:left}
-  .rep td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+  .rep td{padding:6px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
   .rep td:first-child{text-align:left}
   .rep tr:last-child td{border-bottom:none}
   .rep .nm b{font-weight:500}

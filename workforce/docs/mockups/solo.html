@@ -33,7 +33,18 @@
   const src = p.get("src") || "01-workforce-gold.html";
 
   const f = document.getElementById("f");
-  f.width = w; f.height = h; f.src = "./" + src;
+  /*
+   * The bust is carried through to the MOCKUP, not only to this page.
+   *
+   * Third instance of one trap in one session: `frame.js` was cached behind a
+   * busted `shot.html`, `solo.html` was cached behind a busted `measure.html`,
+   * and then the drawing itself was cached behind a busted `solo.html`. Each
+   * time the harness reported yesterday's file as today's measurement, which is
+   * the worst shape a check can take — it is real, and it is of something that
+   * no longer exists. A cache-buster stops at whatever it is not passed to.
+   */
+  f.width = w; f.height = h;
+  f.src = "./" + src + "?bust=" + (p.get("bust") || Date.now());
   document.getElementById("stage").style.transform = "scale(" + k + ")";
 
   f.addEventListener("load", () => {
