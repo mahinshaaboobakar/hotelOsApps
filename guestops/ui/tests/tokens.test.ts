@@ -107,3 +107,42 @@ describe("what the module hardcodes", () => {
     }
   });
 });
+
+/**
+ * The harness is a host, so it must promise exactly what a host promises.
+ *
+ * `preview/tokens.css` is the only place in this application where a token's
+ * *value* is written down, and it stands in for the shell during a capture. Its
+ * history is the reason this guard exists: it once injected twenty-four names —
+ * the shell's whole internal palette — and a module could then consume an
+ * unpublished one and still photograph correctly. Narrowed to fourteen, it was
+ * correct until `894e230` published three more, at which point it was one set
+ * *behind* and captures showed the module rendering its own fallbacks.
+ *
+ * Both directions are the same defect: a harness that does not match the
+ * contract photographs something no property will ever run. Derived from
+ * `TOKEN_NAMES` rather than a copied list, so the day an eighteenth token lands
+ * this fails until the harness carries it.
+ */
+describe("the capture harness", () => {
+  /** Every `--…:` the harness declares. */
+  function injected(css: string): readonly string[] {
+    const names = new Set<string>();
+
+    for (const [, name] of css.matchAll(/^\s*--([a-z0-9-]+)\s*:/gm)) {
+      if (name !== undefined) names.add(name);
+    }
+
+    return [...names].sort();
+  }
+
+  it("injects exactly the published contract — no more, no fewer", async () => {
+    // Read from the project root rather than from `import.meta.url`: vitest
+    // transforms the module, so its own URL is not a file one.
+    const css = await import("node:fs/promises").then((fs) =>
+      fs.readFile("preview/tokens.css", "utf8"),
+    );
+
+    expect(injected(css)).toEqual([...TOKEN_NAMES].sort());
+  });
+});

@@ -1,8 +1,10 @@
 /*
  * The published token contract, at the shell's live values.
  *
- * **Exactly the fourteen names `@hotelos/sdk`'s `TOKENS` publishes, and no
- * others.** An earlier version of this file injected twenty-four — the shell's
+ * **Exactly the seventeen names `@hotelos/sdk`'s `TOKENS` publishes, and no
+ * others.** It was fourteen until `894e230` published the three soft tones;
+ * a harness one set behind the shell photographs a module rendering its own
+ * fallbacks, which is the same wrong answer as a harness that is ahead. An earlier version of this file injected twenty-four — the shell's
  * whole internal palette, including `--color-*-soft`, `--color-scroll-thumb`,
  * `--color-surface-sunken` and `--r-md`. That made the harness a *more
  * generous host than any real one*, so a module could consume an unpublished
@@ -31,6 +33,13 @@
   --color-ok: #34d399;
   --color-warn: #fbbf24;
   --color-bad: #f87171;
+
+  /* The state tints — published 2026-09-04, `894e230`. Without these three a
+     module falls back to its own `color-mix`, and the capture then proves a
+     tint no property supplies. */
+  --color-ok-soft: rgb(52 211 153 / 0.12);
+  --color-warn-soft: rgb(251 191 36 / 0.12);
+  --color-bad-soft: rgb(248 113 113 / 0.12);
 
   --radius-panel: 1rem;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
