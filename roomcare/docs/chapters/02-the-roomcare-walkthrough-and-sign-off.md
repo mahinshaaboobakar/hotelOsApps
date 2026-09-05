@@ -20,7 +20,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(2)` page 48 vs the brief | **the brief governs**; page 48 amended to match; the owner's scenario study is this page's spine | — |
 | `RC-Q1(3)` minibar | **S1 SIGNED OFF — owner, 2026-09-05:** one Inventory application when briefed, minibar items its billable category; Room Care records the act only | — |
 | `RC-Q1(4)` amenities · linen · carts | **S2 SIGNED OFF — owner, 2026-09-05**, as one decision with S1; **the request to the planner for the Inventory application is under S2** | — |
-| `RC-Q1(5)` public areas | | **S3** |
+| `RC-Q1(5)` public areas | **S3 SIGNED OFF — owner, 2026-09-05:** Room Care's, one task model with rooms, scheduled; requests are Jobs'. **Rider, now a page-wide rule:** every schedule and policy is configured per property | — |
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
 | `RC-Q1(7)` reconciliation policy · the PMS-only hotel | | **S4** |
 | `RC-Q1(8)` CONN-Q11 | **accepted provisionally** — the scenario pass (S0) is the final check | S0 |
@@ -131,6 +131,21 @@ THE TWO SCREENS
   attendant: my rooms · start · pause · end · exception · photo · ask for extra time
   supervisor: the board by state · the pending queue · assign · alerts · policy setup
 ```
+
+### The rule every section is under — owner, 2026-09-05
+
+> *"the given scenarios differ property by property — we need to configure
+> this by property. This only my concern."*
+
+**Everything on this page that reads like a fact about how a hotel works is
+a property configuration with a sensible default — never a constant.** The
+service windows, the cleaning kinds and their minutes, the weekday calendar,
+the priority ladder, the area schedules, the reconciliation mode (S4), the
+assignment strategies, the alert thresholds. The scenarios in each section
+are *one* hotel's; the design must hold for the one next door that does it
+differently, and the setup screen is where that difference lives. Where a
+property has not configured something, the default applies and the screen
+says it is the default. *(Recorded on S3; it binds S0–S7.)*
 
 ### What the reference proved, by failing
 
@@ -392,11 +407,78 @@ honest — it decides what care a place is due, never what somebody asked for.
 task model with rooms, scheduled by the property; spills and one-off asks are
 Jobs — yes?*
 
-**Ruling:** —
+**Ruling — owner, 2026-09-05: agreed**, with one concern stated: *"the given
+scenarios differ property by property — we need to configure this by
+property."* **SIGNED OFF.** The concern is not S3's alone; it is written
+into S0 as a rule for every section.
 
 ## S4 · When Room Care and the PMS disagree; the PMS-only hotel — `RC-Q1(7)`
 
-*Opened after S3.*
+### The scenario
+
+*Hotel A* runs the attendant app. At 10:40 the attendant ends the clean of
+214 and Room Care marks it **clean**, inspection pending. At 10:42 a status
+arrives from the PMS saying 214 is **dirty** — the desk's screen had not
+caught up, or the night's checkout landed late. At 11:05 the desk marks 214
+clean in the PMS themselves, because a guest is standing there.
+
+*Hotel B* has the PMS, a printed room list, no devices on the floors. The
+attendants clean; the floor supervisor phones the desk; the desk changes the
+room in the PMS. Room Care is installed for the board, the policy and the
+assignment sheet — nobody taps *done* in it.
+
+### The proposal
+
+**Which one leads is a property setting — and in both modes Room Care is the
+one that announces.**
+
+```text
+ROOM CARE LEADS (Hotel A — attendants use the app)
+  Room Care's condition is the truth it acts on. An observation from the PMS or the desk that
+  disagrees is recorded with its source and shown as a DISAGREEMENT on the board — it never
+  silently overwrites what an attendant did. Clearing it is a supervisor's act: "keep ours" or
+  "take theirs", recorded — who, when, which side won. (The GUEST-Q3 shape: a standing decision
+  by a person beats a possibly stale fact; the disagreement is a flag, never a second answer.)
+  Some observations are not disagreements: a room the PMS marks dirty at checkout while Room
+  Care already holds it dirty is just agreement, and an out-of-order from EngineeringOps is
+  its owner's fact, consumed, never argued with.
+
+PMS LEADS (Hotel B — no attendant app; or a hotel that wants the desk in charge)
+  An observation is APPLIED: Room Care sets its condition from it, with provenance "from the
+  PMS / the desk", and announces it — room.cleaned goes out from Room Care exactly as if an
+  attendant had ended the task (HUB-Q4: the observation is the Hub's; applying it is ours).
+  The task closes on the observation. The board, the pending queue, the policy and the
+  assignment sheet all still work; only the "done" comes from the PMS.
+
+EITHER WAY
+  every change to condition carries who or what set it; a property may switch modes; the
+  mode is per property, as S3's rule requires — and a property may run Room-Care-leads on
+  the floors that have devices and PMS-leads elsewhere only if the walkthrough finds a hotel
+  that needs it (not proposed; noted so it is not assumed impossible)
+```
+
+### The reasoning
+
+Two truths about one room cannot both leave the application, and the
+platform has already settled how a person's standing decision and an
+automated fact are reconciled — for GuestOps, in `GUEST-Q3`: the deliberate
+act wins, the disagreement is visible, the clearing is recorded. Room Care
+takes the same shape rather than inventing a second one, because a receptionist
+and a housekeeping supervisor should meet the same rule for the same kind of
+conflict. The old system had no rule at all: it never marked a room clean
+itself and simply took whatever the PMS said five seconds later (survey F1),
+so an attendant's work was invisible until the desk noticed. What the PMS-only
+hotel needs is not a different application but the same one with the *done*
+arriving from outside — which is exactly what applying an observation is —
+and making that a property setting is what lets a hotel start on paper and
+move to devices without changing anything but a switch.
+
+**For the owner to rule, in a sentence:** *Room Care leads where attendants
+use the app, the PMS leads where they don't — a per-property setting, both
+with Room Care announcing, disagreements flagged and cleared by a supervisor
+— yes?*
+
+**Ruling:** —
 
 ## S5 · The guest's cleaning preference — `RC-Q1(9)`
 
