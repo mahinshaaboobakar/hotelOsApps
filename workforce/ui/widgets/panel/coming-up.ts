@@ -57,18 +57,24 @@ export async function comingUp(host: HostApi): Promise<HTMLElement> {
  * dated can compose it — the service does not know the locale, and the generic
  * row renderer must not sniff a field for something that looks like a date.
  *
- * **One divergence from the approved frame, named rather than closed.** The
- * frame draws *Housekeeping · Thu 11*; this draws *Housekeeping · 11 Sept 2026*,
- * because `formatDay` is the platform's day formatter and it carries the year.
- * There is no published short form — `InstantStyle.date` would give *11 Sep* and
- * takes an instant, which a calendar day is not. Inventing the format here
- * would fork the one formatter the platform has so that one card could match
- * one drawing, so it is reported instead.
+ * **The glance form, and why it is the SDK's rather than this file's.** The
+ * approved frame draws *Housekeeping · Thu 11*, and for a while this drew
+ * *Housekeeping · 11 Sept 2026* — `formatDay`'s only form carried the year, and
+ * `InstantStyle.date` takes an instant, which a calendar day is not. Writing
+ * the short form here would have forked the one day formatter the platform has
+ * so that one card could match one drawing, so it was reported instead and
+ * `DayStyle.weekday-day` was published for every application's widgets to use
+ * (BB, `9fb3c42`).
+ *
+ * **The part order is the locale's, not ours.** A US-locale property renders
+ * *10 Thu*, which is that locale ordering the same two parts and not a defect
+ * to correct here — a card that reimposed weekday-then-day would be this file
+ * deciding what a property's language does.
  */
 function dated(
   overlaps: readonly SummaryRow[], property: PropertyEnvironment,
 ): readonly SummaryRow[] {
   return overlaps.map((one) => one.on === undefined
     ? one
-    : { ...one, name: `${one.name} · ${formatDay(one.on, property)}` });
+    : { ...one, name: `${one.name} · ${formatDay(one.on, property, "weekday-day")}` });
 }

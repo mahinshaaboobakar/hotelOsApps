@@ -11,17 +11,20 @@
  * the inverse of auditing against fallbacks, and a worse error, because the
  * capture would look *better* than the product rather than worse.
  *
- * # Seventeen, not fourteen — and a hand-written list is why this was stale
+ * # The count has moved twice, and both times the guard is what noticed
  *
  * The tone vocabulary joined the published surface in `894e230` (`PKG-Q46` (2)),
- * adding the three `-soft` names. This file was written out by hand against
- * fourteen and had no way to notice: a module using `--color-ok-soft` would
- * have rendered on its fallback in every capture while rendering correctly in
- * the product — a harness that makes the module look *worse* than it is, which
- * is the failure that hides longest because nobody chases it.
+ * adding the three `-soft` names, and this file — hand-written against
+ * fourteen — had no way to notice: a module using `--color-ok-soft` would have
+ * rendered on its fallback in every capture while rendering correctly in the
+ * product, a harness that makes the module look *worse* than it is, which is
+ * the failure that hides longest because nobody chases it.
  *
- * `tests/tokens.test.ts` now asserts this file against `TOKEN_NAMES`, so the
- * next addition fails here rather than waiting to be noticed.
+ * Then the two scrollbar thumb names joined it, and this time
+ * `tests/tokens.test.ts` failed on the addition rather than the omission being
+ * found later. That is the whole return on deriving the guard from
+ * `TOKEN_NAMES` instead of counting: **the number in this heading is not the
+ * contract and never was**, which is why it no longer states one.
  *
  * The values are the shell's own, read from `apps/desktop/src/styles.css`
  * (the default dark block). Not invented, and not the module's fallbacks: this
@@ -44,6 +47,11 @@
   --color-ok-soft: rgb(52 211 153 / 0.12);
   --color-warn-soft: rgb(251 191 36 / 0.12);
   --color-bad-soft: rgb(248 113 113 / 0.12);
+  /* ADR 0111 styles scrollbars once, for the shell and every module realm
+     alike; `realm.ts` writes these two into the module's own scrollbar rules,
+     so a harness without them would draw a thumb no property ever sees. */
+  --color-scroll-thumb: rgb(255 255 255 / 0.28);
+  --color-scroll-thumb-strong: rgb(255 255 255 / 0.45);
   --radius-panel: 1rem;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

@@ -44,6 +44,11 @@ function answering(answer: unknown): HostApi {
   };
 }
 
+/** A host that cannot answer, in a property whose locale is established. */
+function inLocale(locale: string): HostApi {
+  return { ...unavailable(), property: { timezone: "Asia/Kolkata", locale } };
+}
+
 /** Every widget, by the name its manifest entry carries. */
 const WIDGETS = [
   { name: "Shift Board", panel: shiftBoard },
@@ -192,6 +197,35 @@ describe("Coming Up", () => {
     const note = card.querySelector(".wnote");
     note?.remove();
     expect(card.textContent ?? "").not.toMatch(/unfilled|thin/i);
+  });
+
+  it("says an overlap's day in the glance form the frame draws", async () => {
+    // Nothing held this before, which is how the card spent a round drawing
+    // *11 Sept 2026* where the approved frame draws a weekday and a day. The
+    // expected string is spelled out rather than computed from `formatDay`: a
+    // test that called the function it is checking would agree with any form.
+    //
+    // **The weekday is Fri, and the approved frame draws Thu.** 2026-09-11 is
+    // a Friday, so the frame's *Thu 11* is a pair that cannot exist in
+    // September 2026 — and its other two rows are wrong by the same day. That
+    // is a finding against the drawing, reported rather than absorbed: writing
+    // *Thu* here, or sliding the fixture back a day to suit it, would make the
+    // card agree with an impossible date. The **shape** is what the frame
+    // decided, and the shape matches.
+    const card = await comingUp(inLocale("en-IN"));
+
+    expect(card.textContent ?? "").toContain("Housekeeping · Fri 11");
+  });
+
+  it("lets the locale order the two parts, and does not reimpose ours", async () => {
+    // A US property reads *11 Fri* for the same day — the locale ordering the
+    // same two parts, not a defect. Held so that a later "fix" for the ragged
+    // reading has to argue with a test instead of quietly deciding what a
+    // property's language does. Matched on shape rather than one spelling,
+    // because the point is the order and not the day.
+    const card = await comingUp(inLocale("en-US"));
+
+    expect(card.textContent ?? "").toMatch(/Housekeeping · \d{2} Fri/u);
   });
 });
 
