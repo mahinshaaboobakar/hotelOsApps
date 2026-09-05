@@ -22,6 +22,14 @@ export interface Built {
  * @param realmCss what the shell writes into a module's document
  * @returns the page content — **no document wrapper**, because the artifact
  * host supplies one and a second `<html>` inside it is a document nobody parses
+ *
+ * The one head tag it does emit is `<meta charset>`. The host supplies one too
+ * and a second is harmless, but the generated file is also opened directly off
+ * disk and over a plain static server — and without it the browser guesses
+ * Latin-1, so every `·`, `—`, `→` and `＋` in **both** panes renders as
+ * mojibake. A `srcdoc` document inherits its parent's encoding, so its own
+ * `<meta charset>` does not save it; the outer page is the only place this can
+ * be fixed.
  */
 export function page(
   pairs: readonly Built[],
@@ -31,7 +39,8 @@ export function page(
 ): string {
   const sections = pairs.map((one) => section(one, goldCss, tokenCss, realmCss)).join("\n");
 
-  return `<title>Seventeen Pairs</title>
+  return `<meta charset="utf-8">
+<title>Seventeen Pairs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap">
@@ -67,6 +76,22 @@ export function page(
     <ul id="notes"><li>measuring&hellip;</li></ul>
   </details>
 
+  <p><b>One systematic difference, on every pair.</b> The left pane carries the
+  mockup's own window decoration &mdash; two radial gradients behind
+  <code>.win</code>, drawn so a frame reads as a floating window on a page. A
+  module gets a flat <code>--color-surface</code>, because the desktop paints
+  the window and the module paints inside it. It is chrome of the
+  <i>drawing</i>, not of the design, and it is left in rather than removed:
+  taking it out would be adjusting the frame to flatter the build.</p>
+
+  <div class="control">
+    <span class="lbl">Pairs</span>
+    <button type="button" data-view="side" class="on">Side by side</button>
+    <button type="button" data-view="stacked">Stacked, full size</button>
+    <span class="hint">The design is drawn at <b>1220px</b>. Side by side
+    scales both panes to fit; stacked shows each at 1&#8239;:&#8239;1.</span>
+  </div>
+
   <p class="quiet">Dark only, deliberately. Both panes are HotelOS surfaces and
   the harness injects the dark theme's published values; a light frame around
   them would be a colour scheme no property runs.</p>
@@ -91,10 +116,24 @@ function section(one: Built, goldCss: string, tokenCss: string, realmCss: string
 </section>`;
 }
 
-/** A pane, holding a whole document. */
+/**
+ * A pane, holding a whole document at the width it was drawn for.
+ *
+ * **1220px, always** — `.win{max-width:1220px}` is what the gold file lays its
+ * frames out at, and the first gallery rendered them into 727px columns. Every
+ * six- and seven-column grid crushed, every strip wrapped, and both panes were
+ * wrong in the same way, which is why the pairs still measured as matching: two
+ * squeezed documents agree with each other. The owner rejected it as
+ * unauditable and was right.
+ *
+ * The iframe therefore keeps its true width and is **scaled**, not resized, so
+ * layout is computed at 1220 and only the display shrinks. The scale is a CSS
+ * variable the page's control sets.
+ */
 function pane(label: string, document_: string): string {
   return `<figure><figcaption>${label}</figcaption>`
-    + `<iframe loading="lazy" srcdoc="${escaped(document_)}"></iframe></figure>`;
+    + `<div class="frame"><iframe loading="lazy" srcdoc="${escaped(document_)}"></iframe></div>`
+    + `</figure>`;
 }
 
 /**
@@ -204,12 +243,51 @@ h2 .t{min-width:0;color:var(--ink)}
 .verdict.part{color:var(--warn)}
 .verdict.bad{color:var(--bad)}
 
+.control{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:22px 0 4px}
+.control .lbl{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--faint);margin-right:2px}
+.control button{font:400 12.5px/1 var(--sans);color:var(--muted);cursor:pointer;
+  padding:7px 13px;border:1px solid var(--edge);border-radius:8px;
+  background:transparent}
+.control button:hover{color:var(--ink)}
+.control button.on{color:var(--ink);border-color:rgb(129 140 248 / .5);
+  background:rgb(129 140 248 / .12)}
+.control button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.control .hint{flex-basis:100%;font-size:12px;color:var(--faint)}
+
+/*
+ * THE WIDTH IS THE DESIGN'S, and the scale is the page's.
+ *
+ * \`.win\` is drawn at 1220px. An iframe narrowed to a column recomputes the
+ * layout at that column's width, which crushes every six- and seven-column
+ * grid and wraps every strip — and it does it to BOTH panes equally, so the
+ * measurement still reports a match while the pair is unreadable. So the frame
+ * keeps 1220 and \`transform\` shrinks the picture instead.
+ */
 .pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 figure{margin:0;min-width:0}
 figcaption{margin-bottom:8px;font-size:10.5px;letter-spacing:.1em;
   text-transform:uppercase;color:var(--faint)}
-iframe{display:block;width:100%;height:780px;border:1px solid var(--edge);
-  border-radius:12px;background:#0b0d14}
+.frame{overflow:hidden;border:1px solid var(--edge);border-radius:12px;
+  background:#0b0d14;height:calc(var(--h) * var(--scale));position:relative;
+  transition:height .12s ease}
+iframe{display:block;width:var(--w);height:var(--h);border:0;background:#0b0d14;
+  transform:scale(var(--scale));transform-origin:0 0}
+
+/*
+ * The scale is set in script, and it has to be.
+ *
+ * CSS cannot divide a length by a length to get a number, so
+ * \`calc((100vw - 88px) / 2 / 1220)\` is a LENGTH — and \`scale()\` takes a
+ * number, so the declaration is invalid and dropped. The first attempt at this
+ * looked right in the source and did nothing at all in the browser, which is
+ * why it was measured rather than admired.
+ */
+body{--w:1220px;--h:820px;--scale:1}
+
+/* Stacked: one pane at a time, at 1:1 wherever the viewport allows it. This is
+   the view that answers "I cannot audit at that size". */
+body.stacked .pair{grid-template-columns:1fr}
 
 @media (max-width:1180px){.pair{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}

@@ -29,7 +29,7 @@ const SHOWN = 5;
  * @param size how many rows a page holds
  * @param shown how many rows are actually on screen
  * @param go what to do when a page is chosen
- * @returns the pager, or null when there is nothing to page
+ * @returns the pager — always, because the count is information
  */
 export function pager(
   total: number,
@@ -40,13 +40,16 @@ export function pager(
 ): HTMLElement | null {
   const pages = Math.max(1, Math.ceil(total / size));
 
-  // A list that fits on one page gets no pager at all. A single disabled page
-  // button is a control that can never do anything, which reads as a broken
-  // one rather than as a short list.
-  if (pages < 2) {
-    return null;
-  }
-
+  // **The range is drawn even on a single page**, and the nav with it.
+  //
+  // This used to return null for a one-page list, on the argument that a
+  // disabled page button is a control that can never do anything. That was an
+  // implementation opinion and it lost: gold frame 1 draws `showing 1–14 of 14`
+  // over a fourteen-row list with `‹ 1 ›` beneath it, and the owner rejected
+  // the build for the pager's absence (2026-09-05). The count is the
+  // information — it tells a receptionist the list in front of them is the
+  // whole list, which is exactly what a person checking the morning's arrivals
+  // needs to know and cannot infer from a list that simply stops.
   const element = el("div", "pager");
   const first = page * size + 1;
 

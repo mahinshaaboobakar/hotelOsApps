@@ -58,13 +58,17 @@ export const recordedSetup: Setup = {
       },
     ],
 
-    hint: "This says “we choose not to sell”, never “this room cannot be "
-      + "used.” A room that is genuinely unusable is out of order — "
-      + "EngineeringOps's to declare and ours only to hear. Two sentences, two "
-      + "owners, and availability subtracts both.",
-
-    note: null,
-    actions: ["＋ Close a room type for dates"],
+    // The drawing's order: the sentence, then the control it justifies.
+    blocks: [
+      {
+        kind: "hint",
+        text: "This says “we choose not to sell”, never “this room cannot be "
+          + "used.” A room that is genuinely unusable is out of order — "
+          + "EngineeringOps's to declare and ours only to hear. Two sentences, "
+          + "two owners, and availability subtracts both.",
+      },
+      { kind: "actions", labels: ["＋ Close a room type for dates"] },
+    ],
   },
 
   pair: [
@@ -103,15 +107,16 @@ export const recordedSetup: Setup = {
         },
       ],
 
-      hint: null,
-
-      note: "HotelOS does not submit anything. This screen sets the policy, "
-        + "raises the flag and records what was filed — the authority, the "
-        + "reference, who filed it and when. Sending it automatically is an "
-        + "integration, and every integration on this platform is a connector; "
-        + "that one does not exist and is not pretended here.",
-
-      actions: [],
+      blocks: [
+        {
+          kind: "note",
+          text: "HotelOS does not submit anything. This screen sets the policy, "
+            + "raises the flag and records what was filed — the authority, the "
+            + "reference, who filed it and when. Sending it automatically is an "
+            + "integration, and every integration on this platform is a "
+            + "connector; that one does not exist and is not pretended here.",
+        },
+      ],
     },
     {
       title: "Due to file",
@@ -141,12 +146,19 @@ export const recordedSetup: Setup = {
         },
       ],
 
-      hint: "Overdue is shown, never enforced. Chen Wei is checked in, served "
-        + "and will check out on time — the platform says what is owed and "
-        + "stops nothing.",
-
-      note: null,
-      actions: ["Record a filing", "Open the list"],
+      // **Buttons before the sentence here**, where Stop-sell has it the other
+      // way round. That is the drawing, and it is why the order is data: the
+      // hint explains what the list above already shows, so it sits after the
+      // things a person came to press.
+      blocks: [
+        { kind: "actions", labels: ["Record a filing", "Open the list"] },
+        {
+          kind: "hint",
+          text: "Overdue is shown, never enforced. Chen Wei is checked in, "
+            + "served and will check out on time — the platform says what is "
+            + "owed and stops nothing.",
+        },
+      ],
     },
   ],
 

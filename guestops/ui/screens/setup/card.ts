@@ -2,7 +2,7 @@
  * One card of settings — the shape every panel on frame 16 shares.
  */
 
-import type { SettingCard, SettingRow } from "../../book";
+import type { SettingBlock, SettingCard, SettingRow } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { card } from "../../chrome/panel";
 import { tags } from "../../chrome/marks";
@@ -23,27 +23,24 @@ export function settings(panel: SettingCard): HTMLElement {
         : tags([panel.aside])[0],
   );
 
-  fill(built.body, ...panel.rows.map(row));
-
-  if (panel.note !== null) {
-    built.body.append(strong(panel.note));
-  }
-
-  if (panel.hint !== null) {
-    built.body.append(strong(panel.hint, "hint"));
-  }
-
-  if (panel.actions.length > 0) {
-    const acts = el("div", "acts");
-
-    for (const [index, action] of panel.actions.entries()) {
-      acts.append(control(index === 0 ? "btn sm pri" : "btn sm", action));
-    }
-
-    built.body.append(acts);
-  }
+  fill(built.body, ...panel.rows.map(row), ...panel.blocks.map(block));
 
   return built.root;
+}
+
+/** One block under the rows, drawn where the design puts it. */
+function block(one: SettingBlock): HTMLElement {
+  if (one.kind === "actions") {
+    const acts = el("div", "acts");
+
+    for (const [index, label] of one.labels.entries()) {
+      acts.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
+    }
+
+    return acts;
+  }
+
+  return strong(one.text, one.kind === "hint" ? "hint" : "note");
 }
 
 /**

@@ -24,6 +24,20 @@ export interface SettingRow {
   tags: readonly Tag[];
 }
 
+/**
+ * What sits under a card's rows, in the order the design puts it.
+ *
+ * **The order is data, not the screen's**, for the same reason the registration
+ * card's rows are: frame 16's three cards each order these differently —
+ * Stop-sell runs hint then button, Due to file runs buttons then hint, and
+ * Guest reporting has only a note. A renderer with a fixed order gets two of
+ * the three wrong, and the one it gets right is an accident.
+ */
+export type SettingBlock =
+  | { readonly kind: "note"; readonly text: string }
+  | { readonly kind: "hint"; readonly text: string }
+  | { readonly kind: "actions"; readonly labels: readonly string[] };
+
 /** A card of settings, with whatever the design hangs in its header. */
 export interface SettingCard {
   title: string;
@@ -33,14 +47,8 @@ export interface SettingCard {
 
   rows: readonly SettingRow[];
 
-  /** The sentence under the rows. */
-  hint: string | null;
-
-  /** The dashed block, where the card carries the stronger statement. */
-  note: string | null;
-
-  /** Buttons at the foot of the card. The first is the primary. */
-  actions: readonly string[];
+  /** Everything under the rows, in the design's order. */
+  blocks: readonly SettingBlock[];
 }
 
 /**

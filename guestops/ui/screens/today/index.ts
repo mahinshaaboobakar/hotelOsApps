@@ -118,9 +118,14 @@ function strip(stats: readonly Stat[], showing: string, day: Today): HTMLElement
   const element = el("div", "strip");
 
   for (const stat of stats) {
-    // The label carries a sub-detail — "Arrivals · 6 unassigned" — so the entry
-    // is matched on the word before it.
-    const selected = stat.label.split(" · ")[0] === showing;
+    // The label carries a sub-detail — `arrivals · 6 unassigned` — so the entry
+    // is matched on the word before it, and **case-insensitively**: the design
+    // sets the strip in lower case and the tabs in title case, so a literal
+    // comparison silently stops selecting anything the moment the fixture
+    // matches the drawing. Matching on display text is fragile either way; a
+    // key on `Stat` would end it, and that is a shape change the strip does not
+    // need today.
+    const selected = stat.label.split(" · ")[0]?.toLowerCase() === showing.toLowerCase();
     const entry = el("span", selected ? "on" : undefined);
 
     entry.append(el("b", undefined, stat.value), document.createTextNode(stat.label));

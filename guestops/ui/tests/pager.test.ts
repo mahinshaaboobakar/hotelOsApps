@@ -36,16 +36,42 @@ function labels(element: HTMLElement): string[] {
 
 describe("the pager", () => {
   /**
-   * A control that can never do anything reads as a broken one.
+   * The count is information, even when there is one page of it.
    *
-   * The recorded facts are a single page, so this is also the state the preview
-   * harness renders — which is why it is asserted rather than left to a capture
-   * that would show an absence and prove nothing about the reason.
+   * This asserted the opposite until 2026-09-05 — that a one-page list gets no
+   * pager, on the argument that a disabled page button is a control that can
+   * never do anything. Gold frame 1 draws `showing 1–14 of 14` over a
+   * fourteen-row list, and the owner rejected the build for the pager's
+   * absence. **A test encoding a superseded contract is replaced, not
+   * suppressed** (ADR 0034), and what it now guards is the reason: a
+   * receptionist checking the morning's arrivals needs to know the list in
+   * front of them is the whole list, which a list that simply stops cannot say.
    */
-  it("draws nothing at all when the list fits on one page", () => {
-    expect(draw(25, 0).element).toBeNull();
-    expect(draw(5, 0).element).toBeNull();
-    expect(draw(0, 0).element).toBeNull();
+  it("draws the range for a list that fits on one page", () => {
+    const { element } = draw(14, 0, 25, 14);
+
+    expect(element).not.toBeNull();
+    expect(element?.querySelector("span")?.textContent).toBe("showing 1–14 of 14");
+  });
+
+  /**
+   * One page, and neither arrow goes anywhere.
+   *
+   * The page's own button stays live and re-selects page 0, which is harmless
+   * and is what every current-page button in the pager does. What must not
+   * happen is an arrow moving off the only page there is.
+   */
+  it("offers nowhere to go from the only page", () => {
+    const { element, chosen } = draw(14, 0, 25, 14);
+
+    expect(labels(element as HTMLElement)).toEqual(["‹", "1", "›"]);
+
+    for (const arrow of element?.querySelectorAll<HTMLElement>(".pg[disabled]") ?? []) {
+      arrow.click();
+    }
+
+    expect(chosen).toEqual([]);
+    expect(element?.querySelectorAll(".pg[disabled]")).toHaveLength(2);
   });
 
   it("states the range and the total the wire gave it", () => {

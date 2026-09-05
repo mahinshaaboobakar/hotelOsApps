@@ -118,5 +118,64 @@ async function measure() {
 }
 
 measure();
+
+/*
+ * The view control.
+ *
+ * Two states and no third: a pair scaled to fit the row, or one pane at a time
+ * at 1:1. The second exists because the first gallery was rejected for being
+ * unauditable at the size it rendered — a design drawn at 1220px shown in a
+ * 727px column is not a smaller version of itself, it is a different layout.
+ */
+for (const button of document.querySelectorAll(".control button")) {
+  button.addEventListener("click", () => {
+    for (const other of document.querySelectorAll(".control button")) {
+      other.classList.toggle("on", other === button);
+    }
+
+    document.body.classList.toggle("stacked", button.dataset.view === "stacked");
+    fit();
+  });
+}
+
+/*
+ * Set the scale from the room a pane actually has.
+ *
+ * In script because CSS cannot: dividing a length by a length gives a length,
+ * and \`scale()\` needs a number, so the whole thing has to be arithmetic
+ * somebody performs. Capped at 1 — a design drawn at 1220px blown up to 1600 is
+ * not a better view of it, it is a different one.
+ */
+function fit() {
+  const frame = document.querySelector(".frame");
+  if (!frame) return;
+
+  const room = frame.getBoundingClientRect().width;
+  const scale = Math.min(1, room / 1220);
+  document.body.style.setProperty("--scale", String(scale));
+
+  /*
+   * Each pair is as tall as the taller of its two documents.
+   *
+   * A fixed height clips whichever side is longer — frame 1's drawing is
+   * fourteen rows, a pager and a note, and it ran past 820px, so the first
+   * gallery cut the pager off the pane that HAD one while reporting the build
+   * for not having one. Both panes take the same height so the comparison is
+   * of like with like, and neither is cropped.
+   */
+  for (const pair of document.querySelectorAll(".pair")) {
+    const frames = [...pair.querySelectorAll("iframe")];
+    const tall = Math.max(...frames.map(f =>
+      f.contentDocument ? f.contentDocument.documentElement.scrollHeight : 0), 400);
+
+    for (const f of frames) {
+      f.style.height = tall + "px";
+      f.parentElement.style.height = Math.ceil(tall * scale) + "px";
+    }
+  }
+}
+
+addEventListener("resize", fit);
+fit();
 `;
 }
