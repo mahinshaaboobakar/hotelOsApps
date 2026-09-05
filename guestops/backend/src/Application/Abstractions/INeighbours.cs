@@ -24,6 +24,13 @@ namespace HotelOS.GuestOps.Application.Abstractions;
 /// installed and nothing raised yet would be reported as not having Jobs.
 /// </para>
 /// <para>
+/// <b>It answers unknown for everything today</b>, and that is measured rather
+/// than assumed: Context's <c>Domains</c> class has one member and every
+/// resolver records only <c>masterdata</c>, so no reply can name a neighbour.
+/// <c>ContextNeighbours</c> carries the finding. The port is right; the
+/// authority behind it is not yet able to speak.
+/// </para>
+/// <para>
 /// <b>Three-valued, and the third value is the point.</b> Unknown means nobody
 /// established it, and every caller must then draw the <i>installed</i> variant.
 /// Collapsing unknown into absent would take a capability away from a property

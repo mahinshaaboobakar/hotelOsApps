@@ -12,9 +12,24 @@ namespace HotelOS.GuestOps.Infrastructure.Platform;
 /// <c>Resolution.sources</c> lists the domains that answered and its contract
 /// says <i>"a domain not installed on this property is simply not listed"</i>,
 /// with <c>degraded</c> reserved for a domain that <i>is</i> installed and
-/// failed. So the three states a caller needs are all present on one message,
-/// and this reads them rather than inferring an installation from whether a
-/// neighbour has ever done anything.
+/// failed. That is the design, and it is the only place in the platform where
+/// the fact could live.
+/// </para>
+/// <para>
+/// <b>It cannot answer yet, and this returns unknown rather than false.</b>
+/// Measured 2026-09-05: Context's <c>Domains</c> class has exactly one member,
+/// <c>masterdata</c>, and every resolver in the service hardcodes
+/// <c>.Answered(Domains.MasterData)</c>. No code path anywhere records
+/// <c>job</c>, <c>roomcare</c> or <c>guestops</c>. So <c>sources</c> in v1 is
+/// always the single value <c>masterdata</c>, and <i>not listed</i> is a fact
+/// about Context's ledger rather than about the property.
+/// </para>
+/// <para>
+/// The first draft of this file read that absence as <b>false</b>, which would
+/// have told <b>every</b> property that Jobs and Room Care were not installed —
+/// renaming a tab and taking away a button on every desk in the estate. It is
+/// the platform's recurring failure in a new place: a value that would read the
+/// same if the world were otherwise.
 /// </para>
 /// <para>
 /// <b>A degraded resolution answers unknown, not absent.</b> A domain that
@@ -68,9 +83,18 @@ public sealed class ContextNeighbours(ContextService.ContextServiceClient contex
             return true;
         }
 
-        // Degraded means a domain that should have answered did not, and the
-        // message does not say which. Absence is therefore not evidence of
-        // absence on this particular reply.
-        return resolution.Degraded ? null : false;
+        // **Unknown, never false.** Two independent reasons, and either alone
+        // would be enough:
+        //
+        // 1. Context records only `masterdata` today, so this list cannot say
+        //    anything about a neighbour — see the remarks.
+        // 2. Even once it can, `degraded` means a domain that should have
+        //    answered did not, and the message does not say which; absence on
+        //    that reply is not evidence of absence.
+        //
+        // The day Context's ledger records installed domains, the `false`
+        // branch belongs here and this comment is what says so. Returning it
+        // now would be reading a fact off a field that does not carry it.
+        return null;
     }
 }

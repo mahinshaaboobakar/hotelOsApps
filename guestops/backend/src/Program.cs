@@ -148,7 +148,7 @@ builder.Services.AddApplicationEventConsumer(
     declare: events => events
         .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
         .Consume<JobCreated, JobCreatedHandler>("job.created"));
-builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration);
+builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration, platform);
 
 builder.Services.AddGrpc(options =>
     options.Interceptors.Add<DomainExceptionInterceptor>());
