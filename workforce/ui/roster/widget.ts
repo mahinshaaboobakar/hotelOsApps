@@ -41,6 +41,16 @@ export interface SummaryRow {
   /** The subject — a department, a person, a request. */
   name: string;
 
+  /**
+   * The day this row is about, as an **ISO date** — only rows that have one.
+   *
+   * Carried beside the name rather than rendered into it, because the service
+   * cannot say a date in the property's form: it does not know the locale. The
+   * panel that knows its own rows are dated composes the name; the generic row
+   * renderer ignores this, and every other widget leaves it undefined.
+   */
+  on?: string;
+
   /** The qualifier beside it, or null when the row has none. */
   meta: string | null;
 

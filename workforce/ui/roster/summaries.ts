@@ -121,13 +121,16 @@ export const recordedComingUp: ComingUp = {
   // "Thu 11" would look right offline and be the one card never checked
   // against a property's own zone and locale.
   overlaps: [
-    row("HK", "2026-09-11", "3 of 11", "warn", "leave?department=HK"),
-    row("KIT", "2026-09-12", "2 of 8", "warn", "leave?department=KIT"),
-    row("FO", "2026-09-13", "2 of 6", "warn", "leave?department=FO"),
+    { ...row("Housekeeping", "3 away", "of 11", "warn", "leave?department=HK"),
+      on: "2026-09-11" },
+    { ...row("Kitchen", "2 away", "of 8", "warn", "leave?department=KIT"),
+      on: "2026-09-12" },
+    { ...row("Front Office", "2 away", "of 6", "warn", "leave?department=FO"),
+      on: "2026-09-13" },
   ],
   expiring: [
-    row("S. Kumar", "Fire warden", "4d", "warn", "people?capability=expiring"),
-    row("T. Abraham", "Food safety", "6d", "warn", "people?capability=expiring"),
+    row("Fire warden · S. Kumar", null, "4d", "warn", "people?capability=expiring"),
+    row("Food safety · T. Abraham", null, "6d", "warn", "people?capability=expiring"),
   ],
 };
 

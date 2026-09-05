@@ -52,18 +52,23 @@ export async function comingUp(host: HostApi): Promise<HTMLElement> {
 /**
  * The overlap rows, with their day said in the property's form.
  *
- * `meta` is a shared free-text field across all five widgets, so the service
- * cannot render a date into it without choosing a locale on the property's
- * behalf — it sends the ISO day, and the panel that knows its own rows are
- * dated is the one place that turns it into words. Formatting it inside the
- * generic row renderer would mean every widget's meta being sniffed for
- * something that looks like a date, which is the shape-based guessing the
- * platform's redaction rule already rules out.
+ * The service sends the department in words and the day as ISO; the name the
+ * card draws is the two together, and only a panel that knows its rows are
+ * dated can compose it — the service does not know the locale, and the generic
+ * row renderer must not sniff a field for something that looks like a date.
+ *
+ * **One divergence from the approved frame, named rather than closed.** The
+ * frame draws *Housekeeping · Thu 11*; this draws *Housekeeping · 11 Sept 2026*,
+ * because `formatDay` is the platform's day formatter and it carries the year.
+ * There is no published short form — `InstantStyle.date` would give *11 Sep* and
+ * takes an instant, which a calendar day is not. Inventing the format here
+ * would fork the one formatter the platform has so that one card could match
+ * one drawing, so it is reported instead.
  */
 function dated(
   overlaps: readonly SummaryRow[], property: PropertyEnvironment,
 ): readonly SummaryRow[] {
-  return overlaps.map((one) => one.meta === null
+  return overlaps.map((one) => one.on === undefined
     ? one
-    : { ...one, meta: formatDay(one.meta, property) });
+    : { ...one, name: `${one.name} · ${formatDay(one.on, property)}` });
 }

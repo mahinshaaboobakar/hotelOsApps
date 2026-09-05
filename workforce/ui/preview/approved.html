@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>The approved widget frames, side by side</title>
+<style>
+  /* The five approved frames from `docs/working/assets/widgets/app-widgets.html`
+     — the canvas the owner audited and approved — extracted and set beside each
+     other at the size they were drawn. Nothing here is re-drawn: each iframe is
+     the frame's own file, so a capture cannot flatter the drawing. */
+  html,body{margin:0;background:#07090f;font:13px/1.5 "Segoe UI",system-ui,sans-serif}
+  #stack{display:flex;flex-wrap:wrap;gap:18px;padding:18px;align-items:flex-start;
+         width:1074px;transform-origin:0 0}
+  .cell{display:flex;flex-direction:column}
+  .label{font:600 10px/1 "Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;
+         color:#5a6172;margin-bottom:8px}
+  .missing{width:320px;height:384px;display:grid;place-items:center;
+           border:1px dashed #f87171;border-radius:16px;color:#f87171;font-size:12px}
+</style>
+</head><body><div id="stack"></div>
+<script>
+  /*
+   * The drawn card itself, not a photograph of its packaging.
+   *
+   * Each approved frame is a canvas file that shows the card twice, dark and
+   * light, inside a demo wrapper. An iframe of the whole file photographs the
+   * wrapper and scrolls; fetching the file and lifting the FIRST 320x384 card
+   * out of it gives the thing the owner approved, at the size the shell gives
+   * it, with nothing of the canvas around it.
+   */
+  const FRAMES = ["ShiftBoard","AttendanceToday","PendingRequests","ComingUp","OnLeave"];
+  const stack = document.getElementById("stack");
+  stack.style.transform = "scale(" + Number(new URLSearchParams(location.search).get("k") || 1) + ")";
+
+  (async () => {
+    for (const name of FRAMES) {
+      const html = await (await fetch("./approved/" + name + ".html?bust=" + Date.now())).text();
+      const parsed = new DOMParser().parseFromString(html, "text/html");
+
+      const card = [...parsed.querySelectorAll("div")].find((one) => {
+        const style = one.getAttribute("style") || "";
+        return style.includes("width: 320px") && style.includes("height: 384px");
+      });
+
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      const label = document.createElement("div");
+      label.className = "label";
+      label.textContent = name;
+      cell.append(label);
+
+      // A frame whose card cannot be found says so, rather than leaving a gap
+      // that reads as a widget nobody drew.
+      if (card === undefined) {
+        const missing = document.createElement("div");
+        missing.className = "missing";
+        missing.textContent = "no 320x384 card in " + name;
+        cell.append(missing);
+      } else {
+        cell.append(document.adoptNode(card));
+      }
+
+      stack.append(cell);
+    }
+
+    document.documentElement.setAttribute("data-ready", "true");
+  })();
+</script></body></html>

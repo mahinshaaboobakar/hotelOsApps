@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Workforce — the five widgets, at the shell's own size</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /* Scaled as a whole, never resized per card: the cards are laid out at the
+     shell's 320x384 and the finished stack is shrunk to fit one capture, so
+     every proportion inside them is the one the shell gives. Resizing the
+     frames instead would photograph content the widget would have cut. */
+  #stack{transform-origin:0 0}
+  html,body{margin:0;background:#07090f;font:13px/1.5 "Segoe UI",system-ui,sans-serif}
+  #stack{display:flex;flex-wrap:wrap;gap:18px;padding:18px;align-items:flex-start;width:1074px}
+  .label{font:600 10px/1 "Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;
+         color:#5a6172;margin-bottom:8px}
+  /* The frame is the shell's, and it CLIPS: content that does not fit is cut by
+     the widget, not by the shell — a harness that let a card grow would
+     photograph rows a person never sees. */
+  .frame{overflow:hidden;border-radius:12px}
+</style>
+</head><body><div id="stack"></div>
+<script>
+  const k = Number(new URLSearchParams(location.search).get("k") || 1);
+  document.getElementById("stack").style.transform = "scale(" + k + ")";
+</script>
+<script type="module" src="./widgets.js"></script>
+</body></html>

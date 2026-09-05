@@ -1,3 +1,4 @@
+using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Summaries;
 
 namespace HotelOS.Workforce.Module.Views;
@@ -130,6 +131,12 @@ public static class WidgetViews
     {
         var view = await call.Service<ComingUpSummary>().ReadAsync(call.Scope, cancellationToken);
 
+        // The approved frame names the department in words — "Housekeeping",
+        // not "HK" — because a card read at a glance should not ask a reader to
+        // expand a code.
+        var departments = await call.Service<IStaffDirectory>()
+            .FindDepartmentNamesAsync(call.Scope.PropertyId, cancellationToken);
+
         return new
         {
             figures = new[]
@@ -139,15 +146,18 @@ public static class WidgetViews
                 Figure(view.CertsExpiring.ToString(), "expiring",
                     view.CertsExpiring == 0 ? "muted" : "warn"),
             },
-            overlaps = view.Overlaps.Select(one => Row(
-                one.DepartmentCode,
-                one.On.ToString("O"),
-                one.Away + " of " + one.Posted,
+            overlaps = view.Overlaps.Select(one => Dated(
+                departments.TryGetValue(one.DepartmentCode, out var named)
+                    ? named
+                    : one.DepartmentCode,
+                one.On.ToString("yyyy-MM-dd"),
+                one.Away + " away",
+                "of " + one.Posted,
                 "warn",
                 "leave?department=" + one.DepartmentCode)).ToList(),
             expiring = view.Expiring.Select(one => Row(
-                one.Person.Name,
-                one.Capability,
+                one.Capability + " · " + one.Person.Name,
+                null,
                 one.InDays + "d",
                 one.InDays <= 7 ? "bad" : "warn",
                 "people?capability=expiring")).ToList(),
@@ -182,6 +192,11 @@ public static class WidgetViews
         away.People.Count.ToString(),
         "muted",
         "leave?department=" + away.DepartmentCode);
+
+    /// <summary>A row about a particular day — the day travels as ISO.</summary>
+    private static object Dated(
+        string name, string on, string meta, string value, string tone, string opens)
+        => new { name, on, meta, value, tone, opens };
 
     /// <summary>One row of a widget's list.</summary>
     private static object Row(string? name, string? meta, string value, string tone, string opens)
