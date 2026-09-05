@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Care · 02 · setup</title>
+<style>
+/* Same scaffold as 01-the-roomcare-screens.html — page 64; the seventeen tokens at the shell's values. */
+:root{
+  --color-surface:#0b0d14;--color-surface-raised:#11141f;
+  --color-line:rgb(255 255 255 / .07);--color-line-strong:rgb(255 255 255 / .14);
+  --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;--color-ink-on-accent:#0b0d14;
+  --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+  --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);--color-bad-soft:rgb(248 113 113 / 0.12);
+  --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --bg:var(--color-surface);--glass:rgba(255,255,255,.035);--line:var(--color-line);
+  --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
+  --indigo:var(--color-brand);--ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);
+  --accent:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad)));
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 var(--font-sans);padding:40px 48px 120px}
+code{font:12px ui-monospace,Menlo,monospace;color:var(--indigo)}
+.intro{max-width:920px;color:var(--dim);margin-bottom:40px}
+.intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
+.intro p{margin:6px 0}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:64px 0 18px;border-top:1px solid var(--line);padding-top:18px}
+h1.frame{font-size:17px;font-weight:500;color:var(--dim);margin:44px 0 12px}
+h1.frame b{color:var(--text);font-weight:600}
+.win{border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--line);height:56px}
+.app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font-size:12px;color:var(--color-ink-on-accent)}
+.tab{color:var(--dim);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
+.tab.on{color:var(--text);border-bottom-color:var(--indigo)}
+.who{margin-left:auto;color:var(--faint);font-size:12px}
+.body{padding:22px}
+.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.soft-warn{background:var(--color-warn-soft);color:var(--warn);border-color:transparent}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
+.card h3{margin:0 0 10px;font-size:13px;font-weight:600}
+.kv{display:grid;grid-template-columns:190px 1fr;gap:6px 14px;font-size:13px}
+.kv div:nth-child(odd){color:var(--faint)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--text);margin-right:8px;font:inherit;background:none}
+.btn.pri{background:var(--accent);border-color:transparent;color:var(--color-ink-on-accent)}
+.btn.off{color:var(--faint);border-style:dashed}
+.btn.sm{padding:2px 8px;font-size:11px}
+.btn.danger{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.btn.danger.confirm{background:var(--bad);color:var(--color-ink-on-accent);border-color:transparent;font-weight:600}
+.field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:var(--color-surface);display:inline-block;min-width:120px}
+label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;display:block}
+.mono{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim)}
+.chip.on{border-color:var(--indigo);color:var(--text)}
+.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
+.tog.on{background:var(--ok)}
+.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text)}
+.tog.on i{left:18px}
+.strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
+.strip b{color:var(--text);font-size:14px;margin-right:4px}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
+.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
+.pager span.pg.on{color:var(--text);border-color:var(--indigo)}
+.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
+.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
+td.dimtd{color:var(--faint)}
+.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
+.note b{color:var(--text)}
+.note.hold{border-color:var(--warn);background:var(--color-warn-soft)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
+.tag.port{color:var(--warn);border-color:var(--warn)}
+.tag.absent{color:var(--faint);border-style:dashed}
+.radio{display:block;margin:4px 0;font-size:13px}
+.radio b{color:var(--text)}
+ul.flows{max-width:920px;color:var(--dim)}
+ul.flows li{margin-bottom:10px}
+ul.flows b{color:var(--text)}
+.save{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+
+<div class="intro">
+  <h1>Room Care · setup</h1>
+  <p><b>FOR THE OWNER'S AUDIT — not locked.</b> Seven frames, one per Setup tab — redrawn from the single collapsed frame 7 of <code>01-the-roomcare-screens.html</code> on the owner's redline of 2026-09-05 (<i>"seven separate mock screens"</i>). Jobs' settings live on their own page for the same reason.</p>
+  <p><b>The rule every frame draws:</b> S3's — <i>everything on the walkthrough that reads like a fact about how a hotel works is a property configuration with a sensible default, never a constant.</i> Every control here is a row in <code>roomcare</code>'s standard (chapter 03 §2.8), versioned; the day's decisions are stamped with the version they used, so editing a setting never rewrites a past day.</p>
+  <p><b>Chrome and palette:</b> page 64 throughout — the seventeen tokens at the shell's values, one <code>.btn</code>, the 56 px bar with <code>name · department · property</code>, Setup's tabs as the second level (two levels are the ceiling, §3), bare tables with a numbered pager and the row count on every list (§4, §6, §8).</p>
+  <p><b>Who:</b> Rekha Sinha, executive housekeeper, holds <code>roomcare.configure</code> and <code>roomcare.plan</code>; the general manager alone grants <code>roomcare_manager</code> (frame 7g). The Marina Bay, 05 Sep 2026.</p>
+  <p><b>Save:</b> every tab ends with the same two controls — <span class="btn pri" style="pointer-events:none">Save</span><span class="btn" style="pointer-events:none">Discard</span> — and a line saying which version is live and who changed it last. A saved change is a new version; nothing is edited in place.</p>
+</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7a · windows &amp; trigger</h2>
+<h1 class="frame">7a · <b>Windows &amp; trigger</b>. When the day is attempted, and who starts it.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div class="on">Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Windows</h3>
+        <table>
+          <tr><th>Window</th><th>On</th><th>From</th><th>To</th><th>Assign outside it</th></tr>
+          <tr><td>Morning — departures, daily service, refresh</td><td><span class="tog on"><i></i></span></td><td><span class="field">08:00</span></td><td><span class="field">15:00</span></td><td><span class="tog on"><i></i></span> the supervisor may, for an arrival before it opens</td></tr>
+          <tr><td>Turndown — evening</td><td><span class="tog on"><i></i></span></td><td><span class="field">18:00</span></td><td><span class="field">21:00</span></td><td><span class="tog"><i></i></span></td></tr>
+        </table>
+        <div class="pager"><span>2 of 2 — the two windows a hotel has; a window may cross midnight (a night shift is 22:00 → 06:00, not two ranges)</span><span></span></div>
+        <div class="mono" style="margin-top:10px">A room is attempted in each window it is due in; outside a window nothing is attempted — and nothing is dropped: it is collected (S5 c2, S0).</div>
+      </div>
+      <div class="card">
+        <h3>Trigger — who prepares the day</h3>
+        <span class="radio">◉ <b>Prepare by button or HosPilot</b> (default) — changes are collected; the housekeeping manager presses <i>Prepare the day</i> when the window starts; later presses add and never remove</span>
+        <span class="radio">○ <b>Automatic</b> — the decision runs on every change and places the work in the next window</span>
+        <div class="kv" style="margin-top:12px">
+          <div>HosPilot</div><div>always on — not a mode: it presses the button as the person asking (S7)</div>
+          <div>Re-run after the button</div><div>adds new rooms · updates open <i>unstarted</i> tasks whose facts changed · never takes a room off an attendant · never reshuffles what the supervisor accepted</div>
+          <div>Changes between presses</div><div>counted on the board — "N new since 08:00" — created by nobody</div>
+        </div>
+      </div>
+    </div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S0 (the trigger, ruled; the two presses), S5 c2 (two windows).</b> The window's <i>to</i> is when the tick closes it and writes the outcome for every room not reached (§6.1) — nothing here is a cron in UTC (survey F3).</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7b · services &amp; minutes</h2>
+<h1 class="frame">7b · <b>Services &amp; minutes</b>. Per room type: what each service is, how long, and whether it is inspected.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div class="on">Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
+    <div style="margin-bottom:12px"><span class="chip on">Standard</span><span class="chip">Deluxe King</span><span class="chip">Suite</span><span class="chip">Accessible</span><span class="mono" style="margin-left:12px">room types are Master Data's; this tab holds Room Care's numbers for each</span></div>
+    <table>
+      <tr><th>Service</th><th>Minutes</th><th>Credits</th><th>Phases, in order</th><th>Inspection</th><th>Checklist</th></tr>
+      <tr class="sel"><td><b>Departure clean</b><br><span class="mono">the guest checked out — full turnover</span></td><td><span class="field">35</span></td><td><span class="field">1.0</span></td><td>strip → clean → make up → done → inspect</td><td><span class="field">arrivals only ▾</span><br><span class="mono">none · all departures · arrivals only · every Nth · VIP</span></td><td class="dimtd">— <span class="tag absent">inspection app</span></td></tr>
+      <tr><td><b>Daily service</b><br><span class="mono">every occupied room, every day</span></td><td><span class="field">18</span></td><td><span class="field">0.5</span></td><td>clean → make up → done</td><td><span class="field">spot-check 1 in 10 ▾</span></td><td class="dimtd">—</td></tr>
+      <tr><td><b>Turndown</b><br><span class="mono">evening, occupied rooms</span></td><td><span class="field">6</span></td><td><span class="field">0.2</span></td><td>turn down → done</td><td><span class="field">none ▾</span></td><td class="dimtd">—</td></tr>
+      <tr><td><b>Refresh</b><br><span class="mono">a clean room unsold N days, or a day-use pickup</span></td><td><span class="field">8</span></td><td><span class="field">0.2</span></td><td>refresh → done</td><td><span class="field">none ▾</span></td><td class="dimtd">—</td></tr>
+    </table>
+    <div class="pager"><span>4 of 4 services for <b>Standard</b> — the four a hotel has; deep clean is not a service, it is a project (frame 7f)</span><span></span></div>
+    <div class="cols" style="margin-top:16px">
+      <div class="card"><h3>Phases — Departure clean</h3><div class="kv"><div>1 · Strip</div><div>linen and towels out · rubbish · lost property · damage</div><div>2 · Clean</div><div>bathroom · surfaces · floors</div><div>3 · Make up</div><div>fresh bed · restock to standard <span class="tag absent">Inventory</span> · set-up</div><div>4 · Done</div><div>the attendant's <i>done</i> — the room is CLEAN, announced</div><div>5 · Inspect</div><div>only if the rule says — requested from the inspection app <span class="tag port">RC-Q1(6)</span></div></div><div style="margin-top:8px"><span class="btn sm">Reorder…</span><span class="btn sm off">Add a phase</span></div></div>
+      <div class="card"><h3>Copy this room type's numbers to…</h3><div class="mono">Deluxe King · Suite · Accessible — a starting point, edited per type after</div><div style="margin-top:8px"><span class="btn sm">Copy…</span></div></div>
+    </div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S0 (the four services, the phases, per room type × service), ADR 0044's row</b> — <i>"deep-clean and checkout-clean minutes and whether inspection is required"</i> is this table, as rows not columns (survey F19). The phase list is the property's per service; the defaults are the walkthrough's. <i>Add a phase</i> is drawn off because the v1 phases are fixed to the five the owner named — a redline point if a property needs a sixth.</div>
+<div class="note hold"><b>With no inspection application installed</b>, the <i>Inspection</i> column offers <i>none</i> only and says why; <i>Checklist</i> is empty. A property that sets a rule before the app exists gets a refusal with the sentence, not a silent none.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7c · rules</h2>
+<h1 class="frame">7c · <b>Rules</b>. Linen, towels, departure, priority, pending, refresh, DND, the supervisor.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div class="on">Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
+    <div class="cols3">
+      <div class="card">
+        <h3>Linen</h3>
+        <span class="radio">◉ <b>Every N nights, the guest may defer</b> — N = <span class="field" style="min-width:60px">3</span></span>
+        <span class="radio">○ <b>Must be changed by day N</b> — no deferral; the door offers Done or Partial-with-linen only</span>
+        <div class="mono" style="margin-top:8px">counted on the ROOM — "linen last changed", reset by every departure clean; nights empty do not count (S5 c4, c11)</div>
+      </div>
+      <div class="card">
+        <h3>Towels</h3>
+        <span class="radio">○ <b>Replace daily</b></span>
+        <span class="radio">◉ <b>Green programme</b> — hung towels kept, floor towels replaced</span>
+        <div class="mono" style="margin-top:8px">a property rule — the guest does not choose (S5 c5)</div>
+        <h3 style="margin-top:14px">On departure</h3>
+        <span class="radio">the room becomes <span class="field" style="min-width:90px">dirty ▾</span></span>
+      </div>
+      <div class="card">
+        <h3>Who decides a room's condition</h3>
+        <span class="radio">◉ <b>Room Care leads</b> (default) — attendants mark rooms in the app; a PMS change that disagrees is flagged for a supervisor</span>
+        <span class="radio">○ <b>The PMS / front desk leads</b> — rooms change when the PMS says so; Room Care records and announces it</span>
+        <div class="mono" style="margin-top:8px">either way an observation is applied unless it contradicts a later act here (S4)</div>
+      </div>
+    </div>
+    <div class="cols3" style="margin-top:14px">
+      <div class="card">
+        <h3>Priority ladder</h3>
+        <div class="kv"><div>1</div><div>sold tonight</div><div>2</div><div>departures, unsold</div><div>3</div><div>daily service, by zone</div><div>4</div><div>refresh</div></div>
+        <div style="margin-top:8px"><span class="btn sm">Reorder…</span></div>
+        <h3 style="margin-top:14px">Unsold departure</h3>
+        <span class="radio">○ <b>clean today</b> &nbsp; ◉ <b>may wait</b> — the pending lane, one click promotes it (the charter)</span>
+      </div>
+      <div class="card">
+        <h3>Refresh</h3>
+        <span class="radio">a clean vacant room unsold for <span class="field" style="min-width:60px">3</span> days gets a refresh</span>
+        <h3 style="margin-top:14px">DND at the door</h3>
+        <span class="radio">re-check every <span class="field" style="min-width:60px">60</span> min, until <span class="field" style="min-width:120px">the window ends ▾</span></span>
+        <div class="mono">turndown is a fresh attempt on a DND room (S5 c1)</div>
+      </div>
+      <div class="card">
+        <h3>The supervisor steps in</h3>
+        <span class="radio">after <span class="field" style="min-width:60px">2</span> days without service — declined or DND, either counts (row 7)</span>
+        <div class="mono" style="margin-top:8px">on day N+1 the room is the supervisor's: a decision is required before the window closes on it, and every later DND day stays the supervisor's (S5 c9)</div>
+      </div>
+    </div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S4, S5 c1/c4/c5/c9, the charter, the scenario pass row 7.</b> Nine rules, nine rows in <code>property_policy</code> (chapter 03 §2.8), one version. Not here, by ruling: a per-weekday calendar, a preferred attendant, a per-stay cadence, a whole-stay opt-out.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7d · assignment &amp; zones</h2>
+<h1 class="frame">7d · <b>Assignment &amp; zones</b>. The strategy, and which room is in which zone.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div class="on">Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>Strategy — how the proposal matches rooms to the attendants on shift</h3>
+        <div class="kv">
+          <div>First</div><div><span class="field">same zone ▾</span> — an attendant gets rooms in the zone they are posted to</div>
+          <div>Then</div><div><span class="field">lowest load ▾</span> — the fewest minutes already planned</div>
+          <div>Continuity</div><div><span class="tog"><i></i></span> the attendant who did the room yesterday gets it again (off here)</div>
+          <div>Within</div><div>the shift's minutes, from Workforce through Context — never a number set here</div>
+          <div>If nobody fits</div><div>"nobody available" on the board and in the supervision lane — never silence (S0)</div>
+        </div>
+        <div class="mono" style="margin-top:10px">who is posted to which zone today is Workforce's posting, read through Context <span class="tag port">Workforce ask · zone on the posting</span></div>
+      </div>
+      <div class="card">
+        <h3>Zones — which room belongs to which zone <span class="mono">(RoomZoneAssignment, ADR 0044 — Room Care's)</span></h3>
+        <table>
+          <tr><th>Zone</th><th>Rooms</th><th>Effective</th><th></th></tr>
+          <tr><td>Zone 1 · floors 1–3</td><td class="num">0101 – 0324 · 45 rooms</td><td>since 01 Jan 2026</td><td><span class="btn sm">Edit…</span></td></tr>
+          <tr><td>Zone 2 · floors 4–6</td><td class="num">0401 – 0624 · 45 rooms</td><td>since 01 Jan 2026</td><td><span class="btn sm">Edit…</span></td></tr>
+          <tr class="sel"><td>Zone 3 · floors 7–9 + 12</td><td class="num">0701 – 0924, 1201 – 1212 · 57 rooms</td><td>since 15 Aug 2026 · <span class="mono">was floors 7–9</span></td><td><span class="btn sm">Edit…</span></td></tr>
+          <tr><td>Zone 4 · floors 10–11</td><td class="num">1001 – 1124 · 33 rooms</td><td>since 15 Aug 2026</td><td><span class="btn sm">Edit…</span></td></tr>
+        </table>
+        <div class="pager"><span>4 of 4 zones · 180 rooms, every room in exactly one zone; a room left out is a refusal, not a gap</span><span></span></div>
+        <div style="margin-top:8px"><span class="btn sm">Move rooms between zones…</span></div>
+      </div>
+    </div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S0 (assignment), Workforce §3.8, ADR 0044.</b> Two things sit side by side and are different: the <b>zone a room is in</b> is Room Care's (<code>room_zone_assignment</code>, effective-dated); the <b>person posted to a zone</b> is Workforce's. Zones themselves — the entities — are Master Data's (<code>masterdata.zones</code>). Nothing on this tab names a person.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7e · areas</h2>
+<h1 class="frame">7e · <b>Areas</b>. Public areas from Master Data's tree, and each one's routine.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div class="on">Areas</div><div>Deep clean plan</div><div>Managers</div></div>
+    <table>
+      <tr><th>Area</th><th>Kind</th><th>Zone</th><th>Routine</th><th>Minutes</th><th>Inspection</th><th></th></tr>
+      <tr class="sel"><td>Lobby</td><td class="mono">lobby</td><td>Zone 1</td><td>every 2 h · 06:00 – 22:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td>Floor 3 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td>Azure restaurant floor</td><td class="mono">restaurant</td><td>Zone 1</td><td>after breakfast 10:30 · after dinner 22:30</td><td><span class="field" style="min-width:60px">40</span></td><td><span class="field">spot-check ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td>Pool deck</td><td class="mono">pool</td><td>Zone 2</td><td>at 05:30</td><td><span class="field" style="min-width:60px">45</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td>Lobby toilets</td><td class="mono">back_of_house</td><td>Zone 1</td><td>every 45 min · 06:00 – 23:00</td><td><span class="field" style="min-width:60px">10</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td>Terrace bar</td><td class="mono">terrace</td><td>Zone 4</td><td>at 06:00 · at 17:00</td><td><span class="field" style="min-width:60px">25</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
+      <tr><td class="dimtd">Plant room · level −1</td><td class="mono">plant_room</td><td class="dimtd">—</td><td class="dimtd">no routine — Engineering's space, not cleaned by Housekeeping</td><td></td><td></td><td><span class="btn sm off">Add a routine</span></td></tr>
+    </table>
+    <div class="pager"><span>1–7 of 7 public-area nodes at this property · from Master Data's location tree (<code>lobby · corridor · restaurant · pool · terrace · back_of_house · plant_room</code>); an area with no routine is drawn dim and produces nothing</span><span></span></div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S3 — public areas are Room Care's, one task model, scheduled by the property.</b> The areas are not created here: they are Master Data's location nodes (<code>masterdata/v1/dto.proto:207–219</code>), and this tab attaches a routine, minutes and an inspection rule to each. A routine is a Temporal Schedule the tick reads (chapter 03 §6.1). A spill or a one-off is a Jobs request, never a routine.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7f · deep clean plan</h2>
+<h1 class="frame">7f · <b>Deep clean plan</b>. How often each room type is taken out and deep-cleaned.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div class="on">Deep clean plan</div><div>Managers</div></div>
+    <div class="cols">
+      <div class="card">
+        <h3>The plan — per room type</h3>
+        <table>
+          <tr><th>Room type</th><th>Every</th><th>Typical length</th><th>Rooms</th><th>Due this quarter</th></tr>
+          <tr><td>Standard</td><td><span class="field" style="min-width:70px">12</span> months</td><td>3 days</td><td class="num">96</td><td>24</td></tr>
+          <tr><td>Deluxe King</td><td><span class="field" style="min-width:70px">6</span> months</td><td>4 days</td><td class="num">60</td><td>30</td></tr>
+          <tr class="sel"><td>Suite</td><td><span class="field" style="min-width:70px">4</span> months</td><td>1 week</td><td class="num">20</td><td>15</td></tr>
+          <tr><td>Accessible</td><td><span class="field" style="min-width:70px">12</span> months</td><td>3 days</td><td class="num">4</td><td>1</td></tr>
+        </table>
+        <div class="pager"><span>4 of 4 room types · the plan sets "due"; the window is picked per room on the Deep clean tab, in low occupancy</span><span></span></div>
+      </div>
+      <div class="card">
+        <h3>What a deep clean is, at this property</h3>
+        <div class="kv">
+          <div>The work</div><div>a <b>Jobs job</b> — steps: strip · carpets · mattress turn · walls · fixtures · deep bathroom — raised by Room Care with a correlation id; the hands change by day and shift in Jobs <span class="tag port">JOBS-Q2</span></div>
+          <div>The room</div><div><b>out of order</b> for the window — requested by Room Care, placed by the state's owner <span class="tag port">architect · ADR 0051/0056</span></div>
+          <div>Return to sale</div><div>departure clean + inspection → INSPECTED → release requested</div>
+          <div>Typical length</div><div>informational — from the last five jobs of this type, never a promise</div>
+        </div>
+      </div>
+    </div>
+    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+  </div>
+</div>
+<div class="note"><b>Draws S0 · deep clean as a planned project.</b> This tab is the <i>plan</i> only — frequency per room type. Picking a window, requesting the block and raising the job are the Deep clean tab's (screens frame 6, <code>roomcare.plan</code>). Nothing on this tab schedules by weekday.</div>
+
+<!-- ===================================================================== -->
+<h2 class="sec">7g · managers</h2>
+<h1 class="frame">7g · <b>Managers</b>. Who holds Room Care property-wide — the general manager's grant.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div class="on">Managers</div></div>
+    <table>
+      <tr><th>Person</th><th>Department</th><th>Holds</th><th>Since</th><th>Granted by</th><th></th></tr>
+      <tr><td>Rekha Sinha</td><td>Housekeeping · executive housekeeper</td><td><span class="pill ok">roomcare_manager</span></td><td>01 Jan 2026</td><td>Vikram Shah (GM)</td><td><span class="btn sm danger">Revoke…</span></td></tr>
+      <tr><td>Vikram Shah</td><td>General manager</td><td class="dimtd">everything — the GM's own standing</td><td>—</td><td>—</td><td></td></tr>
+    </table>
+    <div class="pager"><span>1 grant at this property · this list is read here and granted by the general manager only (S6; AUTHZ-Q25)</span><span></span></div>
+    <div class="cols" style="margin-top:16px">
+      <div class="card">
+        <h3>What the grant gives</h3>
+        <div class="kv"><div>roomcare_manager</div><div>every Room Care capability, for every room at the property — read · assign · amend · configure · plan</div><div>Not the grant</div><div>an attendant's <i>done</i> (rides the assignment) · an inspector's sign-off (the inspection app's) · placing a room out of order (its owner's)</div></div>
+      </div>
+      <div class="card">
+        <h3>Who else may do what — from postings, not from this tab</h3>
+        <div class="kv"><div>Floor supervisors</div><div>assign · amend — because Workforce posts them as <i>supervisor</i> in Housekeeping</div><div>Attendants</div><div>their own rooms — because they are assigned them</div><div>The desk</div><div>read — the board and a room's day; nothing to grant here</div></div>
+      </div>
+    </div>
+    <div class="dlg" style="margin-top:16px">
+      <div class="sect" style="margin-top:0">Revoke Rekha Sinha's roomcare_manager?</div>
+      <div class="mono" style="margin-bottom:10px">She keeps what her posting gives her. Recorded: who, when.</div>
+      <span class="btn danger confirm">Revoke</span><span class="btn">Cancel</span>
+    </div>
+  </div>
+</div>
+<div class="note"><b>Draws S6 and AUTHZ-Q25.</b> The package declares the grant kind in its manifest; the Kernel materialises <code>property#roomcare_manager</code>; the general manager grants it from here (or from the Access card). The destructive twin is drawn as page 64 §2 rules: outline inline, <b>filled at the confirm</b>. Room Care writes no tuple.</div>
+
+<h2 class="sec">redline log</h2>
+<ul class="flows">
+  <li><b>2026-09-05 · drawn</b> — seven frames, on the owner's redline of the collapsed frame 7 in <code>01-the-roomcare-screens.html</code>: <i>"only 3 tabs mocked on a single screen — seven separate mock screens."</i></li>
+</ul>
+
+</body>
+</html>

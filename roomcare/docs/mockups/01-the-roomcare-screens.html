@@ -383,7 +383,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Draws S0 · deep clean as a planned project.</b> Room Care plans (due dates from the plan per room type), the supervisor picks the window, and two events leave with correlation ids: the <b>block request</b> to the owner of room out-of-order state — <span class="tag port">open with the architect against ADR 0051/0056</span> — and <b>the job</b> to Jobs. The room leaves the board into <i>Blocked</i>; nothing about the days or weeks of work is Room Care's.</div>
 <div class="note hold"><b>Two ports drawn honestly.</b> Until the architect rules who places the block, the <i>Block</i> column stays at "requested". Until Jobs' post-certification round publishes progress (<code>JOBS-Q2</code>), the progress card shows <i>job open</i> / <i>job closed</i> only — the hands-by-day line above is what it will show, not what it shows today.</div>
 
-<h1 class="frame">7 · <b>Setup</b>. The property's standard — everything on the walkthrough is a setting here.</h1>
+<h1 class="frame">7 · <b>Setup</b>. Seven tabs — each drawn as its own frame on <code>02-the-roomcare-setup.html</code>. This is the first.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -392,50 +392,29 @@ ul.flows b{color:var(--text)}
   </div>
   <div class="body">
     <div class="subnav"><div class="on">Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
-    <div class="cols3">
+    <div class="cols">
       <div class="card">
         <h3>Windows</h3>
-        <div class="kv">
-          <div>Morning</div><div><span class="tog on"><i></i></span>08:00 – 15:00</div>
-          <div>Turndown</div><div><span class="tog on"><i></i></span>18:00 – 21:00</div>
-          <div>May cross midnight</div><div>yes — a window is a range, not two clock times</div>
-          <div>Assign outside a window</div><div><span class="tog on"><i></i></span>supervisor may, for an arrival before it opens</div>
-        </div>
+        <table>
+          <tr><th>Window</th><th>On</th><th>From</th><th>To</th><th>Assign outside it</th></tr>
+          <tr><td>Morning — departures, daily service, refresh</td><td><span class="tog on"><i></i></span></td><td><span class="field">08:00</span></td><td><span class="field">15:00</span></td><td><span class="tog on"><i></i></span> the supervisor may, for an arrival before it opens</td></tr>
+          <tr><td>Turndown — evening</td><td><span class="tog on"><i></i></span></td><td><span class="field">18:00</span></td><td><span class="field">21:00</span></td><td><span class="tog"><i></i></span></td></tr>
+        </table>
+        <div class="pager"><span>2 of 2 — a window may cross midnight</span><span></span></div>
       </div>
       <div class="card">
-        <h3>Trigger</h3>
+        <h3>Trigger — who prepares the day</h3>
         <div class="kv">
-          <div>Who prepares the day</div><div>◉ <b>Prepare by button / HosPilot</b><br>○ Automatic — the decision runs on every change</div>
+          <div>Mode</div><div>◉ <b>Prepare by button / HosPilot</b> (default)<br>○ Automatic — the decision runs on every change</div>
           <div>HosPilot</div><div>always on — presses the button as the person asking (S7)</div>
           <div>Later presses</div><div>add new rooms, update unstarted; never remove</div>
         </div>
       </div>
-      <div class="card">
-        <h3>Who decides a room's condition</h3>
-        <div class="kv">
-          <div>Leads</div><div>◉ <b>Room Care</b> — a PMS change that disagrees is flagged<br>○ The PMS / front desk — applied, recorded, announced by Room Care</div>
-          <div>Applies either way</div><div>an observation is applied unless it contradicts a later act here</div>
-        </div>
-      </div>
     </div>
-    <div class="sect">Services &amp; minutes — per room type (the tab beside)</div>
-    <table>
-      <tr><th>Room type</th><th>Departure clean</th><th>Daily service</th><th>Turndown</th><th>Refresh</th><th>Inspection</th><th>Checklist</th></tr>
-      <tr><td>Standard</td><td>35 min · 1.0</td><td>18 min · 0.5</td><td>6 min · 0.2</td><td>8 min · 0.2</td><td>arrivals only</td><td class="dimtd">— <span class="tag absent">inspection app</span></td></tr>
-      <tr><td>Deluxe King</td><td>40 min · 1.2</td><td>20 min · 0.6</td><td>8 min · 0.2</td><td>8 min · 0.2</td><td>all departures</td><td class="dimtd">—</td></tr>
-      <tr><td>Suite</td><td>60 min · 1.8</td><td>30 min · 0.9</td><td>12 min · 0.3</td><td>10 min · 0.3</td><td>all departures + VIP</td><td class="dimtd">—</td></tr>
-    </table>
-    <div class="pager"><span>3 of 3 room types — pages at 12 like every list</span><span></span></div>
-    <div class="sect">Rules (the tab beside)</div>
-    <div class="cols3">
-      <div class="card"><h3>Linen</h3><div class="kv"><div>Rule</div><div>◉ every <b>3</b> nights, guest may defer<br>○ must be changed by day N</div><div>Towels</div><div>○ replace daily ◉ <b>green programme</b> — hung kept, floor replaced</div><div>On departure</div><div>room becomes <b>dirty</b></div></div></div>
-      <div class="card"><h3>Priority &amp; pending</h3><div class="kv"><div>Ladder</div><div>sold tonight › departures › daily by zone › refresh</div><div>Unsold departure</div><div>○ today ◉ <b>may wait</b> — the pending lane, one click</div><div>Refresh after</div><div><b>3</b> days unsold</div></div></div>
-      <div class="card"><h3>DND &amp; supervision</h3><div class="kv"><div>Re-check</div><div>every <b>60</b> min until the window ends</div><div>Supervisor after</div><div><b>2</b> days without service (declined or DND)</div><div>Strategy</div><div>same zone › lowest load · continuity off</div></div></div>
-    </div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
-<div class="note"><b>Draws S0's settings, S3's rule (everything per property), S4, S5 c2/c4/c5/c9, S7.</b> Nothing on the walkthrough that reads like a fact about a hotel is a constant: every one of them is a row here, versioned, and the decision that used it is stamped with the version (§2.8). <i>Checklist</i> is a pointer into the inspection application and is <span class="tag absent">absent</span> until it exists — and with it absent, <i>Inspection</i> can only be <i>none</i> (frame 3b's note).</div>
-<div class="note"><b>Not on this screen:</b> a weekday calendar (ruled out), a preferred attendant or a per-stay cadence (apartment logic, ruled out), a shift or a roster (Workforce), a catalogue or par level (Inventory), an out-of-order control (its owner). <i>Areas</i> holds each public area's schedule (S3) and <i>Assignment &amp; zones</i> holds <code>RoomZoneAssignment</code> — room → zone — which is Room Care's (ADR 0044).</div>
+<div class="note fix"><b>Redline folded (2026-09-05).</b> The owner: <i>"Setup — only 3 tabs mocked on a single screen; seven separate mock screens."</i> This frame had collapsed three tabs into one drawing. It now shows the first tab only, and all seven — Windows &amp; trigger · Services &amp; minutes · Rules · Assignment &amp; zones · Areas · Deep clean plan · Managers — are drawn one per frame on <code>02-the-roomcare-setup.html</code> (7a–7g), as Jobs' settings are on their own page.</div>
 
 <!-- ===================================================================== -->
 <h2 class="sec">E · the five widgets — one question each</h2>
@@ -490,7 +469,8 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
-  <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit. No redlines yet.</li>
+  <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
+  <li><b>2026-09-05 · redline 1 folded</b> — frame 7 (Setup) had three tabs on one screen; now the first tab here and all seven on <code>02-the-roomcare-setup.html</code>.</li>
 </ul>
 
 </body>
