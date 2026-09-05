@@ -303,7 +303,7 @@ idempotent on `event_id`, `DeliverPolicy: New` with the store as the archive
 | `job.complete` | yes · `job#can_close` | resolve a job with a resolution, close it, reopen inside the window | 4 |
 | `job.cancel` | **new** · `job#can_cancel` | end a job as CANCELLED with a reason; cascades to its steps | 2 More ▾ › Cancel |
 | `job.amend` | **new** · `job#can_amend` | change a job's course: hold and resume, reschedule, re-prioritise, restrict / unrestrict, link, add a step | 2 More ▾, hold, priority |
-| `job.configure` | **new** · `property#can_configure_jobs` | this property's concern policies and ladders, presence and service hours, who is told, holds, closing and rating rules, item activation and overrides | page 02 |
+| `job.configure` | **new** · `property#jobs_configurer` | this property's concern policies and ladders, presence and service hours, who is told, holds, closing and rating rules, item activation and overrides | page 02 |
 | `job.curate` | **new** · `organization#can_curate_jobs` | the organisation's catalogue: categories, items, aliases, resolutions | page 01 frame 7 |
 
 Registered and **not requested**: `job.approve_cost` — the name survives,
@@ -344,13 +344,22 @@ authorization:
 ```
 
 `model.fga` gains, on `type property`, `define jobs_manager: [user]` and
-`define can_configure_jobs: manager from department or jobs_manager`; on
+`define jobs_configurer: general_manager or jobs_manager`; on
 `type organization`, `define can_curate_jobs: [user]` (the org admin);
 on `type job`, `can_cancel: supervisor from department` and
 `can_amend: supervisor from department` are added, and every `can_*` on
 `type job` gains `or jobs_manager from property`.
 **The registry entry is the architect's** (ruling 4 confirms the route; the
 row itself is written there, not here). Jobs never writes the tuple.
+
+> **Amended 2026-09-05 — CC's transcription, register row `daf4294`.** This
+> chapter said `property#can_configure_jobs`, defined as *manager from
+> department or jobs_manager*. Ruled: **`property#jobs_configurer:
+> general_manager or jobs_manager`**. Two corrections in one: a property has no
+> `department` relation, so the first half named a path the model does not have;
+> and the type's own idiom for "who may configure this" is `*_configurer`, which
+> `can_configure_jobs` was not. Both lines above carry the ruled name; the
+> chapter follows the ruling rather than the other way round.
 
 ---
 
@@ -716,7 +725,7 @@ for two departments.
 |---|---|---|
 | **The permission vocabulary** (§4.1) | **ruled 2026-09-04** — eight concrete verbs, in the manifest | nothing |
 | **`property#jobs_manager` in the registry** | route ruled; the row is the architect's. **Proven blocking, 2026-09-05**: the Kernel refuses the install outright — *"this package declares a grant that writes property#jobs_manager, which installed applications may not establish"* | the whole install, not just the grant |
-| **Four of the eight verbs are not in the permission registry** | `job.cancel`, `job.amend`, `job.configure`, `job.curate`. The registry carries read · create · assign · complete · approve_cost; the vocabulary ruled 2026-09-04 was never written into it. **Proven blocking, 2026-09-05** | the install, and any grant of those four |
+| **Four of the eight verbs are not in the permission registry** | `job.cancel`, `job.amend`, `job.configure`, `job.curate`. The registry carried read · create · assign · complete · approve_cost, so the vocabulary ruled 2026-09-04 had never been written into it — **proven blocking 2026-09-05**, and **landing now with CC**. The fourth is ruled with a name change this chapter has taken: `property#jobs_configurer: general_manager or jobs_manager`, register row `daf4294` (§4.2) | the install, until CC's rows land |
 | ~~The suite's cluster roles collide with the installer's~~ | **fixed 2026-09-05**: the suite's roles are per run — `hotelos_owner_jobs_<run>` — dropped when a run ends and identifiable when a killed one leaves them | nothing |
 | ~~The connection name~~ | **fixed 2026-09-05**: `ConnectionStrings__HotelOS` is the convention the platform hands every package, and Jobs asked for `Jobs`. The install stopped at step 6 until it did not; no test in this repository could have caught it, because every test supplies its connection string directly | nothing |
 | **`AddPlatformAuthentication` has no endpoints to pass** | The Kernel's environment contract carries the certificate directory, the Kernel endpoint, the property, the package id and the subscriptions — **no Identity endpoint and no NATS url**, which is what that call takes. An application that maps a module capability therefore cannot start (`SHELL-Q40`) | every installed application's boot |
