@@ -14,10 +14,15 @@ import { describe, expect, it } from "vitest";
 
 import { pager } from "../chrome/pager";
 
-/** The rendered pager, or null, with a recorder for what was chosen. */
-function draw(total: number, page: number, size = 25) {
+/**
+ * The rendered pager, or null, with a recorder for what was chosen.
+ *
+ * `shown` defaults to a full page, which is what every page but the last one
+ * holds. The tests that care about a short page pass their own.
+ */
+function draw(total: number, page: number, size = 25, shown = size) {
   const chosen: number[] = [];
-  const element = pager(total, page, size, (to) => chosen.push(to));
+  const element = pager(total, page, size, shown, (to: number) => chosen.push(to));
 
   return { element, chosen };
 }
@@ -117,5 +122,27 @@ describe("the pager", () => {
     const { element } = draw(100, 0);
 
     expect(labels(element!)).toEqual(["‹", "1", "2", "3", "4", "›"]);
+  });
+
+  /**
+   * The range counts what is on screen, not what was asked for.
+   *
+   * A page that came back short — the last page of a list, or a server that
+   * clamped — used to be described by the page size rather than by its rows,
+   * so it stated a range nobody could check by counting. That is a number that
+   * would read the same if the list had failed to load half of itself.
+   */
+  it("states the rows it actually has, not the page size", () => {
+    const { element } = draw(218, 0, 25, 9);
+
+    expect(element?.querySelector("span")?.textContent).toBe("showing 1–9 of 218");
+  });
+
+  it("says a page is empty rather than describing rows that are not there", () => {
+    const { element } = draw(218, 3, 25, 0);
+
+    expect(element?.querySelector("span")?.textContent).toBe(
+      "no rows on this page · 218 in the list",
+    );
   });
 });

@@ -31,12 +31,19 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<StayLifecycleService>();
         services.AddScoped<StayAssignmentService>();
         services.AddScoped<StayListService>();
+        services.AddScoped<BookingReadService>();
         services.AddScoped<Module.TodayView>();
         services.AddScoped<Module.AttentionView>();
         services.AddScoped<Module.OccupancyView>();
         services.AddScoped<Module.FeedView>();
         services.AddScoped<Module.MixView>();
         services.AddScoped<Module.WatchlistView>();
+        services.AddScoped<Module.BookingsView>();
+        services.AddScoped<Module.BookingView>();
+        services.AddScoped<Module.AvailabilityView>();
+        services.AddScoped<Module.CancelPlanView>();
+        services.AddScoped<Module.WalkInCommand>();
+        services.AddScoped<Module.CancelCommand>();
         services.AddScoped<AvailabilityService>();
 
         // The inbound half — the Hub's deferred facts, and the two flows a

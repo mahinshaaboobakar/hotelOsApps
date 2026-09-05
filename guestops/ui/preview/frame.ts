@@ -22,7 +22,15 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
-import { recordedAttention, recordedStay, recordedToday } from "../book";
+import {
+  recordedAttention,
+  recordedAvailability,
+  recordedBooking,
+  recordedBookings,
+  recordedCancelPlan,
+  recordedStay,
+  recordedToday,
+} from "../book";
 
 /**
  * A host that grants what the manifest requests and answers from the fixtures.
@@ -42,10 +50,19 @@ function host(granted: readonly string[]): HostApi {
     property: { timezone: null, locale: null },
 
     call(capability: string, method: string): Promise<unknown> {
-      if (method === "today") return Promise.resolve(recordedToday);
-      if (method === "attention") return Promise.resolve(recordedAttention);
-      if (method === "stay") return Promise.resolve(recordedStay);
-      return Promise.reject(new Error(`unhandled ${capability}/${method}`));
+      const answers: Record<string, unknown> = {
+        today: recordedToday,
+        attention: recordedAttention,
+        stay: recordedStay,
+        bookings: recordedBookings,
+        booking: recordedBooking,
+        cancelPlan: recordedCancelPlan,
+        availability: recordedAvailability,
+      };
+
+      return method in answers
+        ? Promise.resolve(answers[method])
+        : Promise.reject(new Error(`unhandled ${capability}/${method}`));
     },
 
     on(): () => void {
@@ -80,13 +97,21 @@ function click(selector: string, text: string): void {
  * a half-rendered screen often enough to be believed, and a loading state
  * photographs well.
  */
-function drive(): void {
+async function drive(): Promise<void> {
   // `.head .tab`, not `.ri`. The rail became the top bar (docs/working/64 §3)
   // and this driver kept the old class, so every `?screen=attention` capture
   // since then has quietly photographed Today. A harness that cannot reach a
   // screen reports nothing — it just shows a different one, convincingly.
-  if (screen === "attention") click(".head .tab", "Attention");
-  if (screen === "stay") click(".tr.act", "Rajesh Pillai");
+  //
+  // The steps are AWAITED between clicks, because every screen loads through
+  // `load()` and renders in a promise. A synchronous chain of clicks reaches
+  // the second one before the first screen exists, finds nothing to click, and
+  // photographs whatever was already there — the same silent failure the class
+  // name above caused, arrived at a different way.
+  for (const step of PATHS[screen] ?? []) {
+    click(step.selector, step.text);
+    await settled();
+  }
 
   // Two frames: one for the click's own render, one for the screen it opened —
   // RACED AGAINST A TIMER, because a hidden tab paints no frames at all.
@@ -104,4 +129,46 @@ function drive(): void {
   setTimeout(settle, 400);
 }
 
-setTimeout(drive, 60);
+/** One click on the way to a screen. */
+interface Step {
+  selector: string;
+  text: string;
+}
+
+/**
+ * How each screen is reached, as clicks a person would make.
+ *
+ * Driven rather than addressed, deliberately: the module has no router
+ * (docs/working/64 §3, and `apps/desktop` has none either), so a capture that
+ * jumped straight to a screen would be photographing a state the application
+ * cannot actually be put into. Every frame here is reachable from the day.
+ */
+const PATHS: Record<string, readonly Step[]> = {
+  attention: [{ selector: ".head .tab", text: "Attention" }],
+  stay: [{ selector: ".tr.act", text: "Rajesh Pillai" }],
+  bookings: [{ selector: ".head .tab", text: "Bookings" }],
+  walkin: [{ selector: ".tabs .btn", text: "Walk-in" }],
+
+  newbooking: [
+    { selector: ".head .tab", text: "Bookings" },
+    { selector: ".fltr .btn", text: "New booking" },
+  ],
+
+  booking: [
+    { selector: ".head .tab", text: "Bookings" },
+    { selector: ".tr.list.act", text: "Fatima Sheikh" },
+  ],
+
+  cancel: [
+    { selector: ".head .tab", text: "Bookings" },
+    { selector: ".tr.list.act", text: "Fatima Sheikh" },
+    { selector: ".title .btn", text: "Cancel" },
+  ],
+};
+
+/** Let a screen's own promise resolve and its render land. */
+function settled(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 30));
+}
+
+setTimeout(() => void drive(), 60);

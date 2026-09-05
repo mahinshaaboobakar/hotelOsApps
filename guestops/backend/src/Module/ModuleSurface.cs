@@ -11,19 +11,27 @@ namespace HotelOS.GuestOps.Module;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The composition root and nothing else: it names the capability and
-/// dispatches on the method. Every projection lives in its own file
-/// beside this one, because a screen's view model is its own subject and a
-/// dispatcher that also built one would be the file everything accretes onto
-/// (ADR 0038, ADR 0042).
+/// The composition root and nothing else: it names each capability and
+/// dispatches on the method. Every projection and every command lives in its
+/// own file beside this one, because a screen's view model is its own subject
+/// and a dispatcher that also built one would be the file everything accretes
+/// onto (ADR 0038, ADR 0042).
 /// </para>
 /// <para>
-/// <b>One capability, because the bundles ask for one.</b> Every screen and
-/// every widget calls <c>reservation.read</c> — the manifest's <i>"show the
-/// day's arrivals, the stay page and the guest record"</i>. A second
-/// <c>MapModuleCapability</c> would be a permission this application does not
-/// yet read anything under, which is the declared-and-never-used defect
+/// <b>Three capabilities, because the bundles now ask for three.</b> Reads go
+/// under <c>reservation.read</c>; taking a walk-in is <c>stay.create</c>;
+/// cancelling is <c>stay.override</c>, which is the same permission that makes
+/// an override and clears a disagreement (GUEST-Q3). Each is a permission the
+/// manifest declares and screens actually exercise — a fourth mapped
+/// speculatively would be the declared-and-never-used defect that
 /// <c>CORE-Q13</c> is named after.
+/// </para>
+/// <para>
+/// <b>The split is by what a caller is allowed to do, not by what the code
+/// finds convenient.</b> A read and a write of the same aggregate sit in
+/// different maps here so that a property granting only <c>reservation.read</c>
+/// gets a desk that lists and refuses, rather than one that lists and quietly
+/// cancels.
 /// </para>
 /// <para>
 /// <b>The token check and the capability guard are not here.</b> They are
@@ -46,18 +54,31 @@ public static class ModuleSurface
     /// two.
     /// </remarks>
     public static void MapGuestOpsModule(this WebApplication app)
-        => app.MapModuleCapability(
+    {
+        app.MapModuleCapability(
             Application.Abstractions.Permissions.ReservationRead,
             (request, cancellationToken) =>
-                AnswerAsync(request.Services, request, cancellationToken));
+                ReadAsync(request.Services, request, cancellationToken));
 
-    /// <summary>The method, to the projection that answers it.</summary>
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.StayCreate,
+            (request, cancellationToken) =>
+                CreateAsync(request.Services, request, cancellationToken));
+
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.StayOverride,
+            (request, cancellationToken) =>
+                OverrideAsync(request.Services, request, cancellationToken));
+    }
+
+    /// <summary>The reads — every list, every page, every plan.</summary>
     /// <remarks>
-    /// <b>An unknown method is refused by name.</b> Returning null would render
-    /// as an empty screen, which reads to a receptionist as a quiet hotel
-    /// rather than as a bundle asking for something this build does not serve.
+    /// <b>A cancellation <i>plan</i> is a read.</b> It computes penalties and
+    /// names consequences and writes nothing, so a person who may look at a
+    /// booking may see what cancelling it would do. Only the button needs
+    /// <c>stay.override</c>.
     /// </remarks>
-    private static Task<object?> AnswerAsync(
+    private static Task<object?> ReadAsync(
         IServiceProvider services,
         ModuleEnvelope.ModuleRequest request,
         CancellationToken cancellationToken)
@@ -81,6 +102,17 @@ public static class ModuleSurface
             "watchlist" => services.GetRequiredService<WatchlistView>()
                 .AnswerAsync(request.Scope, cancellationToken),
 
+            "bookings" => services.GetRequiredService<BookingsView>()
+                .AnswerAsync(request.Scope, Page(request.Body), cancellationToken),
+
+            "booking" => services.GetRequiredService<BookingView>()
+                .AnswerAsync(request.Scope, Booking(request.Body), cancellationToken),
+
+            "cancelPlan" => services.GetRequiredService<CancelPlanView>()
+                .AnswerAsync(request.Scope, Booking(request.Body), cancellationToken),
+
+            "availability" => Availability(services, request, cancellationToken),
+
             // `stay` is declared by the bundle and not served here. It needs the
             // stay's id from the body and a projection of the whole page —
             // banner, timeline, six tabs — which is its own round. The bundle
@@ -90,6 +122,84 @@ public static class ModuleSurface
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };
+
+    /// <summary>Taking a booking — the walk-in, for now.</summary>
+    private static Task<object?> CreateAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "walkIn" => services.GetRequiredService<WalkInCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
+
+    /// <summary>The lifecycle writes a person makes over a source.</summary>
+    private static Task<object?> OverrideAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "cancel" => services.GetRequiredService<CancelCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
+
+    /// <summary>The dates availability was asked about.</summary>
+    /// <remarks>
+    /// <b>Refused rather than defaulted.</b> A missing arrival could be read as
+    /// *today*, and the answer would then be a availability for dates the desk
+    /// never asked about — shown in the column a guest is quoted from. The
+    /// screen always knows the dates it is asking for; a request without them
+    /// is a caller that has gone wrong.
+    /// </remarks>
+    private static Task<object?> Availability(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Body is not { ValueKind: JsonValueKind.Object } body)
+        {
+            throw new InvalidRequestException("availability needs an arrival and a departure");
+        }
+
+        var from = Date(body, "arrive")
+            ?? throw new InvalidRequestException("availability needs an arrival date");
+
+        var to = Date(body, "depart")
+            ?? throw new InvalidRequestException("availability needs a departure date");
+
+        return services.GetRequiredService<AvailabilityView>()
+            .AnswerAsync(request.Scope, from, to, cancellationToken);
+    }
+
+    /// <summary>Which booking the bundle is asking about.</summary>
+    private static Guid Booking(JsonElement? body)
+    {
+        if (body is not { ValueKind: JsonValueKind.Object } request
+            || !request.TryGetProperty("bookingId", out var value)
+            || value.ValueKind != JsonValueKind.String
+            || !Guid.TryParse(value.GetString(), out var id))
+        {
+            throw new InvalidRequestException("this method needs a booking");
+        }
+
+        return id;
+    }
+
+    /// <summary>A date from the bundle's body, where it sent one.</summary>
+    private static DateOnly? Date(JsonElement body, string name)
+        => body.TryGetProperty(name, out var value)
+            && value.ValueKind == JsonValueKind.String
+            && DateOnly.TryParse(value.GetString(), out var date)
+                ? date
+                : null;
 
     /// <summary>The page the bundle asked for, clamped.</summary>
     /// <remarks>

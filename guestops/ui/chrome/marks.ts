@@ -27,6 +27,13 @@ import { control, el } from "./element";
  * @returns the chip element
  */
 export function mark(chip: Chip): HTMLElement {
+  // Not a mark, and drawn as what it is. Frame 2 puts `penalty applied` in the
+  // marks column with no dot, no tint and no border — a footnote about the row
+  // rather than a claim about where the row came from.
+  if (chip.mark === "note") {
+    return el("span", "hint", chip.text);
+  }
+
   const element = el("span", `sh ${chip.mark}`);
 
   // `missing` is a dashed outline with no dot: it marks an absence, and a dot

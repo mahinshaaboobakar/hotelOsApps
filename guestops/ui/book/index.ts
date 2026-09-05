@@ -83,3 +83,59 @@ export async function load<T>(
     throw error;
   }
 }
+
+/** What a write did, or why it did not. */
+export interface Performed<T> {
+  value: T | null;
+
+  /** Null when it worked. The platform's own words when ADR 0041 permits them. */
+  refused: string | null;
+}
+
+/**
+ * Ask the platform to change something.
+ *
+ * @param host the bridge, and the only route out of this realm
+ * @param capability the permission the manifest requested
+ * @param method the operation within it
+ * @param params the application's own JSON body
+ * @returns what it did, or why it did not
+ *
+ * **There is no fallback, and that is the difference from `load`.** A read that
+ * cannot reach the platform can show recorded facts and say so; a write that
+ * cannot reach the platform has *not happened*, and anything that looked like
+ * success would be a receptionist believing a room was released. So this
+ * returns the refusal and the screen renders it.
+ *
+ * A capability the property did not grant is refused in the same shape rather
+ * than thrown, because on this side of the seam it is the same fact: the thing
+ * the person pressed did not happen, and they need to be told which reason.
+ */
+export async function perform<T>(
+  host: HostApi,
+  capability: string,
+  method: string,
+  params: Record<string, unknown>,
+): Promise<Performed<T>> {
+  if (!host.identity.capabilities.includes(capability)) {
+    return {
+      value: null,
+      refused: `This property has not granted ${capability} to GuestOps.`,
+    };
+  }
+
+  try {
+    return { value: (await host.call(capability, method, params)) as T, refused: null };
+  } catch (error) {
+    if (error instanceof HostCallError) {
+      return {
+        value: null,
+        refused: error.isForPeople
+          ? error.message
+          : "The platform refused this. Nothing was changed.",
+      };
+    }
+
+    throw error;
+  }
+}

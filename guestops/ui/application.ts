@@ -47,19 +47,51 @@
 
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
-import { recordedAttention, recordedToday } from "./book";
+import { recordedAttention, recordedToday, recordedWalkIn } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
+import { booking } from "./screens/booking";
+import { bookings } from "./screens/bookings";
+import { newBooking } from "./screens/newbooking";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
+import { walkIn } from "./screens/walkin";
 
-/** Where the module is. A stay keeps `Today` lit in the bar. */
+/**
+ * Where the module is.
+ *
+ * A stay keeps `Today` lit in the bar, and a booking keeps `Bookings` lit: both
+ * are reached *from* a list and belong to it, so the way back is the way in.
+ * That is how the approved design navigates and it is why there is no back
+ * button.
+ */
 interface Place {
-  screen: "Today" | "Bookings" | "Guests" | "Attention" | "Stay";
+  screen:
+    | "Today"
+    | "Bookings"
+    | "Guests"
+    | "Attention"
+    | "Stay"
+    | "Booking"
+    | "NewBooking";
+
   list: string;
   tab: string;
+
+  /** Which booking the Booking screen is showing. */
+  bookingId: string;
+
+  /**
+   * The overlay standing over whatever screen is drawn, if any.
+   *
+   * Part of *where you are* for the same reason the page is: it survives a
+   * redraw, and the screen underneath keeps rendering while it stands — frame
+   * 10 draws the day behind the walk-in sheet and frame 8 draws the booking's
+   * stays behind the cancellation.
+   */
+  overlay: "walkin" | "cancel" | null;
 
   /**
    * Which page of the list, 0-based.
@@ -85,7 +117,14 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // the type-check nor the suite can see it.
   const style = stylesheet();
 
-  let where: Place = { screen: "Today", list: "Arrivals", tab: "Overview", page: 0 };
+  let where: Place = {
+    screen: "Today",
+    list: "Arrivals",
+    tab: "Overview",
+    page: 0,
+    bookingId: "",
+    overlay: null,
+  };
 
   function show(next: Partial<Place>): void {
     if (root === null) return;
@@ -95,8 +134,13 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     const main = el("div", "main");
 
     frame.append(
-      bar(items(), where.screen === "Stay" ? "Today" : where.screen, OPERATOR, (label) =>
-        show({ screen: label as Place["screen"], list: "Arrivals" })),
+      bar(items(), lit(where.screen), OPERATOR, (label) =>
+        show({
+          screen: label as Place["screen"],
+          list: "Arrivals",
+          page: 0,
+          overlay: null,
+        })),
       main,
     );
 
@@ -105,6 +149,51 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   }
 
   function draw(main: HTMLElement): void {
+    // The sheet stands over whatever screen is drawn, so it is appended after
+    // the screen rather than instead of it — frame 10 is the day, dimmed, with
+    // the walk-in on top of it.
+    const overlay = (): void => {
+      if (where.overlay === "walkin") {
+        main.append(walkIn(recordedWalkIn, () => show({ overlay: null })));
+      }
+    };
+
+    if (where.screen === "Booking") {
+      void booking(
+        host,
+        main,
+        where.bookingId,
+        where.overlay === "cancel",
+        () => show({ overlay: "cancel" }),
+        () => show({ overlay: null }),
+        // A completed cancellation closes the dialog and redraws from the
+        // server. The screen does not patch its own rows: the lifecycle is the
+        // service's, and a client editing its copy would be a second place it
+        // is decided.
+        () => show({ overlay: null }),
+      );
+      return;
+    }
+
+    if (where.screen === "NewBooking") {
+      void newBooking(host, main, () => show({ overlay: "walkin" }))
+        .then(overlay);
+      return;
+    }
+
+    if (where.screen === "Bookings") {
+      void bookings(
+        host,
+        main,
+        where.page,
+        (page) => show({ page }),
+        (row) => show({ screen: "Booking", bookingId: row.id, overlay: null }),
+        () => show({ overlay: "walkin" }),
+        () => show({ screen: "NewBooking", overlay: null }),
+      ).then(overlay);
+      return;
+    }
+
     if (where.screen === "Stay") {
       void stay(host, main, where.tab, (tab) => show({ tab }));
       return;
@@ -125,7 +214,9 @@ export const activate: Activate = (host: HostApi): HostedModule => {
         (list) => show({ list, page: 0 }),
         (page) => show({ page }),
         () => show({ screen: "Stay", tab: "Overview" }),
-      );
+        () => show({ overlay: "walkin" }),
+        () => show({ screen: "NewBooking", overlay: null }),
+      ).then(overlay);
       return;
     }
 
@@ -158,6 +249,23 @@ function items(): readonly BarItem[] {
     { label: "Guests", count: "1 904" },
     { label: "Attention", count: String(recordedAttention.length), attention: true },
   ];
+}
+
+/**
+ * Which bar entry is lit.
+ *
+ * A screen reached from a list lights the list it came from, because that is
+ * where the way back is. Written as a map rather than a chain of ternaries so
+ * the next screen that hangs off a section is one line.
+ */
+function lit(screen: Place["screen"]): string {
+  const under: Partial<Record<Place["screen"], string>> = {
+    Stay: "Today",
+    Booking: "Bookings",
+    NewBooking: "Bookings",
+  };
+
+  return under[screen] ?? screen;
 }
 
 /** A screen the approved design draws and this slice does not build. */

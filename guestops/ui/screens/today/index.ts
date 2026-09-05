@@ -39,6 +39,8 @@ const PAGE = 25;
  * @param go what to do when another list is chosen
  * @param turn what to do when another page is chosen
  * @param open what to do when a stay is picked
+ * @param walk what the Walk-in action does
+ * @param book what the New booking action does
  */
 export async function today(
   host: HostApi,
@@ -48,6 +50,8 @@ export async function today(
   go: (list: string) => void,
   turn: (page: number) => void,
   open: (row: DayRow) => void,
+  walk: () => void,
+  book: () => void,
 ): Promise<void> {
   // The page travels as this application's own body — `{page, pageSize}` — and
   // comes back clamped by the same `Paging.Of` the gRPC surface uses, so the
@@ -71,8 +75,8 @@ export async function today(
   // page header left to put them in — docs/working/64 §3.
   views.append(
     el("div", "grow"),
-    control("btn", "Walk-in"),
-    control("btn pri", "＋ New booking"),
+    control("btn", "Walk-in", walk),
+    control("btn pri", "＋ New booking", book),
   );
 
   const body = el("div", "body");
@@ -82,7 +86,7 @@ export async function today(
     strip(day.stats, showing?.label ?? "", day),
     views,
     table(showing?.rows ?? [], open),
-    pager(Number(showing?.count ?? 0), page, PAGE, turn),
+    pager(Number(showing?.count ?? 0), page, PAGE, showing?.rows.length ?? 0, turn),
   );
 
   // No page heading. It said "Today", which the bar already says — the same

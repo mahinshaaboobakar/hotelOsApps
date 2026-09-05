@@ -27,6 +27,7 @@ const SHOWN = 5;
  * @param total how many rows the whole list holds
  * @param page the current page, 0-based
  * @param size how many rows a page holds
+ * @param shown how many rows are actually on screen
  * @param go what to do when a page is chosen
  * @returns the pager, or null when there is nothing to page
  */
@@ -34,6 +35,7 @@ export function pager(
   total: number,
   page: number,
   size: number,
+  shown: number,
   go: (page: number) => void,
 ): HTMLElement | null {
   const pages = Math.max(1, Math.ceil(total / size));
@@ -47,9 +49,22 @@ export function pager(
 
   const element = el("div", "pager");
   const first = page * size + 1;
-  const last = Math.min(total, (page + 1) * size);
 
-  element.append(el("span", undefined, `showing ${first}–${last} of ${total}`));
+  // Two clamps, and they catch different mistakes. `shown` counts the rows
+  // that are actually here, which is what a short page needs — a range wider
+  // than the screen is a number nobody can check by counting, and it would read
+  // the same if the list had failed to load half of itself. `total` catches a
+  // caller that reports a full page on the last page, which is the easy thing
+  // to pass and the easy thing to get wrong.
+  const last = Math.min(total, first + shown - 1);
+
+  element.append(el(
+    "span",
+    undefined,
+    shown === 0
+      ? `no rows on this page · ${total} in the list`
+      : `showing ${first}–${last} of ${total}`,
+  ));
 
   const nav = el("span", "pnav");
   nav.append(step("‹", page - 1, page > 0, go));

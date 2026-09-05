@@ -61,10 +61,16 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
   const element = el("div", "tr act");
 
   const name = el("div", "nm");
-  name.append(
-    row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest),
-    el("span", undefined, row.contact),
-  );
+  name.append(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest));
+
+  // The second line, only where there is one to draw. A contact is ruled
+  // absent (GUEST-Q12) and a party count is not, so this renders whichever
+  // exists and nothing at all when neither does — never an empty span holding
+  // the row's height open for a value nobody has.
+  const second = row.contact ?? row.party;
+  if (second !== null) {
+    name.append(el("span", undefined, second));
+  }
 
   const room = el("div");
   room.append(
