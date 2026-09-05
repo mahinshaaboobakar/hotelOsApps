@@ -102,7 +102,8 @@ THE SERVICES — a hotel's, in our words (the reference's five kinds-by-weekday 
                     DUE by the property's linen rule (every N nights) or on request, 15–25 min
   turndown          evening, if the property offers it
   refresh           a vacant clean room unsold N days, or a day-use pickup
-  deep clean        periodic per room type — every N nights or on the supervisor's call — never by weekday
+  deep clean        NOT a service — a planned room PROJECT (owner, 2026-09-05: twice a year or yearly,
+                    days to weeks, the room OUT OF ORDER meanwhile, people assigned) — see below
   per room type × service: minutes · credits · inspection rule · which checklist (inspection app)
 
 THE STANDARD IS THE PROPERTY'S; THE GUEST MAY ONLY REDUCE IT — all recorded
@@ -125,6 +126,21 @@ THE TASK — one per room per operating day per service, its phases the property
                     PASSED = INSPECTED, FAILED = dirty again with the reason
   daily service:    CLEAN → MAKE UP (lighter) → DONE; inspection as a spot-check rule
   one state per phase, one declared set of moves; the attendant's timer accumulates across pauses
+
+DEEP CLEAN — a planned room project (owner's input, 2026-09-05; proposal, awaiting the ruling)
+  PLAN    Room Care holds the plan: per room type how often (per property); per room last done, next
+          due; the supervisor picks the window from a due list
+  BLOCK   the room is OUT OF ORDER for the window — blocked from sale in the PMS / GuestOps, reason
+          "deep clean", from–to; Room Care hears it: no daily service, a "blocked" lane with the
+          reason and the return date. The same shape serves any major works on the room
+  DO      a JOBS job — multi-day, steps, assigned to staff or a contractor — raised by Room Care's
+          due event with a correlation id; the job id kept from job.created; progress on the lane
+  RETURN  job closes → dirty → departure clean + inspection → INSPECTED → block lifted → sold;
+          "deep clean done" recorded, next due computed
+  OPEN — for the architect, not decided here: ADR 0051/0056 give room out-of-order STATE to
+          Maintenance (EngineeringOps), and GuestOps consumes it as that owner's fact (GUEST-Q7).
+          Proposed: Room Care REQUESTS the block (reason, dates); the out-of-order owner applies it.
+          Whether Room Care may place one directly is a question against the frozen table.
 
 ASSIGNMENT
   candidates = attendants posted to the room's zone today · capacity from Workforce
