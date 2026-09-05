@@ -343,7 +343,7 @@ ul.flows b{color:var(--text)}
 
 <!-- ===================================================================== -->
 <h2 class="sec">7g · managers</h2>
-<h1 class="frame">7g · <b>Managers</b>. Who holds Room Care property-wide — the general manager's grant.</h1>
+<h1 class="frame">7g · <b>Property-wide access</b>. Visible to the general manager only — the one grant that is not a posting.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -351,13 +351,24 @@ ul.flows b{color:var(--text)}
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
-    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div class="on">Managers</div></div>
+    <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div class="on">Property-wide access</div></div>
+    <div class="dlg" style="margin-bottom:16px">
+      <div class="sect" style="margin-top:0">Read this first — every role in Room Care comes from Workforce</div>
+      <div class="kv">
+        <div>Attendants</div><div>posted to Housekeeping by Workforce → their own assigned rooms. Nothing to set here.</div>
+        <div>Supervisors</div><div>posted as <i>supervisor in Housekeeping</i> → assign · amend. Nothing to set here.</div>
+        <div>Head of Housekeeping</div><div>posted as <i>head of Housekeeping</i> → configure · plan. Nothing to set here.</div>
+        <div>Opening the app</div><div>Core Administration › Applications — the door, not a role.</div>
+        <div><b>This tab</b></div><div><b>one exception only:</b> a person <i>not</i> posted as head of Housekeeping who must hold everything in Room Care at this property — a rooms-division manager, a GM's deputy. <b>The general manager grants it; nobody else sees this tab.</b></div>
+      </div>
+    </div>
     <table>
-      <tr><th>Person</th><th>Department</th><th>Holds</th><th>Since</th><th>Granted by</th><th></th></tr>
-      <tr><td>Rekha Sinha</td><td>Housekeeping · executive housekeeper</td><td><span class="pill ok">roomcare_manager</span></td><td>01 Jan 2026</td><td>Vikram Shah (GM)</td><td><span class="btn sm danger">Revoke…</span></td></tr>
-      <tr><td>Vikram Shah</td><td>General manager</td><td class="dimtd">everything — the GM's own standing</td><td>—</td><td>—</td><td></td></tr>
+      <tr><th>Person</th><th>Posting (Workforce)</th><th>Holds</th><th>Since</th><th>Granted by</th><th></th></tr>
+      <tr><td>Arjun Mehta</td><td>Rooms division manager · <span class="mono">not posted in Housekeeping</span></td><td><span class="pill ok">roomcare_manager</span></td><td>01 Jan 2026</td><td>Vikram Shah (GM)</td><td><span class="btn sm danger">Revoke…</span></td></tr>
+      <tr><td class="dimtd">Rekha Sinha</td><td class="dimtd">Housekeeping · head of department</td><td class="dimtd">everything already — from her posting; no grant needed or shown</td><td class="dimtd">—</td><td class="dimtd">—</td><td></td></tr>
     </table>
-    <div class="pager"><span>1 grant at this property · this list is read here and granted by the general manager only (S6; AUTHZ-Q25)</span><span></span></div>
+    <div class="pager"><span>1 grant at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings are listed dim for contrast and cannot be edited here</span><span></span></div>
+    <div style="margin-top:12px"><span class="btn pri">Grant to a person…</span></div>
     <div class="cols" style="margin-top:16px">
       <div class="card">
         <h3>What the grant gives</h3>
@@ -369,19 +380,20 @@ ul.flows b{color:var(--text)}
       </div>
     </div>
     <div class="dlg" style="margin-top:16px">
-      <div class="sect" style="margin-top:0">Revoke Rekha Sinha's roomcare_manager?</div>
-      <div class="mono" style="margin-bottom:10px">She keeps what her posting gives her. Recorded: who, when.</div>
+      <div class="sect" style="margin-top:0">Revoke Arjun Mehta's roomcare_manager?</div>
+      <div class="mono" style="margin-bottom:10px">He keeps whatever his Workforce posting gives him — nothing in Housekeeping. Recorded: who, when.</div>
       <span class="btn danger confirm">Revoke</span><span class="btn">Cancel</span>
     </div>
   </div>
 </div>
-<div class="note hold"><b>Redline 3, open (2026-09-05) — the owner: "purpose of the Managers tab? managers come from Workforce, right?"</b> Right: who is a supervisor or a manager is a <b>Workforce posting</b>, read by Room Care from the authorization graph — nothing to configure here. Who may <i>open</i> Room Care is Core Administration's Applications card (ADR 0116 §5). The only thing this tab held is the property-wide <code>roomcare_manager</code> override the GM may grant to someone <i>not</i> posted as HK manager. <b>Proposed: drop this tab in v1</b> — the grant kind stays declared in the manifest, so the screen can come back in one step if a property ever asks. Kept drawn until the owner rules.</div>
+<div class="note fix"><b>Redline 3 ruled (2026-09-05) — the owner: "it exists on the platform as a mechanism (AUTHZ-Q25) — keep it, for the GM."</b> Kept, renamed <i>Property-wide access</i>, visible to the general manager only, and it now says on its face what it is and what it is not: every role comes from Workforce; this is the one grant that is not a posting.</div>
+<div class="note"><b>The question it answered — "managers come from Workforce, right?"</b> Right: who is a supervisor or a manager is a <b>Workforce posting</b>, read by Room Care from the authorization graph — nothing to configure here. Who may <i>open</i> Room Care is Core Administration's Applications card (ADR 0116 §5). The only thing this tab held is the property-wide <code>roomcare_manager</code> override the GM may grant to someone <i>not</i> posted as HK manager. <b>Proposed: drop this tab in v1</b> — the grant kind stays declared in the manifest, so the screen can come back in one step if a property ever asks. Kept drawn until the owner rules.</div>
 <div class="note"><b>Draws S6 and AUTHZ-Q25.</b> The package declares the grant kind in its manifest; the Kernel materialises <code>property#roomcare_manager</code>; the general manager grants it from here (or from the Access card). The destructive twin is drawn as page 64 §2 rules: outline inline, <b>filled at the confirm</b>. Room Care writes no tuple.</div>
 
 <h2 class="sec">redline log</h2>
 <ul class="flows">
   <li><b>2026-09-05 · drawn</b> — seven frames, on the owner's redline of the collapsed frame 7 in <code>01-the-roomcare-screens.html</code>: <i>"only 3 tabs mocked on a single screen — seven separate mock screens."</i></li>
-  <li><b>2026-09-05 · redline 3</b> — 7e Areas had seven rows and no numbered pager: redrawn at 12 of 23 with the pager (page 64 §8). 7g Managers: purpose questioned — supervisors and managers are Workforce postings; the tab held only the GM's property-wide override; <b>proposed to drop in v1</b>, awaiting the owner.</li>
+  <li><b>2026-09-05 · redline 3 folded</b> — 7e Areas had seven rows and no numbered pager: redrawn at 12 of 23 with the pager (page 64 §8). 7g: the stream proposed dropping it; <b>the owner ruled: keep it, for the GM</b> — renamed <i>Property-wide access</i>, GM-only, with the every-role-comes-from-Workforce clarity on the frame.</li>
 </ul>
 
 </body>
