@@ -18,7 +18,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 |---|---|---|
 | `RC-Q1(1)` design of record | **yes** — survey + this walkthrough + the design chapter (the `JOBS-Q1(1)` shape) | — |
 | `RC-Q1(2)` page 48 vs the brief | **the brief governs**; page 48 amended to match; the owner's scenario study is this page's spine | — |
-| `RC-Q1(3)` minibar | | **S1** |
+| `RC-Q1(3)` minibar | **S1 signed off, 2026-09-05** — a Minibar application when needed; Room Care records the act only | — |
 | `RC-Q1(4)` amenities · linen · carts | | **S2** |
 | `RC-Q1(5)` public areas | | **S3** |
 | `RC-Q1(6)` inspection | **owner-ruled**: checklists and inspections are a **separate application**; Room Care decides *whether* (ADR 0044's row), requests by event with a correlation id, applies the outcome to `condition`; the suite grows by one app, named at its own brief, reference `hotel-inspection-server` | — |
@@ -177,18 +177,109 @@ about — which is what carrying the whole thing here produces. An event with
 quantities keeps the attendant's act honest and gives the owners something to
 consume; nothing else is lost by leaving it out.
 
-### For the owner to rule, in a sentence
+### How the discussion went — 2026-09-05
 
-*Minibar out of Room Care v1, with the refill as a quantities-only event later
-— yes, or which piece do you want Room Care to keep?*
+The owner asked where the minibar goes if there is no Inventory application
+— there is none in `APPS-Q1`'s suite, and this page should not have leaned
+on one. Taken apart, a refill is three facts with three owners: the
+attendant's act (service — Room Care), the guest's charge (a fact about the
+stay — GuestOps), and the stock (nobody's, in v1). The owner then delegated
+the architectural call — *"what way more secure and correct, more
+flexible… there is no app like inspection in the suite, but we add it if
+needed"* — and it is taken on the inspection precedent.
 
-**Ruling:** —
+### Decision — architectural, under the owner's delegation, 2026-09-05
+
+**The minibar is its own application, added to the suite when a hotel needs
+it; Room Care records only the act.**
+
+```text
+Room Care     the attendant's act on the task: items (from the Minibar app's list, via Context) ·
+              quantities · who · when  →  roomcare.minibar.refilled   (no price, no stock)
+Minibar app   catalogue · prices · par per room type · stock — consumes the refill, records the
+              consumption, moves stock  →  minibar.charge_due (stay · lines · amounts)
+GuestOps      posts the lines to the stay's folio; to the PMS through write-back when it lands
+no Minibar app installed  →  Room Care shows no minibar step (absent is not blocking, ADR 0116)
+```
+
+**Why:** one owner per fact — Room Care can never price or charge, so a
+defect in the attendant's screen can only miscount bottles (the security
+property); a hotel with no minibars installs nothing and GuestOps carries no
+catalogue it does not sell (correctness); the Minibar app is replaceable —
+a hotel posting minibar straight to its PMS swaps only the last hop and Room
+Care never changes (flexibility). It is the same shape as the inspection
+ruling: Room Care does the room, the specialist application owns the
+specialty, they talk by event with a correlation id.
+
+**For the architect:** a suite row for the Minibar application when briefed
+(name minted at its brief); a note to FF that GuestOps consumes
+`minibar.charge_due` as a folio posting.
+
+**Ruling:** decided as above under the owner's delegation — **SIGNED OFF, 2026-09-05.**
 
 ---
 
 ## S2 · Amenities, linen and the attendant's cart — `RC-Q1(4)`
 
-*Opened after S1 is signed off.*
+### The scenario
+
+Before the morning service an attendant loads the cart: forty towels, thirty
+bath sheets, soap, shampoo, tea bags. Room by room the cart empties; 214 gets
+two towels and a full set of toiletries on its full clean, 216 gets nothing
+because the guest hung the towels up. At the end of the shift the cart comes
+back with twelve towels; the linen room sends the rest to laundry and needs
+to know what the floor will want tomorrow.
+
+### The proposal
+
+**Room Care carries none of it as data — and the attendant's act stays.** A
+clean records, on the task, *what was put in the room* — items and
+quantities, picked from a list — and publishes it. Where the list comes from
+and who counts the cart is the same answer as S1, one level wider:
+
+```text
+Room Care          the act: "214 — 2 towels, 1 toiletry set"  →  roomcare.room.restocked
+                   nothing about carts, par levels, stock or laundry
+the Minibar app,   the catalogue of room goods · par per room type · the cart (loaded / returned)
+widened to         · floor-pantry stock · what goes to laundry — consumes the restock event
+"Room Supplies"    → the same application as S1, one brief, one name, because a chocolate and
+                     a towel are the same kind of fact: a thing the property stocks and issues
+Laundry (LDY)      linen counts to and from laundry are that department's — a consumer of the
+                   supplies app's events, never Room Care's concern
+no supplies app    →  the restock step is absent from the attendant's screen; the clean itself
+                      is unchanged
+```
+
+*"Restocked to par"* as a **checklist line** — did the attendant do it — is
+the inspection application's, under S1(6)'s ruling; the *quantities* are the
+supplies application's; only the act is Room Care's.
+
+### The reasoning
+
+The old system built the same five tables five times — for amenities, linen,
+minibar, checklists and inspections — each with a catalogue, a per-room-type
+par, a per-room count and a cart, and none of them ever moved a number
+(survey F19, F32): the cart's *taken* and *returned* were written and read
+by nothing. That is what happens when the goods are modelled inside the
+service that uses them. A towel and a bottle of water differ in price and in
+whether laundry sees them; they do not differ in *kind* — both are things the
+property stocks, issues to a cart, puts in a room and counts back — so one
+supplies application owning that kind is the correct cut, and a second one
+for linen would be S1's mistake again. Keeping the act in Room Care keeps the
+attendant's screen honest and complete without giving housekeeping a stock
+ledger; and because the act is an event, the supplies application can arrive
+after Room Care ships and pick up every restock ever recorded (the platform's
+deferred-and-replay shape, `EVT-Q4`).
+
+### Decision — architectural, under the owner's delegation, 2026-09-05
+
+**As proposed:** the attendant records the restock on the task; Room Care
+publishes it and holds no catalogue, par, cart or stock; one supplies
+application (the S1 application, widened) owns the goods; laundry counts are
+the `LDY` department's through that application; the "restocked" checklist
+line is the inspection application's.
+
+**Ruling:** — *(the owner may confirm in a word, or redirect)*
 
 ## S3 · Public areas — `RC-Q1(5)`
 
