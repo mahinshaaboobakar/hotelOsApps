@@ -147,29 +147,19 @@ differently, and the setup screen is where that difference lives. Where a
 property has not configured something, the default applies and the screen
 says it is the default. *(Recorded on S3; it binds S0–S7.)*
 
-### The apartment property — owner's input, 2026-09-05, before S5 went deep
+### The apartment property — raised and RULED OUT, owner, 2026-09-05
 
-> *"the reference was decided for apartments too — one guest stays 6 months
-> to 1 year, there is only morning cleaning, some guests prefer a particular
-> staff to clean their room. In a hotel this is not a use case. We didn't
-> handle the apartment case."*
+The reference also served serviced apartments — stays of six months to a
+year, morning cleaning only, a guest's preferred attendant, a per-stay
+cadence — and the survey read those as hotel oddities. Raised as input
+before S5; the owner ruled the same day: **"there is no such thing in a
+hotel — we completely remove apartment-based logic and design."**
 
-The survey read the reference's long-stay kind, fixed rooms per attendant and
-a guest's standing choice as hotel oddities; they are the serviced-apartment
-case. It is **a property configuration, not another application** (S3's
-rule), and the design must hold for it:
-
-```text
-a stay of 6–12 months: one stay, one guest, "stay-over" for half a year
-one service only — mornings; no turn-down, no night
-cadence per STAY, not per day: "full clean every Tuesday" · "linen change every 7 days" ·
-   "deep clean monthly" — the policy calendar runs on the stay's clock as well as the day's
-a FIXED ATTENDANT per unit — the guest's standing choice, honoured by assignment
-defaults:  hotel — daily cadence, no fixed attendant  ·  apartment — weekly, fixed attendant
-```
-
-For FF, through the architect: GuestOps must carry a six-month stay as one
-stay with a cadence on it.
+So: **Room Care is designed for hotels.** No preferred attendant, no
+per-stay cadence, no fixed unit per attendant, no long-stay kind as a
+special case — not as a switch, not as a default. The reference's long-stay
+profile and fixed-room criteria are in the not-carried list for this reason.
+If a serviced-apartment product is ever wanted, it is its own brief.
 
 ### What the reference proved, by failing
 
@@ -551,22 +541,18 @@ consumes it as a policy input and records what it did about it.**
 ```text
 GuestOps      owns the preference — it is something the guest said, about their stay:
               "no service today" · "after 14:00" · "towels only" · "no bed change" · a booked
-              deep clean on Thursday · a CADENCE ("every Tuesday", "linen weekly") · a PREFERRED
-              ATTENDANT — with the guest, the stay, the date range, who recorded it (desk, guest
-              app, a card scanned by the attendant) → published as a stay fact
-Room Care     consumes it on the stay's room — in the POLICY and in ASSIGNMENT — with a stated
+              deep clean on Thursday — with the guest, the stay, the date range, who recorded it
+              (desk, guest app, a card scanned by the attendant) → published as a stay fact
+Room Care     consumes it on the stay's room and the policy takes it as an INPUT with a stated
               precedence, per property:
                  a guest's "no service" beats the default kind → the task is SKIPPED, recorded
                  "after 14:00" → the task's earliest start moves; priority unchanged
                  "towels only" → the kind becomes the property's light kind for that stay
                  a booked deep clean → that day's kind is deep, priority per the booking
-                 a cadence → the stay's own calendar drives the kind and the day
-                 a preferred attendant → candidates = that person if posted today, else the
-                    normal set, and the supervisor sees "guest's preferred attendant unavailable"
               and records the OUTCOME on the task: served · skipped by guest · refused at the
               door (the card) · deferred — which GuestOps and the desk can read back via Context
-per property  Honour a guest's preferred attendant?  off (hotel) / on (apartment)
-              Honour a guest's cadence?              off / on        — the apartment input, S0
+              (a preferred attendant and a per-stay cadence were proposed here and RULED OUT —
+              apartment logic, S0)
 the card      the attendant sees a DND card and marks it in the app: that is an EXCEPTION on
 at the door   the task (S0), Room Care's own act — not a preference, because the guest did not
               tell anyone; three of them in a row is the security event (S0)
