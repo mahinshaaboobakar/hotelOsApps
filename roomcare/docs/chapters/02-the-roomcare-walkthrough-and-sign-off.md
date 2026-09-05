@@ -116,6 +116,19 @@ THE STANDARD IS THE PROPERTY'S; THE GUEST MAY ONLY REDUCE IT — all recorded
 PRIORITY — sold tonight first, then departures unsold, then daily service by zone, refreshes last;
   turndown its own window — per property
 
+THE TRIGGER — a property setting (owner's direction, 2026-09-05; proposal awaiting the ruling)
+  in both modes every room change is APPLIED as it arrives — Room Care collects and keeps calm
+  MANUAL (default)  nothing is created from a change; when the window starts the housekeeping
+                    manager PREPARES THE DAY — a button, or HosPilot by voice — and that is the
+                    trigger: the decision runs over every room, tasks and the assignment proposal
+                    are laid out. A later change shows as "N new since"; Prepare again ADDS and
+                    re-proposes unassigned work only — never takes a room off an attendant
+  AUTOMATIC         the decision runs on every change and places the work in the next window
+  AI is not a mode — always enabled: it presses the button in manual, answers "what changed" in both
+  midnight case: a 03:00 checkout sold at 15:00 is dirty from 03:00 either way; the work is placed
+  in the next window, first (sold tonight); an arrival before the window raises "arrival before
+  window" for the supervisor (assignment outside the window: a property setting)
+
 THE DECISION — one function, its inputs and its answer always recorded
   room state + stay + guest's reduction + operating day + service  →  a task (service · phases ·
   priority · minutes)   or   PENDING — visible, "tomorrow" or one click
