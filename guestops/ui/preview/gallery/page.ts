@@ -277,7 +277,19 @@ figcaption{margin-bottom:8px;font-size:10.5px;letter-spacing:.1em;
 .frame{overflow:hidden;border:1px solid var(--edge);border-radius:12px;
   background:#0b0d14;height:calc(var(--h) * var(--scale));position:relative;
   transition:height .12s ease}
-iframe{display:block;width:var(--w);height:var(--h);border:0;background:#0b0d14;
+/*
+ * SCOPED TO .pair, and the scoping is the point.
+ *
+ * This was written as a bare \`iframe\` rule when panes were the only iframes on
+ * the page. The widget captures arrived later and inherited it: 320x384 declared,
+ * painted at 190x228 by a scale meant for a 1220px screen. That is the exact
+ * complaint the previous gallery was rejected for — a design shown too small to
+ * audit — arriving by inheritance rather than by decision, on the one element
+ * whose size is its specification.
+ *
+ * A widget canvas is 320x384 at 1:1 or it is not a widget canvas.
+ */
+.pair iframe{display:block;width:var(--w);height:var(--h);border:0;background:#0b0d14;
   transform:scale(var(--scale));transform-origin:0 0}
 
 /*
