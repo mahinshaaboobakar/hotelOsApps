@@ -249,7 +249,15 @@ ul.flows b{color:var(--text)}
       <span style="margin-left:auto" class="mono">started 09:04 · 40 min expected · arrival 15:00</span>
     </div>
     <div class="mono" style="margin-bottom:12px">phases: <b style="color:var(--ok)">strip ✓</b> · <b>clean</b> · make up · done · inspect (arrivals — required)</div>
-    <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Photo</span><span class="btn">Ask for extra time…</span><span class="btn pri">End…</span></div>
+    <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Photo</span><span class="btn">Ask for extra time…</span><span class="btn">Found an issue…</span><span class="btn pri">End…</span></div>
+    <div class="dlg" style="margin-bottom:14px">
+      <div class="sect" style="margin-top:0">Found an issue — raise a job (Jobs is installed; Anita holds <code>job.create</code>)</div>
+      <div class="cols">
+        <div><label>What</label><div class="field" style="display:block">Air conditioning › Not cooling ▾ <span class="mono">— Jobs' catalogue, read through Context</span></div><label>Note</label><div class="field" style="display:block">Blowing warm since I came in; guest arriving 15:00</div></div>
+        <div class="kv"><div>Room</div><div>214 — from the task, not typed</div><div>Photo</div><div>1 attached</div><div>Then</div><div>recorded here as the task's issue; published with a correlation id; Jobs creates the job and this room shows "J-1190 raised 09:38"</div></div>
+      </div>
+      <div style="margin-top:12px"><span class="btn pri">Raise the job</span><span class="btn">Back</span></div>
+    </div>
     <div class="dlg">
       <div class="sect" style="margin-top:0">End — how did it go?</div>
       <div class="cols">
@@ -268,6 +276,7 @@ ul.flows b{color:var(--text)}
   </div>
 </div>
 <div class="note"><b>Draws S5 c1 — the four ways a room ends</b>, and S0's phases. <i>Done</i> is <code>room.clean</code> on her own room: the condition, the event and the version in one transaction (§2.1, §3.1). <i>Declined</i> and <i>DND</i> are records too — a DND keeps the room on her list with "re-check due 10:04" (the property's spacing), and the day's outcome is the last attempt's. Nothing here is ever just "not done".</div>
+<div class="note fix"><b>Redline 2 folded (2026-09-05) — "Found an issue".</b> An attendant who finds a fault during a clean raises a job from here without leaving the room: the issue is recorded on the task (never lost), published as <code>roomcare.issue.found</code> with a correlation id, and Jobs creates the job and answers with <code>job.created</code> (EVT-Q3 — Room Care never calls Jobs). The control appears only when Jobs is installed <b>and</b> the attendant holds <code>job.create</code> — the Kernel's decision, not Room Care's. With Jobs absent the issue is still recorded and replayed when Jobs arrives. Asked of HH: Jobs subscribes to <code>roomcare.issue.found</code>.</div>
 <div class="note hold"><b>Inspection is requested, not performed, here.</b> On <i>Done</i> for a room whose rule says <i>arrivals</i>, Room Care publishes <code>roomcare.inspection.requested</code> with a correlation id and shows "inspection requested" until the inspection application answers (RC-Q1(6)). <b>With no inspection application installed</b> the rule cannot be set to anything but <i>none</i> (frame 7), so this line never appears.</div>
 
 <!-- ===================================================================== -->
@@ -287,6 +296,7 @@ ul.flows b{color:var(--text)}
       <span class="pill soft-warn">DISAGREEMENT · PMS says DIRTY 09:11</span>
     </div>
     <div class="mono" style="margin-bottom:12px">occupied · stay 3B70, in house until 07 Sep · not sold tonight · linen last changed 03 Sep (due 06 Sep) · deep clean due Nov 2026</div>
+    <div style="margin:0 0 14px"><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
     <div class="subnav"><div class="on">Today</div><div>History · 14 days</div><div>Record</div></div>
     <div class="cols">
       <div>
@@ -318,14 +328,70 @@ ul.flows b{color:var(--text)}
           </div>
         </div>
         <div class="card" style="margin-top:14px">
-          <h3>What Jobs did to this room today</h3>
-          <div class="tl"><div><b>—</b><span>no job closed against 1204 today (S5 c8: <code>job.closed</code> would appear here as "extra service 16:50 · J-1183")</span></div></div>
+          <h3>Inspection — today</h3>
+          <div class="kv">
+            <div>Rule</div><div>daily service · spot-check 1 in 10 (Setup 7b)</div>
+            <div>Today</div><div>not selected — no inspection requested</div>
+            <div>Last inspected</div><div>03 Sep 10:12 · Lakshmi Iyer · passed · after the departure clean</div>
+          </div>
+          <div class="mono" style="margin-top:8px">frame 4b shows a room where it was requested and answered</div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3>Jobs against this room today</h3>
+          <div class="tl"><div><b>—</b><span>none raised, none closed (S5 c8: a <code>job.closed</code> appears here as "extra service 16:50 · J-1183"; an issue raised from here as "J-1190 raised 09:38 · Anita Pillai")</span></div></div>
         </div>
       </div>
     </div>
   </div>
 </div>
 <div class="note"><b>Draws S4 (the ordering clause, who leads), S5 c8/c11/c12, §2.1–2.4.</b> The condition line always says who set it and when — attendant, inspection, supervisor, the PMS, the desk. The PMS's 09:11 is <i>newer than a deliberate act here</i>, so under <b>Room Care leads</b> it is a flag the supervisor clears; under <b>PMS leads</b> it would have been applied with "from the PMS" on it and the overwrite recorded. The <i>Today</i> panel is the read GuestOps shows the desk through Context (c12) — <b>this screen is the link's target</b>.</div>
+
+<h1 class="frame">4b · <b>A room, inspected</b>. 401 — a departure clean whose rule says <i>arrivals only</i>, requested and answered.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
+  </div>
+  <div class="body">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
+      <span style="font-size:18px;font-weight:600">Room 401 · Standard · Floor 4 · Zone 2</span>
+      <span class="pill ok">INSPECTED</span><span class="mono">set by inspection · Lakshmi Iyer · 05 Sep 09:05</span>
+    </div>
+    <div class="mono" style="margin-bottom:12px">vacant · sold tonight, arrival 13:00 · linen changed today (departure clean) · deep clean due Sep 2026</div>
+    <div style="margin:0 0 14px"><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn off">Reassign…</span><span class="btn">More ▾</span></div>
+    <div class="subnav"><div class="on">Today</div><div>History · 14 days</div><div>Record</div></div>
+    <div class="cols">
+      <div>
+        <div class="card">
+          <h3>Today — every attempt, in order</h3>
+          <div class="tl">
+            <div><b>08:00 · Prepared</b><span>departure clean · priority 1 (arrival 13:00) · Anita Pillai · run #1</span></div>
+            <div><b>08:06 · Started</b><span>Anita Pillai · strip → clean → make up</span></div>
+            <div><b>08:41 · Done</b><span>Anita Pillai · linen changed · 35 min · room CLEAN, announced · <b>inspection requested</b> (rule: arrivals only)</span></div>
+            <div><b>09:05 · Inspected — passed</b><span>Lakshmi Iyer (inspection app) · 14 checks, 14 passed · room INSPECTED, announced (<code>room.inspected</code>)</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>Inspection — today</h3>
+          <div class="kv">
+            <div>Rule</div><div>departure clean · arrivals only (Setup 7b) → required, this room is sold tonight</div>
+            <div>Requested</div><div>08:41 · on Anita's <i>done</i> · correlation <span class="num">c-7f2a…</span> <span class="tag port">inspection app · RC-Q1(6)</span></div>
+            <div>Answered</div><div>09:05 · <span class="pill ok">PASSED</span> · Lakshmi Iyer · checklist "Standard · departure" 14/14</div>
+            <div>If it had failed</div><div><span class="pill bad">FAILED</span> · reason from the inspector ("bathroom floor") → the room goes back to DIRTY with that reason, the task reopens on Anita's list as <i>rework</i>, and the arrival is flagged on the supervision lane</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px">
+          <h3>Jobs against this room today</h3>
+          <div class="tl"><div><b>—</b><span>none</span></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note fix"><b>Redline 2 folded (2026-09-05) — "where is the inspection info?"</b> Every room page now carries an <i>Inspection — today</i> card: the rule that applied, whether it was requested and when, who answered and how, and what a failure does. Room Care <i>decides whether</i> (the rule, 7b), <i>requests by event</i>, and <i>applies the outcome</i> to the room's condition (RC-Q1(6)); the checklist and the inspector's screen are the inspection application's. With that application absent the card reads "no inspection application at this property — rule: none".</div>
 
 <h1 class="frame">5 · <b>Supervision</b>. The rooms that are the supervisor's today.</h1>
 <div class="win">
@@ -471,6 +537,7 @@ ul.flows b{color:var(--text)}
 <ul class="flows">
   <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
   <li><b>2026-09-05 · redline 1 folded</b> — frame 7 (Setup) had three tabs on one screen; now the first tab here and all seven on <code>02-the-roomcare-setup.html</code>.</li>
+  <li><b>2026-09-05 · redline 2 folded</b> — inspection was invisible on the room page: an <i>Inspection — today</i> card on frame 4 and a new frame 4b (room 401, requested and passed; what failure does). An attendant can raise a job from the room — "Found an issue…" on 3b and "Raise a job for this room…" on 4/4b — recorded here, published with a correlation id, created by Jobs; shown only when Jobs is installed and the person holds <code>job.create</code>. Chapter 03 gains <code>task_issue</code> and <code>roomcare.issue.found</code>.</li>
 </ul>
 
 </body>

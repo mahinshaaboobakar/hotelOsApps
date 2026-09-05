@@ -218,6 +218,7 @@ number and the day are its name.
 | `task_work_session` | each stretch of one person's work | `user_id` · `started_at` · `ended_at` · `end_reason` `PAUSE · END · REASSIGNED` · `minutes` — **accumulates across pauses** (survey F24) |
 | `task_history` | each transition and each decision | `at` · `by_{kind,id}` · `via` · `from_status` · `to_status` · `reason` · `kind` `TRANSITION · REDUCTION · REPRIORITISED · SUPERVISOR_DECISION · DISAGREEMENT_CLEARED` — the supervisor's overrides live here with their reason (S5 c9) |
 | `task_job_touch` | each `job.closed` against the task's room on its day | `job_id` · `closed_at` · `summary` — *"extra service 16:50 · J-1183"* so the day reads whole (S5 c8) |
+| `task_issue` | **each fault an attendant finds during a clean** (mockup redline 2, 2026-09-05) | `task_id` · `room_id` · `item_hint` (Jobs' catalogue id, via Context; null if Jobs absent) · `note` · `media_id` · `by_user_id` · `at` · `correlation_id` · `job_id` (from `job.created`, null until it arrives) — **the attendant's own record, never lost**; Jobs creates the job and answers (`EVT-Q3`); replayed when Jobs installs later (`EVT-Q4`) |
 
 ### 2.5 · `room_supervision` — the supervisor's lane
 
@@ -317,6 +318,7 @@ asserting the literal strings (Jobs §3, the `EVT-Q4` / `AUTHZ-Q20` lesson).
 | `roomcare.supervision.opened` · `.decided` | the lane | `room_id · reason · decision · by` |
 | `roomcare.disagreement.flagged` · `.cleared` | S4 | `room_id · ours · theirs · source · kept` |
 | `roomcare.inspection.requested` | INSPECT phase activates | `task_id · room_id · checklist_ref · service` and **`correlation_id`** — the inspection app answers on it (`RC-Q1(6)`) |
+| `roomcare.issue.found` | a `task_issue` row | `task_id · room_id · item_hint · note · media_id · by` and **`correlation_id`** — Jobs creates the job; `job.created` carries the id back. Shown to an attendant only when Jobs is installed and they hold `job.create` (the Kernel's decision) |
 | `roomcare.room.restocked` | a restock row | `task_id · room_id · stay_id · items[{item_id, quantity}] · by · at` — no price (`RC-Q2`) |
 | `roomcare.deep_clean.due` | the tick finds one due, or the supervisor plans it | `deep_clean_id · room_id · window · steps_hint` and **`correlation_id`** — Jobs creates the job and `job.created` carries it back (`EVT-Q3`) |
 | `roomcare.block.requested` · `.release_requested` | a deep-clean window opens / closes | `room_id · from · to · reason` and `correlation_id` — **the out-of-order owner's to answer; open, the architect's** |
@@ -466,6 +468,7 @@ events:
     - roomcare.disagreement.cleared
     - roomcare.inspection.requested
     - roomcare.room.restocked
+    - roomcare.issue.found
     - roomcare.deep_clean.due
     - roomcare.block.requested
     - roomcare.block.release_requested
@@ -720,8 +723,8 @@ citations.
 |---|---|---|---|
 | 1 | **The board** — every room of the property for today: condition · occupancy · sold tonight · today's service · who has it · outcome so far; lanes: *to do · in progress · done · pending policy · blocked · supervision*; filters: zone · window · service · attendant | `roomcare.read`, scoped to what the viewer may see | S0, S3, S4, S5 c9 |
 | 2 | **Prepare** — the window's state, "N changes since", the button (*Prepare the day* / *Add the new rooms*), the proposal: rooms by zone against attendants on shift (from Context), *nobody available* rows, accept / move | `roomcare.assign` | S0 trigger, the assignment flow |
-| 3 | **My rooms** — the attendant's list in priority order with earliest times, linen due/must, the guest's reductions; each room: Start · Pause · End as Done / Partial (what) / Declined / DND; photo; restock (only when Inventory is installed); ask for extra time | the assignee (`room.clean`) | S5 c1, c4, c5; `RC-Q2` |
-| 4 | **A room** — condition with its source and time; today's task and every attempt; the disagreement, if any, with *keep ours / take theirs*; the supervisor's decision box when the lane is open; the day's history including job touches; the linen date; the deep-clean due date | `roomcare.read`; actions by permission | S4, S5 c8, c9, c11, c12 |
+| 3 | **My rooms** — the attendant's list in priority order with earliest times, linen due/must, the guest's reductions; each room: Start · Pause · End as Done / Partial (what) / Declined / DND; photo; restock (only when Inventory is installed); ask for extra time; **Found an issue** → a job, when Jobs is installed and `job.create` held | the assignee (`room.clean`) | S5 c1, c4, c5; `RC-Q2`; redline 2 |
+| 4 | **A room** — condition with its source and time; today's task and every attempt; **the inspection card** — rule, requested, answered, what a failure does; the disagreement, if any, with *keep ours / take theirs*; the supervisor's decision box when the lane is open; the day's history including job touches and issues raised; **Raise a job for this room** (Jobs installed, `job.create` held); the linen date; the deep-clean due date | `roomcare.read`; actions by permission | S4, S5 c8, c9, c11, c12; `RC-Q1(6)`; redline 2 |
 | 5 | **Supervision** — the lane: rooms past the threshold, disagreements, arrivals before the window, nobody available; each with its decision box and reason | `roomcare.amend` | S5 c9, S4, S0 |
 | 6 | **Deep clean** — due list per room type, plan a window, the block request's state, the job's progress (as `JOBS-Q2` publishes it), return-to-sale | `roomcare.plan` | S0 deep clean |
 | 7 | **Setup** — windows · services per room type (minutes, inspection rule, checklist) · linen and towel rules · trigger mode · who leads · thresholds · priority ladder · strategy · area schedules · zones · roomcare-manager grants (the GM's) | `roomcare.configure` | S0 settings; S3's rule |
@@ -768,6 +771,7 @@ concept-only carry · the trigger by button or HosPilot · deep clean a project
 | **GuestOps: the cleaning wish as a stay fact; the "Housekeeping today" panel + link** | asked; FF's round | the wish arrives by `roomcare.amend` until then; the desk reads Room Care directly |
 | **The inspection application** | its brief; `RC-Q1(6)` | the INSPECT phase is absent until it exists; a property's `inspection_rule` other than `NONE` is refused at Setup with *"no inspection application installed"* |
 | **Inventory** (`RC-Q2`) | its brief | the restock step is absent until installed; events replay from before |
+| **Jobs subscribes to `roomcare.issue.found`** | an ask to HH (mockup redline 2) — the `stay.request_raised` shape, with replay | an attendant's "found an issue" creates a job the day Jobs subscribes; recorded here regardless |
 | **`JOBS-Q2` progress events** | Jobs' post-certification round | the blocked lane shows *job open* / *job closed* from `job.created` / `job.closed` only, until then |
 | **The deep link from GuestOps into Room Care at a room** | absent from `HostApi`; an ask to the shell (Z) | the link; the panel's history is unaffected |
 | **A property with no Temporal has no tick** | `INSTALL-Q69` | automatic mode, window close, refresh, deep-clean due — PREPARE mode runs on the button regardless |
