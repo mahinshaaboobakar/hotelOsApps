@@ -1,7 +1,7 @@
 {
   "name": "@hotelos-apps/guestops-ui",
   "version": "0.1.0",
-  "description": "GuestOps's packaged desktop module \u2014 the reservation book.",
+  "description": "GuestOps's packaged desktop module — the reservation book.",
   "type": "module",
   "private": true,
   "license": "UNLICENSED",
@@ -11,7 +11,8 @@
     "test": "npm run build && vitest run",
     "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
     "build:module": "node ../../scripts/build-module.mjs",
-    "build:widgets": "node ../../scripts/build-module.mjs widgets/today.js widgets/entry/today.ts && node ../../scripts/build-module.mjs widgets/occupancy.js widgets/entry/occupancy.ts && node ../../scripts/build-module.mjs widgets/from-the-pms.js widgets/entry/from-the-pms.ts && node ../../scripts/build-module.mjs widgets/business-mix.js widgets/entry/business-mix.ts && node ../../scripts/build-module.mjs widgets/watchlist.js widgets/entry/watchlist.ts"
+    "build:widgets": "node ../../scripts/build-module.mjs widgets/today.js widgets/entry/today.ts && node ../../scripts/build-module.mjs widgets/occupancy.js widgets/entry/occupancy.ts && node ../../scripts/build-module.mjs widgets/from-the-pms.js widgets/entry/from-the-pms.ts && node ../../scripts/build-module.mjs widgets/business-mix.js widgets/entry/business-mix.ts && node ../../scripts/build-module.mjs widgets/watchlist.js widgets/entry/watchlist.ts",
+    "gallery": "esbuild preview/gallery/index.ts --bundle --format=esm --platform=node --packages=external --outfile=preview/gallery.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts && node preview/gallery.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
