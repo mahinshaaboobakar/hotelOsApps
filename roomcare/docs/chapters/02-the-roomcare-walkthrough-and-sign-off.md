@@ -30,6 +30,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(12)` permissions | | **S6** |
 | `RC-Q1(13)` escalation | **parked with Jobs' twin** — one answer will serve both | — |
 | `RC-Q1(14)` AI allocation | | **S7** |
+| **`RC-Q2`** the Inventory dependency | **recorded — architect, 2026-09-05** (register row `a32da90`): the S2 contract table as tabled; `APPS-Q1`'s addendum adds **the inspection application and Inventory** to the suite; *Inventory* is the presumptive name, confirmed at its brief (APPS-Q3); the non-blocking shape ratified (restock step absent until installed, events replayable — `EVT-Q3/Q4`); `inventory-dev.txt` classed as concepts only; FF noted on `inventory.charge_due` → folio | — |
 
 ### The method ruling that binds this page — owner, 2026-09-05
 
@@ -334,7 +335,64 @@ dependency.
 
 ## S3 · Public areas — `RC-Q1(5)`
 
-*Opened after S2.*
+### The scenario
+
+The lobby is wiped every two hours from six in the morning until ten at
+night; the third-floor corridor is done once after the morning service; the
+restaurant floor after breakfast and again after dinner; the pool deck at
+dawn; every public toilet on a 45-minute round. A different team does it —
+public-area attendants under the same executive housekeeper, in the same
+uniform, on the same roster — and the same supervisor walks both the floors
+and the lobby. At eleven a guest spills a coffee in the lobby; at three the
+front desk reports a smell in the second-floor lift lobby.
+
+### The proposal
+
+**Room Care owns the routine care of places — rooms and public areas alike —
+with one task model; a one-off request is a Jobs job.**
+
+```text
+Room Care        one task model:  location = a ROOM  |  a PUBLIC AREA (a Master Data location)
+                 the same phases (clean → inspection if required), the same attendant screen,
+                 the same board, the same supervisor; the PA department (under HK) works here
+                 the trigger differs: a room's task comes from the POLICY on its state;
+                 an area's task comes from a SCHEDULE the property sets — every 2 h, once after
+                 morning service, at dawn — as a durable Schedule (Temporal), with its own kind,
+                 minutes and inspection rule per area
+                 an area has no condition to announce; it has "last cared for" and "due", shown
+                 on the board — nothing goes to Context that no other application reads
+
+Jobs             the coffee spill, the smell in the lift lobby, "the lobby needs doing before
+                 the wedding party arrives" — REQUESTS, raised by anyone, from Jobs' catalogue,
+                 assignable to the same PA attendant. Room Care does not take ad-hoc requests.
+
+Master Data      a public area is a location in the property's hierarchy — verified in the
+                 design chapter; if the hierarchy cannot name one today, that is a request to
+                 Master Data, not an area table in roomcare
+```
+
+### The reasoning
+
+Routine care of a place is the same work whether the place has a door
+number or a name: a kind of clean, a duration, someone posted to that part
+of the building, a supervisor who checks, and — where the property wants it
+— an inspection. Splitting it would hand the public-area supervisor two
+applications for one shift and the executive housekeeper two boards for one
+department, and it would give an area a second model of "a clean" with its
+own phases, timers and inspection route; the old system did exactly that,
+and its area schedule never produced a single task (survey F19, F28). What
+genuinely differs — the trigger — is a schedule rather than a room state,
+and a schedule is a configuration, not a reason for another application. The
+line that stays sharp is *routine versus requested*: the platform already
+owns requests in Jobs, with a catalogue, priorities and escalation, and a
+spill is a request. Keeping requests out of Room Care keeps its policy engine
+honest — it decides what care a place is due, never what somebody asked for.
+
+**For the owner to rule, in a sentence:** *Public areas are Room Care's, one
+task model with rooms, scheduled by the property; spills and one-off asks are
+Jobs — yes?*
+
+**Ruling:** —
 
 ## S4 · When Room Care and the PMS disagree; the PMS-only hotel — `RC-Q1(7)`
 
