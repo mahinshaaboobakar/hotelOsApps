@@ -68,8 +68,35 @@ export const TABLE = `
    It MATCHES components/design/pager.tsx rather than importing it: a hosted
    module is styled by tokens and never by importing components across a
    realm, so the match is a rendering obligation, not a dependency. */
-.pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
-  padding:10px 4px 0;font-size:12px;color:var(--color-ink-faint,#5a6172)}
+/*
+ * THE PAGER IS THE LIST'S FLOOR — docs/working/64 §6, ruled 2026-09-05.
+ *
+ * Two rules together, and neither works alone:
+ *
+ *   the table takes the free space, so on a SHORT list the pager is pushed to
+ *   the bottom instead of floating under row three with a gap beneath it;
+ *
+ *   the pager sticks, so on a LONG list it stays at the bottom instead of
+ *   waiting at the end of a scroll nobody should have to make to change page.
+ *
+ * The growth is scoped to a table that HAS a pager after it. Frame 14's
+ * availability table is followed by a note and two cards, and a table that grew
+ * there would push them off the screen — the rule is "a list with a pager",
+ * not "a table".
+ *
+ * The negative margins cancel the body's own padding so the strip spans the
+ * full width and sits flush with the bottom edge while it is stuck; the padding
+ * puts it back, so nothing touches the strip and the pager does not jump when
+ * the list reaches its end. The background must be opaque or rows scroll
+ * through it — and that opacity is the one cost of sticking: the last row is
+ * behind the strip until you reach it.
+ */
+.tbl:has(~ .pager){flex:1 1 auto;min-height:0}
+.pager{position:sticky;bottom:0;z-index:2;
+  display:flex;justify-content:space-between;align-items:center;gap:9px;
+  margin:0 -26px -22px;padding:10px 30px 22px;
+  font-size:12px;color:var(--color-ink-faint,#5a6172);
+  background:var(--color-surface,#0b0d14)}
 .pager .pnav{display:flex;align-items:center}
 .pager .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
   border:1px solid var(--color-line,rgba(255,255,255,.08));font-family:inherit;
