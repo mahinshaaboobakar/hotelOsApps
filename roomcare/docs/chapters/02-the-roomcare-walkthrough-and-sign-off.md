@@ -29,7 +29,7 @@ fourteen questions are `RC-Q1(1)–(14)` in survey order.
 | `RC-Q1(11)` diagram 42's permission name | **verified, S6:** the registry has `room.clean` and `room.inspect`; `masterdata.room.update_status` is an illustration and `can_update_status` is by design never an application-facing name | — |
 | `RC-Q1(12)` permissions | **S6 SIGNED OFF — owner, 2026-09-05 ("yes — S6 locked")**: `room.clean` and `room.inspect` as they exist, plus `roomcare.read` · `assign` · `amend` · `configure` · `plan`; the attendant's acts ride the assignment; the architect mints the rows | — |
 | `RC-Q1(13)` escalation | **parked with Jobs' twin** — one answer will serve both | — |
-| `RC-Q1(14)` AI allocation | | **S7** |
+| `RC-Q1(14)` AI allocation | **S7 SIGNED OFF — owner, 2026-09-05:** HosPilot can do anything the person asking may do — any live read, any instruction — as that person, under the AI Runtime's governed chain; never with nobody behind it | — |
 | **`JOBS-Q2`** the multi-day job with changing hands | **registered — planner, 2026-09-05**; Jobs builds it in its post-certification round; Room Care's blocked lane consumes its progress events as a port with no adapter, marked `JOBS-Q2` | — |
 | **`RC-Q2`** the Inventory dependency | **recorded — architect, 2026-09-05** (register row `a32da90`): the S2 contract table as tabled; `APPS-Q1`'s addendum adds **the inspection application and Inventory** to the suite; *Inventory* is the presumptive name, confirmed at its brief (APPS-Q3); the non-blocking shape ratified (restock step absent until installed, events replayable — `EVT-Q3/Q4`); `inventory-dev.txt` classed as concepts only; FF noted on `inventory.charge_due` → folio | — |
 
@@ -831,9 +831,40 @@ them?*
 trigger mode joins `roomcare.configure` (S0). For the architect: the four
 new rows and `property#roomcare_manager` to mint, by AUTHZ-Q25's mechanism.
 
-## S7 · AI-assisted allocation — `RC-Q1(14)`
+## S7 · HosPilot over Room Care — `RC-Q1(14)`
 
-*Opened after S6.*
+### The scenario
+
+08:00, 62 rooms due, nine attendants across four zones, two new this week,
+three arrivals before noon, one VIP. The manager says "HosPilot, prepare the
+day." At 10:40 the desk asks "where is Anita now?"; at 11:15 the supervisor
+says "give 512 to Priya"; at 14:00 an attendant asks "what's left in my zone?".
+
+### First proposed: advisory only — superseded by the ruling
+
+The stream proposed the AI as a second opinion over Room Care's own
+deterministic proposal — prepare, check, suggest, answer — with every
+acceptance the supervisor's act and no automatic application in v1, against
+the reference's model-decides-and-applies allocation (survey F13).
+
+### Ruling — owner, 2026-09-05: "HosPilot can do anything, decided by AI"
+
+```text
+ASK          any information from Room Care, live — a room's status, an attendant's current position,
+             what is left in a zone, who cleaned a room yesterday, are we short — as the asker may see it
+INSTRUCT     any Room Care act — prepare the day · assign · skip on the guest's behalf · approve a DND
+             decision · change a setting · plan a deep clean — the AI decides how, and does it
+THE RULE     it acts AS THE PERSON: their S6 permissions bound it; every act is recorded "by <person>
+             via HosPilot", never "by the AI"; writes pass the AI Runtime's governed chain — admission ·
+             policy · guardrails · approval-for-writes · audit (ADR 0130); the property sets which
+             instructions need a spoken confirm
+NOT          an AI with nobody behind it; Room Care holds no permission of its own for the AI; automatic
+             action is the trigger's automatic mode (S0), not HosPilot's
+ROOM CARE    exposes its reads and its acts to the runtime — the bundle contract's ask of every app —
+BUILDS       and nothing else for this; the allocation itself stays deterministic and explainable
+```
+
+**SIGNED OFF.**
 
 ---
 
