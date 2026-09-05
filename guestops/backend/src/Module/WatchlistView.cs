@@ -121,7 +121,7 @@ public sealed class WatchlistView(
         var ids = stays.Where(s => s.CurrentRoomId is not null)
             .Select(s => s.CurrentRoomId!.Value).Distinct().ToArray();
 
-        return await db.Set<MasterDataRoomName>()
+        return await db.Set<MasterDataRoom>()
             .Where(r => r.PropertyId == scope.PropertyId && ids.Contains(r.Id))
             .ToDictionaryAsync(r => r.Id, r => r.RoomNumber, cancellationToken);
     }

@@ -15,10 +15,19 @@ namespace HotelOS.GuestOps.Infrastructure.ReadModels;
 /// charge of one table and the second one would lose.
 /// </para>
 /// <para>
-/// Four columns, and only four. A read model that mirrored the room would drift
+/// Five columns, and only five. A read model that mirrored the room would drift
 /// into being a copy of master data, which is the thing the constitution's
-/// no-duplicated-master-data rule forbids — so this carries what availability
-/// needs to count and nothing a screen might be tempted to render.
+/// no-duplicated-master-data rule forbids.
+/// </para>
+/// <para>
+/// <b>It said four, and "nothing a screen might be tempted to render".</b> The
+/// day a screen needed the room's number that sentence had to be settled rather
+/// than worked around: the first attempt was a second keyless entity over the
+/// same table, and <b>EF Core refuses that outright</b> — one keyless type per
+/// table, no linking relationship possible — so the choice was never available.
+/// The number is here, the count of columns is stated as five, and the rule the
+/// sentence was defending is unchanged: what may not happen is this becoming a
+/// copy, not this having a column a screen reads.
 /// </para>
 /// </remarks>
 public sealed class MasterDataRoom
@@ -28,6 +37,9 @@ public sealed class MasterDataRoom
     public Guid PropertyId { get; set; }
 
     public Guid RoomTypeId { get; set; }
+
+    /// <summary>What the desk calls it — <c>214</c>, <c>1204</c>, <c>PH-2</c>.</summary>
+    public string RoomNumber { get; set; } = string.Empty;
 
     /// <summary>ADR 0062's flag. An inactive room is not sellable.</summary>
     /// <remarks>

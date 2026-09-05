@@ -117,7 +117,7 @@ public sealed class TodayView(
             .Where(t => typeIds.Contains(t.Id))
             .ToDictionaryAsync(t => t.Id, t => t.Name, cancellationToken);
 
-        var rooms = await db.Set<MasterDataRoomName>()
+        var rooms = await db.Set<MasterDataRoom>()
             .Where(r => r.PropertyId == scope.PropertyId && roomIds.Contains(r.Id))
             .ToDictionaryAsync(r => r.Id, r => r.RoomNumber, cancellationToken);
 
