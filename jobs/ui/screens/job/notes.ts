@@ -7,9 +7,11 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { when } from "../../chrome/instant";
-import type { JobDetail } from "../../board";
+import { lines, saying, values } from "../../chrome/form";
+import { JOB_AMEND } from "../../chrome/permissions";
+import { act, may, type JobDetail } from "../../board";
 
-export function notes(host: HostApi, d: JobDetail): HTMLElement {
+export function notes(host: HostApi, d: JobDetail, onChanged: () => void): HTMLElement {
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "2fr 1fr";
 
@@ -21,10 +23,33 @@ export function notes(host: HostApi, d: JobDetail): HTMLElement {
     if (note.raising === true) ev.append(el("i", "dim", " (the raising text)"));
     line.append(ev);
   }
-  left.append(line, el("div", "field ph", "Write a note…"));
+  const writing = el("div");
+  writing.append(lines(null, "text", "Write a note…"));
+  const said = saying();
   const row = el("div", "row");
-  row.append(control("btn pri", "Add note"), control("btn", "Attach photo"));
-  left.append(row);
+  if (may(host, JOB_AMEND)) {
+    row.append(control("btn pri", "Add note", () => {
+      const text = String(values(writing).text ?? "");
+      if (text.length === 0) {
+        said.say("a note needs words");
+        return;
+      }
+
+      void act(host, JOB_AMEND, "note", { id: d.row.id, text }).then((done) => {
+        if (done.ok) onChanged();
+        else said.say(done.refused ?? "the note was not added");
+      });
+    }));
+  }
+
+  // A photo needs the media service, which no application client reaches yet —
+  // drawn and disabled rather than drawn and inert, so the screen does not
+  // promise something that silently does nothing.
+  const photo = control("btn", "Attach photo");
+  photo.setAttribute("disabled", "true");
+  photo.title = "photos wait for a media client";
+  row.append(photo);
+  left.append(line, writing, row, said.line);
 
   const photos = d.notes.filter((n) => n.photo !== null);
   const right = el("div", "card");

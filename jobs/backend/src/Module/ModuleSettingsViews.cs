@@ -22,7 +22,13 @@ public static class ModuleSettingsViews
         bool Restricted,
         IReadOnlyList<string> Aliases,
         IReadOnlyList<ItemPropertyView> ActiveAt,
-        IReadOnlyList<string> Resolutions);
+        IReadOnlyList<ResolutionChoiceView> Resolutions);
+
+    /// <summary>
+    /// A resolution the screen can offer — with its id, because resolving names
+    /// one and a name is not what the service stores.
+    /// </summary>
+    public sealed record ResolutionChoiceView(string Id, string Name, bool NoteRequired);
 
     /// <summary>Whether one property has this item switched on.</summary>
     public sealed record ItemPropertyView(string Property, bool On);

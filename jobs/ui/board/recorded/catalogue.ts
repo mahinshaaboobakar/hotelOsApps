@@ -21,14 +21,14 @@ export const recordedCatalogue: Catalogue = {
       defaultPriority: "P2", dueWithinMinutes: 40, restricted: false,
       aliases: ["AC not working", "room warm", "AC broken", "cooling"],
       activeAt: [{ property: "Marina Bay", on: true }, { property: "Marina Hills", on: true }, { property: "Marina Airport", on: false }],
-      resolutions: ["Filter cleaned", "Filter replaced", "Refrigerant topped up", "Thermostat replaced", "Compressor fault — escalate to vendor", "No fault found"],
+      resolutions: [{ id: "r1", name: "Filter cleaned", noteRequired: false }, { id: "r2", name: "Filter replaced", noteRequired: false }, { id: "r3", name: "Refrigerant topped up", noteRequired: false }, { id: "r4", name: "Thermostat replaced", noteRequired: false }, { id: "r5", name: "Compressor fault — escalate to vendor", noteRequired: false }, { id: "r6", name: "No fault found", noteRequired: false }],
     },
     {
       id: "i-wd", categoryId: "c-ac", name: "Water dropping from unit", department: "Engineering (ENG)",
       defaultPriority: "P2", dueWithinMinutes: 60, restricted: false,
       aliases: ["AC leaking", "water from AC", "ceiling wet under AC"],
       activeAt: [{ property: "Marina Bay", on: true }, { property: "Marina Hills", on: true }, { property: "Marina Airport", on: true }],
-      resolutions: ["Drain cleared", "Drain pipe replaced", "Condensate pump replaced"],
+      resolutions: [{ id: "r1", name: "Drain cleared", noteRequired: false }, { id: "r2", name: "Drain pipe replaced", noteRequired: false }, { id: "r3", name: "Condensate pump replaced", noteRequired: false }],
     },
   ],
 };

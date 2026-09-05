@@ -85,6 +85,20 @@ public static class WriteCapabilities
                 },
                 cancellationToken),
 
+            // "Take it" — the person asking becomes the assignee. The id comes
+            // from the token rather than from the body: a screen that could
+            // name whose job it is would be assigning on somebody else's
+            // behalf under the word "take".
+            "take" => await assignment.AssignAsync(
+                request.Scope,
+                new AssignCommand
+                {
+                    JobId = body.Id("id"),
+                    ExpectedVersion = body.Version(),
+                    UserId = request.Caller.UserId,
+                },
+                cancellationToken),
+
             "accept" => await assignment.AcceptAsync(request.Scope, body.Id("id"), body.Version(), cancellationToken),
 
             _ => throw new InvalidRequestException($"job.assign has no method '{request.Method}'"),

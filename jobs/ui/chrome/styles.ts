@@ -79,6 +79,19 @@ table+.mono,.kv+.mono{margin-top:8px}
 .field{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px;padding:8px 12px;font-size:13px;
        background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);margin:4px 0 12px;display:flex;gap:8px}
 .field.ph{color:var(--color-ink-faint,#5a6172)}
+/* A field a person types into is the same field, drawn: same border, same
+   ground, same size — so a form that acts looks like the form that was
+   approved rather than like the browser's idea of one. */
+input.field,select.field,textarea.field{width:100%;box-sizing:border-box;display:block;font:inherit;font-size:13px;
+       appearance:none;outline:none}
+input.field:focus,select.field:focus,textarea.field:focus{border-color:var(--color-brand,#818cf8)}
+textarea.field{resize:vertical;min-height:64px}
+input.tog{width:16px;height:16px;appearance:auto;margin:0 8px 0 0;accent-color:var(--color-brand,#818cf8);position:static}
+.said{margin:8px 0 0;font-size:12px}
+.said.bad{color:var(--color-bad,#f87171)}
+.said.ok{color:var(--color-ok,#34d399)}
+.ask{border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:var(--radius-panel,1rem);
+     padding:14px 16px;margin:10px 0 14px;background:var(--color-surface-raised,#11141f)}
 .field .hint{margin-left:auto}
 .row>.field{margin:0}
 .tl+.field{margin-top:12px}

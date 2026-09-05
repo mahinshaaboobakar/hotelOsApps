@@ -83,7 +83,11 @@ public static class ReadCapability
             body.Flag("scheduledOnly"),
             body.Flag("mine") ? request.Caller.UserId : null,
             body.Number("pageSize", JobQueries.DefaultPageSize),
-            body.Number("page"));
+            body.Number("page"))
+        {
+            RaisedKind = body.OptionalText("raisedKind"),
+            RestrictedOnly = body.Flag("restricted"),
+        };
     }
 
     /// <summary>

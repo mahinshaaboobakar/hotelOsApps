@@ -226,7 +226,11 @@ export interface CatalogueItem {
   restricted: boolean;
   aliases: readonly string[];
   activeAt: readonly { property: string; on: boolean }[];
-  resolutions: readonly string[];
+  /**
+   * What may be chosen when this is resolved — with ids, because resolving
+   * names one and the service stores an id, not a phrase.
+   */
+  resolutions: readonly { id: string; name: string; noteRequired: boolean }[];
 }
 
 export interface Catalogue {

@@ -48,7 +48,7 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
             [new ItemPropertyView("this property", !off.Contains(i.Id))],
             rows.Resolutions
                 .Where(r => r.CategoryId == i.CategoryId || r.ItemId == i.Id || (r.CategoryId is null && r.ItemId is null))
-                .Select(r => r.Name)
+                .Select(r => new ResolutionChoiceView(r.Id.ToString(), r.Name, r.NoteRequired))
                 .ToList())).ToList();
 
         return new CatalogueView("this organisation", categories, items);

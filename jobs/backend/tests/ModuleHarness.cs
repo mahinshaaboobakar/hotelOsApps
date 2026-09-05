@@ -181,6 +181,11 @@ public sealed class ModuleHarness : IAsyncDisposable
         if (token is not null) request.Headers.Add("Authorization", $"Bearer {token}");
         if (property is { } named) request.Headers.Add(ModuleEnvelope.PropertyHeader, named.ToString());
         var response = await client.SendAsync(request);
+        if ((int)response.StatusCode == 500 && Failures.Count > 0)
+        {
+            throw new InvalidOperationException($"the surface failed: {Failures[^1]}");
+        }
+
         return (int)response.StatusCode;
     }
 

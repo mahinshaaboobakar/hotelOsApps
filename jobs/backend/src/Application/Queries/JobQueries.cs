@@ -40,6 +40,8 @@ public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProv
                 ? query.Where(j => filter.Statuses.Contains(j.JobStatus))
                 : query.Where(j => JobStatus.Open.Contains(j.JobStatus));
         if (filter.DepartmentCode is { } code) query = query.Where(j => j.DepartmentCode == code);
+        if (filter.RaisedKind is { } kind) query = query.Where(j => j.RaisedKind == kind);
+        if (filter.RestrictedOnly) query = query.Where(j => j.Restricted);
 
         var total = await query.CountAsync(cancellationToken);
         var size = filter.PageSize <= 0 ? DefaultPageSize : Math.Min(filter.PageSize, MaxPageSize);
@@ -122,7 +124,21 @@ public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProv
 
 /// <summary>The board's filters — frame 1's chips and pager.</summary>
 public sealed record JobFilter(
-    string? DepartmentCode, IReadOnlyList<string> Statuses, bool ScheduledOnly, Guid? AssigneeUserId, int PageSize, int Page);
+    string? DepartmentCode, IReadOnlyList<string> Statuses, bool ScheduledOnly, Guid? AssigneeUserId, int PageSize, int Page)
+{
+    /// <summary>Only jobs a guest raised — frame 1's chip.</summary>
+    /// <remarks>
+    /// The board's chips are the access model drawn, so each one is a filter
+    /// here rather than a word the screen keeps to itself. Two of them —
+    /// this and <see cref="RestrictedOnly"/> — have no field on
+    /// <c>ListJobsRequest</c>; they are the module surface's, and the gRPC
+    /// contract gains them when something on it asks.
+    /// </remarks>
+    public string? RaisedKind { get; init; }
+
+    /// <summary>Only the restricted ones.</summary>
+    public bool RestrictedOnly { get; init; }
+}
 
 /// <summary>A job with what the row derives.</summary>
 public sealed record JobRow(Job Job, JobAssignment? Assignment, JobConcernHistory? Concern, bool SessionRunning);

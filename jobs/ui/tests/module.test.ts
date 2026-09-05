@@ -132,14 +132,18 @@ describe("the Jobs module", () => {
     click(root, "tr.pick td", "MRN-ENG-142");
     await settle();
     expect(root.textContent).toContain("Resolve…");
-    expect(root.textContent).toContain("Reassign…");
+    expect(root.textContent).toContain("Take it");
+    expect(root.textContent).toContain("Put on hold…");
+    expect(root.textContent).toContain("Cancel job…");
 
     const reader = mount(host(["job.read"]));
     await settle();
     click(reader, "tr.pick td", "MRN-ENG-142");
     await settle();
     expect(reader.textContent).not.toContain("Resolve…");
-    expect(reader.textContent).not.toContain("Reassign…");
+    expect(reader.textContent).not.toContain("Take it");
+    expect(reader.textContent).not.toContain("Put on hold…");
+    expect(reader.textContent).not.toContain("Cancel job…");
     expect(reader.textContent).not.toContain("Raise a job");
   });
 

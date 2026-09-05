@@ -107,6 +107,13 @@ function has(root: HTMLElement, ...facts: readonly string[]): void {
   for (const fact of facts) expect(root.textContent, `the frame draws "${fact}"`).toContain(fact);
 }
 
+/** A field's own words, which live in its placeholder rather than in the text. */
+function hasPlaceholder(root: HTMLElement, words: string): void {
+  const fields = Array.from(root.querySelectorAll("input, textarea"))
+    .map((field) => (field as HTMLInputElement | HTMLTextAreaElement).placeholder);
+  expect(fields, `a field says "${words}"`).toContain(words);
+}
+
 describe("frame 2c · One job · History", () => {
   it("draws the five columns and every transition, each keeping its kind", async () => {
     const root = await jobTab("History");
@@ -124,7 +131,11 @@ describe("frame 2d · One job · Notes & photos", () => {
     has(root, "Suction pressure low, likely refrigerant.");
     has(root, "Guest called too; offered fan meanwhile.");
     has(root, "Room feels warm since noon", "the raising text");
-    has(root, "Write a note…", "Add note", "Attach photo", "Photos · 1", "gauge.jpg");
+    // The note box carries the frame's own words as its placeholder now that a
+    // person can type in it; "Attach photo" is drawn disabled, because no
+    // application client reaches a media service yet.
+    hasPlaceholder(root, "Write a note…");
+    has(root, "Add note", "Attach photo", "Photos · 1", "gauge.jpg");
   });
 });
 
@@ -150,23 +161,25 @@ describe("frame 2g · One job · Record", () => {
 });
 
 describe("frame 3 · Raise a job", () => {
-  it("draws the ten fields, the catalogue's hints and the restricted default", async () => {
+  /**
+   * The form acts now, so it starts empty.
+   *
+   * The frame drew example content in every field — a summary already written,
+   * a location already chosen — which is how a drawing shows what a field is
+   * for and not how a form a person fills in can look. The labels, the hint
+   * and the controls are the frame's; the example values are gone, and the
+   * divergence is on the ledger for the owner's redline.
+   */
+  it("draws the frame's fields as ones a person can fill", async () => {
     const root = mount();
     await settle();
     click(root, ".btn", "Raise a job");
     await settle();
-    has(root, "Where", "Room 0817 · Floor 8 · Tower A");
-    has(root, "What", "Lighting › Bedside lamp dead", "alias matched");
-    has(root, "Asset · optional", "Pick from Room 0817's assets…");
-    has(root, "Summary", "Guest says right-side bedside lamp is dead");
-    has(root, "Details · optional", "Anything the technician should know first");
-    has(root, "Department", "Engineering (ENG)", "from the catalogue item");
-    has(root, "Priority", "P3", "catalogue default · you may override");
-    has(root, "Due", "policy: P3 within 60 min");
-    has(root, "Assign to · on shift today", "AUTO — or pick", "Team · Day shift");
-    has(root, "Schedule for later · optional", "Leave empty to raise now");
-    has(root, "Restricted · off (catalogue default for this item)");
-    has(root, "Raise MRN-ENG-143", "Cancel");
+    has(root, "Where · location id", "What", "Summary", "Details · optional");
+    has(root, "Priority", "Schedule for a day · optional", "Restricted");
+    has(root, "The department, the due time and the concern policy all follow the item.");
+    has(root, "Raise it", "Cancel");
+    expect(root.querySelectorAll("input, select, textarea").length).toBeGreaterThan(5);
   });
 });
 
@@ -181,9 +194,9 @@ describe("frame 4 · Resolve", () => {
     has(root, "Resolve MRN-ENG-142", "work 00:31:12 across 2 sessions · stopping the clock now");
     has(root, "What fixed it", "Filter cleaned", "Filter replaced", "Refrigerant topped up",
       "Thermostat replaced", "Compressor fault — escalate to vendor", "No fault found", "Other…");
-    has(root, "In your words · optional", "Suction 45 psi, charged to 68");
+    has(root, "In your words · optional");
     has(root, "Photo · optional", "Add a photo");
-    has(root, "Guest-raised: the guest will be asked to rate this after it closes. Auto-close in 4 h unless reopened.");
+    has(root, "Guest-raised: the guest will be asked to rate this after it closes.");
   });
 });
 

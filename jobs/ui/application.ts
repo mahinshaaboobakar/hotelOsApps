@@ -90,22 +90,26 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     switch (place.tab) {
       case "Live": return live(host, main);
       case "Scheduled": return scheduled(host, main);
-      case "Catalogue": return catalogue(host, main);
+      case "Catalogue": return catalogue(host, main, show);
       case "Settings":
         return settings(host, main, {
           tab: place.settingsTab, view: place.settingsView,
           onTab: (label) => { place.settingsTab = label; place.settingsView = label === "Concern policy" ? "engineering" : "list"; show(); },
           onView: (view) => { place.settingsView = view; show(); },
+          onChanged: show,
         });
       default:
         if (place.mode === "raise") return raise(host, main, back);
-        if (place.mode === "resolve") return resolve(host, main, () => { place.mode = "board"; place.jobId = null; show(); });
+        if (place.mode === "resolve" && place.jobId !== null) {
+          return resolve(host, main, place.jobId, () => { place.mode = "board"; show(); });
+        }
         if (place.jobId !== null) {
           return job(host, main, {
             jobId: place.jobId, tab: place.jobTab,
             onTab: (label) => { place.jobTab = label; show(); },
             onResolve: () => { place.mode = "resolve"; show(); },
             onBack: back,
+            onChanged: show,
           });
         }
 

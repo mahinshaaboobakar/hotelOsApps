@@ -27,12 +27,34 @@ export interface BoardPlace {
 
 const FILTERS = ["My departments · ENG", "All departments", "Assigned to me", "Raised by guests", "Restricted", "Closed"];
 
+/**
+ * What a chip means to the service.
+ *
+ * The chips are the access model drawn (frame 1), and each is a filter the
+ * board already supports rather than a word of its own. "Assigned to me" is
+ * <code>mine</code> and carries no user id: whose jobs those are is the
+ * caller's, resolved from the token, so a screen cannot filter to somebody
+ * else's by editing a request.
+ */
+function asked(filter: string): Record<string, unknown> {
+  switch (filter) {
+    case "All departments": return {};
+    case "Assigned to me": return { mine: true };
+    case "Closed": return { statuses: ["RESOLVED", "CLOSED"] };
+    case "Raised by guests": return { raisedKind: "GUEST" };
+    case "Restricted": return { restricted: true };
+    default: return { department: "ENG" };
+  }
+}
+
 export async function board(host: HostApi, main: HTMLElement, place: BoardPlace): Promise<void> {
   const today = await load(host, JOB_READ, "today", recordedToday);
   const page = await load(host, JOB_READ, "board", recordedBoard, {
-    filter: place.filter,
-    // CORE-Q13's request half, sent as the platform shapes it.
-    paging: { page: place.page, pageSize: 12 },
+    ...asked(place.filter),
+    // CORE-Q13's shape: the page asked for, and the size the service will
+    // answer with — it applies its own ceiling and says which it used.
+    page: place.page,
+    pageSize: 12,
   });
 
   const body = el("div", "body");

@@ -10,53 +10,36 @@ using Microsoft.Extensions.Options;
 namespace HotelOS.Jobs.Module;
 
 /// <summary>
-/// A refusal reaching the screen as a refusal — the status and the sentence the
-/// service itself gave.
+/// What a denied capability needs in order to reach the screen as a denial.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The gRPC surface has this already: <c>DomainExceptionInterceptor</c> turns
-/// the application's own failures into a status and a message a caller can act
-/// on. The module envelope carries no equivalent, so without this every
-/// refusal — a missing summary, a stale version, a job at another property —
-/// arrives at the bundle as <c>500</c>, which a screen can only render as
-/// "something went wrong".
+/// <b>The envelope answers a denied capability with <c>Results.Forbid()</c></b>,
+/// which asks ASP.NET's authentication stack to forbid — and an application
+/// that registers no scheme gets <c>InvalidOperationException</c> instead: the
+/// guard's own denial path arrives at a screen as <b>500</b>, telling a person
+/// who simply lacks a permission that the system is broken.
 /// </para>
 /// <para>
-/// <b>Reported to the platform as well as fixed here</b> (2026-09-05): the
-/// envelope's own documentation says the status vocabulary is the platform's,
-/// and a vocabulary each application spells for itself is one that will differ
-/// between them. This mapping is deliberately the interceptor's, verb for verb,
-/// so that adopting a platform one later changes nothing a screen sees.
+/// Found by driving it in the wired round of 2026-09-05, and reported. It had
+/// not been met before because the exemplar's proof stubbed the .NET side. The
+/// scheme below <b>authenticates nobody</b> — the envelope has already
+/// established the person from their token — and exists only so the framework
+/// has somewhere to send a forbid.
 /// </para>
 /// <para>
-/// <b>An unexpected failure says nothing.</b> Its message could name a table, a
-/// column or a connection string, and the person reading it is on a shift, not
-/// on the team. It is logged whole and answered as <c>500</c> with no body.
+/// The round's other envelope finding is closed at the source: the platform's
+/// <c>755ee02</c> gave the envelope the interceptor's status table, so an
+/// application's own refusals cross this hop as themselves. Jobs' mapping
+/// middleware was deleted the day that landed rather than left to disagree with
+/// it.
 /// </para>
 /// </remarks>
 public static class ModuleRefusals
 {
-    /// <summary>
-    /// What <c>Results.Forbid()</c> needs in order to be a 403.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// <b>A defect in the envelope, worked around here and reported</b>
-    /// (2026-09-05). <c>MapModuleCapability</c> answers a denied capability with
-    /// <c>Results.Forbid()</c>, which asks ASP.NET's authentication stack to
-    /// forbid — and an application that registers none (neither the SDK nor
-    /// <c>hello-hotel</c> does) gets <c>InvalidOperationException</c> instead:
-    /// the guard's denial path arrives at the screen as <b>500</b>, and a
-    /// person who lacks a permission is told the system is broken.
-    /// </para>
-    /// <para>
-    /// It had not been met before because the exemplar's proof stubbed the .NET
-    /// side; this round drove it. The scheme below authenticates nobody — the
-    /// envelope has already established the person from the token — and exists
-    /// only so the framework has somewhere to send a forbid.
-    /// </para>
-    /// </remarks>
+    private const string Scheme = "hotelos-module";
+
+    /// <summary>Give the framework somewhere to send a forbid.</summary>
     public static IServiceCollection AddModuleRefusals(this IServiceCollection services)
     {
         services
@@ -65,7 +48,44 @@ public static class ModuleRefusals
         return services;
     }
 
-    private const string Scheme = "hotelos-module";
+    /// <summary>
+    /// A token that does not verify, answered as a refusal rather than a fault.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The second half of the same envelope defect, and reported with it</b>
+    /// (2026-09-05). <c>JwtCallerAuthenticator</c> <i>throws</i>
+    /// <c>AuthenticationFailedException</c> for a token that is present and
+    /// invalid — a wrong signature, a stale issuer — and the envelope's
+    /// <c>catch (DomainException)</c> is around the <i>handler</i> only, not
+    /// around authentication. So a bad token arrives at the bundle as
+    /// <b>500</b>, where its own status table already says <c>401</c>.
+    /// </para>
+    /// <para>
+    /// One exception, mapped to the status the platform itself chose for it.
+    /// Deliberately not a general mapper: the envelope maps every other refusal
+    /// now, and a second table beside it would be free to disagree.
+    /// </para>
+    /// </remarks>
+    public static WebApplication UseModuleRefusals(this WebApplication app)
+    {
+        app.Use(async (context, next) =>
+        {
+            try
+            {
+                await next(context);
+            }
+            catch (AuthenticationFailedException)
+            {
+                // Nothing about why: an unauthenticated caller learns only that
+                // they are not authenticated, which is the envelope's own rule
+                // for the token that was never sent.
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            }
+        });
+
+        return app;
+    }
 
     /// <summary>Authenticates nobody, and turns a forbid into a 403.</summary>
     private sealed class NoScheme(
@@ -76,57 +96,4 @@ public static class ModuleRefusals
         protected override Task<AuthenticateResult> HandleAuthenticateAsync() =>
             Task.FromResult(AuthenticateResult.NoResult());
     }
-
-    /// <summary>Answer a module call's failure the way the gRPC surface answers one.</summary>
-    public static void UseModuleRefusals(this WebApplication app) =>
-        app.Use(async (context, next) =>
-        {
-            if (!context.Request.Path.StartsWithSegments("/module"))
-            {
-                await next(context);
-                return;
-            }
-
-            try
-            {
-                await next(context);
-            }
-            catch (DomainException refusal)
-            {
-                var status = refusal switch
-                {
-                    NotFoundException => StatusCodes.Status404NotFound,
-                    PermissionDeniedException => StatusCodes.Status403Forbidden,
-                    ConcurrencyException => StatusCodes.Status409Conflict,
-                    InUseException => StatusCodes.Status409Conflict,
-                    AuthenticationFailedException => StatusCodes.Status401Unauthorized,
-                    _ => StatusCodes.Status400BadRequest,
-                };
-
-                context.Response.StatusCode = status;
-
-                // A denial says "permission denied" and never which permission
-                // or which resource — the gRPC interceptor withholds both for
-                // the same reason, that they are what an attacker probes for.
-                // Every other refusal is the service's own sentence, which is
-                // what a screen shows the person who has to act on it.
-                await context.Response.WriteAsJsonAsync(new
-                {
-                    refused = refusal switch
-                    {
-                        PermissionDeniedException => "permission denied",
-                        AuthenticationFailedException => "authentication failed",
-                        _ => refusal.Message,
-                    },
-                });
-            }
-            catch (Exception failure)
-            {
-                context.RequestServices.GetRequiredService<ILoggerFactory>()
-                    .CreateLogger(typeof(ModuleRefusals))
-                    .LogError(failure, "a module call failed: {Path}", context.Request.Path);
-
-                context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            }
-        });
 }
