@@ -11,7 +11,9 @@
     "build:module": "node ../../scripts/build-module.mjs",
     "build:widgets": "node ../../scripts/build-module.mjs widgets/shift-board.js widgets/entry/shift-board.ts && node ../../scripts/build-module.mjs widgets/attendance-today.js widgets/entry/attendance-today.ts && node ../../scripts/build-module.mjs widgets/pending-requests.js widgets/entry/pending-requests.ts && node ../../scripts/build-module.mjs widgets/coming-up.js widgets/entry/coming-up.ts && node ../../scripts/build-module.mjs widgets/on-leave.js widgets/entry/on-leave.ts",
     "test": "npm run build && vitest run",
-    "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
+    "capture": "npm run capture:screens && npm run capture:widgets",
+    "capture:screens": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js",
+    "capture:widgets": "esbuild preview/widgets.ts --bundle --format=esm --outfile=preview/widgets.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
