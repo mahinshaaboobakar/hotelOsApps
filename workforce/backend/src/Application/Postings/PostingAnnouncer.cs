@@ -30,6 +30,11 @@ public class PostingAnnouncer(IEventAppender events, IStaffDirectory directory)
     /// <param name="posting">The posting the fact is about.</param>
     /// <param name="eventType">Which of the four — see <see cref="PostingAnnouncements"/>.</param>
     /// <param name="occurredAt">When.</param>
+    /// <param name="staff">
+    /// The person's account, resolved by the caller. <c>null</c> when they are
+    /// unknown at this property or have no login — both mean nothing is
+    /// announced, and neither is an error.
+    /// </param>
     /// <param name="cancellationToken">Cancellation.</param>
     /// <returns>Whether anything was appended.</returns>
     /// <remarks>
@@ -44,12 +49,19 @@ public class PostingAnnouncer(IEventAppender events, IStaffDirectory directory)
         Posting posting,
         string eventType,
         DateTimeOffset occurredAt,
+        StaffLink? staff,
         CancellationToken cancellationToken)
     {
-        var userId = await directory.FindUserIdAsync(
-            scope.PropertyId, posting.StaffId, cancellationToken);
-
-        if (userId is not { } user)
+        // **The link is passed in, not looked up here.** Every caller has
+        // already resolved it — `post` to refuse an unknown staff member, the
+        // ending path once for both of its announcements — and a lookup here
+        // would read the same row a second and, for a headship, a third time.
+        // A characterisation test counts those reads, which is how the
+        // duplication was found rather than shipped.
+        //
+        // Unknown here, or known with no account: either way there is no
+        // principal to grant anything to, so nothing is announced.
+        if (staff?.UserId is not { } user)
         {
             return false;
         }
@@ -93,15 +105,16 @@ public class PostingAnnouncer(IEventAppender events, IStaffDirectory directory)
         RequestScope scope,
         Posting posting,
         DateTimeOffset occurredAt,
+        StaffLink? staff,
         CancellationToken cancellationToken)
     {
         await AnnounceAsync(
-            scope, posting, PostingAnnouncements.Posted, occurredAt, cancellationToken);
+            scope, posting, PostingAnnouncements.Posted, occurredAt, staff, cancellationToken);
 
         if (posting.IsDepartmentHead)
         {
             await AnnounceAsync(
-                scope, posting, PostingAnnouncements.HeadshipStarted, occurredAt,
+                scope, posting, PostingAnnouncements.HeadshipStarted, occurredAt, staff,
                 cancellationToken);
         }
     }
@@ -119,13 +132,22 @@ public class PostingAnnouncer(IEventAppender events, IStaffDirectory directory)
         DateTimeOffset occurredAt,
         CancellationToken cancellationToken)
     {
+        // Resolved once here, for both announcements. The ending path has no
+        // earlier lookup to reuse: nothing refuses an unknown staff member on
+        // the way out, because a posting that exists is ended whatever Master
+        // Data now says about the person.
+        var staff = await directory.FindStaffAsync(
+            scope.PropertyId, posting.StaffId, cancellationToken);
+
         await AnnounceAsync(
-            scope, posting, PostingAnnouncements.PostingEnded, occurredAt, cancellationToken);
+            scope, posting, PostingAnnouncements.PostingEnded, occurredAt, staff,
+            cancellationToken);
 
         if (posting.IsDepartmentHead)
         {
             await AnnounceAsync(
-                scope, posting, PostingAnnouncements.HeadshipEnded, occurredAt, cancellationToken);
+                scope, posting, PostingAnnouncements.HeadshipEnded, occurredAt, staff,
+                cancellationToken);
         }
     }
 }

@@ -1,3 +1,4 @@
+using HotelOS.Workforce.Infrastructure.ReadModels;
 using HotelOS.Platform;
 using HotelOS.Workforce.Domain;
 using Microsoft.EntityFrameworkCore;
@@ -83,6 +84,27 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
     /// <summary>Which shift boundaries this application has announced.</summary>
     public DbSet<ShiftBoundary> ShiftBoundaries => Set<ShiftBoundary>();
 
+    // ── Master Data, read through the grant — ADR 0092 §4 ────────────────────
+    //
+    // Keyless and excluded from this application's migrations, exactly as the
+    // event store above is and for the same reason: another component owns
+    // these rows. Install step 4 issues `GRANT hotelos_masterdata_reader TO
+    // hotelos_app_workforce`, which is the whole of this application's access —
+    // read, and no write it could express if it wanted to.
+
+    /// <summary>Canonical people, organization-scoped.</summary>
+    public DbSet<StaffRow> MasterDataStaff => Set<StaffRow>();
+
+    /// <summary>Canonical departments, one property's.</summary>
+    public DbSet<DepartmentRow> MasterDataDepartments => Set<DepartmentRow>();
+
+    /// <summary>Which property a person is scoped to — ADR 0052.</summary>
+    public DbSet<StaffPropertyScopeRow> MasterDataStaffScopes =>
+        Set<StaffPropertyScopeRow>();
+
+    /// <summary>The property itself.</summary>
+    public DbSet<PropertyRow> MasterDataProperties => Set<PropertyRow>();
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -107,6 +129,15 @@ public class WorkforceDbContext(DbContextOptions<WorkforceDbContext> options)
         // `postings`, and no event store. A comment asserting an outcome nothing
         // checks is the failure CLAUDE.md names, and this one survived a review.
         modelBuilder.AddPlatformEventStore();
+
+        // Master Data's rows, mapped read-only. One configuration class for the
+        // four, because they are one subject — what this application may read
+        // of somebody else's schema — rather than four unrelated types.
+        var masterData = new MasterDataRowConfiguration();
+        modelBuilder.ApplyConfiguration<StaffRow>(masterData);
+        modelBuilder.ApplyConfiguration<DepartmentRow>(masterData);
+        modelBuilder.ApplyConfiguration<StaffPropertyScopeRow>(masterData);
+        modelBuilder.ApplyConfiguration<PropertyRow>(masterData);
 
         modelBuilder.Entity<Posting>(posting =>
         {

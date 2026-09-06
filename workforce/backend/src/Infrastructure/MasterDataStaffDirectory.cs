@@ -1,95 +1,89 @@
-using HotelOS.Contracts.MasterData.V1;
-using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Infrastructure.ReadModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelOS.Workforce.Infrastructure;
 
 /// <summary>
-/// <see cref="IStaffDirectory"/> over Master Data's own gRPC surface.
+/// <see cref="IStaffDirectory"/> over Master Data's canonical rows, read
+/// through the platform-standard grant.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Why a synchronous call is right here, stated where somebody would
-/// challenge it.</b> <c>EVT-Q3</c> rules that between <i>applications</i> a
-/// reply is an event carrying a correlation id, never a blocking call — and it
-/// preserves request/reply for platform-internal <i>questions</i>. Master Data
-/// is the platform: CLAUDE.md's non-negotiable list says applications may read
-/// master data, and both calls below are questions, never commands. A
-/// <c>CreatePosting</c> in an installable application calling out to a
-/// neighbouring <i>application</i> would be the violation; this is not that.
+/// <b>ADR 0092 §4 names this path</b> — <i>an application reads canonical
+/// Master Data through the platform-standard grant</i> — and install step 4
+/// issues it: <c>GRANT hotelos_masterdata_reader TO hotelos_app_workforce</c>.
 /// </para>
 /// <para>
-/// <b>And it is not the absent-neighbour case either.</b> <c>APPS-Q2</c> says an
-/// application's own flow is never gated on another <i>application</i> being
-/// installed. Master Data cannot be absent — it is platform, always present —
-/// so failing when it is unreachable is a genuine outage rather than a missing
-/// neighbour, and is surfaced as one.
+/// <b>This replaced a gRPC client, and the live drive is why.</b> The client
+/// reached Master Data and was refused — <i>`workforce` presented a certificate
+/// but no access token; sign in first</i> — because an installed application's
+/// certificate is <c>kind=application</c> and the authenticator admits only
+/// <c>TransportPrincipalKind.Service</c> without a token. Neither door was ours
+/// to open: admitting the application kind token-less puts application
+/// capability in Master Data's authenticator, where ADR 0093's authority table
+/// puts it in the Kernel; forwarding a bearer token rebuilds the second
+/// identity channel ADR 0014 deleted <c>on_behalf_of</c> to remove.
 /// </para>
 /// <para>
-/// <b>Nothing is cached.</b> A department deactivated a moment ago must not
-/// still accept a posting, and a stale identity link would announce a tuple for
-/// a user who no longer exists. This is the same reason the platform refuses a
-/// second cache in front of the authorization authority.
+/// <b>Serving is not storing.</b> Every method reads at answer time. Nothing
+/// here is copied into <c>workforce</c> and nothing is cached — a department
+/// deactivated a moment ago must not still accept a posting, and a stale
+/// identity link would announce a tuple for a user who no longer exists. The
+/// rows are keyless, so this application could not write them if it tried.
+/// </para>
+/// <para>
+/// <b>Deleted and inactive are filtered here, not by the caller.</b> The gRPC
+/// surface applied Master Data's own lifecycle rules before answering; reading
+/// the tables directly means inheriting that obligation, and a caller that
+/// forgot would silently post somebody to a department that had been stood
+/// down. ADR 0062's three states, applied at every read.
 /// </para>
 /// </remarks>
-public class MasterDataStaffDirectory(
-    MasterDataService.MasterDataServiceClient masterData)
-    : IStaffDirectory
+public class MasterDataStaffDirectory(WorkforceDbContext database) : IStaffDirectory
 {
     /// <inheritdoc />
-    public async Task<Guid?> FindUserIdAsync(
+    public async Task<StaffLink?> FindStaffAsync(
         Guid propertyId, Guid staffId, CancellationToken cancellationToken)
-    {
-        var staff = await masterData.GetStaffAsync(
-            new GetStaffRequest
-            {
-                Context = RequestContextFactory.ForService("workforce", propertyId),
-                Id = staffId.ToString(),
-            },
-            cancellationToken: cancellationToken);
-
-        // Empty is the ordinary answer — most staff have no login, and the
-        // platform's own proto calls that nullability "the whole point".
-        return Guid.TryParse(staff.UserId, out var userId) ? userId : null;
-    }
+        // One row, and it carries both facts. Projecting to a record rather
+        // than to `UserId` is what keeps "unknown here" distinguishable from
+        // "known, no login": `FirstOrDefaultAsync` over a `Guid?` returns null
+        // for both, which is the defect this shape removes.
+        => await Scoped(propertyId)
+            .Where(staff => staff.Id == staffId)
+            .Select(staff => new StaffLink(staff.Id, staff.UserId))
+            .FirstOrDefaultAsync(cancellationToken);
 
     /// <inheritdoc />
     public async Task<Guid?> FindDepartmentIdAsync(
         Guid propertyId, string departmentCode, CancellationToken cancellationToken)
     {
-        var departments = await masterData.ListDepartmentsAsync(
-            new ListDepartmentsRequest
-            {
-                Context = RequestContextFactory.ForService("workforce", propertyId),
-            },
-            cancellationToken: cancellationToken);
+        var code = departmentCode.ToUpperInvariant();
 
-        // Matched on the **code**, which ADR 0119 makes the canonical identity —
-        // immutable, identical in every installation, and what a posting stores.
-        // The row id is what the authorization graph addresses
-        // (`department:{uuid}`), which is the whole reason this lookup exists.
-        var match = departments.Departments.FirstOrDefault(
-            department => string.Equals(
-                department.Code, departmentCode, StringComparison.OrdinalIgnoreCase));
+        var found = await Departments(propertyId)
+            .Where(department => department.Code.ToUpper() == code)
+            .Select(department => (Guid?)department.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return match is not null && Guid.TryParse(match.Id, out var id) ? id : null;
+        return found;
     }
 
     /// <inheritdoc />
     public async Task<IReadOnlyDictionary<string, string>> FindDepartmentNamesAsync(
         Guid propertyId, CancellationToken cancellationToken)
     {
-        var departments = await masterData.ListDepartmentsAsync(
-            new ListDepartmentsRequest
-            {
-                Context = RequestContextFactory.ForService("workforce", propertyId),
-            },
-            cancellationToken: cancellationToken);
+        var departments = await Departments(propertyId)
+            .Select(department => new { department.Code, department.Name })
+            .ToListAsync(cancellationToken);
 
         // Keyed on the code and upper-cased once here, because a posting stores
         // the canon form and a lookup that differed in case would miss silently
         // — the caller would render a blank name and nothing would say why.
-        return departments.Departments.ToDictionary(
+        //
+        // `ToDictionary` throws on a duplicate key, which is the right failure:
+        // two departments sharing a code after upper-casing is a Master Data
+        // defect, and answering with whichever won would hide it.
+        return departments.ToDictionary(
             department => department.Code.ToUpperInvariant(),
             department => department.Name);
     }
@@ -98,39 +92,21 @@ public class MasterDataStaffDirectory(
     public async Task<string?> FindPropertyCountryAsync(
         Guid propertyId, CancellationToken cancellationToken)
     {
-        var property = await masterData.GetPropertyAsync(
-            // No id on the request: the property *is* the scope, which is
-            // Master Data expressing that a property cannot be read from another
-            // property's context. The tenancy boundary is the request envelope.
-            new GetPropertyRequest
-            {
-                Context = RequestContextFactory.ForService("workforce", propertyId),
-            },
-            cancellationToken: cancellationToken);
+        var country = await database.MasterDataProperties
+            .AsNoTracking()
+            .Where(property => property.Id == propertyId)
+            .Select(property => property.Country)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return string.IsNullOrWhiteSpace(property.Country) ? null : property.Country;
+        return string.IsNullOrWhiteSpace(country) ? null : country;
     }
 
     /// <inheritdoc />
     /// <remarks>
-    /// <para>
-    /// <b>Several small reads, run together.</b> Master Data's <c>ListStaff</c>
-    /// filters by property, a search string and a page — it has no id filter —
-    /// so listing to find five people would pull and page everybody who works
-    /// there to answer a question about five. The gets are issued concurrently,
-    /// so the cost is one round trip's latency rather than five.
-    /// </para>
-    /// <para>
-    /// The port takes a set precisely so this stays the adapter's decision: the
-    /// day <c>ListStaff</c> gains an id filter, this becomes one call and
-    /// nothing above it changes.
-    /// </para>
-    /// <para>
-    /// <b>Nothing is kept.</b> Serving is not storing — the dictionary lives as
-    /// long as the answer being composed. A cache here would be the second copy
-    /// the ruling exists to avoid, and it would be wrong the first time somebody
-    /// was renamed.
-    /// </para>
+    /// <b>One query, where the gRPC surface needed one call per person.</b>
+    /// That version's own comment looked forward to <i>the day `ListStaff`
+    /// gains an id filter</i>; reading the rows directly is that day, and the
+    /// fan-out it apologised for is gone rather than tuned.
     /// </remarks>
     public async Task<IReadOnlyDictionary<Guid, string>> FindNamesAsync(
         Guid propertyId, IReadOnlyCollection<Guid> staffIds, CancellationToken cancellationToken)
@@ -142,27 +118,44 @@ public class MasterDataStaffDirectory(
             return new Dictionary<Guid, string>();
         }
 
-        var context = RequestContextFactory.ForService("workforce", propertyId);
+        var people = await Scoped(propertyId)
+            .Where(staff => wanted.Contains(staff.Id))
+            .Select(staff => new { staff.Id, staff.DisplayName })
+            .ToListAsync(cancellationToken);
 
-        var people = await Task.WhenAll(wanted.Select(id =>
-            masterData.GetStaffAsync(
-                new GetStaffRequest { Context = context, Id = id.ToString() },
-                cancellationToken: cancellationToken).ResponseAsync));
-
-        var names = new Dictionary<Guid, string>(wanted.Count);
-
-        foreach (var person in people)
-        {
-            // An empty display name is left out rather than filled in. The
-            // caller renders what it was given; a placeholder invented here
-            // would be this application deciding what somebody is called.
-            if (Guid.TryParse(person.Id, out var id)
-                && !string.IsNullOrWhiteSpace(person.DisplayName))
-            {
-                names[id] = person.DisplayName;
-            }
-        }
-
-        return names;
+        // An empty display name is left out rather than filled in. The caller
+        // renders what it was given; a placeholder invented here would be this
+        // application deciding what somebody is called.
+        return people
+            .Where(person => !string.IsNullOrWhiteSpace(person.DisplayName))
+            .ToDictionary(person => person.Id, person => person.DisplayName!);
     }
+
+    /// <summary>The property's live departments.</summary>
+    private IQueryable<DepartmentRow> Departments(Guid propertyId)
+        => database.MasterDataDepartments
+            .AsNoTracking()
+            .Where(department => department.PropertyId == propertyId
+                                 && department.Active
+                                 && department.DeletedAt == null);
+
+    /// <summary>
+    /// The people this property may see, live.
+    /// </summary>
+    /// <remarks>
+    /// <c>masterdata.staff</c> is organization-scoped and carries no
+    /// <c>property_id</c> — ADR 0052 left only <c>StaffPropertyScope</c> to
+    /// narrow it. A read that skipped the join would answer across every
+    /// property in the organization, which is the tenancy boundary crossed by
+    /// omission rather than by intent, so the join is here and not at any
+    /// caller's discretion.
+    /// </remarks>
+    private IQueryable<StaffRow> Scoped(Guid propertyId)
+        => from staff in database.MasterDataStaff.AsNoTracking()
+           join scope in database.MasterDataStaffScopes.AsNoTracking()
+               on staff.Id equals scope.StaffId
+           where scope.PropertyId == propertyId
+                 && scope.Active && scope.DeletedAt == null
+                 && staff.Active && staff.DeletedAt == null
+           select staff;
 }

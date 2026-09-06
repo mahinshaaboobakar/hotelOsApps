@@ -56,6 +56,22 @@ public class PostingService(
             throw new InvalidRequestException("job_role is required");
         }
 
+        // The staff member must be one this property can see — ruled
+        // 2026-09-06, and it closes a gap the live drive exposed: `post` took
+        // `StaffId` on trust, so a posting could be written for a person Master
+        // Data has never heard of. It read correctly in the list and announced
+        // nothing, because the announcer finds no user and returns false — a
+        // row that looks like access and grants none, failing silently in the
+        // direction nobody checks.
+        //
+        // **A known person with no login is NOT refused.** That is the ordinary
+        // case and a complete posting; it simply announces nothing, and the
+        // caller is told so rather than left to infer it from silence.
+        var staff =
+            await directory.FindStaffAsync(scope.PropertyId, command.StaffId, cancellationToken)
+            ?? throw new InvalidRequestException(
+                $"staff member {command.StaffId} is not known at this property");
+
         // The department must be one this property has activated — ADR 0119: a
         // property activates canon codes and never invents one. Resolved rather
         // than trusted, because a posting to a department that does not exist
@@ -95,7 +111,7 @@ public class PostingService(
         // Appended in this transaction, never sent — the events and their
         // publish_state rows commit with the posting or not at all. Two events
         // when the posting carries headship, because that is its own grant kind.
-        await announcer.AnnounceStartedAsync(scope, posting, now, cancellationToken);
+        await announcer.AnnounceStartedAsync(scope, posting, now, staff, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return posting;
@@ -342,14 +358,23 @@ public class PostingService(
     /// resolved either identifier — unlike create and end, which already hold
     /// both.
     /// </remarks>
-    private Task AnnounceHeadshipAsync(
-        RequestScope scope, Posting posting, bool started, CancellationToken cancellationToken) =>
-        announcer.AnnounceAsync(
+    private async Task AnnounceHeadshipAsync(
+        RequestScope scope, Posting posting, bool started, CancellationToken cancellationToken)
+    {
+        // Resolved here, because this is the one announcement path with nothing
+        // to reuse — `UpdateAsync` reaches it without having resolved either
+        // identifier, unlike create and end which already hold both.
+        var staff = await directory.FindStaffAsync(
+            scope.PropertyId, posting.StaffId, cancellationToken);
+
+        await announcer.AnnounceAsync(
             scope,
             posting,
             started ? PostingAnnouncements.HeadshipStarted : PostingAnnouncements.HeadshipEnded,
             clock.GetUtcNow(),
+            staff,
             cancellationToken);
+    }
 
     /// <summary>A department has one current head, or none.</summary>
     /// <remarks>

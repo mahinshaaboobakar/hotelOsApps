@@ -1,4 +1,3 @@
-using HotelOS.Contracts.MasterData.V1;
 using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using HotelOS.Workforce.Application.Abstractions;
@@ -42,11 +41,6 @@ using Serilog;
 // string. `packages/process.rs` holds the name as a constant; hello-hotel reads
 // it; GuestOps reads it. This is the third reader, not a fourth spelling.
 const string PlatformConnection = "HotelOS";
-
-// The peer this application reads, by the name on its certificate. A local
-// constant because the SDK publishes only `Kernel` and `Identity`; promoting a
-// third is the platform's call, not an application's.
-const string MasterDataName = "masterdata";
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -169,44 +163,31 @@ builder.Services.AddHealthChecks()
 // take a property from.
 builder.Services.AddHotelOsApplication<WorkforceDbContext>(platform);
 
-// Master Data, read-only — CLAUDE.md: *"applications may read master data"*.
+// Master Data, read-only — CLAUDE.md: *"applications may read master data"*,
+// and ADR 0092 §4 says how: **through the platform-standard grant**, which
+// install step 4 already issued as
+// `GRANT hotelos_masterdata_reader TO hotelos_app_workforce`.
 //
-// Through the canonical transport like every other outbound call (ADR 0040):
-// the authority is the peer's **name**, verified in the handshake, and the
-// connect callback decides where the bytes go. A hand-rolled handler here would
-// get the server half wrong in the way the SDK's own comment records.
+// # There is no client here any more, and that is the point
 //
-// EVT-Q3's boundary, stated at the registration: this is a platform-internal
-// *question*, not a call to a neighbouring application, and not a command.
+// This registered `MasterDataService.MasterDataServiceClient` over the
+// canonical transport. It was correct about the transport and wrong about the
+// path: the live drive found the call reaching Master Data and being refused —
+// *`workforce` presented a certificate but no access token; sign in first* —
+// because an installed application's certificate is `kind=application` and the
+// authenticator admits only `TransportPrincipalKind.Service` without a token.
 //
-// # It is DISCOVERED, and this line used to name an address — found by driving
+// Neither door was this application's to open. Admitting the application kind
+// token-less would put application capability in Master Data's authenticator,
+// where ADR 0093's authority table puts it in the Kernel; forwarding a bearer
+// token would rebuild the second identity channel ADR 0014 deleted
+// `on_behalf_of` to remove. So the client leaves entirely rather than being
+// made to work, and `MasterDataStaffDirectory` reads the canonical rows through
+// the grant — keyless, uncached, filtered for lifecycle at every read.
 //
-// This read `MasterData:Endpoint` and fell back to `https://127.0.0.1:50053`.
-// An application ships no `appsettings.json`, so nothing ever set that key and
-// the fallback was the whole configuration: the app dialled a port no platform
-// service has ever listened on. `AUTHZ-Q21` ruled discovery and the SDK built
-// `IPlatformDirectory` for exactly this, whose own comment records that it was
-// *"called by nothing in either repository"* while four packages shipped an
-// `appsettings.json` naming a port to boot at all. This was the third variant
-// of that gap: no configuration, and a compiled-in address instead.
-//
-// **The live drive is what found it, and only just.** One read reaches Master
-// Data unconditionally — `teams`, for department names — and it answered 500.
-// The other seven passed, and they passed for the wrong reason: every one of
-// them resolves names for a set of ids, `FindNamesAsync` returns early on an
-// empty set, and the property is empty. On a property with a single staff
-// member every one of those reads would have failed the same way. A green
-// ledger against empty data is not evidence the path works.
-builder.Services
-    .AddGrpcClient<MasterDataService.MasterDataServiceClient>(
-        // The **name**, and no port. The authority is what TLS verifies; where
-        // the bytes go is the connect callback's answer, asked fresh each time
-        // a connection opens.
-        options => options.Address = new Uri($"https://{MasterDataName}"))
-    .ConfigurePrimaryHttpMessageHandler(provider => PlatformTransport.Handler(
-        MasterDataName,
-        provider.GetRequiredService<IPlatformDirectory>(),
-        provider.GetRequiredService<ServiceCertificate.Source>()));
+// **The absence is the design.** An application that holds no client to a
+// platform service cannot call one by accident, and cannot acquire a second
+// identity to do it with.
 
 builder.Services.AddScoped<IStaffDirectory, MasterDataStaffDirectory>();
 builder.Services.AddScoped<PostingService>();

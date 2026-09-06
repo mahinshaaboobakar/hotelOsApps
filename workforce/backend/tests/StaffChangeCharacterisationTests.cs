@@ -223,7 +223,7 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
                 new TeamService(
                     db, new RecordingAuthorizer(), directory, TimeProvider.System),
                 TimeProvider.System),
-            new StaffChangeConsumer(db, announcer, TimeProvider.System),
+            new StaffChangeConsumer(db, directory, announcer, TimeProvider.System),
             directory,
             events);
     }

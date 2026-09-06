@@ -136,6 +136,42 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task Create_refuses_a_staff_member_Master_Data_does_not_know()
+    {
+        var (service, _, directory, _) = Build();
+        var stranger = Guid.CreateVersion7();
+        directory.Unknown.Add(stranger);
+
+        // Ruled 2026-09-06. Before this, `post` took the id on trust: a posting
+        // could be written for somebody Master Data had never heard of, it read
+        // correctly in the list, and it announced nothing — because the
+        // announcer finds no user and returns false. A row that looks like
+        // access and grants none, failing in the direction nobody checks.
+        var refused = await Assert.ThrowsAsync<InvalidRequestException>(
+            () => service.CreateAsync(fixture.Scope(), Command(stranger), default));
+
+        // The sentence is the service's own and names the person, because an
+        // operator reading it has to know which id was rejected.
+        Assert.Contains(stranger.ToString(), refused.Message, StringComparison.Ordinal);
+        Assert.Contains("not known at this property", refused.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Create_writes_a_posting_for_a_known_person_with_no_login()
+    {
+        var (service, _, _, events) = Build();
+        var staff = Guid.CreateVersion7();
+
+        // The other half of the same ruling, and the one that must NOT become a
+        // refusal: most staff have no account and never will. The posting is
+        // complete; it simply announces nothing.
+        var posting = await service.CreateAsync(fixture.Scope(), Command(staff), default);
+
+        Assert.NotEqual(Guid.Empty, posting.Id);
+        Assert.Empty(events.Types);
+    }
+
+    [Fact]
     public async Task End_closes_the_window_and_keeps_the_row()
     {
         var (service, _, _, _) = Build();

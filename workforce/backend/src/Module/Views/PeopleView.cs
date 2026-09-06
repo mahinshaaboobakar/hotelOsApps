@@ -95,7 +95,34 @@ public static class PeopleView
             },
             cancellationToken);
 
-        return new { id = posting.Id, version = posting.Version };
+        // **What a posting for somebody with no login actually did** — ruled
+        // 2026-09-06. The posting is complete and correct; it announces
+        // nothing, because there is no principal for a tuple to grant anything
+        // to. Said out loud rather than left to be inferred from silence: a
+        // caller who posted a room attendant and then found no access would
+        // otherwise have nothing to read but an id.
+        //
+        // **One extra read, chosen deliberately.** The service resolved this
+        // same link a moment ago and the stronger shape is for `CreateAsync` to
+        // return it, so there is one authority and no second read. That change
+        // moves the return type past 32 test call sites, and the method name it
+        // shares with `ShiftCatalogueService.CreateAsync` makes a mechanical
+        // sweep of them unsafe — so it is a deliberate deferral, not an
+        // oversight, and it is recorded here rather than in a commit message
+        // nobody reads twice. The window between the two reads can only change
+        // the wording of one message; nothing is stored from it.
+        var staff = await call.Service<IStaffDirectory>()
+            .FindStaffAsync(call.Scope.PropertyId, posting.StaffId, cancellationToken);
+
+        return new
+        {
+            id = posting.Id,
+            version = posting.Version,
+            announced = staff?.UserId is not null,
+            note = staff?.UserId is null
+                ? "No login, nothing announced, no access granted."
+                : null,
+        };
     }
 
     /// <summary>

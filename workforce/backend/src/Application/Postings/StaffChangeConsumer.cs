@@ -34,6 +34,7 @@ namespace HotelOS.Workforce.Application.Postings;
 /// </remarks>
 public class StaffChangeConsumer(
     WorkforceDbContext db,
+    IStaffDirectory directory,
     PostingAnnouncer announcer,
     TimeProvider clock)
 {
@@ -62,9 +63,16 @@ public class StaffChangeConsumer(
         var now = clock.GetUtcNow();
         var postings = await OpenPostingsAsync(scope, staffId, cancellationToken);
 
+        // **Once, outside the loop.** Every posting here belongs to the same
+        // person, so the link is the same fact each time; resolving it per
+        // posting read one row N times for a reconciliation that exists because
+        // that row changed.
+        var staff = await directory.FindStaffAsync(
+            scope.PropertyId, staffId, cancellationToken);
+
         foreach (var posting in postings)
         {
-            await announcer.AnnounceStartedAsync(scope, posting, now, cancellationToken);
+            await announcer.AnnounceStartedAsync(scope, posting, now, staff, cancellationToken);
         }
 
         await db.SaveChangesAsync(cancellationToken);

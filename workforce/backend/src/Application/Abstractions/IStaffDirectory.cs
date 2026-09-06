@@ -38,23 +38,35 @@ namespace HotelOS.Workforce.Application.Abstractions;
 public interface IStaffDirectory
 {
     /// <summary>
-    /// The identity link for a staff member, or <c>null</c> when they have none.
+    /// A staff member this property can see, and whether they can sign in.
     /// </summary>
     /// <remarks>
     /// <para>
+    /// <b>Two facts, one read, and the ambiguous question is unaskable.</b>
+    /// This replaced <c>FindUserIdAsync</c>, which returned <c>Guid?</c> and so
+    /// answered <c>null</c> to both <i>no such person here</i> and <i>a real
+    /// person with no login</i>. Those are opposite answers: one is a refusal
+    /// and the other is an ordinary posting. A caller could not tell them apart
+    /// and neither could a reviewer.
+    /// </para>
+    /// <para>
+    /// <c>null</c> means the staff member is unknown at this property — either
+    /// no such row, or one outside this property's <c>StaffPropertyScope</c>.
+    /// A <see cref="StaffLink"/> with a null <see cref="StaffLink.UserId"/>
+    /// means a real person with no account, which is the ordinary case:
     /// <c>masterdata.staff.user_id</c> is nullable and the platform's own proto
     /// says <i>"that nullability is the whole point"</i> — most room attendants
     /// have no login and never will.
     /// </para>
     /// <para>
-    /// <b>Null is the ordinary answer, not an error.</b> A posting for somebody
-    /// with no account is a complete, correct posting that announces nothing:
-    /// there is no principal for a tuple to grant anything to, and writing one
-    /// would be inventing an account. A department folder grant means something
-    /// only for somebody who can open a folder.
+    /// <b>A posting for somebody with no account is complete and correct</b>,
+    /// and it announces nothing: there is no principal for a tuple to grant
+    /// anything to, and writing one would be inventing an account. A department
+    /// folder grant means something only for somebody who can open a folder.
     /// </para>
     /// </remarks>
-    Task<Guid?> FindUserIdAsync(Guid propertyId, Guid staffId, CancellationToken cancellationToken);
+    Task<StaffLink?> FindStaffAsync(
+        Guid propertyId, Guid staffId, CancellationToken cancellationToken);
 
     /// <summary>
     /// The row id of an activated department, by its canon code.
@@ -150,3 +162,8 @@ public interface IStaffDirectory
     Task<IReadOnlyDictionary<string, string>> FindDepartmentNamesAsync(
         Guid propertyId, CancellationToken cancellationToken);
 }
+
+/// <summary>A canonical person, and their account if they have one.</summary>
+/// <param name="StaffId">The person, as Master Data knows them.</param>
+/// <param name="UserId">Their account, or <c>null</c> when they cannot sign in.</param>
+public sealed record StaffLink(Guid StaffId, Guid? UserId);

@@ -45,14 +45,31 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
     /// <param name="userId">Their account.</param>
     public void WithLogin(Guid staffId, Guid userId) => _identities[staffId] = userId;
 
+    /// <summary>Staff ids to answer as unknown at this property.</summary>
+    /// <remarks>
+    /// <b>Known by default, and that is deliberate.</b> Every posting test in
+    /// this suite predates the staff check and asserts what a posting does for
+    /// an ordinary person — one Master Data knows, who has no login. Defaulting
+    /// to unknown would turn all of them into refusals and quietly change what
+    /// they were written to hold still, which is ADR 0034's trap: a suite that
+    /// still passes while testing something else.
+    /// </remarks>
+    public HashSet<Guid> Unknown { get; } = [];
+
     /// <inheritdoc />
-    public Task<Guid?> FindUserIdAsync(
+    public Task<StaffLink?> FindStaffAsync(
         Guid propertyId, Guid staffId, CancellationToken cancellationToken)
     {
         IdentityLookups.Add(staffId);
 
-        return Task.FromResult(
-            _identities.TryGetValue(staffId, out var userId) ? userId : (Guid?)null);
+        if (Unknown.Contains(staffId))
+        {
+            return Task.FromResult<StaffLink?>(null);
+        }
+
+        return Task.FromResult<StaffLink?>(new StaffLink(
+            staffId,
+            _identities.TryGetValue(staffId, out var userId) ? userId : null));
     }
 
     /// <inheritdoc />
