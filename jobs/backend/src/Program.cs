@@ -3,6 +3,7 @@ using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Cancellation;
 using HotelOS.Jobs.Application.Catalogue;
 using HotelOS.Jobs.Application.Completion;
+using HotelOS.Jobs.Application.Configuration;
 using HotelOS.Jobs.Application.Concerns;
 using HotelOS.Jobs.Application.Course;
 using HotelOS.Jobs.Application.Jobs;
@@ -165,6 +166,10 @@ builder.Services.AddScoped<CatalogueService>();
 builder.Services.AddScoped<PropertyCatalogueService>();
 builder.Services.AddScoped<ConcernPolicyService>();
 builder.Services.AddScoped<PresenceService>();
+
+// The general manager's grant — design §4.2. Jobs announces it; the Kernel
+// folds it into `property#jobs_manager`.
+builder.Services.AddScoped<JobsManagerGrants>();
 builder.Services.AddScoped<ClosingHoldService>();
 builder.Services.AddJobsModule();
 builder.Services.AddModuleRefusals();

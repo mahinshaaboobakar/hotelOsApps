@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Catalogue;
+using HotelOS.Jobs.Application.Configuration;
 using HotelOS.Jobs.Application.Settings;
 using HotelOS.Platform;
 using Microsoft.Extensions.DependencyInjection;
@@ -84,6 +85,25 @@ public static class ConfigureCapabilities
                         TimeOnly.Parse(body.Text("to"))),
                     cancellationToken);
                 return new { id = hours.Id.ToString() };
+
+            // The general manager's action — design §4.2. It sits under
+            // `job.configure` and not under a permission of its own because it
+            // is the same authority: who may set this property's policies is
+            // who may say who else may. `property#jobs_configurer` is
+            // `general_manager or jobs_manager`, so a jobs manager can pass the
+            // grant on — which is the ruling of 2026-09-05, not an oversight
+            // here, and the audit records who did it either way.
+            case "grantJobsManager":
+                var made = await services.GetRequiredService<JobsManagerGrants>().GrantAsync(
+                    scope, body.Id("userId"), cancellationToken);
+                return new { id = made.Id.ToString(), userId = made.UserId.ToString(), grantedAt = made.GrantedAt };
+
+            case "revokeJobsManager":
+                var taken = await services.GetRequiredService<JobsManagerGrants>().RevokeAsync(
+                    scope, body.Id("userId"), cancellationToken);
+                // Nothing standing is a success, not a refusal: revoking what is
+                // already gone is the state the caller asked for.
+                return new { revoked = taken is not null, revokedAt = taken?.RevokedAt };
 
             default:
                 throw new InvalidRequestException($"job.configure has no method '{request.Method}'");

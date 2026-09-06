@@ -22,6 +22,19 @@ public static class EventTypes
     public const string JobRated = "job.rated";
     public const string JobConcernChanged = "job.concern_changed";
 
+    /// <summary>The aggregate a property-wide grant names — design §4.2.</summary>
+    public const string PropertyAggregate = "property";
+
+    /// <summary>
+    /// Published: the general manager made somebody a jobs manager, or took it
+    /// back. The Kernel folds these into <c>property#jobs_manager</c>
+    /// (AUTHZ-Q25's mechanism); Jobs never writes the tuple.
+    /// </summary>
+    public const string JobsManagerGranted = "user.jobs_manager_granted";
+
+    /// <inheritdoc cref="JobsManagerGranted" />
+    public const string JobsManagerRevoked = "user.jobs_manager_revoked";
+
     /// <summary>Consumed: the Engineering app's PPM plan fired (design §3).</summary>
     public const string PpmDue = "maintenance.ppm.due";
 

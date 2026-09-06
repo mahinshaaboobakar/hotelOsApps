@@ -254,7 +254,14 @@ describe("frame 02-6 · Settings · Access", () => {
     has(root, "Department supervisor · ENG", "Priya Nair");
     has(root, "Department member · ENG", "9 people", "Workforce posting");
     has(root, "Department manager · HK", "Anjali Rao");
-    has(root, "Jobs has no editor because it owns none of these facts");
+    // **The frame said Jobs had no editor, and design §4.2 gave it one.** The
+    // jobs-manager grant is this application's action now, so the tab lists who
+    // holds it and offers Revoke; postings and headships are still Workforce's
+    // and still read-only. The old sentence is asserted absent, not merely
+    // replaced — a caption that promised less than the screen does is exactly
+    // the drift the Live tab's caption taught us to guard from both sides.
+    has(root, "Jobs managers", "Postings and headships are Workforce's and are read here, not edited");
+    expect(root.textContent).not.toContain("Jobs has no editor");
   });
 });
 

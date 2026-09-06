@@ -1,6 +1,7 @@
 using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Cancellation;
 using HotelOS.Jobs.Application.Catalogue;
+using HotelOS.Jobs.Application.Configuration;
 using HotelOS.Jobs.Application.Completion;
 using HotelOS.Jobs.Application.Concerns;
 using HotelOS.Jobs.Application.Course;
@@ -49,6 +50,7 @@ public sealed class JobsHarness
         PropertyCatalogue = new PropertyCatalogueService(Db, Authorizer, Clock);
         Policies = new ConcernPolicyService(Db, Authorizer, Clock);
         Presence = new PresenceService(Db, Authorizer, Clock);
+        Grants = new JobsManagerGrants(Db, Events, Clock);
         Sweep = new ConcernSweep(Db, Directory, new Nudger(Db, Directory), Announcer, Clock);
         AutoClose = new AutoClose(Db, Announcer, Records);
         DayStart = new DayStart(Db, Directory, Announcer, Records);
@@ -94,6 +96,9 @@ public sealed class JobsHarness
     public ConcernPolicyService Policies { get; }
 
     public PresenceService Presence { get; }
+
+    /// <summary>The general manager's action — design §4.2.</summary>
+    public JobsManagerGrants Grants { get; }
 
     public ConcernSweep Sweep { get; }
 

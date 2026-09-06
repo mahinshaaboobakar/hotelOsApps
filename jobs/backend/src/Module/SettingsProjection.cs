@@ -77,6 +77,7 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
             await ClosingAsync(property, cancellationToken),
             await RatingAsync(property, cancellationToken),
             Access(),
+            await JobsManagersAsync(scope, cancellationToken),
             "PROPERTY-DEPT-n, from the property's code and the job's department");
     }
 
@@ -138,6 +139,33 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
             string.Join(" → ", ladder.Where(s => s.PolicyId == policy.Id && s.Priority == r.Priority)
                 .OrderBy(s => s.StepNo).Select(s => $"{s.Role} +{s.DelayMinutes}m")),
             r.ManagerAtRisk)).ToList();
+    }
+
+    /// <summary>
+    /// Who holds <c>property#jobs_manager</c> here, as this application recorded
+    /// granting it — design §4.2.
+    /// </summary>
+    /// <remarks>
+    /// <b>Read from Jobs' own record and not from the graph</b>, because the
+    /// graph is the Kernel's and an application asks it about <i>this</i>
+    /// caller, never for a list. Nothing else publishes these two events, so the
+    /// record and the relation can only disagree through a fold that failed —
+    /// which surfaces as a grant that does not work, not as a list that lies.
+    /// </remarks>
+    private async Task<IReadOnlyList<JobsManagerView>> JobsManagersAsync(
+        RequestScope scope, CancellationToken cancellationToken)
+    {
+        var live = await db.JobsManagerGrants
+            .Where(g => g.PropertyId == scope.PropertyId && g.RevokedAt == null)
+            .OrderBy(g => g.GrantedAt)
+            .ToListAsync(cancellationToken);
+
+        return live
+            .Select(g => new JobsManagerView(
+                g.UserId.ToString(),
+                g.GrantedAt.ToString("o"),
+                g.GrantedBy.ToString()))
+            .ToList();
     }
 
     private async Task<IReadOnlyList<PresenceRowView>> PresenceAsync(RequestScope scope, CancellationToken cancellationToken)

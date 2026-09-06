@@ -69,6 +69,9 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
 
     public DbSet<HoldPolicy> HoldPolicies => Set<HoldPolicy>();
 
+    /// <summary>What the general manager has granted — design §4.2.</summary>
+    public DbSet<JobsManagerGrant> JobsManagerGrants => Set<JobsManagerGrant>();
+
     /// <summary>Master Data's own tables, read through the install grant — never written.</summary>
     public DbSet<ReadModels.MasterDataProperty> MasterDataProperties =>
         Set<ReadModels.MasterDataProperty>();
@@ -92,6 +95,7 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
         JobTables.Configure(modelBuilder);
         CatalogueTables.Configure(modelBuilder);
         PolicyTables.Configure(modelBuilder);
+        GrantTables.Configure(modelBuilder);
 
         // Master Data's tables, keyless and excluded from this application's
         // migrations — ADR 0092 §4's install grant, which is how an application

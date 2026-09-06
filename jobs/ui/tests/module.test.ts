@@ -202,6 +202,7 @@ describe("the Jobs module", () => {
     click(root, ".subnav .tab", "Access");
     await settle();
     expect(root.textContent).toContain("Workforce headship");
-    expect(root.textContent).toContain("none of it is in Jobs' database");
+    expect(root.textContent).toContain("nothing here writes an authorization tuple");
+    expect(root.textContent).not.toContain("none of it is in Jobs' database");
   });
 });

@@ -71,5 +71,10 @@ export const recordedSettings: Settings = {
     { label: "Department member · ENG", who: "9 people", from: "Workforce posting" },
     { label: "Department manager · HK", who: "Anjali Rao", from: "Workforce headship" },
   ],
+  // One holder, so the recorded screen draws the list and the Revoke beside it
+  // rather than only the empty state — design §4.2's action.
+  jobsManagers: [
+    { userId: "01a05c39-294b-7c6d-9ca2-6bbbf495106c", grantedAt: "2026-09-01T09:12:00.000Z", grantedBy: "01a05c38-4ec1-796c-8e30-6b011919be5c" },
+  ],
   numbering: "MRN-ENG-… · next 145 · property code from Master Data",
 };

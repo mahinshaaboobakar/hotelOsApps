@@ -101,5 +101,16 @@ public static class ModuleSettingsViews
         IReadOnlyList<ClosingView> Closing,
         IReadOnlyList<ModuleViews.DetailView> Rating,
         IReadOnlyList<AccessView> Access,
+        IReadOnlyList<JobsManagerView> JobsManagers,
         string Numbering);
+
+    /// <summary>
+    /// One person the general manager has made a jobs manager — design §4.2.
+    /// </summary>
+    /// <remarks>
+    /// The id and the dates, and no name: Jobs does not hold people. The screen
+    /// renders whoever the shell can name and the id otherwise, which is the
+    /// same rule every other person-shaped field on these screens follows.
+    /// </remarks>
+    public sealed record JobsManagerView(string UserId, string GrantedAt, string GrantedBy);
 }

@@ -279,6 +279,8 @@ export interface Settings {
   closing: readonly { scope: string; hours: string }[];
   rating: readonly Detail[];
   access: readonly { label: string; who: string; from: string }[];
+  /** Who the general manager has made a jobs manager here — design §4.2. */
+  jobsManagers: readonly { userId: string; grantedAt: string; grantedBy: string }[];
   numbering: string;
 }
 

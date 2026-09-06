@@ -178,8 +178,42 @@ export function closing(s: Settings, configure: boolean, save: Saving, discard: 
   }), discard));
 }
 
-/** Frame 6 — who holds what, shown, not edited: Workforce's and Identity's facts through Context. */
-export function access(s: Settings): HTMLElement {
-  return fill(el("div"), table(["Label", "Who", "Comes from"], s.access.map((a) => [a.label, a.who, a.from])),
-    el("div", "mono", "To change any of this: postings and headships in Workforce; the jobs-manager grant in Identity (GM only). Jobs has no editor because it owns none of these facts — none of it is in Jobs' database."));
+/**
+ * Frame 6 — who holds what, and the one grant this application does own.
+ *
+ * The caption used to end *"Jobs has no editor because it owns none of these
+ * facts"*, and for the jobs-manager grant that stopped being true: design
+ * §4.2 makes the general manager's action Jobs' own, published as
+ * `user.jobs_manager_granted` and folded into `property#jobs_manager` by the
+ * Kernel. Postings and headships are still Workforce's and are still read-only
+ * here.
+ *
+ * **The grant is by id, not by a person picker.** Jobs holds no people, and a
+ * picker would need a directory this application has no business keeping — so
+ * the field takes the id the shell shows, and the list shows ids back.
+ */
+export function access(
+  s: Settings, configure: boolean, save: Saving, discard: () => void,
+): HTMLElement {
+  const held = s.jobsManagers.map((m) => [
+    m.userId,
+    m.grantedAt,
+    configure
+      ? control("btn sm", "Revoke", () => save("revokeJobsManager", { userId: m.userId }))
+      : el("span", "dim", "—"),
+  ]);
+
+  const grant = fill(el("div", "cols"), fill(el("div"), text("User id", "userId", "")));
+
+  return fill(
+    el("div"),
+    table(["Label", "Who", "Comes from"], s.access.map((a) => [a.label, a.who, a.from])),
+    el("div", "hd", "Jobs managers"),
+    s.jobsManagers.length > 0
+      ? table(["User", "Granted", ""], held)
+      : el("div", "dim", "Nobody at this property holds it."),
+    configure ? grant : null,
+    saveRow(configure, grant, save, "grantJobsManager", (h) => ({ userId: h.userId }), discard),
+    el("div", "mono", "Postings and headships are Workforce's and are read here, not edited. The jobs-manager grant is this property's to make: Jobs announces it and the Kernel writes the relation — nothing here writes an authorization tuple."),
+  );
 }
