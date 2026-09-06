@@ -2,7 +2,7 @@
  * The two conformance tables, drawn.
  */
 
-import { PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
+import { DRIVE, PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
 
 /** Attribute- and text-safe. */
 function escaped(text: string): string {
@@ -86,6 +86,14 @@ export function widgets(captures: readonly { entry: string; html: string }[],
 
   return `<section class="conform">
   <h2><span class="n">5</span><span class="t">Widget conformance</span></h2>
+
+  <div class="finding">
+    <p class="lead">${escaped(DRIVE.title)}</p>
+    <p>${rich(DRIVE.answered)}</p>
+    <p>${rich(DRIVE.ran)}</p>
+    <p>${rich(DRIVE.stopped)}</p>
+    <p>${rich(DRIVE.blocked)}</p>
+  </div>
 
   <div class="finding">
     <p class="lead">${escaped(WIDGET_CANVAS.title)}</p>

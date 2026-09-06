@@ -136,6 +136,59 @@ export const WIDGETS: readonly WidgetRow[] = [
 ];
 
 /**
+ * What the live platform said when this application was actually run.
+ *
+ * The gallery above is the design half of APPS-Q4. This is the other half, and
+ * it is recorded here rather than in a report because a certificate that shows
+ * seventeen rendered screens and says nothing about whether the thing starts is
+ * a certificate about drawings.
+ */
+export const DRIVE = {
+  title: "Part B — what the platform answered, and where it stopped",
+
+  answered:
+    "**The Kernel knows this application and approves all of it.** "
+    + "`hotelos-kernel package status guestops` against the development "
+    + "installation answers `guestops 0.1.0`, `signed by guestops-dev`, and "
+    + "**nine permissions, every one approved** — `reservation.read`, "
+    + "`stay.create`, `stay.assign`, `stay.override`, `guest.amend`, "
+    + "`registration.capture`, `request.handle`, `reporting.file`, "
+    + "`desk.configure`. That is the manifest this package declared, accepted at "
+    + "install and read back from the platform's own registry rather than from "
+    + "the manifest it was written in.",
+
+  ran:
+    "**And it ran.** Its own log is 64 lines spanning 308 milliseconds with "
+    + "**zero** errors, exceptions or exit records: `/health` 200, "
+    + "`DiscoverService` 200 against the Kernel, `refreshed 1 signing keys from "
+    + "Identity`, and all three subscriptions consuming — "
+    + "`guestops-GUEST`, `guestops-MAINTENANCE`, and `revocation-guestops`. "
+    + "The manifest's `subscribes` rows are the first real subscriber start "
+    + "against the consumer gate, and they passed.",
+
+  stopped:
+    "**`failed` is the supervisor recording a lost child, not an application "
+    + "that broke** — the log contains no failure, and the state changed when "
+    + "the Kernel it ran under went away. A later restart on a Kernel built "
+    + "from HEAD reproduced the cause verbatim, twice: "
+    + "`application_not_resumed package=guestops error=secret "
+    + "packages/guestops/database not found`, and the identical line for "
+    + "`jobs`. So the application is not the thing that is broken, and this "
+    + "certificate does not claim a drive it did not perform.",
+
+  blocked:
+    "**Two platform findings hold the UI drive, and both are routed rather than "
+    + "worked around.** The desktop reads a single `machine.json` at "
+    + "`%LOCALAPPDATA%\HotelOS` with no profile in the path, so a development "
+    + "enrolment would overwrite the installed product's binding — the "
+    + "per-installation file ADR 0126 §4 defined for exactly this is exported, "
+    + "tested, and called by nothing. And the resume secret above is a platform "
+    + "question, not this application's. **Neither was routed around**, because "
+    + "a certificate that reports a drive performed through a workaround "
+    + "describes a platform nobody will ship.",
+};
+
+/**
  * What the canvas measurement found, and what now guards it.
  *
  * Recorded because the owner asked the question the suite could not answer:
