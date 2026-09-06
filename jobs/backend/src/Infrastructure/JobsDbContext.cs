@@ -69,6 +69,18 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
 
     public DbSet<HoldPolicy> HoldPolicies => Set<HoldPolicy>();
 
+    /// <summary>Master Data's own tables, read through the install grant — never written.</summary>
+    public DbSet<ReadModels.MasterDataProperty> MasterDataProperties =>
+        Set<ReadModels.MasterDataProperty>();
+
+    /// <inheritdoc cref="MasterDataProperties" />
+    public DbSet<ReadModels.MasterDataDepartment> MasterDataDepartments =>
+        Set<ReadModels.MasterDataDepartment>();
+
+    /// <inheritdoc cref="MasterDataProperties" />
+    public DbSet<ReadModels.MasterDataLocation> MasterDataLocations =>
+        Set<ReadModels.MasterDataLocation>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -80,5 +92,13 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
         JobTables.Configure(modelBuilder);
         CatalogueTables.Configure(modelBuilder);
         PolicyTables.Configure(modelBuilder);
+
+        // Master Data's tables, keyless and excluded from this application's
+        // migrations — ADR 0092 §4's install grant, which is how an application
+        // reads master data. It is not a platform service and has no token for
+        // the wire (ADR 0093 §PKG-Q8), so the grant is the path, not a fallback.
+        modelBuilder.ApplyConfiguration(new ReadModels.MasterDataPropertyConfiguration());
+        modelBuilder.ApplyConfiguration(new ReadModels.MasterDataDepartmentConfiguration());
+        modelBuilder.ApplyConfiguration(new ReadModels.MasterDataLocationConfiguration());
     }
 }

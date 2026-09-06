@@ -1,4 +1,3 @@
-using HotelOS.Contracts.MasterData.V1;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Cancellation;
@@ -129,13 +128,13 @@ var platform = PlatformEnvironment.Read()
 // Kernel-launched boot of Jobs died on.
 builder.Services.AddHotelOsApplication<JobsDbContext>(platform);
 
-// Master Data, read-only, over the canonical transport (ADR 0040).
-var masterData = PlatformEndpoint.For(
-    "masterdata", new Uri(builder.Configuration["MasterData:Endpoint"] ?? "https://127.0.0.1:50053"));
-builder.Services
-    .AddGrpcClient<MasterDataService.MasterDataServiceClient>(options => options.Address = masterData.Uri)
-    .ConfigurePrimaryHttpMessageHandler(provider =>
-        PlatformTransport.Handler(masterData, provider.GetRequiredService<ServiceCertificate.Source>()));
+// Master Data is **read through the install grant, not over the wire** — the
+// client that stood here would have been refused the first time a flow reached
+// it, because an application presents a certificate and no access token and an
+// application is not a platform service (ADR 0093 §PKG-Q8). ADR 0092 §4's grant
+// is the ruled path, `hotelos_app_jobs` already holds
+// `hotelos_masterdata_reader`, and the reads are keyless entities in this
+// application's own context — `Infrastructure/ReadModels`.
 
 // The events this application consumes — the manifest's `subscribes`, one
 // durable consumer, ack after commit, idempotent on the row (EVT-Q4).
