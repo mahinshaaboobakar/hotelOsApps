@@ -39,6 +39,8 @@
   --color-ok-soft: rgb(52 211 153 / 0.12);
   --color-warn-soft: rgb(251 191 36 / 0.12);
   --color-bad-soft: rgb(248 113 113 / 0.12);
+  --color-scroll-thumb: rgb(255 255 255 / 0.28);
+  --color-scroll-thumb-strong: rgb(255 255 255 / 0.45);
   --radius-panel: 1rem;
   --font-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
 }

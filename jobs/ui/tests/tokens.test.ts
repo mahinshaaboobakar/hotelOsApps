@@ -46,7 +46,10 @@ describe("the module's token references", () => {
     }
 
     expect([...injected].sort()).toEqual([...TOKEN_NAMES].sort());
-    expect(injected.size).toBe(17);
+    // Counted from the record rather than written down: this assertion said
+    // 17 until the shell published the two scrollbar tokens, and a number
+    // typed here is the same un-derived copy the line above exists to stop.
+    expect(injected.size).toBe(TOKEN_NAMES.length);
   });
 
   it("names only tokens the shell publishes", () => {
