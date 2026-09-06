@@ -69,6 +69,30 @@ public interface IStaffDirectory
         Guid propertyId, Guid staffId, CancellationToken cancellationToken);
 
     /// <summary>
+    /// Who this login is, at this property — <c>WF-Q20</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The other direction from <see cref="FindStaffAsync"/>, and the one
+    /// nothing could ask before: linking a login to a staff record let
+    /// Workforce find a person, and never let the person find themselves. It is
+    /// what <i>My Schedule</i> and <i>Leave · mine</i> resolve the signed-in
+    /// person through.
+    /// </para>
+    /// <para>
+    /// <b>Three answers, and none of them is a guess.</b> While
+    /// <c>ix_staff__user</c> is not unique, two staff records in one
+    /// organization may carry one <c>user_id</c>, and this must say so rather
+    /// than pick one — the gap rule: <i>no value stands in for a measurement
+    /// nobody took</i>. Answering with whichever row sorted first would put a
+    /// person on somebody else's schedule and leave nothing to read.
+    /// </para>
+    /// </remarks>
+    Task<StaffResolution> FindStaffIdAsync(
+        Guid propertyId, Guid userId, CancellationToken cancellationToken);
+
+
+    /// <summary>
     /// The row id of an activated department, by its canon code.
     /// </summary>
     /// <remarks>
@@ -167,3 +191,46 @@ public interface IStaffDirectory
 /// <param name="StaffId">The person, as Master Data knows them.</param>
 /// <param name="UserId">Their account, or <c>null</c> when they cannot sign in.</param>
 public sealed record StaffLink(Guid StaffId, Guid? UserId);
+
+/// <summary>What <c>who is this login?</c> answered.</summary>
+/// <remarks>
+/// <para>
+/// <b>A closed hierarchy rather than a nullable.</b> A <c>Guid?</c> would carry
+/// two of these three and force the third into a second flag; a caller could
+/// then read the id without having considered the ambiguous case, which is
+/// exactly the branch that must not be skipped while the index is not unique.
+/// Here there is no id to read unless one was resolved.
+/// </para>
+/// <para>
+/// ADR 0135 ruled the invariant — <c>UNIQUE (organization_id, user_id) WHERE
+/// user_id IS NOT NULL</c> — which makes <see cref="Ambiguous"/> unreachable.
+/// <b>It is removed when CC's migration lands and not before</b>: until the
+/// database enforces it, a type that could not express the collision would be
+/// this application asserting a guarantee the platform does not yet hold.
+/// </para>
+/// </remarks>
+public abstract record StaffResolution
+{
+    private StaffResolution() { }
+
+    /// <summary>No staff record at this property carries that login.</summary>
+    /// <remarks>
+    /// Ordinary, not an error: the founding administrator signs in before any
+    /// staff record exists (ADR 0088), and a user may be linked later.
+    /// </remarks>
+    public sealed record Unknown : StaffResolution;
+
+    /// <summary>Exactly one, which is the invariant's answer.</summary>
+    /// <param name="StaffId">The person.</param>
+    public sealed record Resolved(Guid StaffId) : StaffResolution;
+
+    /// <summary>
+    /// More than one — stated, never resolved.
+    /// </summary>
+    /// <param name="Count">
+    /// How many were seen. Reported so an administrator can find them; the
+    /// read stops at two, so this is <c>2</c> for any collision and is a
+    /// floor rather than a total.
+    /// </param>
+    public sealed record Ambiguous(int Count) : StaffResolution;
+}

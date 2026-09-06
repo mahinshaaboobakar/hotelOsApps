@@ -136,6 +136,42 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task Who_is_this_login_answers_unknown_resolved_and_ambiguous()
+    {
+        var (_, _, directory, _) = Build();
+        var staff = Guid.CreateVersion7();
+        var user = Guid.CreateVersion7();
+        var stranger = Guid.CreateVersion7();
+        var shared = Guid.CreateVersion7();
+
+        directory.WithLogin(staff, user);
+        directory.Colliding.Add(shared);
+
+        var property = fixture.Scope().PropertyId;
+
+        // WF-Q20's three answers, and the point of the closed hierarchy: the
+        // caller cannot read a staff id out of the third without having
+        // considered it.
+        Assert.IsType<StaffResolution.Unknown>(
+            await directory.FindStaffIdAsync(property, stranger, default));
+
+        var resolved = Assert.IsType<StaffResolution.Resolved>(
+            await directory.FindStaffIdAsync(property, user, default));
+        Assert.Equal(staff, resolved.StaffId);
+
+        // ── Goes with CC's migration for ADR 0135, and not before ────────────
+        //
+        // `UNIQUE (organization_id, user_id) WHERE user_id IS NOT NULL` makes
+        // this unreachable. Deleting the test before the index exists would
+        // leave the branch it covers as the only defence and nothing holding
+        // it — which is how a guard survives its reason and then quietly stops
+        // working.
+        var ambiguous = Assert.IsType<StaffResolution.Ambiguous>(
+            await directory.FindStaffIdAsync(property, shared, default));
+        Assert.Equal(2, ambiguous.Count);
+    }
+
+    [Fact]
     public async Task Create_refuses_a_staff_member_Master_Data_does_not_know()
     {
         var (service, _, directory, _) = Build();

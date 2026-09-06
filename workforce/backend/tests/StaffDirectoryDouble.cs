@@ -72,6 +72,34 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
             _identities.TryGetValue(staffId, out var userId) ? userId : null));
     }
 
+    /// <summary>Logins to answer as carried by more than one staff record.</summary>
+    /// <remarks>
+    /// The collision ADR 0135 forbids and the database does not yet prevent.
+    /// Named explicitly by a test, because it must not be reachable by accident
+    /// once the migration lands — a double that could produce it silently would
+    /// keep the branch alive after its reason had gone.
+    /// </remarks>
+    public HashSet<Guid> Colliding { get; } = [];
+
+    /// <inheritdoc />
+    public Task<StaffResolution> FindStaffIdAsync(
+        Guid propertyId, Guid userId, CancellationToken cancellationToken)
+    {
+        if (Colliding.Contains(userId))
+        {
+            return Task.FromResult<StaffResolution>(new StaffResolution.Ambiguous(2));
+        }
+
+        var match = _identities
+            .Where(pair => pair.Value == userId)
+            .Select(pair => (Guid?)pair.Key)
+            .FirstOrDefault();
+
+        return Task.FromResult<StaffResolution>(match is { } staffId
+            ? new StaffResolution.Resolved(staffId)
+            : new StaffResolution.Unknown());
+    }
+
     /// <inheritdoc />
     public Task<Guid?> FindDepartmentIdAsync(
         Guid propertyId, string departmentCode, CancellationToken cancellationToken)

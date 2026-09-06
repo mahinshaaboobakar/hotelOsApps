@@ -55,6 +55,37 @@ public class MasterDataStaffDirectory(WorkforceDbContext database) : IStaffDirec
             .FirstOrDefaultAsync(cancellationToken);
 
     /// <inheritdoc />
+    public async Task<StaffResolution> FindStaffIdAsync(
+        Guid propertyId, Guid userId, CancellationToken cancellationToken)
+    {
+        // **Two, not all.** The question is *is there exactly one*, and a
+        // `Count()` would read every row of a collision that must not exist to
+        // answer a question two rows already settle. `Take(2)` is the whole
+        // difference between a lookup and a scan.
+        var found = await Scoped(propertyId)
+            .Where(staff => staff.UserId == userId)
+            .Select(staff => staff.Id)
+            .Take(2)
+            .ToListAsync(cancellationToken);
+
+        return found.Count switch
+        {
+            0 => new StaffResolution.Unknown(),
+            1 => new StaffResolution.Resolved(found[0]),
+
+            // ── Remove with CC's migration for ADR 0135, and not before ──────
+            //
+            // `UNIQUE (organization_id, user_id) WHERE user_id IS NOT NULL`
+            // makes this unreachable. Until the index exists this is the only
+            // thing standing between a collision and a person being shown
+            // somebody else's schedule — so it is live defence now and dead
+            // code the day the migration lands, never the reverse. The test
+            // that covers it goes with it.
+            _ => new StaffResolution.Ambiguous(found.Count),
+        };
+    }
+
+    /// <inheritdoc />
     public async Task<Guid?> FindDepartmentIdAsync(
         Guid propertyId, string departmentCode, CancellationToken cancellationToken)
     {
