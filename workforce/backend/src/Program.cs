@@ -43,6 +43,11 @@ using Serilog;
 // it; GuestOps reads it. This is the third reader, not a fourth spelling.
 const string PlatformConnection = "HotelOS";
 
+// The peer this application reads, by the name on its certificate. A local
+// constant because the SDK publishes only `Kernel` and `Identity`; promoting a
+// third is the platform's call, not an application's.
+const string MasterDataName = "masterdata";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // `dotnet HotelOS.Workforce.dll migrate` — ADR 0039, and install step 6.
@@ -173,17 +178,34 @@ builder.Services.AddHotelOsApplication<WorkforceDbContext>(platform);
 //
 // EVT-Q3's boundary, stated at the registration: this is a platform-internal
 // *question*, not a call to a neighbouring application, and not a command.
+//
+// # It is DISCOVERED, and this line used to name an address — found by driving
+//
+// This read `MasterData:Endpoint` and fell back to `https://127.0.0.1:50053`.
+// An application ships no `appsettings.json`, so nothing ever set that key and
+// the fallback was the whole configuration: the app dialled a port no platform
+// service has ever listened on. `AUTHZ-Q21` ruled discovery and the SDK built
+// `IPlatformDirectory` for exactly this, whose own comment records that it was
+// *"called by nothing in either repository"* while four packages shipped an
+// `appsettings.json` naming a port to boot at all. This was the third variant
+// of that gap: no configuration, and a compiled-in address instead.
+//
+// **The live drive is what found it, and only just.** One read reaches Master
+// Data unconditionally — `teams`, for department names — and it answered 500.
+// The other seven passed, and they passed for the wrong reason: every one of
+// them resolves names for a set of ids, `FindNamesAsync` returns early on an
+// empty set, and the property is empty. On a property with a single staff
+// member every one of those reads would have failed the same way. A green
+// ledger against empty data is not evidence the path works.
 builder.Services
-    .AddGrpcClient<MasterDataService.MasterDataServiceClient>(options =>
-        options.Address = PlatformEndpoint.For(
-            "masterdata",
-            new Uri(builder.Configuration["MasterData:Endpoint"]
-                    ?? "https://127.0.0.1:50053")).Uri)
+    .AddGrpcClient<MasterDataService.MasterDataServiceClient>(
+        // The **name**, and no port. The authority is what TLS verifies; where
+        // the bytes go is the connect callback's answer, asked fresh each time
+        // a connection opens.
+        options => options.Address = new Uri($"https://{MasterDataName}"))
     .ConfigurePrimaryHttpMessageHandler(provider => PlatformTransport.Handler(
-        PlatformEndpoint.For(
-            "masterdata",
-            new Uri(builder.Configuration["MasterData:Endpoint"]
-                    ?? "https://127.0.0.1:50053")),
+        MasterDataName,
+        provider.GetRequiredService<IPlatformDirectory>(),
         provider.GetRequiredService<ServiceCertificate.Source>()));
 
 builder.Services.AddScoped<IStaffDirectory, MasterDataStaffDirectory>();
