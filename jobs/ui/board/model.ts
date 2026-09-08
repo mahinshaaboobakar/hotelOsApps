@@ -316,6 +316,41 @@ export interface BlockedNow {
   paused: readonly WidgetRow[];
 }
 
+/** By Priority — where the pressure is, in this design's own vocabulary. */
+export interface PriorityNow {
+  p1: number;
+  p2: number;
+  p3: number;
+  notTriaged: number;
+  pressing: readonly { id: string; number: string; what: string; priority: string; raised: string }[];
+}
+
+/** Due Soon — what is already late, then what is close. One due_at, two groups. */
+export interface DueNow {
+  overdue: number;
+  dueWithinTwoHours: number;
+  late: readonly DueRow[];
+  soon: readonly DueRow[];
+}
+
+/** One row of Due Soon — the job, what it was allowed, and how far off the mark. */
+export interface DueRow {
+  id: string;
+  number: string;
+  what: string;
+  allowance: string;
+  mark: string;
+  tone: string;
+}
+
+/** Raised Today — what came in, what went out, and of what kind. */
+export interface RaisedNow {
+  raised: number;
+  closed: number;
+  byCategory: readonly { name: string; department: string; count: number }[];
+  otherCategories: number;
+}
+
 /** The widget's three numbers and the worst rows — the manifest's `jobs-now`. */
 export interface JobsNow {
   scope: string;

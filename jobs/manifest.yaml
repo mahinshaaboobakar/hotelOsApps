@@ -94,9 +94,13 @@ ui:
   widgets:
     # Six, and the sixth is ruled: `jobs-now` is this design's own widget and
     # stays beside the approved five — JOBS-Q3, the owner's ruling of
-    # 2026-09-05. The other four of the five are drawn and approved but not
-    # built: three of them ask for figures this design cannot compute, and the
-    # reasons are in the chapter's §9 rather than approximated here.
+    # 2026-09-05. All six are built as of 2026-09-08: the last three waited on
+    # frames that asked for figures this design could not produce, and were
+    # amended to what it carries — P1 · P2 · P3 · NOT_TRIAGED rather than
+    # emergency · high · normal · low; one due_at split by urgency rather than
+    # by a deadline source that does not exist; and today counted by category
+    # rather than by an intent the walkthrough removed. The owner approved all
+    # three on 2026-09-08.
     - id: jobs-now
       name: Jobs Now
       file: ui/widgets/jobs-now.js
@@ -106,6 +110,15 @@ ui:
     - id: blocked
       name: Blocked
       file: ui/widgets/blocked.js
+    - id: by-priority
+      name: By Priority
+      file: ui/widgets/by-priority.js
+    - id: due-soon
+      name: Due Soon
+      file: ui/widgets/due-soon.js
+    - id: raised-today
+      name: Raised Today
+      file: ui/widgets/raised-today.js
 
 authorization:
   # Design §4.2, ruling (4) of 2026-09-03: `property#jobs_manager` joins the
@@ -127,3 +140,6 @@ files:
   "ui/widgets/jobs-now.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/widgets/the-board.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
   "ui/widgets/blocked.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/by-priority.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/due-soon.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/raised-today.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

@@ -182,6 +182,55 @@ public static class ModuleViews
         int DoneToday,
         IReadOnlyList<WidgetRowView> LongestWaiting);
 
+    /// <summary><i>By Priority</i> — where the pressure is, in this design's own words.</summary>
+    /// <remarks>
+    /// <c>NOT_TRIAGED</c> is a figure of its own and never folded into P3: a job
+    /// nobody has judged is not a low-priority job, and the frame draws it
+    /// apart for that reason (JOBS-Q3, approved 2026-09-08).
+    /// </remarks>
+    public sealed record PriorityWidgetView(
+        int P1,
+        int P2,
+        int P3,
+        int NotTriaged,
+        IReadOnlyList<PriorityRowView> Pressing);
+
+    /// <summary>One P1 or P2 job on the widget — what it is, how urgent, who asked.</summary>
+    public sealed record PriorityRowView(string Id, string Number, string What, string Priority, string Raised);
+
+    /// <summary><i>Due Soon</i> — what is late, then what is close.</summary>
+    /// <remarks>
+    /// Two groups and one clock. The frame's corrected reading (2026-09-06):
+    /// overdue furthest-past-due first, then due within two hours soonest
+    /// first. There is one <c>due_at</c> per job; the split is urgency, which
+    /// the model carries, and never deadline source, which it does not.
+    /// </remarks>
+    public sealed record DueSoonWidgetView(
+        int Overdue,
+        int DueWithinTwoHours,
+        IReadOnlyList<DueRowView> Late,
+        IReadOnlyList<DueRowView> Soon);
+
+    /// <summary>One row of <i>Due Soon</i> — the job, its allowance, and how far off the mark.</summary>
+    public sealed record DueRowView(string Id, string Number, string What, string Allowance, string Mark, string Tone);
+
+    /// <summary><i>Raised Today</i> — how much came in, how much went out, and of what kind.</summary>
+    /// <remarks>
+    /// <b>By category, not by intent.</b> The frame counted Fix · Prepare ·
+    /// Deliver · Check until 2026-09-05; the walkthrough had removed the job
+    /// <c>type</c> and put the catalogue's category › item in its place, so
+    /// there was nothing to count by. The redrawn frame counts categories and
+    /// was approved on 2026-09-08.
+    /// </remarks>
+    public sealed record RaisedTodayWidgetView(
+        int Raised,
+        int Closed,
+        IReadOnlyList<CategoryCountView> ByCategory,
+        int OtherCategories);
+
+    /// <summary>One category's share of today — the name, its department, the count.</summary>
+    public sealed record CategoryCountView(string Name, string Department, int Count);
+
     /// <summary><i>Blocked</i> — two states, because whose delay it is decides whose clock runs.</summary>
     public sealed record BlockedWidgetView(
         int OnHold,

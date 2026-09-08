@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run build:module && npm run build:widgets",
     "build:module": "node ../../scripts/build-module.mjs",
-    "build:widgets": "node ../../scripts/build-module.mjs widgets/jobs-now.js widgets/entry/jobs-now.ts && node ../../scripts/build-module.mjs widgets/the-board.js widgets/entry/the-board.ts && node ../../scripts/build-module.mjs widgets/blocked.js widgets/entry/blocked.ts",
+    "build:widgets": "node ../../scripts/build-module.mjs widgets/jobs-now.js widgets/entry/jobs-now.ts && node ../../scripts/build-module.mjs widgets/the-board.js widgets/entry/the-board.ts && node ../../scripts/build-module.mjs widgets/blocked.js widgets/entry/blocked.ts && node ../../scripts/build-module.mjs widgets/by-priority.js widgets/entry/by-priority.ts && node ../../scripts/build-module.mjs widgets/due-soon.js widgets/entry/due-soon.ts && node ../../scripts/build-module.mjs widgets/raised-today.js widgets/entry/raised-today.ts",
     "test": "npm run build && vitest run",
     "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
   },

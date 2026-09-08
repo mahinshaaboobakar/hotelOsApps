@@ -67,6 +67,15 @@ public static class ReadCapability
             "widgetBlocked" => await services.GetRequiredService<WidgetProjection>()
                 .BlockedAsync(scope, cancellationToken),
 
+            "widgetPriority" => await services.GetRequiredService<WidgetProjection>()
+                .ByPriorityAsync(scope, cancellationToken),
+
+            "widgetDue" => await services.GetRequiredService<WidgetProjection>()
+                .DueSoonAsync(scope, cancellationToken),
+
+            "widgetRaised" => await services.GetRequiredService<WidgetProjection>()
+                .RaisedTodayAsync(scope, cancellationToken),
+
             "me" => await MeAsync(services, request, cancellationToken),
 
             _ => throw new InvalidRequestException($"job.read has no method '{request.Method}'"),
