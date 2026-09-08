@@ -62,27 +62,25 @@ public class MasterDataStaffDirectory(WorkforceDbContext database) : IStaffDirec
         // `Count()` would read every row of a collision that must not exist to
         // answer a question two rows already settle. `Take(2)` is the whole
         // difference between a lookup and a scan.
+        // **The database answers at most one now** — ADR 0135's
+        // `uq_staff__organization_user`, `UNIQUE (organization_id, user_id)
+        // WHERE user_id IS NOT NULL`, verified on the dev database as the one
+        // index on the column rather than a sibling of the old lookup.
+        //
+        // This carried an `Ambiguous` arm until that landed: two staff records
+        // on one login had to be stated, never resolved, because answering with
+        // whichever row sorted first would put somebody on another person's
+        // schedule with nothing to read afterwards. The arm went the day the
+        // index made it unreachable and not before — live defence first, dead
+        // code second, never the reverse.
         var found = await Scoped(propertyId)
             .Where(staff => staff.UserId == userId)
-            .Select(staff => staff.Id)
-            .Take(2)
-            .ToListAsync(cancellationToken);
+            .Select(staff => (Guid?)staff.Id)
+            .FirstOrDefaultAsync(cancellationToken);
 
-        return found.Count switch
-        {
-            0 => new StaffResolution.Unknown(),
-            1 => new StaffResolution.Resolved(found[0]),
-
-            // ── Remove with CC's migration for ADR 0135, and not before ──────
-            //
-            // `UNIQUE (organization_id, user_id) WHERE user_id IS NOT NULL`
-            // makes this unreachable. Until the index exists this is the only
-            // thing standing between a collision and a person being shown
-            // somebody else's schedule — so it is live defence now and dead
-            // code the day the migration lands, never the reverse. The test
-            // that covers it goes with it.
-            _ => new StaffResolution.Ambiguous(found.Count),
-        };
+        return found is { } staffId
+            ? new StaffResolution.Resolved(staffId)
+            : new StaffResolution.Unknown();
     }
 
     /// <inheritdoc />

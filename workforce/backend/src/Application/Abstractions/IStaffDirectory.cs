@@ -80,12 +80,11 @@ public interface IStaffDirectory
     /// person through.
     /// </para>
     /// <para>
-    /// <b>Three answers, and none of them is a guess.</b> While
-    /// <c>ix_staff__user</c> is not unique, two staff records in one
-    /// organization may carry one <c>user_id</c>, and this must say so rather
-    /// than pick one — the gap rule: <i>no value stands in for a measurement
-    /// nobody took</i>. Answering with whichever row sorted first would put a
-    /// person on somebody else's schedule and leave nothing to read.
+    /// <b>Two answers, and neither is a guess.</b> ADR 0135 makes one login at
+    /// most one staff record per organization, so <i>who is this login?</i> has
+    /// one answer or none — never a choice this read would have to make. A
+    /// third case, <i>stated but unresolvable</i>, guarded the gap until the
+    /// database closed it.
     /// </para>
     /// </remarks>
     Task<StaffResolution> FindStaffIdAsync(
@@ -202,11 +201,14 @@ public sealed record StaffLink(Guid StaffId, Guid? UserId);
 /// Here there is no id to read unless one was resolved.
 /// </para>
 /// <para>
-/// ADR 0135 ruled the invariant — <c>UNIQUE (organization_id, user_id) WHERE
-/// user_id IS NOT NULL</c> — which makes <see cref="Ambiguous"/> unreachable.
-/// <b>It is removed when CC's migration lands and not before</b>: until the
-/// database enforces it, a type that could not express the collision would be
-/// this application asserting a guarantee the platform does not yet hold.
+/// <b>A third case stood here.</b> While <c>ix_staff__user</c> was not unique,
+/// two staff records in one organization could carry one login, and the read
+/// had to say so rather than pick one. ADR 0135's
+/// <c>uq_staff__organization_user</c> now makes that impossible in the
+/// database, so the case went — with the branch that returned it and the
+/// fixture that reached it, in one commit. The order matters: a type that
+/// could not express the collision before the database refused it would have
+/// been this application asserting a guarantee the platform did not hold.
 /// </para>
 /// </remarks>
 public abstract record StaffResolution
@@ -223,14 +225,4 @@ public abstract record StaffResolution
     /// <summary>Exactly one, which is the invariant's answer.</summary>
     /// <param name="StaffId">The person.</param>
     public sealed record Resolved(Guid StaffId) : StaffResolution;
-
-    /// <summary>
-    /// More than one — stated, never resolved.
-    /// </summary>
-    /// <param name="Count">
-    /// How many were seen. Reported so an administrator can find them; the
-    /// read stops at two, so this is <c>2</c> for any collision and is a
-    /// floor rather than a total.
-    /// </param>
-    public sealed record Ambiguous(int Count) : StaffResolution;
 }

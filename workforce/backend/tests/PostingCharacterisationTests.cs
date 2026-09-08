@@ -142,33 +142,22 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
         var staff = Guid.CreateVersion7();
         var user = Guid.CreateVersion7();
         var stranger = Guid.CreateVersion7();
-        var shared = Guid.CreateVersion7();
 
         directory.WithLogin(staff, user);
-        directory.Colliding.Add(shared);
 
         var property = fixture.Scope().PropertyId;
 
-        // WF-Q20's three answers, and the point of the closed hierarchy: the
-        // caller cannot read a staff id out of the third without having
-        // considered it.
+        // WF-Q20's answers. A third — `Ambiguous` — stood here while
+        // `ix_staff__user` was not unique; ADR 0135's
+        // `uq_staff__organization_user` makes two staff records on one login
+        // impossible, so it went with the branch it covered and the fixture
+        // that reached it, in one commit.
         Assert.IsType<StaffResolution.Unknown>(
             await directory.FindStaffIdAsync(property, stranger, default));
 
         var resolved = Assert.IsType<StaffResolution.Resolved>(
             await directory.FindStaffIdAsync(property, user, default));
         Assert.Equal(staff, resolved.StaffId);
-
-        // ── Goes with CC's migration for ADR 0135, and not before ────────────
-        //
-        // `UNIQUE (organization_id, user_id) WHERE user_id IS NOT NULL` makes
-        // this unreachable. Deleting the test before the index exists would
-        // leave the branch it covers as the only defence and nothing holding
-        // it — which is how a guard survives its reason and then quietly stops
-        // working.
-        var ambiguous = Assert.IsType<StaffResolution.Ambiguous>(
-            await directory.FindStaffIdAsync(property, shared, default));
-        Assert.Equal(2, ambiguous.Count);
     }
 
     [Fact]
