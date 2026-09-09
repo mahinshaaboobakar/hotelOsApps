@@ -154,7 +154,7 @@ export function asking(
     box,
     fill(
       el("div", "row"),
-      control(destructive ? "btn pri danger" : "btn pri", "Do it", () => onDone(box.value.trim())),
+      control(destructive ? "btn danger confirm" : "btn pri", "Do it", () => onDone(box.value.trim())),
       control("btn", "Cancel", onCancel),
     ),
   );

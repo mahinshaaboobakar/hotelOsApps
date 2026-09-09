@@ -83,6 +83,12 @@ async function drive(): Promise<void> {
     const panel = await jobsNow(host(GRANTS, widget as "quiet" | "escalated" | "mine"));
     document.body.replaceChildren(stylesheet(), panel);
     document.documentElement.setAttribute("data-ready", "true");
+    // The shared review harness waits on `data-review-ready`
+    // (`scripts/review-measure.mjs`). Both are set: this page's own
+    // driver has always keyed on the first, and one instrument for every
+    // UI round is the point of the merged sweep — a private ready signal
+    // would make this page unmeasurable by it.
+    document.documentElement.setAttribute("data-review-ready", "true");
     return;
   }
 
@@ -135,6 +141,12 @@ async function drive(): Promise<void> {
   // foreground one, and rAF does not fire there — the flag would never land
   // while every screen rendered correctly.
   document.documentElement.setAttribute("data-ready", "true");
+    // The shared review harness waits on `data-review-ready`
+    // (`scripts/review-measure.mjs`). Both are set: this page's own
+    // driver has always keyed on the first, and one instrument for every
+    // UI round is the point of the merged sweep — a private ready signal
+    // would make this page unmeasurable by it.
+    document.documentElement.setAttribute("data-review-ready", "true");
 }
 
 void drive();

@@ -61,9 +61,10 @@ const CHROME = `
    would shout on a screen where deletion is one affordance among many. One base
    class modified, and the pair lives here rather than in a screen, because a
    confirm that looks different on two screens teaches a person two things. */
-.btn.danger{border-color:var(--color-bad,#f87171);color:var(--color-bad,#f87171)}
-.btn.danger.pri{border-color:transparent;background:var(--color-bad,#f87171);
-                color:var(--color-ink-on-accent,#0b0d14)}
+.btn.danger{color:var(--color-bad,#f87171);
+            border-color:color-mix(in srgb, var(--color-bad,#f87171) 45%, transparent)}
+.btn.danger.confirm{border-color:transparent;background:var(--color-bad,#f87171);
+                    color:var(--color-ink-on-accent,#0b0d14);font-weight:600}
 .btn.sm{padding:2px 8px;font-size:11px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .row.act{margin:10px 0 14px}

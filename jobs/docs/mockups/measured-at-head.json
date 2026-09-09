@@ -1,1 +1,128 @@
-{"readings":8316,"panes":[{"id":"1","name":"The board","drawn":true,"compared":16,"diverged":[{"selector":".chip:not(.on)","property":"margin-bottom","drawn":"8px","built":"0px"},{"selector":".chip:not(.on)","property":"display","drawn":"inline-block","built":"block"},{"selector":".chip.on","property":"margin-bottom","drawn":"8px","built":"0px"},{"selector":".chip.on","property":"display","drawn":"inline-block","built":"block"},{"selector":"td","property":"line-height","drawn":"normal","built":"18px"},{"selector":".num","property":"line-height","drawn":"normal","built":"18px"}]},{"id":"2","name":"One job · Overview","drawn":true,"compared":14,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".num","property":"line-height","drawn":"normal","built":"21px"},{"selector":".timer","property":"gap","drawn":"normal","built":"10px"},{"selector":".timer","property":"display","drawn":"block","built":"flex"}]},{"id":"2b","name":"One job · Work","drawn":true,"compared":16,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"8px","built":"0px"},{"selector":".mono","property":"margin-bottom","drawn":"0px","built":"6px"},{"selector":".num","property":"line-height","drawn":"normal","built":"21px"},{"selector":".timer","property":"gap","drawn":"normal","built":"10px"},{"selector":".timer","property":"display","drawn":"block","built":"flex"}]},{"id":"2c","name":"One job · History","drawn":true,"compared":10,"diverged":[{"selector":".num","property":"line-height","drawn":"normal","built":"21px"},{"selector":".timer","property":"gap","drawn":"normal","built":"10px"},{"selector":".timer","property":"display","drawn":"block","built":"flex"}]},{"id":"2d","name":"One job · Notes","drawn":true,"compared":11,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".field","property":"color","drawn":"rgb(90, 97, 114)","built":"rgb(232, 235, 244)"},{"selector":".field","property":"margin-top","drawn":"12px","built":"4px"},{"selector":".field","property":"gap","drawn":"normal","built":"8px"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"6px","built":"0px"},{"selector":".mono","property":"margin-bottom","drawn":"0px","built":"6px"}]},{"id":"2e","name":"One job · Links & steps","drawn":true,"compared":11,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"font-size","drawn":"11px","built":"13px"},{"selector":".btn:not(.pri):not(.sm)","property":"line-height","drawn":"16.5px","built":"19.5px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-top","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-right","drawn":"8px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-bottom","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-left","drawn":"8px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"6px","built":"0px"},{"selector":".mono","property":"margin-bottom","drawn":"0px","built":"6px"},{"selector":".num","property":"font-size","drawn":"12px","built":"14px"},{"selector":".num","property":"line-height","drawn":"normal","built":"21px"},{"selector":".num","property":"padding-top","drawn":"10px","built":"0px"},{"selector":".num","property":"padding-right","drawn":"10px","built":"0px"},{"selector":".num","property":"padding-bottom","drawn":"10px","built":"0px"},{"selector":".num","property":"padding-left","drawn":"10px","built":"0px"},{"selector":".num","property":"display","drawn":"table-cell","built":"block"}]},{"id":"2f","name":"One job · Rating","drawn":true,"compared":9,"diverged":[{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-bottom","drawn":"0px","built":"6px"},{"selector":".num","property":"line-height","drawn":"normal","built":"21px"}]},{"id":"2g","name":"One job · Record","drawn":true,"compared":8,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"font-size","drawn":"12px","built":"13px"},{"selector":".btn:not(.pri):not(.sm)","property":"line-height","drawn":"18px","built":"19.5px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-top","drawn":"3px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-right","drawn":"10px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-bottom","drawn":"3px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-left","drawn":"10px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-bottom","drawn":"0px","built":"6px"}]},{"id":"3","name":"Raise a job","drawn":true,"compared":9,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".field","property":"gap","drawn":"normal","built":"8px"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".tog","property":"color","drawn":"rgb(232, 235, 244)","built":"rgb(0, 0, 0)"},{"selector":".tog","property":"border-top-color","drawn":"rgb(232, 235, 244)","built":"rgb(0, 0, 0)"},{"selector":".tog","property":"border-radius","drawn":"9px","built":"0px"},{"selector":".tog","property":"font-size","drawn":"14px","built":"13.3333px"},{"selector":".tog","property":"line-height","drawn":"21px","built":"normal"},{"selector":".tog","property":"display","drawn":"inline-block","built":"block"}]},{"id":"4","name":"Resolve","drawn":true,"compared":8,"diverged":[{"selector":".chip:not(.on)","property":"margin-bottom","drawn":"8px","built":"0px"},{"selector":".chip:not(.on)","property":"display","drawn":"inline-block","built":"block"},{"selector":".chip.on","property":"margin-bottom","drawn":"8px","built":"0px"},{"selector":".chip.on","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".field","property":"gap","drawn":"normal","built":"8px"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-bottom","drawn":"16px","built":"0px"}]},{"id":"5","name":"Live","drawn":true,"compared":16,"diverged":[{"selector":"td","property":"line-height","drawn":"normal","built":"18px"},{"selector":".pill.ok","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"display","drawn":"inline","built":"block"},{"selector":".num","property":"line-height","drawn":"normal","built":"18px"}]},{"id":"6","name":"Scheduled","drawn":true,"compared":10,"diverged":[{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"14px","built":"0px"},{"selector":".num","property":"line-height","drawn":"normal","built":"18px"}]},{"id":"7","name":"Catalogue","drawn":true,"compared":16,"diverged":[{"selector":".chip:not(.on)","property":"margin-bottom","drawn":"8px","built":"0px"},{"selector":".chip:not(.on)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"font-size","drawn":"11px","built":"13px"},{"selector":".btn:not(.pri):not(.sm)","property":"font-weight","drawn":"600","built":"400"},{"selector":".btn:not(.pri):not(.sm)","property":"line-height","drawn":"16.5px","built":"19.5px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-top","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-right","drawn":"8px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-bottom","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-left","drawn":"8px","built":"14px"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".field","property":"margin-top","drawn":"0px","built":"4px"},{"selector":".field","property":"margin-bottom","drawn":"0px","built":"12px"},{"selector":".field","property":"gap","drawn":"normal","built":"8px"},{"selector":".field","property":"display","drawn":"inline-block","built":"block"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".dlg","property":"border-radius","drawn":"12px","built":"16px"}]},{"id":"02-1","name":"Settings · Concern policy","drawn":true,"compared":15,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"font-size","drawn":"11px","built":"13px"},{"selector":".btn:not(.pri):not(.sm)","property":"font-weight","drawn":"600","built":"400"},{"selector":".btn:not(.pri):not(.sm)","property":"line-height","drawn":"16.5px","built":"19.5px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-top","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-right","drawn":"8px","built":"14px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-bottom","drawn":"2px","built":"7px"},{"selector":".btn:not(.pri):not(.sm)","property":"padding-left","drawn":"8px","built":"14px"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"}]},{"id":"02-2","name":"Settings · Shifts & presence","drawn":true,"compared":10,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"}]},{"id":"02-3","name":"Settings · Who is told","drawn":true,"compared":8,"diverged":[{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"8px","built":"0px"}]},{"id":"02-4","name":"Settings · Holds & reminders","drawn":true,"compared":13,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"12px","built":"0px"}]},{"id":"02-5","name":"Settings · Closing & rating","drawn":true,"compared":14,"diverged":[{"selector":".btn:not(.pri):not(.sm)","property":"border-top-color","drawn":"rgba(255, 255, 255, 0.07)","built":"rgba(255, 255, 255, 0.14)"},{"selector":".btn:not(.pri):not(.sm)","property":"display","drawn":"inline-block","built":"block"},{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".card h3","property":"gap","drawn":"normal","built":"8px"},{"selector":".card h3","property":"display","drawn":"block","built":"flex"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"8px","built":"0px"},{"selector":".tog","property":"color","drawn":"rgb(232, 235, 244)","built":"rgb(0, 0, 0)"},{"selector":".tog","property":"background-color","drawn":"rgb(52, 211, 153)","built":"rgba(255, 255, 255, 0.07)"},{"selector":".tog","property":"border-top-color","drawn":"rgb(232, 235, 244)","built":"rgb(0, 0, 0)"},{"selector":".tog","property":"border-radius","drawn":"9px","built":"0px"},{"selector":".tog","property":"font-size","drawn":"13px","built":"13.3333px"},{"selector":".tog","property":"line-height","drawn":"19.5px","built":"normal"},{"selector":".tog","property":"display","drawn":"inline-block","built":"block"}]},{"id":"02-6","name":"Settings · Access","drawn":true,"compared":7,"diverged":[{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"margin-top","drawn":"12px","built":"0px"}]},{"id":"02-7","name":"Settings · Policies","drawn":true,"compared":10,"diverged":[{"selector":".btn.pri","property":"display","drawn":"inline-block","built":"block"},{"selector":".mono","property":"line-height","drawn":"normal","built":"18px"},{"selector":".mono","property":"display","drawn":"inline","built":"block"}]}],"selectors":42}
+[
+  {
+    "name": "frame-01-board",
+    "paired": 95,
+    "differs": 24,
+    "readings": 2646
+  },
+  {
+    "name": "frame-02-job-overview",
+    "paired": 56,
+    "differs": 19,
+    "readings": 1224
+  },
+  {
+    "name": "frame-02b-job-work",
+    "paired": 46,
+    "differs": 17,
+    "readings": 1134
+  },
+  {
+    "name": "frame-02c-job-history",
+    "paired": 49,
+    "differs": 18,
+    "readings": 1278
+  },
+  {
+    "name": "frame-02d-job-notes",
+    "paired": 30,
+    "differs": 16,
+    "readings": 720
+  },
+  {
+    "name": "frame-02e-job-links",
+    "paired": 56,
+    "differs": 19,
+    "readings": 1224
+  },
+  {
+    "name": "frame-02f-job-rating",
+    "paired": 29,
+    "differs": 11,
+    "readings": 648
+  },
+  {
+    "name": "frame-02g-job-record",
+    "paired": 40,
+    "differs": 17,
+    "readings": 846
+  },
+  {
+    "name": "frame-03-raise",
+    "paired": 17,
+    "differs": 10,
+    "readings": 504
+  },
+  {
+    "name": "frame-04-resolve",
+    "paired": 23,
+    "differs": 16,
+    "readings": 450
+  },
+  {
+    "name": "frame-05-live",
+    "paired": 57,
+    "differs": 23,
+    "readings": 1296
+  },
+  {
+    "name": "frame-06-scheduled",
+    "paired": 38,
+    "differs": 13,
+    "readings": 864
+  },
+  {
+    "name": "frame-07-catalogue",
+    "paired": 44,
+    "differs": 22,
+    "readings": 1260
+  },
+  {
+    "name": "frame-08-settings-policy",
+    "paired": 59,
+    "differs": 15,
+    "readings": 1188
+  },
+  {
+    "name": "frame-08b-policy-list",
+    "paired": 54,
+    "differs": 8,
+    "readings": 1404
+  },
+  {
+    "name": "frame-08c-policy-flow",
+    "paired": 41,
+    "differs": 23,
+    "readings": 1008
+  },
+  {
+    "name": "frame-09-presence",
+    "paired": 34,
+    "differs": 10,
+    "readings": 918
+  },
+  {
+    "name": "frame-10-who-is-told",
+    "paired": 32,
+    "differs": 5,
+    "readings": 666
+  },
+  {
+    "name": "frame-11-holds",
+    "paired": 31,
+    "differs": 8,
+    "readings": 774
+  },
+  {
+    "name": "frame-12-closing",
+    "paired": 32,
+    "differs": 11,
+    "readings": 720
+  },
+  {
+    "name": "frame-13-access",
+    "paired": 31,
+    "differs": 5,
+    "readings": 774
+  }
+]
