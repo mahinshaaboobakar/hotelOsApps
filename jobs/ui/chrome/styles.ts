@@ -45,7 +45,7 @@ const CHROME = `
    cursor for themselves, which is a second geometry however carefully it is
    copied: the day .btn changes, they do not. (No backticks in this file: the
    sheet is a template literal, and one would end it mid-rule.) */
-.btn.chip{border-color:var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px;padding:6px 10px;
+.btn.chip{border-radius:8px;padding:6px 10px;
       font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .btn.chip.on{border-color:var(--color-brand,#818cf8);color:var(--color-ink,#e8ebf4)}
 .grow{margin-left:auto}
@@ -101,7 +101,7 @@ table:has(~ .pager){flex:1 1 auto;min-height:0}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;
        color:var(--color-ink-faint,#5a6172);position:sticky;bottom:0;
        background:var(--color-surface,#0b0d14);margin:0 -22px -22px;padding:10px 22px 22px}
-.btn.pg{border-color:var(--color-line,rgb(255 255 255 / 0.07));border-radius:6px;padding:2px 8px;margin-left:4px;
+.btn.pg{border-radius:6px;padding:2px 8px;margin-left:4px;
      font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .btn.pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
 .btn.pg[disabled]{color:var(--color-ink-faint,#5a6172);cursor:default;opacity:.5}

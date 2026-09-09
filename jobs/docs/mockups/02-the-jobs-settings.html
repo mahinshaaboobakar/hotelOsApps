@@ -82,7 +82,7 @@ tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .card h3{margin:0 0 10px;font-size:13px;font-weight:600}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
 .kv div:nth-child(odd){color:var(--faint)}
-.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--line);color:var(--text);margin-right:8px}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--text);margin-right:8px;line-height:inherit}
 /* Text on an accent fill is what --color-ink-on-accent is published for; this
    page taught ordinary ink there until the 5 September measurement. */
 .btn.pri{background:var(--grad);border-color:transparent;color:var(--color-ink-on-accent)}
@@ -99,7 +99,7 @@ label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppe
 .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;background:var(--ok)}
 .bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim)}
+.chip{display:inline-block;border:1px solid var(--color-line-strong);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim);line-height:inherit}
 .chip.on{border-color:var(--indigo);color:var(--text)}
 .tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
 .tog.on{background:var(--ok)}
@@ -109,7 +109,7 @@ label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppe
 .strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
 .strip b{color:var(--text);font-size:14px;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
+.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--dim);line-height:inherit}
 .pager span.pg.on{color:var(--text);border-color:var(--indigo)}
 .scroll{max-height:168px;overflow:hidden;position:relative}
 .scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--bg))}
