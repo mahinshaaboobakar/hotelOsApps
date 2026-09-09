@@ -17,9 +17,9 @@ export const SHELL = `
    drawing happened to name. */
 .go{display:flex;flex-direction:column;height:100vh;font-size:13.5px;line-height:1.55;
   color:var(--color-ink,#e8ebf4);
-  font-family:var(--font-sans,system-ui,sans-serif);background:var(--color-surface,#0b0d14)}
+  font-family:var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);background:var(--color-surface,#0b0d14)}
 .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;
-  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
 .mark{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:11px;
   font-weight:700;color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent)}
@@ -84,7 +84,7 @@ export const SHELL = `
    counts the tabs immediately below already carry. */
 .strip{display:flex;gap:24px;align-items:center;flex-wrap:wrap;font-size:12px;
   color:var(--color-ink-muted,#8b93a7);padding:8px 12px;border-radius:8px;
-  border:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .strip b{color:var(--color-ink,#e8ebf4);font-size:14px;font-weight:600;margin-right:5px}
 .strip .on{color:var(--color-ink,#e8ebf4)}
 .strip .on b{color:var(--color-brand,#818cf8)}
@@ -92,7 +92,7 @@ export const SHELL = `
 .strip .ctx{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
 .strip .ctx b{font-size:12px;color:var(--color-ink-muted,#8b93a7);margin-right:0}
 .tabs{display:flex;gap:4px;align-items:center;flex-wrap:wrap;margin-top:2px;
-  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .tab{padding:8px 14px;font-size:12.5px;color:var(--color-ink-faint,#5a6172);
   border:0;border-bottom:2px solid transparent;background:none;font-family:inherit;
   line-height:inherit;cursor:pointer}
@@ -104,6 +104,6 @@ export const SHELL = `
    looking at it. */
 .tabs .btn{margin-bottom:6px}
 .stand{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;font-size:11.5px;
-  border:1px dashed var(--color-line-strong,rgba(255,255,255,.16));
+  border:1px dashed var(--color-line-strong,rgb(255 255 255 / 0.14));
   color:var(--color-ink-faint,#5a6172)}
 `;

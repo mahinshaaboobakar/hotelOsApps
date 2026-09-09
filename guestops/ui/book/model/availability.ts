@@ -64,6 +64,14 @@ export interface AvailabilityQuery {
 
 /** The answer, and what was asked — frame 14. */
 export interface Availability {
+  /**
+   * How many rows the list holds in all — `64` §8's pager, not this page.
+   *
+   * A total taken from the rows in hand is a pager that says the list ends
+   * where the page does.
+   */
+  total: number;
+
   query: AvailabilityQuery;
 
   /** Null in a PMS-connected property, where the mode sentence differs. */

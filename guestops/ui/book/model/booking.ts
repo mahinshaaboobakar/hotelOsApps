@@ -120,6 +120,14 @@ export interface BookingStay {
 
 /** One booking and its stays — the page frames 8 and 9 both draw. */
 export interface BookingDetail {
+  /**
+   * How many rows the list holds in all — `64` §8's pager, not this page.
+   *
+   * A total taken from the rows in hand is a pager that says the list ends
+   * where the page does.
+   */
+  total: number;
+
   id: string;
   guest: string;
   reference: string;

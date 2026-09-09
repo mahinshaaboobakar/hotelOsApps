@@ -2,9 +2,9 @@
  * The four kinds of thing a person has to decide — frame 12.
  */
 
-import type { AttentionCard } from "../model";
+import type { AttentionCard, AttentionPage } from "../model";
 /** The honest list — gold frame 12, all four kinds. */
-export const recordedAttention: readonly AttentionCard[] = [
+const cards: readonly AttentionCard[] = [
   {
     id: "a1",
     kind: "Same stay, or two?",
@@ -80,3 +80,10 @@ export const recordedAttention: readonly AttentionCard[] = [
     actions: [],
   },
 ];
+
+/**
+ * The recorded page. `total` is the length of what is here and nothing more —
+ * a fixture that claimed a larger total would be drawing a pager over rows that
+ * do not exist.
+ */
+export const recordedAttention: AttentionPage = { total: cards.length, cards };

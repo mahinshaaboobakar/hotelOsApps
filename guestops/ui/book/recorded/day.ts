@@ -22,7 +22,7 @@ export const recordedToday: Today = {
     // 4 is incoherent to the person at the desk. The count is derived from the
     // attention list itself, so it cannot drift again. Reported as a proposed
     // mockup amendment rather than resolved by picking a number.
-    { value: String(recordedAttention.length), label: "attention" },
+    { value: String(recordedAttention.total), label: "attention" },
   ],
   lists: [
     {
@@ -147,6 +147,6 @@ export const recordedToday: Today = {
         },
       ],
     },
-    { key: "attention", label: "Attention", count: String(recordedAttention.length), rows: [] },
+    { key: "attention", label: "Attention", count: String(recordedAttention.total), rows: [] },
   ],
 };

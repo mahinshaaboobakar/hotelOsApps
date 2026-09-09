@@ -5,11 +5,11 @@
 /** Cards, their header bands, label–value rows, and the activity timeline. */
 export const PANEL = `
 .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
-.card{border:1px solid var(--color-line,rgba(255,255,255,.08));overflow:hidden;
-  border-radius:var(--radius-panel,14px);background:var(--color-surface-raised,#11141f)}
+.card{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));overflow:hidden;
+  border-radius:var(--radius-panel,1rem);background:var(--color-surface-raised,#11141f)}
 .ch{padding:11px 15px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
   display:flex;align-items:center;gap:8px;color:var(--color-ink-faint,#5a6172);
-  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .ch .grow{margin-left:auto;text-transform:none;letter-spacing:0;font-size:11.5px}
 .cb{padding:13px 15px;display:flex;flex-direction:column;gap:11px}
 .fr{display:flex;align-items:flex-start;gap:10px;font-size:12.5px}
@@ -25,7 +25,7 @@ export const PANEL = `
    about to be pressed does, and the two must not read the same. */
 .ban.gone{border-color:var(--go-bad-edge);background:var(--go-bad-wash);
   color:var(--color-bad,#f87171)}
-.note{border:1px dashed var(--color-line-strong,rgba(255,255,255,.16));border-radius:12px;
+.note{border:1px dashed var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:12px;
   padding:10px 12px;font-size:12px;line-height:1.65;color:var(--color-ink-muted,#8b93a7)}
 .note b{color:var(--color-ink,#e8ebf4)}
 /* A note about a refusal rather than about a rule — frame 7 s folio. */
@@ -86,11 +86,11 @@ export const PANEL = `
    constant, and a two-night stay laid out in five columns would leave three
    empty ones. */
 .nights{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;overflow:hidden;
-  border:1px solid var(--color-line,rgba(255,255,255,.08));
-  border-radius:var(--radius-panel,14px);
+  border:1px solid var(--color-line,rgb(255 255 255 / 0.07));
+  border-radius:var(--radius-panel,1rem);
   background:var(--color-surface-raised,#11141f)}
 .ng{padding:11px 12px;min-height:104px;display:flex;flex-direction:column;gap:7px;
-  border-right:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-right:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .ng:last-child{border-right:none}
 .ng .dt{font-size:11px;text-transform:uppercase;letter-spacing:.06em;
   color:var(--color-ink-faint,#5a6172)}
@@ -103,7 +103,7 @@ export const PANEL = `
 .te .g{display:flex;flex-direction:column;align-items:center}
 .te .g i{width:7px;height:7px;border-radius:50%;margin-top:12px;
   background:var(--color-ink-faint,#5a6172)}
-.te .g u{flex:1;width:1px;background:var(--color-line-strong,rgba(255,255,255,.16))}
+.te .g u{flex:1;width:1px;background:var(--color-line-strong,rgb(255 255 255 / 0.14))}
 .te.pms .g i{background:var(--go-pms)}
 .te.override .g i{background:var(--go-override)}
 .te.disagrees .g i{background:var(--color-warn,#fbbf24)}

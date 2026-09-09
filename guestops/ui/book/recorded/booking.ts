@@ -105,6 +105,7 @@ export const recordedBookings: Bookings = {
 
 /** Frame 8's booking — two stays, one of them not yet named. */
 export const recordedBooking: BookingDetail = {
+  total: 2,
   id: "b5",
   guest: "Fatima Sheikh",
   reference: "BK-4506",
@@ -185,6 +186,7 @@ export const recordedCancelPlan: CancelPlan = {
  * that always produced `-1` (R9). The honest form is a sentence and a number.
  */
 export const recordedGroup: BookingDetail = {
+  total: 1,
   id: "b1",
   guest: "Rajesh Pillai",
   reference: "BK-4471",

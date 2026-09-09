@@ -17,6 +17,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { pager } from "../../chrome/pager";
 import { load, recordedAvailability, recordedConflict } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { standIn } from "../../chrome/marks";
@@ -31,9 +32,14 @@ import { sources } from "./sources";
  * @param into the element this screen owns
  * @param walkIn what the Walk-in action does
  */
+/** Room types per page — a catalogue, and a resort's is not eleven rows. */
+const PAGE = 12;
+
 export async function newBooking(
   host: HostApi,
   into: HTMLElement,
+  page: number,
+  turn: (page: number) => void,
   walkIn: () => void,
 ): Promise<void> {
   // **The dates travel, and the backend refuses a request without them.** A
@@ -45,6 +51,8 @@ export async function newBooking(
     host, "reservation.read", "availability", recordedAvailability, {
       arrive: recordedAvailability.query.arriveOn,
       depart: recordedAvailability.query.departOn,
+      page,
+      pageSize: PAGE,
     });
 
   const answer = loaded.value;
@@ -71,6 +79,7 @@ export async function newBooking(
     loaded.live ? null : standIn(loaded.because),
     query,
     availability(answer.types),
+    pager(answer.total, page, PAGE, answer.types.length, turn),
     explain(),
     cards,
   );

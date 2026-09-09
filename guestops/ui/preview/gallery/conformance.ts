@@ -37,17 +37,17 @@ export const PAGINATION: readonly PagedRow[] = [
   },
   {
     screen: "The booking",
-    draws: "Deliberately none",
-    why: "A booking's stays are its own — two here, three in the group frame. Bounded by the booking, and a pager under two rows is furniture.",
+    draws: "Numbered pager, 12 stays a page — showing 1–2 of 2, arrows disabled",
+    why: "It drew none, on the argument that a booking bounds its own stays and a pager under two rows is furniture. Refused: a coach party of forty is the same screen, and `showing 1–2 of 2` is what tells somebody checking a group that the booking is whole rather than truncated.",
     pair: "8, 9",
-    rule: "§6 — the test excludes it: the count is not a moving target, it is the booking",
+    rule: "§8 — every list screen, ruled 2026-09-09",
   },
   {
     screen: "New booking",
-    draws: "Deliberately none",
-    why: "The property's own room types. A catalogue, bounded by what the hotel has, and it is the answer to one question rather than a list to walk.",
+    draws: "Numbered pager, 12 room types a page — showing 1–3 of 3",
+    why: "A catalogue is bounded by what the hotel has, which is a property of this hotel and not of the screen: a resort's catalogue is not three rows. The list is paged in the backend rather than sliced in the module, so the count is the property's own.",
     pair: "14",
-    rule: "§6 — bounded by a natural key",
+    rule: "§8 — every list screen, ruled 2026-09-09",
   },
   {
     screen: "The stay · Activity",
@@ -58,10 +58,10 @@ export const PAGINATION: readonly PagedRow[] = [
   },
   {
     screen: "Attention",
-    draws: "Deliberately none",
-    why: "One business day's exceptions. It has a count the bar carries and the wire could total it — what excludes it is the approved frame: a property with enough of these to need a second page has a problem a pager would help it not to look at.",
+    draws: "Numbered pager, 10 cards a page — showing 1–4 of 4 on this fixture",
+    why: "It used to draw none, on the argument that a property with enough exceptions to need a second page has a problem a pager would help it not to look at. That was refused: bounded by a natural key is a property of today's data, not of the screen, and the count is information in its own right. The backend now merges its two sources by time and pages the union — a total taken from what was fetched would stop growing at the cap.",
     pair: "12",
-    rule: "§6 — and frame 12, which draws none",
+    rule: "§8 — every list screen, ruled 2026-09-09",
   },
 ];
 

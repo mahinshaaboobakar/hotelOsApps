@@ -93,8 +93,16 @@ public static class ModuleSurface
             "today" => services.GetRequiredService<TodayView>()
                 .AnswerAsync(request.Scope, Page(request.Body), cancellationToken),
 
-            "attention" => services.GetRequiredService<AttentionView>()
+            // Who is at this desk. Under `reservation.read` rather than a
+            // capability of its own: a property that granted this application
+            // the day's arrivals has already decided its screens may name the
+            // person reading them, and a tenth permission for the bar's right
+            // slot is a decision an administrator would have to make twice.
+            "me" => services.GetRequiredService<OperatorView>()
                 .AnswerAsync(request.Scope, cancellationToken),
+
+            "attention" => services.GetRequiredService<AttentionView>()
+                .AnswerAsync(request.Scope, Page(request.Body), cancellationToken),
 
             "occupancy" => services.GetRequiredService<OccupancyView>()
                 .AnswerAsync(request.Scope, cancellationToken),
@@ -112,7 +120,7 @@ public static class ModuleSurface
                 .AnswerAsync(request.Scope, Page(request.Body), cancellationToken),
 
             "booking" => services.GetRequiredService<BookingView>()
-                .AnswerAsync(request.Scope, Booking(request.Body), cancellationToken),
+                .AnswerAsync(request.Scope, Booking(request.Body), Page(request.Body), cancellationToken),
 
             "cancelPlan" => services.GetRequiredService<CancelPlanView>()
                 .AnswerAsync(request.Scope, Booking(request.Body), cancellationToken),
@@ -197,7 +205,7 @@ public static class ModuleSurface
             ?? throw new InvalidRequestException("availability needs a departure date");
 
         return services.GetRequiredService<AvailabilityView>()
-            .AnswerAsync(request.Scope, from, to, cancellationToken);
+            .AnswerAsync(request.Scope, from, to, Page(request.Body), cancellationToken);
     }
 
     /// <summary>Which stay the bundle is asking about.</summary>

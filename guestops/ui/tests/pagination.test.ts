@@ -43,7 +43,7 @@ const LIST = /el\(\s*"div"\s*,\s*"(?:tbl|ev)\b/u;
  * container — and hiding that behind one regex would make the next reader think
  * every list here is a table.
  */
-const CARD_LIST = /for \(const item of loaded\.value\)/u;
+const CARD_LIST = /for \(const item of loaded\.value(?:\.cards)?\)/u;
 
 /**
  * The classification the certificate's table states, screen by screen.
@@ -54,13 +54,25 @@ const CARD_LIST = /for \(const item of loaded\.value\)/u;
  * natural key: one booking's stays, one property's room types, one stay's
  * history, one business day's exceptions. A pager on those is furniture.
  */
+/**
+ * **Ruled 2026-09-09: `64` §8 says every list screen and means it.** The four
+ * that read `bounded` did so on the argument that each was bounded by a natural
+ * key — a booking's stays, a property's room types, one day's exceptions. That
+ * is a property of today's data and not of the screen: a list bounded by one
+ * property's room types is unbounded the day a property has four hundred.
+ *
+ * `stay` is the one that stays `bounded`, and not because it is exempt: its
+ * primary read has no backend method at all, so there is nothing to page. It is
+ * tracked as its own item rather than as a missing pager, because estimating it
+ * as a pager would hide that the anchor screen cannot load.
+ */
 const CLASSIFIED: Record<string, "paged" | "bounded"> = {
   today: "paged",
   bookings: "paged",
 
-  attention: "bounded",
-  booking: "bounded",
-  newbooking: "bounded",
+  attention: "paged",
+  booking: "paged",
+  newbooking: "paged",
   stay: "bounded",
 };
 
@@ -132,16 +144,18 @@ describe("the pagination conformance table", () => {
   });
 
   /**
-   * Attention is the row most likely to be got wrong, so it is asserted by name.
+   * **Rewritten, not deleted — ADR 0034.** It asserted that Attention draws a
+   * list and no pager, on the approved frame's authority: frame 12 draws none,
+   * because one business day's exceptions is a list a property should not need
+   * to page.
    *
-   * It is a list, it has a count the bar carries, and the wire could produce a
-   * total — so §6's test does not obviously exclude it. What excludes it is the
-   * approved frame: frame 12 draws no pager, because the list is one business
-   * day's exceptions and a property with enough of them to need a second page
-   * has a problem a pager would help it not to look at.
+   * Ruled otherwise on 2026-09-09: `64` §8 says every list screen and means it.
+   * *Bounded by a natural key* is a property of today's data, not of the screen
+   * — a list bounded by one property's exceptions is unbounded the day a
+   * property has four hundred — and the count is information in its own right.
    */
-  it("counts Attention as a list, and as one that does not page", () => {
+  it("counts Attention as a list, and as one that pages", () => {
     expect(listBearing()).toContain("attention");
-    expect(paging()).not.toContain("attention");
+    expect(paging()).toContain("attention");
   });
 });

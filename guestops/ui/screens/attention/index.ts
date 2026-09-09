@@ -17,6 +17,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { load, recordedAttention, type AttentionCard } from "../../book";
+import { pager } from "../../chrome/pager";
 import { el, fill } from "../../chrome/element";
 import { mark, standIn } from "../../chrome/marks";
 import { actions, card, detail } from "../../chrome/panel";
@@ -26,9 +27,22 @@ import { actions, card, detail } from "../../chrome/panel";
  *
  * @param host the bridge — the only route out of this realm
  * @param into the element this screen owns
+ * @param page which page, 0-based
+ * @param turn what to do when another page is chosen
  */
-export async function attention(host: HostApi, into: HTMLElement): Promise<void> {
-  const loaded = await load(host, "reservation.read", "attention", recordedAttention);
+/** Cards per page. Fewer than a table's rows: each is several lines tall. */
+const PAGE = 10;
+
+export async function attention(
+  host: HostApi,
+  into: HTMLElement,
+  page: number,
+  turn: (page: number) => void,
+): Promise<void> {
+  const loaded = await load(host, "reservation.read", "attention", recordedAttention, {
+    page,
+    pageSize: PAGE,
+  });
 
   // No page heading, and no `.head` — docs/working/64 §3. This built
   // `<div class="head">` holding `<div class="ht">Attention</div>`, which was
@@ -43,19 +57,24 @@ export async function attention(host: HostApi, into: HTMLElement): Promise<void>
     el(
       "div",
       "hint",
-      `${count(loaded.value.length)} a person has to decide — nothing here decides itself`,
+      `${count(loaded.value.total)} a person has to decide — nothing here decides itself`,
     ),
   );
 
-  if (loaded.value.length === 0) {
+  if (loaded.value.total === 0) {
     const clear = card("Nothing waiting");
     clear.body.append(el("div", "hint", "Nothing needs a person."));
     body.append(clear.root);
   }
 
-  for (const item of loaded.value) {
+  for (const item of loaded.value.cards) {
     body.append(one(item));
   }
+
+  // A pager over cards, not rows — `64` §8 asks every list screen for one, and
+  // a stack of cards a person scans is a list by the only test that matters.
+  const turning = pager(loaded.value.total, page, PAGE, loaded.value.cards.length, turn);
+  if (turning !== null) body.append(turning);
 
   into.replaceChildren(body);
 }

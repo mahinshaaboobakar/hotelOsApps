@@ -26,26 +26,59 @@ namespace HotelOS.GuestOps.Module;
 /// </remarks>
 public sealed class AttentionView(GuestOpsDbContext db)
 {
-    /// <summary>The cards, newest first.</summary>
-    public async Task<object?> AnswerAsync(RequestScope scope, CancellationToken cancellationToken)
+    /// <summary>One page of the cards, newest first across both sources.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Paged, and the merge is why it took thought</b> — <c>64</c> §8 asks
+    /// every list screen for a pager, and this list is two lists. It used to
+    /// take twenty of each and concatenate them, which put every disagreement
+    /// above every held fact regardless of when either happened, and silently
+    /// dropped the twenty-first of either.
+    /// </para>
+    /// <para>
+    /// <b>Ordered by when it happened, then paged over the union.</b> To serve
+    /// page <c>n</c> of a merge, at most <c>(n + 1) × size</c> rows of each
+    /// source can contribute — anything further down either list is behind
+    /// <c>(n + 1) × size</c> newer rows and cannot reach this page. So each
+    /// source is asked for exactly that many, the two are merged by time, and
+    /// the page is taken from the result.
+    /// </para>
+    /// <para>
+    /// <b>The total counts both</b>, from the database rather than from what was
+    /// fetched: a total derived from a capped read is a number that stops
+    /// growing at the cap, which is the pager claiming a list is shorter than it
+    /// is.
+    /// </para>
+    /// </remarks>
+    public async Task<object?> AnswerAsync(
+        RequestScope scope, Paging.Window page, CancellationToken cancellationToken)
     {
         var mine = db.Stays.Where(s => s.PropertyId == scope.PropertyId).Select(s => s.Id);
 
-        var disagreements = await db.Disagreements
-            .Where(d => d.ClearedAt == null && mine.Contains(d.StayId))
-            .OrderByDescending(d => d.RaisedAt)
-            .Take(20)
-            .ToListAsync(cancellationToken);
+        var disagreeing = db.Disagreements.Where(d => d.ClearedAt == null && mine.Contains(d.StayId));
+        var holding = db.HeldFacts.Where(f => f.PropertyId == scope.PropertyId && f.ResolvedAt == null);
 
-        var held = await db.HeldFacts
-            .Where(f => f.PropertyId == scope.PropertyId && f.ResolvedAt == null)
-            .OrderByDescending(f => f.ReceivedAt)
-            .Take(20)
-            .ToListAsync(cancellationToken);
+        var total = await disagreeing.CountAsync(cancellationToken)
+            + await holding.CountAsync(cancellationToken);
 
-        return new[] { Disagreements(disagreements), Held(held) }
-            .SelectMany(cards => cards)
+        var reach = (page.Page + 1) * page.PageSize;
+
+        var disagreements = await disagreeing
+            .OrderByDescending(d => d.RaisedAt).Take(reach).ToListAsync(cancellationToken);
+
+        var held = await holding
+            .OrderByDescending(f => f.ReceivedAt).Take(reach).ToListAsync(cancellationToken);
+
+        var cards = Disagreements(disagreements)
+            .Select(card => (When: card.When, Card: card.Card))
+            .Concat(Held(held).Select(card => (When: card.When, Card: card.Card)))
+            .OrderByDescending(entry => entry.When)
+            .Skip(page.Page * page.PageSize)
+            .Take(page.PageSize)
+            .Select(entry => entry.Card)
             .ToArray();
+
+        return new { total, cards };
     }
 
     /// <summary>A value the feed disagrees with, over a value a person set.</summary>
@@ -55,8 +88,9 @@ public sealed class AttentionView(GuestOpsDbContext db)
     /// truth leaves this application, and the disagreement is a mark on that
     /// answer rather than a second answer.
     /// </remarks>
-    private static IEnumerable<object> Disagreements(IReadOnlyList<StayDisagreement> rows)
-        => rows.Select(row => new
+    private static IEnumerable<(DateTimeOffset When, object Card)> Disagreements(
+        IReadOnlyList<StayDisagreement> rows)
+        => rows.Select(row => (row.RaisedAt, (object)new
         {
             id = row.Id.ToString(),
             kind = row.Aspect switch
@@ -75,11 +109,12 @@ public sealed class AttentionView(GuestOpsDbContext db)
             note = "Your entry stands. Nothing is applied until you decide.",
             hint = (string?)null,
             actions = new[] { "Keep ours", "Take the PMS value" },
-        });
+        }));
 
     /// <summary>A fact the matcher could not place on a stay.</summary>
-    private static IEnumerable<object> Held(IReadOnlyList<HeldFact> rows)
-        => rows.Select(fact => new
+    private static IEnumerable<(DateTimeOffset When, object Card)> Held(
+        IReadOnlyList<HeldFact> rows)
+        => rows.Select(fact => (fact.ReceivedAt, (object)new
         {
             id = fact.Id.ToString(),
             kind = "A fact arrived that names no stay we hold",
@@ -98,5 +133,5 @@ public sealed class AttentionView(GuestOpsDbContext db)
             // the platform diagnostic ADR 0041 keeps off it.
             hint = "Held rather than guessed at. Nothing has been applied.",
             actions = Array.Empty<string>(),
-        });
+        }));
 }

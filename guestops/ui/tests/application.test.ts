@@ -124,18 +124,33 @@ describe("the day's table", () => {
 
 describe("the app bar", () => {
   /**
-   * Gold frames 1 and 12 disagree about the Attention count — 2 and 4. One
-   * running screen cannot hold both, so the count is derived from the list and
-   * the bar cannot claim a number the screen does not show.
+   * **Rewritten, not deleted — ADR 0034.** It asserted that Attention's count
+   * was derived from the recorded list, which was the best available answer
+   * while the bar read fixtures. It is the wrong contract now: nothing
+   * establishes any of these counts, so drawing one derived from a fixture is
+   * the same claim the frames' hardcoded `218` was, one indirection along.
+   *
+   * What it guards instead is the rule that replaced it: **every count is the
+   * dash, and no count is a figure.** A `0` would say the hotel is empty and a
+   * number would say somebody counted.
    */
-  it("counts attention from the list itself", async () => {
+  it("claims no count it cannot establish", async () => {
     const root = await mount();
 
-    const count = [...root.querySelectorAll<HTMLElement>(".head .tab")]
-      .find((item) => item.textContent?.includes("Attention") === true)
-      ?.querySelector(".n")?.textContent;
+    const counts = [...root.querySelectorAll<HTMLElement>(".head .tab .n")]
+      .map((n) => n.textContent);
 
-    expect(count).toBe(String(recordedAttention.length));
+    expect(counts.length).toBeGreaterThan(0);
+    expect(counts.every((c) => c === "—")).toBe(true);
+  });
+
+  /** The person is not in the host contract, so the bar says so — SHELL-Q52. */
+  it("says the operator is not established rather than naming one", async () => {
+    const root = await mount();
+    const who = root.querySelector<HTMLElement>(".head .who");
+
+    expect(who?.textContent).toBe("operator not established");
+    expect(root.textContent).not.toContain("Anitha Menon");
   });
 
   /** A stay is reached from the day and belongs to it — no back button. */

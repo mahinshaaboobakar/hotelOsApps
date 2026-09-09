@@ -69,6 +69,18 @@ export function pager(
       : `showing ${first}–${last} of ${total}`,
   ));
 
+  // **The rows-per-page statement, drawn here so no screen can omit it** —
+  // `64` §5. Jobs says *"12 per page at this height; a maximised window shows
+  // 24"* on the page; GuestOps said nothing anywhere, on any screen. Putting it
+  // in the pager rather than in each screen's body is the same reasoning as the
+  // range beside it: an author who has a pager has this, and an author who
+  // forgets cannot forget it separately.
+  //
+  // It states the size and not a guess at what a taller window would hold —
+  // this module does not resize its page, so a sentence about a maximised
+  // window would be a claim about behaviour it does not have.
+  element.append(el("span", "psize", `${size} per page`));
+
   const nav = el("span", "pnav");
   nav.append(step("‹", page - 1, page > 0, go));
 

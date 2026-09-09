@@ -31,7 +31,10 @@ public sealed class BookingView(
 {
     /// <summary>The booking the bundle asked for.</summary>
     public async Task<object?> AnswerAsync(
-        RequestScope scope, Guid bookingId, CancellationToken cancellationToken)
+        RequestScope scope,
+        Guid bookingId,
+        Paging.Window page,
+        CancellationToken cancellationToken)
     {
         var record = await bookings.GetAsync(scope, bookingId, cancellationToken);
         var types = await TypesAsync(record, cancellationToken);
@@ -50,7 +53,18 @@ public sealed class BookingView(
             // would be an attribution to a system nobody installed.
             managedBy = record.Reference is null ? null : "Opera manages this booking",
 
-            stays = record.Stays.Select(stay => Stay(stay, types, rooms)).ToArray(),
+            // **Paged, though a booking bounds its own stays** — `64` §8. Two
+            // stays here and three in the group frame, and a coach party with
+            // forty is the same screen. The count is the information the pager
+            // carries: `showing 1–2 of 2` says the booking is whole, which is
+            // exactly what somebody checking a group needs and cannot infer from
+            // a list that simply stops.
+            total = record.Stays.Count,
+            stays = record.Stays
+                .Skip(page.Page * page.PageSize)
+                .Take(page.PageSize)
+                .Select(stay => Stay(stay, types, rooms))
+                .ToArray(),
 
             incomplete = Incomplete(record),
 

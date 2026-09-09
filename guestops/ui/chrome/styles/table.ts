@@ -11,7 +11,7 @@ export const TABLE = `
    operator looks at. */
 .tbl{font-size:13px}
 .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;
-  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 /* The last row keeps its rule: with no card around the list, that final line
    is what closes it. */
 .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
@@ -44,7 +44,7 @@ export const TABLE = `
    already means a row you can click, and one class meaning two things is
    ADR 0037's collision by another door. */
 .ev{display:grid;grid-template-columns:118px 118px 1fr;font-size:12.5px;
-  border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .ev:last-child{border-bottom:none}
 .ev>div{padding:10px 14px;display:flex;align-items:flex-start;gap:7px;min-width:0}
 /* NOT filled — docs/working/64 §4. The drawing fills this one header and
@@ -113,6 +113,7 @@ export const TABLE = `
  * standard states the rule so the third application does not rediscover it.
  */
 .tbl:has(~ .pager){flex:1 0 auto}
+.psize{color:var(--color-ink-faint,#5a6172)}
 .pager{position:sticky;bottom:-22px;z-index:2;
   display:flex;justify-content:space-between;align-items:center;gap:9px;
   margin:0 -26px -22px;padding:10px 30px 22px;
@@ -120,7 +121,7 @@ export const TABLE = `
   background:var(--color-surface,#0b0d14)}
 .pager .pnav{display:flex;align-items:center}
 .pager .pg{display:inline-block;padding:2px 8px;margin-left:4px;border-radius:6px;
-  border:1px solid var(--color-line,rgba(255,255,255,.08));font-family:inherit;
+  border:1px solid var(--color-line,rgb(255 255 255 / 0.07));font-family:inherit;
   font-size:12px;background:none;cursor:pointer;color:var(--color-ink-muted,#8b93a7)}
 .pager .pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
 .pager .pg[disabled]{color:var(--color-ink-faint,#5a6172);opacity:.45;cursor:default}

@@ -47,15 +47,9 @@
 
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
-import {
-  recordedAttention,
-  recordedFirstRun,
-  recordedRegistration,
-  recordedToday,
-  recordedWalkIn,
-} from "./book";
+import { load, recordedFirstRun, recordedRegistration, recordedWalkIn } from "./book";
 import { el } from "./chrome/element";
-import { bar, type BarItem } from "./chrome/bar";
+import { bar, type BarItem, type Operator } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
 import { firstRun } from "./screens/firstrun";
@@ -127,9 +121,6 @@ interface Place {
   page: number;
 }
 
-/** Who is signed in, drawn at the right of the bar. */
-const OPERATOR = { name: "Anitha Menon", where: "Front Office · Avenue Regent" };
-
 /**
  * Where the module starts.
  *
@@ -165,6 +156,18 @@ export interface Opening {
 export function start(host: HostApi, opening?: Opening): HostedModule {
   let root: HTMLElement | null = null;
 
+  /**
+   * Who is at this desk, once the backend has said.
+   *
+   * **Null until it answers, and null forever if it cannot.** There is no
+   * recorded fallback here and that is deliberate: a read that cannot reach the
+   * platform may show recorded facts and say so, but a *person's name* has no
+   * stand-in — drawing one attributes every write on these screens to somebody
+   * who may not be at the desk. So the fallback passed to `load` is `null`, and
+   * the bar draws the sentence instead.
+   */
+  let operator: Operator | null = null;
+
   // Held, not appended once. `show` replaces the root's children on every
   // screen change, so a stylesheet appended at mount is deleted by the first
   // render — the module then draws itself as an unstyled column, and neither
@@ -190,7 +193,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     const main = el("div", "main");
 
     frame.append(
-      bar(items(where.filling), lit(where.screen), OPERATOR, (label) =>
+      bar(items(where.filling), lit(where.screen), operator, (label) =>
         show({
           screen: label as Place["screen"],
           list: "Arrivals",
@@ -239,6 +242,8 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         host,
         main,
         where.bookingId,
+        where.page,
+        (page) => show({ page }),
         where.overlay === "cancel",
         () => show({ overlay: "cancel" }),
         () => show({ overlay: null }),
@@ -252,7 +257,8 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "NewBooking") {
-      void newBooking(host, main, () => show({ overlay: "walkin" }))
+      void newBooking(host, main, where.page, (page) => show({ page }), () =>
+        show({ overlay: "walkin" }))
         .then(overlay);
       return;
     }
@@ -276,7 +282,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "Attention") {
-      void attention(host, main);
+      void attention(host, main, where.page, (page) => show({ page }));
       return;
     }
 
@@ -303,6 +309,29 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     mount(element) {
       root = element;
       show({});
+
+      // Asked once, after the first paint — the bar is drawn synchronously and
+      // a person should not wait on a name to see their day. It redraws when
+      // the answer arrives, and does not when it does not.
+      void load<{ name: string | null; where: string | null } | null>(
+        host, "reservation.read", "me", null,
+      ).then((got) => {
+        // **A present value, not a non-null one.** The first version of this
+        // tested `!== null` and drew `undefined · undefined` on a host that
+        // answered without the fields — the round's own defect, one guard along:
+        // a value nobody established, rendered with confidence. A name is drawn
+        // when it is a non-empty string and never otherwise.
+        const said = (value: unknown): string | null =>
+          typeof value === "string" && value.trim() !== "" ? value : null;
+
+        const name = said(got.live ? got.value?.name : null);
+        const where = said(got.live ? got.value?.where : null);
+
+        if (name !== null && where !== null) {
+          operator = { name, where };
+          show({});
+        }
+      });
     },
 
     unmount() {
@@ -322,37 +351,38 @@ export const activate: Activate = (host: HostApi): HostedModule => start(host);
  * through the same seam.
  */
 function items(filling: boolean): readonly BarItem[] {
-  if (filling) {
-    // **Every count is `—` while the book is being brought in**, and that dash
-    // is not decoration. On install day nothing has been counted yet, so a real
-    // figure would be a number nobody produced — and a `0` would be worse,
-    // because it says the hotel is empty. The dash says *this counts something
-    // and the number is not established*, which is exactly the state.
-    //
-    // Setup keeps no count at all, because it counts nothing in any condition.
-    return [
-      { label: "Today", count: "—" },
-      { label: "Bookings", count: "—" },
-      { label: "Guests", count: "—" },
-      { label: "Attention", count: "—" },
-      { label: "Setup" },
-    ];
-  }
-
-  return [
-    { label: "Today", count: recordedToday.businessDate.split(" ").slice(1).join(" ") },
-    { label: "Bookings", count: "218" },
-    { label: "Guests", count: "1 904" },
-    { label: "Attention", count: String(recordedAttention.length), attention: true },
-
-    // **Five entries, where frame 16 draws four.** That frame shows Setup in
-    // Attention's place, which no other frame does — it is the only one drawn
-    // for a general manager, and dropping Attention to match it would remove
-    // the entry every other frame carries. Added rather than swapped, and
-    // reported: a bar whose entries change with who is signed in is a real
-    // design question and not one this build should answer by inference.
+  // **Every count is `—`, and the dash is the whole point.**
+  //
+  // It used to be `—` only while the book was being brought in, and a live desk
+  // got `Bookings 218` and `Guests 1 904` written into this file, with Today and
+  // Attention read off the recorded fixtures. Four numbers nobody counted, in
+  // the one place a receptionist glances to see whether anything needs them.
+  //
+  // Nothing establishes a count here. The bar is drawn before any screen has
+  // loaded, the seam is per-screen, and a figure this file holds is a figure
+  // that survives being wrong. `—` says *this counts something and the number is
+  // not established*, which is exactly the state — and a `0` would be worse,
+  // because it says the hotel is empty.
+  //
+  // The approved frames draw numbers. That is a divergence with a reason and it
+  // is on the Part A sheet: the frames were drawn for a bar fed by live counts,
+  // and the honest build draws the dash until something feeds it. Setup keeps no
+  // count at all, because it counts nothing in any condition.
+  const counting: readonly BarItem[] = [
+    { label: "Today", count: "—" },
+    { label: "Bookings", count: "—" },
+    { label: "Guests", count: "—" },
+    { label: "Attention", count: "—", attention: true },
     { label: "Setup" },
   ];
+
+  // Five entries where frame 16 draws four: that frame shows Setup in
+  // Attention's place, which no other frame does — it is the only one drawn for
+  // a general manager, and dropping Attention to match it would remove the entry
+  // every other frame carries. Added rather than swapped, and reported.
+  return filling
+    ? counting.map((item) => (item.label === "Attention" ? { ...item, attention: false } : item))
+    : counting;
 }
 
 /**

@@ -21,9 +21,9 @@ export const DERIVED = `
      Aliased rather than deleted, because ten selectors name them and the
      shell's tone is the value either way; the fallback is the old mix, so a
      host that has not published the tones yet still renders. */
-  --go-warn-wash:var(--color-warn-soft, color-mix(in srgb, var(--color-warn,#fbbf24) 14%, transparent));
-  --go-ok-wash:var(--color-ok-soft, color-mix(in srgb, var(--color-ok,#34d399) 12%, transparent));
-  --go-bad-wash:var(--color-bad-soft, color-mix(in srgb, var(--color-bad,#f87171) 10%, transparent));
+  --go-warn-wash:var(--color-warn-soft, rgb(251 191 36 / 0.12));
+  --go-ok-wash:var(--color-ok-soft, rgb(52 211 153 / 0.12));
+  --go-bad-wash:var(--color-bad-soft, rgb(248 113 113 / 0.12));
   --go-brand-wash:color-mix(in srgb, var(--color-brand,#818cf8) 18%, transparent);
   --go-brand-edge:color-mix(in srgb, var(--color-brand,#818cf8) 50%, transparent);
   --go-bad-edge:color-mix(in srgb, var(--color-bad,#f87171) 45%, transparent);

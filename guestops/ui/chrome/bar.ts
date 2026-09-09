@@ -41,7 +41,20 @@ export interface BarItem {
   attention?: boolean;
 }
 
-/** Who is signed in, drawn at the right of the bar. */
+/**
+ * Who is signed in, drawn at the right of the bar.
+ *
+ * **A module is not told.** `ModuleIdentity` carries `id`, `version` and
+ * `capabilities`; `PropertyEnvironment` carries `timezone` and `locale`. Neither
+ * carries the signed-in person or the property's name, and a realm has no other
+ * input — so this is `null` on a real desk, and the bar says so.
+ *
+ * Absent is not a default. The platform's own words for this shape, in
+ * `protocol.ts`: *"`null` means the platform could not establish this here —
+ * never use yours."* A name drawn here is an attribution claim on every write
+ * these screens make, so inventing one is the gap rule's own example rather
+ * than a placeholder worth improving. Parked as `SHELL-Q52`.
+ */
 export interface Operator {
   name: string;
   where: string;
@@ -52,14 +65,14 @@ export interface Operator {
  *
  * @param items the entries, in the design's order
  * @param current the selected entry's label
- * @param who the signed-in person
+ * @param who the signed-in person, or null when the platform did not say
  * @param go what to do when an entry is chosen
  * @returns the bar
  */
 export function bar(
   items: readonly BarItem[],
   current: string,
-  who: Operator,
+  who: Operator | null,
   go: (label: string) => void,
 ): HTMLElement {
   const element = el("div", "head");
@@ -82,7 +95,19 @@ export function bar(
     element.append(button);
   }
 
-  element.append(el("div", "who", `${who.name} · ${who.where}`));
+  // Stated, not blank. A bar with nothing in this slot reads as a bar that
+  // forgot to draw it; the sentence says which of the two it is.
+  const who_ = who === null
+    ? el("div", "who none", "operator not established")
+    : el("div", "who", `${who.name} · ${who.where}`);
+
+  if (who === null) {
+    who_.title =
+      "This application is not told who is signed in: the host contract carries "
+      + "the package id, version and capabilities, and no person.";
+  }
+
+  element.append(who_);
 
   return element;
 }

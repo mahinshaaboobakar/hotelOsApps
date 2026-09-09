@@ -22,10 +22,10 @@ export const MARKS = `
 .sh.unknown{background:var(--go-bad-wash);color:var(--color-bad,#f87171);
   border-color:var(--go-bad-edge)}
 .sh.missing{color:var(--color-ink-faint,#5a6172);border-style:dashed;
-  border-color:var(--color-line,rgba(255,255,255,.08))}
+  border-color:var(--color-line,rgb(255 255 255 / 0.07))}
 .lock{font-size:10px;letter-spacing:.04em;padding:1px 5px;border-radius:5px;
   color:var(--color-ink-faint,#5a6172);
-  border:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 /* A lock naming something the platform CANNOT do — frames 4, 6 and 7. It is
    bad-toned because it is a refusal, and it is a lock rather than a chip
    because it says how a value was established: by nothing. */

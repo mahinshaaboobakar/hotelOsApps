@@ -53,13 +53,13 @@ export const SHEET = `
 .dlg{width:520px;display:flex;flex-direction:column;overflow:hidden;
   background:var(--color-surface-raised,#11141f);
   border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
-  border-radius:calc(var(--radius-panel,14px) + 2px);
+  border-radius:calc(var(--radius-panel,1rem) + 2px);
   box-shadow:0 24px 60px var(--go-shadow)}
-.dh{padding:18px 20px 12px;border-bottom:1px solid var(--color-line,rgba(255,255,255,.08))}
+.dh{padding:18px 20px 12px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .dh b{font-size:15.5px;font-weight:600}
 .dh span{display:block;margin-top:3px;font-size:11.5px;color:var(--color-ink-faint,#5a6172)}
 .db{padding:16px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto}
 .df{margin-top:auto;padding:14px 20px;display:flex;gap:10px;align-items:center;
-  border-top:1px solid var(--color-line,rgba(255,255,255,.08))}
+  border-top:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .df .grow{margin-left:auto}
 `;

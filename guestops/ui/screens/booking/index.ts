@@ -14,6 +14,8 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { pager } from "../../chrome/pager";
+
 import {
   load,
   perform,
@@ -39,10 +41,15 @@ import { table } from "./table";
  * @param close what dismissing the dialog does
  * @param done what a completed cancellation does
  */
+/** Stays per page. A booking's own rows, and a coach party is the same screen. */
+const PAGE = 12;
+
 export async function booking(
   host: HostApi,
   into: HTMLElement,
   id: string,
+  page: number,
+  turn: (page: number) => void,
   confirming: boolean,
   ask: () => void,
   close: () => void,
@@ -84,6 +91,7 @@ export async function booking(
     record.incomplete === null ? null : says(record.incomplete),
 
     table(record.stays),
+    pager(record.total, page, PAGE, record.stays.length, turn),
 
     // The same fact under the table, answering the other question: not *what
     // am I looking at* but *why are the missing two not here*. Frame 9 says it

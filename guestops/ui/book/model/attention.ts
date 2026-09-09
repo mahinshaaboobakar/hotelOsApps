@@ -33,3 +33,16 @@ export interface AttentionCard {
   /** The first is the primary. Empty when the card is informational. */
   actions: readonly string[];
 }
+
+/**
+ * One page of the things a person has to decide.
+ *
+ * **The count is the list's, not the page's** — `64` §8. A screen that showed
+ * nine cards and said "9 to decide" while eleven were waiting would be telling
+ * a receptionist the morning is lighter than it is, which is the one thing this
+ * screen exists not to do.
+ */
+export interface AttentionPage {
+  total: number;
+  cards: readonly AttentionCard[];
+}
