@@ -273,6 +273,22 @@ async function drive(): Promise<void> {
   }
 
   document.documentElement.setAttribute("data-ready", "true");
+
+  // **Two signals, and the second is not this harness's own** — `ARCH-Q12`,
+  // GuestOps' pattern followed rather than a second one invented. `data-ready`
+  // is what this preview's own captures wait on; the shared sweep
+  // (`scripts/review-measure.mjs`) waits on `data-review-ready`, and a page
+  // that sets only a private signal is a page the merged instrument cannot
+  // measure — a stream making its own surface unauditable by the tool every
+  // stream owes.
+  //
+  // **Only on this path.** The miss branch above sets `data-ready="missed"`
+  // and returns without this, so the sweep is never told a screen with a red
+  // HARNESS MISSED banner across it is ready to measure. It can still be swept
+  // — the instrument falls back to `readyState` — and the banner's text is
+  // then in the reading, which is the right outcome: the miss appears in the
+  // numbers rather than being silently absent from them.
+  document.documentElement.setAttribute("data-review-ready", "true");
 }
 
 /** Remember a control the query named and the screen never drew. */

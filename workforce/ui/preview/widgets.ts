@@ -92,6 +92,11 @@ async function draw(): Promise<void> {
   // it is set after the loop rather than inside it so a pass can never
   // photograph four cards and a gap.
   document.documentElement.setAttribute("data-ready", "true");
+
+  // The shared sweep's signal beside the private one — `ARCH-Q12`. A widget
+  // stack is a surface the merged instrument should be able to measure for the
+  // same reason a screen is.
+  document.documentElement.setAttribute("data-review-ready", "true");
 }
 
 void draw();

@@ -155,11 +155,29 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    font:inherit is load-bearing rather than tidy — without it a control leaves
    --font-sans and picks up the UA's, which is invisible until a capture sits
    beside a frame. */
+/* # APPS-Q29 — §2 governs a control as §10 governs a field
+   '--color-line-strong', never '--color-line': the tokens are published as *an
+   ordinary divider* and *a border that needs to be seen*, and a control is a
+   thing a person presses.
+
+   'line-height:inherit' beside 'font:inherit', and this one was already CORRECT
+   by measurement rather than by declaration — the shared instrument read
+   20.15px against the root's 20.925px, which is 1.55 x 13px: the unitless ratio
+   inheriting through the 'font' shorthand, not the UA's 'normal' (~15.6px here).
+   It is written out because §2 names both, and because the outcome currently
+   depends on 'font:inherit' carrying line-height. An author who later replaces
+   the shorthand with individual properties would take the line-height away
+   without touching anything that looks like it. 2.5px, invisible in a
+   screenshot.
+
+   (Quoted with apostrophes, not backticks: this whole stylesheet is a
+   template literal, so a backtick in a comment ENDS it and tsc reports a
+   module-declaration error thirty lines away.) */
 .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;
      white-space:nowrap;cursor:pointer;background:none;
      border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
-     border-radius:8px;padding:7px 14px;font:inherit;font-size:13px;
-     color:var(--color-ink,#e8ebf4)}
+     border-radius:8px;padding:7px 14px;font:inherit;line-height:inherit;
+     font-size:13px;color:var(--color-ink,#e8ebf4)}
 .btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);
          font-weight:600;background:var(--accent)}
 /* Unavailable, and saying so — dashed rather than hidden, for the same reason a
