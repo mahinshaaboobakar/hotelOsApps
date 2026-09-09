@@ -65,8 +65,30 @@ function host(granted: readonly string[]): HostApi {
       // The first run is a data state, not a screen: the same People screen,
       // answered with a property that has posted nobody.
       if (method === "people") {
-        return Promise.resolve(
-          params.get("state") === "first-run" ? recordedFirstRun : recordedPeople);
+        if (params.get("state") === "first-run") {
+          return Promise.resolve(recordedFirstRun);
+        }
+
+        // **A short page, for the half of §6 that a full page cannot show.**
+        // The rule is *the pager is the list's floor*, and a list long enough
+        // to scroll proves only that it scrolls. Whether a SHORT list still
+        // pushes the pager to the bottom needs a list that does not fill the
+        // viewport, and every recorded state here is either a full page of 25
+        // or empty. `CORE-Q28` turns on exactly this case: a scroll container
+        // that grows is right and one that only clips leaves the pager
+        // floating under three rows.
+        //
+        // Four rows of the recorded page, and the totals left alone so the
+        // pager still says what it would say — this is a geometry fixture, not
+        // a claim about a property.
+        if (params.get("state") === "short") {
+          return Promise.resolve({
+            ...recordedPeople,
+            postings: recordedPeople.postings.slice(0, 4),
+          });
+        }
+
+        return Promise.resolve(recordedPeople);
       }
 
       // Frame 7 the same way: the property that has formed no team is answered

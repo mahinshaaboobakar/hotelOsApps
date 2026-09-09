@@ -133,6 +133,18 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    is the first thing the capture showed. */
 .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:12px;
       flex:1 1 auto;min-height:0}
+/* # CORE-Q28 — only the LIST scrolls, and only where there is one
+   Owner ruling: the page does not scroll; the heading and the pager stay put
+   and the list is the scroll container. Scoped to a body that HAS a pager,
+   which is where the ruling speaks — it names the pager as the thing that
+   stays put.
+
+   Measured why the scope matters: applied to every body, Policy lost 174px off
+   the bottom with no way to reach it. Policy draws no list and no pager, so
+   nothing inside it scrolls, and taking the body's scroll away simply clips a
+   settings screen. A rule about lists applied to a screen without one removes
+   content. */
+.body:has(.pager){overflow:hidden}
 /* ...unless a switcher sits above and has already paid for it. */
 .tabs + .main .body{padding-top:14px}
 
@@ -281,7 +293,8 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
    does not clip — so 1048px of rows rendered underneath the note and the pager.
    flex:1 0 auto grows into free space and refuses to shrink below the content,
    which is what the ruling says in words. */
-.rows:has(~ .pager){flex:1 0 auto;min-height:0}
+.rows:has(~ .pager){flex:1 1 auto;min-height:0;overflow-y:auto;
+                    margin:0 -26px;padding:0 26px}
 /* The negative margins are not a flourish: a sticky footer inside a body with
    its own padding sits inset while stuck and jumps back when the list ends.
    These cancel .body's 22px 26px and re-supply it here, so the strip is
@@ -297,7 +310,7 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
           strip parks 22px short of the floor and rows scroll through the
           gap: measured, pager bottom 598 against a body bottom of 620. Matching
           the inset to the margin puts the border box flush at 620. */
-       position:sticky;bottom:-22px;flex:0 0 auto;
+       flex:0 0 auto;
        background:var(--color-surface,#0b0d14);
        margin:0 -26px -22px;padding:10px 30px 22px;font-size:12px;
        border-top:1px solid var(--color-line,rgb(255 255 255/.07));
