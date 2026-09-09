@@ -93,6 +93,8 @@ public sealed class InstallerConvention(string run)
     /// </remarks>
     public async Task EnsureRolesAsync(string adminConnection, string password)
     {
+        RefuseInstalledProduct(adminConnection);
+
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
 
@@ -260,6 +262,40 @@ public sealed class InstallerConvention(string run)
         $"REVOKE SET OPTION FOR {OwnerRole} FROM CURRENT_USER",
     ];
 
+    /// <summary>The installed product's PostgreSQL, which no suite may write to.</summary>
+    private const int InstalledProductPort = 15432;
+
+    /// <summary>Refuse a connection that names a real property's cluster.</summary>
+    /// <remarks>
+    /// <para>
+    /// <c>INSTALL-Q88</c>. The run suffix on these role names stops a
+    /// <i>collision</i> with an installed property's; it does nothing about the
+    /// suite writing to that property's cluster at all, and a pair per run
+    /// accumulates there under names that read as the platform's own.
+    /// </para>
+    /// <para>
+    /// <b>Parsed, not matched.</b> <c>NpgsqlConnectionStringBuilder</c> reports
+    /// the port whatever the spelling or key order, and Npgsql's default when
+    /// the string names none — so a connection assembled without an explicit
+    /// port cannot silently be the product's.
+    /// </para>
+    /// </remarks>
+    private static void RefuseInstalledProduct(string adminConnection)
+    {
+        var port = new NpgsqlConnectionStringBuilder(adminConnection).Port;
+
+        if (port != InstalledProductPort)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"this harness was asked to write cluster roles on port {InstalledProductPort}, "
+            + "which is the INSTALLED product's PostgreSQL — a real property's database on "
+            + "this machine. Point the suite at the development cluster (ADR 0104 "
+            + "§E2E-Q5(a)); INSTALL-Q88 is the round this cost.");
+    }
+
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
     {
         await using var command = new NpgsqlCommand(sql, connection);
@@ -283,12 +319,19 @@ public sealed class InstallerConvention(string run)
     /// <param name="adminConnection">A connection to the cluster, as the provisioner.</param>
     /// <param name="databaseConnection">A connection to this run's database, as the provisioner.</param>
     /// <returns>When both roles are gone, or when they could not be.</returns>
-    public async Task DropRolesAsync(string adminConnection, string databaseConnection)
+    public async Task DropRolesAsync(string adminConnection, string? databaseConnection)
     {
+        RefuseInstalledProduct(adminConnection);
+
         try
         {
-            await using (var database = new NpgsqlConnection(databaseConnection))
+            // Null when the run failed before the database existed — which is
+            // exactly the run whose roles are otherwise never cleaned up
+            // (`INSTALL-Q88`). Nothing is owned in a database that was never
+            // created, so the cluster-level drop below is sufficient on its own.
+            if (databaseConnection is not null)
             {
+                await using var database = new NpgsqlConnection(databaseConnection);
                 await database.OpenAsync();
                 await ExecuteAsync(database, $"DROP OWNED BY {AppRole}, {OwnerRole} CASCADE");
             }

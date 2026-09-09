@@ -122,7 +122,13 @@ public sealed class WorkforceFixture : IAsyncLifetime
                 "Workforce's characterisation tests require PostgreSQL and could not reach it "
                 + $"at {ScratchDatabase.Target}. Run `make db-up db-test-role` in the platform "
                 + "checkout and try again. This is a failure rather than a skip: a suite that "
-                + "passes without a database reports success having executed nothing.");
+                + "passes without a database reports success having executed nothing. "
+                + $"NOTE: the cluster roles {InstallerConvention.OwnerRole} and "
+                + $"{InstallerConvention.AppRole} were already created on {ScratchDatabase.Target} "
+                + "before this check — they are cluster-scoped and must exist before a database "
+                + "can grant them CONNECT. Teardown drops them; if the process died instead, "
+                + "they are still there. This message used to say only that the database was "
+                + "unreachable, which read as nothing happened (INSTALL-Q88).");
         }
 
         // Not `ScratchDatabase.CreateSchemaAsync`: that creates the schema
@@ -186,12 +192,30 @@ public sealed class WorkforceFixture : IAsyncLifetime
         "the fixture has no database — initialisation should have failed before any test ran");
 
     /// <inheritdoc />
+    /// <remarks>
+    /// <para>
+    /// <b>The roles go too, and unconditionally.</b> Dropping the scratch
+    /// database was never cleanup for them: roles are cluster objects, so every
+    /// run left this application's pair behind — and a run that threw before
+    /// the database existed left them with nothing else to show it had run at
+    /// all (<c>INSTALL-Q88</c>).
+    /// </para>
+    /// <para>
+    /// <b>Outside the null check</b>, for that exact case. Tying role cleanup
+    /// to a database that may never have been created is the shape that
+    /// produced the debris: the first write happens before the database, so the
+    /// last erase must not depend on it. Erase at the end as well as the start,
+    /// or the last run's residue always survives.
+    /// </para>
+    /// </remarks>
     public async Task DisposeAsync()
     {
         if (_database is not null)
         {
             await _database.DisposeAsync();
         }
+
+        await InstallerConvention.DropRolesAsync(ProvisionerConnection("postgres"));
     }
 }
 

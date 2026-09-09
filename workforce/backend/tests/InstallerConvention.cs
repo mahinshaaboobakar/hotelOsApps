@@ -68,14 +68,28 @@ public static class InstallerConvention
     /// at creation, so a second run does not authenticate with the first run's.
     /// </para>
     /// <para>
-    /// <b>This cannot collide with an installed property.</b> ADR 0104 puts the
-    /// development cluster on 25432 and the installed product's on 15432, and
-    /// they are separate clusters — which is exactly the separation that ruling
-    /// exists to buy.
+    /// <b>It could collide with an installed property, and this is where that
+    /// is stopped.</b> This paragraph used to assert the opposite — <i>"the
+    /// development cluster is on 25432 and the installed product's on 15432,
+    /// and they are separate clusters"</i> — which is true of the ports and
+    /// says nothing about which one a suite was pointed at.
+    /// <c>HOTELOS_TEST_DB_PORT</c> chooses, and two roles under the installer's
+    /// own names were created on a real property's cluster
+    /// (<c>INSTALL-Q88</c>). The refusal below is that sentence made
+    /// enforceable.
+    /// </para>
+    /// <para>
+    /// <b>Checked here as well as at the port</b>, because this method opens a
+    /// <i>superuser</i> connection and writes cluster-scoped roles. It takes a
+    /// connection string from its caller, so it must not depend on that caller
+    /// having been careful: the guard belongs on the dangerous operation, not
+    /// only on the value that usually feeds it.
     /// </para>
     /// </remarks>
     public static async Task EnsureRolesAsync(string adminConnection, string password)
     {
+        RefuseInstalledProduct(adminConnection);
+
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
 
@@ -177,6 +191,82 @@ public static class InstallerConvention
         // needs at uninstall, and loses the ability to *become* the owner.
         $"REVOKE SET OPTION FOR {OwnerRole} FROM CURRENT_USER",
     ];
+
+    /// <summary>The installed product's PostgreSQL, which no suite may write to.</summary>
+    private const int InstalledProductPort = 15432;
+
+    /// <summary>Refuse a connection that names a real property's cluster.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Parsed, not matched.</b> <c>NpgsqlConnectionStringBuilder</c> reports
+    /// the port whatever the string's spelling or key order, and reports
+    /// Npgsql's default when the string names none — so a connection assembled
+    /// without an explicit port cannot silently be the product's.
+    /// </para>
+    /// </remarks>
+    private static void RefuseInstalledProduct(string adminConnection)
+    {
+        var port = new NpgsqlConnectionStringBuilder(adminConnection).Port;
+
+        if (port != InstalledProductPort)
+        {
+            return;
+        }
+
+        throw new InvalidOperationException(
+            $"this harness was asked to create cluster roles on port {InstalledProductPort}, "
+            + "which is the INSTALLED product's PostgreSQL — a real property's database on "
+            + "this machine. It creates roles under the installer's own names, so they would "
+            + "collide with that property's and survive every teardown, roles being "
+            + "cluster-scoped. Point the suite at the development cluster (ADR 0104 "
+            + "§E2E-Q5(a)); INSTALL-Q88 is the round this cost.");
+    }
+
+    /// <summary>
+    /// Remove the two roles this convention created.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Roles are cluster objects and the scratch database is not</b>, so
+    /// dropping the database was never cleanup for them — every run left them
+    /// behind, and a run that failed before the database existed left them with
+    /// nothing at all to show it had run.
+    /// </para>
+    /// <para>
+    /// <b>Only this application's pair.</b> The shared names —
+    /// <c>hotelos_masterdata_reader</c>, <c>hotelos_event_appender</c> — belong
+    /// to the cluster and to every other suite on it; dropping those would make
+    /// this harness's teardown somebody else's failure.
+    /// </para>
+    /// <para>
+    /// <c>DROP OWNED BY</c> first: it revokes the grants held in this database
+    /// and drops what the role owns here, which is what makes the drop
+    /// reliable rather than a dependency error at the end of a green run.
+    /// </para>
+    /// </remarks>
+    public static async Task DropRolesAsync(string adminConnection)
+    {
+        RefuseInstalledProduct(adminConnection);
+
+        await using var connection = new NpgsqlConnection(adminConnection);
+        await connection.OpenAsync();
+
+        foreach (var role in new[] { AppRole, OwnerRole })
+        {
+            await ExecuteAsync(
+                connection,
+                $"""
+                 DO $$
+                 BEGIN
+                     IF EXISTS (SELECT FROM pg_roles WHERE rolname = '{role}') THEN
+                         DROP OWNED BY {role};
+                         DROP ROLE {role};
+                     END IF;
+                 END
+                 $$;
+                 """);
+        }
+    }
 
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
     {

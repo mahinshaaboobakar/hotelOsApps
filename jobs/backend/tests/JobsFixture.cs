@@ -128,7 +128,13 @@ public sealed class JobsFixture : IAsyncLifetime
                 "Jobs's characterisation tests require PostgreSQL and could not reach it "
                 + $"at {ScratchDatabase.Target}. Run `make db-up db-test-role` in the platform "
                 + "checkout and try again. This is a failure rather than a skip: a suite that "
-                + "passes without a database reports success having executed nothing.");
+                + "passes without a database reports success having executed nothing. "
+                + $"NOTE: the cluster roles {_convention.OwnerRole} and {_convention.AppRole} "
+                + $"were already created on {ScratchDatabase.Target} before this check — they "
+                + "are cluster-scoped and must exist before a database can grant them CONNECT. "
+                + "Teardown drops them; if the process died instead, they are still there. "
+                + "This message used to say only that the database was unreachable, which read "
+                + "as nothing happened (INSTALL-Q88).");
         }
 
         // Not `ScratchDatabase.CreateSchemaAsync`: that creates the schema
@@ -226,16 +232,25 @@ public sealed class JobsFixture : IAsyncLifetime
     /// <inheritdoc />
     public async Task DisposeAsync()
     {
-        if (_database is null) return;
-
         // The roles go before the database, because DROP OWNED needs the
         // database they own things in to still be there. Roles are cluster-wide
         // and a scratch database is not, so this is the only cleanup that has
         // to be asked for rather than falling out of dropping the database.
+        //
+        // **Unconditional.** This opened `if (_database is null) return;`, so a
+        // run that threw before the database existed left its roles behind —
+        // and the first write happens before the database, which makes that the
+        // one run whose residue was guaranteed to survive (`INSTALL-Q88`). The
+        // drop takes a null database connection for exactly this case: nothing
+        // is owned in a database that was never created.
         await _convention.DropRolesAsync(
-            ProvisionerConnection("postgres"), ProvisionerConnection(_database.Name));
+            ProvisionerConnection("postgres"),
+            _database is null ? null : ProvisionerConnection(_database.Name));
 
-        await _database.DisposeAsync();
+        if (_database is not null)
+        {
+            await _database.DisposeAsync();
+        }
     }
 }
 
