@@ -1,6 +1,13 @@
 /**
  * Resolve — frame 4: the item's resolutions as chips, the plain text box,
  * a photo, and what follows (auto-close, the guest's rating).
+ *
+ * **A full-screen composition, not a sheet — an approved exception.** Standard
+ * §9 rules that a sheet composes and a dialog confirms; mockup 01 draws this as
+ * a screen and was owner-locked 2026-09-04. Ruled `APPS-Q26`, 2026-09-09: the
+ * locked drawing governs and §9 is **not** amended — the exception is Jobs' and
+ * is labelled here rather than left to be tidied back by somebody reading the
+ * standard alone.
  */
 
 import type { HostApi } from "@hotelos/sdk";

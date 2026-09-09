@@ -2,6 +2,13 @@
  * Raise a job — frame 3: where, what (from the catalogue), summary, details;
  * department and priority follow the item, the due time follows the policy,
  * and a day makes it scheduled instead of raised.
+ *
+ * **A full-screen composition, not a sheet — an approved exception.** Standard
+ * §9 rules that a sheet composes and a dialog confirms; mockup 01 draws this as
+ * a screen and was owner-locked 2026-09-04. Ruled `APPS-Q26`, 2026-09-09: the
+ * locked drawing governs and §9 is **not** amended — the exception is Jobs' and
+ * is labelled here rather than left to be tidied back by somebody reading the
+ * standard alone.
  */
 
 import type { HostApi } from "@hotelos/sdk";

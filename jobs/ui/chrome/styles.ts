@@ -111,8 +111,14 @@ table:has(~ .pager){flex:1 1 auto;min-height:0}
 .card h3{margin:0 0 10px;font-size:13px;font-weight:600;display:flex;gap:8px;align-items:center}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
 .kv .k{color:var(--color-ink-faint,#5a6172)}
-.field{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px;padding:8px 12px;font-size:13px;
-       background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);margin:4px 0 12px;display:flex;gap:8px}
+/* Standard §10's five values, adopted 2026-09-09 on the owner's ruling that the
+   written standard governs (APPS-Q27, reversing the planner's park). This box
+   drew radius 8, 8px padding, --color-line and the surface ground until then —
+   what mockups 01 and 02 draw, and what Part A measured. The mockups are the
+   stale side now and are amended to match; the certificate is re-run. */
+.field{border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:10px;padding:9px 12px;font-size:13px;
+       background:color-mix(in srgb, var(--color-ink,#e8ebf4) 2%, transparent);
+       color:var(--color-ink,#e8ebf4);margin:4px 0 12px;display:flex;gap:8px}
 .field.ph{color:var(--color-ink-faint,#5a6172)}
 /* A field a person types into is the same field, drawn: same border, same
    ground, same size — so a form that acts looks like the form that was
@@ -130,7 +136,7 @@ input.tog{width:16px;height:16px;appearance:auto;margin:0 8px 0 0;accent-color:v
 .field .hint{margin-left:auto}
 .row>.field{margin:0}
 .tl+.field{margin-top:12px}
-label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.08em;text-transform:uppercase;display:block}
+label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07em;text-transform:uppercase;display:block}
 .tl{border-left:2px solid var(--color-line,rgb(255 255 255 / 0.07));padding-left:16px;margin:8px 0 0 6px}
 .tl .ev{margin-bottom:10px;font-size:13px}
 .tl .ev b{display:block;font-weight:600}
