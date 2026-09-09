@@ -168,7 +168,17 @@ async function drive(): Promise<void> {
   // exists to replace. The race keeps the frame-accurate path when there are
   // frames and still settles when there are none: the DOM is updated
   // synchronously either way, so there is nothing left to wait for.
-  const settle = () => document.documentElement.setAttribute("data-ready", "true");
+  const settle = () => {
+    // **Two signals, and the second is not this harness's own** — `ARCH-Q12`.
+    // `data-ready` is what this preview's own captures wait on. The shared
+    // sweep waits on `data-review-ready`, and a page that sets only a private
+    // signal is a page the merged instrument cannot measure — which is a stream
+    // making its surface unauditable by the tool every stream owes. Set beside
+    // the private one rather than instead of it, so nothing that already waits
+    // on `data-ready` changes.
+    document.documentElement.setAttribute("data-ready", "true");
+    document.documentElement.setAttribute("data-review-ready", "true");
+  };
 
   requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(settle, 40)));
   setTimeout(settle, 400);

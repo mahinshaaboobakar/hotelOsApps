@@ -60,6 +60,21 @@ export const SHELL = `
    font family — and the UA's font shorthand also resets line-height to normal,
    so a control that inherited family and size still sat 2.5px shorter than the
    same control drawn as a div in the gold. Measured, not eyeballed. */
+/* Section 2's reset on the ELEMENT, because every control is one -- APPS-Q29.
+   Each control in this module is a button element from one factory, and the UA
+   resets the font and the line-height on all of them. Putting the reset on .btn
+   alone left .pg and the inline links keeping the UA's normal: the shared sweep
+   measured the pager's arrows and page number at line-height normal against the
+   drawing's 18.6px, which is a control whose height comes from the font rather
+   than from the page.
+
+   It is 2.5px and invisible in a screenshot, which is why the standard names the
+   value rather than trusting an eye -- and why the reset belongs where an author
+   cannot write a control without it. font-size is deliberately NOT reset here:
+   .btn and .btn.sm set their own, and inheriting the page's would change two
+   controls the standard has already fixed. */
+button{font-family:inherit;line-height:inherit}
+
 .btn{font-family:inherit;line-height:inherit;cursor:pointer;white-space:nowrap;
   display:inline-flex;gap:8px;
   align-items:center;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
