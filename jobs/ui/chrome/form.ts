@@ -134,6 +134,14 @@ export function asking(
   placeholder: string,
   onDone: (answer: string) => void,
   onCancel: () => void,
+  /**
+   * Whether the thing being confirmed is destructive — standard §2.
+   *
+   * The confirm is FILLED danger and the affordance that opened it is outline
+   * danger, which is the split the standard makes: weight where the decision is
+   * taken, quiet where it is merely offered.
+   */
+  destructive = false,
 ): HTMLElement {
   const panel = el("div", "ask");
   const box = document.createElement("input");
@@ -146,7 +154,7 @@ export function asking(
     box,
     fill(
       el("div", "row"),
-      control("btn pri", "Do it", () => onDone(box.value.trim())),
+      control(destructive ? "btn pri danger" : "btn pri", "Do it", () => onDone(box.value.trim())),
       control("btn", "Cancel", onCancel),
     ),
   );

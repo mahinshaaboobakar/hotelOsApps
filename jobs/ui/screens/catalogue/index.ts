@@ -27,7 +27,7 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
       else said.say(done.refused ?? "the catalogue was not changed");
     });
   };
-  body.append(subnav([{ label: `${got.value.organisation} · master` }, { label: "Marina Bay · this property" }, { label: "Import / export" }], `${got.value.organisation} · master`, () => {}));
+  body.append(subnav([{ label: `${got.value.organisation} · master` }, { label: "This property" }, { label: "Import / export" }], `${got.value.organisation} · master`, () => {}));
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "260px 1fr";
   const item = got.value.items[0];
@@ -57,7 +57,7 @@ function categories(
   form.append(
     text("Name", "name", "Lifts"),
     text("Code", "code", "LIFTS"),
-    text("Department", "department", "ENG"),
+    text("Department", "department", "a department code"),
     fill(el("div", "row"), control("btn pri", "Create category", () => {
       const held = values(form);
       if (String(held.name ?? "").length === 0 || String(held.code ?? "").length === 0) {
@@ -100,7 +100,7 @@ function detail(
   );
   box.append(kv, el("div", "sect", "Resolutions"));
   const chips = el("div", "chips");
-  for (const r of item.resolutions) chips.append(control("chip", r.name));
+  for (const r of item.resolutions) chips.append(control("btn chip", r.name));
   box.append(chips);
   if (curate) {
     const adding = el("div");

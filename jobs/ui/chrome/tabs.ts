@@ -55,14 +55,14 @@ export function pager(shown: string, page: number, pages: number, go: (page: num
   // the information a one-page list carries — it says the list in front of you
   // is the whole list, which a list that simply stops cannot (standard §6).
   const arrow = (text: string, to: number, dead: boolean): HTMLElement => {
-    const button = control("pg", text, () => go(to));
+    const button = control("btn pg", text, () => go(to));
     if (dead) button.setAttribute("disabled", "true");
     return button;
   };
 
   buttons.append(arrow("‹", Math.max(0, page - 1), page === 0));
   for (let i = 0; i < pages; i += 1) {
-    buttons.append(control(i === page ? "pg on" : "pg", String(i + 1), () => go(i)));
+    buttons.append(control(i === page ? "btn pg on" : "btn pg", String(i + 1), () => go(i)));
   }
 
   buttons.append(arrow("›", Math.min(pages - 1, page + 1), page >= pages - 1));

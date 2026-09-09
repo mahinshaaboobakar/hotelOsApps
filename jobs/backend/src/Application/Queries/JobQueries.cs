@@ -33,6 +33,17 @@ public class JobQueries(JobsDbContext db, IKernelAuthorizer authorizer, TimeProv
         RequestScope scope, JobFilter filter, CancellationToken cancellationToken)
     {
         await ReaderAsync(scope, cancellationToken);
+
+        if (filter.MineDepartmentsOnly)
+        {
+            // Answered before a query is built rather than by a `where` that
+            // happens to match nothing: the two say different things, and this
+            // one is "the source is absent", not "the property has no work in
+            // your departments".
+            var asked = filter.PageSize <= 0 ? DefaultPageSize : Math.Min(filter.PageSize, MaxPageSize);
+            return ([], 0, asked);
+        }
+
         var query = db.Jobs.Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null);
         query = filter.ScheduledOnly
             ? query.Where(j => j.JobStatus == JobStatus.Scheduled)
@@ -138,6 +149,21 @@ public sealed record JobFilter(
 
     /// <summary>Only the restricted ones.</summary>
     public bool RestrictedOnly { get; init; }
+
+    /// <summary>
+    /// The caller's own departments — frame 1's first chip.
+    /// </summary>
+    /// <remarks>
+    /// <b>Answered with nothing, deliberately, until Workforce reaches Jobs.</b>
+    /// A person's departments are their postings, which this application cannot
+    /// resolve (design §6: no Workforce client exists). The chip used to be
+    /// answered by naming <c>ENG</c> in the bundle — telling every person their
+    /// departments were Engineering, which was an attribution nobody had
+    /// established. An empty answer is the honest one: it shows no work rather
+    /// than another department's work, and the screen says which source is
+    /// missing.
+    /// </remarks>
+    public bool MineDepartmentsOnly { get; init; }
 }
 
 /// <summary>A job with what the row derives.</summary>

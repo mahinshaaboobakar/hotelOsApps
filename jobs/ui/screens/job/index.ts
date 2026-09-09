@@ -61,7 +61,12 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
   };
 
   const asked = el("div");
-  const ask = (question: string, placeholder: string, onDone: (answer: string) => void): void => {
+  const ask = (
+    question: string,
+    placeholder: string,
+    onDone: (answer: string) => void,
+    destructive = false,
+  ): void => {
     asked.replaceChildren(asking(question, placeholder, (answer) => {
       asked.replaceChildren();
       if (answer.length === 0) {
@@ -70,7 +75,7 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
       }
 
       onDone(answer);
-    }, () => asked.replaceChildren()));
+    }, () => asked.replaceChildren(), destructive));
   };
 
   body.append(
@@ -88,7 +93,19 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
 type Doing = (capability: string, method: string, params: unknown) => Promise<void>;
 
 /** Ask for one thing first — a hold's reason, a cancellation's. */
-type Asking = (question: string, placeholder: string, onDone: (answer: string) => void) => void;
+/**
+ * Asking for a reason before doing something.
+ *
+ * The fourth argument says whether what is being confirmed is destructive —
+ * standard §2's split: the affordance is outline danger, the button that does
+ * it is filled danger.
+ */
+type Asking = (
+  question: string,
+  placeholder: string,
+  onDone: (answer: string) => void,
+  destructive?: boolean,
+) => void;
 
 function tabs(d: JobDetail): readonly Tab[] {
   const list: Tab[] = [
@@ -202,8 +219,12 @@ function actions(
   }
 
   if (may(host, JOB_CANCEL)) {
-    row.append(control("btn", "Cancel job…", () => ask("Why is it being cancelled?", "raised twice", (reason) =>
-      void doing(JOB_CANCEL, "cancel", { id, version, reason }))));
+    row.append(control("btn danger", "Cancel job…", () => ask(
+      "Why is it being cancelled?",
+      "raised twice",
+      (reason) => void doing(JOB_CANCEL, "cancel", { id, version, reason }),
+      true,
+    )));
   }
 
   return row.childElementCount === 0 ? null : row;

@@ -270,7 +270,14 @@ describe("frame 02-8 · New policy · 1 of 3 · Name and scope", () => {
     const root = await settings("Concern policy", "＋ New policy");
     has(root, "1 · Name and scope", "2 · The clock", "3 · The ladder");
     has(root, "Sample A · Engineering, one category", "Engineering ▾", "AC not working ▾", "AC — guest in room");
-    has(root, "Applies to: every AC job at Marina Bay, unless the item has its own policy.");
+    // **The drawing names a hotel; the built screen may not.** The frame reads
+    // "every AC job at Marina Bay", and that sentence is drawn by this bundle
+    // rather than by the service — so it named a property that is not
+    // necessarily the signed-in one, which is the fabricated-value class the
+    // owner found in GuestOps. The sample now says "this property"; the frame
+    // is reported as diverging rather than quietly followed.
+    has(root, "Applies to: every AC job at this property, unless the item has its own policy.");
+    expect(root.textContent).not.toContain("Marina Bay,");
     has(root, "Sample B · Housekeeping, one category", "Bottle of water ▾", "Water — 10 minutes");
     has(root, "Applies to: Still water · Sparkling water — the two items of the category.");
     has(root, "Sample C · one item, narrower still", "Water dropping from unit", "AC leak — ceiling risk");

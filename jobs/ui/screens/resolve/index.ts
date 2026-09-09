@@ -38,13 +38,13 @@ export async function resolve(
   const draw = (): void => {
     chips.replaceChildren();
     for (const resolution of chosen) {
-      chips.append(control(resolution.id === picked ? "chip on" : "chip", resolution.name, () => {
+      chips.append(control(resolution.id === picked ? "btn chip on" : "btn chip", resolution.name, () => {
         picked = resolution.id;
         draw();
       }));
     }
 
-    chips.append(control(picked === null ? "chip on" : "chip", "Other…", () => {
+    chips.append(control(picked === null ? "btn chip on" : "btn chip", "Other…", () => {
       picked = null;
       draw();
     }));

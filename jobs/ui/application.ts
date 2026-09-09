@@ -72,7 +72,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 
   const place: Place = {
     tab: "Board", jobId: null, lastOpened: null, jobTab: "Overview", mode: "board",
-    boardFilter: "My departments · ENG", boardPage: 0,
+    boardFilter: "My departments", boardPage: 0,
     settingsTab: "Concern policy", settingsView: "engineering",
   };
 

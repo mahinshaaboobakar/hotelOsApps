@@ -27,7 +27,7 @@ const CHROME = `
       background:linear-gradient(135deg, var(--color-brand,#818cf8),
                  color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
 .tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--color-ink-muted,#8b93a7);
-     padding:19px 2px;font:inherit;font-size:13px;cursor:pointer}
+     padding:19px 2px;font:inherit;line-height:inherit;font-size:13px;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
 .search{margin-left:auto;color:var(--color-ink-faint,#5a6172);border:1px solid var(--color-line,rgb(255 255 255 / 0.07));
         border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
@@ -40,16 +40,30 @@ const CHROME = `
 .strip b{color:var(--color-ink,#e8ebf4);font-size:14px;margin-right:4px}
 .strip .end{margin-left:auto}
 .chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
-.chip{background:none;border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px;padding:6px 10px;
-      font:inherit;font-size:12px;color:var(--color-ink-muted,#8b93a7);cursor:pointer}
-.chip.on{border-color:var(--color-brand,#818cf8);color:var(--color-ink,#e8ebf4)}
+/* A filter chip and a pager button are .btn, modified — standard §2's one
+   control vocabulary. They used to re-declare background, border, font and
+   cursor for themselves, which is a second geometry however carefully it is
+   copied: the day .btn changes, they do not. (No backticks in this file: the
+   sheet is a template literal, and one would end it mid-rule.) */
+.btn.chip{border-color:var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px;padding:6px 10px;
+      font-size:12px;color:var(--color-ink-muted,#8b93a7)}
+.btn.chip.on{border-color:var(--color-brand,#818cf8);color:var(--color-ink,#e8ebf4)}
 .grow{margin-left:auto}
 .btn{background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:7px 14px;
-     font:inherit;font-size:13px;color:var(--color-ink,#e8ebf4);cursor:pointer;text-align:start}
+     font:inherit;line-height:inherit;font-size:13px;color:var(--color-ink,#e8ebf4);cursor:pointer;text-align:start}
 .btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);text-align:start;
          background:linear-gradient(135deg, var(--color-brand,#818cf8),
                     color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed}
+/* **Destructive: outline inline, filled at the confirm** — standard §2, amended
+   2026-09-04 on GG's finding. Conforming to the ordinary outline made the most
+   consequential control on the screen the quietest; filling every one of them
+   would shout on a screen where deletion is one affordance among many. One base
+   class modified, and the pair lives here rather than in a screen, because a
+   confirm that looks different on two screens teaches a person two things. */
+.btn.danger{border-color:var(--color-bad,#f87171);color:var(--color-bad,#f87171)}
+.btn.danger.pri{border-color:transparent;background:var(--color-bad,#f87171);
+                color:var(--color-ink-on-accent,#0b0d14)}
 .btn.sm{padding:2px 8px;font-size:11px}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .row.act{margin:10px 0 14px}
@@ -86,10 +100,10 @@ table:has(~ .pager){flex:1 1 auto;min-height:0}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;
        color:var(--color-ink-faint,#5a6172);position:sticky;bottom:0;
        background:var(--color-surface,#0b0d14);margin:0 -22px -22px;padding:10px 22px 22px}
-.pg{background:none;border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:6px;padding:2px 8px;margin-left:4px;
-    font:inherit;font-size:12px;color:var(--color-ink-muted,#8b93a7);cursor:pointer}
-.pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
-.pg[disabled]{color:var(--color-ink-faint,#5a6172);cursor:default;opacity:.5}
+.btn.pg{border-color:var(--color-line,rgb(255 255 255 / 0.07));border-radius:6px;padding:2px 8px;margin-left:4px;
+     font-size:12px;color:var(--color-ink-muted,#8b93a7)}
+.btn.pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
+.btn.pg[disabled]{color:var(--color-ink-faint,#5a6172);cursor:default;opacity:.5}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .card{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:var(--radius-panel,1rem);padding:16px;
@@ -103,7 +117,7 @@ table:has(~ .pager){flex:1 1 auto;min-height:0}
 /* A field a person types into is the same field, drawn: same border, same
    ground, same size — so a form that acts looks like the form that was
    approved rather than like the browser's idea of one. */
-input.field,select.field,textarea.field{width:100%;box-sizing:border-box;display:block;font:inherit;font-size:13px;
+input.field,select.field,textarea.field{width:100%;box-sizing:border-box;display:block;font:inherit;line-height:inherit;font-size:13px;
        appearance:none;outline:none}
 input.field:focus,select.field:focus,textarea.field:focus{border-color:var(--color-brand,#818cf8)}
 textarea.field{resize:vertical;min-height:64px}

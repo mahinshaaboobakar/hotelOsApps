@@ -28,7 +28,15 @@ export interface BoardPlace {
   onRaise: () => void;
 }
 
-const FILTERS = ["My departments · ENG", "All departments", "Assigned to me", "Raised by guests", "Restricted", "Closed"];
+// **"My departments" names no department.** It used to read "My departments ·
+// ENG", which told the person their departments were Engineering — an
+// attribution about them that this application has never established. Jobs
+// cannot resolve a person's postings: they are Workforce's, and there is no
+// client (design §6). So the tab keeps its place on the locked frame, asks for
+// the caller's own departments, and the screen says plainly when nothing can
+// answer that — rather than quietly showing one hotel department's work as
+// though it were theirs.
+const FILTERS = ["My departments", "All departments", "Assigned to me", "Raised by guests", "Restricted", "Closed"];
 
 /**
  * What a chip means to the service.
@@ -46,7 +54,7 @@ function asked(filter: string): Record<string, unknown> {
     case "Closed": return { statuses: ["RESOLVED", "CLOSED"] };
     case "Raised by guests": return { raisedKind: "GUEST" };
     case "Restricted": return { restricted: true };
-    default: return { department: "ENG" };
+    default: return { mineDepartments: true };
   }
 }
 
@@ -62,6 +70,18 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
 
   const body = el("div", "body");
   body.append(strip(host, today.value), filters(place, may(host, JOB_CREATE)), table(host, page.value.rows, place), pages(page.value, place));
+
+  // An empty list is not self-explanatory, and this one has a specific cause:
+  // a person's departments are their Workforce postings, and no client reaches
+  // them. The screen names the missing source rather than looking like a quiet
+  // morning.
+  if (place.filter === "My departments" && page.value.rows.length === 0) {
+    body.append(el(
+      "div",
+      "note",
+      "Your departments are not established here — a person's postings are Workforce's, and Jobs has no client for them yet (design §6). Nothing is filtered out; nothing can be filtered in.",
+    ));
+  }
   if (!page.live) body.append(standIn("board", page.because));
   main.replaceChildren(body);
 }
@@ -82,7 +102,7 @@ function strip(host: HostApi, today: Today): HTMLElement {
 function filters(place: BoardPlace, mayRaise: boolean): HTMLElement {
   const row = el("div", "chips");
   for (const label of FILTERS) {
-    row.append(control(label === place.filter ? "chip on" : "chip", label, () => place.onFilter(label)));
+    row.append(control(label === place.filter ? "btn chip on" : "btn chip", label, () => place.onFilter(label)));
   }
   if (mayRaise) fill(row, el("span", "grow"), control("btn pri", "＋ Raise a job", place.onRaise));
   return row;
@@ -119,5 +139,16 @@ function pages(page: BoardPage, place: BoardPlace): HTMLElement {
   const from = at * pageSize + 1;
   const to = Math.min(total, from + page.rows.length - 1);
   const count = Math.max(1, Math.ceil(total / pageSize));
-  return pager(`${String(from)}–${String(to)} of ${String(total)} · ${String(pageSize)} per page at this height`, at, count, place.onPage);
+
+  // **A page with no rows says which of the two it is** — standard §6. "1–0 of
+  // 218" is arithmetic nobody reads as "this page is empty and the list is
+  // not", and a person who paged past the end deserves the difference between
+  // that and an empty list.
+  const shown = page.rows.length === 0
+    ? total === 0
+      ? "no jobs in this list"
+      : `no rows on this page · ${String(total)} in the list`
+    : `${String(from)}–${String(to)} of ${String(total)} · ${String(pageSize)} per page at this height`;
+
+  return pager(shown, at, count, place.onPage);
 }

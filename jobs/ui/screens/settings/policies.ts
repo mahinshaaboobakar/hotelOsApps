@@ -100,7 +100,7 @@ function sample(title: string, lines: readonly [string, string, boolean?][], app
 function scopeStep(): HTMLElement {
   const grid = el("div", "cols");
   grid.append(
-    sample("Sample A · Engineering, one category", [["Department", "Engineering ▾"], ["Category · optional", "AC not working ▾"], ["Item · optional", "— all items of the category ▾", true], ["Name", "AC — guest in room"], ["Start from", "Copy of \"Engineering\" (department) ▾"]], "Applies to: every AC job at Marina Bay, unless the item has its own policy."),
+    sample("Sample A · Engineering, one category", [["Department", "Engineering ▾"], ["Category · optional", "AC not working ▾"], ["Item · optional", "— all items of the category ▾", true], ["Name", "AC — guest in room"], ["Start from", "Copy of \"Engineering\" (department) ▾"]], "Applies to: every AC job at this property, unless the item has its own policy."),
     sample("Sample B · Housekeeping, one category", [["Department", "Housekeeping ▾"], ["Category · optional", "Bottle of water ▾"], ["Item · optional", "— all items of the category ▾", true], ["Name", "Water — 10 minutes"], ["Start from", "Copy of \"Housekeeping\" (department) ▾"]], "Applies to: Still water · Sparkling water — the two items of the category."),
   );
   const c = el("div", "card");

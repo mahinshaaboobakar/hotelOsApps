@@ -167,7 +167,7 @@ export function closing(s: Settings, configure: boolean, save: Saving, discard: 
   );
   const form = el("div", "cols");
   form.append(
-    fill(el("div"), text("Department · empty for the property", "department", "ENG"), text("Auto-close after · hours", "autoCloseHours", "4")),
+    fill(el("div"), text("Department · empty for the property", "department", "a department code"), text("Auto-close after · hours", "autoCloseHours", "4")),
     fill(el("div"), switchOf("Ask the guest to rate on close", "ratingOnClose", true)),
   );
 

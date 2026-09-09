@@ -105,6 +105,7 @@ public static class ReadCapability
         {
             RaisedKind = body.OptionalText("raisedKind"),
             RestrictedOnly = body.Flag("restricted"),
+            MineDepartmentsOnly = body.Flag("mineDepartments"),
         };
     }
 
