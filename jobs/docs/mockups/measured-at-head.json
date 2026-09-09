@@ -2,7 +2,7 @@
   {
     "name": "frame-01-board",
     "paired": 95,
-    "differs": 24,
+    "differs": 12,
     "readings": 2646
   },
   {
@@ -62,13 +62,13 @@
   {
     "name": "frame-05-live",
     "paired": 57,
-    "differs": 23,
+    "differs": 21,
     "readings": 1296
   },
   {
     "name": "frame-06-scheduled",
     "paired": 38,
-    "differs": 13,
+    "differs": 9,
     "readings": 864
   },
   {
