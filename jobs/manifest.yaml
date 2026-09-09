@@ -15,7 +15,18 @@
 manifest_version: 1
 id: jobs
 name: "Jobs"
-version: 0.1.0
+# **0.2.0, not 0.1.0 again.** The probe ladder reached 0.1.8 and this property
+# last installed that, so an install offered as 0.1.0 is a version regression:
+# `supersede` requires the offered version to be newer and would refuse it at
+# admission. It is also what kept this package off the shelf — the registry's
+# retention keeps the newest two by semver (`catalogue/retention.rs`), so among
+# 0.1.0, 0.1.7 and 0.1.8 the one swept was mine, twice, between staging it and
+# reporting it staged.
+#
+# The minor rather than the patch because this is the first build that is not a
+# probe: six widgets, the general manager's grant, and Master Data read through
+# the install grant.
+version: 0.2.0
 publisher: hotelos
 category: operations
 description: >-
