@@ -22,4 +22,17 @@
   body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; }
   * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
 </style>
-</head><body><script type="module" src="./frame.js"></script></body></html>
+</head><body><script type="module">
+  // ARCH-Q25's mechanism, adopted here under ARCH-Q26. This page loaded the
+  // bundle with a plain `<script src>` — a capture pass could photograph the
+  // previous build and nothing on the screen would say so, which is the one
+  // failure a capture cannot survive: a real screen, rendered properly, of code
+  // that no longer exists.
+  //
+  // The tag comes from the bundle's own bytes, so a rebuilt bundle is always
+  // fetched and an unchanged one still comes from cache. No parameter — that is
+  // the thing that failed, twice, in two harnesses.
+  const { fresh, refuseBuildParam } = await import("./boot/fresh.js?t=" + Date.now());
+  refuseBuildParam(new URLSearchParams(location.search));
+  await fresh("./frame.js");
+</script></body></html>
