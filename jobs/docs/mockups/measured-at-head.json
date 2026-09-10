@@ -57,13 +57,13 @@
   {
     "name": "frame-02e-job-links",
     "frame": "01-05.html",
-    "match": 0.11,
-    "runnerUp": 0.11,
-    "paired": 4,
-    "differs": 3,
-    "readings": 1242,
+    "match": 0.51,
+    "runnerUp": 0.22,
+    "paired": 26,
+    "differs": 5,
+    "readings": 1116,
     "collapsedDrawn": 4,
-    "collapsedBuilt": 0
+    "collapsedBuilt": 4
   },
   {
     "name": "frame-02f-job-rating",

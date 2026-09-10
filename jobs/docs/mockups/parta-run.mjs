@@ -48,7 +48,7 @@ const CAPTURES = [
   ["frame-02b-job-work", "01", "?open=job&tab=Work"],
   ["frame-02c-job-history", "01", "?open=job&tab=History"],
   ["frame-02d-job-notes", "01", "?open=job&tab=Notes"],
-  ["frame-02e-job-links", "01", "?open=job&tab=Steps"],
+  ["frame-02e-job-links", "01", "?open=job&tab=Links"],
   ["frame-02f-job-rating", "01", "?open=job&job=rated&tab=Rating"],
   ["frame-02g-job-record", "01", "?open=job&tab=Record"],
   ["frame-03-raise", "01", "?open=raise"],
