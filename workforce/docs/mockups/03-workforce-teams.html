@@ -421,7 +421,7 @@
 <div class="cap"><b>Why this page exists.</b> The team object was ruled and built on 2026-09-04 from Jobs' <b>S3-D1</b> — <i>"a named group of posted staff within a department"</i> — and it went in <b>without a drawn screen</b>. That is the gap this closes. Every frame below is <b>what the built service already does and nothing more</b>: form, rename, stand down and back up, add and remove members, list, and who was in a team on a given day. Where a frame shows a rule, the rule is in the code and its test, not in the picture. <b>Frame 6 is the one to look at hardest</b> — it is a consequence the build has and the interface does not admit to.</div>
 
 <h1>1 · <b>Teams</b> — the list, with one stood down</h1>
-<div class="win" style="height:560px">
+<div id="t1" class="win" style="height:560px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -452,7 +452,7 @@
 <div class="cap"><b>What the service already answers.</b> The list is <b>per department or all</b>, and stood-down teams are <b>hidden unless asked for</b>. Sorted by department then name, which is the order the service returns rather than a choice the screen makes. <b>The member count is the live count on the day being viewed</b>: a membership is effective-dated, so <i>Pool Bar has 0</i> is a fact about today rather than a team that was never used. <b>Two live teams in one department may not share a name</b> — enforced by a unique index as well as by the service, because the service's check and a concurrent insert can both pass, and a supervisor picking <i>"Team A"</i> from two identical rows is choosing at random.</div>
 
 <h1>2 · <b>A team, and who is in it</b> — the list beside the detail</h1>
-<div class="win" style="height:790px">
+<div id="t2" class="win" style="height:790px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -503,7 +503,7 @@
 <div class="cap"><b>Names are borrowed, never held.</b> Workforce stores a <code>staff_id</code> and nothing about the person — its proto says so in its own header — so every name here is read from Master Data <b>at the moment the answer is composed</b> and kept nowhere. That is the <i>serving is not storing</i> ruling, and it is why this screen costs <b>one</b> lookup for all six rather than six. <b>A name Master Data does not answer for stays blank</b> rather than becoming <i>Unknown</i>: "we could not find this person" and "this person has no name" are different facts, and neither is a placeholder this application gets to invent.</div>
 
 <h1>3 · <b>Form a team</b> — two fields, and the rule on each</h1>
-<div class="win" style="height:560px">
+<div id="t3" class="win" style="height:560px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -545,7 +545,7 @@
 <div class="cap"><b>Both refusals are the service's, drawn.</b> The department must be one this property has <b>activated</b> — resolved through Master Data at the moment of writing, exactly as a posting's is, because a team in a department that does not exist here is a team nothing can ever route work to. And the duplicate-name warning is shown <b>against the department chosen above it</b>, never against the property: <i>Front Office</i> may have its own Morning Crew. <b>No lead field, deliberately</b> — a team assignment becomes a person's when they accept it, so nothing needs one, and accountability runs on roles.</div>
 
 <h1>4 · <b>Add a member</b> — and the one person who cannot be added</h1>
-<div class="win" style="height:600px">
+<div id="t4" class="win" style="height:600px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -584,7 +584,7 @@
 <div class="cap"><b>The invariant, drawn as a list.</b> The service refuses somebody with no posting in force in the team's department <i>on the day the membership starts</i> — so the picker offers the people who pass and shows the one who does not, greyed with the reason, rather than hiding them and leaving a supervisor wondering where Joseph went. <b>A person is in a team once</b>: a second live membership is refused by a unique index, because two rows would let a removal close one and leave the other standing, and the person would still be in the team.</div>
 
 <h1>5 · <b>Stand a team down</b> — and bring it back</h1>
-<div class="win" style="height:470px">
+<div id="t5" class="win" style="height:470px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -612,7 +612,7 @@
 <div class="cap"><b>Deactivate and Reactivate, never Archive and Restore</b> — ADR 0062's vocabulary, and reactivation is <b>required rather than optional</b>: a deactivate with no counterpart states a capability in the schema and withholds it from the service. A seasonal crew comes back. <b>The toggle is the one thing here the build does not have.</b> The service stands a team down and leaves its memberships alone, which is what the switch shows in its on position; the off position would end them, and that is a second decision nobody has asked for. <b>Drawn so it can be ruled, not built.</b></div>
 
 <h1>6 · <b>Ending a posting</b> — the consequence the interface does not admit to</h1>
-<div class="win" style="height:560px">
+<div id="t6" class="win" style="height:560px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
@@ -646,7 +646,7 @@
 <div class="cap"><b>The frame to audit hardest, and it is a finding rather than a feature.</b> The build already does this: ending a posting closes every team membership it supported, <b>in the posting's own transaction</b>, because a membership left standing routes work to somebody who left the department last month with nothing anywhere saying so. <b>What the build does not do is tell anyone.</b> A supervisor ending a posting empties two teams and sees no mention of it. The panel above is the smallest honest fix — <b>the consequence stated before the button, not a toast afterwards</b> — and it needs no new service call, because the memberships are already known at that moment. Drawn, not built.</div>
 
 <h1>7 · <b>First run</b> — no teams yet</h1>
-<div class="win" style="height:480px">
+<div id="t7" class="win" style="height:480px">
   <div class="head">
     <div class="app"><div class="mark">W</div>Workforce</div>
     <div class="tab">Rota</div>
