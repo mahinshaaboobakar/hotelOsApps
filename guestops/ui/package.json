@@ -9,7 +9,9 @@
     "typecheck": "tsc --noEmit",
     "build": "npm run build:module && npm run build:widgets",
     "test": "npm run build && vitest run",
-    "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
+    "harness": "npm run harness:frame && npm run harness:widget",
+    "harness:frame": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
+    "harness:widget": "esbuild preview/widget-host.ts --bundle --format=esm --outfile=preview/widget-frame.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts",
     "build:module": "node ../../scripts/build-module.mjs",
     "build:widgets": "node ../../scripts/build-module.mjs widgets/today.js widgets/entry/today.ts && node ../../scripts/build-module.mjs widgets/occupancy.js widgets/entry/occupancy.ts && node ../../scripts/build-module.mjs widgets/from-the-pms.js widgets/entry/from-the-pms.ts && node ../../scripts/build-module.mjs widgets/business-mix.js widgets/entry/business-mix.ts && node ../../scripts/build-module.mjs widgets/watchlist.js widgets/entry/watchlist.ts",
     "gallery": "esbuild preview/gallery/index.ts --bundle --format=esm --platform=node --packages=external --outfile=preview/gallery.js --alias:@hotelos/sdk=../../../HosPilotOS/packages/sdk-typescript/src/index.ts && node preview/gallery.js"
