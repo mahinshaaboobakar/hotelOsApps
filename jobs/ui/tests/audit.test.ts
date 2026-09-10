@@ -177,7 +177,13 @@ describe("frame 3 · Raise a job", () => {
     await settle();
     has(root, "Where · location id", "What", "Summary", "Details · optional");
     has(root, "Priority", "Schedule for a day · optional", "Restricted");
-    has(root, "The department, the due time and the concern policy all follow the item.");
+    // **The sentence became three values.** Frame 3 draws Department, Priority
+    // and Due; the screen drew a hint saying they follow the item, which was
+    // true and insufficient — a `missed` verdict, not a divergence. Rewritten
+    // rather than deleted (ADR 0034), and it asserts the new values AND the
+    // absence of the promise they replaced.
+    has(root, "Department", "Priority", "Due", "from the catalogue item");
+    expect(root.textContent).not.toContain("all follow the item");
     has(root, "Raise it", "Cancel");
     expect(root.querySelectorAll("input, select, textarea").length).toBeGreaterThan(5);
   });

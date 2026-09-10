@@ -28,21 +28,37 @@
  * ```
  */
 
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+// **Async, because the servers now live in this process.** `execFileSync` blocks
+// the event loop, so an in-process server cannot answer the very sweep it was
+// started for — the run hangs with both halves waiting on each other. The
+// blocking form was fine while the servers were separate processes; it stopped
+// being fine the moment the port rule moved them in here.
+const run = async (args) => (await promisify(execFile)("node", args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })).stdout;
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
+import { pathToFileURL } from "node:url";
+
+// A Windows path is not an ESM specifier — `import` takes a URL, and a drive
+// letter reads as a scheme. `pathToFileURL` is the difference between a driver
+// that runs and one that throws ERR_UNSUPPORTED_ESM_URL_SCHEME.
+const { serve } = await import(pathToFileURL(
+  "C:/Users/Mahin Aboobakker/PycharmProjects/HotelOsApps/jobs/ui/preview/parta/serve.mjs",
+).href);
 
 const HERE = "C:/Users/MAHINA~1/AppData/Local/Temp/claude/C--Users-Mahin-Aboobakker-PycharmProjects-HotelOsAdmin/1c512277-6433-4d9c-9187-04d8f1d21685/scratchpad/parta";
 const FRAMES = join(HERE, "frames");
 const MOCKUPS = "C:/Users/Mahin Aboobakker/PycharmProjects/HotelOsApps/jobs/docs/mockups";
 const MEASURE = "C:/Users/Mahin Aboobakker/PycharmProjects/HosPilotOS/scripts/review-measure.mjs";
-// **Ports come from the server that proved its own identity** — `serve.py`
-// probes upward for a free one, checks each root for a file only it holds, and
-// writes them here. Two harnesses bound 8853 today and GG's browser was
-// answered by mine: a 200 cannot tell a server from YOUR server.
-const PORTS = JSON.parse(readFileSync(join(HERE, "..", "ports.json"), "utf8"));
-const BUILT = `http://127.0.0.1:${PORTS.ui}/preview/frame.html`;
-const DRAWN = `http://127.0.0.1:${PORTS.frames}`;
+// **No port is chosen at all.** The servers run IN THIS PROCESS on port 0, so
+// the OS assigns something nothing holds and there is nothing for two streams
+// to converge on — GG's `serve.mjs`, adopted rather than rewritten. Each one
+// proves its own identity by fetching a page and matching that page's own
+// title before this driver is allowed to sweep it.
+
 
 mkdirSync(FRAMES, { recursive: true });
 
@@ -86,7 +102,11 @@ function cut(page) {
     const name = `${page}-${String(at).padStart(2, "0")}.html`;
     writeFileSync(
       join(FRAMES, name),
-      `<!doctype html><html><head><meta charset="utf-8"><style>${style}</style></head><body>${win}</body></html>`,
+      // The title is the frame's own name — the identity a server proves before
+      // this driver is allowed to sweep it, and the name a reader sees if one of
+      // these documents is ever opened by hand.
+      `<!doctype html><html><head><meta charset="utf-8"><title>Jobs frame ${name}</title>`
+      + `<style>${style}</style></head><body>${win}</body></html>`,
       "utf8",
     );
     return { name, text: new Set(words(win)) };
@@ -141,27 +161,38 @@ function swept(file) {
   return artefact;
 }
 
-const sweep = (url, out, root) =>
-  execFileSync("node", [MEASURE, "--sweep", url, out, "1440", "900", ...(root === undefined ? [] : [root])],
-    { encoding: "utf8" }).trim();
+const sweep = async (url, out, root) =>
+  (await run([MEASURE, "--sweep", url, out, "1440", "900", ...(root === undefined ? [] : [root])])).trim();
 
 const frames = { "01": cut("01"), "02": cut("02") };
+
+const ui = await serve({
+  root: "C:/Users/Mahin Aboobakker/PycharmProjects/HotelOsApps/jobs/ui",
+  path: "/preview/frame.html",
+  title: "Jobs module realm",
+});
+
+const drawn = await serve({ root: FRAMES, path: "/01-00.html", title: "Jobs frame 01-00.html" });
+
+const BUILT = `${ui.origin}/preview/frame.html`;
+const DRAWN = drawn.origin;
 for (const page of ["01", "02"]) {
   for (const frame of frames[page]) {
-    sweep(`${DRAWN}/${frame.name}`, join(HERE, `drawn-${frame.name}.json`));
+    await sweep(`${DRAWN}/${frame.name}`, join(HERE, `drawn-${frame.name}.json`));
   }
 }
 
 // Every capture is swept first, because the frame each one belongs to is
 // decided against ALL of them at once.
-const captured = CAPTURES.map(([name, page, query]) => {
+const captured = [];
+for (const [name, page, query] of CAPTURES) {
   const built = join(HERE, `built-${name}.json`);
-  sweep(BUILT + query, built);
-  return {
+  await sweep(BUILT + query, built);
+  captured.push({
     name, page, built,
     seen: new Set(swept(built).rows.flatMap((node) => words(node.text))),
-  };
-});
+  });
+}
 
 /**
  * Which frame each capture is of — assigned globally, best pair first.
@@ -214,17 +245,13 @@ for (const capture of captured) {
   // 2 by position)` as zero once. Both forms render the same object, so nothing
   // is lost by quoting the one that cannot be improved out from under a
   // consumer.
-  const report = execFileSync(
-    "node",
+  const report = await run(
     [MEASURE, "--compare", join(HERE, `drawn-${chosen.frame.name}.json`), capture.built, capture.name],
-    { encoding: "utf8" },
   );
   writeFileSync(join(HERE, `compare-${capture.name}.txt`), report, "utf8");
 
-  const result = JSON.parse(execFileSync(
-    "node",
+  const result = JSON.parse(await run(
     [MEASURE, "--compare", join(HERE, `drawn-${chosen.frame.name}.json`), capture.built, capture.name, "--json"],
-    { encoding: "utf8" },
   ));
 
   // Schema first, then by name — and never enumerate the buckets. `counts` may
@@ -281,3 +308,6 @@ console.log(
   `\n${rows.length} pairs · ${sum("readings")} readings · ${sum("paired")} paired · ${sum("differs")} differing` +
   `\ncollapsed: drawn ${sum("collapsedDrawn")}, built ${sum("collapsedBuilt")}`,
 );
+
+await ui.close();
+await drawn.close();

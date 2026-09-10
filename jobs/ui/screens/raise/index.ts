@@ -15,6 +15,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { choose, day, lines, saying, text, toggle, values } from "../../chrome/form";
+import { when } from "../../chrome/instant";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
 import { standIn } from "../../chrome/standin";
 import { act, load, type Catalogue, type CatalogueItem } from "../../board";
@@ -27,7 +28,7 @@ export async function raise(host: HostApi, main: HTMLElement, onDone: () => void
   const form = el("div", "cols");
   const said = saying();
 
-  form.append(left(catalogue), right(catalogue));
+  form.append(left(catalogue), right(host, catalogue));
 
   const actions = el("div", "row");
   actions.append(
@@ -101,7 +102,55 @@ function left(catalogue: Catalogue): HTMLElement {
   );
 }
 
-function right(catalogue: Catalogue): HTMLElement {
+
+/**
+ * What follows from the item, shown rather than promised.
+ *
+ * The screen drew a hint — <em>“The department, the due time and the concern
+ * policy all follow the item.”</em> — where frame 3 draws three values. The
+ * sentence was true and insufficient: the catalogue read already carries the
+ * department, the default priority and the item's allowance, so the screen
+ * could say what they are and was telling the person to imagine them.
+ *
+ * **The due is the ITEM's allowance and is labelled as the item's.** The frame
+ * annotates it <em>“policy: P3 within 60 min”</em>, and the policy chain —
+ * item, then category, then department, then property — is resolved by the
+ * service when the job is raised. A client that printed a policy result would
+ * be attributing a resolution nobody ran, which is the invented-trace-id defect
+ * wearing a due date. So this says what it knows and names its source.
+ */
+function follows(host: HostApi, item: CatalogueItem | undefined): HTMLElement {
+  if (item === undefined) return el("div", "hint mono", "Choose an item and its department, priority and time appear here.");
+
+  const due = item.dueWithinMinutes === null
+    ? null
+    : new Date(Date.now() + item.dueWithinMinutes * 60_000).toISOString();
+
+  return fill(
+    el("div"),
+    shown("Department", item.department, "from the catalogue item"),
+    shown("Priority", item.defaultPriority, "the item's default · you may override"),
+    shown(
+      "Due",
+      due === null ? "no allowance on this item" : when(host, due),
+      due === null
+        ? "the item sets no time; the service's policy chain decides"
+        : `the item allows ${String(item.dueWithinMinutes)} min · the service's policy chain decides the stored due`,
+    ),
+  );
+}
+
+/** A value the desk did not choose: drawn, never typed into — standard §10. */
+function shown(label: string, value: string, hint: string): HTMLElement {
+  return fill(
+    el("div"),
+    el("label", "lbl", label),
+    el("div", "field", value),
+    el("div", "hint mono", hint),
+  );
+}
+
+function right(host: HostApi, catalogue: Catalogue): HTMLElement {
   const item = catalogue.items[0];
   return fill(
     el("div"),
@@ -118,7 +167,8 @@ function right(catalogue: Catalogue): HTMLElement {
     ),
     day("Schedule for a day · optional", "scheduledFor", "Empty raises it now; a day makes it SCHEDULED until then"),
     toggle("Restricted · only the department sees it", "restricted"),
-    el("div", "hint mono", "The department, the due time and the concern policy all follow the item."),
+    follows(host, item),
+    // The sentence this replaced is now three values — see `follows`.
   );
 }
 
