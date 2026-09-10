@@ -179,29 +179,53 @@ export const DRIVE = {
     + "terminal now.",
 
   since:
-    "**What has been proven since, on a stack that stays up.** GuestOps installs "
-    + "from a HEAD-built package, is adopted by the Kernel at start "
-    + "(`application_resumed`), answers `/health` on its own door, and consumes "
-    + "all three subjects. The desktop enrols against the development "
-    + "installation and holds it across restarts — `desktop_tls_ready anchors=1`, "
-    + "no join screen — after `SHELL-Q43` gave the root a selection and the "
-    + "installation its own file, so Al Tamar Dubai's binding survives beside it. "
-    + "And ten of eleven envelope probes were run live against the app's own "
-    + "door: no token, forged token, unmapped method, unmapped capability, GET on "
-    + "a POST route, chunked without a type, HEAD, OPTIONS, `Basic`, and a path "
-    + "traversal in the method segment — 401 · 401 · 401 · 404 · 405 · 401 · 405 "
-    + "· 405 · 401 · 401, **every refusal zero bytes**, and the mTLS door "
-    + "refusing an unauthenticated caller at the handshake.",
+    "**Re-scored under ADR 0148, and the served column is zero.** *Served* means "
+    + "the requested operation completed according to its contract; RPC "
+    + "reachability alone is not enough, and a validation refusal is not enough. "
+    + "**No operation of GuestOps has ever completed against the live platform.** "
+    + "Every capability answers 403 because no authorization tuple names an "
+    + "operator, so there is nothing to put in the column and the honest figure "
+    + "is 0 of 9.",
+
+  cause:
+    "**The zero carries its cause, because two absences have opposite "
+    + "remedies.** *Blocked on a grant nobody has issued* and *tried and failed* "
+    + "read identically as a bare zero, and a reader meeting one assumes the "
+    + "second. This is the first: the `SetGeneralManager` grant has not landed, "
+    + "and until it does no capability of any of the three applications can "
+    + "complete. Nothing here has been attempted and refused on its merits.",
+
+  envelope:
+    "**The envelope probes are their own row and prove their own thing.** Ten "
+    + "ran live against the application's door — no token, forged token, unmapped "
+    + "method, unmapped capability, GET on a POST route, chunked without a type, "
+    + "HEAD, OPTIONS, `Basic`, and a path traversal in the method segment — "
+    + "answering 401 · 401 · 401 · 404 · 405 · 401 · 405 · 405 · 401 · 401, "
+    + "**every refusal zero bytes**, with the mTLS door refusing an "
+    + "unauthenticated caller at the handshake. Under ADR 0148 a refusal is not a "
+    + "served operation, and these are all refusals: **they are evidence the "
+    + "envelope works, not that any capability was served.** Kept apart so one "
+    + "column's evidence is not read as another's.",
+
+  completed:
+    "**What did complete, and it is the platform's own machinery rather than "
+    + "this application's contract.** GuestOps installs from a HEAD-built "
+    + "package, is adopted by the Kernel at start (`application_resumed`), "
+    + "answers `/health` on its own door, and consumes all three subjects — "
+    + "`guestops-GUEST`, `guestops-MAINTENANCE`, `revocation-guestops`. The "
+    + "desktop enrols against the development installation and holds it across "
+    + "restarts. None of that is a capability completing, and none of it is "
+    + "counted as one.",
 
   blocked:
     "**One thing holds the rest, and it is not this application.** Part B's "
-    + "second column — reachable-by-a-person — needs an authorization tuple "
-    + "naming the operator, and until one exists every capability answers 403. "
-    + "The two findings that used to sit here are closed: the desktop's single "
-    + "`machine.json` became a selection plus a per-installation file "
-    + "(`SHELL-Q43`), and the resume secret was CC's. **Neither was routed "
-    + "around**, because a certificate that reports a drive performed through a "
-    + "workaround describes a platform nobody will ship.",
+    + "second column — reachable-by-a-person — needs the same grant the first "
+    + "does, and both stay empty until a tuple exists. The two findings that used "
+    + "to sit here are closed: the desktop's single `machine.json` became a "
+    + "selection plus a per-installation file (`SHELL-Q43`), and the resume "
+    + "secret was CC's. **Neither was routed around**, because a certificate that "
+    + "reports a drive performed through a workaround describes a platform nobody "
+    + "will ship.",
 };
 
 /**

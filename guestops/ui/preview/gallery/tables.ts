@@ -105,6 +105,9 @@ export function widgets(captures: readonly { entry: string; html: string }[],
     <p>${rich(DRIVE.ran)}</p>
     <p>${rich(DRIVE.stopped)}</p>
     <p>${rich(DRIVE.since)}</p>
+    <p>${rich(DRIVE.cause)}</p>
+    <p>${rich(DRIVE.envelope)}</p>
+    <p>${rich(DRIVE.completed)}</p>
     <p>${rich(DRIVE.blocked)}</p>
   </div>
 
