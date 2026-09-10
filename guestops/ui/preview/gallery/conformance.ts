@@ -216,8 +216,37 @@ export const PART_A = {
   key: "tag + normalised text, then document order inside a colliding group "
      + "(ARCH-Q12 step two, 2026-09-10)",
 
-  counts: "**715 paired · 634 identical · 81 differing · 0 collapsed · 0 unpaired**, "
-        + "seventeen frames, both sides swept in one pass.",
+  counts:
+    "**Seventeen frames, both sides swept in one pass, and the columns close on "
+    + "each side exactly:** `drawn 929 = 715 paired + 7 refused + 207 drawn-only`, "
+    + "and `built 1060 = 715 paired + 8 refused + 337 built-only`. Of the 715 "
+    + "paired, **634 identical and 81 differing**.",
+
+  withdrawn:
+    "**This certificate said `0 unpaired`, and that was false.** The figure came "
+    + "from grepping the compare output for a section called `UNPAIRED`, which the "
+    + "instrument never prints — it prints `DRAWN, NOT IN THE BUILD` and `IN THE "
+    + "BUILD, NOT DRAWN`. A pattern that matches nothing returns zero, and the zero "
+    + "was read as a measurement. It is the same fault as reading an exit code "
+    + "through a pipe: **the tool was not consulted, and its silence was quoted as "
+    + "its answer.** Adding the columns up is what caught it, which is why the "
+    + "arithmetic is printed above rather than summarised. **And `0 collapsed` is "
+    + "structural rather than earned** — under `ARCH-Q12` step two every node lands "
+    + "in paired, refused or an unpaired list, so the collapsed count has nowhere "
+    + "left to be non-zero. It is printed because the key requires it and it is "
+    + "evidence of nothing.",
+
+  blind:
+    "**Two frames the instrument cannot serve, flagged rather than absorbed.** "
+    + "Frames 10 (Walk-in) and 15 (Registration) carry **99 and 107 built-only "
+    + "nodes**, and every one is a guest name from the day behind the overlay: the "
+    + "build renders the sheet over a full fourteen-row list and the drawing draws "
+    + "it over a shorter one. Convention 4 names this exactly — *a handful of rows "
+    + "is a finding, and twenty rows of proper nouns is a fixture mismatch wearing "
+    + "one*. **It is not a build divergence**: both sides are right about the "
+    + "overlay, and the day beneath it is a fixture the two do not share. It is "
+    + "§8 clause 2, and it is the owner's, because closing it means drawing the "
+    + "day behind two approved frames.",
 
   aligned:
     "**The drawings were aligned to `ARCH-Q20` first, and the alignment is why "
