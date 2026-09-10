@@ -241,10 +241,26 @@ export const PART_A = {
      + "(ARCH-Q12 step two, 2026-09-10)",
 
   counts:
-    "**Seventeen frames, both sides swept in one pass, and the columns close on "
-    + "each side exactly:** `drawn 929 = 715 paired + 7 refused + 207 drawn-only`, "
-    + "and `built 1060 = 715 paired + 8 refused + 337 built-only`. Of the 715 "
-    + "paired, **660 identical and 55 differing**.",
+    "**Every figure here is read from `--compare --json`, not from the readable "
+    + "report.** Seventeen frames, both sides swept in one pass: "
+    + "`drawn 929 = 715 paired + 7 refused + 207 unpaired`, and "
+    + "`built 1060 = 715 paired + 8 refused + 337 unpaired`. Of the 715 paired, "
+    + "**660 identical and 55 differing**, and the instrument reports `closes` "
+    + "true on every frame — the arithmetic this certificate used to compute by "
+    + "hand, now emitted by the thing that measured it.",
+
+  source:
+    "**The prose is no longer a source, and this certificate is why.** It quoted "
+    + "two wrong figures from parsing the readable report: `0 unpaired`, from "
+    + "searching for a section the instrument never prints, and — narrowly "
+    + "avoided — a `PAIRED (n, m by position)` header that a sibling stream's "
+    + "parser read as zero, silently, on 587 nodes. `preview/parta/read.mjs` "
+    + "checks the schema, reads every field by name, never enumerates `counts` "
+    + "as a closed set, and **treats a named field that is absent as an error "
+    + "rather than a zero** — which is exactly the fault that produced the first "
+    + "of those figures. The numbers above are unchanged by the move, which is "
+    + "the point: the old parse was right this time and could not be relied on "
+    + "to be.",
 
   moved:
     "**APPS-Q45: 81 → 55, and the 26 that closed were three declarations.** These "

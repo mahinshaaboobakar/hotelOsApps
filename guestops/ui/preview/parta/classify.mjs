@@ -15,8 +15,10 @@
 // usage:
 //   node preview/parta/classify.mjs <dir-of-cmp-*.txt>
 
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { join } from "node:path";
+
+import { read } from "./read.mjs";
 
 const INK = "color(srgb 0.909804 0.921569 0.956863";
 const BAD = "color(srgb 0.972549 0.443137 0.443137";
@@ -175,23 +177,49 @@ if (dir === undefined) {
   process.exit(2);
 }
 
+// **Read from `--compare --json`, never from the readable report.** The prose
+// parse this replaced produced two wrong figures before a right one: `0
+// unpaired` from searching for a section the instrument does not print, and a
+// `PAIRED (n, m by position)` header a sibling parser read as zero. The report
+// stays readable; it is no longer a source.
 const nodes = [];
-for (const file of readdirSync(dir).filter((f) => /^cmp-.+\.txt$/u.test(f))) {
-  const frame = /^cmp-(.+)\.txt$/u.exec(file)[1];
-  let current = null;
+const totals = {
+  drawnNodes: 0, builtNodes: 0, paired: 0, identical: 0, differing: 0,
+  collapsed: 0, refusedDrawn: 0, refusedBuilt: 0, unpairedDrawn: 0, unpairedBuilt: 0,
+};
 
-  for (const line of readFileSync(join(dir, file), "utf8").split("\n")) {
-    const differs = /^ {2}DIFFERS\s+(.*)$/u.exec(line.trimEnd());
-    if (differs !== null) {
-      current = { frame, text: differs[1], props: {} };
-      nodes.push(current);
-      continue;
-    }
+let key = null;
+const open = [];
 
-    const prop = /^ {6}([a-z-]+)\s+drawn (.+?) {2,}built (.+)$/u.exec(line.trimEnd());
-    if (prop !== null && current !== null) current.props[prop[1]] = [prop[2].trim(), prop[3].trim()];
-    else if (/^ {2}IDENTICAL/u.test(line)) current = null;
+for (const file of readdirSync(dir).filter((f) => /^cmp-.+\.json$/u.test(f))) {
+  const report = read(join(dir, file));
+
+  // Every run in a certificate carries one key, or the runs are not comparable
+  // and the number is two measurements wearing one word.
+  key ??= report.key;
+
+  if (report.key.description !== key.description) {
+    process.stderr.write(
+      `${file}: measured under '${report.key.description}' where the rest of this `
+      + `run used '${key.description}'. Counts across two keys do not add up.\n`);
+    process.exit(2);
   }
+
+  // The instrument's own arithmetic, not a sum computed here.
+  if (!report.closes.drawn || !report.closes.built) open.push(report.label);
+
+  for (const name of Object.keys(totals)) totals[name] += report.counts[name];
+
+  for (const one of report.differing) {
+    nodes.push({ frame: report.label.replace(/^frame /u, ""), text: one.text, props: one.properties });
+  }
+}
+
+if (open.length > 0) {
+  process.stderr.write(
+    `columns do not close on: ${open.join(", ")}. Every node must land in paired, `
+    + "refused or an unpaired list before a count means anything.\n");
+  process.exit(2);
 }
 
 const counts = new Map();
