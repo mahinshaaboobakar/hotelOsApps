@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -29,22 +29,61 @@ import { stylesheet } from "../chrome/styles";
  * The list of stylesheets is `readdir`, never a literal. A guard naming the
  * files it checks stops checking the one somebody adds next week, which is
  * exactly the file most likely to carry a new mistake.
+ *
+ * **And it enumerates over the right axis, which took a second go.** This
+ * paragraph was true and the walk was still blind: it derived which SCREENS
+ * existed and then looked in two hardcoded PLACES, so `widgets/styles.ts` — a
+ * third location, shipping to five dock widgets — was never checked at all.
+ * The question is not *which screens are there*, it is *which files hold CSS*,
+ * and asking the second one covers a directory nobody has thought of yet.
  */
 
 const UI = join(__dirname, "..");
 const SCREENS = join(UI, "screens");
 
-/** Every stylesheet in the module — the chrome's, and one per screen. */
+/**
+ * Every file in the module that holds CSS.
+ *
+ * **Derived over the right axis, which took two goes.** The first version
+ * walked `screens/` for directories and added `chrome/styles.ts` — derived
+ * about *which screens*, and blind to the existence of a third location. It
+ * never saw `widgets/styles.ts`, which ships to five dock widgets and holds a
+ * template literal like every other: not because somebody removed it from a
+ * list, but because the list was of PLACES and the question is about FILES.
+ *
+ * A guard derived within an assumed shape is a hardcoded list wearing a walk.
+ * This one asks the only question that matters — does this file hold a CSS
+ * template literal — so a stylesheet in a directory nobody has thought of yet
+ * is covered the day it is written.
+ */
 function stylesheets(): readonly { name: string; source: string; css: string }[] {
-  // A screen with no rules of its own has no file — Shifts draws entirely on
-  // the chrome's. Absent is legitimate; what is not legitimate is a guard that
-  // stops looking at the directory somebody adds next.
-  const screens = readdirSync(SCREENS, { withFileTypes: true })
-    .filter((entry) => entry.isDirectory())
-    .map((entry) => join(SCREENS, entry.name, "styles.ts"))
-    .filter((path) => existsSync(path));
+  const holders: string[] = [];
 
-  return [join(UI, "chrome", "styles.ts"), ...screens].map((path) => {
+  const walk = (dir: string): void => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+
+      // The harness and the suite are not the module. `preview/` stands in for
+      // a host and `tests/` is this file's own neighbourhood.
+      if (entry.isDirectory()) {
+        if (!["node_modules", "preview", "tests"].includes(entry.name)) walk(path);
+        continue;
+      }
+
+      if (!entry.name.endsWith(".ts")) continue;
+      if (/const \w*CSS\w* = `/u.test(readFileSync(path, "utf8"))) holders.push(path);
+    }
+  };
+
+  walk(UI);
+
+  // The chrome's own sheet is named `CHROME` rather than `*_CSS`, so it is
+  // named here — and asserted below, because a guard that silently walked past
+  // the module's largest stylesheet would be worse than one that never had it.
+  const chrome = join(UI, "chrome", "styles.ts");
+  const all = holders.includes(chrome) ? holders : [chrome, ...holders];
+
+  return all.map((path) => {
     const source = readFileSync(path, "utf8");
 
     return {
@@ -114,6 +153,28 @@ function classes(source: string, leadingOnly: boolean): Set<string> {
 }
 
 describe("the module's one stylesheet", () => {
+  it("walks every file that holds CSS, including the ones outside screens/", () => {
+    const walked = stylesheets().map((sheet) => sheet.name);
+
+    // **The chrome, by name, because its constant is `CHROME` rather than
+    // `*_CSS`.** The comment above says it is asserted here; this is that
+    // assertion, so a rename cannot drop the module's largest stylesheet out of
+    // the population in silence.
+    expect(walked).toContain("chrome/styles.ts");
+
+    // **The widgets, because they were the gap.** The first version of this
+    // walk derived which SCREENS existed and hardcoded the two places to look
+    // - so `widgets/styles.ts` was never checked at all, though it ships to
+    // five dock widgets and holds a template literal like every other. A guard
+    // derived within an assumed shape is a hardcoded list wearing a walk.
+    expect(walked).toContain("widgets/styles.ts");
+
+    // And no fewer than the `styles.ts` files on disk: a walk that quietly
+    // stopped finding things would otherwise pass every check below on the
+    // shrinking set it still had.
+    expect(walked.length).toBeGreaterThanOrEqual(12);
+  });
+
   it("closes every CSS template literal", () => {
     // A backtick inside the literal ends it, and what follows is parsed as
     // code — which `tsc` reports as a syntax error somewhere else entirely.
@@ -270,6 +331,7 @@ function sources(): readonly (readonly [string, string])[] {
 
   walk(SCREENS);
   walk(join(UI, "chrome"));
+  walk(join(UI, "widgets"));
 
   return found;
 }
