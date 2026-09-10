@@ -2,6 +2,8 @@
 #
 # Three integrations in one package: `oracle-cloud` (we pull from OHIP),
 # `oracle-onpremise` and `oracle-web` (the PMS pushes to the property ingress).
+# **Declared in the `integrations:` block below since `CONN-Q13` stage 2** --
+# this sentence describes them; that block is what the platform reads.
 # Owner ruling `CONN-Q2(a)`, 2026-08-31 — Oracle first, three flavours as three
 # integrations in one package, because a PMS brand is not the connector unit
 # (ADR 0128 §2; requirement R28).
@@ -41,7 +43,7 @@
 # own `Manifest::parse`, and on 2026-09-10 it answered, exit 1:
 #
 #     the manifest would be refused: manifest.yaml is not a valid v1 package
-#     manifest: runtime: missing field `principal` at line 104 column 3
+#     manifest: runtime: missing field `principal` at line 111 column 3
 #
 # That line number points inside the `runtime:` block below and **moves when
 # this comment does** — it read 86 before this paragraph was added, which is
@@ -51,9 +53,14 @@
 # **The parser got past `kind: connector` and stopped only at the principal**,
 # which is the "alone" above proven rather than asserted — reading
 # `sections.rs:59` says the field is required, and only running the thing says
-# nothing else in this file is refused as well. `hopkg` is also the check to
-# re-run when `CONN-Q19`'s `integrations:` block lands: `deny_unknown_fields`
-# means the parser is what says whether the platform accepts it yet.
+# nothing else in this file is refused as well.
+#
+# **Re-run when `CONN-Q19`'s `integrations:` block landed, and it passed.** II
+# landed the manifest half at `5f802474`; the block below was added and `hopkg`
+# still refuses on the principal ALONE — which is what proves
+# `deny_unknown_fields` accepts every field name and the `shared-secret`
+# spelling. The line number moved 86 -> 99 -> 104 -> 111 as this comment grew,
+# and each time it was re-read rather than assumed.
 #
 # **And it is no longer installed by a path that does not exist — it is refused
 # by one that does.** `packages/hotelos-package/src/capability.rs:141` — the
@@ -191,6 +198,54 @@ configuration:
   # integration. Nothing about it belongs in this list.
 
 dependencies: []
+
+# WHAT THIS PACKAGE PROVIDES -- `CONN-Q13` stage 2, landed at 5f802474.
+#
+# **Three integrations, and this is now identity rather than prose.** These ids
+# lived in the comment on lines 3-4 until the manifest type gained a field for
+# them; the Hub's closed set is keyed on them and it "may only materialize
+# registrations for ids present in the verified signed manifest".
+#
+# **Derived from `backend/Capabilities/PmsOracleCapabilities.cs`, not typed.**
+# The ids, the delivery and the fact kinds are declared once in code, and a
+# fourth place they live is the duplication rule's own target. `accepts_push`
+# follows `ChangeDelivery`; the capability strings are the HUB's --
+# `InboundPipeline.CapabilityOf` maps room stays to `bookings` and room states
+# to `room_state`, and groups inbox records by exactly that column to compute
+# per-capability health. A connector declaring anything else would declare
+# capabilities that can never be observed arriving, which is R27's
+# silence-is-visible defeated by a vocabulary mismatch.
+#
+# **`ingress_authentication` is the one field the code does not determine, and
+# it is a judgement call listed rather than kept quietly.** The ingress refuses
+# a push when a connector declares no shape, so the two push flavours must
+# declare one; `shared-secret` is what the approved mockup draws for
+# `oracle-web`, and it is a real improvement on the reference, whose on-site
+# endpoint had no authentication at all -- "a body was enough to write into any
+# property". Whether a source allow-list should be declared beside it is the
+# architect's call, not this file's.
+
+integrations:
+  # we pull from OHIP’s business-event queue
+  - id: oracle-cloud
+    name: "Oracle OPERA Cloud"
+    capabilities: [bookings, room_state]
+    accepts_push: false
+    ingress_authentication: []
+
+  # the on-site agent posts to the property ingress
+  - id: oracle-onpremise
+    name: "Oracle OPERA on-premise"
+    capabilities: [bookings, room_state]
+    accepts_push: true
+    ingress_authentication: [shared-secret]
+
+  # the web variant posts to the property ingress
+  - id: oracle-web
+    name: "Oracle OPERA web"
+    capabilities: [bookings, room_state]
+    accepts_push: true
+    ingress_authentication: [shared-secret]
 
 # THE `ui:` BLOCK, and it is here — the heading above this used to read *"NO
 # `ui:` BLOCK YET"* with the block declared eight lines under it. The comment
