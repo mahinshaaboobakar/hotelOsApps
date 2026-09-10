@@ -9,12 +9,17 @@
  * head otherwise. One rule, one queue.
  */
 
+import { formatDay, type PropertyEnvironment } from "@hotelos/sdk";
+
 import { codeChip } from "../../chrome/code";
+import { days } from "../../chrome/dates";
 import { el } from "../../chrome/element";
 import type { SwapDetail, Waiting } from "../../roster/leave";
 
 /** The queue. */
-export function queue(items: readonly Waiting[]): HTMLElement {
+export function queue(items: readonly Waiting[],
+  property: PropertyEnvironment,
+): HTMLElement {
   const list = el("div", "rows");
   const columns = "1.9fr 90px 110px";
 
@@ -34,7 +39,16 @@ export function queue(items: readonly Waiting[]): HTMLElement {
     const what = el("div");
     what.append(el("b", undefined, item.who), el("s", undefined, item.what));
 
-    row.append(what, el("div", "pill neu", item.kind), el("div", undefined, item.dates));
+    // A leave row carries a span and a swap row carries the day it was
+    // accepted. They shared one field while both were rendered strings,
+    // so nothing on the row said which kind it was.
+    const when = item.dates !== undefined
+      ? days(item.dates, property)
+      : item.accepted !== undefined && item.accepted !== null
+        ? formatDay(item.accepted, property, "day-month-year")
+        : "";
+
+    row.append(what, el("div", "pill neu", item.kind), el("div", undefined, when));
     list.append(row);
   }
 

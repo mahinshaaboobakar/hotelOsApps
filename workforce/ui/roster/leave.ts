@@ -32,7 +32,15 @@ export type RequestState = "Requested" | "Approved" | "Declined" | "Cancelled";
 export interface LeaveRow {
   type: string;
   note: string;
-  dates: string;
+  /**
+   * The two ends of the leave, as the wire carries them - ADR 0152.
+   *
+   * The service used to join them, in its own culture, and compress a
+   * same-month range to "7 - 8 Sep". That compression assumes the month
+   * FOLLOWS the day, which is true of en-GB and false of en-US, so it was a
+   * locale's word order written into a service.
+   */
+  dates: { from: string; to: string };
   days: number;
   state: RequestState;
 }
@@ -49,7 +57,18 @@ export interface Waiting {
   kind: "Leave" | "Swap";
 
   /** When. */
-  dates: string;
+  /**
+   * The two ends of the leave, for a row that is a leave request.
+   *
+   * **Absent on a swap row**, which has an acceptance day instead. The two
+   * arrived under one name while both were rendered strings, so a row's shape
+   * was invisible: `"7 - 8 Sep"` and `"27 Aug"` are the same type and mean
+   * different things.
+   */
+  dates?: { from: string; to: string };
+
+  /** When the colleague accepted - a swap row's day. Absent on a leave row. */
+  accepted?: string | null;
 }
 
 /** The swap the approver has open — its three steps, and both cells. */
@@ -97,17 +116,17 @@ export const recordedLeave: LeaveBoard = {
   requests: [
     {
       type: "Casual leave", note: "Family function — will be back Monday",
-      dates: "7 – 8 Sep", days: 2, state: "Requested",
+      dates: { from: "2026-09-07", to: "2026-09-08" }, days: 2, state: "Requested",
     },
     {
       type: "Earned leave", note: "Approved with the balance overdrawn by 1",
-      dates: "18 – 22 Aug", days: 5, state: "Approved",
+      dates: { from: "2026-08-18", to: "2026-08-22" }, days: 5, state: "Approved",
     },
-    { type: "Sick leave", note: "—", dates: "3 Aug", days: 1, state: "Approved" },
+    { type: "Sick leave", note: "—", dates: { from: "2026-08-03", to: "2026-08-03" }, days: 1, state: "Approved" },
     {
       type: "Casual leave",
       note: "Withdrawn before the decision — the balance was credited back",
-      dates: "11 Jul", days: 1, state: "Cancelled",
+      dates: { from: "2026-07-11", to: "2026-07-11" }, days: 1, state: "Cancelled",
     },
   ],
 
@@ -115,12 +134,12 @@ export const recordedLeave: LeaveBoard = {
     {
       who: "Anjali Menon & Sneha Iyer",
       what: "Swap — accepted by Sneha, awaiting you",
-      kind: "Swap", dates: "27 Aug",
+      kind: "Swap", accepted: "2026-08-27",
     },
-    { who: "Joseph Kurian", what: "Casual · 2 days", kind: "Leave", dates: "7–8 Sep" },
+    { who: "Joseph Kurian", what: "Casual · 2 days", kind: "Leave", dates: { from: "2026-09-07", to: "2026-09-08" } },
     {
       who: "Rani Rajan", what: "Earned · 4 days · balance 1 of 15",
-      kind: "Leave", dates: "12–15 Sep",
+      kind: "Leave", dates: { from: "2026-09-12", to: "2026-09-15" },
     },
   ],
 

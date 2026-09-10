@@ -7,6 +7,9 @@
  * front of them, and a balance one click away is a number nobody checks.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
+import { days } from "../../chrome/dates";
 import { el } from "../../chrome/element";
 import type { Balance, LeaveRow } from "../../roster/leave";
 
@@ -43,7 +46,9 @@ export function balances(balances_: readonly Balance[]): HTMLElement {
 }
 
 /** The request list. */
-export function requests(rows: readonly LeaveRow[]): HTMLElement {
+export function requests(rows: readonly LeaveRow[],
+  property: PropertyEnvironment,
+): HTMLElement {
   const list = el("div", "rows");
   const columns = "1.6fr 120px 60px 110px";
 
@@ -70,7 +75,7 @@ export function requests(rows: readonly LeaveRow[]): HTMLElement {
 
     item.append(
       what,
-      el("div", undefined, row.dates),
+      el("div", undefined, days(row.dates, property)),
       el("div", undefined, String(row.days)),
       el("div", `pill ${tone(row.state)}`, row.state),
     );

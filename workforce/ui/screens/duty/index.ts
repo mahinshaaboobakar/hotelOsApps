@@ -13,7 +13,8 @@
  * backend refused for the same reason.
  */
 
-import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, formatInstant, type HostApi, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -21,6 +22,29 @@ import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
 import { assignDuty } from "./dialog";
 import { type Duty, type Holder, type Register } from "../../roster/duty";
+
+/**
+ * The week, as one label.
+ *
+ * **Composed here because the dash is a word.** The service sent
+ * `1 Sep – 7 Sep` already joined, so the separator, the order and the culture
+ * of the month name all lived on the wire. It sends the seven days now; this
+ * is the first and the last of them, and nothing else.
+ *
+ * @param days the week, ISO, as the read answered
+ * @param property the property's zone and locale
+ * @returns the range, or an empty string when the week is somehow empty
+ */
+function weekRange(
+  days: readonly string[], property: PropertyEnvironment,
+): string {
+  const first = days[0];
+  const last = days[days.length - 1];
+  if (first === undefined || last === undefined) return "";
+
+  return `${formatDay(first, property, "day-month-year")} – `
+    + formatDay(last, property, "day-month-year");
+}
 
 /** Draw the screen. */
 export async function duty(
@@ -45,12 +69,14 @@ export async function duty(
   const body = el("div", "body");
   body.append(nowNext(register, host.property), week(register, host.property), reading());
 
-  main.replaceChildren(header(register, open), body);
+  main.replaceChildren(header(register, open, host.property), body);
 
   if (dialog) main.append(assignDuty(close));
 }
 
-function header(register: Register, open: () => void): HTMLElement {
+function header(
+  register: Register, open: () => void, property: PropertyEnvironment,
+): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -63,7 +89,7 @@ function header(register: Register, open: () => void): HTMLElement {
 
   const grow = el("div", "grow");
   head.append(title, grow,
-    el("div", "btn", `‹ ${register.week} ›`),
+    el("div", "btn", `‹ ${weekRange(register.days, property)} ›`),
     assign(open));
   return head;
 }
@@ -118,7 +144,9 @@ function week(register: Register, property: PropertyEnvironment): HTMLElement {
 
   grid.append(el("div", "rhd", "This week"));
   for (const day of register.days) {
-    grid.append(el("div", "rhd", day));
+    // `weekday-day` — "Mon 24" — which is what a week strip wants and what
+    // the service used to render as `ddd d` in its own culture.
+    grid.append(el("div", "rhd", formatDay(day, property, "weekday-day")));
   }
 
   grid.append(el("div", "rlab", "★ Duty"));

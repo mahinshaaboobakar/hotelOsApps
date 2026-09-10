@@ -53,10 +53,10 @@ export async function leave(
     // simply could not be reached, which is the worst shape a layout
     // divergence takes.
     const split = el("div", "asplit");
-    split.append(queue(board.waiting), swapCard(board.swap));
+    split.append(queue(board.waiting, host.property), swapCard(board.swap));
     body.append(split);
   } else {
-    body.append(balances(board.balances), requests(board.requests));
+    body.append(balances(board.balances), requests(board.requests, host.property));
   }
 
   main.replaceChildren(header(board, open), tabs(board, tab, go), body);

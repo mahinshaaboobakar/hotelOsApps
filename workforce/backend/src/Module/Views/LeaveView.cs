@@ -294,7 +294,12 @@ public static class LeaveView
             who = Pair(one, names),
             what = "Swap — accepted, awaiting you",
             kind = "Swap",
-            dates = one.AcceptedAt?.ToString("d MMM") ?? "—",
+            // **`accepted`, not `dates`.** It is one day — when the colleague
+            // accepted — and it shared a name with the leave rows' two-ended
+            // range purely because both used to arrive as a rendered string.
+            // Null when nothing has been accepted: an absence is the screen's
+            // to draw, and "—" is a rendering.
+            accepted = one.AcceptedAt?.ToString("yyyy-MM-dd"),
         }));
 
         return rows;
@@ -311,11 +316,22 @@ public static class LeaveView
             : string.Join(" & ", new[] { proposer, colleague }.Where(one => one is not null));
     }
 
-    /// <summary>"7 – 8 Sep", or "3 Aug" when it is one day.</summary>
-    private static string Dates(DateOnly from, DateOnly to)
-        => from == to
-            ? from.ToString("d MMM")
-            : from.Month == to.Month
-                ? from.Day + " – " + to.ToString("d MMM")
-                : from.ToString("d MMM") + " – " + to.ToString("d MMM");
+    /// <summary>The two ends of a leave, as the wire carries them.</summary>
+    /// <remarks>
+    /// <para>
+    /// **The range is the screen's to compose** — ADR 0152. This joined it
+    /// here, in the culture of whichever account the service runs under, and
+    /// compressed a same-month range to <c>"7 – 8 Sep"</c>.
+    /// </para>
+    /// <para>
+    /// <b>The compression went with it, deliberately.</b> Putting the month
+    /// only at the second end assumes the month FOLLOWS the day — true of
+    /// <c>en-GB</c> and false of <c>en-US</c>, where the same two days read
+    /// <i>Sep 7 – 8</i>. It was a locale's word order written into a service,
+    /// which is the defect this ruling removes rather than a nicety worth
+    /// carrying across the bridge.
+    /// </para>
+    /// </remarks>
+    private static object Dates(DateOnly from, DateOnly to)
+        => new { from = from.ToString("yyyy-MM-dd"), to = to.ToString("yyyy-MM-dd") };
 }

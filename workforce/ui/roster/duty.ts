@@ -44,7 +44,14 @@ export interface Holder {
 }
 
 export interface Register {
-  week: string;
+  /**
+   * The seven days of the week being viewed, as the wire carries them.
+   *
+   * ADR 0152. This arrived as a rendered range plus seven rendered headers,
+   * both in the culture of the account the service runs under. The range is
+   * composed by the screen from the first and the last of these - the dash and
+   * the word order are the screen's, and the days are the service's.
+   */
   days: readonly string[];
 
   /** Who holds it at this instant, and what the screen says about them. */
@@ -89,8 +96,8 @@ function pair(day: number, dayName: string, nightName: string | null): readonly 
 }
 
 export const recordedRegister: Register = {
-  week: "24 – 30 Aug",
-  days: ["Mon 24", "Tue 25", "Wed 26", "Thu 27", "Fri 28", "Sat 29", "Sun 30"],
+  days: ["2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27",
+         "2026-08-28", "2026-08-29", "2026-08-30"],
 
   now: { who: "Anjali Menon", from: iso(4, 20), to: iso(5, 8) },
   next: { who: "Vishnu Das", from: iso(5, 8), to: iso(5, 20) },

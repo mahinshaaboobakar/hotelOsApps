@@ -57,9 +57,14 @@ public static class DutyView
 
         return new
         {
-            week = monday.ToString("d MMM") + " – " + monday.AddDays(6).ToString("d MMM"),
+            // **The seven days, as the wire carries them** — ADR 0152. This sent
+            // a rendered range (`1 Sep – 7 Sep`) and seven rendered headers
+            // (`ddd d`), both in the culture of whichever account the service
+            // runs under. The screen composes the range from the first and the
+            // last of these, so the dash and the word order are the screen's
+            // and the days are the service's.
             days = Enumerable.Range(0, 7)
-                .Select(offset => monday.AddDays(offset).ToString("ddd d"))
+                .Select(offset => monday.AddDays(offset).ToString("yyyy-MM-dd"))
                 .ToList(),
             now = Standing(holder, names),
             next = Standing(next, names),
