@@ -273,6 +273,18 @@ bytes, never published. `integration` is the registered connector identifier
 > connector-declared, so **all** of a reservation's typed identifiers map, each
 > under its own kind. The one-kind-per-entity restriction this page carried
 > while the question was open is withdrawn.
+>
+> **The verdict is exact for `room_id` and the neighbouring field is not the
+> same case** — `CONN-Q15`, on reading the built connector. Nothing here ever
+> sets `room_id`: the normalisers add `ExternalRefs` and stop, and Enrich
+> resolves it. But `room_type_id` **does** carry the PMS's own room-type code
+> between connector and Enrich, deliberately and by contract — the proto says
+> so at the field: *"both flavours send the PMS's own room-type code (OHIP
+> `roomStay.currentRoomInfo.roomType`, on-site `RoomType`), and Master Data
+> owns the canonical id."* Two canonical-looking fields, two treatments, both
+> documented. Said here beside the verdict because a reader taking **REFUSED**
+> flatly would not expect the second, and a note that lives only in a review
+> report is a note the next reader never meets.
 
 ### 2.4 · `permitAll()` — every inbound endpoint unauthenticated
 
