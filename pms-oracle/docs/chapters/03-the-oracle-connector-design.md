@@ -209,6 +209,29 @@ NO OCCASION     the structure removes the situation that produced it; a
                 determined author could still err, and would have to try
 ```
 
+**Every row below cites the reference's own Java, and that is deliberate** —
+`cloud/services/OracleCloudBaseService.java:90-147`, `onPremise:361-366`, and
+so on. Chapter 01 catalogues these same weaknesses in its §7, and this page
+points past that catalogue to the source it was built from: a defect is easier
+to argue with when the reader can open the file.
+
+**So the correspondence to §7 is stated here rather than left to be
+reconstructed** — `CONN-Q15`, on tracing chapter 02 back to the study and
+finding this page reaches the evidence but never the catalogue:
+
+```text
+§7.1 Security               2.4 permitAll() · 2.5 secrets in a properties file
+§7.2 Property isolation     2.7 two databases and a property table per provider
+§7.3 Correctness defects    2.1 read timeout as success · 2.2 destructive drain
+                            2.3 no identifier mapping · 2.6 blank time zone
+§7.5 Structure              2.8 per-provider copy-paste of the mechanics
+```
+
+A reader can now reach both: the Java, through the citations in each row, and
+the study's own account of the same weakness, through the group above. **No
+citation below changes** — the primary evidence is the stronger reference and
+stays where it is.
+
 ### 2.1 · A read timeout is treated as success
 
 **There** — all four downstream writes returned success on a socket timeout
