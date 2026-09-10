@@ -38,6 +38,26 @@
 // content. The digest is taken after a build this process ran, which is the
 // only ordering that establishes anything.
 
+// **WHAT THIS INSTRUMENT PRODUCED BEFORE IT EXISTED.** A defect in an
+// instrument invalidates its output *backwards*, and the fix travels only
+// forwards — so repairing one means asking what it has already produced that
+// somebody may still quote. A commit cannot carry that sentence: it records
+// what changed, never *and everything measured up to now carries this*. Two
+// caveats live here because here is where a reader arrives.
+//
+// **Part A figures quoted before `5371443`** — 929 drawn · 1060 built · 715
+// paired · 55 differing — are real passes whose reproducibility claim was not
+// supportable at the time, for BB's reason and not a smaller one. Figures after
+// it name their build.
+//
+// **Any widget capture taken before 2026-09-10** rendered against a
+// `preview/widget-frame.js` that was five days stale, two SDK contract fixes
+// behind, and short `color-scroll-thumb` and `color-scroll-thumb-strong` —
+// because no build script produced it and nothing anywhere would have said so.
+// The page is the one every widget capture comes from. **If you are about to
+// quote one from before that date, re-take it** — the caveat is not a warning
+// to carry, it is a capture to redo, and redoing it now costs one command.
+
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
