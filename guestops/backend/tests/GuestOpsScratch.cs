@@ -16,12 +16,51 @@ namespace HotelOS.GuestOps.Tests;
 /// a fifth copy of the create/grant/drop dance is what it exists to prevent.
 /// </para>
 /// <para>
-/// <b>An installed application is provisioned exactly like a platform service.</b>
-/// <c>02-roles.sql</c> already carries <c>hotelos_owner_guestops</c> and
-/// <c>hotelos_app_guestops</c>, so nothing had to be widened to run this: the
-/// suite migrates as <c>hotelos_migrator</c> assuming the owner, and then
-/// connects as the application role, never as the owner and never privileged.
-/// A suite that ran as the owner would pass through a missing grant.
+/// <b>The suite migrates as <c>hotelos_migrator</c> assuming the owner, then
+/// connects as the application role</b> — never as the owner and never
+/// privileged, because a suite that ran as the owner would pass through a
+/// missing grant. That part is unchanged and is why the shape was chosen.
+/// </para>
+/// <para>
+/// <b>THE PREMISE UNDER IT IS NO LONGER TRUE, AND THE 41 TESTS BEHIND THIS
+/// FIXTURE DO NOT RUN.</b> This paragraph used to read: <i>"An installed
+/// application is provisioned exactly like a platform service. 02-roles.sql
+/// already carries <c>hotelos_owner_guestops</c> and <c>hotelos_app_guestops</c>,
+/// so nothing had to be widened to run this."</i> It was true when written.
+/// </para>
+/// <para>
+/// <c>INSTALL-Q76</c> removed both roles from bootstrap — <c>02-roles.sql</c>
+/// now says an application's schema and roles are <b>its install's</b> to create,
+/// and that the provisioner is deliberately unable to name them in advance. The
+/// install therefore generates the application role's password and seals it
+/// (<c>packages/database.rs:145</c> creates the <c>Uuid</c>, <c>:198</c> issues
+/// the <c>CREATE ROLE … PASSWORD</c>, <c>:441</c> seals it). So on any machine
+/// where GuestOps has been installed, <c>hotelos_app_guestops</c> exists with a
+/// password nobody can restore, and <see cref="AppPassword"/>'s default cannot
+/// authenticate: 41 tests fail <c>28P01</c> at connect, before a single
+/// assertion — 17 in <c>DeskTests</c>, 10 in <c>InboundFactTests</c>, 8 in
+/// <c>ReconciliationTests</c>, 6 in <c>StayListTests</c>. <b>What they assert has
+/// been seen by nobody since.</b>
+/// </para>
+/// <para>
+/// <b>Two things a reader should not conclude from this, because both send
+/// somebody to the wrong remedy.</b> The platform does <i>not</i> still provide
+/// the role — reading the old sentence and going to look is exactly the path
+/// that ends in asking for a cluster-role write. And running this suite has
+/// never been able to damage an installed application: <see cref="ScratchDatabase"/>
+/// issues <c>CREATE DATABASE</c>, <c>GRANT CONNECT</c> and <c>DROP DATABASE</c>
+/// and no role statement of any kind, and this fixture adds none. The collision
+/// is on the cluster-wide role <i>name</i>, not on the installed database.
+/// </para>
+/// <para>
+/// <b>The shape is frozen until <c>INSTALL-Q98</c> rules</b>, which asks which of
+/// two patterns already in the tree is standard for a package's own backend
+/// suite: this one, or the sibling applications' <c>postgres</c>/<c>devroot</c>
+/// against a scratch database. It is not to be changed to go green — a suite
+/// that switched in the meantime is harder to switch back than one that is red.
+/// Note also that <see cref="AppRole"/> is a <c>const</c>: only the password
+/// reads the environment, so pointing the suite at a differently-named role is
+/// not available without changing this file.
 /// </para>
 /// </remarks>
 public sealed class GuestOpsScratch : IAsyncDisposable
