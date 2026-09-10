@@ -62,17 +62,14 @@ public static class TeamsView
         {
             property = call.Optional("property")?.GetString(),
             teams = rows,
-            on = on.ToString("ddd d MMM"),
 
-            // **The same day, as the wire carries it.** A write needs a date it
-            // can send, and the field above is a rendering — reconstructing a
-            // date by parsing "Thu 4 Sep" is how a screen invents a year.
-            //
-            // It is ISO here and formatted in the module by the SDK's
-            // `formatDay`, against the property's own locale. The display field
-            // beside it is one of this service's 25 culture-sensitive
-            // renderings, which are machine-dependent for the reason the
-            // department ordering was and are not fixed here.
+            // **The day, once, as the wire carries it** — ADR 0152. This
+            // carried a rendering (`ddd d MMM`) beside the ISO value for one
+            // commit, which was one commit of two spellings of one fact. The
+            // rendering used the process's current culture, so a hotel's own
+            // week label depended on the account the service runs under; the
+            // module renders this through the SDK's `formatDay` against the
+            // property's locale, which is where the reader's locale is.
             onDate = on.ToString("yyyy-MM-dd"),
             detail = open,
 
@@ -215,7 +212,9 @@ public static class TeamsView
                 : team.DepartmentCode,
             note = (string?)null,
             members,
-            formed = team.CreatedAt.ToString("d MMM yyyy"),
+            // ISO, and rendered by the module: a formation date is read months
+            // later, so it carries its year - `date-year` on the other side.
+            formed = team.CreatedAt.ToString("O"),
             active = team.Active,
         };
 
@@ -250,7 +249,7 @@ public static class TeamsView
         return new
         {
             team = Row(team, departments, memberIds.Count),
-            on = on.ToString("ddd d MMM"),
+            onDate = on.ToString("yyyy-MM-dd"),
             members = memberIds.Select(id => Member(id, names)).ToList(),
             candidates = Candidates(postings, memberIds, names, team.DepartmentCode),
         };

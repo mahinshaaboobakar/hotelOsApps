@@ -9,6 +9,8 @@
  * date moved rather than by a second surface.
  */
 
+import { formatDay, formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
+
 import { el, fill } from "../../chrome/element";
 import type { Member, TeamDetail } from "../../roster/team";
 import type { TeamPlace } from ".";
@@ -20,14 +22,17 @@ import type { TeamPlace } from ".";
  * @param place how to open a dialog over the screen
  * @returns the pane
  */
-export function detail(open: TeamDetail, place: TeamPlace): HTMLElement {
+export function detail(
+  open: TeamDetail, place: TeamPlace, property: PropertyEnvironment,
+): HTMLElement {
   const pane = el("div", "panel tdetail");
 
   const head = el("div", "thead");
   const name = el("div");
   name.append(
     el("b", undefined, open.team.name),
-    el("s", undefined, `${open.team.departmentName} · formed ${open.team.formed}`));
+    el("s", undefined, `${open.team.departmentName} · formed `
+      + formatInstant(open.team.formed, property, "date-year")));
 
   // Rename is inert until a client lands, like every other write on this
   // screen. Stand down and Add a member open dialogs the module already draws,
@@ -36,7 +41,7 @@ export function detail(open: TeamDetail, place: TeamPlace): HTMLElement {
   head.append(name, el("div", "grow"),
     el("div", "btn", "Rename"), action("Stand down", "down", place));
 
-  pane.append(head, department(open), count(open), el("div", "tsec", "Members"),
+  pane.append(head, department(open), count(open, property), el("div", "tsec", "Members"),
     members(open.members), action("＋ Add a member", "member", place), why());
 
   return pane;
@@ -54,11 +59,12 @@ function department(open: TeamDetail): HTMLElement {
 }
 
 /** How many, on the day being asked about. */
-function count(open: TeamDetail): HTMLElement {
+function count(open: TeamDetail, property: PropertyEnvironment): HTMLElement {
   const row = el("div", "tkv");
 
   return fill(row,
-    el("em", undefined, `Members on ${open.on}`),
+    el("em", undefined,
+      `Members on ${formatDay(open.onDate, property, "day-month-year")}`),
     el("b", undefined, String(open.members.length)));
 }
 

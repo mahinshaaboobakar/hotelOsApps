@@ -17,7 +17,8 @@
  * `WF-Q7` put it.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatDay, formatInstant, type HostApi, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -84,12 +85,12 @@ export async function teams(
   if (board.teams.length === 0) {
     body.append(firstRun(place));
   } else if (open === null) {
-    body.append(list(board, place), oneDepartment());
+    body.append(list(board, place, host.property), oneDepartment());
   } else {
-    body.append(split(board, open, place));
+    body.append(split(board, open, place, host.property));
   }
 
-  main.replaceChildren(header(board, place, open), body);
+  main.replaceChildren(header(board, place, open, host.property), body);
 
   if (place.dialog !== null) {
     // `board` and `host` reach the overlays because a write needs both: the
@@ -155,7 +156,10 @@ async function overlays(
  * @param open the team the detail pane is showing, when one is
  * @returns the header
  */
-function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLElement {
+function header(
+  board: Teams, place: TeamPlace, open: TeamDetail | null,
+  property: PropertyEnvironment,
+): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -178,7 +182,15 @@ function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLEl
   // The detail pane asks about a day, so the day belongs in the header beside
   // it — the same shape the rota and attendance headers already use.
   if (open !== null) {
-    head.append(title, grow, el("div", "btn", `‹ ${board.on} ›`), form);
+    head.append(title, grow, el("div", "btn",
+      // `day-month-year`, not `weekday-day`. The SDK publishes no style that
+      // renders weekday-day-MONTH, which is what this chip and the pane's
+      // "Members on ..." actually want - a supervisor paging days needs the
+      // weekday, and a strip that says "Fri 04" says nothing when the paging
+      // crosses a month. Reported rather than composed here: building the
+      // string myself would put culture-sensitive formatting straight back
+      // into this module, which is the thing ADR 0152 just removed.
+      `‹ ${formatDay(board.onDate, property, "day-month-year")} ›`), form);
     return head;
   }
 
@@ -196,7 +208,9 @@ function header(board: Teams, place: TeamPlace, open: TeamDetail | null): HTMLEl
  * @param place how to open one
  * @returns the card
  */
-function list(board: Teams, place: TeamPlace): HTMLElement {
+function list(
+  board: Teams, place: TeamPlace, property: PropertyEnvironment,
+): HTMLElement {
   // A list sits bare on the page — no wrapper, no fill, no radius. A card is
   // for a thing you are looking at; a row is for one of many you are looking
   // through, and the difference is how many fit on a screen.
@@ -211,7 +225,7 @@ function list(board: Teams, place: TeamPlace): HTMLElement {
   card.append(head);
 
   for (const team of board.teams) {
-    card.append(row(team, false, "tgrid", board, place));
+    card.append(row(team, false, "tgrid", board, place, property));
   }
 
   return card;
@@ -225,7 +239,10 @@ function list(board: Teams, place: TeamPlace): HTMLElement {
  * @param place how to open another
  * @returns the two columns
  */
-function split(board: Teams, open: TeamDetail, place: TeamPlace): HTMLElement {
+function split(
+  board: Teams, open: TeamDetail, place: TeamPlace,
+  property: PropertyEnvironment,
+): HTMLElement {
   const columns = el("div", "tsplit");
   // A list sits bare on the page — no wrapper, no fill, no radius. A card is
   // for a thing you are looking at; a row is for one of many you are looking
@@ -240,10 +257,11 @@ function split(board: Teams, open: TeamDetail, place: TeamPlace): HTMLElement {
   card.append(head);
 
   for (const team of board.teams) {
-    card.append(row(team, open.team.id === team.id, "tnarrow", board, place));
+    card.append(
+      row(team, open.team.id === team.id, "tnarrow", board, place, property));
   }
 
-  columns.append(card, detail(open, place));
+  columns.append(card, detail(open, place, property));
   return columns;
 }
 
@@ -267,6 +285,7 @@ function split(board: Teams, open: TeamDetail, place: TeamPlace): HTMLElement {
  */
 function row(
   team: Team, open: boolean, grid: string, board: Teams, place: TeamPlace,
+  property: PropertyEnvironment,
 ): HTMLElement {
   const known = board.detail?.team.id === team.id;
   const classes = `${grid}${open ? " sel" : ""}${team.active ? "" : " down"}`;
@@ -285,7 +304,12 @@ function row(
   line.append(name, fill(el("div"), dep(team)), el("div", undefined, String(team.members)));
 
   if (grid === "tgrid") {
-    line.append(el("div", "tm", team.formed), status(team));
+    // The formation date carries its year: a team formed in January is
+    // read in September, and "4 Jan" of an unstated year is not a date
+    // somebody can act on.
+    line.append(
+      el("div", "tm", formatInstant(team.formed, property, "date-year")),
+      status(team));
   }
 
   return line;

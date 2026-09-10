@@ -16,28 +16,27 @@ import type { PostingEnding, Teams } from "./team";
 /** The five teams frame 1 lists, one of them stood down. */
 export const recordedTeams: Teams = {
   property: "Kochi Beach Resort",
-  on: "Thu 4 Sep",
   onDate: "2026-09-04",
   teams: [
     {
       id: "t-mc", name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
       note: "Rooms 101–140",
-      members: 6, formed: "12 Mar 2026", active: true,
+      members: 6, formed: "2026-03-12T00:00:00Z", active: true,
     },
     {
       id: "t-tb", name: "Tower Block", department: "HK", departmentName: "Housekeeping",
       note: "Floors 8–12",
-      members: 4, formed: "12 Mar 2026", active: true,
+      members: 4, formed: "2026-03-12T00:00:00Z", active: true,
     },
     {
       id: "t-fd", name: "Front Desk — Early", department: "FO", departmentName: "Front Office",
       note: null,
-      members: 3, formed: "4 Jan 2026", active: true,
+      members: 3, formed: "2026-01-04T00:00:00Z", active: true,
     },
     {
       id: "t-bs", name: "Banquet Service", department: "KIT", departmentName: "Kitchen",
       note: null,
-      members: 5, formed: "19 Aug 2026", active: true,
+      members: 5, formed: "2026-08-19T00:00:00Z", active: true,
     },
     // Stood down, and drawn: the list hides it unless asked for, and frame 1
     // asks for it. Zero members is a fact about today rather than a team that
@@ -45,16 +44,16 @@ export const recordedTeams: Teams = {
     {
       id: "t-pb", name: "Pool Bar", department: "KIT", departmentName: "Kitchen",
       note: "Seasonal",
-      members: 0, formed: "1 Nov 2025", active: false,
+      members: 0, formed: "2025-11-01T00:00:00Z", active: false,
     },
   ],
   detail: {
     team: {
       id: "t-mc", name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
       note: "Rooms 101–140",
-      members: 6, formed: "12 Mar 2026", active: true,
+      members: 6, formed: "2026-03-12T00:00:00Z", active: true,
     },
-    on: "Thu 4 Sep",
+    onDate: "2026-09-04",
     members: [
       { staffId: "s-pd", name: "P. Das", initials: "PD", since: "since 12 Mar" },
       { staffId: "s-rk", name: "R. Kurian", initials: "RK", since: "since 12 Mar" },
@@ -100,7 +99,6 @@ export const recordedTeams: Teams = {
 /** Frame 7 — a property that has formed none. */
 export const recordedNoTeams: Teams = {
   property: "Kochi Beach Resort",
-  on: "Thu 4 Sep",
   onDate: "2026-09-04",
   teams: [],
   detail: null,

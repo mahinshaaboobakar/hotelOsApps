@@ -41,7 +41,13 @@ export interface Team {
   /** Live members on the day being viewed. */
   members: number;
 
-  /** When it was formed, spelled as a person reads it. */
+  /**
+   * When it was formed, as the wire carries it - ADR 0152.
+   *
+   * ISO, rendered by the screen against the property's locale. It used to
+   * arrive as `d MMM yyyy` from the service, where the month name came from
+   * whichever account the service process runs under.
+   */
   formed: string;
 
   /** Whether it is offered when work is assigned — ADR 0062's flag. */
@@ -91,8 +97,8 @@ export interface Candidate {
 export interface TeamDetail {
   team: Team;
 
-  /** The day "members" is being asked about. */
-  on: string;
+  /** The day "members" is being asked about, as the wire carries it. */
+  onDate: string;
 
   members: readonly Member[];
 
@@ -108,16 +114,13 @@ export interface Teams {
   /** Every team, active first — the order the service returns. */
   teams: readonly Team[];
 
-  /** The day the counts are for, as the service renders it. */
-  on: string;
-
   /**
-   * The same day, as the wire carries it.
+   * The day the counts are for, as the wire carries it - ADR 0152.
    *
-   * **A write needs a date it can send**, and `on` above is a rendering —
-   * reconstructing a date by parsing *Thu 4 Sep* is how a screen invents a
-   * year. This is what a membership's start date is sent as, and what
-   * `formatDay` renders from when a sheet has to show it.
+   * **One spelling of one fact.** For one commit this arrived twice, once
+   * rendered and once ISO, because a write needs a day it can send and the
+   * rendering could not be sent. The rendering is gone: the screen renders
+   * this through `formatDay`, and the write sends the same value it drew.
    */
   onDate: string;
 
