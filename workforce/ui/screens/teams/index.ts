@@ -112,7 +112,10 @@ async function overlays(
   }
 
   if (place.dialog === "member") {
-    return (await import("./member")).addMember(place.close);
+    // The team the pane has open, which this function already holds. The
+    // dialog used to read `recordedTeams.detail` instead - a fixture, on a
+    // live screen, naming a team and its candidates.
+    return (await import("./member")).addMember(place.close, open);
   }
 
   // Acts on the team the pane has open, so it does not exist without one —

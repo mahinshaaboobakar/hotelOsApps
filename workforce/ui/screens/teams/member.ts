@@ -16,19 +16,23 @@
  */
 
 import { el, fill } from "../../chrome/element";
-import { recordedTeams } from "../../roster/teams";
+import type { TeamDetail } from "../../roster/team";
 import type { Candidate } from "../../roster/team";
 
 /**
  * Build the dialog.
  *
  * @param close called when it is dismissed
+ * @param open the team the pane has open, from the loaded board - null when
+ *   none is open, and then the dialog names no team rather than one it made up
  * @returns the overlay
  */
-export function addMember(close: () => void): HTMLElement {
+export function addMember(
+  close: () => void,
+  open: TeamDetail | null,
+): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
-  const open = recordedTeams.detail;
 
   const department = open?.team.departmentName ?? "its department";
 
