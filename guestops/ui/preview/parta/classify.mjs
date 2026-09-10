@@ -93,9 +93,7 @@ const RULES = [
        + "em dash, because nothing establishes a count at bar-render time. So a drawn count "
        + "has no counterpart and pairs against whatever else carries those digits — a stat, "
        + "a room number. A consequence of a declared divergence, not a second one.",
-    hit: (p) => p["color"]
-      && p["color"][0] === "rgb(251, 191, 36)"
-      && p["font-size"] && p["font-size"][0] === "11px",
+    hit: (p) => p["color"] && p["color"][0] === "rgb(251, 191, 36)",
   },
   {
     name: "link-token",
@@ -155,6 +153,15 @@ const NAMED = new Map([
    ["adjudicate", "The build gives this a `.btn.sm.pri` treatment — a brand-tinted fill and "
     + "edge — where the drawing draws a plain inline action. §2 defines both; which one an "
     + "additive action in a settings panel takes is a reading."]],
+
+  ["6|Ask for service",
+   ["neither", "**A residual collision under tag + text, and one for Z.** These words appear "
+    + "twice on BOTH sides — as a control and as a row label. The key distinguishes a "
+    + "`<button>` from a `<div>`, but this drawing renders its controls as `<div class=\"btn\">`, "
+    + "so the drawing's CONTROL pairs against the build's LABEL: two divs, same words. Tag + "
+    + "text narrows the collision class without closing it wherever a mock draws a control as "
+    + "a div, which is most mocks. Not a build divergence — the build has both nodes and both "
+    + "are right."]],
 
   ["2|holds no room",
    ["drawing", "The build draws this as a mark: a dashed edge, 3px of padding and a gap for "
