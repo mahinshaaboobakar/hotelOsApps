@@ -233,13 +233,13 @@ public static class TeamsView
         var team = all.FirstOrDefault(one => one.Id == teamId)
                    ?? throw new NotFoundException("team", teamId);
 
-        var memberIds = await teams.MembersAsync(call.Scope, teamId, on, cancellationToken);
+        var roll = await teams.MembersAsync(call.Scope, teamId, on, cancellationToken);
 
         var postings = await call.Service<PostingService>().ListAsync(
             call.Scope, new ListPostingsQuery(), cancellationToken);
 
         var everybody = postings.Select(one => one.StaffId)
-            .Concat(memberIds)
+            .Concat(roll.Select(one => one.StaffId))
             .Distinct()
             .ToList();
 
@@ -248,16 +248,18 @@ public static class TeamsView
 
         return new
         {
-            team = Row(team, departments, memberIds.Count),
+            team = Row(team, departments, roll.Count),
             onDate = on.ToString("yyyy-MM-dd"),
-            members = memberIds.Select(id => Member(id, names)).ToList(),
-            candidates = Candidates(postings, memberIds, names, team.DepartmentCode),
+            members = roll.Select(one => Member(one, names)).ToList(),
+            candidates = Candidates(
+                postings, [.. roll.Select(one => one.StaffId)], names, team.DepartmentCode),
         };
     }
 
     /// <summary>One person on the roll.</summary>
-    private static object Member(Guid staffId, IReadOnlyDictionary<Guid, string> names)
+    private static object Member(TeamMember member, IReadOnlyDictionary<Guid, string> names)
     {
+        var staffId = member.StaffId;
         var name = names.TryGetValue(staffId, out var found) ? found : null;
 
         return new
@@ -268,7 +270,16 @@ public static class TeamsView
             // there is not — a two-letter stand-in derived from a UUID would be
             // an identity this application invented for somebody.
             initials = name is null ? "" : Wording.Initials(name),
-            since = (string?)null,
+
+            // **When they joined, which this answer used to withhold.** It sent
+            // `null` unconditionally while the UI typed it as a string and the
+            // harness's fixture supplied one — so every capture showed a join
+            // date and every real property showed nothing, and the two could
+            // not be told apart from either side.
+            //
+            // ISO, per ADR 0152: the screen renders it against the property's
+            // locale.
+            since = member.JoinedOn.ToString("yyyy-MM-dd"),
         };
     }
 

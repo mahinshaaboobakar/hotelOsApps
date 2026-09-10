@@ -131,6 +131,50 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task The_roll_says_when_each_member_joined()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        harness.Directory.WithDepartmentName("HK", "Housekeeping");
+
+        var early = await Post(harness, scope, "Deepa Menon", "HK", "Supervisor");
+        var later = await Post(harness, scope, "Ravi Kurian", "HK", "Room attendant");
+        var team = await Form(harness, scope, "HK", "Morning Crew");
+
+        var joined = new DateOnly(2026, 9, 4);
+        foreach (var (staff, on) in new[] { (early, September), (later, joined) })
+        {
+            await harness.CallAsync(TeamsView.Write, scope, "addMember", new
+            {
+                teamId = team,
+                staffId = staff,
+                on = on.ToString("yyyy-MM-dd"),
+            });
+        }
+
+        var answer = await harness.CallAsync(
+            TeamsView.List, scope, "teams",
+            new { on = joined.ToString("yyyy-MM-dd"), team = team.ToString() });
+
+        var roll = answer.GetProperty("detail").GetProperty("members").EnumerateArray()
+            .Select(one => (one.GetProperty("name").GetString(),
+                            one.GetProperty("since").GetString()))
+            .ToList();
+
+        // **A date, and the right one per person.** This answered `null` for
+        // every member while the module typed it as a string and the harness
+        // fixture supplied one, so a capture showed a join date and a property
+        // showed nothing. The value was on the membership row the query threw
+        // away.
+        //
+        // ISO on the wire — ADR 0152 — and ordered by when they joined, which
+        // was previously whatever the database returned.
+        Assert.Equal(
+            [("Deepa Menon", "2026-09-01"), ("Ravi Kurian", "2026-09-04")],
+            roll);
+    }
+
+    [Fact]
     public async Task The_teams_read_carries_every_department_a_team_could_be_formed_in()
     {
         var harness = new ModuleHarness(fixture);

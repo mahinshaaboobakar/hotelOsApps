@@ -353,7 +353,7 @@ public class TeamService(
     /// <param name="on">Which day.</param>
     /// <param name="cancellationToken">Cancellation.</param>
     /// <returns>The staff ids — this application holds no name.</returns>
-    public async Task<IReadOnlyList<Guid>> MembersAsync(
+    public async Task<IReadOnlyList<TeamMember>> MembersAsync(
         RequestScope scope, Guid teamId, DateOnly on, CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
@@ -363,7 +363,20 @@ public class TeamService(
             .Where(m => m.PropertyId == scope.PropertyId && m.TeamId == teamId)
             .ToListAsync(cancellationToken);
 
-        return [.. members.Where(m => m.IsInForceOn(on)).Select(m => m.StaffId)];
+        // **The memberships, not their staff ids.** This returned ids alone, so
+        // the roll had nothing to say when a person joined and the view sent
+        // `since = null` for every member — while the value sat on the row it
+        // had just discarded. One caller wants the count and one wants the
+        // dates; a second method for the same query would be the same rows
+        // fetched twice.
+        //
+        // Ordered by when they joined, then by id. The order was previously
+        // whatever the database returned, which is not an order — two runs
+        // could draw one roll two ways and nothing would be wrong.
+        return [.. members
+            .Where(m => m.IsInForceOn(on))
+            .OrderBy(m => m.JoinedOn)
+            .ThenBy(m => m.StaffId)];
     }
 
     /// <summary>End every membership a person holds in one department.</summary>

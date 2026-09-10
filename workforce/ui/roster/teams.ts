@@ -55,12 +55,12 @@ export const recordedTeams: Teams = {
     },
     onDate: "2026-09-04",
     members: [
-      { staffId: "s-pd", name: "P. Das", initials: "PD", since: "since 12 Mar" },
-      { staffId: "s-rk", name: "R. Kurian", initials: "RK", since: "since 12 Mar" },
-      { staffId: "s-sk", name: "S. Kumar", initials: "SK", since: "since 2 Apr" },
-      { staffId: "s-np", name: "N. Pillai", initials: "NP", since: "since 2 Apr" },
-      { staffId: "s-dr", name: "D. Rao", initials: "DR", since: "since 19 Aug" },
-      { staffId: "s-vn", name: "V. Nambiar", initials: "VN", since: "since 1 Sep" },
+      { staffId: "s-pd", name: "P. Das", initials: "PD", since: "2026-03-12" },
+      { staffId: "s-rk", name: "R. Kurian", initials: "RK", since: "2026-03-12" },
+      { staffId: "s-sk", name: "S. Kumar", initials: "SK", since: "2026-04-02" },
+      { staffId: "s-np", name: "N. Pillai", initials: "NP", since: "2026-04-02" },
+      { staffId: "s-dr", name: "D. Rao", initials: "DR", since: "2026-08-19" },
+      { staffId: "s-vn", name: "V. Nambiar", initials: "VN", since: "2026-09-01" },
     ],
     candidates: [
       {

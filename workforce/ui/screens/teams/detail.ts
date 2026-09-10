@@ -42,7 +42,7 @@ export function detail(
     el("div", "btn", "Rename"), action("Stand down", "down", place));
 
   pane.append(head, department(open), count(open, property), el("div", "tsec", "Members"),
-    members(open.members), action("＋ Add a member", "member", place), why());
+    members(open.members, property), action("＋ Add a member", "member", place), why());
 
   return pane;
 }
@@ -69,7 +69,9 @@ function count(open: TeamDetail, property: PropertyEnvironment): HTMLElement {
 }
 
 /** The people, each with the day they joined. */
-function members(people: readonly Member[]): HTMLElement {
+function members(
+  people: readonly Member[], property: PropertyEnvironment,
+): HTMLElement {
   const list = el("div", "tlist");
 
   for (const person of people) {
@@ -81,7 +83,12 @@ function members(people: readonly Member[]): HTMLElement {
     // module gets to invent.
     who.append(
       el("b", undefined, person.name ?? "—"),
-      el("s", undefined, person.since));
+      // **The word is the screen's; the date is the wire's.** The fixture
+      // carried the whole phrase - "since 12 Mar" - so the vocabulary of
+      // this row lived in the data, where no locale could reach it and no
+      // other screen could reuse it.
+      el("s", undefined,
+        `since ${formatDay(person.since, property, "day-month-year")}`));
 
     row.append(el("div", "av", person.initials), who, el("div", "grow"),
       el("div", "btn", "Remove"));

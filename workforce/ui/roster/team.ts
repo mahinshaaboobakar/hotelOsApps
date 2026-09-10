@@ -70,7 +70,14 @@ export interface Member {
   /** The initials the avatar draws — derived from the name, absent without one. */
   initials: string;
 
-  /** When they joined, as the row shows it. */
+  /**
+   * When they joined, as the wire carries it.
+   *
+   * **The service used to send `null` here, always**, while this type said
+   * `string` and the harness's fixture supplied a date — so every capture
+   * showed a join date, every real property showed nothing, and neither side
+   * could tell. The value was on the row the query discarded.
+   */
   since: string;
 }
 

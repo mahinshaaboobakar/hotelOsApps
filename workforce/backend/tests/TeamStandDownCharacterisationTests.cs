@@ -55,9 +55,13 @@ public class TeamStandDownCharacterisationTests(WorkforceFixture fixture)
         // same convention the posting uses — so today cannot tell the two
         // toggle positions apart, and a pair of tests that both passed on today
         // would be a pair that proved nothing.
+        // `MembersAsync` answers memberships rather than staff ids now — the
+        // roll needs the join date and the ids alone could not carry one.
+        // Rewritten rather than dropped, ADR 0034: the rule is unchanged and
+        // only what satisfies it moved.
         Assert.Equal(
             staff,
-            Assert.Single(await teams.MembersAsync(scope, team.Id, Tomorrow, default)));
+            Assert.Single(await teams.MembersAsync(scope, team.Id, Tomorrow, default)).StaffId);
     }
 
     [Fact]
