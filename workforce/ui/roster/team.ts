@@ -108,8 +108,18 @@ export interface Teams {
   /** Every team, active first — the order the service returns. */
   teams: readonly Team[];
 
-  /** The day the counts are for. */
+  /** The day the counts are for, as the service renders it. */
   on: string;
+
+  /**
+   * The same day, as the wire carries it.
+   *
+   * **A write needs a date it can send**, and `on` above is a rendering —
+   * reconstructing a date by parsing *Thu 4 Sep* is how a screen invents a
+   * year. This is what a membership's start date is sent as, and what
+   * `formatDay` renders from when a sheet has to show it.
+   */
+  onDate: string;
 
   /**
    * The team whose roll the answer carries, when it carries one.

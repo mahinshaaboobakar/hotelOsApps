@@ -15,40 +15,92 @@
  * supervisor sits down on Friday to build.
  */
 
+import { formatDay, type HostApi } from "@hotelos/sdk";
+
+import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
-import type { TeamDetail } from "../../roster/team";
-import type { Candidate } from "../../roster/team";
+import { write, WriteRefused } from "../../roster";
+import type { Candidate, TeamDetail } from "../../roster/team";
 
 /**
  * Build the dialog.
  *
+ * @param host the bridge
+ * @param onDate the day the membership starts, as the wire carries it
  * @param close called when it is dismissed
  * @param open the team the pane has open, from the loaded board - null when
  *   none is open, and then the dialog names no team rather than one it made up
+ * @param done called after the member is added, so the roll is re-read
  * @returns the overlay
  */
 export function addMember(
+  host: HostApi,
+  onDate: string,
   close: () => void,
   open: TeamDetail | null,
+  done: () => void,
 ): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
 
   const department = open?.team.departmentName ?? "its department";
+  const candidates = open?.candidates ?? [];
+
+  let chosen: Candidate | null = null;
 
   const head = el("div");
   head.append(
     el("div", "ht", "Add a member"),
     el("div", "hsub", `To ${open?.team.name ?? "this team"}, in ${department}.`));
 
+  const refusal = el("div", "note twarn");
+  const acts = foot("Add to team", "Adding…", close);
+
+  function waiting(): string | null {
+    // The team is the pane's, so the only thing this dialog waits on is a
+    // person - and it says so rather than greying out silently.
+    if (open === null) return "No team is open";
+    if (chosen === null) return "Choose somebody";
+    return null;
+  }
+
+  async function submit(): Promise<void> {
+    if (open === null || chosen === null) return;
+
+    refusal.replaceChildren();
+    acts.working(true);
+
+    try {
+      await write(host, "posting.assign", "addMember",
+        { teamId: open.team.id, staffId: chosen.staffId, on: onDate });
+      done();
+    } catch (error) {
+      // Section 9: a refusal keeps the overlay open, carrying the reason.
+      refusal.append(el("span", undefined,
+        error instanceof WriteRefused
+          ? error.message
+          : "That did not go through. Nothing was changed."));
+      acts.working(false);
+
+      if (!(error instanceof WriteRefused)) throw error;
+    }
+  }
+
+  acts.onConfirm(() => { void submit(); });
+
   fill(
     dialog,
-    head, from(), who(open?.candidates ?? []),
+    head,
+    from(onDate, host),
+    who(candidates, (candidate) => { chosen = candidate; acts.waitingFor(waiting()); }),
     // The refusal explains itself only when there is one to explain.
-    (open?.candidates ?? []).some((one) => one.refused !== null)
-      ? why(open?.candidates ?? [], department)
+    candidates.some((one) => one.refused !== null)
+      ? why(candidates, department)
       : null,
-    actions(close));
+    refusal,
+    acts.row);
+
+  acts.waitingFor(waiting());
 
   scrim.append(dialog);
   scrim.addEventListener("click", (event) => {
@@ -58,10 +110,23 @@ export function addMember(
   return scrim;
 }
 
-/** The day the membership starts. */
-function from(): HTMLElement {
+/**
+ * The day the membership starts.
+ *
+ * **Rendered from the ISO day the read answered**, through the SDK against the
+ * property's own locale. It used to be the literal `Thu 4 Sep 2026` - the
+ * frame's date, on every property, forever - and it is also the date the write
+ * sends, so the field and the payload cannot disagree.
+ *
+ * It is not editable yet, and that is deliberate rather than unfinished: the
+ * day comes from the board the person is looking at, and a second date control
+ * here would let a supervisor form next week's crew while reading this week's
+ * candidates. Section 10's rule holds - it is drawn, because nothing behind it
+ * accepts a different day.
+ */
+function from(onDate: string, host: HostApi): HTMLElement {
   const field = el("div", "fld");
-  const input = el("div", "inp", "Thu 4 Sep 2026");
+  const input = el("div", "inp", formatDay(onDate, host.property, "day-month-year"));
 
   const note = el("div", "note");
   note.append(
@@ -72,17 +137,41 @@ function from(): HTMLElement {
   return fill(field, el("div", "fld-label", "From"), input, note);
 }
 
-/** Everybody the picker offers, and the one it refuses. */
-function who(candidates: readonly Candidate[]): HTMLElement {
+/**
+ * Everybody the picker offers, and the one it refuses.
+ *
+ * **Nothing is chosen when the dialog opens.** The first eligible candidate
+ * used to arrive selected - `index === 0 ? " on" : ""` - which is the same
+ * fault as a department picker that arrives reading *Front Office*: it supplies
+ * an answer on the person's behalf, and the one it supplies is whoever the
+ * service happened to list first.
+ *
+ * A refused row is a real `disabled` button rather than a div wearing
+ * `aria-disabled`, so it cannot be clicked, cannot be tabbed into, and reports
+ * itself honestly to a screen reader.
+ */
+function who(
+  candidates: readonly Candidate[],
+  pick: (candidate: Candidate) => void,
+): HTMLElement {
   const field = el("div", "fld");
   const list = el("div", "tlist");
 
-  candidates.forEach((candidate, index) => {
-    const row = el(
-      "button",
-      `tmem${candidate.refused === null ? (index === 0 ? " on" : "") : " no"}`);
+  for (const candidate of candidates) {
+    const row = el("button", `tcand${candidate.refused === null ? "" : " no"}`);
     row.setAttribute("type", "button");
-    if (candidate.refused !== null) row.setAttribute("aria-disabled", "true");
+
+    if (candidate.refused !== null) {
+      row.toggleAttribute("disabled", true);
+    } else {
+      row.addEventListener("click", () => {
+        for (const other of Array.from(list.querySelectorAll(".tcand"))) {
+          other.classList.remove("on");
+        }
+        row.classList.add("on");
+        pick(candidate);
+      });
+    }
 
     const person = el("div");
     person.append(
@@ -97,7 +186,7 @@ function who(candidates: readonly Candidate[]): HTMLElement {
       candidate.refused === null ? null : el("span", "pill bad", candidate.refused));
 
     list.append(row);
-  });
+  }
 
   return fill(field, el("div", "fld-label", "Who"), list);
 }
@@ -128,17 +217,4 @@ function initials(name: string): string {
   const last = parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "";
 
   return `${first}${last}`.toUpperCase();
-}
-
-function actions(close: () => void): HTMLElement {
-  const row = el("div", "acts");
-
-  const cancel = el("button", "btn", "Cancel");
-  cancel.setAttribute("type", "button");
-  cancel.addEventListener("click", close);
-
-  const confirm = el("button", "btn pri", "Add to team");
-  confirm.setAttribute("type", "button");
-
-  return fill(row, el("div", "grow"), cancel, confirm);
 }

@@ -131,7 +131,11 @@ async function overlays(
     // The team the pane has open, which this function already holds. The
     // dialog used to read `recordedTeams.detail` instead - a fixture, on a
     // live screen, naming a team and its candidates.
-    return (await import("./member")).addMember(place.close, open);
+    //
+    // `onDate` is the board's own day, so the date the dialog shows and the
+    // date the write sends are one value read once.
+    return (await import("./member")).addMember(
+      host, board.onDate, place.close, open, done);
   }
 
   // Acts on the team the pane has open, so it does not exist without one —

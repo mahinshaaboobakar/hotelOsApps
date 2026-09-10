@@ -17,6 +17,7 @@ import type { PostingEnding, Teams } from "./team";
 export const recordedTeams: Teams = {
   property: "Kochi Beach Resort",
   on: "Thu 4 Sep",
+  onDate: "2026-09-04",
   teams: [
     {
       id: "t-mc", name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
@@ -100,6 +101,7 @@ export const recordedTeams: Teams = {
 export const recordedNoTeams: Teams = {
   property: "Kochi Beach Resort",
   on: "Thu 4 Sep",
+  onDate: "2026-09-04",
   teams: [],
   detail: null,
   // A property with no teams still has departments, and this is the state that

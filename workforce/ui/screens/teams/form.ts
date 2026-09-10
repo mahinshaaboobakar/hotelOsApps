@@ -30,6 +30,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
 import { write, WriteRefused } from "../../roster";
 import type { Department, Team } from "../../roster/team";
@@ -71,7 +72,7 @@ export function formTeam(
 
   const taken = el("div", "note twarn");
   const refusal = el("div", "note twarn");
-  const acts = actions(close);
+  const acts = foot("Form team", "Forming…", close);
 
   function redraw(): void {
     const clash = teams.find((team) =>
@@ -92,7 +93,7 @@ export function formTeam(
     // reason beside it — never live and refusing. The reason names the field
     // it is waiting on, because a greyed-out confirm with no explanation is a
     // control a person reads as broken.
-    acts.setReason(draft.department === null
+    acts.waitingFor(draft.department === null
       ? "Choose a department"
       : draft.name.trim() === ""
         ? "Name the team"
@@ -235,52 +236,4 @@ function name(taken: HTMLElement, typed: (value: string) => void): HTMLElement {
       + "vocabulary, a team is this hotel's."));
 
   return fill(field, el("div", "fld-label", "Name"), input, rule, taken);
-}
-
-/** The foot: cancel, confirm, and what the confirm is waiting for. */
-interface Actions {
-  row: HTMLElement;
-  onConfirm: (run: () => void) => void;
-  setReason: (reason: string | null) => void;
-  working: (busy: boolean) => void;
-}
-
-function actions(close: () => void): Actions {
-  const row = el("div", "acts");
-  const reason = el("div", "note");
-
-  const cancel = el("button", "btn", "Cancel");
-  cancel.setAttribute("type", "button");
-  cancel.addEventListener("click", close);
-
-  const confirm = el("button", "btn pri", "Form team");
-  confirm.setAttribute("type", "button");
-
-  fill(row, reason, el("div", "grow"), cancel, confirm);
-
-  return {
-    row,
-
-    onConfirm(run) {
-      confirm.addEventListener("click", () => {
-        // Guarded here as well as by the attribute: `disabled` stops a click on
-        // a `<button>`, and this function is the one place that decides the
-        // write happens, so it does not depend on the attribute being right.
-        if (confirm.hasAttribute("disabled")) return;
-        run();
-      });
-    },
-
-    setReason(waiting) {
-      reason.textContent = waiting ?? "";
-      confirm.classList.toggle("off", waiting !== null);
-      confirm.classList.toggle("pri", waiting === null);
-      confirm.toggleAttribute("disabled", waiting !== null);
-    },
-
-    working(busy) {
-      confirm.textContent = busy ? "Forming…" : "Form team";
-      confirm.toggleAttribute("disabled", busy);
-    },
-  };
 }

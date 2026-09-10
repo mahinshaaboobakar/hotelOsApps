@@ -63,6 +63,17 @@ public static class TeamsView
             property = call.Optional("property")?.GetString(),
             teams = rows,
             on = on.ToString("ddd d MMM"),
+
+            // **The same day, as the wire carries it.** A write needs a date it
+            // can send, and the field above is a rendering — reconstructing a
+            // date by parsing "Thu 4 Sep" is how a screen invents a year.
+            //
+            // It is ISO here and formatted in the module by the SDK's
+            // `formatDay`, against the property's own locale. The display field
+            // beside it is one of this service's 25 culture-sensitive
+            // renderings, which are machine-dependent for the reason the
+            // department ordering was and are not fixed here.
+            onDate = on.ToString("yyyy-MM-dd"),
             detail = open,
 
             // **The departments a team could be formed in, which the screen had

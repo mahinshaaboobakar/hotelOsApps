@@ -54,19 +54,29 @@ button.tgrid:focus-visible,button.tnarrow:focus-visible{
 .tsec{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
       color:var(--color-ink-muted,#8b93a7)}
 
-.tmem{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:9px;
+/* The pane's member rows and the dialog's candidate rows look the same and are
+   not the same thing: a member row is a div listing who is already in the team,
+   a candidate row is a button a person chooses. They shared one class until the
+   dialog began writing, and then a query for a candidate returned the pane's
+   rows instead - the first such row in the document is a member, and clicking
+   it does nothing at all. Half an hour went into a listener that was attached
+   the whole time, to elements the test never touched.
+   The no and on states belong to the choice, so they are the candidate's alone.
+   NO BACKTICKS in this file: every rule lives inside a template literal, and
+   this module counts them per file for exactly that reason. */
+.tmem,.tcand{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:9px;
       border:1px solid var(--color-line,rgb(255 255 255/.07))}
-.tmem b{font-weight:600;font-size:13px}
-.tmem s{text-decoration:none;display:block;font-size:11px;
+.tmem b,.tcand b{font-weight:600;font-size:13px}
+.tmem s,.tcand s{text-decoration:none;display:block;font-size:11px;
         color:var(--color-ink-faint,#5a6172)}
 /* Somebody the picker may not add. Dashed rather than hidden — a supervisor who
    cannot see them wonders where they went. */
-.tmem.no{opacity:.55;border-style:dashed}
+.tcand.no{opacity:.55;border-style:dashed}
 /* on, not pick: the Rota owns .pick for its 420px column panel, and every
    screen's rules compose into ONE stylesheet — so this row inherited
    flex-direction:column and drew its avatar centred above the name. Found by a
    capture; the drawing's own word for a chosen row is on. */
-.tmem.on{border-color:var(--color-brand,#818cf8);
+.tcand.on{border-color:var(--color-brand,#818cf8);
          background:color-mix(in srgb, var(--color-brand) 9%, transparent)}
 .tlist{display:flex;flex-direction:column;gap:6px}
 

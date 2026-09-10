@@ -168,14 +168,22 @@ describe("Teams", () => {
     await click(root, "button.tgrid", "Morning Crew");
     await click(root, ".btn", "Add a member");
 
-    const refused = Array.from(root.querySelectorAll<HTMLElement>(".tmem.no"));
+    const refused = Array.from(root.querySelectorAll<HTMLElement>(".tcand.no"));
     expect(refused).toHaveLength(1);
     expect(refused[0]?.textContent).toContain("Joseph Kurian");
     expect(refused[0]?.textContent).toContain("Not posted here");
 
     // Filtering him out would leave a supervisor looking for somebody who is
     // simply absent, which teaches nothing and reads as a broken picker.
-    expect(refused[0]?.getAttribute("aria-disabled")).toBe("true");
+    //
+    // **Really disabled, not `aria-disabled`.** This asserted the ARIA
+    // attribute until the picker began writing: a div wearing `aria-disabled`
+    // announces itself as unavailable and still takes a click and still takes
+    // focus, which was harmless while nothing happened on a click and is not
+    // now. Rewritten rather than dropped — ADR 0034 — because the rule it
+    // covers did not change, only what satisfies it.
+    expect(refused[0]?.hasAttribute("disabled")).toBe(true);
+    expect((refused[0] as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("offers the toggle as a switch a keyboard can reach", async () => {
