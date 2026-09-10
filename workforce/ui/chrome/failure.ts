@@ -220,8 +220,30 @@ export function causeOf(kind: string): Cause {
   switch (kind) {
     case "forbidden":
       return "forbidden";
+
+    // **A refusal is not a timeout, and this arm is why the default is not one
+    // either.** `rejected` and `invalid` mean the service answered and declined
+    // - and the shell folds HTTP 404, *no handler mapped for that capability*,
+    // onto `Rejected` beside 409 and 422 (`module_call.rs:174`). Sent to
+    // `unanswered` they drew "did not answer in time" over a Try again button
+    // that could never succeed: a permanent condition dressed as a transient
+    // one, which is the second lie this file refuses everywhere else.
+    //
+    // `faulted` is the least wrong of three, not the right one. It offers no
+    // retry, which is the half that matters, and the service's own sentence
+    // reaches the screen verbatim because these two kinds are the ones ADR 0041
+    // makes client-facing - so the specifics are carried even though the
+    // heading is approximate.
+    //
+    // **The vocabulary has no way to say *no handler*** - `CORE-Q30`. A fourth
+    // cause is not this module's to mint: every application would reinvent it,
+    // and the four causes a person learns would then differ per application.
+    // Interim, and named as one.
+    case "rejected":
+    case "invalid":
     case "internal":
       return "faulted";
+
     default:
       return "unanswered";
   }

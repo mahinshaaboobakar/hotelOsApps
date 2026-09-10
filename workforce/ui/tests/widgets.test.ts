@@ -292,6 +292,20 @@ describe("a widget that cannot read", () => {
     expect(card.textContent ?? "").not.toContain("recorded");
   });
 
+  it("never offers a retry on a refusal, however the shell spells it", async () => {
+    // The shell maps HTTP 404 - no handler mapped - onto `rejected`, beside the
+    // genuine validation refusals 409 and 422. Sent to the retryable cause it
+    // drew a Try again button over a condition no retry can change.
+    for (const kind of ["rejected", "invalid", "forbidden", "internal"] as const) {
+      const card = await shiftBoard({
+        ...unavailable(),
+        call: () => Promise.reject(new HostCallError({ kind, message: "no" })),
+      });
+
+      expect(card.querySelector(".fail-acts")).toBeNull();
+    }
+  });
+
   it("names the capability and the moment, and invents no reason", async () => {
     // ADR 0041 strips a fault's own sentence at the boundary and logs it, so
     // the wire line carries what actually arrived. The module is not declining
