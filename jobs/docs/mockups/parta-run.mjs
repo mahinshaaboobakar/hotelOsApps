@@ -108,6 +108,34 @@ function keyOf(report) {
   return report.slice(at + "PAIRING KEY".length, end === -1 ? undefined : end).replace(/\s+/g, " ").trim();
 }
 
+
+/**
+ * The nodes a sweep produced, and the interfaces it read to get them.
+ *
+ * **The artefact grew a shape today** (`1e895354`): it was a bare array of
+ * nodes and is now `{ schema, reads, skipped, overlong, rows }`, because a
+ * sweep that reads `value` as well as text has to say so — a run where value
+ * was read is not comparable with one where it was not.
+ *
+ * An unknown shape throws by name rather than reading as zero. That is the same
+ * defect this driver already had once, when `PAIRED (25, 2 by position)` was
+ * read as nothing: a consumer that quietly copes with a producer it does not
+ * understand reports a catastrophe in the thing being measured.
+ */
+function swept(file) {
+  const artefact = JSON.parse(readFileSync(file, "utf8"));
+
+  if (Array.isArray(artefact)) {
+    throw new Error(`${file}: the pre-schema artefact — re-sweep on the current instrument`);
+  }
+
+  if (artefact.schema !== 1 || !Array.isArray(artefact.rows)) {
+    throw new Error(`${file}: unknown sweep artefact (schema ${String(artefact.schema)})`);
+  }
+
+  return artefact;
+}
+
 const sweep = (url, out, root) =>
   execFileSync("node", [MEASURE, "--sweep", url, out, "1440", "900", ...(root === undefined ? [] : [root])],
     { encoding: "utf8" }).trim();
@@ -126,7 +154,7 @@ const captured = CAPTURES.map(([name, page, query]) => {
   sweep(BUILT + query, built);
   return {
     name, page, built,
-    seen: new Set(JSON.parse(readFileSync(built, "utf8")).flatMap((node) => words(node.text))),
+    seen: new Set(swept(built).rows.flatMap((node) => words(node.text))),
   };
 });
 
@@ -175,6 +203,12 @@ for (const pair of scores) {
 const rows = [];
 for (const capture of captured) {
   const chosen = chosenFor.get(capture.name);
+  // **The JSON is the source; the report is for reading.** Retired rather than
+  // hardened, per the contract at `review-measure/report.mjs:18-40`: a prose
+  // line is improvable by design, and this driver has already read `PAIRED (25,
+  // 2 by position)` as zero once. Both forms render the same object, so nothing
+  // is lost by quoting the one that cannot be improved out from under a
+  // consumer.
   const report = execFileSync(
     "node",
     [MEASURE, "--compare", join(HERE, `drawn-${chosen.frame.name}.json`), capture.built, capture.name],
@@ -182,25 +216,51 @@ for (const capture of captured) {
   );
   writeFileSync(join(HERE, `compare-${capture.name}.txt`), report, "utf8");
 
-  // **Tolerant of the report's own growth.** This read `PAIRED (n)` exactly, and
-  // the instrument grew a suffix — `PAIRED (25, 2 by position)` — the day
-  // ARCH-Q12 gained its second key. Every row silently read zero. A parser that
-  // demands the whole line is a parser that breaks on an improvement.
-  const paired = Number(/PAIRED \((\d+)/.exec(report)?.[1] ?? 0);
-  const key = keyOf(report);
-  const differs = (report.match(/^ {2}DIFFERS/gm) ?? []).length;
-  const collapsed = /COLLAPSED\s+drawn (\d+), built (\d+)/.exec(report);
-  const readings = JSON.parse(readFileSync(capture.built, "utf8"))
-    .reduce((sum, node) => sum + Object.keys(node.style).length, 0);
+  const result = JSON.parse(execFileSync(
+    "node",
+    [MEASURE, "--compare", join(HERE, `drawn-${chosen.frame.name}.json`), capture.built, capture.name, "--json"],
+    { encoding: "utf8" },
+  ));
+
+  // Schema first, then by name — and never enumerate the buckets. `counts` may
+  // gain one and `key` may gain a fact (`valueRead` arrived the day after `key`
+  // itself); a consumer holding a closed set breaks on an addition that harms
+  // nothing.
+  if (result.schema !== 1) {
+    throw new Error(`${capture.name}: comparison schema ${String(result.schema)} is not one this driver reads`);
+  }
+
+  /** A named field that is absent is an ERROR, never a zero — the one thing to implement rather than inherit. */
+  const count = (name) => {
+    const value = result.counts?.[name];
+    if (typeof value !== "number") {
+      throw new Error(`${capture.name}: counts.${name} is absent — that is a contract break, not a zero`);
+    }
+    return value;
+  };
+
+  const paired = count("paired");
+  const differs = count("differing");
+  const collapsedDrawn = count("collapsed");
+  const key = `${result.key.description} (${result.key.step}, ${result.key.changedOn})`;
+  const artefact = swept(capture.built);
+  const readings = artefact.rows.reduce((sum, node) => sum + Object.keys(node.style).length, 0);
 
   rows.push({
     name: capture.name,
     frame: chosen.frame.name,
     match: Number(chosen.score.toFixed(2)),
     runnerUp: Number((runnerUpFor.get(capture.name) ?? 0).toFixed(2)),
-    paired, differs, readings,
-    collapsedDrawn: Number(collapsed?.[1] ?? 0),
-    collapsedBuilt: Number(collapsed?.[2] ?? 0),
+    paired,
+    differs,
+    readings,
+    identical: count("identical"),
+    unpairedDrawn: count("unpairedDrawn"),
+    unpairedBuilt: count("unpairedBuilt"),
+    collapsedDrawn,
+    collapsedBuilt: collapsedDrawn,
+    valueRead: `drawn ${String(result.key.valueRead.drawn)} · built ${String(result.key.valueRead.built)}`,
+    reads: artefact.reads.join(" + "),
     key,
   });
 

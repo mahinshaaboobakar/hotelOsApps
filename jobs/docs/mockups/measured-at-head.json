@@ -7,9 +7,14 @@
     "paired": 116,
     "differs": 26,
     "readings": 2646,
+    "identical": 90,
+    "unpairedDrawn": 46,
+    "unpairedBuilt": 29,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02-job-overview",
@@ -19,9 +24,14 @@
     "paired": 47,
     "differs": 9,
     "readings": 1224,
+    "identical": 38,
+    "unpairedDrawn": 26,
+    "unpairedBuilt": 21,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02b-job-work",
@@ -31,9 +41,14 @@
     "paired": 36,
     "differs": 5,
     "readings": 1134,
+    "identical": 31,
+    "unpairedDrawn": 16,
+    "unpairedBuilt": 27,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02c-job-history",
@@ -43,9 +58,14 @@
     "paired": 46,
     "differs": 3,
     "readings": 1278,
+    "identical": 43,
+    "unpairedDrawn": 16,
+    "unpairedBuilt": 25,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02d-job-notes",
@@ -55,9 +75,14 @@
     "paired": 12,
     "differs": 3,
     "readings": 720,
+    "identical": 9,
+    "unpairedDrawn": 14,
+    "unpairedBuilt": 28,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02e-job-links",
@@ -67,9 +92,14 @@
     "paired": 35,
     "differs": 5,
     "readings": 1116,
+    "identical": 30,
+    "unpairedDrawn": 14,
+    "unpairedBuilt": 27,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02f-job-rating",
@@ -79,9 +109,14 @@
     "paired": 21,
     "differs": 7,
     "readings": 648,
+    "identical": 14,
+    "unpairedDrawn": 10,
+    "unpairedBuilt": 15,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-02g-job-record",
@@ -91,33 +126,48 @@
     "paired": 25,
     "differs": 5,
     "readings": 846,
+    "identical": 20,
+    "unpairedDrawn": 11,
+    "unpairedBuilt": 22,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-03-raise",
     "frame": "01-08.html",
     "match": 0.17,
-    "runnerUp": 0.12,
-    "paired": 6,
-    "differs": 5,
-    "readings": 522,
+    "runnerUp": 0.13,
+    "paired": 8,
+    "differs": 7,
+    "readings": 576,
+    "identical": 1,
+    "unpairedDrawn": 32,
+    "unpairedBuilt": 24,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-04-resolve",
     "frame": "01-09.html",
-    "match": 0.38,
+    "match": 0.36,
     "runnerUp": 0.1,
     "paired": 6,
     "differs": 6,
-    "readings": 450,
+    "readings": 468,
+    "identical": 0,
+    "unpairedDrawn": 16,
+    "unpairedBuilt": 20,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-05-live",
@@ -127,9 +177,14 @@
     "paired": 56,
     "differs": 8,
     "readings": 1296,
+    "identical": 48,
+    "unpairedDrawn": 22,
+    "unpairedBuilt": 16,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-06-scheduled",
@@ -139,9 +194,14 @@
     "paired": 31,
     "differs": 5,
     "readings": 864,
+    "identical": 26,
+    "unpairedDrawn": 20,
+    "unpairedBuilt": 17,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-07-catalogue",
@@ -151,9 +211,14 @@
     "paired": 21,
     "differs": 5,
     "readings": 1188,
+    "identical": 16,
+    "unpairedDrawn": 52,
+    "unpairedBuilt": 43,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-08-settings-policy",
@@ -163,9 +228,14 @@
     "paired": 55,
     "differs": 7,
     "readings": 1188,
+    "identical": 48,
+    "unpairedDrawn": 16,
+    "unpairedBuilt": 11,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-08b-policy-list",
@@ -175,9 +245,14 @@
     "paired": 56,
     "differs": 2,
     "readings": 1404,
+    "identical": 54,
+    "unpairedDrawn": 22,
+    "unpairedBuilt": 22,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-08c-policy-flow",
@@ -187,9 +262,14 @@
     "paired": 27,
     "differs": 14,
     "readings": 1008,
+    "identical": 13,
+    "unpairedDrawn": 18,
+    "unpairedBuilt": 29,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-09-presence",
@@ -198,10 +278,15 @@
     "runnerUp": 0.2,
     "paired": 27,
     "differs": 1,
-    "readings": 918,
+    "readings": 954,
+    "identical": 26,
+    "unpairedDrawn": 12,
+    "unpairedBuilt": 26,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-10-who-is-told",
@@ -211,9 +296,14 @@
     "paired": 27,
     "differs": 1,
     "readings": 666,
+    "identical": 26,
+    "unpairedDrawn": 11,
+    "unpairedBuilt": 10,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-11-holds",
@@ -222,10 +312,15 @@
     "runnerUp": 0.17,
     "paired": 23,
     "differs": 4,
-    "readings": 774,
+    "readings": 792,
+    "identical": 19,
+    "unpairedDrawn": 8,
+    "unpairedBuilt": 21,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-12-closing",
@@ -234,10 +329,15 @@
     "runnerUp": 0.18,
     "paired": 25,
     "differs": 3,
-    "readings": 720,
+    "readings": 738,
+    "identical": 22,
+    "unpairedDrawn": 7,
+    "unpairedBuilt": 16,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   },
   {
     "name": "frame-13-access",
@@ -247,8 +347,13 @@
     "paired": 25,
     "differs": 1,
     "readings": 774,
+    "identical": 24,
+    "unpairedDrawn": 11,
+    "unpairedBuilt": 18,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
-    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
+    "valueRead": "drawn true · built true",
+    "reads": "text + value",
+    "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10)"
   }
 ]
