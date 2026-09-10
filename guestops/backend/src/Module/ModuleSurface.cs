@@ -127,6 +127,9 @@ public static class ModuleSurface
 
             "availability" => Availability(services, request, cancellationToken),
 
+            "stay" => services.GetRequiredService<StayDetailView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
             "activity" => services.GetRequiredService<ActivityView>()
                 .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
 
