@@ -167,25 +167,41 @@ export const DRIVE = {
     + "against the consumer gate, and they passed.",
 
   stopped:
-    "**`failed` is the supervisor recording a lost child, not an application "
-    + "that broke** — the log contains no failure, and the state changed when "
-    + "the Kernel it ran under went away. A later restart on a Kernel built "
-    + "from HEAD reproduced the cause verbatim, twice: "
+    "**It stopped, and every reason since turned out to be something other than "
+    + "this application.** `failed` was the supervisor recording a lost child — "
+    + "the log holds no failure — and a restart then reproduced "
     + "`application_not_resumed package=guestops error=secret "
-    + "packages/guestops/database not found`, and the identical line for "
-    + "`jobs`. So the application is not the thing that is broken, and this "
-    + "certificate does not claim a drive it did not perform.",
+    + "packages/guestops/database not found` twice. Both were platform findings "
+    + "and both are closed: CC's lifecycle fix sealed the credential in the right "
+    + "namespace, and the Kernel exits that framed all of it were **the agent "
+    + "harness's job object reaping its children** — `KILL_ON_JOB_CLOSE` — never "
+    + "a Kernel fault at all. The dev stack is the owner's to start from a real "
+    + "terminal now.",
+
+  since:
+    "**What has been proven since, on a stack that stays up.** GuestOps installs "
+    + "from a HEAD-built package, is adopted by the Kernel at start "
+    + "(`application_resumed`), answers `/health` on its own door, and consumes "
+    + "all three subjects. The desktop enrols against the development "
+    + "installation and holds it across restarts — `desktop_tls_ready anchors=1`, "
+    + "no join screen — after `SHELL-Q43` gave the root a selection and the "
+    + "installation its own file, so Al Tamar Dubai's binding survives beside it. "
+    + "And ten of eleven envelope probes were run live against the app's own "
+    + "door: no token, forged token, unmapped method, unmapped capability, GET on "
+    + "a POST route, chunked without a type, HEAD, OPTIONS, `Basic`, and a path "
+    + "traversal in the method segment — 401 · 401 · 401 · 404 · 405 · 401 · 405 "
+    + "· 405 · 401 · 401, **every refusal zero bytes**, and the mTLS door "
+    + "refusing an unauthenticated caller at the handshake.",
 
   blocked:
-    "**Two platform findings hold the UI drive, and both are routed rather than "
-    + "worked around.** The desktop reads a single `machine.json` at "
-    + "`%LOCALAPPDATA%\HotelOS` with no profile in the path, so a development "
-    + "enrolment would overwrite the installed product's binding — the "
-    + "per-installation file ADR 0126 §4 defined for exactly this is exported, "
-    + "tested, and called by nothing. And the resume secret above is a platform "
-    + "question, not this application's. **Neither was routed around**, because "
-    + "a certificate that reports a drive performed through a workaround "
-    + "describes a platform nobody will ship.",
+    "**One thing holds the rest, and it is not this application.** Part B's "
+    + "second column — reachable-by-a-person — needs an authorization tuple "
+    + "naming the operator, and until one exists every capability answers 403. "
+    + "The two findings that used to sit here are closed: the desktop's single "
+    + "`machine.json` became a selection plus a per-installation file "
+    + "(`SHELL-Q43`), and the resume secret was CC's. **Neither was routed "
+    + "around**, because a certificate that reports a drive performed through a "
+    + "workaround describes a platform nobody will ship.",
 };
 
 /**

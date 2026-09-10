@@ -92,6 +92,7 @@ export function widgets(captures: readonly { entry: string; html: string }[],
     <p>${rich(DRIVE.answered)}</p>
     <p>${rich(DRIVE.ran)}</p>
     <p>${rich(DRIVE.stopped)}</p>
+    <p>${rich(DRIVE.since)}</p>
     <p>${rich(DRIVE.blocked)}</p>
   </div>
 

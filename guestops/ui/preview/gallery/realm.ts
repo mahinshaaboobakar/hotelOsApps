@@ -192,6 +192,13 @@ function host(params: URLSearchParams): Parameters<typeof start>[0] {
     setup: recordedSetup,
     requests: alone ? recordedRequestsAlone : recordedRequests,
     servicing: alone ? recordedServicingAlone : recordedServicing,
+
+    // **The bar's operator, answered so the capture shows what a desk shows.**
+    // The frames draw a signed-in person at the right of the bar; a harness that
+    // left `me` unanswered would photograph "operator not established" on all
+    // seventeen and the pairs would disagree about a thing that is not wrong.
+    // These are the drawing's own two values, taken from it rather than chosen.
+    me: { name: "Anitha Menon", where: "Front Office · Avenue Regent" },
   };
 
   return {

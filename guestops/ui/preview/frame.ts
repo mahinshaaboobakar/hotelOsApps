@@ -83,6 +83,12 @@ function host(granted: readonly string[]): HostApi {
         // property rather than a route.
         requests: alone ? recordedRequestsAlone : recordedRequests,
         servicing: alone ? recordedServicingAlone : recordedServicing,
+
+        // The bar's operator. Unanswered, every capture would read "operator
+        // not established" against a drawing that names one — seventeen false
+        // divergences on a value neither side is wrong about. The drawing's own
+        // two, taken from it.
+        me: { name: "Anitha Menon", where: "Front Office · Avenue Regent" },
       };
 
       return method in answers
