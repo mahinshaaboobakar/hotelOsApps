@@ -38,7 +38,7 @@ body{margin:0}
        background:var(--color-surface-raised,#11141f);
        border:1px solid var(--color-line,rgb(255 255 255/.07));
        border-radius:var(--radius-panel,1rem);
-       box-shadow:0 12px 32px -8px rgba(0,0,0,.32);
+       box-shadow:0 12px 32px -8px color-mix(in srgb, var(--color-surface,#0b0d14) 55%, transparent);
        overflow:hidden;
        font-family:var(--font-sans,system-ui,-apple-system,"Segoe UI",sans-serif);
        color:var(--color-ink,#e8ebf4)}

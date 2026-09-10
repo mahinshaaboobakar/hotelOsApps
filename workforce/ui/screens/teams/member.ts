@@ -61,7 +61,7 @@ export function addMember(
 /** The day the membership starts. */
 function from(): HTMLElement {
   const field = el("div", "fld");
-  const input = el("div", "finput", "Thu 4 Sep 2026");
+  const input = el("div", "inp", "Thu 4 Sep 2026");
 
   const note = el("div", "note");
   note.append(
@@ -69,7 +69,7 @@ function from(): HTMLElement {
     el("b", undefined, "next week's"),
     el("span", undefined, " postings, not today's."));
 
-  return fill(field, el("div", "flab", "From"), input, note);
+  return fill(field, el("div", "fld-label", "From"), input, note);
 }
 
 /** Everybody the picker offers, and the one it refuses. */
@@ -99,7 +99,7 @@ function who(candidates: readonly Candidate[]): HTMLElement {
     list.append(row);
   });
 
-  return fill(field, el("div", "flab", "Who"), list);
+  return fill(field, el("div", "fld-label", "Who"), list);
 }
 
 /**

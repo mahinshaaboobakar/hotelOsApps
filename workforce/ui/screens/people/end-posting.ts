@@ -62,8 +62,8 @@ function lastDay(ending: PostingEnding): HTMLElement {
   const field = el("div", "fld");
 
   return fill(field,
-    el("div", "flab", "Last day"),
-    el("div", "finput", ending.lastDay));
+    el("div", "fld-label", "Last day"),
+    el("div", "inp", ending.lastDay));
 }
 
 /** What else this closes, listed before the button that does it. */

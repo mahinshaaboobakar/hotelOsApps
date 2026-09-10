@@ -44,12 +44,12 @@ function span(): HTMLElement {
   const pair = el("div", "spans");
 
   pair.append(
-    el("div", "finput", "Fri 28 · 20:00"),
-    el("div", "finput", "Sat 29 · 08:00"),
+    el("div", "inp", "Fri 28 · 20:00"),
+    el("div", "inp", "Sat 29 · 08:00"),
   );
 
   row.append(
-    el("div", "flab", "From"),
+    el("div", "fld-label", "From"),
     pair,
     // Derived from the two ends and shown back, so a person can see that the
     // form understood what they typed — the alternative is discovering it on
@@ -85,7 +85,7 @@ function who(): HTMLElement {
     list.append(option);
   }
 
-  row.append(el("div", "flab", "Who"), list);
+  row.append(el("div", "fld-label", "Who"), list);
   return row;
 }
 

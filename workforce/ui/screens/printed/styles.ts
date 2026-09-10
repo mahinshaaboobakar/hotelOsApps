@@ -1,5 +1,13 @@
 /**
- * The printed sheet's rules — ink on paper, and no colour at all.
+ * The printed page's rules — ink on paper, and no colour at all.
+ *
+ * **The class is `.page`, not `.sheet`, and the name matters.** Page 64 §9
+ * publishes `.sheet` for the right-hand overlay, and `01-workforce-gold.html`
+ * uses it that way too — 390px, right-anchored. This module had the name on
+ * the printed paper instead, so adopting the standard's vocabulary for the
+ * overlay put two meanings of one class in one stylesheet. The module's own
+ * cross-screen guard refused it, which is the `replay.rs` collision of
+ * ADR 0037 caught in CSS rather than in a review.
  *
  * Deliberately not on published tokens: this artifact is for a monochrome
  * photocopier, so it fixes black on white rather than following the viewer's
@@ -13,7 +21,7 @@ export const PRINTED_CSS = `
       padding:16px 26px}
 .paper{padding:20px 26px 26px;overflow:auto;flex:1 1 auto;
        background:var(--color-surface,#0b0d14)}
-.sheet{background:#fff;color:#111;padding:26px 30px;min-height:100vh;
+.page{background:#fff;color:#111;padding:26px 30px;min-height:100vh;
        font:12px/1.5 "Times New Roman",Georgia,serif}
 .phead{display:flex;justify-content:space-between;align-items:flex-end;
        border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px}

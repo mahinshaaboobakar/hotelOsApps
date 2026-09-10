@@ -57,8 +57,8 @@ function field(label: string, value: string, note: string): HTMLElement {
   const row = el("div", "fld");
 
   row.append(
-    el("div", "flab", label),
-    el("div", "finput", value),
+    el("div", "fld-label", label),
+    el("div", "inp", value),
     el("div", "note", note),
   );
 
@@ -76,7 +76,7 @@ function kind(): HTMLElement {
   choices.append(working, off);
 
   row.append(
-    el("div", "flab", "Kind"),
+    el("div", "fld-label", "Kind"),
     choices,
     el("div", "note",
       "An off shift has no times and counts no hours — that is what Week-off is. "
@@ -95,12 +95,12 @@ function times(): HTMLElement {
   const spans = el("div", "spans four");
 
   spans.append(
-    el("div", "finput", "10:00"), el("div", "finput", "14:00"),
-    el("div", "finput", "18:00"), el("div", "finput", "22:00"),
+    el("div", "inp", "10:00"), el("div", "inp", "14:00"),
+    el("div", "inp", "18:00"), el("div", "inp", "22:00"),
   );
 
   row.append(
-    el("div", "flab", "Times"),
+    el("div", "fld-label", "Times"),
     spans,
     el("div", "note",
       "A second span makes it a split shift. A span ending before it starts "
@@ -120,7 +120,7 @@ function colour(): HTMLElement {
   }
 
   row.append(
-    el("div", "flab", "Colour"),
+    el("div", "fld-label", "Colour"),
     swatches,
     el("div", "note",
       "How the week reads at a glance. Colour is the shift's own attribute, not "

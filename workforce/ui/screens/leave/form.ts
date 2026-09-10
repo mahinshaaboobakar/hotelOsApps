@@ -62,12 +62,12 @@ export function requestForm(
 /** Who it is for, and the sentence that keeps the record honest. */
 function forWhom(who: string, raisedBy: string): HTMLElement {
   const row = el("div", "fld");
-  const picker = el("div", "finput");
+  const picker = el("div", "inp");
 
   picker.append(el("span", "av", initials(who)), el("span", undefined, who));
 
   row.append(
-    el("div", "flab", "For"),
+    el("div", "fld-label", "For"),
     picker,
     el("div", "note",
       `Recorded as raised by ${raisedBy} on behalf of ${who}. `
@@ -87,7 +87,7 @@ function forWhom(who: string, raisedBy: string): HTMLElement {
 function type(balance: Balance): HTMLElement {
   const row = el("div", "fld");
 
-  row.append(el("div", "flab", "Type"), el("div", "finput", `${balance.type} leave`));
+  row.append(el("div", "fld-label", "Type"), el("div", "inp", `${balance.type} leave`));
 
   if (balance.days < 0) {
     const warn = el("div", "warnrow");
@@ -108,10 +108,10 @@ function dates(): HTMLElement {
   const row = el("div", "fld");
   const pair = el("div", "spans");
 
-  pair.append(el("div", "finput", "14 Sep 2026"), el("div", "finput", "16 Sep 2026"));
+  pair.append(el("div", "inp", "14 Sep 2026"), el("div", "inp", "16 Sep 2026"));
 
   row.append(
-    el("div", "flab", "Dates"),
+    el("div", "fld-label", "Dates"),
     pair,
     // The second sentence is the one that matters: the form knows who else is
     // away, which is the fact a manager would otherwise discover after
@@ -126,8 +126,8 @@ function note(): HTMLElement {
   const row = el("div", "fld");
 
   row.append(
-    el("div", "flab", "Note"),
-    el("div", "finput", "Brother's wedding — travelling on the 13th."),
+    el("div", "fld-label", "Note"),
+    el("div", "inp", "Brother's wedding — travelling on the 13th."),
   );
 
   return row;

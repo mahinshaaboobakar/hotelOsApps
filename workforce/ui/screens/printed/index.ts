@@ -35,7 +35,7 @@ import { type Duty, type Register } from "../../roster/duty";
 export async function printed(
   host: HostApi, root: HTMLElement, back: () => void = () => {},
 ): Promise<void> {
-  // **Both reads, because the sheet shows both.** The week was already read
+  // **Both reads, because the page shows both.** The week was already read
   // here; the Manager-on-Duty band was taken from a recorded fixture whatever
   // the service said, so a printed rota could carry a real week over invented
   // duty rows — and paper is exactly where nobody would notice, because there
@@ -45,7 +45,7 @@ export async function printed(
     load<Register>(host, ROSTER_READ, "register"),
   ]);
 
-  // **Either read failing means no sheet.** This is paper: a fabricated row
+  // **Either read failing means no page.** This is paper: a fabricated row
   // here is the one nobody notices, because there is no live screen beside it
   // to disagree with. Both reads feed one page, so the first failure is the
   // page's failure - printing half a rota would be worse than printing none.
@@ -60,20 +60,20 @@ export async function printed(
 
   const week = gotWeek.value;
 
-  const sheet = el("div", "sheet");
-  sheet.append(
+  const page = el("div", "page");
+  page.append(
     masthead(week), grid(week, gotDuty.value, host.property), legend(week), changes());
 
   const paper = el("div", "paper");
-  paper.append(sheet);
+  paper.append(page);
 
   root.append(preview(back), paper);
 }
 
 /**
- * The preview's own chrome — what the sheet is, and the way out of it.
+ * The preview's own chrome — what the page is, and the way out of it.
  *
- * The build had none: the sheet replaced the module's chrome and the frame's
+ * The build had none: the page replaced the module's chrome and the frame's
  * Page setup and Print went with it, on the argument that a dead button is
  * worse than none. That was wrong twice over. The option is what the screen is
  * for, and a preview a person cannot leave is worse than one with a control
@@ -99,7 +99,7 @@ function preview(back: () => void): HTMLElement {
     el("div", "btn", "Page setup"), el("div", "btn pri", "⎙ Print"));
 }
 
-/** Who issued it and when — a printed sheet has no other provenance. */
+/** Who issued it and when — a printed page has no other provenance. */
 function masthead(week: Week): HTMLElement {
   const head = el("div", "phead");
   const title = el("div");
@@ -126,13 +126,13 @@ function grid(
   }
 
   // The MOD row shows TWO names on most days, because the duty crosses midnight
-  // and a printed sheet has no hover to explain it.
+  // and a printed page has no hover to explain it.
   table.append(el("div", "pcell pmod", "MANAGER ON DUTY"));
   for (let day = 0; day < week.days.length; day += 1) {
     const cell = el("div", "pcell pmod");
 
     for (const item of register.duties.filter((duty) => duty.day === day)) {
-      // The printed sheet says the hours in the property's clock too. Paper is
+      // The printed page says the hours in the property's clock too. Paper is
       // where a wrong timezone survives longest: there is no live screen beside
       // it to disagree, and somebody acts on it hours later.
       cell.append(el("div", undefined,
@@ -176,7 +176,7 @@ function legend(week: Week): HTMLElement {
 /**
  * One legend entry, its code boxed.
  *
- * A rule around the code, because this sheet is read after a photocopier has
+ * A rule around the code, because this page is read after a photocopier has
  * removed every colour: the box is what separates the code from the words beside
  * it when both are the same black.
  */
@@ -193,7 +193,7 @@ function entry(code: string, name: string, hours: string | null): HTMLElement {
 }
 
 /**
- * What changed after the sheet was issued.
+ * What changed after the page was issued.
  *
  * The week's record rather than somebody's memory — rendered from the events
  * the application already publishes, not kept as a second list that could

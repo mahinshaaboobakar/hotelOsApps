@@ -77,7 +77,7 @@ button{background:transparent;color:inherit;font:inherit;border:0;
                                          var(--color-bad,#f87171)))}
 .wf{height:100vh;display:flex;flex-direction:column;
     background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);
-    font:13.5px/1.55 var(--font-sans,"Segoe UI",system-ui,sans-serif);
+    font:13.5px/1.55 var(--font-sans,system-ui,-apple-system,"Segoe UI",sans-serif);
     font-variant-numeric:tabular-nums}
 
 /* # When a screen cannot read - APPS-Q26(4)
@@ -332,7 +332,7 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
    over two lines. The count is now said out loud at the call site. */
 .spans{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .spans.four{grid-template-columns:repeat(4,1fr);gap:6px}
-.spans .finput{white-space:nowrap}
+.spans .inp{white-space:nowrap}
 /* # The pager — §6, and it MATCHES the design system rather than importing it
    A hosted module is styled by tokens and never by importing a component
    across a realm, so the match is a rendering obligation. The arithmetic is
@@ -413,16 +413,16 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
      flex-direction:column;gap:14px;padding:22px 24px;border-radius:16px;
      background:var(--color-surface-raised,#11141f);
      border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
-     box-shadow:0 24px 60px rgb(0 0 0/.45)}
+     box-shadow:0 24px 60px color-mix(in srgb, var(--color-surface,#0b0d14) 72%, transparent)}
 /* The right-hand sheet. A form that is a place rather than a question: it holds
    the screen's edge, keeps its full height, and does not cover the list the
    name is being checked against. Frame 3 draws Form a team this way. */
 .scrim.edge{place-items:stretch;padding:10px}
-.dlg.edge{width:390px;max-width:100%;margin-left:auto;border-radius:16px}
+.dlg.sheet{width:390px;max-width:100%;margin-left:auto;border-radius:16px}
 .fld{display:flex;flex-direction:column;gap:5px}
-.flab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+.fld-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
       color:var(--color-ink-faint,#5a6172)}
-.finput{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
+.inp{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
         border-radius:8px;padding:7px 11px;font-size:13px;
         background:var(--color-surface,#0b0d14)}
 .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
@@ -453,9 +453,9 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
    change once. */
 .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;
       width:fit-content;white-space:nowrap}
-.pill.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));color:var(--color-ok,#34d399)}
-.pill.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));color:var(--color-warn,#fbbf24)}
-.pill.bad{background:var(--color-bad-soft,color-mix(in srgb, var(--color-bad) 13%, transparent));color:var(--color-bad,#f87171)}
+.pill.ok{background:var(--color-ok-soft,rgb(52 211 153 / 0.12));color:var(--color-ok,#34d399)}
+.pill.warn{background:var(--color-warn-soft,rgb(251 191 36 / 0.12));color:var(--color-warn,#fbbf24)}
+.pill.bad{background:var(--color-bad-soft,rgb(248 113 113 / 0.12));color:var(--color-bad,#f87171)}
 /* A TRANSLUCENT ground, never the raised surface. The raised one is the ground
    a card already has, so a neutral pill on a card renders as the plain text it
    was written to replace — the zone-chip defect, and only a capture can see
@@ -490,9 +490,9 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
               font-size:11px;font-weight:600}
 .legend .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
                     color:var(--color-brand,#818cf8)}
-.legend .code.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));
+.legend .code.ok{background:var(--color-ok-soft,rgb(52 211 153 / 0.12));
                  color:var(--color-ok,#34d399)}
-.legend .code.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));
+.legend .code.warn{background:var(--color-warn-soft,rgb(251 191 36 / 0.12));
                    color:var(--color-warn,#fbbf24)}
 .legend .code.neutral{color:var(--color-ink-faint,#5a6172)}
 .lnote{margin-left:auto;color:var(--color-ink-faint,#5a6172)}
@@ -502,11 +502,11 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
       padding:2px 6px;font-size:11.5px;font-weight:600;letter-spacing:.02em}
 .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
             color:var(--color-brand,#818cf8)}
-.code.ok{background:var(--color-ok-soft,color-mix(in srgb, var(--color-ok) 13%, transparent));
+.code.ok{background:var(--color-ok-soft,rgb(52 211 153 / 0.12));
          color:var(--color-ok,#34d399)}
-.code.warn{background:var(--color-warn-soft,color-mix(in srgb, var(--color-warn) 13%, transparent));
+.code.warn{background:var(--color-warn-soft,rgb(251 191 36 / 0.12));
            color:var(--color-warn,#fbbf24)}
-.code.bad{background:var(--color-bad-soft,color-mix(in srgb, var(--color-bad) 13%, transparent));
+.code.bad{background:var(--color-bad-soft,rgb(248 113 113 / 0.12));
           color:var(--color-bad,#f87171)}
 /* Same defect, same fix: the department chip sits on a card. */
 .code.neutral{background:color-mix(in srgb, var(--color-ink) 7%, transparent);

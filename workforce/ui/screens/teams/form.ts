@@ -20,7 +20,7 @@ export function formTeam(close: () => void): HTMLElement {
   // A sheet rather than a centred dialog: the name is being checked against
   // the list behind it, so the form holds the edge and leaves the list visible.
   const scrim = el("div", "scrim edge");
-  const sheet = el("div", "dlg edge");
+  const sheet = el("div", "dlg sheet");
 
   const head = el("div");
   head.append(
@@ -40,12 +40,12 @@ export function formTeam(close: () => void): HTMLElement {
 /** The department — one, and unchangeable afterwards. */
 function department(): HTMLElement {
   const field = el("div", "fld");
-  const picker = el("div", "finput");
+  const picker = el("div", "inp");
 
   picker.append(el("span", undefined, "Housekeeping"));
 
   return fill(field,
-    el("div", "flab", "Department"),
+    el("div", "fld-label", "Department"),
     picker,
     el("div", "note",
       "One department, and it cannot be changed afterwards. Moving a team "
@@ -57,7 +57,7 @@ function department(): HTMLElement {
 /** The name — the property's own word, and the duplicate it collides with. */
 function name(): HTMLElement {
   const field = el("div", "fld");
-  const input = el("div", "finput", "Morning Crew");
+  const input = el("div", "inp", "Morning Crew");
 
   const rule = el("div", "note");
   rule.append(
@@ -77,7 +77,7 @@ function name(): HTMLElement {
     el("span", undefined,
       ". Two with one name is a supervisor choosing at random."));
 
-  return fill(field, el("div", "flab", "Name"), input, rule, taken);
+  return fill(field, el("div", "fld-label", "Name"), input, rule, taken);
 }
 
 function actions(close: () => void): HTMLElement {
