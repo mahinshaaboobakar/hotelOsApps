@@ -16,8 +16,7 @@
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
 import { read, serve } from "../answer";
-import { card, el, label, note, opener, row, stat, stylesheet } from "../card";
-import { occupancy as recorded } from "../recorded";
+import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One room type, and how much of it is sold. */
 interface TypeRow {
@@ -52,7 +51,15 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Occupancy>(host, "reservation.read", "occupancy", recorded);
+    const answer = await read<Occupancy>(host, "reservation.read", "occupancy");
+
+    // A read that did not answer IS the card — APPS-Q42. The canvas is
+    // 320x384 and does not scroll, so a failure cannot sit above content;
+    // it takes the place of it.
+    if (!answer.ok) {
+      into.replaceChildren(stylesheet(), unanswered("Occupancy", answer.because));
+      return;
+    }
     const now = answer.value;
 
     const { root: frame, body } = card("Occupancy");
@@ -90,9 +97,7 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note(answer.live
-      ? "By floor is not drawn — GuestOps counts rooms by type only."
-      : "Example figures — this desk has no GuestOps data yet."));
+    body.append(note("By floor is not drawn — GuestOps counts rooms by type only."));
 
     into.replaceChildren(stylesheet(), frame);
   }

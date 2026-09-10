@@ -46,7 +46,7 @@ import {
   type Tab,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
-import { mark, standIn } from "../../chrome/marks";
+import { mark, failed } from "../../chrome/marks";
 import { card, detail, tabs } from "../../chrome/panel";
 import { activityTab } from "./activity-tab";
 import { banner } from "./banner";
@@ -60,30 +60,65 @@ import { timeline } from "./activity";
  *
  * @param host the bridge — the only route out of this realm
  * @param into the element this screen owns
+ * @param stayId which stay — the id the row that opened this screen carried
  * @param tab which tab to show
  * @param go what to do when another tab is chosen
  */
 export async function stay(
   host: HostApi,
   into: HTMLElement,
+  stayId: string,
   tab: string,
   go: (tab: string) => void,
 ): Promise<void> {
-  const loaded = await load(host, "reservation.read", "stay", recordedStay);
+  // **Reached without a stay, which is a defect rather than an empty state.**
+  // Every route here comes from a row, and a row has an id; arriving without
+  // one means something upstream dropped it, and drawing a stay would be
+  // drawing somebody's.
+  if (stayId === "") {
+    into.replaceChildren(failed("No stay was chosen. Open a stay from the day or a booking."));
+    return;
+  }
+
+  const loaded = await load<typeof recordedStay>(
+    host, "reservation.read", "stay", { stayId });
+
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
+
   const page = loaded.value;
 
-  const requests = (await load(
-    host, "reservation.read", "requests", recordedRequests)).value;
+  // **The tabs are read with the stay's id, which they always needed.** The
+  // backend's `requests` has taken `Stay(request.Body)` since it was written
+  // and would have refused every call this screen made — "this method needs a
+  // stay" — the moment one reached the platform. It never did, because the
+  // fallback answered first.
+  const asked = await load<typeof recordedRequests>(
+    host, "reservation.read", "requests", { stayId });
 
-  const servicing = (await load(
-    host, "reservation.read", "servicing", recordedServicing)).value;
+  const serviced = await load<typeof recordedServicing>(
+    host, "reservation.read", "servicing", { stayId });
+
+  if (!asked.ok) {
+    into.replaceChildren(failed(asked.because));
+    return;
+  }
+
+  if (!serviced.ok) {
+    into.replaceChildren(failed(serviced.because));
+    return;
+  }
+
+  const requests = asked.value;
+  const servicing = serviced.value;
 
   const body = el("div", "body");
 
   fill(
     body,
     tabs(labelled(page.tabs, requests, servicing.roomCareInstalled), tab, go),
-    loaded.live ? null : standIn(loaded.because),
   );
 
   if (tab === "Overview") {

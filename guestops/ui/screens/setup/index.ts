@@ -23,7 +23,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { load, recordedSetup, type Setup } from "../../book";
 import { control, el, fill } from "../../chrome/element";
-import { standIn } from "../../chrome/marks";
+import { failed } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
 import { row, settings } from "./card";
 
@@ -41,14 +41,20 @@ export async function setup(
   section: string,
   go: (section: string) => void,
 ): Promise<void> {
-  const loaded = await load(host, "desk.configure", "setup", recordedSetup);
+  const loaded = await load<typeof recordedSetup>(host, "desk.configure", "setup", );
+
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
   const config = loaded.value;
 
   const body = el("div", "body");
 
   fill(
     body,
-    loaded.live ? null : standIn(loaded.because),
     sections(config.sections, section, go),
     settings(config.lead),
     pair(config),

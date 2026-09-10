@@ -15,8 +15,7 @@
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
 import { read, serve } from "../answer";
-import { card, el, label, note, opener, row, stat, stylesheet } from "../card";
-import { watchlist as recorded } from "../recorded";
+import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** A departure that has not happened, and how late it is. */
 interface Overdue {
@@ -49,7 +48,15 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Watchlist>(host, "reservation.read", "watchlist", recorded);
+    const answer = await read<Watchlist>(host, "reservation.read", "watchlist");
+
+    // A read that did not answer IS the card — APPS-Q42. The canvas is
+    // 320x384 and does not scroll, so a failure cannot sit above content;
+    // it takes the place of it.
+    if (!answer.ok) {
+      into.replaceChildren(stylesheet(), unanswered("Watchlist", answer.because));
+      return;
+    }
     const list = answer.value;
 
     const { root: frame, body } = card("Watchlist");
@@ -97,12 +104,11 @@ connectToHost((host: HostApi) => {
       }
     }
 
-    // No footer when the data is the property's: the canvas gives this card
-    // none, because a watchlist with nothing to caveat should end at its last
-    // row rather than explain itself.
-    if (!answer.live) {
-      body.append(note("Example figures — this desk has no GuestOps data yet."));
-    }
+    // **No footer at all now.** The canvas gave this card none when the data
+    // was the property's, and an examples footnote when it was not — and the
+    // second case no longer reaches here: a read that does not answer draws the
+    // failure card instead. What is left ends at its last row, which is what the
+    // drawing always wanted.
 
     into.replaceChildren(stylesheet(), frame);
   }

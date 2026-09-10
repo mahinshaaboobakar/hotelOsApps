@@ -17,7 +17,7 @@ import {
   load, recordedToday, type DayRow, type Stat, type Staleness, type Today,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
-import { standIn } from "../../chrome/marks";
+import { failed } from "../../chrome/marks";
 import { tabs } from "../../chrome/panel";
 import { pager } from "../../chrome/pager";
 import { table } from "./table";
@@ -58,10 +58,17 @@ export async function today(
   // The page travels as this application's own body — `{page, pageSize}` — and
   // comes back clamped by the same `Paging.Of` the gRPC surface uses, so the
   // module route and the wire cannot disagree about what page 0 means.
-  const loaded = await load(host, "reservation.read", "today", recordedToday, {
+  const loaded = await load<typeof recordedToday>(host, "reservation.read", "today", {
     page,
     pageSize: PAGE,
   });
+
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
   const day = loaded.value;
 
   const showing = day.lists.find((one) => one.label === list) ?? day.lists[0];
@@ -84,7 +91,6 @@ export async function today(
   const body = el("div", "body");
   fill(
     body,
-    loaded.live ? null : standIn(loaded.because),
 
     // **Above everything, and it gates nothing** (S36, GUEST-Q4, R27). It says
     // what is late rather than declaring the feed down, because a connector can

@@ -20,8 +20,7 @@
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
 import { read, serve } from "../answer";
-import { card, el, label, note, opener, row, stylesheet } from "../card";
-import { mix as recorded } from "../recorded";
+import { card, el, label, note, opener, row, stylesheet, unanswered } from "../card";
 
 /** One line of the mix: a code the source sent, and how many arrived on it. */
 interface Line {
@@ -57,7 +56,15 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Mix>(host, "reservation.read", "mix", recorded);
+    const answer = await read<Mix>(host, "reservation.read", "mix");
+
+    // A read that did not answer IS the card — APPS-Q42. The canvas is
+    // 320x384 and does not scroll, so a failure cannot sit above content;
+    // it takes the place of it.
+    if (!answer.ok) {
+      into.replaceChildren(stylesheet(), unanswered("Business Mix", answer.because));
+      return;
+    }
     const mix = answer.value;
 
     const { root: frame, body } = card("Business Mix");
@@ -80,9 +87,7 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note(answer.live
-      ? "In the source's own words, never normalised."
-      : "Example figures — no GuestOps data on this desk yet."));
+    body.append(note("In the source's own words, never normalised."));
 
     into.replaceChildren(stylesheet(), frame);
   }

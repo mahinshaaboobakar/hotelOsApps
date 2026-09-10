@@ -15,47 +15,54 @@
 
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
-/** What a widget got, and whether it is the property's own. */
-export interface Answer<T> {
-  value: T;
-
-  /**
-   * True when this came from the platform.
-   *
-   * The card says so when it is false. A widget showing plausible numbers that
-   * are nobody's is worse than one showing nothing, because it looks current —
-   * the same reason the design refuses a figure from the last time it was
-   * opened.
-   */
-  live: boolean;
-}
+/**
+ * What a widget's read returned: the property's figures, or why there are none.
+ *
+ * **A union, so the canvas cannot hold a stand-in** — `APPS-Q42`. This was
+ * `{ value, live }` with recorded numbers in `value` and a footnote saying they
+ * were examples, and the ruling covers widgets for the reason the footnote
+ * could not answer: a widget is the frame most likely to be glanced at and
+ * believed, because nobody opens one to interrogate it. Plausible numbers
+ * belonging to nobody are worse in 320×384 than on a page, not better.
+ */
+export type Answer<T> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly because: string };
 
 /**
- * Ask the platform, and fall back to the canvas's own numbers.
+ * Ask the platform.
  *
  * @param host the bridge, and the only route out of this realm
  * @param capability the permission the manifest requested
  * @param method the question within it
- * @param recorded what to show when the platform cannot answer
- * @returns the answer, and whether it is real
+ * @param params the widget's own body, where it has one
+ * @returns the figures, or why there are none
+ *
+ * **No `recorded` parameter**, and its absence is the mechanism: a widget has
+ * nothing to fall back to because it is handed nothing to fall back to.
  */
 export async function read<T>(
   host: HostApi,
   capability: string,
   method: string,
-  recorded: T,
+  params?: Record<string, unknown>,
 ): Promise<Answer<T>> {
-  // A capability the package was not granted is not worth a round trip, and its
-  // refusal would read as an outage rather than as a permission a property
-  // chose not to give.
   if (!host.identity.capabilities.includes(capability)) {
-    return { value: recorded, live: false };
+    return { ok: false, because: `This property has not granted ${capability} to GuestOps.` };
   }
 
   try {
-    return { value: (await host.call(capability, method)) as T, live: true };
+    return { ok: true, value: (await host.call(capability, method, params)) as T };
   } catch (error) {
-    if (error instanceof HostCallError) return { value: recorded, live: false };
+    if (error instanceof HostCallError) {
+      return {
+        ok: false,
+        because: error.isForPeople
+          ? error.message
+          : "GuestOps could not reach the platform.",
+      };
+    }
+
     throw error;
   }
 }

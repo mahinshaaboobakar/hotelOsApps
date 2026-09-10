@@ -80,20 +80,20 @@ function one(tag: Tag): HTMLElement {
 }
 
 /**
- * The banner shown when a screen is not reading the property's own data.
+ * A read that did not answer, drawn as the failure it is.
  *
- * **Always rendered when the data is recorded.** A person looking at a stay must
- * be able to tell whether they are seeing their hotel; a module that hid the
- * difference is one somebody eventually acts on.
+ * **This replaced `standIn`, and the difference is what is on the screen** —
+ * `APPS-Q42`. `standIn` drew a banner above recorded values: a hotel's screen
+ * full of names, rates and room numbers belonging to nobody, with a sentence
+ * over it. Whoever read the sentence knew; whoever read the list did not, and
+ * the list is what a person at a desk reads.
  *
- * @param because the platform's own reason, when ADR 0041 permits showing it
- * @returns the banner
+ * So there is no data beneath this. The reason is the content, and it names
+ * what failed rather than apologising: a capability the property declined says
+ * so, and a platform that could not be reached says that.
  */
-export function standIn(because: string | null): HTMLElement {
-  return el(
-    "div",
-    "stand",
-    because
-      ?? "Recorded example data — the desktop has no GuestOps client yet, so nothing here is this property's.",
-  );
+export function failed(because: string): HTMLElement {
+  const box = el("div", "fail");
+  box.append(el("div", "fh", "GuestOps could not load this."), el("div", "fb", because));
+  return box;
 }

@@ -196,9 +196,28 @@ export function stylesheet(): HTMLStyleElement {
     .bar{height:5px;border-radius:99px;overflow:hidden;
       background:color-mix(in srgb, var(--color-ink,#e8ebf4) 10%, transparent)}
     .bar i{display:block;height:100%;background:var(--color-brand,#818cf8)}
+    .wf{font-size:11.5px;color:var(--color-ink-muted,#8b93a7);line-height:1.6}
     .wn{margin-top:auto;padding-top:8px;font-size:10.5px;line-height:1.5;
       color:var(--color-ink-faint,#5a6172)}
   `;
 
   return style;
+}
+
+/**
+ * A widget whose read did not answer — the whole card, not a note under figures.
+ *
+ * **The canvas is 320×384 and does not scroll**, so a failure here cannot be a
+ * banner above content the way a screen's can. It is the content: the title the
+ * widget always has, and the reason underneath it. Nothing plausible, nothing
+ * shaped like a figure.
+ *
+ * The reason is drawn small and quiet rather than as an alarm. A property that
+ * has not granted a capability is not broken, and a widget that shouts at a
+ * receptionist about it has made a configuration choice look like an outage.
+ */
+export function unanswered(title: string, because: string): HTMLElement {
+  const { root, body } = card(title);
+  body.append(el("div", "wf", because));
+  return root;
 }

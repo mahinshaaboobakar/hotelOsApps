@@ -28,8 +28,7 @@
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
 import { read, serve } from "../answer";
-import { card, el, label, note, opener, row, stat, stylesheet } from "../card";
-import { pms as recorded } from "../recorded";
+import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One fact the Hub could not place, and why. */
 interface Held {
@@ -60,7 +59,15 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Feed>(host, "reservation.read", "feed", recorded);
+    const answer = await read<Feed>(host, "reservation.read", "feed");
+
+    // A read that did not answer IS the card — APPS-Q42. The canvas is
+    // 320x384 and does not scroll, so a failure cannot sit above content;
+    // it takes the place of it.
+    if (!answer.ok) {
+      into.replaceChildren(stylesheet(), unanswered("From the PMS", answer.because));
+      return;
+    }
     const feed = answer.value;
 
     const { root: frame, body } = card("From the PMS");
@@ -91,9 +98,7 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note(answer.live
-      ? "Amended and cancelled are not drawn — see the report."
-      : "Example figures — this desk has no GuestOps data yet."));
+    body.append(note("Amended and cancelled are not drawn — see the report."));
 
     into.replaceChildren(stylesheet(), frame);
   }

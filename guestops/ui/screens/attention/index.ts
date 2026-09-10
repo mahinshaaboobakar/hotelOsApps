@@ -19,7 +19,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { load, recordedAttention, type AttentionCard } from "../../book";
 import { pager } from "../../chrome/pager";
 import { el, fill } from "../../chrome/element";
-import { mark, standIn } from "../../chrome/marks";
+import { mark, failed } from "../../chrome/marks";
 import { actions, card, detail } from "../../chrome/panel";
 
 /**
@@ -39,10 +39,17 @@ export async function attention(
   page: number,
   turn: (page: number) => void,
 ): Promise<void> {
-  const loaded = await load(host, "reservation.read", "attention", recordedAttention, {
+  const loaded = await load<typeof recordedAttention>(host, "reservation.read", "attention", {
     page,
     pageSize: PAGE,
   });
+
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
 
   // No page heading, and no `.head` — docs/working/64 §3. This built
   // `<div class="head">` holding `<div class="ht">Attention</div>`, which was
@@ -51,7 +58,6 @@ export async function attention(
   // sentence underneath is the screen's own and survives, as the drawing keeps
   // it — a hint, not a title.
   const body = el("div", "body");
-  if (!loaded.live) body.append(standIn(loaded.because));
 
   body.append(
     el(

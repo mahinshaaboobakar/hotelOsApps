@@ -87,6 +87,18 @@ interface Place {
   /** Which booking the Booking screen is showing. */
   bookingId: string;
 
+  /**
+   * Which stay the Stay screen is showing.
+   *
+   * **It had none, and that was the whole defect.** The row click discarded the
+   * row it was handed, `Place` had nowhere to put a stay, the screen's three
+   * reads carried no body, and the backend's `activity`, `requests` and
+   * `payment` all refuse a request without one — `"this method needs a stay"`.
+   * So the anchor screen showed one recorded stay, always, and no path existed
+   * by which it could show another.
+   */
+  stayId: string;
+
   /** Which section of Setup is showing. */
   section: string;
 
@@ -180,6 +192,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     tab: "Overview",
     page: 0,
     bookingId: "",
+    stayId: "",
     section: "Registration",
     overlay: opening?.overlay ?? null,
     filling: opening?.filling ?? false,
@@ -277,7 +290,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "Stay") {
-      void stay(host, main, where.tab, (tab) => show({ tab }));
+      void stay(host, main, where.stayId, where.tab, (tab) => show({ tab }));
       return;
     }
 
@@ -295,7 +308,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         // Another list starts at its own beginning.
         (list) => show({ list, page: 0 }),
         (page) => show({ page }),
-        () => show({ screen: "Stay", tab: "Overview" }),
+        (row) => show({ screen: "Stay", tab: "Overview", stayId: row.id }),
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
       ).then(overlay);
@@ -313,19 +326,24 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
       // Asked once, after the first paint — the bar is drawn synchronously and
       // a person should not wait on a name to see their day. It redraws when
       // the answer arrives, and does not when it does not.
-      void load<{ name: string | null; where: string | null } | null>(
-        host, "reservation.read", "me", null,
+      void load<{ name: string | null; where: string | null }>(
+        host, "reservation.read", "me",
       ).then((got) => {
-        // **A present value, not a non-null one.** The first version of this
-        // tested `!== null` and drew `undefined · undefined` on a host that
-        // answered without the fields — the round's own defect, one guard along:
-        // a value nobody established, rendered with confidence. A name is drawn
-        // when it is a non-empty string and never otherwise.
+        // **No branch for a failed read, because the bar already has one.** An
+        // unanswered `me` leaves `operator` null and the bar says the operator
+        // is not established — which is what a failure means here. APPS-Q42 asks
+        // that a failure not be rendered as data; this renders it as absence,
+        // which is the same sentence in the one slot that already had it.
+        if (!got.ok) return;
+
+        // A present value, not a non-null one. The first version tested
+        // `!== null` and drew `undefined · undefined` on a host that answered
+        // without the fields.
         const said = (value: unknown): string | null =>
           typeof value === "string" && value.trim() !== "" ? value : null;
 
-        const name = said(got.live ? got.value?.name : null);
-        const where = said(got.live ? got.value?.where : null);
+        const name = said(got.value.name);
+        const where = said(got.value.where);
 
         if (name !== null && where !== null) {
           operator = { name, where };

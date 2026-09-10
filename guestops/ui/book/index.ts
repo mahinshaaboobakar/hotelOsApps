@@ -22,31 +22,38 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 export * from "./model";
 export * from "./recorded";
 
-/** What a screen got, and whether it is the property's own data. */
-export interface Loaded<T> {
-  value: T;
-
-  /**
-   * True when this came from the platform.
-   *
-   * Screens render it. A person looking at a stay must be able to tell whether
-   * they are seeing their hotel or a stand-in.
-   */
-  live: boolean;
-
-  /** Why it is not live, when it is not — shown only if ADR 0041 permits. */
-  because: string | null;
-}
+/**
+ * What a read returned: the property's data, or why there is none.
+ *
+ * **A union, so a stand-in is not expressible** — `APPS-Q42`. This was
+ * `{ value, live, because }` with a recorded fallback in `value`, and every
+ * screen drew the recorded facts under a banner saying they were not real. A
+ * banner is read by whoever looks for it; a list of names is read by everyone.
+ * Showing a hardcoded list is not made right by a label, and it is not made
+ * right at 320×384 either — a widget is the frame most likely to be glanced at
+ * and believed, because nobody opens one to interrogate it.
+ *
+ * The old shape could express *"here is data, and it is fake"*. This one cannot:
+ * there is a value or there is a reason, and a screen that wants to draw
+ * something has to have been given it.
+ */
+export type Read<T> =
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly because: string };
 
 /**
- * Ask the platform, and fall back to the recorded facts.
+ * Ask the platform.
  *
  * @param host the bridge, and the only route out of this realm
  * @param capability the permission the manifest requested
  * @param method the operation within it
- * @param recorded what to show when the platform cannot answer
  * @param params the application's own JSON body — the page, a stay's id
- * @returns the value, and whether it is real
+ * @returns the value, or why there is none
+ *
+ * **There is no `recorded` parameter, and its absence is the mechanism.** While
+ * one existed, every caller had a fallback within reach and sixteen of them took
+ * it. Removing it means a screen cannot render recorded facts by accident: it
+ * has nothing to render them from.
  *
  * `params` is this application's vocabulary, not the platform's: the envelope
  * defines the path and the status codes and nothing inside them, so a screen
@@ -56,28 +63,32 @@ export async function load<T>(
   host: HostApi,
   capability: string,
   method: string,
-  recorded: T,
   params?: Record<string, unknown>,
-): Promise<Loaded<T>> {
-  // Asking for a capability that was not granted is not worth a round trip, and
-  // the refusal would read as an outage rather than as a permission a property
-  // chose not to give.
+): Promise<Read<T>> {
+  // A capability the property did not grant is not an outage and does not read
+  // as one. It is a decision somebody made, and the screen says which.
   if (!host.identity.capabilities.includes(capability)) {
-    return { value: recorded, live: false, because: null };
+    return {
+      ok: false,
+      because: `This property has not granted ${capability} to GuestOps.`,
+    };
   }
 
   try {
-    return {
-      value: (await host.call(capability, method, params)) as T,
-      live: true,
-      because: null,
-    };
+    return { ok: true, value: (await host.call(capability, method, params)) as T };
   } catch (error) {
     if (error instanceof HostCallError) {
       // ADR 0041, asked by the SDK so a package does not rediscover the rule:
-      // `internal` and `forbidden` carry a message for a log, and putting one
-      // on a hotel's screen leaks a platform diagnostic to a receptionist.
-      return { value: recorded, live: false, because: error.isForPeople ? error.message : null };
+      // `internal` and `forbidden` carry a message for a log, and putting one on
+      // a hotel's screen leaks a platform diagnostic to a receptionist. What is
+      // left when the message may not be shown is still a reason, and it is
+      // still not data.
+      return {
+        ok: false,
+        because: error.isForPeople
+          ? error.message
+          : "GuestOps could not reach the platform. Nothing here is this property's.",
+      };
     }
 
     throw error;

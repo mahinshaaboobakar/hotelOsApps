@@ -25,7 +25,7 @@ import {
   type GroupFact,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
-import { mark, standIn } from "../../chrome/marks";
+import { mark, failed } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
 import { cancel } from "./cancel";
 import { table } from "./table";
@@ -55,8 +55,15 @@ export async function booking(
   close: () => void,
   done: () => void,
 ): Promise<void> {
-  const loaded = await load(
-    host, "reservation.read", "booking", recordedBooking, { bookingId: id });
+  const loaded = await load<typeof recordedBooking>(
+    host, "reservation.read", "booking", { bookingId: id });
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
+
 
   const record = loaded.value;
 
@@ -83,7 +90,6 @@ export async function booking(
   const body = el("div", "body");
   fill(
     body,
-    loaded.live ? null : standIn(loaded.because),
 
     // **Above the table, because it explains why there is one row.** A person
     // meeting a single row under a booking reference reads it as the whole
@@ -115,8 +121,15 @@ export async function booking(
   // computes penalties from the stored offset **at the moment it is shown**
   // (R18), so fetching it with the page would put a stale number in front of
   // somebody about to agree to it.
-  const plan = await load(
-    host, "reservation.read", "cancelPlan", recordedCancelPlan, { bookingId: id });
+  const plan = await load<typeof recordedCancelPlan>(
+    host, "reservation.read", "cancelPlan", { bookingId: id });
+
+  // The dialog is a decision about a booking; without the plan there is nothing
+  // to decide from, so it says why rather than opening over recorded terms.
+  if (!plan.ok) {
+    into.append(failed(plan.because));
+    return;
+  }
 
   into.append(cancel(
     plan.value,

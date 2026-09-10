@@ -165,15 +165,36 @@ describe("the app bar", () => {
   });
 });
 
-describe("fallback honesty", () => {
-  it("says so when it is not reading the property's own data", async () => {
+/**
+ * **Rewritten, not deleted — ADR 0034.** This was "fallback honesty", and it
+ * asserted that a screen reading nothing drew a banner (`.stand`) above the
+ * recorded facts, and no banner when the data was real. That was the honest
+ * form of the wrong mechanism: whoever read the banner knew, and whoever read
+ * the list of names did not — and the list is what a person at a desk reads.
+ *
+ * `APPS-Q42` ruled the fallback out, not the banner. So the contract now is
+ * that a read which does not answer renders a **failure** and no data at all,
+ * and the test that guarded the banner guards its absence.
+ */
+describe("a read that did not answer", () => {
+  it("renders the failure and none of the data", async () => {
     const root = await mount([]);
-    expect(root.querySelector(".stand")).not.toBeNull();
+
+    expect(root.querySelector(".fail")).not.toBeNull();
+    expect(root.querySelector(".stand")).toBeNull();
+
+    // The recorded book's own names must not be anywhere on a failed screen.
+    // Asserting the failure exists would pass with the list still beneath it,
+    // which is the shape this ruling removed.
+    expect(root.querySelector(".tbl")).toBeNull();
+    expect(root.textContent).not.toContain("Anand Menon");
   });
 
-  it("says nothing when the data is the property's", async () => {
+  it("draws no failure when the platform answered", async () => {
     const root = await mount();
-    expect(root.querySelector(".stand")).toBeNull();
+
+    expect(root.querySelector(".fail")).toBeNull();
+    expect(root.querySelector(".tbl")).not.toBeNull();
   });
 });
 

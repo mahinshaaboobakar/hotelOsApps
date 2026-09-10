@@ -15,8 +15,7 @@
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
 import { read, serve } from "../answer";
-import { card, el, label, note, opener, row, stat, stylesheet } from "../card";
-import { today as recorded } from "../recorded";
+import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One arrival, as the desk reads it. */
 interface Arrival {
@@ -42,7 +41,15 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Today>(host, "reservation.read", "today", recorded);
+    const answer = await read<Today>(host, "reservation.read", "today");
+
+    // A read that did not answer IS the card — APPS-Q42. The canvas is
+    // 320x384 and does not scroll, so a failure cannot sit above content;
+    // it takes the place of it.
+    if (!answer.ok) {
+      into.replaceChildren(stylesheet(), unanswered("Today at the Desk", answer.because));
+      return;
+    }
     const day = answer.value;
 
     const { root: frame, body } = card("Today at the Desk");
@@ -75,9 +82,7 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note(answer.live
-      ? "Arrivals without a room show the gap rather than a guess."
-      : "Example figures — this desk has no GuestOps data yet."));
+    body.append(note("Arrivals without a room show the gap rather than a guess."));
 
     into.replaceChildren(stylesheet(), frame);
   }

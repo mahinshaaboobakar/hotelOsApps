@@ -21,7 +21,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { load, recordedBookings, type BookingRow } from "../../book";
 import { fill } from "../../chrome/element";
-import { standIn } from "../../chrome/marks";
+import { failed } from "../../chrome/marks";
 import { pager } from "../../chrome/pager";
 import { filters } from "./filters";
 import { table } from "./table";
@@ -51,10 +51,17 @@ export async function bookings(
   book: () => void,
   selected?: string,
 ): Promise<void> {
-  const loaded = await load(host, "reservation.read", "bookings", recordedBookings, {
+  const loaded = await load<typeof recordedBookings>(host, "reservation.read", "bookings", {
     page,
     pageSize: PAGE,
   });
+
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
 
   const list = loaded.value;
   const body = document.createElement("div");
@@ -62,7 +69,6 @@ export async function bookings(
 
   fill(
     body,
-    loaded.live ? null : standIn(loaded.because),
     filters(list, walkIn, book),
     table(list.rows, open, selected),
     pager(list.total, page, PAGE, list.rows.length, turn),

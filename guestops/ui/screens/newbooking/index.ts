@@ -20,7 +20,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { pager } from "../../chrome/pager";
 import { load, recordedAvailability, recordedConflict } from "../../book";
 import { control, el, fill } from "../../chrome/element";
-import { standIn } from "../../chrome/marks";
+import { failed } from "../../chrome/marks";
 import { availability } from "./availability";
 import { conflict } from "./conflict";
 import { sources } from "./sources";
@@ -47,13 +47,20 @@ export async function newBooking(
   // availability for dates nobody asked about — in the column a guest is
   // quoted from. These are the dates the recorded query names until the sheet
   // captures a person's own.
-  const loaded = await load(
-    host, "reservation.read", "availability", recordedAvailability, {
+  const loaded = await load<typeof recordedAvailability>(
+    host, "reservation.read", "availability", {
       arrive: recordedAvailability.query.arriveOn,
       depart: recordedAvailability.query.departOn,
       page,
       pageSize: PAGE,
     });
+
+  // **A read that did not answer renders the failure, not a stand-in** —
+  // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  if (!loaded.ok) {
+    into.replaceChildren(failed(loaded.because));
+    return;
+  }
 
   const answer = loaded.value;
 
@@ -76,7 +83,6 @@ export async function newBooking(
   const body = el("div", "body");
   fill(
     body,
-    loaded.live ? null : standIn(loaded.because),
     query,
     availability(answer.types),
     pager(answer.total, page, PAGE, answer.types.length, turn),
