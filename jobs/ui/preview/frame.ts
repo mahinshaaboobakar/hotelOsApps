@@ -63,6 +63,17 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
   };
 }
 
+/**
+ * Every drive step that found nothing to click.
+ *
+ * **A missed click used to be silent**, which was fine while this page only
+ * photographed itself and is not now: the merged sweep keys on a ready signal,
+ * and a harness that says "ready" after driving to nothing hands the audit a
+ * picture of the wrong screen with no sign that it is wrong. GG's refinement,
+ * taken one layer deeper than the signal itself.
+ */
+const missed: string[] = [];
+
 function click(selector: string, text: string): void {
   for (const node of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
     if (node.textContent?.includes(text) === true) {
@@ -70,6 +81,31 @@ function click(selector: string, text: string): void {
       return;
     }
   }
+
+  missed.push(`${selector} containing "${text}"`);
+}
+
+/**
+ * Say ready — but only when every step landed.
+ *
+ * On a miss the shared signal is withheld and the page says so on itself. The
+ * sweep still measures it through its `readyState` fallback, so the miss lands
+ * IN the reading rather than being absent from it: an audit that quietly drops
+ * what it could not drive is an audit grading itself.
+ */
+function ready(): void {
+  document.documentElement.setAttribute("data-ready", "true");
+
+  if (missed.length === 0) {
+    document.documentElement.setAttribute("data-review-ready", "true");
+    return;
+  }
+
+  const note = document.createElement("div");
+  note.setAttribute("data-missed", "true");
+  note.style.cssText = "padding:10px 14px;font:13px system-ui;color:#f87171";
+  note.textContent = `This capture was not driven to its screen: ${missed.join("; ")} matched nothing.`;
+  document.body.prepend(note);
 }
 
 async function settle(): Promise<void> {
@@ -82,13 +118,7 @@ async function drive(): Promise<void> {
   if (widget !== null) {
     const panel = await jobsNow(host(GRANTS, widget as "quiet" | "escalated" | "mine"));
     document.body.replaceChildren(stylesheet(), panel);
-    document.documentElement.setAttribute("data-ready", "true");
-    // The shared review harness waits on `data-review-ready`
-    // (`scripts/review-measure.mjs`). Both are set: this page's own
-    // driver has always keyed on the first, and one instrument for every
-    // UI round is the point of the merged sweep — a private ready signal
-    // would make this page unmeasurable by it.
-    document.documentElement.setAttribute("data-review-ready", "true");
+    ready();
     return;
   }
 
@@ -140,13 +170,7 @@ async function drive(): Promise<void> {
   // Timers, not `requestAnimationFrame`: a capture tab is often not the
   // foreground one, and rAF does not fire there — the flag would never land
   // while every screen rendered correctly.
-  document.documentElement.setAttribute("data-ready", "true");
-    // The shared review harness waits on `data-review-ready`
-    // (`scripts/review-measure.mjs`). Both are set: this page's own
-    // driver has always keyed on the first, and one instrument for every
-    // UI round is the point of the merged sweep — a private ready signal
-    // would make this page unmeasurable by it.
-    document.documentElement.setAttribute("data-review-ready", "true");
+  ready();
 }
 
 void drive();
