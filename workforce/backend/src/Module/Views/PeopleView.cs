@@ -170,7 +170,12 @@ public static class PeopleView
             // own contract says the two facts differ and neither is a
             // placeholder.
             who = names.TryGetValue(held.Key, out var name) ? name : null,
-            since = Since(primary, postings.Count),
+            since = Since(primary),
+
+            // How many postings this person holds. It used to be a clause
+            // inside the sentence above, which meant a screen could render the
+            // date only by rendering the count with it.
+            postings = postings.Count,
             departments = postings.Select(one => one.DepartmentCode).ToList(),
             zone = (string?)null,
             role = primary.JobRole,
@@ -180,13 +185,16 @@ public static class PeopleView
         };
     }
 
-    /// <summary>"Since 4 Jan 2025", and the second posting when there is one.</summary>
-    private static string Since(Posting primary, int count)
-    {
-        var since = "Since " + primary.EffectiveFrom.ToString("d MMM yyyy");
-
-        return count > 1 ? since + " · " + count + " postings" : since;
-    }
+    /// <summary>When the primary posting began — ADR 0152.</summary>
+    /// <remarks>
+    /// **The word and the count are the screen's; the date is the wire's.**
+    /// This composed the whole line — <c>"Since 4 Jan 2025 · 2 postings"</c> —
+    /// so the vocabulary of a row lived in the payload, the month name came
+    /// from whichever account the service runs under, and a screen wanting the
+    /// date on its own had to parse the sentence back apart.
+    /// </remarks>
+    private static string Since(Posting primary) =>
+        primary.EffectiveFrom.ToString("yyyy-MM-dd");
 
     /// <summary>A manager's name, or the words that stand where a name would.</summary>
     private static string ReportsTo(Posting posting, IReadOnlyDictionary<Guid, string> names)

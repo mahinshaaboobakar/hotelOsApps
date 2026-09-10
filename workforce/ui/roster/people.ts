@@ -15,7 +15,17 @@ export interface Posting {
   who: string;
 
   /** When the posting began, and whether the person holds more than one. */
+  /**
+   * When the primary posting began, as the wire carries it - ADR 0152.
+   *
+   * The service used to send the whole sentence, `"Since 4 Jan 2025 - 2
+   * postings"`, so a row's vocabulary lived in the payload and the month name
+   * came from the account the service runs under.
+   */
   since: string;
+
+  /** How many postings this person holds - the clause that was inside `since`. */
+  postings: number;
 
   /**
    * The department codes, plural.
@@ -66,34 +76,34 @@ export const recordedPeople: People = {
   paging: { page: 0, pageSize: 25, total: 42 },
   postings: [
     {
-      who: "Priya Thomas", since: "Since 12 Mar 2023", departments: ["FO"],
+      who: "Priya Thomas", since: "2023-03-12", postings: 1, departments: ["FO"],
       zone: "Zone 1", role: "Supervisor", reportsTo: "— department head",
       capability: "3 valid", tone: "ok",
     },
     {
-      who: "Anjali Menon", since: "Since 4 Jan 2025", departments: ["FO"],
+      who: "Anjali Menon", since: "2025-01-04", postings: 1, departments: ["FO"],
       zone: "Zone 3", role: "Receptionist", reportsTo: "Priya Thomas",
       capability: "1 expiring", tone: "warn",
     },
     {
-      who: "Vishnu Das", since: "Since 19 Aug 2021", departments: ["FO"],
+      who: "Vishnu Das", since: "2021-08-19", postings: 1, departments: ["FO"],
       zone: "Zone 1", role: "Night auditor", reportsTo: "Priya Thomas",
       capability: "2 valid", tone: "ok",
     },
     // Two postings, and an expired certification which is shown, named, and
     // blocks nothing — WF-Q16's judgment side.
     {
-      who: "Rajan Pillai", since: "Since 2 Feb 2020 · 2 postings",
+      who: "Rajan Pillai", since: "2020-02-02", postings: 2,
       departments: ["KIT", "BQT"], zone: "Zone 5", role: "Sous chef",
       reportsTo: "Mathew George", capability: "1 expired", tone: "bad",
     },
     {
-      who: "Rahul Nair", since: "Since 8 Jun 2024", departments: ["SEC"],
+      who: "Rahul Nair", since: "2024-06-08", postings: 1, departments: ["SEC"],
       zone: "Zone 1", role: "Security officer", reportsTo: "Thomas Varghese",
       capability: "4 valid", tone: "ok",
     },
     {
-      who: "Sneha Iyer", since: "Since 30 Nov 2025", departments: ["FO"],
+      who: "Sneha Iyer", since: "2025-11-30", postings: 1, departments: ["FO"],
       zone: "Zone 2", role: "Receptionist", reportsTo: "Priya Thomas",
       capability: "none recorded", tone: "neu",
     },
@@ -104,97 +114,97 @@ export const recordedPeople: People = {
     // platform's default and §6's worked example, and the six above stay first
     // because every other frame in the set draws them.
     {
-      who: "Mathew George", since: "Since 3 Mar 2019", departments: ["KIT"],
+      who: "Mathew George", since: "2019-03-03", postings: 1, departments: ["KIT"],
       zone: "Zone 5", role: "Executive chef", reportsTo: "— department head",
       capability: "5 valid", tone: "ok",
     },
     {
-      who: "Thomas Varghese", since: "Since 14 Jul 2018", departments: ["SEC"],
+      who: "Thomas Varghese", since: "2018-07-14", postings: 1, departments: ["SEC"],
       zone: "Zone 1", role: "Security manager", reportsTo: "— department head",
       capability: "2 valid", tone: "ok",
     },
     {
-      who: "Deepa Menon", since: "Since 21 Sep 2022", departments: ["HK"],
+      who: "Deepa Menon", since: "2022-09-21", postings: 1, departments: ["HK"],
       zone: "Zone 4", role: "Housekeeping supervisor", reportsTo: "— department head",
       capability: "3 valid", tone: "ok",
     },
     {
-      who: "Arun Kumar", since: "Since 5 May 2023", departments: ["HK"],
+      who: "Arun Kumar", since: "2023-05-05", postings: 1, departments: ["HK"],
       zone: "Zone 4", role: "Room attendant", reportsTo: "Deepa Menon",
       capability: "1 expiring", tone: "warn",
     },
     {
-      who: "Lakshmi Nair", since: "Since 12 Aug 2024", departments: ["HK"],
+      who: "Lakshmi Nair", since: "2024-08-12", postings: 1, departments: ["HK"],
       zone: "Zone 6", role: "Room attendant", reportsTo: "Deepa Menon",
       capability: "2 valid", tone: "ok",
     },
     {
-      who: "Jose Mathew", since: "Since 2 Jan 2021", departments: ["ENG"],
+      who: "Jose Mathew", since: "2021-01-02", postings: 1, departments: ["ENG"],
       zone: "Zone 1", role: "Maintenance technician", reportsTo: "Suresh Babu",
       capability: "4 valid", tone: "ok",
     },
     {
-      who: "Suresh Babu", since: "Since 8 Nov 2017", departments: ["ENG"],
+      who: "Suresh Babu", since: "2017-11-08", postings: 1, departments: ["ENG"],
       zone: "Zone 1", role: "Chief engineer", reportsTo: "— department head",
       capability: "6 valid", tone: "ok",
     },
     {
-      who: "Fathima Rasheed", since: "Since 17 Feb 2025", departments: ["FB"],
+      who: "Fathima Rasheed", since: "2025-02-17", postings: 1, departments: ["FB"],
       zone: "Zone 3", role: "Server", reportsTo: "Nikhil Varma",
       capability: "none recorded", tone: "neu",
     },
     {
-      who: "Nikhil Varma", since: "Since 29 Apr 2020", departments: ["FB"],
+      who: "Nikhil Varma", since: "2020-04-29", postings: 1, departments: ["FB"],
       zone: "Zone 3", role: "Restaurant manager", reportsTo: "— department head",
       capability: "3 valid", tone: "ok",
     },
     {
-      who: "Meera Suresh", since: "Since 6 Jun 2023", departments: ["FB"],
+      who: "Meera Suresh", since: "2023-06-06", postings: 1, departments: ["FB"],
       zone: "Zone 3", role: "Server", reportsTo: "Nikhil Varma",
       capability: "1 expiring", tone: "warn",
     },
     {
-      who: "Aravind Pillai", since: "Since 23 Oct 2021", departments: ["KIT"],
+      who: "Aravind Pillai", since: "2021-10-23", postings: 1, departments: ["KIT"],
       zone: "Zone 5", role: "Commis chef", reportsTo: "Mathew George",
       capability: "2 valid", tone: "ok",
     },
     {
-      who: "Sara Thomas", since: "Since 11 Dec 2024", departments: ["SPA"],
+      who: "Sara Thomas", since: "2024-12-11", postings: 1, departments: ["SPA"],
       zone: "Zone 7", role: "Therapist", reportsTo: "Divya Krishnan",
       capability: "3 valid", tone: "ok",
     },
     {
-      who: "Divya Krishnan", since: "Since 4 Apr 2019", departments: ["SPA"],
+      who: "Divya Krishnan", since: "2019-04-04", postings: 1, departments: ["SPA"],
       zone: "Zone 7", role: "Spa manager", reportsTo: "— department head",
       capability: "4 valid", tone: "ok",
     },
     {
-      who: "Manoj Kurup", since: "Since 19 Jan 2022", departments: ["SEC"],
+      who: "Manoj Kurup", since: "2022-01-19", postings: 1, departments: ["SEC"],
       zone: "Zone 2", role: "Security officer", reportsTo: "Thomas Varghese",
       capability: "1 expired", tone: "bad",
     },
     {
-      who: "Reshma Anil", since: "Since 27 Jul 2025", departments: ["FO"],
+      who: "Reshma Anil", since: "2025-07-27", postings: 1, departments: ["FO"],
       zone: "Zone 1", role: "Guest relations", reportsTo: "Priya Thomas",
       capability: "none recorded", tone: "neu",
     },
     {
-      who: "Gopal Menon", since: "Since 15 Mar 2020", departments: ["ENG"],
+      who: "Gopal Menon", since: "2020-03-15", postings: 1, departments: ["ENG"],
       zone: "Zone 6", role: "Electrician", reportsTo: "Suresh Babu",
       capability: "3 valid", tone: "ok",
     },
     {
-      who: "Anu Jacob", since: "Since 9 Sep 2023", departments: ["HK"],
+      who: "Anu Jacob", since: "2023-09-09", postings: 1, departments: ["HK"],
       zone: "Zone 4", role: "Linen attendant", reportsTo: "Deepa Menon",
       capability: "2 valid", tone: "ok",
     },
     {
-      who: "Vinod Raj", since: "Since 1 Feb 2024", departments: ["FB"],
+      who: "Vinod Raj", since: "2024-02-01", postings: 1, departments: ["FB"],
       zone: "Zone 3", role: "Bartender", reportsTo: "Nikhil Varma",
       capability: "1 valid", tone: "ok",
     },
     {
-      who: "Kavya Nambiar", since: "Since 22 May 2025", departments: ["KIT"],
+      who: "Kavya Nambiar", since: "2025-05-22", postings: 1, departments: ["KIT"],
       zone: "Zone 5", role: "Pastry chef", reportsTo: "Mathew George",
       capability: "2 valid", tone: "ok",
     },

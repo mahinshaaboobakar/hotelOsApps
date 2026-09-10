@@ -8,7 +8,7 @@
  * row, never as a column that could stand alone.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -61,7 +61,7 @@ export async function people(
   const body = el("div", "body");
 
   // Nobody posted is a real state with its own screen, not an empty table.
-  body.append(board.postings.length === 0 ? firstRun() : table(board.postings, onEnd));
+  body.append(board.postings.length === 0 ? firstRun() : table(board.postings, onEnd, host.property));
 
   body.append(ownership());
 
@@ -143,7 +143,10 @@ function subtitle(
       + `${expiring} certifications expiring`;
 }
 
-function table(postings: readonly Posting[], onEnd: (who: string) => void): HTMLElement {
+function table(
+  postings: readonly Posting[], onEnd: (who: string) => void,
+  property: PropertyEnvironment,
+): HTMLElement {
   const list = el("div", "rows");
 
   const head = el("div", "row hd");
@@ -154,7 +157,7 @@ function table(postings: readonly Posting[], onEnd: (who: string) => void): HTML
   list.append(head);
 
   for (const posting of postings) {
-    list.append(row(posting, onEnd));
+    list.append(row(posting, onEnd, property));
   }
 
   return list;
@@ -169,7 +172,9 @@ function table(postings: readonly Posting[], onEnd: (who: string) => void): HTML
  * and the teams list both work this way), and it is recorded as an
  * implementation choice rather than read off the drawing.
  */
-function row(posting: Posting, onEnd: (who: string) => void): HTMLElement {
+function row(
+  posting: Posting, onEnd: (who: string) => void, property: PropertyEnvironment,
+): HTMLElement {
   const item = el("button", "row");
   item.setAttribute("type", "button");
   item.style.gridTemplateColumns = COLUMNS;
@@ -183,7 +188,14 @@ function row(posting: Posting, onEnd: (who: string) => void): HTMLElement {
     name.append(el("em", undefined, "★ head"));
   }
 
-  who.append(name, el("s", undefined, posting.since));
+  // **The word and the count are the screen's; the date is the wire's.**
+  // The service sent this whole line as one string, so the date could not
+  // be read without the sentence around it and the month name came from
+  // the account the service runs under.
+  const since = `Since ${formatDay(posting.since, property, "day-month-year")}`;
+
+  who.append(name, el("s", undefined,
+    posting.postings > 1 ? `${since} · ${posting.postings} postings` : since));
 
   const departments = el("div", "deps");
   for (const code of posting.departments) {

@@ -53,6 +53,14 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         Assert.Equal("Receptionist", row.GetProperty("role").GetString());
         Assert.Equal("FO", row.GetProperty("departments")[0].GetString());
 
+        // **A date and a count, not a sentence** — ADR 0152. This answered
+        // "Since 1 Sep 2026 · 2 postings" as one string, so a row's vocabulary
+        // travelled in the payload, the month name came from the account the
+        // service runs under, and a screen wanting the date had to take the
+        // words with it.
+        Assert.Equal("2026-09-01", row.GetProperty("since").GetString());
+        Assert.Equal(1, row.GetProperty("postings").GetInt32());
+
         // The zone is a Room Care name this application cannot resolve, so it is
         // null and the screen draws an em-dash — never "Zone 1" from an index
         // nobody assigned.
