@@ -17,6 +17,17 @@ namespace PmsOracle.Authentication;
 /// constant to drift from a vendor's configuration change, and no way to
 /// construct this type without supplying one.
 /// </para>
+/// <para>
+/// <b>Nothing calls this yet, and the reason is one file over.</b>
+/// <c>OhipPasswordGrant</c> states it — <i>"built here, sent nowhere; the
+/// transport that posts them is <c>IOhipQueue</c>'s and remains
+/// unimplemented"</i> — so no poll holds a token to refresh. Said here as well
+/// because a reader arriving at this file alone would take the paragraph above
+/// for a mechanism that runs: it describes the reference's commented-out sweep
+/// as the defect it prevents, and there is no sweep on this side either until
+/// the transport exists. The type is ready for its caller; it is not evidence
+/// of one.
+/// </para>
 /// </remarks>
 public readonly record struct TokenLifetime
 {

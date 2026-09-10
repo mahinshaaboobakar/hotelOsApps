@@ -23,6 +23,26 @@ namespace PmsOracle.Normalisation;
 /// three fields eliminates it.
 /// </para>
 /// <para>
+/// <b>The comparison is exact, and that is not the same decision the
+/// vocabularies made.</b> Names are trimmed and never case-folded, so
+/// <c>"Menon"</c> and <c>"MENON"</c> are two keys. Next door,
+/// <c>StringComparer.Ordinal</c> is <i>load-bearing</i> — <c>"Checked In"</c>
+/// and <c>"CHECKED IN"</c> are two halves with different meanings (R6), and
+/// folding case there would destroy the very join this key serves; those
+/// vocabularies absorb the source's case-instability by declaring every
+/// observed spelling instead.
+/// </para>
+/// <para>
+/// <b>Here nothing decides it.</b> The study establishes case-instability for
+/// STATUSES and says nothing about names, no test covers it, and the two halves
+/// travel different code paths in the agent — which is exactly where a spelling
+/// could differ. What can be said is the direction: an unmatched key expires as
+/// <c>join_window_expired</c>, which is visible, while a wrong join merges two
+/// stays. It fails safe. <b>Whether that is why it was written this way is not
+/// recorded, and a later reader adding <c>OrdinalIgnoreCase</c> "for
+/// robustness" would be changing join behaviour with nothing to catch it.</b>
+/// </para>
+/// <para>
 /// The reference did the same correlation with a Mongo query written inline at
 /// the call site, over its own private copy of the data. Naming it as a type
 /// does not make it safer; it makes it visible, testable, and something a
