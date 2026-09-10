@@ -76,7 +76,8 @@ export async function duty(
   // a literal date and three names.
   if (dialog) {
     main.append(assignDuty(
-      close, register.candidates, register.days[0], host.property));
+      host, close, register.candidates, register.days[0], host.property,
+      () => { close(); }));
   }
 }
 

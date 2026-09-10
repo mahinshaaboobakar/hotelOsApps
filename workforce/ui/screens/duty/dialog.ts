@@ -7,10 +7,11 @@
  * the owner described, and this sentence is how a person checks that it did.
  */
 
-import { formatDay, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el } from "../../chrome/element";
+import { write, WriteRefused } from "../../roster";
 import type { DutyCandidate } from "../../roster/duty";
 
 /**
@@ -20,10 +21,12 @@ import type { DutyCandidate } from "../../roster/duty";
  * @returns the overlay
  */
 export function assignDuty(
+  host: HostApi,
   close: () => void,
   candidates: readonly DutyCandidate[],
   day: string | undefined,
   property: PropertyEnvironment,
+  done: () => void,
 ): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
@@ -38,24 +41,60 @@ export function assignDuty(
     el("div", "hsub", day === undefined ? "" : formatDay(day, property, "day-month-year")),
   );
 
-  // **Never live, and it says why.** §2: a primary action with nothing to send
-  // is drawn `off` with the reason beside it. `AssignDutyCommand` takes two
-  // datetimes, and this screen has no control that sets them and no default it
-  // could honestly supply — `20:00 → 08:00` appears once in the codebase, in a
-  // doc comment explaining why two datetimes are needed, and an example given
-  // in passing is not a rule. Choosing a span here would promote it to one.
-  //
-  // So the person can choose WHO, the reason names what is missing, and the
-  // span is a frame for the owner rather than a number invented in a module.
-  const acts = foot("Assign duty", "Assigning…", close);
-  acts.waitingFor("No duty span is set — this screen cannot choose one yet");
+  // **The span is typed, and the confirm waits on it.** The first pass drew
+  // placeholders and left this permanently `off`, reporting the span as a
+  // frame the owner owed. That was a step too early: the question was never
+  // *what does the span default to*, it was that nothing here could be typed
+  // into — and section 10 licenses the control the moment a write path accepts
+  // what is typed. A control removes the question instead of answering it.
+  const draft = { from: "", to: "" };
 
-  dialog.append(head, span(), who(candidates, (one) => {
-    chosen = one;
-    acts.waitingFor(chosen === null
-      ? "Choose somebody"
-      : "No duty span is set — this screen cannot choose one yet");
-  }), acts.row);
+  const refusal = el("div", "note warn");
+  const acts = foot("Assign duty", "Assigning…", close);
+
+  function waiting(): string | null {
+    if (chosen === null) return "Choose somebody";
+    if (draft.from === "" || draft.to === "") return "Set when the duty starts and ends";
+
+    // Compared as the control writes them - `YYYY-MM-DDTHH:mm`, which sorts
+    // lexically in the same order it sorts chronologically.
+    if (draft.to <= draft.from) return "A duty has to end after it starts";
+    return null;
+  }
+
+  acts.onConfirm(() => {
+    void (async () => {
+      if (chosen === null) return;
+
+      refusal.replaceChildren();
+      acts.working(true);
+
+      try {
+        await write(host, "duty.assign", "assign", {
+          staffId: chosen.staffId,
+          from: new Date(draft.from).toISOString(),
+          to: new Date(draft.to).toISOString(),
+        });
+        done();
+      } catch (error) {
+        refusal.append(el("span", undefined,
+          error instanceof WriteRefused
+            ? error.message
+            : "That did not go through. Nothing was changed."));
+        acts.working(false);
+
+        if (!(error instanceof WriteRefused)) throw error;
+      }
+    })();
+  });
+
+  dialog.append(head,
+    span(day, (which, value) => { draft[which] = value; acts.waitingFor(waiting()); }),
+    who(candidates, (one) => { chosen = one; acts.waitingFor(waiting()); }),
+    refusal,
+    acts.row);
+
+  acts.waitingFor(waiting());
 
   scrim.append(dialog);
   scrim.addEventListener("click", (event) => {
@@ -66,7 +105,10 @@ export function assignDuty(
 }
 
 /** The two ends, and what they come to. */
-function span(): HTMLElement {
+function span(
+  day: string | undefined,
+  set: (which: "from" | "to", value: string) => void,
+): HTMLElement {
   const row = el("div", "fld");
   // The chrome's field row, two columns. It was Policy's four-column grid for
   // a while and each date got a quarter of the width, so `Fri 28 · 20:00`
@@ -80,10 +122,18 @@ function span(): HTMLElement {
   //
   // Null is *nobody has supplied this*, and that is exactly the state - there
   // is no control here that could.
-  pair.append(
-    el("div", "inp ph", "Start"),
-    el("div", "inp ph", "End"),
-  );
+  // **Two real controls, and section 10 is what licenses them**: *a field is a
+  // div until there is a write path behind it that accepts what is typed*, and
+  // `AssignDutyCommand` takes two datetimes.
+  //
+  // They drew `Fri 28 · 20:00` and `Sat 29 · 08:00` as though somebody had
+  // chosen them, then placeholders on a card whose foot said no span was set.
+  // Neither was a span a person could set, which is what this field is for.
+  //
+  // `datetime-local`, not a time: a duty may cross midnight - WF-Q8's whole
+  // point - so a time alone cannot say which day it lands on.
+  pair.append(stamp(day, (value) => { set("from", value); }),
+    stamp(day, (value) => { set("to", value); }));
 
   row.append(
     el("div", "fld-label", "From"),
@@ -99,6 +149,27 @@ function span(): HTMLElement {
   );
 
   return row;
+}
+
+/**
+ * One end of the span.
+ *
+ * @param day the day the register is showing, so the picker opens near it
+ * @param set called with the value the person chose
+ * @returns the control
+ */
+function stamp(day: string | undefined, set: (value: string) => void): HTMLElement {
+  const input = document.createElement("input");
+  input.className = "inp";
+  input.type = "datetime-local";
+
+  // Where the picker opens, not a value: `min` narrows the control and sends
+  // nothing. It opens on the day being looked at rather than the browser's own.
+  if (day !== undefined) input.min = `${day}T00:00`;
+
+  input.addEventListener("input", () => { set(input.value); });
+
+  return input;
 }
 
 /**
