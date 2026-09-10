@@ -1,128 +1,233 @@
 [
   {
     "name": "frame-01-board",
-    "paired": 95,
-    "differs": 24,
-    "readings": 2646
+    "frame": "01-00.html",
+    "match": 0.48,
+    "runnerUp": 0.17,
+    "paired": 87,
+    "differs": 19,
+    "readings": 2646,
+    "collapsedDrawn": 33,
+    "collapsedBuilt": 31
   },
   {
     "name": "frame-02-job-overview",
-    "paired": 56,
-    "differs": 24,
-    "readings": 1224
+    "frame": "01-01.html",
+    "match": 0.56,
+    "runnerUp": 0.22,
+    "paired": 43,
+    "differs": 10,
+    "readings": 1224,
+    "collapsedDrawn": 1,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-02b-job-work",
-    "paired": 46,
-    "differs": 20,
-    "readings": 1134
+    "frame": "01-02.html",
+    "match": 0.63,
+    "runnerUp": 0.26,
+    "paired": 29,
+    "differs": 5,
+    "readings": 1134,
+    "collapsedDrawn": 3,
+    "collapsedBuilt": 6
   },
   {
     "name": "frame-02c-job-history",
-    "paired": 49,
-    "differs": 23,
-    "readings": 1278
+    "frame": "01-03.html",
+    "match": 0.64,
+    "runnerUp": 0.27,
+    "paired": 32,
+    "differs": 3,
+    "readings": 1278,
+    "collapsedDrawn": 9,
+    "collapsedBuilt": 9
   },
   {
     "name": "frame-02d-job-notes",
-    "paired": 30,
-    "differs": 20,
-    "readings": 720
+    "frame": "01-04.html",
+    "match": 0.46,
+    "runnerUp": 0.24,
+    "paired": 7,
+    "differs": 3,
+    "readings": 720,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-02e-job-links",
-    "paired": 56,
-    "differs": 24,
-    "readings": 1242
+    "frame": "01-05.html",
+    "match": 0.11,
+    "runnerUp": 0.11,
+    "paired": 4,
+    "differs": 3,
+    "readings": 1242,
+    "collapsedDrawn": 4,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-02f-job-rating",
-    "paired": 29,
-    "differs": 15,
-    "readings": 648
+    "frame": "01-06.html",
+    "match": 0.35,
+    "runnerUp": 0.15,
+    "paired": 16,
+    "differs": 7,
+    "readings": 648,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-02g-job-record",
-    "paired": 40,
-    "differs": 21,
-    "readings": 846
+    "frame": "01-07.html",
+    "match": 0.45,
+    "runnerUp": 0.25,
+    "paired": 20,
+    "differs": 5,
+    "readings": 846,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-03-raise",
-    "paired": 17,
-    "differs": 10,
-    "readings": 504
+    "frame": "01-08.html",
+    "match": 0.16,
+    "runnerUp": 0.12,
+    "paired": 6,
+    "differs": 5,
+    "readings": 504,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-04-resolve",
-    "paired": 23,
-    "differs": 16,
-    "readings": 450
+    "frame": "01-09.html",
+    "match": 0.37,
+    "runnerUp": 0.1,
+    "paired": 6,
+    "differs": 6,
+    "readings": 450,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-05-live",
-    "paired": 57,
-    "differs": 15,
-    "readings": 1296
+    "frame": "01-10.html",
+    "match": 0.46,
+    "runnerUp": 0.15,
+    "paired": 51,
+    "differs": 7,
+    "readings": 1296,
+    "collapsedDrawn": 5,
+    "collapsedBuilt": 5
   },
   {
     "name": "frame-06-scheduled",
-    "paired": 38,
-    "differs": 13,
-    "readings": 864
+    "frame": "01-11.html",
+    "match": 0.4,
+    "runnerUp": 0.12,
+    "paired": 30,
+    "differs": 5,
+    "readings": 864,
+    "collapsedDrawn": 2,
+    "collapsedBuilt": 2
   },
   {
     "name": "frame-07-catalogue",
-    "paired": 44,
-    "differs": 22,
-    "readings": 1260
+    "frame": "01-12.html",
+    "match": 0.28,
+    "runnerUp": 0.11,
+    "paired": 24,
+    "differs": 6,
+    "readings": 1260,
+    "collapsedDrawn": 1,
+    "collapsedBuilt": 2
   },
   {
     "name": "frame-08-settings-policy",
-    "paired": 59,
-    "differs": 14,
-    "readings": 1188
+    "frame": "02-00.html",
+    "match": 0.44,
+    "runnerUp": 0.22,
+    "paired": 47,
+    "differs": 7,
+    "readings": 1188,
+    "collapsedDrawn": 3,
+    "collapsedBuilt": 3
   },
   {
     "name": "frame-08b-policy-list",
-    "paired": 54,
-    "differs": 12,
-    "readings": 1404
+    "frame": "02-06.html",
+    "match": 0.39,
+    "runnerUp": 0.25,
+    "paired": 41,
+    "differs": 2,
+    "readings": 1404,
+    "collapsedDrawn": 16,
+    "collapsedBuilt": 16
   },
   {
     "name": "frame-08c-policy-flow",
-    "paired": 41,
-    "differs": 29,
-    "readings": 1008
+    "frame": "02-07.html",
+    "match": 0.41,
+    "runnerUp": 0.22,
+    "paired": 27,
+    "differs": 16,
+    "readings": 1008,
+    "collapsedDrawn": 6,
+    "collapsedBuilt": 6
   },
   {
     "name": "frame-09-presence",
-    "paired": 34,
-    "differs": 14,
-    "readings": 918
+    "frame": "02-01.html",
+    "match": 0.39,
+    "runnerUp": 0.2,
+    "paired": 20,
+    "differs": 1,
+    "readings": 918,
+    "collapsedDrawn": 3,
+    "collapsedBuilt": 3
   },
   {
     "name": "frame-10-who-is-told",
-    "paired": 32,
-    "differs": 8,
-    "readings": 666
+    "frame": "02-02.html",
+    "match": 0.38,
+    "runnerUp": 0.17,
+    "paired": 20,
+    "differs": 1,
+    "readings": 666,
+    "collapsedDrawn": 3,
+    "collapsedBuilt": 2
   },
   {
     "name": "frame-11-holds",
-    "paired": 31,
-    "differs": 12,
-    "readings": 774
+    "frame": "02-03.html",
+    "match": 0.46,
+    "runnerUp": 0.17,
+    "paired": 18,
+    "differs": 4,
+    "readings": 774,
+    "collapsedDrawn": 0,
+    "collapsedBuilt": 0
   },
   {
     "name": "frame-12-closing",
-    "paired": 32,
-    "differs": 14,
-    "readings": 720
+    "frame": "02-04.html",
+    "match": 0.43,
+    "runnerUp": 0.18,
+    "paired": 19,
+    "differs": 3,
+    "readings": 720,
+    "collapsedDrawn": 1,
+    "collapsedBuilt": 1
   },
   {
     "name": "frame-13-access",
-    "paired": 31,
-    "differs": 9,
-    "readings": 774
+    "frame": "02-05.html",
+    "match": 0.25,
+    "runnerUp": 0.18,
+    "paired": 18,
+    "differs": 1,
+    "readings": 774,
+    "collapsedDrawn": 2,
+    "collapsedBuilt": 2
   }
 ]
