@@ -13,23 +13,28 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { codeChip } from "../../chrome/code";
-import { standIn } from "../../chrome/standin";
+import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedDay, type Day, type DayRow } from "../../roster/attendance";
+import { type Day, type DayRow } from "../../roster/attendance";
 
 /** Draw the screen. */
 export async function attendance(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load(host, ROSTER_READ, "day", recordedDay);
-  const day = got.value;
+  const got = await load<Day>(host, ROSTER_READ, "day");
 
-  const body = el("div", "body");
-  body.append(marks(day), table(day.rows));
-
-  if (!got.live) {
-    body.append(standIn("day", got.because));
+  // No fallback — `APPS-Q26(4)`. The header goes with the body, because this
+  // screen's header carries the day it is about and a read that failed produced
+  // no day to name.
+  if (!got.ok) {
+    failureScreen(main, "Attendance", got.failure, { the: "today's attendance" },
+      () => void attendance(host, main));
+    return;
   }
 
+  const day = got.value;
+  const body = el("div", "body");
+
+  body.append(marks(day), table(day.rows));
   main.replaceChildren(header(day), body);
 }
 

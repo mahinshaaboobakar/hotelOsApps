@@ -8,10 +8,10 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
-import { standIn } from "../../chrome/standin";
+import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedLeave, type LeaveBoard } from "../../roster/leave";
+import { type LeaveBoard } from "../../roster/leave";
 import { queue, swapCard } from "./approvals";
 import { requestForm } from "./form";
 import { balances, requests } from "./requests";
@@ -33,7 +33,16 @@ export async function leave(
   open: () => void = () => {},
   close: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "leave", recordedLeave);
+  const got = await load<LeaveBoard>(host, ROSTER_READ, "leave");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Leave & Requests", got.failure, { the: "leave" },
+      () => void leave(host, main, tab, go, dialog, open, close));
+    return;
+  }
+
   const board = got.value;
 
   const body = el("div", "body");
@@ -48,10 +57,6 @@ export async function leave(
     body.append(split);
   } else {
     body.append(balances(board.balances), requests(board.requests));
-  }
-
-  if (!got.live) {
-    body.append(standIn("example", got.because));
   }
 
   main.replaceChildren(header(board, open), tabs(board, tab, go), body);

@@ -19,10 +19,10 @@ import type { HostApi } from "@hotelos/sdk";
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
-import { standIn } from "../../chrome/standin";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
 import { newShift } from "../policy/dialog";
-import { recordedPolicy, type CatalogueRow } from "../../roster/policy";
+import { type CatalogueRow, type Policy } from "../../roster/policy";
 
 /** One table cell holding an element rather than text. */
 function cell(child: HTMLElement, className?: string): HTMLElement {
@@ -49,15 +49,20 @@ export async function shifts(
   open: () => void = () => {},
   close: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "policy", recordedPolicy);
+  const got = await load<Policy>(host, ROSTER_READ, "policy");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Policy", got.failure, { the: "the shift catalogue" },
+      () => void shifts(host, main, dialog, open, close));
+    return;
+  }
+
   const catalogue = got.value.catalogue;
 
   const body = el("div", "body");
   body.append(table(catalogue), note());
-
-  if (!got.live) {
-    body.append(standIn("catalogue", got.because));
-  }
 
   main.replaceChildren(header(catalogue, open), body);
 

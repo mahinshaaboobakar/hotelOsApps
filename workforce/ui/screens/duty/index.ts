@@ -17,9 +17,10 @@ import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
 import { assignDuty } from "./dialog";
-import { recordedRegister, type Duty, type Holder, type Register } from "../../roster/duty";
+import { type Duty, type Holder, type Register } from "../../roster/duty";
 
 /** Draw the screen. */
 export async function duty(
@@ -29,7 +30,16 @@ export async function duty(
   open: () => void = () => {},
   close: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "register", recordedRegister);
+  const got = await load<Register>(host, ROSTER_READ, "register");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Duty", got.failure, { the: "the duty register" },
+      () => void duty(host, main, dialog, open, close));
+    return;
+  }
+
   const register = got.value;
 
   const body = el("div", "body");

@@ -17,7 +17,7 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
-import { recordedOvertime, recordedWeek } from "../roster";
+import { recordedOvertime, recordedWeek } from "../roster/recorded";
 import { recordedDay } from "../roster/attendance";
 import { recordedRegister } from "../roster/duty";
 import { recordedLeave } from "../roster/leave";

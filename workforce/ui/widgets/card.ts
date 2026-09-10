@@ -17,6 +17,8 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
+import { mark, sentence, wire, type ReadFailure, type Subject }
+  from "../chrome/failure";
 import type { Figure, Segment, SummaryRow } from "../roster/widget";
 
 import { WIDGET_CSS } from "./styles";
@@ -94,16 +96,14 @@ async function open(host: HostApi, row: HTMLElement, destination: string): Promi
  */
 export function card(
   title: string,
-  live: boolean,
   body: readonly (Node | null)[],
 ): HTMLElement {
   const root = el("div", "wcard");
-  root.dataset["live"] = String(live);
 
   const head = el("div", "whead");
   head.append(
     el("span", "wtitle", title),
-    el("span", "wapp", live ? APPLICATION : `${APPLICATION} · recorded`),
+    el("span", "wapp", APPLICATION),
   );
 
   const contents = el("div", "wbody");
@@ -224,4 +224,44 @@ export function rows(entries: readonly SummaryRow[], host: HostApi): HTMLElement
  */
 export function note(text: string): HTMLElement {
   return el("div", "wnote", text);
+}
+
+/**
+ * A widget that could not read, in the space a widget has.
+ *
+ * @param title the widget name, kept so the dock tile is still identifiable
+ * @param failure what went wrong
+ * @param subject what could not be read
+ * @returns the card, with the failure where its rows would be
+ *
+ * @remarks
+ * **The screen treatment does not fit and would not help.** A card is 320x384
+ * and IS the frame - there is no header to keep and no column names to hold a
+ * person's bearings, so what survives is the sentence and the wire line. No
+ * action: the three the approved frame offers all leave this application, and
+ * the bridge carries no navigation.
+ *
+ * **The card no longer says `recorded`.** That header existed to mark a
+ * fabrication honestly, and marking one is still rendering one - so the
+ * fabrication went and the mark went with it.
+ */
+export function failureCard(
+  title: string,
+  failure: ReadFailure,
+  subject: Subject,
+): HTMLElement {
+  const root = el("div", "wcard");
+  const head = el("div", "whead");
+
+  head.append(el("span", "wtitle", title), el("span", "wapp", "Workforce"));
+
+  const body = el("div", "wbody wfail");
+  body.append(
+    mark(failure.cause),
+    el("div", "fail-said", sentence(failure, subject)),
+    wire(failure),
+  );
+
+  root.append(head, body);
+  return root;
 }

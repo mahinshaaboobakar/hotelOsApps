@@ -2,7 +2,7 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { activate } from "../application";
-import { recordedOvertime, recordedWeek } from "../roster";
+import { recordedOvertime, recordedWeek } from "../roster/recorded";
 
 /**
  * The Team Rota's rules — the ones the backend enforces, held still in the UI.
@@ -87,12 +87,21 @@ describe("the Team Rota", () => {
     expect(root.textContent ?? "").not.toContain("Overtime");
   });
 
-  it("admits it when the data is not the property's own", async () => {
+  it("shows the failure in place of the week, and no week at all", async () => {
     const root = await mount(failing());
+    const text = root.textContent ?? "";
 
-    // ADR 0124: the surface fails in place and names what it awaits. A person
-    // must be able to tell whether they are looking at their hotel.
-    expect(root.textContent ?? "").toContain("approved example week");
+    // This asserted "approved example week" - the stand-in banner that sat
+    // under a recorded rota. APPS-Q26(4) rejected the mechanism, not the
+    // wording: a screen that cannot read shows what failed, so there is no
+    // longer an example to admit to.
+    //
+    // The two halves matter together. Naming the failure is worth nothing if
+    // the fabricated week is still drawn behind it, and that is exactly what
+    // the old shape did.
+    expect(text).toContain("did not answer in time");
+    expect(root.querySelector(".fail-wire")).not.toBeNull();
+    expect(root.querySelector(".rota")).toBeNull();
   });
 
   it("does not ask when the capability was not granted", async () => {

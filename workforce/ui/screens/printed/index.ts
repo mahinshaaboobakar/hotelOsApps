@@ -21,8 +21,9 @@ import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load, recordedWeek, type Week } from "../../roster";
-import { recordedRegister, type Duty, type Register } from "../../roster/duty";
+import { failureScreen } from "../../chrome/failure";
+import { load, type Week } from "../../roster";
+import { type Duty, type Register } from "../../roster/duty";
 
 /**
  * Draw the preview into `root`, replacing the module's chrome entirely.
@@ -40,9 +41,22 @@ export async function printed(
   // duty rows — and paper is exactly where nobody would notice, because there
   // is no live screen beside it to disagree.
   const [gotWeek, gotDuty] = await Promise.all([
-    load(host, ROSTER_READ, "week", recordedWeek),
-    load(host, ROSTER_READ, "register", recordedRegister),
+    load<Week>(host, ROSTER_READ, "week"),
+    load<Register>(host, ROSTER_READ, "register"),
   ]);
+
+  // **Either read failing means no sheet.** This is paper: a fabricated row
+  // here is the one nobody notices, because there is no live screen beside it
+  // to disagree with. Both reads feed one page, so the first failure is the
+  // page's failure - printing half a rota would be worse than printing none.
+  const failed = !gotWeek.ok ? gotWeek : !gotDuty.ok ? gotDuty : null;
+  if (failed !== null && !failed.ok) {
+    failureScreen(root, "The printed week", failed.failure,
+      { the: "the week to print" }, () => void printed(host, root, back));
+    return;
+  }
+
+  if (!gotWeek.ok || !gotDuty.ok) return;
 
   const week = gotWeek.value;
 

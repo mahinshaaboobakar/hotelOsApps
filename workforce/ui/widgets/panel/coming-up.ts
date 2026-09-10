@@ -21,10 +21,10 @@ import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk"
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedComingUp } from "../../roster/summaries";
 import type { SummaryRow } from "../../roster/widget";
 
-import { card, figures, note, rows, section } from "../card";
+import type { ComingUp } from "../../roster/widget";
+import { failureCard, card, figures, note, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -33,10 +33,14 @@ import { card, figures, note, rows, section } from "../card";
  * @returns the card
  */
 export async function comingUp(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, ROSTER_READ, "comingUp", recordedComingUp);
+  const got = await load<ComingUp>(host, ROSTER_READ, "comingUp");
+  if (!got.ok) {
+    return failureCard('Coming Up', got.failure, { the: 'the next seven days' });
+  }
+
   const ahead = got.value;
 
-  return card("Coming Up", got.live, [
+  return card("Coming Up", [
     section("Next 7 days"),
     figures(ahead.figures),
     section("Two or more away, same department"),

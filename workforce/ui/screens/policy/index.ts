@@ -18,10 +18,10 @@ import type { HostApi } from "@hotelos/sdk";
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
-import { standIn } from "../../chrome/standin";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
 import { newShift } from "./dialog";
-import { recordedPolicy, type CatalogueRow, type LeaveRow, type Policy } from "../../roster/policy";
+import { type CatalogueRow, type LeaveRow, type Policy } from "../../roster/policy";
 
 /** One table cell holding an element rather than text. */
 function cell(child: HTMLElement, className?: string): HTMLElement {
@@ -46,15 +46,20 @@ export async function policy(
   close: () => void = () => {},
   open: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "policy", recordedPolicy);
+  const got = await load<Policy>(host, ROSTER_READ, "policy");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Policy", got.failure, { the: "this property's policy" },
+      () => void policy(host, main, dialog, close, open));
+    return;
+  }
+
   const config = got.value;
 
   const body = el("div", "body");
   body.append(shifts(config.catalogue), leave(config.leave), overtime(config), holidays(config));
-
-  if (!got.live) {
-    body.append(standIn("policy", got.because));
-  }
 
   main.replaceChildren(header(config, open), body);
 

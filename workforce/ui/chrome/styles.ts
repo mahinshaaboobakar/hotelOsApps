@@ -80,6 +80,58 @@ button{background:transparent;color:inherit;font:inherit;border:0;
     font:13.5px/1.55 var(--font-sans,"Segoe UI",system-ui,sans-serif);
     font-variant-numeric:tabular-nums}
 
+/* # When a screen cannot read - APPS-Q26(4)
+   The body a screen draws in place of its rows. The frame above it stays, so
+   this sits where the list would and nothing else moves.
+
+   Quiet rather than alarming. This is not an error dialog: it is the screen,
+   in the state it is actually in, and a red panel would make an unanswered
+   read look like damage. The mark carries the difference between the three
+   causes; the colour does not have to. */
+.fail{display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+      padding:34px 2px;max-width:62ch}
+.fail-mark{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;font-size:15px;
+           letter-spacing:.22em;color:var(--color-ink-faint,#5a6172);
+           padding:5px 9px;border:1px solid var(--color-line,rgb(255 255 255/.07));
+           border-radius:7px}
+/* The three causes read differently at a glance without relying on colour
+   alone: the refusal is the only one drawn on a line that stops. */
+.fail-forbidden{color:var(--color-warn,#fbbf24);
+                border-color:color-mix(in srgb, var(--color-warn) 34%, transparent)}
+.fail-faulted{color:var(--color-bad,#f87171);
+              border-color:color-mix(in srgb, var(--color-bad) 34%, transparent)}
+.fail-said{font-size:15.5px;font-weight:600;color:var(--color-ink,#e8ebf4);
+           letter-spacing:-.01em}
+.fail-why{font-size:13.5px;line-height:1.6;color:var(--color-ink-muted,#8b93a7)}
+/* The line a person hands to somebody who can act, so it selects cleanly and
+   wraps rather than truncating - a fault id cut off at the edge is a fault id
+   nobody can quote. */
+/* **A literal stack, and not a token.** The published set has no monospace
+   family: TOKEN_NAMES carries the sans one and nothing beside it. A custom
+   property for mono would therefore resolve to its own fallback on every
+   property forever - the defect the token guard exists to catch, and it caught
+   this one.
+
+   Reported rather than worked around. The wire line is exactly the surface a
+   platform monospace token would serve, and an application must not mint a
+   name the shell does not inject.
+
+   Written without the property syntax on purpose: the guard scans text, so a
+   comment spelling the name in full would count as using it. That is the
+   guard being right - one that skipped comments could be fooled by one. */
+.fail-wire{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;font-size:11.5px;
+           line-height:1.7;color:var(--color-ink-faint,#5a6172);
+           background:var(--color-surface-raised,#11141f);
+           border:1px solid var(--color-line,rgb(255 255 255/.07));
+           border-radius:6px;padding:7px 10px;overflow-wrap:anywhere;user-select:text}
+.fail-acts{display:flex;gap:9px;margin-top:2px}
+/* The widget's form of the same thing, in 320x384: no paragraph and no action,
+   because neither fits and the sentence is what a glance needs. */
+.wfail{display:flex;flex-direction:column;align-items:flex-start;gap:9px;
+       padding:18px 2px}
+.wfail .fail-said{font-size:13px}
+.wfail .fail-wire{font-size:10.5px;padding:6px 8px}
+
 /* # The app bar — an installed application navigates from the top
    The platform's own four keep the left rail, because they are the desktop's
    own furniture. An installed application is a guest in that shell, and a guest

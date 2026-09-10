@@ -22,9 +22,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedPendingRequests } from "../../roster/summaries";
 
-import { card, figures, note, rows, section } from "../card";
+import type { PendingRequests } from "../../roster/widget";
+import { failureCard, card, figures, note, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -33,10 +33,14 @@ import { card, figures, note, rows, section } from "../card";
  * @returns the card
  */
 export async function pendingRequests(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, ROSTER_READ, "pendingRequests", recordedPendingRequests);
+  const got = await load<PendingRequests>(host, ROSTER_READ, "pendingRequests");
+  if (!got.ok) {
+    return failureCard('Pending Requests', got.failure, { the: 'what is waiting' });
+  }
+
   const queue = got.value;
 
-  return card("Pending Requests", got.live, [
+  return card("Pending Requests", [
     figures(queue.figures),
     section("Oldest first"),
     rows(queue.rows, host),

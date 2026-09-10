@@ -17,10 +17,10 @@ import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/
 import { ROSTER_READ } from "../../chrome/permissions";
 import { el, fill } from "../../chrome/element";
 import { load } from "../../roster";
-import { recordedShiftBoard } from "../../roster/summaries";
 import type { Changeover } from "../../roster/widget";
 
-import { card, figures, rows, section } from "../card";
+import type { ShiftBoard } from "../../roster/widget";
+import { failureCard, card, figures, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -29,10 +29,14 @@ import { card, figures, rows, section } from "../card";
  * @returns the card
  */
 export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, ROSTER_READ, "shiftBoard", recordedShiftBoard);
+  const got = await load<ShiftBoard>(host, ROSTER_READ, "shiftBoard");
+  if (!got.ok) {
+    return failureCard('Shift Board', got.failure, { the: 'who is on now' });
+  }
+
   const board = got.value;
 
-  return card("Shift Board", got.live, [
+  return card("Shift Board", [
     figures([
       { value: String(board.onNow), label: "on now", tone: "ink" },
       { value: String(board.departments), label: "departments", tone: "muted" },

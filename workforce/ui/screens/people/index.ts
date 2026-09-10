@@ -12,8 +12,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
-import { recordedPeople, type People, type Posting } from "../../roster/people";
+import { type People, type Posting } from "../../roster/people";
 import { endPosting } from "./end-posting";
 import { pager } from "../../chrome/pager";
 import { recordedPostingEnding } from "../../roster/teams";
@@ -45,7 +46,16 @@ export async function people(
   // answer. A screen that fetched everything and cut it locally would be a
   // pager over a list the property already sent in full, which is the thing
   // paging exists to avoid.
-  const got = await load(host, ROSTER_READ, "people", recordedPeople, { page });
+  const got = await load<People>(host, ROSTER_READ, "people", { page });
+
+  // No fallback - `APPS-Q26(4)`. The page is carried into the retry: a retry
+  // that dropped it would move a person to page one and call it a retry.
+  if (!got.ok) {
+    failureScreen(main, "People", got.failure, { the: "the people here" },
+      () => void people(host, main, ending, close, onEnd, onPage, page));
+    return;
+  }
+
   const board = got.value;
 
   const body = el("div", "body");

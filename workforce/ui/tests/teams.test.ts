@@ -95,8 +95,12 @@ describe("Teams", () => {
     // the switcher below chooses. The section is what the bar lists.
     const sections = Array.from(root.querySelectorAll(".head .tab"))
       .map((one) => one.textContent);
+    // "Leave & Requests3" until APPS-Q26(4): the 3 was the length of a recorded
+    // queue, drawn on every screen whatever the property held. A badge is where
+    // a wrong number is believed, because nobody opens the screen to check one
+    // that small - so it is absent until something can answer it.
     expect(sections).toEqual(
-      ["Rota", "Leave & Requests3", "Attendance", "Duty", "People", "Reports", "Policy"]);
+      ["Rota", "Leave & Requests", "Attendance", "Duty", "People", "Reports", "Policy"]);
 
     await click(root, ".head .tab", "People");
     const views = Array.from(root.querySelectorAll(".tabs .tab")).map((one) => one.textContent);

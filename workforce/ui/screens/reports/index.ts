@@ -13,8 +13,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
-import { recordedMonth, type Month, type MonthRow } from "../../roster/reports";
+import { type Month, type MonthRow } from "../../roster/reports";
 
 const HEADINGS = [
   "Person", "Posted", "Present", "Late", "Casual", "Sick", "Earned", "Comp",
@@ -25,7 +26,16 @@ const COLUMNS = "1.5fr repeat(7,58px) 118px 74px 74px";
 
 /** Draw the screen. */
 export async function reports(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load(host, ROSTER_READ, "month", recordedMonth);
+  const got = await load<Month>(host, ROSTER_READ, "month");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Reports", got.failure, { the: "this month's numbers" },
+      () => void reports(host, main));
+    return;
+  }
+
   const month = got.value;
 
   const body = el("div", "body");

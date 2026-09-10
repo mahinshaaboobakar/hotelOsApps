@@ -13,27 +13,37 @@ import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { legend } from "../../chrome/legend";
-import { standIn } from "../../chrome/standin";
-import { load, recordedWeek } from "../../roster";
-import { recordedSchedule, type Schedule, type ScheduleDay } from "../../roster/schedule";
+import { failureScreen } from "../../chrome/failure";
+import { load } from "../../roster";
+import { type Schedule, type ScheduleDay } from "../../roster/schedule";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
 /** Draw the screen. */
 export async function schedule(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load(host, ROSTER_READ, "schedule", recordedSchedule);
+  const got = await load<Schedule>(host, ROSTER_READ, "schedule");
+
+  // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
+  // never a recorded list with an apology under it.
+  if (!got.ok) {
+    failureScreen(main, "Rota", got.failure, { the: "this person's month" },
+      () => void schedule(host, main));
+    return;
+  }
+
   const month = got.value;
 
+  // **No legend here, and its absence is the finding.** This drew
+  // `legend(recordedWeek.catalogue)` — "this property's shifts", from a
+  // recorded fixture, on every render including a successful read. The month
+  // this screen loads carries no catalogue, so there is no live source for it:
+  // absent rather than invented (`APPS-Q26(4)`, and the gap rule it rests on).
+  // Restoring it means a second read for the catalogue, which is a decision
+  // rather than a repair, and it is reported instead of taken.
   const body = el("div", "body");
   body.append(
     figures(month, host.property),
-    calendar(month, host.property),
-    legend(recordedWeek.catalogue));
-
-  if (!got.live) {
-    body.append(standIn("month", got.because));
-  }
+    calendar(month, host.property));
 
   main.replaceChildren(header(month), body);
 }

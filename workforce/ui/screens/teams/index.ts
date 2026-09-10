@@ -21,8 +21,8 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
+import { failureScreen } from "../../chrome/failure";
 import { load } from "../../roster";
-import { recordedTeams } from "../../roster/teams";
 import type { Team, TeamDetail, Teams } from "../../roster/team";
 
 import { detail } from "./detail";
@@ -62,7 +62,14 @@ export async function teams(
   // Frame 7 is a DATA state, not a route: a property that has formed none gets
   // the same screen, answered with none. A flag would make "empty" reachable
   // with teams in the answer, which is a state nobody drew.
-  const got = await load(host, ROSTER_READ, "teams", recordedTeams);
+  const got = await load<Teams>(host, ROSTER_READ, "teams");
+
+  if (!got.ok) {
+    failureScreen(main, "People", got.failure, { the: "this property's teams" },
+      () => void teams(host, main, place));
+    return;
+  }
+
   const board = got.value;
 
   // Open only when the list has selected a team AND the answer carries its

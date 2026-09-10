@@ -20,9 +20,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedAttendanceToday } from "../../roster/summaries";
 
-import { bar, card, figures, rows, section } from "../card";
+import type { AttendanceToday } from "../../roster/widget";
+import { failureCard, bar, card, figures, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -31,10 +31,14 @@ import { bar, card, figures, rows, section } from "../card";
  * @returns the card
  */
 export async function attendanceToday(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, ROSTER_READ, "attendanceToday", recordedAttendanceToday);
+  const got = await load<AttendanceToday>(host, ROSTER_READ, "attendanceToday");
+  if (!got.ok) {
+    return failureCard('Attendance Today', got.failure, { the: "today's attendance" });
+  }
+
   const day = got.value;
 
-  return card("Attendance Today", got.live, [
+  return card("Attendance Today", [
     figures(day.figures),
     bar(day.share),
     section("Absent against the rota"),

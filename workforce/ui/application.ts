@@ -25,7 +25,6 @@
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
-import { recordedLeave } from "./roster/leave";
 import { bar, switcher, type Operator, type Section } from "./chrome/bar";
 import { stylesheet } from "./chrome/styles";
 import { attendance } from "./screens/attendance";
@@ -129,7 +128,7 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
       {
         label: "Team rota",
         draw: (h, m, place) => void rota(
-          h, m, () => place.open("print"), undefined,
+          h, m, () => place.open("print"),
           place.pick, place.onPick, place.close),
       },
       { label: "Staff schedule", draw: (h, m) => void schedule(h, m) },
@@ -345,9 +344,20 @@ export const activate: Activate = (host: HostApi): HostedModule => {
  * stays true without being changed.
  */
 function sections(): readonly Section[] {
-  return SECTIONS.map((section) => section.label === "Leave & Requests"
-    ? { label: section.label, count: String(recordedLeave.waiting.length) }
-    : { label: section.label });
+  // **No count, and its absence is the point.** This drew
+  // `String(recordedLeave.waiting.length)` on the Leave & Requests tab - a
+  // number from a recorded fixture, on every screen, always. The comment above
+  // argues the count must come "from the same facts the screen draws", and it
+  // came from a file instead: a guarantee stated on the very line that failed
+  // to hold it.
+  //
+  // There is no live source for it here. The bar is built before any screen
+  // reads anything, so a true count needs a read this seam does not make - and
+  // a badge is exactly where a wrong number is believed, because nobody opens
+  // the screen to check a number that small. Absent until something can answer
+  // it (`APPS-Q26(4)`, and the gap rule: no value stands in for a measurement
+  // nobody took).
+  return SECTIONS.map((section) => ({ label: section.label }));
 }
 
 export default activate;

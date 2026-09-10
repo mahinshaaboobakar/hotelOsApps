@@ -8,9 +8,9 @@
 
 import { el } from "../../chrome/element";
 import { legend } from "../../chrome/legend";
-import { standIn } from "../../chrome/standin";
+import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load, recordedWeek, type Week } from "../../roster";
+import { load, type Week } from "../../roster";
 import type { HostApi } from "@hotelos/sdk";
 import { grid } from "./grid";
 import { picker } from "./picker";
@@ -27,12 +27,21 @@ export async function rota(
   host: HostApi,
   main: HTMLElement,
   print: () => void = () => {},
-  fixture: Week = recordedWeek,
   pick: { person: string; day: number } | null = null,
   onPick: (person: string, day: number) => void = () => {},
   closePick: () => void = () => {},
 ): Promise<void> {
-  const got = await load(host, ROSTER_READ, "week", fixture);
+  const got = await load<Week>(host, ROSTER_READ, "week");
+
+  // No fallback - `APPS-Q26(4)`. The `fixture` parameter went with it: a
+  // recorded week as a DEFAULT ARGUMENT put the fabrication in the shipped
+  // signature, where a caller passing nothing got one without deciding to.
+  if (!got.ok) {
+    failureScreen(main, "Rota", got.failure, { the: "the team rota" },
+      () => void rota(host, main, print, pick, onPick, closePick));
+    return;
+  }
+
   const week = got.value;
 
   const body = el("div", "body");
@@ -46,10 +55,6 @@ export async function rota(
 
   if (week.overtime.length > 0) {
     body.append(overtime(week));
-  }
-
-  if (!got.live) {
-    body.append(standIn("week", got.because));
   }
 
   main.replaceChildren(header(week, print), body);

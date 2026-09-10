@@ -14,9 +14,9 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { load } from "../../roster";
-import { recordedOnLeave } from "../../roster/summaries";
 
-import { card, figures, note, rows, section } from "../card";
+import type { OnLeave } from "../../roster/widget";
+import { failureCard, card, figures, note, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -25,10 +25,14 @@ import { card, figures, note, rows, section } from "../card";
  * @returns the card
  */
 export async function onLeave(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, ROSTER_READ, "onLeave", recordedOnLeave);
+  const got = await load<OnLeave>(host, ROSTER_READ, "onLeave");
+  if (!got.ok) {
+    return failureCard('On Leave', got.failure, { the: 'who is away' });
+  }
+
   const away = got.value;
 
-  return card("On Leave", got.live, [
+  return card("On Leave", [
     figures(away.figures),
     section("Away today"),
     rows(away.today, host),
