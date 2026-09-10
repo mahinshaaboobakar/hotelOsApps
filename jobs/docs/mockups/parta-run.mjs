@@ -98,6 +98,16 @@ function words(html) {
     .filter((word) => word.length > 3);
 }
 
+
+/** The pairing key the instrument printed — quoted with every number it produced. */
+const BLANK = String.fromCharCode(10, 10);
+function keyOf(report) {
+  const at = report.indexOf("PAIRING KEY");
+  if (at === -1) return "unstated";
+  const end = report.indexOf(BLANK, at);
+  return report.slice(at + "PAIRING KEY".length, end === -1 ? undefined : end).replace(/\s+/g, " ").trim();
+}
+
 const sweep = (url, out, root) =>
   execFileSync("node", [MEASURE, "--sweep", url, out, "1440", "900", ...(root === undefined ? [] : [root])],
     { encoding: "utf8" }).trim();
@@ -172,7 +182,12 @@ for (const capture of captured) {
   );
   writeFileSync(join(HERE, `compare-${capture.name}.txt`), report, "utf8");
 
-  const paired = Number(/PAIRED \((\d+)\)/.exec(report)?.[1] ?? 0);
+  // **Tolerant of the report's own growth.** This read `PAIRED (n)` exactly, and
+  // the instrument grew a suffix — `PAIRED (25, 2 by position)` — the day
+  // ARCH-Q12 gained its second key. Every row silently read zero. A parser that
+  // demands the whole line is a parser that breaks on an improvement.
+  const paired = Number(/PAIRED \((\d+)/.exec(report)?.[1] ?? 0);
+  const key = keyOf(report);
   const differs = (report.match(/^ {2}DIFFERS/gm) ?? []).length;
   const collapsed = /COLLAPSED\s+drawn (\d+), built (\d+)/.exec(report);
   const readings = JSON.parse(readFileSync(capture.built, "utf8"))
@@ -186,6 +201,7 @@ for (const capture of captured) {
     paired, differs, readings,
     collapsedDrawn: Number(collapsed?.[1] ?? 0),
     collapsedBuilt: Number(collapsed?.[2] ?? 0),
+    key,
   });
 
   console.log(
