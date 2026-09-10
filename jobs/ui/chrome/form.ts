@@ -160,3 +160,34 @@ export function asking(
   );
   return panel;
 }
+
+/**
+ * A panel that confirms one destructive act — no answer, just the decision.
+ *
+ * Separate from {@link asking} because they are different questions: that one
+ * needs a reason before it can act, and this one needs only that the person
+ * meant it. Giving a revocation an empty text box would invite a sentence
+ * nobody stores.
+ *
+ * Standard §2's pair, from the confirm's side: the button that does it is
+ * FILLED danger at weight 600, and the affordance that opened it is outline
+ * danger. Standard §9's placement: a dialog confirms.
+ */
+export function confirming(
+  question: string,
+  detail: string,
+  onDone: () => void,
+  onCancel: () => void,
+): HTMLElement {
+  const panel = el("div", "ask");
+  panel.append(
+    el("div", "sect", question),
+    el("div", "mono", detail),
+    fill(
+      el("div", "row"),
+      control("btn danger confirm", "Revoke it", onDone),
+      control("btn", "Cancel", onCancel),
+    ),
+  );
+  return panel;
+}

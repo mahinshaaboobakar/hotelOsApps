@@ -4,7 +4,7 @@
  */
 
 import { control, el, fill } from "../../chrome/element";
-import { choose, text, toggle as switchOf, values } from "../../chrome/form";
+import { choose, confirming, text, toggle as switchOf, values } from "../../chrome/form";
 import type { Detail, Settings } from "../../board";
 
 /** What a settings tab does when Save is pressed — the one call it makes. */
@@ -195,11 +195,27 @@ export function closing(s: Settings, configure: boolean, save: Saving, discard: 
 export function access(
   s: Settings, configure: boolean, save: Saving, discard: () => void,
 ): HTMLElement {
+  // **Revoking is destructive and is drawn as destructive** — standard §2's
+  // pair. It ended a person's property-wide authority over every job from a
+  // plain `btn sm`, with no confirm at all, while cancelling one job had both.
+  // A fidelity sweep measures the button that is there and finds it perfect;
+  // nothing measures that it should have been the other button.
+  const asked = el("div");
   const held = s.jobsManagers.map((m) => [
     m.userId,
     m.grantedAt,
     configure
-      ? control("btn sm", "Revoke", () => save("revokeJobsManager", { userId: m.userId }))
+      ? control("btn sm danger", "Revoke…", () => {
+        asked.replaceChildren(confirming(
+          "Revoke this person's jobs-manager grant?",
+          `${m.userId} · granted ${m.grantedAt}. They keep every other permission they hold.`,
+          () => {
+            asked.replaceChildren();
+            save("revokeJobsManager", { userId: m.userId });
+          },
+          () => asked.replaceChildren(),
+        ));
+      })
       : el("span", "dim", "—"),
   ]);
 
@@ -212,6 +228,7 @@ export function access(
     s.jobsManagers.length > 0
       ? table(["User", "Granted", ""], held)
       : el("div", "dim", "Nobody at this property holds it."),
+    asked,
     configure ? grant : null,
     saveRow(configure, grant, save, "grantJobsManager", (h) => ({ userId: h.userId }), discard),
     el("div", "mono", "Postings and headships are Workforce's and are read here, not edited. The jobs-manager grant is this property's to make: Jobs announces it and the Kernel writes the relation — nothing here writes an authorization tuple."),

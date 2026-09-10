@@ -1,13 +1,8 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
-import { recordedBoard, recordedToday } from "../board/recorded/board";
-import { recordedCatalogue } from "../board/recorded/catalogue";
-import { recordedJob } from "../board/recorded/job";
-import { recordedLive, recordedScheduled } from "../board/recorded/live";
-import { recordedSettings } from "../board/recorded/settings";
 import declared from "./pagination.json";
+import { host, open, settle, SCREENS } from "./walk";
 
 /**
  * The pagination conformance table, enforced rather than kept.
@@ -24,48 +19,6 @@ import declared from "./pagination.json";
  * treating them as such would make the guard cry wolf until somebody widened
  * the exception list until it covered everything.
  */
-const ALL = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel", "job.amend", "job.configure", "job.curate"];
-
-function host(): HostApi {
-  const answers: Record<string, unknown> = {
-    today: recordedToday, board: recordedBoard, job: recordedJob, live: recordedLive,
-    scheduled: recordedScheduled, catalogue: recordedCatalogue, settings: recordedSettings,
-  };
-
-  return {
-    identity: { id: "jobs", version: "0.1.0", capabilities: ALL },
-    property: { timezone: "Asia/Qatar", locale: "en-GB" },
-    call: (capability, method) => {
-      const answer = answers[method];
-      return answer === undefined
-        ? Promise.reject(new HostCallError({ kind: "unavailable", message: `no answer for ${capability}/${method}` }))
-        : Promise.resolve(answer);
-    },
-    on: () => () => {},
-  };
-}
-
-async function settle(): Promise<void> {
-  await new Promise((done) => setTimeout(done, 0));
-  await new Promise((done) => setTimeout(done, 0));
-}
-
-/** Open a screen the way a person does — by pressing what it says. */
-async function open(root: HTMLElement, steps: readonly string[]): Promise<void> {
-  for (const step of steps) {
-    if (step === "job") {
-      root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
-    } else {
-      const target = Array.from(root.querySelectorAll<HTMLElement>("button"))
-        .find((button) => button.textContent?.startsWith(step) === true);
-      if (target === undefined) throw new Error(`no control opens "${step}"`);
-      target.click();
-    }
-
-    await settle();
-  }
-}
-
 /**
  * Every list surface on the screen as drawn.
  *
@@ -117,25 +70,7 @@ describe("every screen that shows a list is classified", () => {
     const named = new Set(declared.surfaces.map((surface) => surface.screen));
     const unclassified: string[] = [];
 
-    const screens: { name: string; open: readonly string[] }[] = [
-      { name: "Board", open: ["Board"] },
-      { name: "Live", open: ["Live"] },
-      { name: "Scheduled", open: ["Scheduled"] },
-      { name: "Catalogue", open: ["Catalogue"] },
-      { name: "Settings · Concern policy", open: ["Settings"] },
-      { name: "Settings · Shifts & presence", open: ["Settings", "Shifts & presence"] },
-      { name: "Settings · Who is told", open: ["Settings", "Who is told"] },
-      { name: "Settings · Holds & reminders", open: ["Settings", "Holds & reminders"] },
-      { name: "Settings · Closing & rating", open: ["Settings", "Closing & rating"] },
-      { name: "Settings · Access", open: ["Settings", "Access"] },
-      { name: "Settings · Policies", open: ["Settings", "All policies"] },
-      { name: "One job · Overview", open: ["job"] },
-      { name: "One job · Work", open: ["job", "Work"] },
-      { name: "One job · History", open: ["job", "History"] },
-      { name: "One job · Notes & photos", open: ["job", "Notes & photos"] },
-      { name: "One job · Links & steps", open: ["job", "Links & steps"] },
-      { name: "One job · Record", open: ["job", "Record"] },
-    ];
+    const screens = SCREENS;
 
     for (const screen of screens) {
       const root = document.createElement("div");
