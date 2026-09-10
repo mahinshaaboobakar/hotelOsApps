@@ -71,10 +71,23 @@ public static class TeamsView
             // so a property's first team in Housekeeping was unformable from
             // the screen, and the sheet's picker drew a literal.
             //
-            // Ordered by name rather than by code: the person reads the name,
-            // and `HK` sorting before `FO` is the code's order, not theirs.
+            // **Ordered by CODE, ordinally — and the order a person reads is
+            // not this layer's to choose.** The first version sorted by name
+            // with <c>CurrentCultureIgnoreCase</c>, which reads like the right
+            // intent and is not: nothing sets a culture in this service, in the
+            // SDK, or in the Kernel that launches the process, and
+            // <c>InvariantGlobalization</c> is off — so "current culture" is
+            // the account the service happens to run under, and the order of a
+            // hotel's departments would be a property of the machine. This
+            // platform is sold into India and the GCC and writes no country
+            // into code.
+            //
+            // The code is what this service owns and it sorts the same
+            // everywhere. The reader's order belongs where the reader's locale
+            // is, which is the module: <c>PropertyEnvironment.locale</c> is on
+            // the bundle's side of the bridge and on no side of this one.
             departments = names
-                .OrderBy(entry => entry.Value, StringComparer.CurrentCultureIgnoreCase)
+                .OrderBy(entry => entry.Key, StringComparer.Ordinal)
                 .Select(entry => new { code = entry.Key, name = entry.Value })
                 .ToArray(),
         };

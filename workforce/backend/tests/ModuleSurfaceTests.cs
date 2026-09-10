@@ -136,9 +136,14 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         var harness = new ModuleHarness(fixture);
         var scope = ModuleHarness.Property();
 
+        // **Chosen so the two candidate orders disagree.** By code: ENG, FO,
+        // HK. By name: Front Office, Housekeeping, Maintenance. A fixture whose
+        // code order and name order coincide — FO/HK/KIT against Front
+        // Office/Housekeeping/Kitchen, which is what this test had — passes
+        // under either rule and discriminates nothing.
         harness.Directory.WithDepartmentName("HK", "Housekeeping");
         harness.Directory.WithDepartmentName("FO", "Front Office");
-        harness.Directory.WithDepartmentName("KIT", "Kitchen");
+        harness.Directory.WithDepartmentName("ENG", "Maintenance");
 
         // One team, in one department. The other two have none.
         await Form(harness, scope, "HK", "Morning Crew");
@@ -152,13 +157,18 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
                             one.GetProperty("name").GetString()))
             .ToList();
 
-        // **All three, and ordered by the name a person reads.** A list derived
-        // from the teams above would carry Housekeeping alone, so the first
-        // team in Front Office would be the one team the screen could not form
-        // — and the failure would look like a missing department rather than a
-        // missing list. `HK` before `FO` is the code's order, not the reader's.
+        // **All three, ordered by CODE.** A list derived from the teams above
+        // would carry Housekeeping alone, so the first team in Front Office
+        // would be the one team the screen could not form — and the failure
+        // would look like a missing department rather than a missing list.
+        //
+        // The order is the code's, ordinally, because it is the same on every
+        // machine: nothing sets a culture in this service, so a
+        // culture-sensitive sort would order a hotel's departments by whichever
+        // account the service runs under. The order a person reads is the
+        // module's, from the property's own locale.
         Assert.Equal(
-            [("FO", "Front Office"), ("HK", "Housekeeping"), ("KIT", "Kitchen")],
+            [("ENG", "Maintenance"), ("FO", "Front Office"), ("HK", "Housekeeping")],
             departments);
     }
 

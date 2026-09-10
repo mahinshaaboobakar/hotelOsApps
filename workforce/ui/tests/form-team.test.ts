@@ -94,8 +94,16 @@ describe("forming a team", () => {
     // Every department the property has, not the ones that already have a
     // team: the first team in a department is the one this screen exists for.
     expect(picker).not.toBeNull();
-    expect(Array.from(picker!.options).map((one) => one.value))
-      .toEqual(["", "FO", "HK", "KIT"]);
+
+    // **In the reader's order, not the read's.** The service answers by code —
+    // ENG, FO, HK, KIT — because nothing sets a culture in that process and a
+    // culture-sensitive sort there would order a hotel's departments by
+    // whichever account the service runs under. The picker re-orders by name
+    // with the property's own locale, which is why Maintenance moves from
+    // first to last.
+    expect(Array.from(picker!.options).map((one) => one.textContent))
+      .toEqual(["Choose a department", "Front Office", "Housekeeping",
+                "Kitchen", "Maintenance"]);
 
     // Unchosen, and drawn as unchosen. A picker arriving on "Front Office"
     // has supplied an answer on the person's behalf.

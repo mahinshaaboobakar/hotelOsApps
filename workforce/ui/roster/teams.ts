@@ -85,6 +85,11 @@ export const recordedTeams: Teams = {
   // always has departments a team has not been formed in yet - which is
   // exactly the case a list derived from `teams` cannot represent.
   departments: [
+    // In the order the read answers: by CODE, which is the same on every
+    // machine. `ENG` first and `Maintenance` last is the whole point of the
+    // fixture — the picker orders for the reader, and a fixture whose code
+    // order and name order coincide could not tell the two apart.
+    { code: "ENG", name: "Maintenance" },
     { code: "FO", name: "Front Office" },
     { code: "HK", name: "Housekeeping" },
     { code: "KIT", name: "Kitchen" },
@@ -106,6 +111,11 @@ export const recordedNoTeams: Teams = {
   // always has departments a team has not been formed in yet - which is
   // exactly the case a list derived from `teams` cannot represent.
   departments: [
+    // In the order the read answers: by CODE, which is the same on every
+    // machine. `ENG` first and `Maintenance` last is the whole point of the
+    // fixture — the picker orders for the reader, and a fixture whose code
+    // order and name order coincide could not tell the two apart.
+    { code: "ENG", name: "Maintenance" },
     { code: "FO", name: "Front Office" },
     { code: "HK", name: "Housekeeping" },
     { code: "KIT", name: "Kitchen" },

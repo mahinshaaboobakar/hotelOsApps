@@ -124,7 +124,8 @@ export function formTeam(
 
   sheet.append(
     head,
-    department(departments, (code) => { draft.department = code; redraw(); }),
+    department(forReader(departments, host.property.locale),
+      (code) => { draft.department = code; redraw(); }),
     name(taken, (value) => { draft.name = value; redraw(); }),
     refusal,
     acts.row);
@@ -139,6 +140,34 @@ export function formTeam(
   });
 
   return scrim;
+}
+
+/**
+ * The departments in the order the person reading them expects.
+ *
+ * **Ordered here, not by the service, because the locale is here.** The read
+ * answers in code order — the same on every machine — and the code is not what
+ * anybody reads. The first version sorted by name in the service with
+ * `CurrentCultureIgnoreCase`, which looks like the right intent and is not:
+ * nothing sets a culture in that process, so the order of a hotel's
+ * departments would have been a property of the account the service runs
+ * under. This platform is sold into India and the GCC and writes no country
+ * into code.
+ *
+ * `locale` is null when the property has not set one, and the SDK renders that
+ * state honestly rather than inventing a locale. `Intl.Collator(undefined)`
+ * is the runtime's own default, which is the honest answer to *nobody said*:
+ * the alternative is picking a locale on the property's behalf.
+ *
+ * @param departments as the read answered them
+ * @param locale the property's, or null when it has none
+ * @returns the same departments, ordered for a reader
+ */
+function forReader(
+  departments: readonly Department[], locale: string | null,
+): readonly Department[] {
+  const collator = new Intl.Collator(locale ?? undefined, { sensitivity: "base" });
+  return [...departments].sort((a, b) => collator.compare(a.name, b.name));
 }
 
 /** What a department is called, for a code a row carries. */
