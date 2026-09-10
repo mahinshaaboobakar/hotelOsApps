@@ -71,6 +71,15 @@ public static class ModuleSurface
             (request, cancellationToken) =>
                 CreateAsync(request.Services, request, cancellationToken));
 
+        // **The manifest declares this and nothing routed it** — CORE-Q30's
+        // resolution: a method absent from an application's surface is the
+        // application's defect. The Setup screen has called `desk.configure/setup`
+        // since it was written, against a surface that mapped three capabilities.
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.Configure,
+            (request, cancellationToken) =>
+                ConfigureAsync(request.Services, request, cancellationToken));
+
         app.MapModuleCapability(
             Application.Abstractions.Permissions.StayOverride,
             (request, cancellationToken) =>
@@ -164,6 +173,20 @@ public static class ModuleSurface
         {
             "walkIn" => services.GetRequiredService<WalkInCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
+
+    /// <summary>This application's own settings.</summary>
+    private static Task<object?> ConfigureAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "setup" => services.GetRequiredService<SetupView>()
+                .AnswerAsync(request.Scope, cancellationToken),
 
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),

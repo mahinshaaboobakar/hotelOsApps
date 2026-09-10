@@ -36,6 +36,7 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.AttentionView>();
         services.AddScoped<Module.OperatorView>();
         services.AddScoped<Module.StayDetailView>();
+        services.AddScoped<Module.SetupView>();
         services.AddScoped<Module.OccupancyView>();
         services.AddScoped<Module.FeedView>();
         services.AddScoped<Module.MixView>();
