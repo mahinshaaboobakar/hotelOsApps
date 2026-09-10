@@ -205,6 +205,59 @@ export const DRIVE = {
 };
 
 /**
+ * The Part A run, with the key it was measured under.
+ *
+ * **The key is quoted because a count without one is not comparable** —
+ * `ARCH-Q12`. Two figures taken under different pairing rules are two different
+ * measurements wearing one word, and this certificate has already withdrawn two
+ * numbers for that reason.
+ */
+export const PART_A = {
+  key: "tag + normalised text, then document order inside a colliding group "
+     + "(ARCH-Q12 step two, 2026-09-10)",
+
+  counts: "**715 paired · 634 identical · 81 differing · 0 collapsed · 0 unpaired**, "
+        + "seventeen frames, both sides swept in one pass.",
+
+  aligned:
+    "**The drawings were aligned to `ARCH-Q20` first, and the alignment is why "
+    + "this number means anything.** This module's frames drew every control as a "
+    + "`<div class=\"btn\">` where the build renders a `<button>` — 187 of them: "
+    + "50 buttons, 112 tabs, 14 pager steps, 11 inline links. The sweep pairs on "
+    + "tag and text, so the drawing's *control* paired against the build's row "
+    + "*label* wherever both said the same words. That was this stream's own "
+    + "finding this morning and it was GuestOps' own defect.",
+
+  effect:
+    "**Two collision classes disappeared rather than shrinking.** "
+    + "`frame-heading-collision` and `bar-count-collision` accounted for seven "
+    + "differences under the old key and account for none now — a heading at "
+    + "weight 900 and a bar count in `--color-warn` were both artefacts of a "
+    + "control that could not be told from prose. Paired rose 535 → 715 because "
+    + "187 controls became comparable, not because anything was built.",
+
+  carried:
+    "**The styling followed the tag, which is the caveat that cost another stream "
+    + "a run.** A `<button>` inherits a UA font, line-height, border and "
+    + "background that a `<div>` never had, so `.tab` gained `border:0`, "
+    + "`background:none` and a cursor, `.link` gained the full `font: inherit` "
+    + "reset, and a `button` rule carries the two the build's own reset carries. "
+    + "**Nothing was retagged to make a divergence pair** — every change is to "
+    + "the element type the build already uses, and the pager's `off` class kept "
+    + "its rule beside the `[disabled]` attribute rather than being renamed into "
+    + "agreement.",
+
+  drove:
+    "**And the harness now asserts it arrived.** A drive step that matched "
+    + "nothing used to return quietly, so a stale selector photographed a "
+    + "different screen — convincingly, because the capture was of a real screen. "
+    + "It throws now, and the failure is *drawn into the frame* rather than left "
+    + "to a timeout: a timeout reads as a broken harness and carries no sentence. "
+    + "All seventeen reached their screen on this run, and that is a measured "
+    + "fact rather than an assumption.",
+};
+
+/**
  * What the canvas measurement found, and what now guards it.
  *
  * Recorded because the owner asked the question the suite could not answer:

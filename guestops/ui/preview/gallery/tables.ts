@@ -2,7 +2,7 @@
  * The two conformance tables, drawn.
  */
 
-import { DRIVE, PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
+import { DRIVE, PART_A, PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
 
 /** Attribute- and text-safe. */
 function escaped(text: string): string {
@@ -86,6 +86,16 @@ export function widgets(captures: readonly { entry: string; html: string }[],
 
   return `<section class="conform">
   <h2><span class="n">5</span><span class="t">Widget conformance</span></h2>
+
+  <div class="finding">
+    <p class="lead">Part A — the pairing key, and what it was measured under</p>
+    <p><b>PAIRING KEY</b> ${escaped(PART_A.key)}</p>
+    <p>${rich(PART_A.counts)}</p>
+    <p>${rich(PART_A.aligned)}</p>
+    <p>${rich(PART_A.effect)}</p>
+    <p>${rich(PART_A.carried)}</p>
+    <p>${rich(PART_A.drove)}</p>
+  </div>
 
   <div class="finding">
     <p class="lead">${escaped(DRIVE.title)}</p>

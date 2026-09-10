@@ -55,6 +55,12 @@
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box;margin:0}
+  /* ARCH-Q20 / 64 §8: this drawing renders its controls as <button>, because
+     the build does and the sweep pairs on tag + text. The UA resets the font
+     and the line-height on every button, so the reset follows the tag -- DD's
+     caveat, which cost them a run: retagging without carrying the styling
+     measures the drawing against a browser default rather than against itself. */
+  button{font-family:inherit;line-height:inherit}
   ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}::-webkit-scrollbar-button{display:none}
   body{background:#04050a;color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
@@ -155,7 +161,9 @@
   .tabs .btn{margin-bottom:6px}
   /* Where a screen has no view switcher to hang its actions on. */
   .acts{display:flex;gap:9px;justify-content:flex-end;margin-top:12px}
-  .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border-bottom:2px solid transparent;white-space:nowrap}
+  .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border:0;
+       border-bottom:2px solid transparent;background:none;cursor:pointer;
+       white-space:nowrap}
   .tab.on{color:var(--text);border-bottom-color:var(--indigo);font-weight:600}
   .tab.gone{opacity:.38}
   .tab .n{color:var(--faint);font-weight:400;margin-left:5px;font-size:11px}
@@ -232,11 +240,16 @@
          padding:10px 4px 0;font-size:12px;color:var(--faint)}
   .pager .pnav{display:flex;align-items:center}
   .pager .pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);
-             border-radius:6px;margin-left:4px;color:var(--dim)}
+             border-radius:6px;margin-left:4px;color:var(--dim);
+             background:none;font-size:12px;cursor:pointer}
   .pager .pg.on{color:var(--text);border-color:var(--color-brand)}
-  .pager .pg.off{color:var(--faint);opacity:.45}
+  /* Both, because the markup carries both: `off` is the drawing's word and
+     `disabled` is what the build sets, and the sweep reads the computed style
+     rather than either name. */
+  .pager .pg.off,
+  .pager .pg[disabled]{color:var(--faint);opacity:.45;cursor:default}
   .pager .gap{margin-left:4px;color:var(--faint)}
-  .link{color:var(--indigo)}
+  .link{color:var(--indigo);background:none;border:0;padding:0;font:inherit;cursor:pointer}
   /* banner */
   .ban{display:flex;gap:11px;align-items:center;border-radius:12px;padding:10px 14px;font-size:12.5px;border:1px solid}
   .ban.stale{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.3);color:var(--warn)}
@@ -360,10 +373,10 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">4</span></div>
+    <button class="tab on" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">4</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
@@ -376,13 +389,13 @@
         <span class="ctx">Business day <b>Tue 31 Aug</b> · rolls at 04:00 · standalone — this property is the book</span>
       </div>
       <div class="tabs">
-        <div class="tab on">Arrivals<span class="n">14</span></div>
-        <div class="tab">In house<span class="n">42</span></div>
-        <div class="tab">Departures<span class="n">11</span></div>
-        <div class="tab">Attention<span class="n">4</span></div>
+        <button class="tab on" type="button">Arrivals<span class="n">14</span></button>
+        <button class="tab" type="button">In house<span class="n">42</span></button>
+        <button class="tab" type="button">Departures<span class="n">11</span></button>
+        <button class="tab" type="button">Attention<span class="n">4</span></button>
         <div class="grow"></div>
-        <div class="btn">Walk-in</div>
-        <div class="btn pri">＋ New booking</div>
+        <button class="btn" type="button">Walk-in</button>
+        <button class="btn pri" type="button">＋ New booking</button>
       </div>
       <div class="tbl">
         <div class="tr hd"><div>Guest</div><div>Booking</div><div>Room type</div><div>Room</div><div>Nights</div><div></div></div>
@@ -393,12 +406,12 @@
         </div>
         <div class="tr">
           <div class="nm"><b class="un">Not yet named</b><span>party of 2</span></div>
-          <div>BK-4471 · 1 of 3</div><div>Deluxe King</div><div class="link">＋ assign</div><div>31 Aug → 2 Sep</div>
+          <div>BK-4471 · 1 of 3</div><div>Deluxe King</div><button class="link" type="button">＋ assign</button><div>31 Aug → 2 Sep</div>
           <div><span class="sh miss">party unnamed</span><span class="sh miss">no room</span></div>
         </div>
         <div class="tr">
           <div class="nm"><b>Meera Krishnan</b><span>meera.k@•••••.com</span></div>
-          <div>BK-4482</div><div>Executive Suite</div><div class="link">＋ assign</div><div>31 Aug → 1 Sep</div>
+          <div>BK-4482</div><div>Executive Suite</div><button class="link" type="button">＋ assign</button><div>31 Aug → 1 Sep</div>
           <div><span class="sh miss">no room</span></div>
         </div>
         <div class="tr">
@@ -423,7 +436,7 @@
         </div>
         <div class="tr">
           <div class="nm"><b>Thomas Weber</b><span>t.weber@•••••.de</span></div>
-          <div>BK-4497</div><div>Executive Suite</div><div class="link">＋ assign</div><div>31 Aug → 5 Sep</div>
+          <div>BK-4497</div><div>Executive Suite</div><button class="link" type="button">＋ assign</button><div>31 Aug → 5 Sep</div>
           <div><span class="sh miss">no room</span></div>
         </div>
         <div class="tr">
@@ -433,7 +446,7 @@
         </div>
         <div class="tr">
           <div class="nm"><b>Yusuf Al-Amri</b><span>+968 9•••• 314</span></div>
-          <div>BK-4503</div><div>Deluxe King</div><div class="link">＋ assign</div><div>31 Aug → 6 Sep</div>
+          <div>BK-4503</div><div>Deluxe King</div><button class="link" type="button">＋ assign</button><div>31 Aug → 6 Sep</div>
           <div><span class="sh miss">no room</span></div>
         </div>
         <div class="tr">
@@ -443,7 +456,7 @@
         </div>
         <div class="tr">
           <div class="nm"><b>Vikram Desai</b><span>+91 97400 •••• 63</span></div>
-          <div>BK-4509</div><div>Deluxe King</div><div class="link">＋ assign</div><div>31 Aug → 4 Sep</div>
+          <div>BK-4509</div><div>Deluxe King</div><button class="link" type="button">＋ assign</button><div>31 Aug → 4 Sep</div>
           <div><span class="sh miss">no room</span><span class="sh miss">no ID captured</span></div>
         </div>
         <div class="tr">
@@ -453,13 +466,13 @@
         </div>
         <div class="tr">
           <div class="nm"><b>Hiroshi Tanaka</b><span>h.tanaka@•••••.jp</span></div>
-          <div>BK-4515</div><div>Deluxe Twin</div><div class="link">＋ assign</div><div>31 Aug → 2 Sep</div>
+          <div>BK-4515</div><div>Deluxe Twin</div><button class="link" type="button">＋ assign</button><div>31 Aug → 2 Sep</div>
           <div><span class="sh miss">no room</span></div>
         </div>
       </div>
       <div class="pager">
         <span>showing 1–14 of 14 · 14 rows at this height; a maximised window shows 28</span>
-        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg off">›</span></span>
+        <span class="pnav"><button class="pg off" type="button" disabled>‹</button><button class="pg on" type="button">1</button><button class="pg off" type="button" disabled>›</button></span>
       </div>
       <div class="note"><b>Six of fourteen arrivals have no room, and that is the ordinary case.</b> The stay's anchor is the room <b>type</b>; the room number is an assignment, chosen the night before or at the desk (GUEST-Q2 addendum, S8). The list is built to be worked in that state — <b>＋ assign</b> is inline, and check-in is the one action that refuses to proceed without a room.</div>
     </div>
@@ -472,10 +485,10 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
@@ -485,8 +498,8 @@
         <div class="inp" style="flex:1">Arriving · next 30 days <span class="grow">▾</span></div>
         <div class="inp" style="flex:1">Any status <span class="grow">▾</span></div>
         <div class="inp" style="flex:1">Any source <span class="grow">▾</span></div>
-        <div class="btn">Walk-in</div>
-        <div class="btn pri">＋ New booking</div>
+        <button class="btn" type="button">Walk-in</button>
+        <button class="btn pri" type="button">＋ New booking</button>
       </div>
       <div class="tbl">
         <div class="tr list hd"><div>Guest</div><div>Booking</div><div>Rooms</div><div>Dates</div><div>Status</div><div></div></div>
@@ -539,7 +552,7 @@
       </div>
       <div class="pager">
         <span>showing 1–8 of 218 · 8 rows at this height; a maximised window shows 16</span>
-        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">4</span><span class="pg">5</span><span class="gap">…</span><span class="pg">28</span><span class="pg">›</span></span>
+        <span class="pnav"><button class="pg off" type="button" disabled>‹</button><button class="pg on" type="button">1</button><button class="pg" type="button">2</button><button class="pg" type="button">3</button><button class="pg" type="button">4</button><button class="pg" type="button">5</button><span class="gap">…</span><button class="pg" type="button">28</button><button class="pg" type="button">›</button></span>
       </div>
     </div>
   </div>
@@ -553,33 +566,33 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · <span class="sh pms" style="display:inline-flex"><i></i>Opera manages this stay</span></div></div>
       <div class="grow"></div>
-      <div class="btn">Move room</div>
-      <div class="btn">Check out</div>
-      <div class="btn danger">Cancel…</div>
+      <button class="btn" type="button">Move room</button>
+      <button class="btn" type="button">Check out</button>
+      <button class="btn danger" type="button">Cancel…</button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab on">Overview</div>
-        <div class="tab">Activity<span class="n">14</span></div>
-        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
-        <div class="tab">Servicing<span class="n">4 nights</span></div>
-        <div class="tab">Payment</div>
-        <div class="tab">Documents</div>
+        <button class="tab on" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">14</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
       </div>
       <div class="ban dis">
         <div><b>Opera disagrees about the room.</b> You have 214 · Opera says 208 — recorded 15:30, not applied.<br>
           <span style="color:var(--faint)">Your entry stands everywhere until someone decides: override by <b style="color:var(--dim)">Anitha Menon</b> at 14:10, when Opera said <b style="color:var(--dim)">due in, no room</b>.</span></div>
-        <div class="grow"><div class="btn sm pri">Keep 214</div><div class="btn sm">Take Opera's 208</div></div>
+        <div class="grow"><button class="btn sm pri" type="button">Keep 214</button><button class="btn sm" type="button">Take Opera's 208</button></div>
       </div>
       <div class="cols">
         <div class="card">
@@ -589,15 +602,15 @@
             <div class="fr"><div class="k">Arrival</div><div class="v">31 Aug <b>14:10</b> <span class="lock">OBSERVED</span> <span class="sh ovr"><i></i>override</span></div></div>
             <div class="fr"><div class="k">Departure</div><div class="v">4 Sep <b>11:00</b> <span class="lock">DERIVED FROM PROPERTY CLOCK</span></div></div>
             <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King <span class="lock">FROM OPERA</span></div></div>
-            <div class="fr"><div class="k">Party</div><div class="v">Rajesh Pillai <span class="pill neu">primary</span> · Lakshmi Pillai <span class="link">＋ add</span></div></div>
-            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <span class="link">reveal</span> <span class="lock">MOBILE · PRIMARY</span> · rajesh.p@•••••.com <span class="link">reveal</span></div></div>
+            <div class="fr"><div class="k">Party</div><div class="v">Rajesh Pillai <span class="pill neu">primary</span> · Lakshmi Pillai <button class="link" type="button">＋ add</button></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <button class="link" type="button">reveal</button> <span class="lock">MOBILE · PRIMARY</span> · rajesh.p@•••••.com <button class="link" type="button">reveal</button></div></div>
             <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/08/1147 · ID captured <span class="pill ok">complete</span></div></div>
             <div class="fr"><div class="k">Preferences</div><div class="v"><span class="un">High floor, away from the lift</span> <span class="lock">GUEST · CARRIES TO NEXT STAY</span></div></div>
             <div class="fr"><div class="k">Note</div><div class="v"><span class="un">Anniversary — cake sent 31 Aug</span> <span class="lock">THIS STAY ONLY</span></div></div>
           </div>
         </div>
         <div class="card">
-          <div class="ch">What happened, in order <div class="grow"><span class="link">Full activity →</span></div></div>
+          <div class="ch">What happened, in order <div class="grow"><button class="link" type="button">Full activity →</button></div></div>
           <div class="cb">
             <div class="tl">
               <div class="te pms"><div class="t">28 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked in Opera<span>reservation 84119377 · 4 nights · Deluxe King</span></div></div>
@@ -619,29 +632,29 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
-      <div class="btn off">Export <span class="lock no">NEEDS SHELL-Q23'S FILE-SAVE HALF</span></div>
+      <button class="btn off" type="button" disabled>Export <span class="lock no">NEEDS SHELL-Q23'S FILE-SAVE HALF</span></button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab">Overview</div>
-        <div class="tab on">Activity<span class="n">14</span></div>
-        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
-        <div class="tab">Servicing<span class="n">4 nights</span></div>
-        <div class="tab">Payment</div>
-        <div class="tab">Documents</div>
+        <button class="tab" type="button">Overview</button>
+        <button class="tab on" type="button">Activity<span class="n">14</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <div class="btn sm pri">Everything</div><div class="btn sm">Ours</div><div class="btn sm">Opera</div><div class="btn sm">Other apps</div>
+        <button class="btn sm pri" type="button">Everything</button><button class="btn sm" type="button">Ours</button><button class="btn sm" type="button">Opera</button><button class="btn sm" type="button">Other apps</button>
         <div class="hint" style="margin-left:auto">Newest last · times are the property's</div>
       </div>
       <div class="tbl">
@@ -678,26 +691,26 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
-      <div class="btn pri">＋ Raise a job</div>
+      <button class="btn pri" type="button">＋ Raise a job</button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab">Overview</div>
-        <div class="tab">Activity<span class="n">14</span></div>
-        <div class="tab on">Requests &amp; jobs<span class="n">2</span></div>
-        <div class="tab">Servicing<span class="n">4 nights</span></div>
-        <div class="tab">Payment</div>
-        <div class="tab">Documents</div>
+        <button class="tab" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">14</span></button>
+        <button class="tab on" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
       </div>
       <div class="cols even">
         <div class="card">
@@ -706,7 +719,7 @@
             <div class="fr"><div class="k">14:35</div><div class="v">AC not cooling <span class="pill warn">raised as JOB-8821</span></div></div>
             <div class="fr"><div class="k">16:02</div><div class="v">Late checkout on 4 Sep <span class="pill neu">no job needed</span></div></div>
             <div class="hint">A request is a fact about the guest's stay and lives here whether or not any work follows from it. <b>Not every request is a job</b> — a late checkout is answered at the desk.</div>
-            <div class="btn sm">＋ Log a request</div>
+            <button class="btn sm" type="button">＋ Log a request</button>
           </div>
         </div>
         <div class="card">
@@ -733,7 +746,7 @@
             <div class="fld"><label>Detail</label><div class="inp tall ph">Guest reports the room is not cooling since check-in. Guest is in the room this evening.</div></div>
             <div class="note" style="padding:10px 12px">Creating this <b>records a request on the stay and announces it</b>. Jobs picks it up and owns everything after that — assignment, status, completion. GuestOps never assigns anyone.</div>
           </div>
-          <div class="sh_f"><div class="hint">Visible to Engineering immediately.</div><div class="grow"></div><div class="btn sm">Cancel</div><div class="btn sm pri">Raise job</div></div>
+          <div class="sh_f"><div class="hint">Visible to Engineering immediately.</div><div class="grow"></div><button class="btn sm" type="button">Cancel</button><button class="btn sm pri" type="button">Raise job</button></div>
         </div>
       </div>
     </div>
@@ -746,23 +759,23 @@
 <div class="win" style="min-height:380px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471</div></div>
       <div class="grow"></div>
-      <div class="btn off">＋ Raise a job</div>
+      <button class="btn off" type="button" disabled>＋ Raise a job</button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab">Overview</div><div class="tab">Activity<span class="n">12</span></div>
-        <div class="tab on">Requests<span class="n">2</span></div>
-        <div class="tab gone">Servicing</div><div class="tab">Payment</div><div class="tab">Documents</div>
+        <button class="tab" type="button">Overview</button><button class="tab" type="button">Activity<span class="n">12</span></button>
+        <button class="tab on" type="button">Requests<span class="n">2</span></button>
+        <button class="tab gone" type="button">Servicing</button><button class="tab" type="button">Payment</button><button class="tab" type="button">Documents</button>
       </div>
       <div class="cols even">
         <div class="card">
@@ -770,7 +783,7 @@
           <div class="cb">
             <div class="fr"><div class="k">14:35</div><div class="v">AC not cooling <span class="pill neu">logged</span></div></div>
             <div class="fr"><div class="k">16:02</div><div class="v">Late checkout on 4 Sep <span class="pill neu">logged</span></div></div>
-            <div class="btn sm">＋ Log a request</div>
+            <button class="btn sm" type="button">＋ Log a request</button>
           </div>
         </div>
         <div class="card ghost">
@@ -789,24 +802,24 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">2 Sep</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">2 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">31 Aug → 4 Sep · four nights · in house</div></div>
       <div class="grow"></div>
-      <div class="btn">Ask for service</div>
+      <button class="btn" type="button">Ask for service</button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab">Overview</div><div class="tab">Activity<span class="n">18</span></div>
-        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
-        <div class="tab on">Servicing<span class="n">4 nights</span></div>
-        <div class="tab">Payment</div><div class="tab">Documents</div>
+        <button class="tab" type="button">Overview</button><button class="tab" type="button">Activity<span class="n">18</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab on" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button><button class="tab" type="button">Documents</button>
       </div>
       <div class="ban info"><div><b>All of this is Room Care's.</b> GuestOps shows it because the desk is asked about it — it is read through the Context Service and stored nowhere here.</div></div>
       <div class="nights">
@@ -815,7 +828,7 @@
         <div class="ng"><div class="dt">Mon <b>1 Sep</b></div>
           <div class="st"><span class="sh oth"><i></i>Serviced 10:20</span><span class="hint">Suma T. · stayover service</span></div></div>
         <div class="ng"><div class="dt">Tue <b>2 Sep</b> · today</div>
-          <div class="st"><span class="pill warn">Not serviced</span><span class="hint">Do-not-disturb at 09:50 and 13:15 · guest declined</span><span class="link">Ask again this evening</span></div></div>
+          <div class="st"><span class="pill warn">Not serviced</span><span class="hint">Do-not-disturb at 09:50 and 13:15 · guest declined</span><button class="link" type="button">Ask again this evening</button></div></div>
         <div class="ng now"><div class="dt">Wed <b>3 Sep</b></div>
           <div class="st"><span class="pill neu">Planned</span><span class="hint">Linen change due — third night</span></div></div>
         <div class="ng"><div class="dt">Thu <b>4 Sep</b> · departure</div>
@@ -851,24 +864,24 @@
 <div class="win" style="margin-top:12px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · four nights</div></div>
       <div class="grow"></div>
-      <div class="btn">Open in Opera</div>
+      <button class="btn" type="button">Open in Opera</button>
     </div>
     <div class="body">
       <div class="tabs">
-        <div class="tab">Overview</div><div class="tab">Activity<span class="n">14</span></div>
-        <div class="tab">Requests &amp; jobs<span class="n">2</span></div>
-        <div class="tab">Servicing<span class="n">4 nights</span></div>
-        <div class="tab on">Payment</div><div class="tab">Documents</div>
+        <button class="tab" type="button">Overview</button><button class="tab" type="button">Activity<span class="n">14</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab on" type="button">Payment</button><button class="tab" type="button">Documents</button>
       </div>
       <div class="cols">
         <div class="card">
@@ -906,17 +919,17 @@
 <div class="win" style="min-height:600px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Fatima Sheikh · BK-4506</div><div class="hsub">Two stays · 3 Sep → 7 Sep · <span class="sh pms" style="display:inline-flex"><i></i>Opera manages this booking</span></div></div>
       <div class="grow"></div>
-      <div class="btn danger">Cancel…</div>
+      <button class="btn danger" type="button">Cancel…</button>
     </div>
     <div class="body">
       <div class="tbl">
@@ -944,7 +957,7 @@
             <div class="fld"><label>Reason</label><div class="inp">Guest cancelled — flight changed <span class="grow">▾</span></div></div>
             <div class="hint"><b>The penalty is calculated and recorded, not charged.</b> Charging is Finance's, a later round.</div>
           </div>
-          <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><div class="btn sm">Keep the booking</div><div class="btn sm danger">Cancel both stays</div></div>
+          <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Keep the booking</button><button class="btn sm danger" type="button">Cancel both stays</button></div>
         </div>
       </div>
     </div>
@@ -959,17 +972,17 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab on">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">3</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="title">
       <div><div class="ht">Booking BK-4471</div><div class="hsub">Group 84119377 · from Opera · booked 28 Aug</div></div>
       <div class="grow"></div>
-      <div class="btn danger">Cancel…</div>
+      <button class="btn danger" type="button">Cancel…</button>
     </div>
     <div class="body">
       <div class="ban info"><div><b>1 of 3 rooms known.</b> Opera says this booking is for three rooms and has sent one. The other two have not arrived — they may arrive in minutes, tomorrow, or never.</div></div>
@@ -1007,15 +1020,15 @@
 <div class="win" style="min-height:560px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">2</span></div>
+    <button class="tab on" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span><span class="ctx">Business day <b>Tue 31 Aug</b> · standalone</span></div>
-      <div class="acts"><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div></div>
+      <div class="acts"><button class="btn" type="button">Walk-in</button><button class="btn pri" type="button">＋ New booking</button></div></div>
     <div class="scrim">
       <div class="sheet">
         <div class="sh_h"><b>Walk-in</b><span>Creates the stay and checks it in — one action, one business day</span></div>
@@ -1036,7 +1049,7 @@
           <div class="fld"><label>Registration</label><div class="inp ph">GRC number · ID · signature — capture now or at the desk</div></div>
           <div class="note" style="padding:10px 12px"><b>This is a walk-in and it will be recorded as one.</b> The walk-in ratio is a number every hotel reports on, and it cannot be recovered later if the flag is not set when the stay is created.</div>
         </div>
-        <div class="sh_f"><div class="hint">Room 308 will be marked occupied.</div><div class="grow"></div><div class="btn sm">Cancel</div><div class="btn sm pri">Create and check in</div></div>
+        <div class="sh_f"><div class="hint">Room 308 will be marked occupied.</div><div class="grow"></div><button class="btn sm" type="button">Cancel</button><button class="btn sm pri" type="button">Create and check in</button></div>
       </div>
     </div>
   </div>
@@ -1048,10 +1061,10 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">2</span></div>
+    <button class="tab on" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
@@ -1064,7 +1077,7 @@
         <span><b>2</b>attention · 1 outage batch</span>
         <span class="ctx">Business day <b>Tue 31 Aug</b> · Opera connected</span>
       </div>
-      <div class="acts"><div class="btn">Walk-in</div><div class="btn pri">＋ New booking</div></div>
+      <div class="acts"><button class="btn" type="button">Walk-in</button><button class="btn pri" type="button">＋ New booking</button></div>
       <div class="tbl">
         <div class="tr hd"><div>Guest</div><div>Booking</div><div>Room type</div><div>Room</div><div>Nights</div><div></div></div>
         <div class="tr">
@@ -1091,7 +1104,7 @@
       </div>
       <div class="pager">
         <span>showing 1–14 of 14 · 14 rows at this height; a maximised window shows 28</span>
-        <span class="pnav"><span class="pg off">‹</span><span class="pg on">1</span><span class="pg off">›</span></span>
+        <span class="pnav"><button class="pg off" type="button" disabled>‹</button><button class="pg on" type="button">1</button><button class="pg off" type="button" disabled>›</button></span>
       </div>
       <div class="note"><b>Meera's row is the ruling that keeps this screen usable.</b> The desk checked her into 506 at 11:20 while the feed was down; at 15:44 Opera said 506 too. That is agreement arriving late, not work — it settled <b>silently as confirmed</b>, and it is shown here only because this frame is explaining itself. Twenty such rows would be twenty non-events; only <b>differing</b> values become a disagreement.</div>
     </div>
@@ -1104,10 +1117,10 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab on">Attention<span class="n att">4</span></div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab on" type="button">Attention<span class="n att">4</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
@@ -1120,7 +1133,7 @@
           <div class="fr"><div class="k">Opera now sends</div><div class="v"><b>Joseph K Mathew</b> · room 308 · 31 Aug → 1 Sep · reservation 84119512</div></div>
           <div class="fr"><div class="k">Why it is here</div><div class="v"><span class="pill neu">same room</span><span class="pill neu">overlapping dates</span><span class="pill warn">names look alike</span></div></div>
           <div class="note" style="padding:10px 12px">Same room and overlapping dates is what raised this. <b>The names only ordered the list — they can never join two stays.</b> Until you decide, Opera's version is held and applied to nothing.</div>
-          <div style="display:flex;gap:9px"><div class="btn sm pri">Same stay</div><div class="btn sm">Two different stays</div></div>
+          <div style="display:flex;gap:9px"><button class="btn sm pri" type="button">Same stay</button><button class="btn sm" type="button">Two different stays</button></div>
         </div>
       </div>
       <div class="card">
@@ -1128,7 +1141,7 @@
         <div class="cb">
           <div class="fr"><div class="k">Rajesh Pillai</div><div class="v">room — you: <b>214</b> · Opera: <b>208</b> <span class="sh dis"><i></i>standing</span></div></div>
           <div class="hint">14 facts arrived when the feed returned at 14:12. <b>13 matched what you had and settled silently.</b> This is the one that differs.</div>
-          <div style="display:flex;gap:9px"><div class="btn sm pri">Open the stay</div><div class="btn sm">Keep 214 for all</div></div>
+          <div style="display:flex;gap:9px"><button class="btn sm pri" type="button">Open the stay</button><button class="btn sm" type="button">Keep 214 for all</button></div>
         </div>
       </div>
       <div class="card">
@@ -1136,7 +1149,7 @@
         <div class="cb">
           <div class="fr"><div class="k">Anand Varma</div><div class="v">in house since 30 Aug · room 411 · Opera sent <b>cancelled</b> at 03:40</div></div>
           <div class="note" style="padding:10px 12px">A cancellation cannot move a stay that is already in house, so it was <b>recorded and not applied</b> — the guest stays served and the room stays occupied. Someone has to look, because the two records cannot both be right.</div>
-          <div style="display:flex;gap:9px"><div class="btn sm pri">Open the stay</div><div class="btn sm">Mark resolved</div></div>
+          <div style="display:flex;gap:9px"><button class="btn sm pri" type="button">Open the stay</button><button class="btn sm" type="button">Mark resolved</button></div>
         </div>
       </div>
       <div class="card">
@@ -1154,10 +1167,10 @@
 <div class="win" style="min-height:420px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">—</span></div>
-    <div class="tab">Bookings<span class="n">—</span></div>
-    <div class="tab">Guests<span class="n">—</span></div>
-    <div class="tab">Attention<span class="n">—</span></div>
+    <button class="tab on" type="button">Today<span class="n">—</span></button>
+    <button class="tab" type="button">Bookings<span class="n">—</span></button>
+    <button class="tab" type="button">Guests<span class="n">—</span></button>
+    <button class="tab" type="button">Attention<span class="n">—</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
@@ -1166,7 +1179,7 @@
       <b>Bringing in what Opera already sent</b>
       <p><b style="color:var(--dim)">2 314 reservations and 1 806 guests</b> have been held since the Opera connector was configured on 12 August. They are replaying now, in the order they happened — arrivals, moves and departures alike.</p>
       <p style="color:var(--faint)">This runs once. You can start working as soon as today's arrivals appear.</p>
-      <div class="btn sm pri" style="margin-top:4px">Show progress</div>
+      <button class="btn sm pri" style="margin-top:4px" type="button">Show progress</button>
     </div>
   </div>
 </div>
@@ -1179,14 +1192,14 @@
 <div class="win" style="min-height:620px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">2</span></div>
+    <button class="tab on" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">New booking</div><div class="hsub">Standalone — this property is the book</div></div><div class="grow"></div><div class="btn">Walk-in</div></div>
+    <div class="title"><div><div class="ht">New booking</div><div class="hsub">Standalone — this property is the book</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
     <div class="body">
       <div style="display:flex;gap:10px">
         <div class="inp" style="flex:1">Arrive <b style="margin-left:6px">3 Sep</b></div>
@@ -1227,7 +1240,7 @@
           <div class="ch">Assigning room 214 · the conflict check</div>
           <div class="cb">
             <div class="ban dis"><div><b>214 already has a stay over these dates.</b> Rajesh Pillai, 31 Aug → 4 Sep.<br><span style="color:var(--faint)">Assign anyway, or pick another room.</span></div></div>
-            <div style="display:flex;gap:9px"><div class="btn sm">Pick another</div><div class="btn sm pri">Assign anyway</div></div>
+            <div style="display:flex;gap:9px"><button class="btn sm" type="button">Pick another</button><button class="btn sm pri" type="button">Assign anyway</button></div>
             <div class="hint"><b>It warns and never forbids.</b> When staff answer <i>"two different stays"</i> to a candidate link, the room is genuinely double-booked and that is the truth — a hard block would make a ruled outcome unreachable. So it names the other stay and lets a person decide.</div>
           </div>
         </div>
@@ -1244,14 +1257,14 @@
 <div class="win" style="min-height:640px">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab on">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab">Attention<span class="n att">2</span></div>
+    <button class="tab on" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
     <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
   </div>
   <div class="main">
-    <div class="title"><div><div class="ht">Checking in · Fatima Sheikh</div><div class="hsub">Room 506 · 31 Aug → 4 Sep</div></div><div class="grow"></div><div class="btn">Print card</div></div>
+    <div class="title"><div><div class="ht">Checking in · Fatima Sheikh</div><div class="hsub">Room 506 · 31 Aug → 4 Sep</div></div><div class="grow"></div><button class="btn" type="button">Print card</button></div>
     <div class="body"><div class="strip"><span><b>14</b>arrivals</span><span><b>42</b>in house</span><span><b>11</b>departures</span><span><b>2</b>attention</span></div></div>
     <div class="scrim">
       <div class="sheet">
@@ -1296,7 +1309,7 @@
           <div class="fld"><label>Signature</label><div class="inp ph">Captured on the pad, or printed and scanned</div></div>
           <div class="note" style="padding:10px 12px"><b>The block above appears because this guest's nationality is not the property's own.</b> The property sets its home country and both field lists — so a hotel in Kochi treats an Emirati guest this way, and a hotel in Dubai treats an Indian guest this way, from the same product with no country written into it.</div>
         </div>
-        <div class="sh_f"><div class="hint">Filing due 1 Sep (24 h after arrival).</div><div class="grow"></div><div class="btn sm">Cancel</div><div class="btn sm pri">Save and check in</div></div>
+        <div class="sh_f"><div class="hint">Filing due 1 Sep (24 h after arrival).</div><div class="grow"></div><button class="btn sm" type="button">Cancel</button><button class="btn sm pri" type="button">Save and check in</button></div>
       </div>
     </div>
   </div>
@@ -1308,22 +1321,22 @@
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">GO</div>GuestOps</div>
-    <div class="tab">Today<span class="n">31 Aug</span></div>
-    <div class="tab">Bookings<span class="n">218</span></div>
-    <div class="tab">Guests<span class="n">1 904</span></div>
-    <div class="tab on">Setup</div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab on" type="button">Setup</button>
     <div class="who">Rakesh Varma · General Manager · Avenue Regent</div>
   </div>
   <div class="main">
     <div class="body">
-      <div class="tabs"><div class="tab on">Registration</div><div class="tab">Guest reporting</div><div class="tab">Stop-sell</div><div class="tab">Stay defaults</div><div class="grow"></div><div class="btn">Discard</div><div class="btn pri">Save</div></div>
+      <div class="tabs"><button class="tab on" type="button">Registration</button><button class="tab" type="button">Guest reporting</button><button class="tab" type="button">Stop-sell</button><button class="tab" type="button">Stay defaults</button><div class="grow"></div><button class="btn" type="button">Discard</button><button class="btn pri" type="button">Save</button></div>
       <div class="card">
         <div class="ch">Stop-sell <div class="grow">the seller's control — not an inventory fact</div></div>
         <div class="cb">
           <div class="fr"><div class="k">Executive Suite</div><div class="v">3 Sep → 7 Sep · 4 rooms · <span class="un">wedding party</span> <span class="hint">set by Rakesh Varma, 22 Aug</span></div></div>
           <div class="fr"><div class="k">Deluxe Twin</div><div class="v">14 Oct → 20 Oct · all · <span class="un">corridor renovation</span></div></div>
           <div class="hint"><b>This says "we choose not to sell", never "this room cannot be used."</b> A room that is genuinely unusable is <b>out of order</b> — EngineeringOps's to declare and ours only to hear. Two sentences, two owners, and availability subtracts both.</div>
-          <div class="btn sm">＋ Close a room type for dates</div>
+          <button class="btn sm" type="button">＋ Close a room type for dates</button>
         </div>
       </div>
       <div class="cols">
@@ -1345,7 +1358,7 @@
             <div class="fr"><div class="k">Daniel Fernandes</div><div class="v">arrived 31 Aug · <span class="pill warn">due 1 Sep</span></div></div>
             <div class="fr"><div class="k">Chen Wei</div><div class="v">arrived 29 Aug · <span class="pill bad2">overdue</span></div></div>
             <div class="fr"><div class="k">Filed today</div><div class="v">2 · <span class="hint">by Anitha Menon, ref KP/2026/8841</span></div></div>
-            <div style="display:flex;gap:9px"><div class="btn sm pri">Record a filing</div><div class="btn sm">Open the list</div></div>
+            <div style="display:flex;gap:9px"><button class="btn sm pri" type="button">Record a filing</button><button class="btn sm" type="button">Open the list</button></div>
             <div class="hint"><b>Overdue is shown, never enforced.</b> Chen Wei is checked in, served and will check out on time — the platform says what is owed and stops nothing.</div>
           </div>
         </div>

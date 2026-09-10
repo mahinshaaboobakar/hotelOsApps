@@ -139,6 +139,13 @@ function click(selector: string, text: string): void {
       return;
     }
   }
+
+  // **A step that matched nothing throws** — `64` §8 clause 3, and the reason
+  // is the comment two functions down: this used to return quietly, so a driver
+  // whose selector had gone stale photographed a different screen, convincingly.
+  // The capture was of a real screen; it was simply not the one asked for, and
+  // nothing in the image said so.
+  throw new Error(`no ${selector} says "${text}" — the drive could not reach it`);
 }
 
 /**
@@ -159,9 +166,24 @@ async function drive(): Promise<void> {
   // the second one before the first screen exists, finds nothing to click, and
   // photographs whatever was already there — the same silent failure the class
   // name above caused, arrived at a different way.
-  for (const step of PATHS[screen] ?? []) {
-    click(step.selector, step.text);
-    await settled();
+  try {
+    for (const step of PATHS[screen] ?? []) {
+      click(step.selector, step.text);
+      await settled();
+    }
+  } catch (error) {
+    // **Drawn, and then still marked ready.** Refusing to signal would make the
+    // sweep time out, which reads as a broken harness rather than as a screen
+    // that could not be reached — and a timeout carries no sentence. This
+    // photographs the failure instead, so the capture says which step missed.
+    const said = error instanceof Error ? error.message : String(error);
+    document.body.replaceChildren();
+    const box = document.createElement("pre");
+    box.style.cssText = "padding:24px;color:#f87171;font:13px/1.6 monospace;white-space:pre-wrap";
+    box.textContent = `drive failed for screen=${screen}
+
+${said}`;
+    document.body.append(box);
   }
 
   // Two frames: one for the click's own render, one for the screen it opened —
