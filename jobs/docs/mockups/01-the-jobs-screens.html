@@ -13,7 +13,7 @@
    =========================================================================== */
 :root{
   /*
-   * The published tokens, at the shell's own values — ADR 0106, seventeen
+   * The published tokens, at the shell's own values — ADR 0106, nineteen
    * names. Re-tokenised 2026-09-05 on the owner's disposition: this page is
    * the appearance authority, and it was teaching a palette the platform had
    * replaced. An audit against an un-retokenised drawing measures the
@@ -27,7 +27,7 @@
   --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
 
   /* This page's own names, kept as aliases so no selector drifts back. */
-  --bg:var(--color-surface);--glass:rgba(255,255,255,.035);--line:var(--color-line);
+  --bg:var(--color-surface);--glass:color-mix(in srgb,var(--color-ink) 3%,transparent);--line:var(--color-line);
   --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
   --indigo:var(--color-brand);
   /*
@@ -42,7 +42,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
-code{font:12px ui-monospace,Menlo,monospace;color:var(--cyan)}
+code{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--cyan)}
 .intro{max-width:920px;color:var(--dim);margin-bottom:40px}
 .intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
 .intro p{margin:6px 0}
@@ -65,7 +65,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
 tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
-.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim);line-height:inherit}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
 .pill.ok{color:var(--ok);border-color:var(--ok)}
 .pill.warn{color:var(--warn);border-color:var(--warn)}
@@ -87,15 +87,18 @@ tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
    page taught ordinary ink there until the 5 September measurement. */
 .btn.pri{background:var(--grad);border-color:transparent;color:var(--color-ink-on-accent)}
 .btn.off{color:var(--faint);border-style:dashed}
+.btn.sm{padding:2px 8px;font-size:11px}
+.btn.danger{color:var(--color-bad);border-color:color-mix(in srgb,var(--color-bad) 45%,transparent)}
+.btn.danger.confirm{background:var(--color-bad);border-color:transparent;color:var(--color-ink-on-accent);font-weight:600}
 .field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent)}
-.field.ph{color:var(--faint)}
+.field.ph{color:var(--faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
 label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}
 .tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
 .tl div{margin-bottom:10px;font-size:13px}
 .tl b{display:block;color:var(--text);font-weight:600}
 .tl span{color:var(--faint);font-size:12px}
 .big{font-size:34px;font-weight:600;line-height:1}
-.mono{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.mono{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--dim)}
 .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
 .bar i{display:block;height:100%;background:var(--ok)}
 .bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
@@ -109,16 +112,16 @@ label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppe
 .strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
 .strip b{color:var(--text);font-size:14px;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--dim);line-height:inherit}
-.pager span.pg.on{color:var(--text);border-color:var(--indigo)}
+.pager button.pg{display:inline-block;background:none;font:inherit;line-height:inherit;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--dim);line-height:inherit}
+.pager button.pg.on{color:var(--text);border-color:var(--indigo)}
 .scroll{max-height:168px;overflow:hidden;position:relative}
 .scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--bg))}
 .more{font-size:11px;color:var(--faint);text-align:center;padding-top:4px}
 .timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--cyan);line-height:1}
 .timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:10px;vertical-align:middle}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
-.subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
-.subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
+.subnav button{background:none;border:none;font:inherit;line-height:inherit;cursor:pointer;padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav button.on{color:var(--text);border-bottom-color:var(--indigo)}
 .dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
 td.dimtd{color:var(--faint)}
 /* widget */
@@ -130,9 +133,9 @@ td.dimtd{color:var(--faint)}
 /* notes under frames */
 .note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
 .note b{color:var(--text)}
-.note.stop{border-color:var(--bad);background:rgba(255,92,122,.05)}
-.note.hold{border-color:var(--warn);background:rgba(245,181,63,.05)}
-.note.fix{border-color:var(--ok);background:rgba(62,207,142,.05)}
+.note.stop{border-color:var(--bad);background:var(--color-bad-soft)}
+.note.hold{border-color:var(--warn);background:var(--color-warn-soft)}
+.note.fix{border-color:var(--ok);background:var(--color-ok-soft)}
 .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
 .tag.obs{color:var(--bad);border-color:var(--bad)}
 .tag.later{color:var(--warn);border-color:var(--warn)}
@@ -186,7 +189,7 @@ ul.flows b{color:var(--text)}
       <tr><td class="num">MRN-ENG-130</td><td>Room 1204</td><td>Air conditioning › Leak test <span class="tag">child 1/2 · blocked</span></td><td><span class="pill p2">P2</span></td><td><span class="pill">ASSIGNED</span></td><td>Arjun Menon</td><td>Arjun Menon</td><td class="dimtd">clock stopped</td><td>Wed</td></tr>
       <tr><td class="num">MRN-HK-388</td><td>Room 1204</td><td>Housekeeping › Extra towels <span class="tag">linked</span></td><td><span class="pill p3">P3</span></td><td><span class="pill ok">RESOLVED</span></td><td>Guest · stay 7F2A</td><td>Meera Krishnan (HK)</td><td>—</td><td>auto-close 02 Sep 18:00</td></tr>
     </table>
-    <div class="pager"><span>1–12 of 47 · 12 per page at this height; a maximised window shows 24</span><span><span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">4</span><span class="pg">›</span></span></div>
+    <div class="pager"><span>1–12 of 47 · 12 per page at this height; a maximised window shows 24</span><span><button class="pg">‹</button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg">4</button><button class="pg">›</button></span></div>
   </div>
 </div>
 <div class="note"><b>Draws S1.18, S3, S5.</b> The row carries the lean job's public columns — <code>job_number</code> (<code>MRN-ENG-142</code>: property code upper, root department, one counter per property, S1 D3), catalogue <b>category › item</b> instead of a type (S1 D5/D6, R7), the priority chain's result (<code>P1</code> set by the flow; <code>NT</code> = NOT TRIAGED when nothing matched, S1 D4), the 9-status job status (S2), and the <b>derived</b> concern — computed by the 60-second sweep, never stored as a job column (S5 D1).</div>
@@ -210,7 +213,8 @@ ul.flows b{color:var(--text)}
     </div>
     <div class="mono" style="margin-bottom:6px">Arjun Menon working · due 02 Sep 14:10 · accountable now <b>Priya Nair</b> (supervisor, ladder step 2) · raised 02 Sep 13:31 by the guest of stay 7F2A</div>
     <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span><span class="btn">Put on hold…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
-    <div class="subnav"><div class="on">Overview</div><div>Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
+    <div class="subnav"><button class="on">Overview</button>
+<div>Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
     <div class="cols">
       <div>
         <div class="card">
@@ -276,7 +280,8 @@ ul.flows b{color:var(--text)}
       <span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED</span>
       <span style="margin-left:auto" class="timer"><i></i>00:23:41</span>
     </div>
-    <div class="subnav"><div>Overview</div><div class="on">Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div class="on">Work · 2 sessions</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
     <div class="cols" style="grid-template-columns:1fr 2fr">
       <div class="card">
         <h3>Now</h3>
@@ -306,7 +311,8 @@ ul.flows b{color:var(--text)}
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px"><span class="num" style="font-size:14px">MRN-ENG-142</span><span style="font-size:16px;font-weight:600">Air conditioning › Not cooling — Room 1204</span><span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED</span><span style="margin-left:auto" class="timer"><i></i>00:23:41</span></div>
-    <div class="subnav"><div>Overview</div><div>Work · 2</div><div class="on">History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div>Work · 2</div><div class="on">History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
     <table>
       <tr><th>When</th><th>Kind</th><th>What</th><th>By</th><th>Detail</th></tr>
       <tr><td>02 Sep 14:10</td><td><span class="pill bad">concern</span></td><td>BREACHED</td><td>sweep</td><td>accountable → Priya Nair (step 2) · nudge in-app</td></tr>
@@ -326,7 +332,8 @@ ul.flows b{color:var(--text)}
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
   <div class="body">
-    <div class="subnav"><div>Overview</div><div>Work · 2</div><div>History · 7</div><div class="on">Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div>Work · 2</div><div>History · 7</div><div class="on">Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
     <div class="cols" style="grid-template-columns:2fr 1fr">
       <div>
         <div class="tl">
@@ -351,7 +358,8 @@ ul.flows b{color:var(--text)}
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
   <div class="body">
-    <div class="subnav"><div>Overview</div><div>Work · 2</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div class="on">Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div>Work · 2</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div class="on">Links &amp; steps · 3</div><div>Rating</div><div>Record</div></div>
     <p class="sect">Steps of this job · sequence</p>
     <table>
       <tr><th>Step</th><th>Job</th><th>What</th><th>Status</th><th>Clock</th><th>Assigned to</th></tr>
@@ -374,7 +382,8 @@ ul.flows b{color:var(--text)}
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Anjali Rao · HK manager</div></div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px"><span class="num" style="font-size:14px">MRN-HK-388</span><span style="font-size:16px;font-weight:600">Housekeeping › Extra towels — Room 1204</span><span class="pill p3">P3</span><span class="pill">CLOSED</span></div>
-    <div class="subnav"><div>Overview</div><div>Work · 1</div><div>History · 6</div><div>Notes &amp; photos · 1</div><div>Links &amp; steps · 1</div><div class="on">Rating</div><div>Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div>Work · 1</div><div>History · 6</div><div>Notes &amp; photos · 1</div><div>Links &amp; steps · 1</div><div class="on">Rating</div><div>Record</div></div>
     <div class="cols">
       <div class="card">
         <h3>The guest's rating</h3>
@@ -401,7 +410,8 @@ ul.flows b{color:var(--text)}
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
   <div class="body">
-    <div class="subnav"><div>Overview</div><div>Work · 2</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div class="on">Record</div></div>
+    <div class="subnav"><button>Overview</button>
+<div>Work · 2</div><div>History · 7</div><div>Notes &amp; photos · 3</div><div>Links &amp; steps · 3</div><div>Rating</div><div class="on">Record</div></div>
     <div class="cols3">
       <div class="card"><h3>Identity</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>job_id</div><div class="mono">018f3c…9a1e</div><div>Number</div><div>MRN-ENG-142</div><div>Property</div><div>Marina Bay · mrn</div><div>Version</div><div>9</div></div></div>
       <div class="card"><h3>Audit</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Created</div><div>02 Sep 13:31 · guest · stay 7F2A</div><div>Updated</div><div>02 Sep 14:07 · Arjun Menon</div><div>Deleted</div><div>—</div></div></div>
@@ -562,7 +572,8 @@ ul.flows b{color:var(--text)}
     <div class="who">Nadia Rahman · Marina Hotels · organisation admin</div>
   </div>
   <div class="body">
-    <div class="subnav"><div class="on">Marina Hotels · master</div><div>Marina Bay · this property</div><div>Import / export</div></div>
+    <div class="subnav"><button class="on">Marina Hotels · master</button>
+<div>Marina Bay · this property</div><div>Import / export</div></div>
     <div class="cols" style="grid-template-columns:260px 1fr">
       <div class="card">
         <h3>Categories <span class="btn" style="float:right;padding:2px 8px;font-size:11px">＋ New</span></h3>

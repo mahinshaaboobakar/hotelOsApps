@@ -2,49 +2,49 @@
   {
     "name": "frame-01-board",
     "paired": 95,
-    "differs": 12,
+    "differs": 24,
     "readings": 2646
   },
   {
     "name": "frame-02-job-overview",
     "paired": 56,
-    "differs": 19,
+    "differs": 24,
     "readings": 1224
   },
   {
     "name": "frame-02b-job-work",
     "paired": 46,
-    "differs": 17,
+    "differs": 20,
     "readings": 1134
   },
   {
     "name": "frame-02c-job-history",
     "paired": 49,
-    "differs": 18,
+    "differs": 23,
     "readings": 1278
   },
   {
     "name": "frame-02d-job-notes",
     "paired": 30,
-    "differs": 16,
+    "differs": 20,
     "readings": 720
   },
   {
     "name": "frame-02e-job-links",
     "paired": 56,
-    "differs": 19,
-    "readings": 1224
+    "differs": 24,
+    "readings": 1242
   },
   {
     "name": "frame-02f-job-rating",
     "paired": 29,
-    "differs": 11,
+    "differs": 15,
     "readings": 648
   },
   {
     "name": "frame-02g-job-record",
     "paired": 40,
-    "differs": 17,
+    "differs": 21,
     "readings": 846
   },
   {
@@ -62,13 +62,13 @@
   {
     "name": "frame-05-live",
     "paired": 57,
-    "differs": 21,
+    "differs": 15,
     "readings": 1296
   },
   {
     "name": "frame-06-scheduled",
     "paired": 38,
-    "differs": 9,
+    "differs": 13,
     "readings": 864
   },
   {
@@ -80,49 +80,49 @@
   {
     "name": "frame-08-settings-policy",
     "paired": 59,
-    "differs": 15,
+    "differs": 14,
     "readings": 1188
   },
   {
     "name": "frame-08b-policy-list",
     "paired": 54,
-    "differs": 7,
+    "differs": 12,
     "readings": 1404
   },
   {
     "name": "frame-08c-policy-flow",
     "paired": 41,
-    "differs": 23,
+    "differs": 29,
     "readings": 1008
   },
   {
     "name": "frame-09-presence",
     "paired": 34,
-    "differs": 10,
+    "differs": 14,
     "readings": 918
   },
   {
     "name": "frame-10-who-is-told",
     "paired": 32,
-    "differs": 5,
+    "differs": 8,
     "readings": 666
   },
   {
     "name": "frame-11-holds",
     "paired": 31,
-    "differs": 8,
+    "differs": 12,
     "readings": 774
   },
   {
     "name": "frame-12-closing",
     "paired": 32,
-    "differs": 11,
+    "differs": 14,
     "readings": 720
   },
   {
     "name": "frame-13-access",
     "paired": 31,
-    "differs": 5,
+    "differs": 9,
     "readings": 774
   }
 ]
