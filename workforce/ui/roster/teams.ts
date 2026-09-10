@@ -145,10 +145,16 @@ export const recordedNoTeams: Teams = {
  * adjudicate.
  */
 export const recordedPostingEnding: PostingEnding = {
+  id: "p-rp",
+  version: 1,
   who: "Rajan Pillai",
   department: "Kitchen",
-  lastDay: "Thu 4 Sep 2026",
+
+  // ISO, like every other day on the wire - ADR 0152. It read
+  // "Thu 4 Sep 2026", which is a Friday, and the word "member since 19 Aug"
+  // put the sentence inside the value where no locale could reach it.
+  lastDay: "2026-09-04",
   alsoEnds: [
-    { team: "Banquet Service", department: "KIT", since: "member since 19 Aug" },
+    { team: "Banquet Service", department: "Kitchen", since: "2026-08-19" },
   ],
 };

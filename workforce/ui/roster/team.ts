@@ -181,6 +181,12 @@ export interface Supported {
 
 /** What ending a posting is about to do, as the dialog states it. */
 export interface PostingEnding {
+  /** The posting, as the write must name it. */
+  id: string;
+
+  /** The row the write quotes back. */
+  version: number;
+
   who: string;
   department: string;
 

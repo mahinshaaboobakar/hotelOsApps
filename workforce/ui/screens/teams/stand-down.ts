@@ -54,7 +54,7 @@ export function standDown(
     el("div", "ht", `Stand down ${open.team.name}?`),
     el("div", "hsub", `${open.team.departmentName} · ${members} members`));
 
-  const refusal = el("div", "note twarn");
+  const refusal = el("div", "note warn");
 
   // **Destructive, so the confirm is FILLED** — page 64 §2. There is nothing
   // to wait for: the team is the pane's and the toggle has a position, so this

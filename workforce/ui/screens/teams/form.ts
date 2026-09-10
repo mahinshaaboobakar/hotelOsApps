@@ -70,8 +70,8 @@ export function formTeam(
     el("div", "ht", "Form a team"),
     el("div", "hsub", "A named group of people in one department, to assign work to"));
 
-  const taken = el("div", "note twarn");
-  const refusal = el("div", "note twarn");
+  const taken = el("div", "note warn");
+  const refusal = el("div", "note warn");
   const acts = foot("Form team", "Forming…", close);
 
   function redraw(): void {

@@ -25,7 +25,8 @@ import { recordedFirstRun, recordedPeople } from "../roster/people";
 import { recordedPolicy } from "../roster/policy";
 import { recordedMonth } from "../roster/reports";
 import { recordedSchedule } from "../roster/schedule";
-import { recordedNoTeams, recordedTeams } from "../roster/teams";
+import { recordedNoTeams, recordedPostingEnding, recordedTeams }
+  from "../roster/teams";
 
 const params = new URLSearchParams(location.search);
 
@@ -109,6 +110,11 @@ function host(granted: readonly string[]): HostApi {
         // owner added on 2026-09-04, after those frames were drawn. A capture
         // therefore shows one clause the frame does not, which is the drawing
         // being behind the ruling rather than the capture being wrong.
+        // What ending a posting closes — the service's answer, which this
+        // screen used to compose for itself. The harness stands in for the
+        // host, so it answers it like any other read.
+        ending: recordedPostingEnding,
+
         me: {
           name: "Priya Thomas",
           department: "Front Office",

@@ -83,8 +83,7 @@ button.tgrid:focus-visible,button.tnarrow:focus-visible{
 /* A note that is a refusal rather than an explanation. The shared note is the
    quiet voice; this is the same shape in the warn tone, so the two read as one
    family and a person can still tell them apart. */
-.twarn{color:var(--color-warn,#fbbf24)}
-.twarn b{color:var(--color-warn,#fbbf24)}
+
 
 
 /* Frame 5's toggle. */

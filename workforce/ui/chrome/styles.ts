@@ -441,6 +441,14 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 .inp.ph{color:var(--color-ink-faint,#5a6172)}
 .inp::placeholder{color:var(--color-ink-faint,#5a6172)}
 .inp:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-1px}
+/* A note that is a warning. Teams styled it as .twarn and three of its own
+   dialogs wore it; the moment People's End posting wanted the same refusal
+   line, a fourth dialog was reaching into another screen's stylesheet - which
+   the cross-screen guard refused, correctly.
+   A tone word on the chrome's own note, like .pill.warn and .code.warn:
+   nothing styles .warn alone, so it cannot reach anything it should not. */
+.note.warn{color:var(--color-warn,#fbbf24)}
+.note.warn b{color:var(--color-warn,#fbbf24)}
 .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
 .sel{display:flex;gap:8px;align-items:center;justify-content:space-between;

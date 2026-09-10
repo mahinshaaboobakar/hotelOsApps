@@ -139,6 +139,58 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task The_ending_read_names_the_memberships_that_close_with_the_posting()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        harness.Directory.WithDepartmentName("HK", "Housekeeping");
+
+        var staff = await Post(harness, scope, "Deepa Menon", "HK", "Supervisor");
+        var team = await Form(harness, scope, "HK", "Morning Crew");
+
+        await harness.CallAsync(TeamsView.Write, scope, "addMember", new
+        {
+            teamId = team,
+            staffId = staff,
+            on = September.ToString("yyyy-MM-dd"),
+        });
+
+        var posting = await Posting(harness, scope, staff);
+
+        var answer = await harness.CallAsync(
+            EndingView.Read, scope, "ending", new { posting = posting.Id.ToString() });
+
+        Assert.Equal("Deepa Menon", answer.GetProperty("who").GetString());
+        Assert.Equal("Housekeeping", answer.GetProperty("department").GetString());
+        Assert.Equal(posting.Version, answer.GetProperty("version").GetInt64());
+
+        // **The consequence, read rather than predicted.** The module used to
+        // build this panel itself and answered an EMPTY list for everybody
+        // except one recorded person — so the panel that exists to say what
+        // else closes said "nothing" for every posting in the property.
+        var also = answer.GetProperty("alsoEnds").EnumerateArray().ToList();
+        Assert.Equal("Morning Crew", Assert.Single(also).GetProperty("team").GetString());
+    }
+
+    [Fact]
+    public async Task The_ending_read_says_nothing_closes_when_nothing_does()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        harness.Directory.WithDepartmentName("HK", "Housekeeping");
+
+        var staff = await Post(harness, scope, "Ravi Kurian", "HK", "Room attendant");
+        var posting = await Posting(harness, scope, staff);
+
+        var answer = await harness.CallAsync(
+            EndingView.Read, scope, "ending", new { posting = posting.Id.ToString() });
+
+        // Empty is a real answer and now means what it says. The pair matters:
+        // a read that always answered empty would pass this test alone.
+        Assert.Empty(answer.GetProperty("alsoEnds").EnumerateArray());
+    }
+
+    [Fact]
     public async Task The_roll_says_when_each_member_joined()
     {
         var harness = new ModuleHarness(fixture);

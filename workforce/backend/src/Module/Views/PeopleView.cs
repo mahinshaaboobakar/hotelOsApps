@@ -169,6 +169,12 @@ public static class PeopleView
             // a name this application would be inventing — IStaffDirectory's
             // own contract says the two facts differ and neither is a
             // placeholder.
+            // **The posting a write has to name, and the row it has to quote
+            // back.** This read sent neither: a row was keyed by the person's
+            // NAME, so End posting had nothing to send even once its button
+            // was wired, and optimistic concurrency had no version to check.
+            id = primary.Id,
+            version = primary.Version,
             who = names.TryGetValue(held.Key, out var name) ? name : null,
             since = Since(primary),
 

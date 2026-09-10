@@ -53,7 +53,7 @@ export function addMember(
     el("div", "ht", "Add a member"),
     el("div", "hsub", `To ${open?.team.name ?? "this team"}, in ${department}.`));
 
-  const refusal = el("div", "note twarn");
+  const refusal = el("div", "note warn");
   const acts = foot("Add to team", "Adding…", close);
 
   function waiting(): string | null {
@@ -198,7 +198,7 @@ function who(
  * screen showing two refusals cannot explain one of them.
  */
 function why(candidates: readonly Candidate[], department: string): HTMLElement {
-  const note = el("div", "note twarn");
+  const note = el("div", "note warn");
   const refused = candidates.filter((one) => one.refused !== null);
   const names = refused.map((one) => one.name.split(" ")[0]).join(" and ");
 

@@ -17,8 +17,9 @@ import { load } from "../../roster";
 import { type People, type Posting } from "../../roster/people";
 import { endPosting } from "./end-posting";
 import { pager } from "../../chrome/pager";
-import { recordedPostingEnding } from "../../roster/teams";
 import type { PostingEnding } from "../../roster/team";
+import { failureBody } from "../../chrome/failure";
+import type { ReadFailure } from "../../chrome/failure";
 
 const COLUMNS = "1.5fr 116px 96px 1fr 1fr 116px";
 
@@ -29,7 +30,7 @@ const COLUMNS = "1.5fr 116px 96px 1fr 1fr 116px";
  * @param main where the screen mounts
  * @param ending whether the end-posting dialog is open over it
  * @param close dismiss the dialog
- * @param onEnd open the dialog on one person's posting
+ * @param onEnd open the dialog on one posting, by its id
  * @param onPage turn to a page, 0-based
  * @param page which page to ask for, 0-based
  */
@@ -38,7 +39,7 @@ export async function people(
   main: HTMLElement,
   ending: string | null = null,
   close: () => void = () => {},
-  onEnd: (who: string) => void = () => {},
+  onEnd: (posting: string) => void = () => {},
   onPage: (page: number) => void = () => {},
   page = 0,
 ): Promise<void> {
@@ -79,22 +80,24 @@ export async function people(
 
   // Ending a posting closes team memberships with it, and until this dialog
   // existed nothing said so — the round's finding, drawn.
-  if (ending !== null) main.append(endPosting(close, closing(ending)));
+  //
+  // **Read, not built here.** The consequence panel is the service's answer to
+  // `roster.read/ending`; this screen used to compose it, and for everybody
+  // except one recorded person it composed an empty list — the panel that
+  // exists to say what else closes, saying nothing, before a destructive
+  // button.
+  if (ending !== null) {
+    const got = await load<PostingEnding>(host, ROSTER_READ, "ending", { posting: ending });
+
+    main.append(got.ok
+      ? endPosting(host, close, got.value, () => { close(); })
+      // A dialog that cannot read what it is about does not open a destructive
+      // button over a guess. It says what it could not read, and offers the way
+      // out — the same rule the screens follow, one surface in.
+      : cannotRead(got.failure, close));
+  }
 }
 
-/**
- * What ending this person's posting does, as the service would answer it.
- *
- * The recorded answer covers one person, so everybody else gets an ending that
- * closes nothing — and the panel is then **absent** rather than empty. That is
- * the honest shape: a screen inventing two teams for whoever was clicked would
- * be exactly the second version of the rule this dialog exists to avoid.
- */
-function closing(who: string): PostingEnding {
-  return who === recordedPostingEnding.who
-    ? recordedPostingEnding
-    : { who, department: "Front Office", lastDay: "Thu 4 Sep 2026", alsoEnds: [] };
-}
 
 /**
  * The header, counting what the list holds.
@@ -130,8 +133,13 @@ function subtitle(
   board: People, ending: string | null, here: number, expiring: number,
 ): string {
   if (ending !== null) {
-    const posting = board.postings.find((one) => one.who === ending);
-    return `${ending} · ${posting?.departments.join(" · ") ?? ""}`.trim();
+    // Found by id, because that is what the click carried. It was found by
+    // name, so a subtitle could name the wrong person's departments the day a
+    // property employed two people called the same thing.
+    const posting = board.postings.find((one) => one.id === ending);
+    if (posting === undefined) return "";
+
+    return `${posting.who} · ${posting.departments.join(" · ")}`.trim();
   }
 
   // **The property's total, not this page's length.** A subtitle counting the
@@ -144,7 +152,7 @@ function subtitle(
 }
 
 function table(
-  postings: readonly Posting[], onEnd: (who: string) => void,
+  postings: readonly Posting[], onEnd: (posting: string) => void,
   property: PropertyEnvironment,
 ): HTMLElement {
   const list = el("div", "rows");
@@ -164,6 +172,40 @@ function table(
 }
 
 /**
+ * The dialog, when the service could not say what ending this posting does.
+ *
+ * **No destructive button over a guess.** The screen used to compose the
+ * consequence itself and would have shown an empty one; a dialog that cannot
+ * read what it is about says what it could not read and offers the way out,
+ * which is the same rule the screens follow one surface further in.
+ *
+ * @param failure what the read reported
+ * @param close the way out
+ * @returns the overlay
+ */
+function cannotRead(failure: ReadFailure, close: () => void): HTMLElement {
+  const scrim = el("div", "scrim");
+  const dialog = el("div", "dlg");
+
+  dialog.append(
+    failureBody(failure, { the: "what ending this posting would close" }));
+
+  const acts = el("div", "acts");
+  const cancel = el("button", "btn", "Close");
+  cancel.setAttribute("type", "button");
+  cancel.addEventListener("click", close);
+  acts.append(el("div", "grow"), cancel);
+  dialog.append(acts);
+
+  scrim.append(dialog);
+  scrim.addEventListener("click", (event) => {
+    if (event.target === scrim) close();
+  });
+
+  return scrim;
+}
+
+/**
  * One posting.
  *
  * **A button, because it opens something.** The locked frame draws the table
@@ -173,12 +215,15 @@ function table(
  * implementation choice rather than read off the drawing.
  */
 function row(
-  posting: Posting, onEnd: (who: string) => void, property: PropertyEnvironment,
+  posting: Posting, onEnd: (posting: string) => void, property: PropertyEnvironment,
 ): HTMLElement {
   const item = el("button", "row");
   item.setAttribute("type", "button");
   item.style.gridTemplateColumns = COLUMNS;
-  item.addEventListener("click", () => { onEnd(posting.who); });
+  // **The posting's id, not the person's name.** The name is what a
+  // row shows; it is not what identifies a posting, and two people of
+  // one name were one row to everything downstream of this click.
+  item.addEventListener("click", () => { onEnd(posting.id); });
 
   const who = el("div");
   const name = el("div", "wn");

@@ -43,6 +43,12 @@ public static class ReadViews
             // nobody can decline.
             ["me"] = MeView.Read,
 
+            // What ending a posting closes. A read rather than a field on
+            // the People page: it is asked for one posting at the moment
+            // somebody opens the dialog, and answering it for every row of
+            // a page would be a team query per person.
+            ["ending"] = EndingView.Read,
+
             // The five dock widgets — SHELL-Q35. Same capability, same door,
             // because a widget asks this application the same kind of question
             // a screen does and is handed the same HostApi to ask it with.

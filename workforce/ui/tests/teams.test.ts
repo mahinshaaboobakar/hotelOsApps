@@ -206,7 +206,16 @@ describe("Teams", () => {
 
 describe("ending a posting", () => {
   it("states what else it closes before the button that does it", async () => {
-    const root = await mount(host({ people: recordedPeople, teams: recordedTeams }));
+    // **The consequence is the service's answer now, so the double answers it.**
+    // This screen used to compose the panel itself — a recorded ending for one
+    // person and an EMPTY list for everybody else — and the test passed against
+    // that composition. Rewritten rather than dropped, ADR 0034: the rule it
+    // covers is unchanged and only what satisfies it moved to the wire.
+    const root = await mount(host({
+      people: recordedPeople,
+      teams: recordedTeams,
+      ending: recordedPostingEnding,
+    }));
     await open(root, "People", "Postings");
     await click(root, ".row", recordedPostingEnding.who);
 
