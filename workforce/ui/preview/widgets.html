@@ -22,5 +22,11 @@
   const k = Number(new URLSearchParams(location.search).get("k") || 1);
   document.getElementById("stack").style.transform = "scale(" + k + ")";
 </script>
-<script type="module" src="./widgets.js"></script>
+<script type="module">
+  // ARCH-Q25 — this page had no cache-buster at all, so every widget capture
+  // after the first was taken against whatever the browser still held.
+  const { fresh, refuseBuildParam } = await import("./boot/fresh.js?t=" + Date.now());
+  refuseBuildParam(new URLSearchParams(location.search));
+  await fresh("./widgets.js");
+</script>
 </body></html>

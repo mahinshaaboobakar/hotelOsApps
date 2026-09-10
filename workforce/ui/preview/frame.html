@@ -23,8 +23,11 @@
   * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
 </style>
 </head><body><script type="module">
-  // The build tag rides in from the harness so a rebuilt bundle is actually
-  // fetched; without it a capture pass photographs the previous build.
-  const build = new URLSearchParams(location.search).get("build") || "";
-  await import("./frame.js?build=" + build);
+  // ARCH-Q25. The bundle's tag is derived from its own bytes, so a rebuilt
+  // bundle is fetched and an unchanged one still comes from cache. The loader
+  // itself is tiny and always re-fetched, which costs nothing and leaves no
+  // second thing to forget.
+  const { fresh, refuseBuildParam } = await import("./boot/fresh.js?t=" + Date.now());
+  refuseBuildParam(new URLSearchParams(location.search));
+  await fresh("./frame.js");
 </script></body></html>
