@@ -435,15 +435,15 @@ ul.flows b{color:var(--text)}
     <div class="cols">
       <div>
         <label>Where</label><input class="field" readonly value="Room 0817 · Floor 8 · Tower A">
-        <label>What</label><div class="field">Lighting › Bedside lamp dead <span class="mono" style="float:right">alias matched: "lamp not working"</span></div>
+        <label>What</label><input class="field" readonly value="Lighting › Bedside lamp dead"><div class="hint mono">alias matched: "lamp not working"</div>
         <label>Asset · optional</label><input class="field ph" readonly placeholder="Pick from Room 0817's assets…">
         <label>Summary</label><input class="field" readonly value="Guest says right-side bedside lamp is dead, bulb changed by HK, still dead.">
         <label>Details · optional</label><input class="field ph" readonly placeholder="Anything the technician should know first">
       </div>
       <div>
-        <label>Department</label><div class="field">Engineering (ENG) <span class="mono" style="float:right">from the catalogue item</span></div>
-        <label>Priority</label><div class="field">P3 <span class="mono" style="float:right">catalogue default · you may override</span></div>
-        <label>Due</label><div class="field">Today 02 Sep 15:40 <span class="mono" style="float:right">policy: P3 within 60 min</span></div>
+        <label>Department</label><input class="field" readonly value="Engineering (ENG)"><div class="hint mono">from the catalogue item</div>
+        <label>Priority</label><input class="field" readonly value="P3"><div class="hint mono">catalogue default · you may override</div>
+        <label>Due</label><input class="field" readonly value="Today 02 Sep 15:40"><div class="hint mono">policy: P3 within 60 min</div>
         <label>Assign to · on shift today</label><input class="field ph" readonly placeholder="AUTO — or pick: Arjun Menon · Deepak Rao · Team · Day shift">
         <label>Schedule for later · optional</label><input class="field ph" readonly placeholder="Leave empty to raise now">
         <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">Restricted · off (catalogue default for this item)</span></div>
@@ -605,7 +605,9 @@ ul.flows b{color:var(--text)}
           <div class="cols">
             <div>
               <label>Name</label><input class="field" readonly value="Water dripping from unit">
-              <label>Aliases · one per line</label><div class="field">AC leaking<br>water from AC<br>ceiling wet under AC</div>
+              <label>Aliases · one per line</label><textarea class="field" readonly rows="3">AC leaking
+water from AC
+ceiling wet under AC</textarea>
             </div>
             <div>
               <label>Default priority</label><input class="field" readonly value="P2">

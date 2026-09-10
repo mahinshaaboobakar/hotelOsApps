@@ -134,7 +134,6 @@ input.tog{width:16px;height:16px;appearance:auto;margin:0 8px 0 0;accent-color:v
 .said.ok{color:var(--color-ok,#34d399)}
 .ask{border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:var(--radius-panel,1rem);
      padding:14px 16px;margin:10px 0 14px;background:var(--color-surface-raised,#11141f)}
-.field .hint{margin-left:auto}
 .row>.field{margin:0}
 .tl+.field{margin-top:12px}
 label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07em;text-transform:uppercase;display:block}

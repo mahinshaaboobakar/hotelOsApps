@@ -98,7 +98,7 @@
   {
     "name": "frame-03-raise",
     "frame": "01-08.html",
-    "match": 0.2,
+    "match": 0.17,
     "runnerUp": 0.12,
     "paired": 6,
     "differs": 5,
@@ -147,7 +147,7 @@
     "name": "frame-07-catalogue",
     "frame": "01-12.html",
     "match": 0.22,
-    "runnerUp": 0.13,
+    "runnerUp": 0.12,
     "paired": 21,
     "differs": 5,
     "readings": 1188,
