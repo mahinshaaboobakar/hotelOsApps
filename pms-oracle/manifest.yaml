@@ -18,13 +18,62 @@
 # `runtime.principal` — ADR 0019 gives a connector no Kernel principal of its
 # own, because it authenticates as the Integration Hub (`integration`).
 #
-# The Kernel-side half of that ruling is platform work that arrives with the Hub
-# itself: the conditional validation that permits an absent principal for
-# `kind: connector`, and the install path that registers a connector with the
-# Hub instead of provisioning a schema and a service certificate. Today
-# `kernel-core`'s `Manifest` has no `kind` field and `Runtime.principal` is
-# required, so **this file is validated by a schema that does not yet accept
-# it, and installed by a path that does not yet exist.**
+# The Kernel-side half of that ruling is platform work, and **half of it has
+# since landed** — checked at HEAD rather than carried forward:
+#
+#   kind        LANDED. `PackageKind::Connector` is real (`kind.rs:37`) and the
+#               manifest type carries the field (`manifest/installable.rs:47`).
+#               This comment used to say `kernel-core`'s `Manifest` had no
+#               `kind`; that was wrong twice over — the type does not live in
+#               `kernel-core` at all, it is the shared `hotelos-package` crate.
+#   principal   NOT LANDED. `Runtime.principal` is still `String` and not
+#               `Option` (`manifest/sections.rs:59`), and its own doc says
+#               `CONN-Q10`'s conditional — required for `kind: application`,
+#               forbidden for `kind: connector` — *"arrives with the connector
+#               round"*.
+#
+# So **this file is still validated by a schema that does not yet accept it**,
+# and the reason is the principal alone. The conclusion outlived the half of
+# its argument that stopped being true, which is why the sentence was rewritten
+# rather than deleted.
+#
+# **And that is executed rather than read.** `hopkg sign` runs the platform's
+# own `Manifest::parse`, and on 2026-09-10 it answered, exit 1:
+#
+#     the manifest would be refused: manifest.yaml is not a valid v1 package
+#     manifest: runtime: missing field `principal` at line 104 column 3
+#
+# That line number points inside the `runtime:` block below and **moves when
+# this comment does** — it read 86 before this paragraph was added, which is
+# the quote catching its own staleness in the one file where a stale quote is
+# the whole subject.
+#
+# **The parser got past `kind: connector` and stopped only at the principal**,
+# which is the "alone" above proven rather than asserted — reading
+# `sections.rs:59` says the field is required, and only running the thing says
+# nothing else in this file is refused as well. `hopkg` is also the check to
+# re-run when `CONN-Q19`'s `integrations:` block lands: `deny_unknown_fields`
+# means the parser is what says whether the platform accepts it yet.
+#
+# **And it is no longer installed by a path that does not exist — it is refused
+# by one that does.** `packages/hotelos-package/src/capability.rs:141` — the
+# crate matters and this comment first got it wrong: the Kernel has a
+# `capability.rs` of its own, the register cites this one by bare filename, and
+# the Kernel's has nothing to do with it. `floor()` there returns `None` for
+# `PackageKind::Connector`, so `completable()` answers
+# `NotCompletable::NoRelease`: *"this platform cannot complete what a connector
+# package promises; no release of HotelOS implements that flow yet, so the
+# package is refused rather than installed into a path that ends nowhere."*
+# That sentence is the `#[error]` template with `{kind}` = `connector`, not a
+# paraphrase. `tests/flow_capability.rs:81` pins it, asserting the kind reads
+# `"connector"` rather than merely that something was refused.
+#
+# **The reason `floor()` gives is the one that matters here**, and it is not
+# about this file: *"Nothing registers a connector with the Integration Hub, and
+# the module its card's sentence names does not exist — `CONN-Q13`."*
+# **That refusal is correct and nothing here
+# routes around it** — ADR 0141 §Consequences authorises exactly this state:
+# *"`pms-oracle` may exist, build and be tested, and stays unpublished."*
 #
 # It is written this way regardless, because the frozen ruling is what the
 # manifest should say. hello-hotel documents its own absent `ui:` block for the
@@ -143,16 +192,22 @@ configuration:
 
 dependencies: []
 
-# NO `ui:` BLOCK YET — and, as with hello-hotel, the absence is deliberate.
+# THE `ui:` BLOCK, and it is here — the heading above this used to read *"NO
+# `ui:` BLOCK YET"* with the block declared eight lines under it. The comment
+# described its own sequencing correctly and was never updated when that
+# sequencing completed, so the file contradicted itself in the plainest way a
+# file can. `CONN-Q15`, 2026-09-10.
 #
 # `CONN-Q9` ruled (b): this connector ships a signed `ui.module` and Software
 # Center hosts it inside Integration Management. That is the design, and
 # `docs/mockups/01-oracle-connector.html` draws it.
 #
-# The block and the payload arrive together, as the architect sequenced on
-# 2026-08-31 — `ui/module.js` ships in this same change. `kernel-core`'s
-# `validate` refuses a declared `ui:` whose payload is absent, which is the
-# mechanism behind that sequencing rather than a convention beside it.
+# The block and the payload arrive together — `kernel-core`'s `validate` refuses
+# a declared `ui:` whose payload is absent, which is the mechanism behind that
+# sequencing rather than a convention beside it. The payload is `ui/module.js`,
+# built from `ui/` by `scripts/build-module.mjs`; it is a build output and is
+# not committed, which is why `files:` below carries a placeholder digest the
+# packager replaces.
 ui:
   # The module-registry id, which must equal `id:` above — ADR 0092 §Q15: a
   # declared name must equal the thing it names, and the shell refuses a
