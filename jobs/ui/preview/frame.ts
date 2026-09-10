@@ -113,6 +113,70 @@ async function settle(): Promise<void> {
   await new Promise((done) => setTimeout(done, 0));
 }
 
+
+/**
+ * Put a value into a control the way a person does, and say so if it did not
+ * take.
+ *
+ * **By parameter where a control exists, by typing only where none can.**
+ * Typing into something the screen is supposed to set makes the capture depend
+ * on the control under test: a priority chip that fails to set produces an
+ * empty capture and twenty divergences that are really one broken control, and
+ * the audit blames the drawing (`ARCH-Q20`, 2026-09-10).
+ */
+function put(name: string, value: string): void {
+  const field = document.querySelector<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(
+    `[name="${name}"]`,
+  );
+
+  if (field === null) {
+    missed.push(`a field named "${name}"`);
+    return;
+  }
+
+  if (field instanceof HTMLSelectElement) {
+    const option = Array.from(field.options).find((o) => o.textContent?.includes(value) === true);
+    if (option === undefined) {
+      missed.push(`an option reading "${value}" in "${name}"`);
+      return;
+    }
+
+    field.value = option.value;
+  } else {
+    field.value = value;
+  }
+
+  field.dispatchEvent(new Event("input", { bubbles: true }));
+  field.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+/**
+ * The state each frame draws, reached before the capture is called ready.
+ *
+ * A capture of an unfilled form must never reach the audit as a filled one, so
+ * every step here records its own miss and `ready()` withholds the shared
+ * signal when any of them did.
+ */
+async function fill(what: string): Promise<void> {
+  if (what === "raise") {
+    put("locationId", "Room 0817 · Floor 8 · Tower A");
+    put("itemId", "Bedside lamp dead");
+    put("summary", "Guest says right-side bedside lamp is dead, bulb changed by HK, still dead.");
+    await settle();
+    return;
+  }
+
+  if (what === "resolve") {
+    click(".btn", "Refrigerant topped up");
+    await settle();
+    put("note", "Suction 45 psi, charged to 68. Recommend leak test at next PPM.");
+    await settle();
+    return;
+  }
+
+  missed.push(`a fill named "${what}"`);
+}
+
 async function drive(): Promise<void> {
   const widget = params.get("widget");
   if (widget !== null) {
@@ -151,6 +215,9 @@ async function drive(): Promise<void> {
     await settle();
   }
   if (open === "resolve") { click(".btn", "Resolve…"); await settle(); }
+
+  const filling = params.get("fill");
+  if (filling !== null) await fill(filling);
 
   const tab = params.get("tab");
   if (tab !== null) { click(".tab", tab); await settle(); }

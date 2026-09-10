@@ -16,6 +16,19 @@ export const recordedCatalogue: Catalogue = {
     { id: "c-spa", name: "Spa", department: "SPA", items: 3, activeHere: false },
   ],
   items: [
+    // **The frame's own item.** The Raise frame draws a bedside lamp in Room
+    // 0817, and the harness held no such item — so a capture of that screen
+    // could never reach the state the drawing specifies, and six nodes paired.
+    // §8's fixture rule, extended to state (ARCH-Q20, 2026-09-10): a frame
+    // drawn for measurement draws the fixture the harness holds, and the
+    // harness is the side that moves.
+    {
+      id: "i-bl", categoryId: "c-li", name: "Bedside lamp dead", department: "Engineering (ENG) · inherited from the category",
+      defaultPriority: "P3", dueWithinMinutes: 240, restricted: false,
+      aliases: ["lamp not working", "bedside light dead"],
+      activeAt: [{ property: "Marina Bay", on: true }],
+      resolutions: [{ id: "r7", name: "Bulb replaced", noteRequired: false }, { id: "r8", name: "Fitting replaced", noteRequired: false }],
+    },
     {
       id: "i-nc", categoryId: "c-ac", name: "Not cooling", department: "Engineering (ENG) · inherited from the category",
       defaultPriority: "P2", dueWithinMinutes: 40, restricted: false,

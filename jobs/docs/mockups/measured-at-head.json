@@ -98,11 +98,11 @@
   {
     "name": "frame-03-raise",
     "frame": "01-08.html",
-    "match": 0.16,
+    "match": 0.17,
     "runnerUp": 0.12,
     "paired": 6,
     "differs": 5,
-    "readings": 504,
+    "readings": 522,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
     "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
@@ -146,11 +146,11 @@
   {
     "name": "frame-07-catalogue",
     "frame": "01-12.html",
-    "match": 0.28,
-    "runnerUp": 0.11,
-    "paired": 23,
+    "match": 0.21,
+    "runnerUp": 0.12,
+    "paired": 21,
     "differs": 5,
-    "readings": 1260,
+    "readings": 1188,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
     "key": "tag + normalised text, then document order inside a colliding group (ARCH-Q12 step two, 2026-09-10) counts are not comparable with runs before that date"
