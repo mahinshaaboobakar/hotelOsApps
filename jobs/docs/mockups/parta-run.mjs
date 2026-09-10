@@ -36,8 +36,13 @@ const HERE = "C:/Users/MAHINA~1/AppData/Local/Temp/claude/C--Users-Mahin-Aboobak
 const FRAMES = join(HERE, "frames");
 const MOCKUPS = "C:/Users/Mahin Aboobakker/PycharmProjects/HotelOsApps/jobs/docs/mockups";
 const MEASURE = "C:/Users/Mahin Aboobakker/PycharmProjects/HosPilotOS/scripts/review-measure.mjs";
-const BUILT = "http://127.0.0.1:8853/preview/frame.html";
-const DRAWN = "http://127.0.0.1:8855";
+// **Ports come from the server that proved its own identity** — `serve.py`
+// probes upward for a free one, checks each root for a file only it holds, and
+// writes them here. Two harnesses bound 8853 today and GG's browser was
+// answered by mine: a 200 cannot tell a server from YOUR server.
+const PORTS = JSON.parse(readFileSync(join(HERE, "..", "ports.json"), "utf8"));
+const BUILT = `http://127.0.0.1:${PORTS.ui}/preview/frame.html`;
+const DRAWN = `http://127.0.0.1:${PORTS.frames}`;
 
 mkdirSync(FRAMES, { recursive: true });
 
