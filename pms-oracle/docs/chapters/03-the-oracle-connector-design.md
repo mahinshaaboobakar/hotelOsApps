@@ -453,12 +453,16 @@ it only lists wins.
 Named here so nobody has to infer them, and so the owner's gate is written
 down rather than remembered.
 
-### Closed since this page was written — both 2026-08-31, both the planner
+### Closed since this page was written
 
 | | Ruling | What it changed here |
 |---|---|---|
 | **`CONN-Q9` — who renders configuration** | **(b)**: a connector ships a **signed `ui.module`**, and Software Center hosts it inside Integration Management (ADR 0128 §7). Ruled over a generic form engine deliberately — a declarative schema able to express secrets, allow-lists, two-tier schedules and connection tests *"quickly becomes a second programming language"*. A clarification of ADR 0092's intended use; no second package mechanism | The mockup's frames needed **no redrawing** — bound 1 of ten requires the HotelOS design system, so the form was already drawn where and how it will be built. `pms-oracle` now knows it carries a `ui.module`, which §5 had said was waiting on this |
 | **`CONN-Q8` — the mapping key** | **As proposed**: `(entity_type, identifier_kind, external_id)`, property-scoped, bijective within the three-part key, kinds **connector-declared**. ADR 0016 carries the amendment | §2.3's one-kind restriction is **withdrawn**. All of OHIP's typed identifiers map, each under its own kind. Nothing had been built on the restriction |
+
+| **`CONN-Q6` — the business date's storage home** | **CLOSED — planner, 2026-08-31, shape (a) of design page 44.** No `Property.current_business_date`: the **boundary** is stable configuration beside `check_in_time`, the **current date is derived, never stored**, the Context Service answers `operating_day(timestamp, boundary)`, and the Hub attaches `business_date` at normalisation — *the connector never calculates it*. ADR 0051 holds untouched | Nothing here changes: this design already committed to the substance. What changes is that the row is no longer open — and it is the register-closure trap, because the same cell OPENS with *"Open — planner. Asked 2026-08-30"* |
+| **The Reservations/GuestOps domain** | **BUILT.** `guestops` is a package in this repository — `backend/src`, `backend/tests`, `docs/chapters` — and it registers on the owner's platform: `service=guestops` appears in the running Kernel's log, and Health lists GuestOps under Installed applications | The row said *"Ruled and unbuilt"*. Deferred facts still replay into the domain; what is no longer true is that there is nothing to replay into |
+| **The two listener rows** | **TAKEN.** 15156 and 15157 are in the installer's `$PlatformPort` prerequisite list, its firewall entries and `hotelos-integration-service.xml`, with `PropertyFacing.Tests.ps1` covering the ingress. Measured live: one process holds both (dev 25156/25157) | The row said *"Proposed, not taken"*, and frame 6's port was *"the proposal, not a decision"*. It is a decision |
 
 **The ten bounds on connector UI**, which this connector is reviewed against:
 the HotelOS design system · a sandboxed module boundary · only declared
@@ -475,11 +479,12 @@ outlet is the inbox (§2.2); *never creates tuples* is ADR 0092 rule 2.
 
 ### Still open
 
+**One row, and it is not this connector's.** The three that stood beside it on
+2026-08-31 are above — reconciled against the tree under `CONN-Q15`, which is
+where a chapter's open list gets read rather than written.
+
 | | State | What it blocks |
 |---|---|---|
-| **The Reservations/GuestOps domain** | **Ruled and unbuilt** — `CONN-Q2(b)`, ADR 0089. Reservation and guest facts normalise and are held as **deferred**, with their business date and provenance, and replay into the domain the day it ships | Nothing in this connector. Which facts publish is Hub configuration, not connector code |
-| **The two listener rows** | **Proposed, not taken.** `integration` 15156 and `integration-ingress` 15157 continue the `1515x` family below 49152 (ADR 0104). `packages/property-facing` is Stream CC's table | The ingress endpoint in frame 6 of the mockup — the port shown there is the proposal, not a decision |
-| **The business date's storage home** | **Reported back to the planner** — ADR 0128 §6. The substance is ruled (derived, not stored; attached at normalisation; the connector never computes it) and this design commits to the substance | Nothing now |
 | **Inbound webhooks from a cloud PMS** | The property ingress is reachable on the property LAN; a cloud PMS's webhook comes from the public internet. ADR 0115's Edge Gateway is the shape that would answer it | Nothing for Oracle — the cloud flavour is polled and the two on-site flavours are LAN pushes. It is the **first cloud-PMS connector's** blocker |
 
 ### The gate, written down
