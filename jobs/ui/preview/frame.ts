@@ -20,12 +20,8 @@ import { recordedLive, recordedScheduled } from "../board/recorded/live";
 import { recordedSettings } from "../board/recorded/settings";
 import { recordedMe } from "../board/recorded/me";
 import { recordedEscalated, recordedMine, recordedQuiet } from "../board/recorded/widget";
-import { blocked } from "../widgets/panel/blocked";
-import { byPriority } from "../widgets/panel/by-priority";
-import { dueSoon } from "../widgets/panel/due-soon";
 import { jobsNow } from "../widgets/panel/jobs-now";
-import { raisedToday } from "../widgets/panel/raised-today";
-import { theBoard } from "../widgets/panel/the-board";
+import { PANELS } from "./widgets";
 import { stylesheet } from "../widgets/card";
 
 const params = new URLSearchParams(location.search);
@@ -191,16 +187,8 @@ async function drive(): Promise<void> {
     // that published seventeen tokens rather than today's nineteen. A defect in
     // an instrument invalidates its output backwards; the fix travels forwards
     // only, so the pictures are re-taken rather than re-labelled.
-    const panels: Record<string, (host: HostApi) => Promise<HTMLElement>> = {
-      "the-board": theBoard,
-      blocked,
-      "by-priority": byPriority,
-      "due-soon": dueSoon,
-      "raised-today": raisedToday,
-    };
-
-    const panel = Object.hasOwn(panels, widget)
-      ? await panels[widget]!(host(GRANTS))
+    const panel = Object.hasOwn(PANELS, widget)
+      ? await PANELS[widget]!(host(GRANTS))
       : await jobsNow(host(GRANTS, widget as "quiet" | "escalated" | "mine"));
 
     document.body.replaceChildren(stylesheet(), panel);
