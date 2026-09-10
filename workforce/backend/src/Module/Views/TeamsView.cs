@@ -205,6 +205,13 @@ public static class TeamsView
         => new
         {
             id = team.Id,
+
+            // **The row a write has to quote back.** Standing a team down and
+            // renaming one both take `ExpectedVersion`, and this read sent no
+            // version at all - so neither write could be made from the screen
+            // that offers it, whatever the button did. Optimistic concurrency
+            // needs the reader to say which row it was looking at.
+            version = team.Version,
             name = team.Name,
             department = team.DepartmentCode,
             departmentName = names.TryGetValue(team.DepartmentCode, out var named)

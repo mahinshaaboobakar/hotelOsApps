@@ -19,22 +19,22 @@ export const recordedTeams: Teams = {
   onDate: "2026-09-04",
   teams: [
     {
-      id: "t-mc", name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
+      id: "t-mc", version: 1, name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
       note: "Rooms 101–140",
       members: 6, formed: "2026-03-12T00:00:00Z", active: true,
     },
     {
-      id: "t-tb", name: "Tower Block", department: "HK", departmentName: "Housekeeping",
+      id: "t-tb", version: 1, name: "Tower Block", department: "HK", departmentName: "Housekeeping",
       note: "Floors 8–12",
       members: 4, formed: "2026-03-12T00:00:00Z", active: true,
     },
     {
-      id: "t-fd", name: "Front Desk — Early", department: "FO", departmentName: "Front Office",
+      id: "t-fd", version: 1, name: "Front Desk — Early", department: "FO", departmentName: "Front Office",
       note: null,
       members: 3, formed: "2026-01-04T00:00:00Z", active: true,
     },
     {
-      id: "t-bs", name: "Banquet Service", department: "KIT", departmentName: "Kitchen",
+      id: "t-bs", version: 1, name: "Banquet Service", department: "KIT", departmentName: "Kitchen",
       note: null,
       members: 5, formed: "2026-08-19T00:00:00Z", active: true,
     },
@@ -42,14 +42,14 @@ export const recordedTeams: Teams = {
     // asks for it. Zero members is a fact about today rather than a team that
     // was never used.
     {
-      id: "t-pb", name: "Pool Bar", department: "KIT", departmentName: "Kitchen",
+      id: "t-pb", version: 1, name: "Pool Bar", department: "KIT", departmentName: "Kitchen",
       note: "Seasonal",
       members: 0, formed: "2025-11-01T00:00:00Z", active: false,
     },
   ],
   detail: {
     team: {
-      id: "t-mc", name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
+      id: "t-mc", version: 1, name: "Morning Crew", department: "HK", departmentName: "Housekeeping",
       note: "Rooms 101–140",
       members: 6, formed: "2026-03-12T00:00:00Z", active: true,
     },

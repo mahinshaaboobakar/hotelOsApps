@@ -21,6 +21,15 @@
 export interface Team {
   id: string;
 
+  /**
+   * The row a write quotes back - optimistic concurrency.
+   *
+   * Standing a team down and renaming one both carry it, and the read used to
+   * send none: the dialogs that offer those writes could not have made them
+   * whatever their buttons did.
+   */
+  version: number;
+
   name: string;
 
   /** The canon department code — ADR 0119. Exactly one, by ruling. */

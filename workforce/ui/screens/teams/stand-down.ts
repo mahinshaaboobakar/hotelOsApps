@@ -16,28 +16,84 @@
  * March* is still a question.
  */
 
+import type { HostApi } from "@hotelos/sdk";
+
+import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
+import { write, WriteRefused } from "../../roster";
 import type { TeamDetail } from "../../roster/team";
 
 /**
  * Build the dialog.
  *
+ * @param host the bridge
  * @param close called when it is dismissed
  * @param open the team the detail pane has open — the one being stood down
+ * @param done called after it is stood down, so the list is re-read
  * @returns the overlay
  */
-export function standDown(close: () => void, open: TeamDetail): HTMLElement {
+export function standDown(
+  host: HostApi,
+  close: () => void,
+  open: TeamDetail,
+  done: () => void,
+): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
 
   const members = open.members.length;
+
+  // The toggle's position, held here because the write carries it. It starts
+  // where the switch starts, and the switch starts where the SERVICE's own
+  // default is — `keepMembers` defaults to true on the wire, so the screen and
+  // the service agree about what happens if nobody touches anything.
+  let keepMembers = true;
 
   const head = el("div");
   head.append(
     el("div", "ht", `Stand down ${open.team.name}?`),
     el("div", "hsub", `${open.team.departmentName} · ${members} members`));
 
-  dialog.append(head, what(), keep(members), actions(close));
+  const refusal = el("div", "note twarn");
+
+  // **Destructive, so the confirm is FILLED** — page 64 §2. There is nothing
+  // to wait for: the team is the pane's and the toggle has a position, so this
+  // confirm is live from the moment the dialog opens rather than `off` with a
+  // reason. A dialog whose confirm is never `off` is not a dialog missing the
+  // rule; it is one with nothing outstanding.
+  const acts = foot("Stand down", "Standing down…", close, "destructive");
+
+  acts.onConfirm(() => {
+    void (async () => {
+      refusal.replaceChildren();
+      acts.working(true);
+
+      try {
+        await write(host, "posting.assign", "standing", {
+          id: open.team.id,
+          version: open.team.version,
+          active: false,
+          keepMembers,
+        });
+        done();
+      } catch (error) {
+        // §9: the overlay stays open, carrying the reason. A stand-down that
+        // closed on a failed write would leave a supervisor believing a crew
+        // had been taken off the board.
+        refusal.append(el("span", undefined,
+          error instanceof WriteRefused
+            ? error.message
+            : "That did not go through. Nothing was changed."));
+        acts.working(false);
+
+        if (!(error instanceof WriteRefused)) throw error;
+      }
+    })();
+  });
+
+  dialog.append(head, what(),
+    keep(members, (on) => { keepMembers = on; }),
+    refusal, acts.row);
 
   scrim.append(dialog);
   scrim.addEventListener("click", (event) => {
@@ -68,9 +124,10 @@ function what(): HTMLElement {
  * a keyboard is a decision only a mouse can make.
  *
  * @param members how many people the decision is about
+ * @param set called with the new position
  * @returns the row
  */
-function keep(members: number): HTMLElement {
+function keep(members: number, set: (on: boolean) => void): HTMLElement {
   const row = el("div", "tog");
   const label = el("div");
 
@@ -87,20 +144,8 @@ function keep(members: number): HTMLElement {
   toggle.addEventListener("click", () => {
     const on = toggle.classList.toggle("on");
     toggle.setAttribute("aria-checked", String(on));
+    set(on);
   });
 
   return fill(row, label, toggle);
-}
-
-function actions(close: () => void): HTMLElement {
-  const row = el("div", "acts");
-
-  const cancel = el("button", "btn", "Cancel");
-  cancel.setAttribute("type", "button");
-  cancel.addEventListener("click", close);
-
-  const confirm = el("button", "btn danger confirm", "Stand down");
-  confirm.setAttribute("type", "button");
-
-  return fill(row, el("div", "grow"), cancel, confirm);
 }

@@ -46,17 +46,30 @@ export interface Foot {
 }
 
 /**
+ * What kind of confirm the dialog ends in.
+ *
+ * **Page 64 §2 splits the destructive control in two, and the split is the
+ * point**: an inline destructive affordance is an outline, and *the confirm
+ * step of the flow is FILLED*. Leaving the confirm as an outline whispers at
+ * the exact moment weight is wanted — a person has already decided by then, and
+ * the quietest control on the screen should not be the one that does it.
+ */
+export type Kind = "primary" | "destructive";
+
+/**
  * Build the foot.
  *
  * @param confirmLabel what the confirm says at rest — the dialog's own verb
  * @param workingLabel what it says while the write is in flight
  * @param close called when the person cancels
+ * @param kind primary by default; destructive fills it in `--color-bad`
  * @returns the row, and the handles to drive it
  */
 export function foot(
   confirmLabel: string,
   workingLabel: string,
   close: () => void,
+  kind: Kind = "primary",
 ): Foot {
   const row = el("div", "acts");
   const reason = el("div", "note");
@@ -65,7 +78,8 @@ export function foot(
   cancel.setAttribute("type", "button");
   cancel.addEventListener("click", close);
 
-  const confirm = el("button", "btn pri", confirmLabel);
+  const lit = kind === "destructive" ? "danger confirm" : "pri";
+  const confirm = el("button", `btn ${lit}`, confirmLabel);
   confirm.setAttribute("type", "button");
 
   fill(row, reason, el("div", "grow"), cancel, confirm);
@@ -86,7 +100,15 @@ export function foot(
     waitingFor(waiting) {
       reason.textContent = waiting ?? "";
       confirm.classList.toggle("off", waiting !== null);
-      confirm.classList.toggle("pri", waiting === null);
+
+      // Whichever class this foot lit, not `pri` unconditionally: a
+      // destructive confirm that fell back to the primary fill while waiting
+      // would change colour to say it was unavailable, which is the one moment
+      // its colour should not move.
+      for (const one of lit.split(" ")) {
+        confirm.classList.toggle(one, waiting === null);
+      }
+
       confirm.toggleAttribute("disabled", waiting !== null);
     },
 

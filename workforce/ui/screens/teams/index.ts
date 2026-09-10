@@ -142,7 +142,7 @@ async function overlays(
   // Acts on the team the pane has open, so it does not exist without one —
   // which is also why the control that opens it lives in the pane.
   if (place.dialog === "down" && open !== null) {
-    return (await import("./stand-down")).standDown(place.close, open);
+    return (await import("./stand-down")).standDown(host, place.close, open, done);
   }
 
   return null;
