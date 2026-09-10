@@ -90,7 +90,7 @@ tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .btn.sm{padding:2px 8px;font-size:11px}
 .btn.danger{color:var(--color-bad);border-color:color-mix(in srgb,var(--color-bad) 45%,transparent)}
 .btn.danger.confirm{background:var(--color-bad);border-color:transparent;color:var(--color-ink-on-accent);font-weight:600}
-.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent)}
+.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
 .field.ph{color:var(--faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
 label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}
 .tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
@@ -434,18 +434,18 @@ ul.flows b{color:var(--text)}
   <div class="body">
     <div class="cols">
       <div>
-        <label>Where</label><div class="field">Room 0817 · Floor 8 · Tower A</div>
+        <label>Where</label><input class="field" readonly value="Room 0817 · Floor 8 · Tower A">
         <label>What</label><div class="field">Lighting › Bedside lamp dead <span class="mono" style="float:right">alias matched: "lamp not working"</span></div>
-        <label>Asset · optional</label><div class="field ph">Pick from Room 0817's assets…</div>
-        <label>Summary</label><div class="field">Guest says right-side bedside lamp is dead, bulb changed by HK, still dead.</div>
-        <label>Details · optional</label><div class="field ph">Anything the technician should know first</div>
+        <label>Asset · optional</label><input class="field ph" readonly placeholder="Pick from Room 0817's assets…">
+        <label>Summary</label><input class="field" readonly value="Guest says right-side bedside lamp is dead, bulb changed by HK, still dead.">
+        <label>Details · optional</label><input class="field ph" readonly placeholder="Anything the technician should know first">
       </div>
       <div>
         <label>Department</label><div class="field">Engineering (ENG) <span class="mono" style="float:right">from the catalogue item</span></div>
         <label>Priority</label><div class="field">P3 <span class="mono" style="float:right">catalogue default · you may override</span></div>
         <label>Due</label><div class="field">Today 02 Sep 15:40 <span class="mono" style="float:right">policy: P3 within 60 min</span></div>
-        <label>Assign to · on shift today</label><div class="field ph">AUTO — or pick: Arjun Menon · Deepak Rao · Team · Day shift</div>
-        <label>Schedule for later · optional</label><div class="field ph">Leave empty to raise now</div>
+        <label>Assign to · on shift today</label><input class="field ph" readonly placeholder="AUTO — or pick: Arjun Menon · Deepak Rao · Team · Day shift">
+        <label>Schedule for later · optional</label><input class="field ph" readonly placeholder="Leave empty to raise now">
         <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">Restricted · off (catalogue default for this item)</span></div>
         <div style="margin-top:20px"><span class="btn pri">Raise MRN-ENG-143</span><span class="btn">Cancel</span></div>
       </div>
@@ -471,8 +471,8 @@ ul.flows b{color:var(--text)}
       <span class="chip">Filter cleaned</span><span class="chip">Filter replaced</span><span class="chip on">Refrigerant topped up</span><span class="chip">Thermostat replaced</span><span class="chip">Compressor fault — escalate to vendor</span><span class="chip">No fault found</span><span class="chip">Other…</span>
     </div>
     <label>In your words · optional</label>
-    <div class="field">Suction 45 psi, charged to 68. Recommend leak test at next PPM.</div>
-    <label>Photo · optional</label><div class="field ph">Add a photo</div>
+    <input class="field" readonly value="Suction 45 psi, charged to 68. Recommend leak test at next PPM.">
+    <label>Photo · optional</label><input class="field ph" readonly placeholder="Add a photo">
     <div style="margin-top:14px"><span class="btn pri">Resolve</span><span class="btn">Back</span></div>
     <div class="mono" style="margin-top:12px">Guest-raised: the guest will be asked to rate this after it closes. Auto-close in 4 h unless reopened.</div>
   </div>
@@ -604,14 +604,14 @@ ul.flows b{color:var(--text)}
           <h3 style="margin:0 0 10px;font-size:13px">New item in <b>Air conditioning</b></h3>
           <div class="cols">
             <div>
-              <label>Name</label><div class="field">Water dripping from unit</div>
+              <label>Name</label><input class="field" readonly value="Water dripping from unit">
               <label>Aliases · one per line</label><div class="field">AC leaking<br>water from AC<br>ceiling wet under AC</div>
             </div>
             <div>
-              <label>Default priority</label><div class="field">P2</div>
-              <label>Due within</label><div class="field">60 min</div>
+              <label>Default priority</label><input class="field" readonly value="P2">
+              <label>Due within</label><input class="field" readonly value="60 min">
               <label>Restricted by default</label><div><span class="tog"><i></i></span><span class="mono">off</span></div>
-              <label style="display:block;margin-top:10px">Resolutions to start with</label><div class="field">Drain cleared · Drain pipe replaced · Condensate pump replaced</div>
+              <label style="display:block;margin-top:10px">Resolutions to start with</label><input class="field" readonly value="Drain cleared · Drain pipe replaced · Condensate pump replaced">
             </div>
           </div>
           <span class="btn pri">Create item</span><span class="btn">Cancel</span>

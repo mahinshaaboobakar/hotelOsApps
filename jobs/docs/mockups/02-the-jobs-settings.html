@@ -90,7 +90,7 @@ tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .btn.sm{padding:2px 8px;font-size:11px}
 .btn.danger{color:var(--color-bad);border-color:color-mix(in srgb,var(--color-bad) 45%,transparent)}
 .btn.danger.confirm{background:var(--color-bad);border-color:transparent;color:var(--color-ink-on-accent);font-weight:600}
-.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent)}
+.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
 .field.ph{color:var(--faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
 label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}
 .tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
@@ -352,20 +352,20 @@ ul.flows b{color:var(--text)}
     <div class="cols">
       <div class="card">
         <h3>Sample A · Engineering, one category</h3>
-        <label>Department</label><div class="field">Engineering ▾</div>
+        <label>Department</label><input class="field" readonly value="Engineering ▾">
         <label>Category · optional</label><div class="field">AC not working ▾ <span class="mono" style="float:right">6 items</span></div>
-        <label>Item · optional</label><div class="field ph">— all items of the category ▾</div>
-        <label>Name</label><div class="field">AC — guest in room</div>
-        <label>Start from</label><div class="field">Copy of "Engineering" (department) ▾</div>
+        <label>Item · optional</label><input class="field ph" readonly placeholder="— all items of the category ▾">
+        <label>Name</label><input class="field" readonly value="AC — guest in room">
+        <label>Start from</label><input class="field" readonly value="Copy of "Engineering" (department) ▾">
         <div class="mono">Applies to: every AC job at Marina Bay, unless the item has its own policy.</div>
       </div>
       <div class="card">
         <h3>Sample B · Housekeeping, one category</h3>
-        <label>Department</label><div class="field">Housekeeping ▾</div>
+        <label>Department</label><input class="field" readonly value="Housekeeping ▾">
         <label>Category · optional</label><div class="field">Bottle of water ▾ <span class="mono" style="float:right">2 items</span></div>
-        <label>Item · optional</label><div class="field ph">— all items of the category ▾</div>
-        <label>Name</label><div class="field">Water — 10 minutes</div>
-        <label>Start from</label><div class="field">Copy of "Housekeeping" (department) ▾</div>
+        <label>Item · optional</label><input class="field ph" readonly placeholder="— all items of the category ▾">
+        <label>Name</label><input class="field" readonly value="Water — 10 minutes">
+        <label>Start from</label><input class="field" readonly value="Copy of "Housekeeping" (department) ▾">
         <div class="mono">Applies to: Still water · Sparkling water — the two items of the category.</div>
       </div>
     </div>

@@ -98,7 +98,7 @@
   {
     "name": "frame-03-raise",
     "frame": "01-08.html",
-    "match": 0.17,
+    "match": 0.2,
     "runnerUp": 0.12,
     "paired": 6,
     "differs": 5,
@@ -110,7 +110,7 @@
   {
     "name": "frame-04-resolve",
     "frame": "01-09.html",
-    "match": 0.37,
+    "match": 0.38,
     "runnerUp": 0.1,
     "paired": 6,
     "differs": 6,
@@ -146,8 +146,8 @@
   {
     "name": "frame-07-catalogue",
     "frame": "01-12.html",
-    "match": 0.21,
-    "runnerUp": 0.12,
+    "match": 0.22,
+    "runnerUp": 0.13,
     "paired": 21,
     "differs": 5,
     "readings": 1188,
@@ -182,10 +182,10 @@
   {
     "name": "frame-08c-policy-flow",
     "frame": "02-07.html",
-    "match": 0.41,
+    "match": 0.36,
     "runnerUp": 0.22,
-    "paired": 35,
-    "differs": 22,
+    "paired": 27,
+    "differs": 14,
     "readings": 1008,
     "collapsedDrawn": 0,
     "collapsedBuilt": 0,
