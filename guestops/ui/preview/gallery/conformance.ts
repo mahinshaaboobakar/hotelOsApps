@@ -244,7 +244,28 @@ export const PART_A = {
     "**Seventeen frames, both sides swept in one pass, and the columns close on "
     + "each side exactly:** `drawn 929 = 715 paired + 7 refused + 207 drawn-only`, "
     + "and `built 1060 = 715 paired + 8 refused + 337 built-only`. Of the 715 "
-    + "paired, **634 identical and 81 differing**.",
+    + "paired, **660 identical and 55 differing**.",
+
+  moved:
+    "**APPS-Q45: 81 → 55, and the 26 that closed were three declarations.** These "
+    + "were classified *the drawing moves* in the previous run, and APPS-Q27 makes "
+    + "that a **RECORD** rather than a **DECISION** — the written standard already "
+    + "governs, so the edit records a ruling rather than making one. The drawing's "
+    + "base `.grow` was `margin-left:auto` where the build's is that plus "
+    + "`display:flex; gap:8px` (17 nodes); two bare `<b>` elements took the UA's "
+    + "700 where the build states 600 (3); and `.hsub` had the sub-heading's colour "
+    + "and size without its flex row (2). **Same key, same totals, same run shape "
+    + "both times** — the count fell for a stated reason rather than moving between "
+    + "two runs nobody can compare.",
+
+  notmoved:
+    "**Four were left, deliberately, and they are a markup difference rather than "
+    + "a style one.** `Walk-in` and `＋ New booking` measure `margin-bottom` 0 "
+    + "against the build's 6px on frames 10 and 11 — and the drawing already "
+    + "carries `.tabs .btn{margin-bottom:6px}`. The rule is there; those two "
+    + "controls simply are not inside `.tabs` in those frames. **Moving them would "
+    + "be retagging to make a divergence pair**, which `§8` forbids and which cost "
+    + "another stream a run. They stay open with their reason.",
 
   withdrawn:
     "**This certificate said `0 unpaired`, and that was false.** The figure came "

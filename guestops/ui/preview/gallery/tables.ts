@@ -91,6 +91,8 @@ export function widgets(captures: readonly { entry: string; html: string }[],
     <p class="lead">Part A — the pairing key, and what it was measured under</p>
     <p><b>PAIRING KEY</b> ${escaped(PART_A.key)}</p>
     <p>${rich(PART_A.counts)}</p>
+    <p>${rich(PART_A.moved)}</p>
+    <p>${rich(PART_A.notmoved)}</p>
     <p>${rich(PART_A.withdrawn)}</p>
     <p>${rich(PART_A.blind)}</p>
     <p>${rich(PART_A.aligned)}</p>

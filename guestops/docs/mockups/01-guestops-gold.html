@@ -111,8 +111,18 @@
   /* The page's own title row, inside the frame rather than in the bar. */
   .title{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
   .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
-  .hsub{color:var(--faint);font-size:12px;margin-top:2px}
-  .grow{margin-left:auto}
+  /* APPS-Q45 · RECORD. The build's sub-heading row is a flex line with a 7px
+     gap (chrome/styles/shell.ts); this drawing had the colour and the size and
+     not the layout, so its parts measured as one block. */
+  .hsub{color:var(--faint);font-size:12px;margin-top:2px;
+        display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  /* APPS-Q45 · RECORD. The build's base .grow is margin-left:auto with
+     display:flex and gap:8px (chrome/styles/shell.ts); this drawing carried the
+     flex only in the scoped .ban .grow below, so every other grow measured
+     block-with-no-gap against a flex row — 17 of the run's 81 differences, one
+     declaration. The scoped rule stays: it now repeats the base rather than
+     contradicting it, and deleting it is a separate edit nobody asked for. */
+  .grow{margin-left:auto;display:flex;gap:8px}
   /* One control, modified — docs/working/64 §2. This drawing used to carry four
      base classes (.btn2 .create .danger .mini) at three geometries, and the two
      sibling apps each invented a fourth; a second base class is a second
@@ -306,6 +316,12 @@
   .act .w{flex-direction:column;align-items:flex-start;gap:3px}
   .act .w span{color:var(--faint);font-size:11.5px}
   .act .tm{color:var(--faint);font-size:11.5px;flex-direction:column;align-items:flex-start;gap:1px}
+  /* APPS-Q45 · RECORD, the same cause two frames over: a bare <b> inside a
+     field and inside a night's date, each taking the UA's 700 where the build
+     states 600. */
+  .inp b{font-weight:600}
+  .ng .dt b{font-weight:600}
+
   /* APPS-Q31 F5. The date was a bare <b>, so it took the UA's bold — 700 — where
      this drawing's own emphasis is 600 everywhere it is stated (.app, .btn.pri).
      Not a wrong value so much as an unstated one: the browser chose it. */
