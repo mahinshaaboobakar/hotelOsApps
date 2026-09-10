@@ -309,7 +309,7 @@ The six problems of study §5.3 as six requirements. They are listed together
 because they compound: a single reservation can exercise all six.
 
 ### R12 · A source sends dates; a hotel operates on datetimes
-*(42b G-C11a)*
+*(42b G-C11a · study §5.3(a))*
 
 **Fact.** `arrivalDate` and `departureDate` carry no time. A usable timestamp
 exists only after combining the date with the **property's** configured
@@ -325,7 +325,7 @@ property configuration. A consumer that cannot tell them apart will treat an
 inferred 14:00 arrival as an observed one.
 
 ### R13 · Expected times stand in for actual times
-*(42b G-C11b)*
+*(42b G-C11b · study §5.3(b))*
 
 **Fact.** For a stay in house or departed, the timestamps available are
 `reservationExpectedArrivalTime` and `reservationExpectedDepartureTime` — the
@@ -340,7 +340,7 @@ is not pedantry: an arrival-time report built from expected times measures the
 reservation, not the guest, and the two differ by hours.
 
 ### R14 · Which clock to read depends on the status
-*(42b G-C11c)*
+*(42b G-C11c · study §5.3(c))*
 
 **Fact.** Four statuses, four different rules for the same two fields:
 
@@ -358,7 +358,7 @@ must let a connector express that without a consumer needing to know it. A
 consumer must never have to re-derive a time from a status.
 
 ### R15 · Wire formats are per call site, not per source
-*(42b G-C11d)*
+*(42b G-C11d · study §5.3(d))*
 
 **Fact.** Three formats inside one integration —
 `yyyy-MM-dd HH:mm:ss.S` (OHIP), `yyyy-MM-dd'T'HH:mm:ss` (on-site) and
@@ -375,7 +375,7 @@ fail loudly on an unparseable value rather than fall through to a guess — the
 sniffer returned `null` on failure and every caller carried on.
 
 ### R16 · The property time zone is mandatory and must never be defaulted
-*(42b G-C11e)*
+*(42b G-C11e · study §5.3(e))*
 
 **Fact.** A blank time zone silently became `Asia/Kolkata`: the three-argument
 conversion fell through to a two-argument overload with that zone hardcoded.
@@ -404,7 +404,7 @@ only an offset, that is a connector-level gap to be recorded and resolved
 against the property's configured zone — never accepted in its place.
 
 ### R17 · The business date is a distinct field, and its owner is unruled
-*(42b G-C11f, and 42b G-A4 → `CONN-Q6`)*
+*(42b G-C11f · study §5.3(f), and 42b G-A4 → `CONN-Q6`)*
 
 **Fact.** Every OHIP reservation carries `createBusinessDate` — the hotel's
 operating day, which rolls at night audit and is not the calendar date. The
