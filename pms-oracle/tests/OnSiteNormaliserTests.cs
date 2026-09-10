@@ -241,6 +241,65 @@ public sealed class OnSiteNormaliserTests
         Assert.Equal(new DateOnly(2026, 8, 31), waiting.JoinKey.ArrivalDate);
     }
 
+    /// <summary>
+    /// `CONN-Q25`. Pins the join key's comparison, because nothing else decides
+    /// it and the label in <c>OnSiteJoinKey</c> is one a reader may skip.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Exact by accident, in a neighbourhood where exactness is
+    /// deliberate.</b> Next door <c>StringComparer.Ordinal</c> is load-bearing —
+    /// <c>"Checked In"</c> and <c>"CHECKED IN"</c> are two halves with different
+    /// meanings (R6), and those vocabularies absorb the source's
+    /// case-instability by declaring every observed spelling rather than by
+    /// folding. The join key folds nothing either, and no document says whether
+    /// the agent's NAME casing is stable.
+    /// </para>
+    /// <para>
+    /// So this asserts the direction rather than the wisdom: two halves whose
+    /// surname differs only in case do not pair. An unmatched key expires as
+    /// <c>join_window_expired</c>, which is visible; a wrong join merges two
+    /// stays. <b>It fails safe, and a later change to
+    /// <c>OrdinalIgnoreCase</c> now fails a test that says why</b> instead of
+    /// passing quietly.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void a_surname_in_another_casing_is_another_key_so_the_halves_do_not_pair()
+    {
+        var contactHalf = Booking() with { Status = "Checked In" };
+        var roomHalf = Booking() with { Status = "CHECKED IN", Surname = "Rajan" };
+
+        var waitingContact = Assert.IsType<NormalisationOutcome.AwaitingJoin>(
+            Kochi().Normalise(contactHalf));
+        var waitingRoom = Assert.IsType<NormalisationOutcome.AwaitingJoin>(
+            Kochi().Normalise(roomHalf));
+
+        // Both are halves of a check-in for one guest on one day, and the Hub
+        // matches the key as an opaque string -- so these two never meet.
+        Assert.Equal(OnSiteMessagePart.ContactHalf, waitingContact.Part);
+        Assert.Equal(OnSiteMessagePart.RoomHalf, waitingRoom.Part);
+        Assert.NotEqual(waitingContact.JoinKey, waitingRoom.JoinKey);
+    }
+
+    /// <summary>
+    /// The other half of the same pin: surrounding whitespace IS absorbed, so
+    /// the exactness above is a decision about case and not about tidiness.
+    /// </summary>
+    [Fact]
+    public void surrounding_whitespace_is_trimmed_so_the_halves_still_pair()
+    {
+        var contactHalf = Booking() with { Status = "Checked In" };
+        var roomHalf = Booking() with { Status = "CHECKED IN", Surname = "  RAJAN  " };
+
+        var waitingContact = Assert.IsType<NormalisationOutcome.AwaitingJoin>(
+            Kochi().Normalise(contactHalf));
+        var waitingRoom = Assert.IsType<NormalisationOutcome.AwaitingJoin>(
+            Kochi().Normalise(roomHalf));
+
+        Assert.Equal(waitingContact.JoinKey, waitingRoom.JoinKey);
+    }
+
     [Fact]
     public void an_unknown_status_is_rejected_carrying_the_value()
     {
