@@ -64,6 +64,19 @@ public static class TeamsView
             teams = rows,
             on = on.ToString("ddd d MMM"),
             detail = open,
+
+            // **The departments a team could be formed in, which the screen had
+            // no way to ask for.** Forming a team needs a department code, and
+            // this read carried only the departments that already HAVE a team —
+            // so a property's first team in Housekeeping was unformable from
+            // the screen, and the sheet's picker drew a literal.
+            //
+            // Ordered by name rather than by code: the person reads the name,
+            // and `HK` sorting before `FO` is the code's order, not theirs.
+            departments = names
+                .OrderBy(entry => entry.Value, StringComparer.CurrentCultureIgnoreCase)
+                .Select(entry => new { code = entry.Key, name = entry.Value })
+                .ToArray(),
         };
     }
 

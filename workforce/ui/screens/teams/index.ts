@@ -92,7 +92,15 @@ export async function teams(
   main.replaceChildren(header(board, place, open), body);
 
   if (place.dialog !== null) {
-    const overlay = await overlays(place, open);
+    // `board` and `host` reach the overlays because a write needs both: the
+    // sheet sends through the same seam every read uses, and it checks the
+    // name against the property's own teams rather than against a literal.
+    //
+    // `done` is `close`, and that is the refresh: closing a dialog redraws the
+    // screen, and the redraw re-runs the read at the top of this function. A
+    // separate refresh call would be a second way to reach the same state.
+    const overlay = await overlays(host, board, place, open,
+      () => { place.close(); });
     if (overlay !== null) main.append(overlay);
   }
 }
@@ -100,15 +108,23 @@ export async function teams(
 /**
  * The dialogs this screen opens over itself.
  *
+ * @param host the bridge, for the sheets that write
+ * @param board the answer this screen drew, for the facts a sheet checks
  * @param place which one is open, and how to dismiss it
  * @param open the team the detail pane has, when it has one
+ * @param done called after a write lands, so the screen re-reads
  * @returns the overlay, or nothing
  */
 async function overlays(
-  place: TeamPlace, open: TeamDetail | null,
+  host: HostApi,
+  board: Teams,
+  place: TeamPlace,
+  open: TeamDetail | null,
+  done: () => void,
 ): Promise<HTMLElement | null> {
   if (place.dialog === "form") {
-    return (await import("./form")).formTeam(place.close);
+    return (await import("./form")).formTeam(
+      host, board.departments, board.teams, place.close, done);
   }
 
   if (place.dialog === "member") {

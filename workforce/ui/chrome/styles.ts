@@ -424,7 +424,23 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
       color:var(--color-ink-faint,#5a6172)}
 .inp{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
         border-radius:8px;padding:7px 11px;font-size:13px;
-        background:var(--color-surface,#0b0d14)}
+        background:var(--color-surface,#0b0d14);
+        /* The same UA resets a control needs anywhere - 64 section 2. A field
+           drawn as a div inherits the module's face for nothing; the moment it
+           becomes an input or a select it leaves for the UA's, and font:inherit
+           alone still leaves line-height at normal.
+           NO BACKTICKS in this file: every rule here lives inside a template
+           literal, so one in a comment ends the string and the error lands
+           thirty lines away on whatever word follows. */
+        color:var(--color-ink,#e8ebf4);font:inherit;line-height:inherit;
+        font-size:13px;width:100%;display:block}
+/* Section 10's placeholder state: the whole box, when nobody has supplied a
+   value. null and the empty string are different - null is *nobody has
+   supplied this*, and it reads faint rather than like a value somebody
+   chose. */
+.inp.ph{color:var(--color-ink-faint,#5a6172)}
+.inp::placeholder{color:var(--color-ink-faint,#5a6172)}
+.inp:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-1px}
 .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
 
 .sel{display:flex;gap:8px;align-items:center;justify-content:space-between;

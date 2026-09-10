@@ -80,6 +80,15 @@ export const recordedTeams: Teams = {
       },
     ],
   },
+  // The departments this property has, which is what the picker offers.
+  // **Three, not two**: `KIT` has teams and `FO` has one, and a property
+  // always has departments a team has not been formed in yet - which is
+  // exactly the case a list derived from `teams` cannot represent.
+  departments: [
+    { code: "FO", name: "Front Office" },
+    { code: "HK", name: "Housekeeping" },
+    { code: "KIT", name: "Kitchen" },
+  ],
 };
 
 /** Frame 7 — a property that has formed none. */
@@ -88,6 +97,19 @@ export const recordedNoTeams: Teams = {
   on: "Thu 4 Sep",
   teams: [],
   detail: null,
+  // A property with no teams still has departments, and this is the state that
+  // proves the list is not derived from the teams above: derived, it would be
+  // empty here, and Form a team would offer nothing on the one screen whose
+  // whole purpose is forming the first one.
+  // The departments this property has, which is what the picker offers.
+  // **Three, not two**: `KIT` has teams and `FO` has one, and a property
+  // always has departments a team has not been formed in yet - which is
+  // exactly the case a list derived from `teams` cannot represent.
+  departments: [
+    { code: "FO", name: "Front Office" },
+    { code: "HK", name: "Housekeeping" },
+    { code: "KIT", name: "Kitchen" },
+  ],
 };
 
 /**

@@ -121,6 +121,26 @@ export interface Teams {
    * had no state that could produce it.
    */
   detail: TeamDetail | null;
+
+  /**
+   * Every department a team could be formed in.
+   *
+   * **Not derived from `teams`, and that is why it is a field.** A list built
+   * from the teams that exist carries only the departments that already have
+   * one — so the property's first team in Housekeeping would be the one team
+   * the screen could not form, and it would look like a missing department
+   * rather than a missing list.
+   */
+  departments: readonly Department[];
+}
+
+/** A department, as the picker names it and a write sends it. */
+export interface Department {
+  /** The canon code — ADR 0119 — which is what the write carries. */
+  code: string;
+
+  /** What a person reads. */
+  name: string;
 }
 
 /** A membership a posting is holding open — what frame 6's panel lists. */

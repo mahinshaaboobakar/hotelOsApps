@@ -120,9 +120,9 @@ function grid(
 ): HTMLElement {
   const table = el("div", "pgrid");
 
-  table.append(el("div", "pcell ph", "Staff"));
+  table.append(el("div", "pcell hd", "Staff"));
   for (const day of week.days) {
-    table.append(el("div", "pcell ph", day));
+    table.append(el("div", "pcell hd", day));
   }
 
   // The MOD row shows TWO names on most days, because the duty crosses midnight

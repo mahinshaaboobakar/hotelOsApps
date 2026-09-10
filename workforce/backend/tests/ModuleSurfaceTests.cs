@@ -131,6 +131,38 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task The_teams_read_carries_every_department_a_team_could_be_formed_in()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        harness.Directory.WithDepartmentName("HK", "Housekeeping");
+        harness.Directory.WithDepartmentName("FO", "Front Office");
+        harness.Directory.WithDepartmentName("KIT", "Kitchen");
+
+        // One team, in one department. The other two have none.
+        await Form(harness, scope, "HK", "Morning Crew");
+
+        var answer = await harness.CallAsync(
+            TeamsView.List, scope, "teams", new { on = September.ToString("yyyy-MM-dd") });
+
+        var departments = answer.GetProperty("departments")
+            .EnumerateArray()
+            .Select(one => (one.GetProperty("code").GetString(),
+                            one.GetProperty("name").GetString()))
+            .ToList();
+
+        // **All three, and ordered by the name a person reads.** A list derived
+        // from the teams above would carry Housekeeping alone, so the first
+        // team in Front Office would be the one team the screen could not form
+        // — and the failure would look like a missing department rather than a
+        // missing list. `HK` before `FO` is the code's order, not the reader's.
+        Assert.Equal(
+            [("FO", "Front Office"), ("HK", "Housekeeping"), ("KIT", "Kitchen")],
+            departments);
+    }
+
+    [Fact]
     public async Task A_team_read_the_day_before_it_was_joined_has_nobody_in_it()
     {
         var harness = new ModuleHarness(fixture);

@@ -32,7 +32,17 @@ export const PRINTED_CSS = `
        border:1px solid #111;border-right:0;border-bottom:0}
 .pcell{border-right:1px solid #111;border-bottom:1px solid #111;
        padding:5px 7px;font-size:11px;text-align:center}
-.ph{font-weight:700;background:#eee}
+/* The printed table's header cell - .pcell.hd, and the name took two tries.
+   It was a BARE .ph, which 64 section 10 publishes as a field's placeholder
+   state, so it would have painted any placeholder appearing on this screen
+   bold on grey; the module's cross-screen guard caught that. The first fix
+   called it .phead, which is the PAGE header eleven lines above - a second
+   collision, inside one file, invisible to a guard that checks across
+   screens. The tell was in the check's own output, which printed
+   "phead collisions: 1" and was read past.
+   .hd is what a header row is called everywhere else here - .row.hd,
+   .tgrid.hd, .tnarrow.hd - and as a compound it cannot leak. */
+.pcell.hd{font-weight:700;background:#eee}
 .pwho{text-align:left}
 .pwho b{display:block;font-weight:700}
 .pwho s{text-decoration:none;display:block;font-size:10px;color:#444}
