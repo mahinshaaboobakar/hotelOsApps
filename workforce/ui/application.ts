@@ -48,6 +48,7 @@ import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
 import { schedule } from "./screens/schedule";
 import { SCHEDULE_CSS } from "./screens/schedule/styles";
+import { load } from "./roster";
 
 /** What a screen needs to draw itself. */
 interface Place {
@@ -179,14 +180,6 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
   },
 ];
 
-/** Who is signed in, drawn at the rail's foot. */
-const OPERATOR: Operator = {
-  name: "Priya Thomas",
-  department: "Front Office",
-  property: "Kochi Beach Resort",
-  role: "Head of Front Office",
-};
-
 /**
  * Rendered by the host into the module's own document.
  *
@@ -211,6 +204,16 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // `current` string made expressible.
   let current = "Rota";
   let view: string | null = null;
+
+  // **Who is signed in, and null until this application's own backend says.**
+  // It replaced `const OPERATOR = { name: "Priya Thomas", ... }`, which drew a
+  // person who does not work at the property and a hotel that may not be the
+  // hotel, on every screen, above every write those screens attribute.
+  //
+  // Null is the starting truth rather than a placeholder to be swapped out: the
+  // bar draws no operator line at all until there is one, so the first paint
+  // states what it knows instead of stating something it does not.
+  let operator: Operator | null = null;
   let tab = "Requests";
   let dialog = false;
   let which: string | null = null;
@@ -245,7 +248,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     const strip = switcher(section.views, screen.label,
       (label) => { show(current, label); });
 
-    frame.append(bar(sections(), current, OPERATOR, show));
+    frame.append(bar(sections(), current, operator, show));
     if (strip !== null) frame.append(strip);
     frame.append(main);
 
@@ -322,10 +325,47 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     show(current);
   }
 
+  /**
+   * Ask this application's backend who is signed in.
+   *
+   * **The module asks its own backend, because nothing else can answer.** The
+   * host hands a bundle its identity and its property environment; neither
+   * names a person, and `SHELL-Q52` refused to widen either. Design page 63 §3
+   * has the route — a bundle calls only its own backend, and everything else
+   * its backend does — and the backend validated the session token, so the
+   * person is a fact it already holds.
+   *
+   * **Under `roster.read`, not a tenth capability.** Reading your own name is
+   * not a distinct authority from reading the rota you are named on, and a
+   * permission an administrator had to approve separately in order for the app
+   * bar to draw would be a permission nobody could decline.
+   *
+   * **A failure draws nothing and says nothing.** This read is not the screen
+   * the person asked for: refusing to render Rota because the bar could not be
+   * captioned would answer a question nobody asked. Drawing no operator line is
+   * not a substitution — it is the same absence the backend reports for a
+   * service caller, and it is what the bar shows either way.
+   */
+  async function naming(): Promise<void> {
+    const read = await load<Operator>(host, "roster.read", "me");
+    if (!read.ok) return;
+
+    operator = read.value;
+
+    // Redrawn only if the module is still mounted. The answer can arrive after
+    // an unmount, and `show` returns on a null root — held here as well so
+    // the intent is visible rather than inferred from a guard one call away.
+    if (root !== null) show(current);
+  }
+
   return {
     mount(element) {
       root = element;
       show(current);
+
+      // Started, not awaited: the first paint does not wait on a round trip,
+      // and the bar names whoever it is when the answer lands.
+      void naming();
     },
 
     unmount() {

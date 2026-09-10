@@ -113,7 +113,7 @@ permissions:
   - id: roster.configure
     reason: "Configure the shift catalogue, the leave types and the overtime threshold"
   - id: roster.read
-    reason: "See the rota, the duty register, balances, attendance and the month's numbers"
+    reason: "See the rota, the duty register, balances, attendance, the month's numbers, and who is signed in"
 
 events:
   # ADR 0093's addendum makes `publishes` load-bearing: `PublishEvent` from an

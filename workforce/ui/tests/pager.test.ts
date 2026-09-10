@@ -25,7 +25,10 @@ import { recordedFirstRun, recordedPeople } from "../roster/people";
  * rejections beside a green run, which is the shape this repository already
  * has a rule about. Refusing by method is also what the platform does: an
  * ungranted or unimplemented call comes back as a `HostCallError`, and `load`
- * falls back to the recorded fixture, so every other screen draws its own.
+ * returns the failure rather than data — so every other screen draws its
+ * failure state, which is what a property would see. This paragraph said `load`
+ * "falls back to the recorded fixture" until `APPS-Q26(4)` removed that
+ * mechanism; the sentence outlived the behaviour it described by a day.
  */
 function host(answer: unknown): HostApi {
   return {

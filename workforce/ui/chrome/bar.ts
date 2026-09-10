@@ -41,16 +41,16 @@ export interface Section {
  * hotel*.
  */
 export interface Operator {
-  name: string;
+  name: string | null;
 
   /** Which department they are working in. */
-  department: string;
+  department: string | null;
 
   /** Which hotel. */
-  property: string;
+  property: string | null;
 
   /** Their role, which the bar has no room for and the rail used to show. */
-  role: string;
+  role: string | null;
 }
 
 /**
@@ -65,7 +65,7 @@ export interface Operator {
 export function bar(
   sections: readonly Section[],
   current: string,
-  operator: Operator,
+  operator: Operator | null,
   go: (label: string) => void,
 ): HTMLElement {
   const head = el("div", "head");
@@ -87,10 +87,46 @@ export function bar(
     head.append(tab);
   }
 
-  head.append(el("div", "who",
-    `${operator.name} · ${operator.department} · ${operator.property}`));
+  const named = who(operator);
+  if (named !== null) head.append(named);
 
   return head;
+}
+
+/**
+ * The operator line, or nothing at all.
+ *
+ * **Guarded on a non-empty string, not on `!== null`.** The clauses come from
+ * this application's own backend over JSON, where a field can arrive absent, as
+ * `null`, or as a string a person never typed anything into. `!== null` admits
+ * two of those three, and the bar then draws `undefined · undefined` or a
+ * line of separators with nothing between them — which reads as a rendering
+ * fault rather than as an absence, and sends whoever sees it looking for a bug
+ * in the bar.
+ *
+ * **An unknown clause is dropped, never filled in.** A person known by name at
+ * a hotel Master Data has not named draws `Anjali Menon · Front Office` and
+ * stops there. Nothing here substitutes "Unknown", the property's id, or the
+ * signed-in user's email: the bar attributes every write on these screens, so a
+ * name on it is a claim about who is at the desk.
+ *
+ * **All three unknown draws no element.** Not an empty one, and not a
+ * placeholder — the bar simply does not say who is looking at it, which is
+ * the honest answer when nobody could establish it.
+ *
+ * @param operator who is signed in, as far as the backend could say
+ * @returns the line, or null when there is nothing true to put on it
+ */
+function who(operator: Operator | null): HTMLElement | null {
+  if (operator === null) return null;
+
+  const clauses = [operator.name, operator.department, operator.property]
+    .map((clause) => (typeof clause === "string" ? clause.trim() : ""))
+    .filter((clause) => clause.length > 0);
+
+  if (clauses.length === 0) return null;
+
+  return el("div", "who", clauses.join(" · "));
 }
 
 /**

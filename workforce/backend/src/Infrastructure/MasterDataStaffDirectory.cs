@@ -118,6 +118,19 @@ public class MasterDataStaffDirectory(WorkforceDbContext database) : IStaffDirec
     }
 
     /// <inheritdoc />
+    public async Task<string?> FindPropertyNameAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+    {
+        var name = await database.MasterDataProperties
+            .AsNoTracking()
+            .Where(property => property.Id == propertyId)
+            .Select(property => property.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return string.IsNullOrWhiteSpace(name) ? null : name;
+    }
+
+    /// <inheritdoc />
     public async Task<string?> FindPropertyCountryAsync(
         Guid propertyId, CancellationToken cancellationToken)
     {

@@ -133,6 +133,15 @@ public interface IStaffDirectory
     /// </remarks>
     Task<string?> FindPropertyCountryAsync(Guid propertyId, CancellationToken cancellationToken);
 
+    /// <summary>What this property is called.</summary>
+    /// <remarks>
+    /// For the one line that names where the signed-in person is. Null when
+    /// Master Data holds no name for it, which the caller states rather than
+    /// filling in: a property drawn under a blank is better than one drawn
+    /// under a guess.
+    /// </remarks>
+    Task<string?> FindPropertyNameAsync(Guid propertyId, CancellationToken cancellationToken);
+
     /// <summary>The display names for a set of staff, for one answer.</summary>
     /// <param name="propertyId">Whose property is asking.</param>
     /// <param name="staffIds">The people an answer is about.</param>

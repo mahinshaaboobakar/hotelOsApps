@@ -35,6 +35,14 @@ public static class ReadViews
             ["month"] = ReportsView.Month,
             ["policy"] = PolicyView.Read,
 
+            // Who is signed in - under `roster.read`, the permission this
+            // module already holds, rather than a tenth capability. Reading
+            // your own name is not a distinct authority from reading the rota
+            // you are named on, and a permission an administrator must approve
+            // separately in order to see the app bar would be a permission
+            // nobody can decline.
+            ["me"] = MeView.Read,
+
             // The five dock widgets — SHELL-Q35. Same capability, same door,
             // because a widget asks this application the same kind of question
             // a screen does and is handed the same HostApi to ask it with.

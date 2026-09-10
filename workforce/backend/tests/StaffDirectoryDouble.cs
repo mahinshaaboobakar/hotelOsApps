@@ -115,6 +115,14 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
     /// </remarks>
     public string? Country { get; set; }
 
+    /// <summary>What this property is called, when a test says.</summary>
+    public string? PropertyName { get; set; }
+
+    /// <inheritdoc />
+    public Task<string?> FindPropertyNameAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+        => Task.FromResult(PropertyName);
+
     /// <inheritdoc />
     public Task<string?> FindPropertyCountryAsync(
         Guid propertyId, CancellationToken cancellationToken) =>

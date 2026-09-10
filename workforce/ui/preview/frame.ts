@@ -99,6 +99,22 @@ function host(granted: readonly string[]): HostApi {
       }
 
       const answers: Record<string, unknown> = {
+        // Who the gold frames draw at the bar's right — answered here
+        // because it is the host's answer, and the harness stands in for the
+        // host. The module holds no name of its own any more: it asks
+        // `roster.read/me`, and this is what a property's backend would say.
+        //
+        // Two of the three clauses are the frame's own text
+        // (`01-workforce-gold.html:426`); the property is the third clause the
+        // owner added on 2026-09-04, after those frames were drawn. A capture
+        // therefore shows one clause the frame does not, which is the drawing
+        // being behind the ruling rather than the capture being wrong.
+        me: {
+          name: "Priya Thomas",
+          department: "Front Office",
+          property: "Kochi Beach Resort",
+          role: "Head of Front Office",
+        },
         week,
         leave: recordedLeave,
         day: recordedDay,
