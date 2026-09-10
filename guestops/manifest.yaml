@@ -80,6 +80,21 @@ resources:
 #         request.manage      →  request.handle
 #         guestops.configure  →  desk.configure   no application name as a
 #                                                 resource
+# **Eight, and it was nine.** `guest.amend` was declared and reached by neither
+# door — no route in `ModuleSurface` and no `RequireAsync` in any application
+# service — so a property approving it granted a permission nothing in this
+# bundle can exercise. Measured through both doors rather than argued from one:
+# the four that look similar (`stay.assign`, `registration.capture`,
+# `reporting.file`, `request.handle`) ARE reachable, through the gRPC surface via
+# the services that authorize them, and removing those would make `AssignRoom`
+# answer 403 to a PMS connector.
+#
+# Its constant stays in `Permissions.cs` and is unused. That is safe rather than
+# untidy: the guard's other direction fails the moment anything reaches for it
+# without the manifest declaring it again.
+#
+# `tests/ManifestRoutingTests.cs` reads this block and both doors, and fails in
+# both directions.
 permissions:
   - id: reservation.read
     reason: "Show the day's arrivals, the stay page and the guest record"
@@ -89,8 +104,6 @@ permissions:
     reason: "Check in, check out, cancel, record a no-show, and correct any of them"
   - id: stay.assign
     reason: "Give a stay its room, and move it to another"
-  - id: guest.amend
-    reason: "Record who is staying, and how to reach them"
   - id: registration.capture
     reason: "Capture the registration card, its documents and its signature"
   - id: reporting.file
