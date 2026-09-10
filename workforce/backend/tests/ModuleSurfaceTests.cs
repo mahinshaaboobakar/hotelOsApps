@@ -139,6 +139,38 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task The_duty_register_says_who_could_hold_one()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        harness.Directory.WithDepartmentName("HK", "Housekeeping");
+        harness.Directory.WithDepartmentName("SEC", "Security");
+
+        await Post(harness, scope, "Deepa Menon", "HK", "Supervisor");
+        await Post(harness, scope, "Rahul Nair", "SEC", "Security officer");
+
+        var answer = await harness.CallAsync(
+            DutyView.Register, scope, "register",
+            new { week = September.ToString("yyyy-MM-dd") });
+
+        var offered = answer.GetProperty("candidates").EnumerateArray()
+            .Select(one => (one.GetProperty("name").GetString(),
+                            one.GetProperty("department").GetString()))
+            .ToList();
+
+        // **The property's own people.** The dialog listed three names written
+        // into the module — the same three strangers whoever the property
+        // employed — because this read answered no candidates at all.
+        //
+        // Both departments, because the command's rule is *any active staff
+        // member, from any department*: a picker narrowed to one would be a
+        // rule nobody wrote down.
+        Assert.Equal(2, offered.Count);
+        Assert.Contains(("Deepa Menon", "Housekeeping"), offered);
+        Assert.Contains(("Rahul Nair", "Security"), offered);
+    }
+
+    [Fact]
     public async Task The_ending_read_names_the_memberships_that_close_with_the_posting()
     {
         var harness = new ModuleHarness(fixture);

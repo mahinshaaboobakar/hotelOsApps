@@ -71,7 +71,13 @@ export async function duty(
 
   main.replaceChildren(header(register, open, host.property), body);
 
-  if (dialog) main.append(assignDuty(close));
+  // The day the register is showing — its first — and the people it says
+  // could hold a duty. Both come from the read; the dialog used to hold
+  // a literal date and three names.
+  if (dialog) {
+    main.append(assignDuty(
+      close, register.candidates, register.days[0], host.property));
+  }
 }
 
 function header(

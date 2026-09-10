@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Duties;
+using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Domain;
 
 namespace HotelOS.Workforce.Module.Views;
@@ -69,6 +70,16 @@ public static class DutyView
             now = Standing(holder, names),
             next = Standing(next, names),
             duties = Bands(week, monday, names),
+
+            // **Who could hold it.** The dialog listed three people written
+            // into the module — Anjali Menon, Rahul Nair, Vishnu Das, with
+            // their roles and department codes — so a property saw the same
+            // three strangers whoever it employed.
+            //
+            // Every active posting, because that is the rule the command
+            // states: *any active staff member, from any department*. Nothing
+            // narrower is invented here, and nothing narrower is written down.
+            candidates = await Candidates(call, cancellationToken),
         };
     }
 
@@ -81,6 +92,43 @@ public static class DutyView
             "withdraw" => Withdraw(call, cancellationToken),
             _ => throw new InvalidRequestException(call.Method + " is not a duty method"),
         };
+
+    /// <summary>Everybody who could hold a duty, as the picker lists them.</summary>
+    /// <remarks>
+    /// Ordered by name for the reader’s eye — no, ordered by staff id, because
+    /// the ORDER a person reads is the module’s and the locale is on its side
+    /// of the bridge. Same division as the department picker.
+    /// </remarks>
+    private static async Task<object[]> Candidates(
+        ModuleCall call, CancellationToken cancellationToken)
+    {
+        var postings = await call.Service<PostingService>().ListAsync(
+            call.Scope, new ListPostingsQuery(), cancellationToken);
+
+        var directory = call.Service<IStaffDirectory>();
+
+        var people = postings.Select(one => one.StaffId).Distinct().ToList();
+
+        var names = await directory.FindNamesAsync(
+            call.Scope.PropertyId, people, cancellationToken);
+
+        var departments = await directory.FindDepartmentNamesAsync(
+            call.Scope.PropertyId, cancellationToken);
+
+        return [.. postings
+            .GroupBy(one => one.StaffId)
+            .Select(group => group.OrderByDescending(one => one.IsPrimary).First())
+            .OrderBy(one => one.StaffId)
+            .Select(one => new
+            {
+                staffId = one.StaffId,
+                name = names.TryGetValue(one.StaffId, out var found) ? found : null,
+                role = one.JobRole,
+                department = departments.TryGetValue(one.DepartmentCode, out var known)
+                    ? known
+                    : one.DepartmentCode,
+            })];
+    }
 
     private static async Task<object?> Assign(ModuleCall call, CancellationToken cancellationToken)
     {

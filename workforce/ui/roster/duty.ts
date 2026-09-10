@@ -43,6 +43,19 @@ export interface Holder {
   to: string;
 }
 
+/** Somebody the duty picker offers. */
+export interface DutyCandidate {
+  staffId: string;
+
+  /** What a name badge shows, or null when Master Data did not answer. */
+  name: string | null;
+
+  role: string;
+
+  /** What a person reads, not the canon code. */
+  department: string;
+}
+
 export interface Register {
   /**
    * The seven days of the week being viewed, as the wire carries them.
@@ -61,6 +74,18 @@ export interface Register {
   next: Holder | null;
 
   duties: readonly Duty[];
+  /**
+   * Everybody who could hold a duty.
+   *
+   * **The dialog listed three people written into the module** - Anjali Menon,
+   * Rahul Nair, Vishnu Das, with their roles and department codes - so a
+   * property saw the same three strangers whoever it employed.
+   *
+   * Every active posting, which is the rule the command states: *any active
+   * staff member, from any department*.
+   */
+  candidates: readonly DutyCandidate[];
+
 }
 
 /** Both bands of one day, as the frame draws them. */
@@ -98,6 +123,14 @@ function pair(day: number, dayName: string, nightName: string | null): readonly 
 export const recordedRegister: Register = {
   days: ["2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27",
          "2026-08-28", "2026-08-29", "2026-08-30"],
+
+  // The three the dialog used to hold as literals, now arriving as an answer
+  // like every other row. Ids because the write carries an id.
+  candidates: [
+    { staffId: "s-am", name: "Anjali Menon", role: "Receptionist", department: "Front Office" },
+    { staffId: "s-rn", name: "Rahul Nair", role: "Security officer", department: "Security" },
+    { staffId: "s-vd", name: "Vishnu Das", role: "Night auditor", department: "Front Office" },
+  ],
 
   now: { who: "Anjali Menon", from: iso(4, 20), to: iso(5, 8) },
   next: { who: "Vishnu Das", from: iso(5, 8), to: iso(5, 20) },
