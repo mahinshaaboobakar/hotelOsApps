@@ -131,4 +131,47 @@ public sealed class CapabilityTests
             Assert.Contains(FactKind.RoomState, c.Produces);
         });
     }
+
+    /// <summary>
+    /// ADR 0150 — there is no Hub-wide TTL, so every integration says what
+    /// retires its source facts. <b>Asserted over <c>All</c> rather than over
+    /// three named integrations</b>: a fourth added later is covered the day it
+    /// is written, and the failure it produces is the question being asked
+    /// rather than a test nobody updated.
+    /// </summary>
+    [Fact]
+    public void every_integration_declares_what_retires_its_source_facts()
+    {
+        Assert.All(PmsOracleCapabilities.All, c =>
+            Assert.True(Enum.IsDefined(c.Freshness)));
+    }
+
+    /// <summary>
+    /// OHIP's guarantee object carries a code, three flags, two offsets and a
+    /// penalty basis — and no expiry and no validity window
+    /// (<c>OracleCloudReservationGuarantees.java:13-27</c>, <c>:50-52</c>,
+    /// <c>:75-79</c>, <c>:85-92</c>). So ADR 0150's first two rules do not
+    /// apply and the third does, which is what this declares.
+    /// </summary>
+    [Fact]
+    public void the_cloud_flavour_declares_its_own_maximum_because_ohip_states_none()
+    {
+        Assert.Equal(
+            SourceFreshness.IntegrationDeclaresMaximum,
+            PmsOracleCapabilities.Cloud.Freshness);
+    }
+
+    /// <summary>
+    /// <b>Stated rather than left unset.</b> Both on-site flavours produce
+    /// observations superseded by the next message and neither sends a
+    /// guarantee at all, so nothing here retires — which is a different answer
+    /// from *nobody has declared a contract*, and ADR 0150 makes the second a
+    /// gap to report.
+    /// </summary>
+    [Fact]
+    public void the_on_site_flavours_declare_that_nothing_retires()
+    {
+        Assert.Equal(SourceFreshness.NoRetirableFact, PmsOracleCapabilities.OnPremise.Freshness);
+        Assert.Equal(SourceFreshness.NoRetirableFact, PmsOracleCapabilities.Web.Freshness);
+    }
 }

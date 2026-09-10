@@ -146,6 +146,19 @@ public sealed class OnSiteNormaliser
             fact.Guests.Add(guest);
         }
 
+        // **`commercial_terms` is permanently absent here, and the SOURCE is
+        // why** — R18, and it is stated rather than left to be inferred. The
+        // study's capability table records the guarantee, deposit and
+        // cancellation policy as `fetchGuarantee` on the cloud flavour and
+        // **absent on both on-site flavours** (`01-…md:186`): the agent does
+        // not send one and there is no endpoint here to ask.
+        //
+        // A reader that simply never populated the field would say nothing at
+        // all. *Absent because the vendor does not send it* is a fact about the
+        // vendor with no remedy; *absent because nothing fetched it* is a
+        // defect with one — and on a screen they are the same silence. Nothing
+        // in this connector could tell them apart afterwards, so the one that
+        // is permanent is written down where the mapping happens.
         var amount = AmountReading.Read(push.Amount, _settings.Currency, _settings.AmountTaxBasis);
         if (amount is not null)
         {

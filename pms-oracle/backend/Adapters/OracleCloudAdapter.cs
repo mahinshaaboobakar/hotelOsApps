@@ -1,8 +1,10 @@
 using System.Text.Json;
 using HotelOS.Connector;
+using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Authentication;
 using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
+using PmsOracle.Vocabularies;
 
 namespace PmsOracle.Adapters;
 
@@ -35,6 +37,7 @@ namespace PmsOracle.Adapters;
 public sealed class OracleCloudAdapter(
     IntegrationSettings settings,
     IOhipQueue queue,
+    IOhipGuarantees guarantees,
     HttpClient http)
     : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
@@ -43,6 +46,15 @@ public sealed class OracleCloudAdapter(
 
     /// <summary>A housekeeping room record as OHIP returns it.</summary>
     public const string HousekeepingPayload = "ohip-housekeeping-room";
+
+    /// <summary>A guarantee policy, fetched for a property and an arrival date.</summary>
+    /// <remarks>
+    /// <b>Its own kind because it is its own fact</b> — ADR 0147 rules it a
+    /// Hub-held source fact rather than a field on a reservation, since one
+    /// policy serves every reservation arriving on that date. It carries the
+    /// key the source does not echo; see <see cref="GuaranteeRecord"/>.
+    /// </remarks>
+    public const string GuaranteePayload = "ohip-guarantee";
 
     /// <summary>A business-event notification, stored before anything is fetched.</summary>
     /// <remarks>
@@ -81,9 +93,76 @@ public sealed class OracleCloudAdapter(
         OhipPollingSchedule.Read(configuration).Wait(settings.Clock, now);
 
     /// <inheritdoc />
+    /// <remarks>
+    /// <para>
+    /// <b>The queue, then the guarantees the queue asked for</b> — R18 and
+    /// ADR 0147. A guarantee policy is fetched per property and arrival date
+    /// and only for reservations still in <c>Reserved</c> (study <c>:664</c>,
+    /// <c>cloud:112-113</c>), so the arrival dates come from what was just
+    /// drained. <b>Once per distinct date, never once per reservation</b>: one
+    /// policy serves them all, which is the same fact the reference had right
+    /// and keyed wrong.
+    /// </para>
+    /// <para>
+    /// <b>A guarantee failure must never discard what the queue already gave
+    /// up.</b> The read is the delete (R22), so an exception thrown after the
+    /// drain and before the return loses a hotel's changes permanently — to
+    /// fetch a policy. The catch is deliberately broad for that reason, and it
+    /// is a test rather than a sentence: a guarantee source that throws still
+    /// leaves every drained payload returned.
+    /// </para>
+    /// </remarks>
     public async Task<IReadOnlyList<PolledPayload>> DrainAsync(
-        CancellationToken cancellationToken) =>
-        await queue.DrainAsync(settings, cancellationToken);
+        CancellationToken cancellationToken)
+    {
+        var drained = await queue.DrainAsync(settings, cancellationToken);
+
+        try
+        {
+            var fetched = await guarantees.FetchAsync(
+                settings, AwaitingGuarantee(drained), cancellationToken);
+
+            return [.. drained, .. fetched.Select(Envelope)];
+        }
+        catch (Exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            return drained;
+        }
+    }
+
+    /// <summary>The arrival dates the drained reservations need a policy for.</summary>
+    /// <param name="drained">What the queue just gave up.</param>
+    /// <returns>Each distinct arrival date, once.</returns>
+    /// <remarks>
+    /// <b>Still <c>Reserved</c> only</b>, which is the source's own rule
+    /// (<c>cloud:112-113</c>) and not a saving invented here: a guarantee is
+    /// what a booking is held on, and a stay already in house or checked out is
+    /// not held on anything. Read through <see cref="CloudStayStatus"/> rather
+    /// than compared to a literal, so a value OHIP gains does not silently
+    /// become <i>not reserved</i>.
+    /// </remarks>
+    private static IReadOnlyCollection<string> AwaitingGuarantee(
+        IReadOnlyList<PolledPayload> drained) =>
+        drained
+            .Where(payload => payload.PayloadKind == ReservationPayload)
+            .Select(payload => Read<OhipReservation>(payload.Payload))
+            .Where(reservation =>
+                reservation?.ReservationStatus is { } status
+                && CloudStayStatus.Read(status).TryGet(out var lifecycle)
+                && lifecycle is StayLifecycle.Booked)
+            .Select(reservation => reservation!.RoomStay?.ArrivalDate)
+            .Where(arrival => !string.IsNullOrWhiteSpace(arrival))
+            .Select(arrival => arrival!)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+    /// <summary>Put a fetched policy on the wire the Hub reads.</summary>
+    /// <param name="record">The identified policy.</param>
+    /// <returns>One drained payload.</returns>
+    private PolledPayload Envelope(GuaranteeRecord record) =>
+        new(Guid.Parse(settings.PropertyId),
+            JsonSerializer.SerializeToUtf8Bytes(record, Json),
+            GuaranteePayload);
 
     /// <inheritdoc />
     /// <remarks>
@@ -134,7 +213,7 @@ public sealed class OracleCloudAdapter(
     public PipelineResult Validate(byte[] payload, string payloadKind)
     {
         if (payloadKind is not (ReservationPayload or HousekeepingPayload
-            or NotificationPayload))
+            or NotificationPayload or GuaranteePayload))
         {
             return PipelineResult.Reject(
                 "unknown message kind", "payload_kind", payloadKind);
@@ -162,6 +241,19 @@ public sealed class OracleCloudAdapter(
     /// </remarks>
     public string DedupeKey(byte[] payload, string payloadKind)
     {
+        if (payloadKind == GuaranteePayload)
+        {
+            // **The source fact's own identity, not a digest of it** — ADR 0147
+            // keys a guarantee at property plus arrival date plus integration.
+            // A digest would make two fetches of an unchanged policy two facts,
+            // and a policy the property edited a third, with nothing saying
+            // which is current.
+            var record = Read<GuaranteeRecord>(payload);
+            return record is null
+                ? $"{payloadKind}:{Guid.CreateVersion7()}"
+                : $"{payloadKind}:{record.Key()}";
+        }
+
         if (payloadKind == NotificationPayload)
         {
             var notification = Read<BusinessEventNotification>(payload);
@@ -187,6 +279,21 @@ public sealed class OracleCloudAdapter(
 
         ReservationPayload => OutcomeMapping.ToPayload(
             new CloudNormaliser(settings).Normalise(Read<OhipReservation>(payload)!)),
+
+        // **A guarantee produces no fact here, and this is not the
+        // notification's reason.** A notification is provenance; a guarantee is
+        // a source fact in its own right — ADR 0147 puts its durability and
+        // keyed lookup with the Hub, and has ENRICHMENT resolve a reservation
+        // against it. `NormalisedPayload` carries exactly `RoomStayFact` and
+        // `RoomStateFact`, so there is no shape here to return it in, and
+        // `CommercialTermsReading` is the reader enrichment will use.
+        //
+        // Deferring rather than rejecting: nothing is wrong with the payload,
+        // and it is stored and deduplicated on the strength of `DedupeKey`
+        // above. Two arms rather than one, because folding them would give one
+        // sentence to two different reasons.
+        GuaranteePayload => NormalisedPayload.Nothing(PipelineResult.Defer(
+            "a guarantee policy is a Hub-held source fact, applied at enrichment")),
 
         // A notification is provenance, not a fact. It is stored, it is
         // deduplicated, and it produces nothing on its own — the fetch it
@@ -218,4 +325,35 @@ public interface IOhipQueue
     /// <returns>What was taken — and it has already left OHIP.</returns>
     Task<IReadOnlyList<PolledPayload>> DrainAsync(
         IntegrationSettings settings, CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// OHIP's guarantee endpoint, as this connector reaches it.
+/// </summary>
+/// <remarks>
+/// <b>A seam beside <see cref="IOhipQueue"/>, and owed for the same reason</b>
+/// — the per-property token read from the Token Vault is unimplemented
+/// (<c>HUB-Q6</c>). What is finished above this line is the identification, the
+/// keying, the once-per-date rule and the reading; only the socket is owed.
+/// </remarks>
+public interface IOhipGuarantees
+{
+    /// <summary>Fetch the policy for each arrival date.</summary>
+    /// <param name="settings">Which integration and property to fetch for.</param>
+    /// <param name="arrivalDates">
+    /// Each distinct arrival date, exactly as OHIP stated it on the
+    /// reservations that need a policy.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>What was fetched, identified.</returns>
+    /// <remarks>
+    /// <b>Dates in, records out, and the caller has already made them
+    /// distinct.</b> A method taking one date would be called in a loop the
+    /// caller could not describe, and the reference's defect is what happens
+    /// when the one-to-many shape is lost between the query and the answer.
+    /// </remarks>
+    Task<IReadOnlyList<GuaranteeRecord>> FetchAsync(
+        IntegrationSettings settings,
+        IReadOnlyCollection<string> arrivalDates,
+        CancellationToken cancellationToken);
 }

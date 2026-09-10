@@ -408,6 +408,36 @@ declarations.
 > Operations Center and unreplayable. The reference's authors were not careless
 > — they had no platform to put this in.
 
+**Built since, and the guarantee cache is the worked case** — R18, ADR 0147,
+ADR 0150. The connector now fetches the guarantee policy during its drain and
+hands the Hub an identified source fact: `GuaranteeRecord` carries the
+**integration, the property code and the arrival date it queried by**, which is
+exactly the segment the reference's key omitted. There is no cache here at all —
+ADR 0147 puts durability, deduplication and keyed lookup with the Hub, *"rather
+than turning every connector into a mini-database"* — and one policy is fetched
+**per distinct arrival date**, never per reservation, which is the one-to-many
+shape the reference lost between its query and its answer.
+
+**The hour it cached for is not reproduced either.** ADR 0150 rules that
+freshness is the source's: explicit expiry, then a validity window, then the
+integration's declared maximum. **OHIP supplies neither of the first two**, so
+`oracle-cloud` declares `SourceFreshness.IntegrationDeclaresMaximum` and the
+maximum itself arrives as per-integration configuration — the same pending home
+as `AmountTaxBasis`. It is deliberately **not a number chosen in code**: the
+study cites the reference's *key* as the defect and is silent on its duration,
+so the hour is not evidence for a value, and ADR 0150 makes an undeclared
+maximum a gap to report rather than a default to choose.
+
+**One thing the platform cannot yet express, reported rather than worked
+around.** A guarantee is not a `RoomStayFact` or a `RoomStateFact`, which are
+the only two `NormalisedPayload` carries, and `InboundPipeline.CapabilityOf`
+maps a payload to `bookings` or `room_state` and to nothing else. So the
+`integrations:` block is unchanged and correct: **declaring a capability the Hub
+cannot observe arriving would defeat R27's silence-is-visible**. The payload is
+drained, validated and deduplicated on its own key, and `Normalise` defers it
+with its own sentence — the fact is stored and awaits the Hub-side keyed store
+and the enrichment step, which is new surface.
+
 ### 2.9 · Two more, from the study
 
 | | There | Here | Grade |

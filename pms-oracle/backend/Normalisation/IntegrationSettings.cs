@@ -24,7 +24,34 @@ namespace PmsOracle.Normalisation;
 /// <param name="AmountTaxBasis">
 /// Whether this source's amounts include tax.
 /// </param>
+/// <param name="GuaranteeMaximumFreshness">
+/// How long a fetched guarantee policy may be trusted as current enrichment
+/// input — ADR 0150's third rule, declared for this property.
+/// <c>null</c> means nobody has declared one.
+/// </param>
 /// <remarks>
+/// <para>
+/// <b><see cref="GuaranteeMaximumFreshness"/> is nullable, and the null is a
+/// value rather than a default.</b> ADR 0150 puts the maximum on the
+/// integration precisely because a central number would be a claim about every
+/// source made by something that has read none — and it says the <i>absence</i>
+/// of a declared contract is a gap to report, never a default to choose. So
+/// there is no fallback here: a property that has not declared one produces a
+/// guarantee fact the Hub cannot evaluate, and the connector says so.
+/// </para>
+/// <para>
+/// <b>Named for the guarantee rather than for source facts in general</b>,
+/// because the guarantee is the only fact this connector supplies that retires
+/// — room-stays and room-states are observations superseded by the next
+/// message. A general name would state a policy for facts this package does not
+/// produce.
+/// </para>
+/// <para>
+/// <b>Not a number chosen here.</b> How long a property's cancellation policy
+/// stays true is a fact about that property's operations, not about OHIP; the
+/// reference's one-hour cache had no stated basis and the study cites its
+/// <i>key</i> as the defect, so the hour is not evidence for a value.
+/// </para>
 /// <para>
 /// <b><see cref="AmountTaxBasis"/> has no home yet, and this is the flag.</b>
 /// It is per-integration configuration — whether a source means net or gross is
@@ -40,6 +67,10 @@ namespace PmsOracle.Normalisation;
 /// and is named as pending, which is honest where inventing a home would not
 /// be. Nothing else about this type changes when the home exists.
 /// </para>
+/// <para>
+/// The freshness maximum shares that home and that pending state, which is why
+/// it arrives the same way.
+/// </para>
 /// </remarks>
 public sealed record IntegrationSettings(
     string IntegrationId,
@@ -47,4 +78,5 @@ public sealed record IntegrationSettings(
     string PropertyCode,
     PropertyClock Clock,
     string Currency,
-    TaxBasis AmountTaxBasis);
+    TaxBasis AmountTaxBasis,
+    TimeSpan? GuaranteeMaximumFreshness);

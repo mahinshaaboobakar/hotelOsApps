@@ -5,6 +5,7 @@ using HotelOS.Contracts.Integration.V1;
 
 using PmsOracle.Adapters;
 using PmsOracle.Authentication;
+using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
 using Xunit;
@@ -31,8 +32,10 @@ public sealed class ConnectionTestTests
                 PropertyCode: "KOCHI01",
                 Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
                 Currency: "INR",
-                AmountTaxBasis: TaxBasis.Net),
+                AmountTaxBasis: TaxBasis.Net,
+                GuaranteeMaximumFreshness: null),
             new NeverDrains(),
+            new NeverFetches(),
             new HttpClient(new Answers(answers)) { Timeout = TimeSpan.FromSeconds(5) });
 
     private static Dictionary<string, string> Complete() => new()
@@ -144,7 +147,7 @@ public sealed class ConnectionTestTests
         var handler = new Answers(HttpStatusCode.OK);
 
         var adapter = new OracleCloudAdapter(
-            Settings(), new NeverDrains(), new HttpClient(handler));
+            Settings(), new NeverDrains(), new NeverFetches(), new HttpClient(handler));
 
         var found = await adapter.TestAsync(Complete(), Only("application-key"), default);
 
@@ -172,7 +175,8 @@ public sealed class ConnectionTestTests
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
             Currency: "INR",
-            AmountTaxBasis: TaxBasis.Net);
+            AmountTaxBasis: TaxBasis.Net,
+            GuaranteeMaximumFreshness: null);
 
     /// <summary>A tenancy that answers what the test says, and counts asks.</summary>
     /// <remarks>
@@ -204,5 +208,22 @@ public sealed class ConnectionTestTests
             throw new InvalidOperationException(
                 "a connection test must not drain the queue: the queue is emptied "
                 + "by reading, so testing by draining would discard a hotel's changes");
+    }
+
+    /// <summary>A guarantee source a connection test must not reach.</summary>
+    /// <remarks>
+    /// Same reason as <see cref="NeverDrains"/>, one endpoint over: a
+    /// connection test proves the credential set, and fetching policies to do
+    /// it would spend a rate limit answering a question the token request has
+    /// already answered.
+    /// </remarks>
+    private sealed class NeverFetches : IOhipGuarantees
+    {
+        public Task<IReadOnlyList<GuaranteeRecord>> FetchAsync(
+            IntegrationSettings settings,
+            IReadOnlyCollection<string> arrivalDates,
+            CancellationToken cancellationToken) =>
+            throw new InvalidOperationException(
+                "a connection test must not fetch guarantees");
     }
 }

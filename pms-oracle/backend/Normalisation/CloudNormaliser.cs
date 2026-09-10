@@ -98,6 +98,18 @@ public sealed class CloudNormaliser
 
         fact.Guests.Add(BuildParty(reservation.ReservationGuests));
 
+        // **`commercial_terms` is absent here too, and for the opposite
+        // reason** — the guarantee exists for this flavour and is not part of
+        // this message. It is fetched per property and arrival date
+        // (`OracleCloudGuaranteeServiceImpl.java:58-59`), so one policy serves
+        // every reservation arriving that day, and ADR 0147 rules it a
+        // Hub-held source fact that ENRICHMENT applies rather than a field a
+        // reservation normaliser could fill.
+        //
+        // Written here because the two absences are indistinguishable on the
+        // wire and have opposite remedies: on-site is permanent (see
+        // `OnSiteNormaliser`), and this one ends when the Hub-side keyed store
+        // exists. `CommercialTermsReading` is the reader that will fill it.
         var amount = ReadAmount(stay.Total);
         if (amount is not null)
         {

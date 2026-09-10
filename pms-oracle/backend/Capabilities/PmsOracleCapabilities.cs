@@ -38,7 +38,14 @@ public static class PmsOracleCapabilities
         // Observed, not closed: OHIP names its own kinds and the values are not
         // yet known, so the connector passes them through and this records what
         // has been seen. Vendor documentation or a live call settles the set.
-        IdentifierKinds: [RoomStateNormaliser.RoomNumberKind]);
+        IdentifierKinds: [RoomStateNormaliser.RoomNumberKind],
+
+        // ADR 0150's third rule, and OHIP is why the ADR has one. The guarantee
+        // policy carries no expiry and no validity window, so nothing in the
+        // source says when it stops being true — the maximum is this
+        // integration's, and it arrives as configuration rather than as a
+        // number chosen here.
+        Freshness: SourceFreshness.IntegrationDeclaresMaximum);
 
     /// <summary>The on-site agent integration — the PMS posts to us.</summary>
     public static IntegrationCapability OnPremise { get; } = OnSite("oracle-onpremise");
@@ -62,7 +69,14 @@ public static class PmsOracleCapabilities
         [
             OnSiteNormaliser.ReservationNumberKind,
             RoomStateNormaliser.RoomNumberKind,
-        ]);
+        ],
+
+        // Nothing here retires. Both on-site flavours produce room-stays and
+        // room-states — observations superseded by the next message — and
+        // neither sends a guarantee policy at all. Stated rather than left
+        // unset: *no such fact* and *nobody has declared a contract* are
+        // different answers, and a missing declaration is a gap to report.
+        Freshness: SourceFreshness.NoRetirableFact);
 
     private static IReadOnlyCollection<string> Combined(
         params IReadOnlyCollection<string>[] vocabularies) =>

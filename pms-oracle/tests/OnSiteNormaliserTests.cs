@@ -19,7 +19,12 @@ public sealed class OnSiteNormaliserTests
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
             Currency: "INR",
-            AmountTaxBasis: basis));
+            AmountTaxBasis: basis,
+
+            // Nobody has declared a maximum — ADR 0150. On-site produces no
+            // retirable fact at all, so the value is beside the point here and
+            // stating `null` is still the honest answer.
+            GuaranteeMaximumFreshness: null));
 
     private static OnSitePush Booking() => new()
     {

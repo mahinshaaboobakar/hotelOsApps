@@ -19,7 +19,13 @@ public sealed class CloudNormaliserTests
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
             Currency: "INR",
             // OHIP's field is literally `amountBeforeTax`.
-            AmountTaxBasis: TaxBasis.Net));
+            AmountTaxBasis: TaxBasis.Net,
+
+            // Nobody has declared a maximum — ADR 0150. `null` rather than a
+            // value, because a fixture that supplied one would make every test
+            // in this file a test of the declared case, and the undeclared one
+            // is what a property has before anybody configures it.
+            GuaranteeMaximumFreshness: null));
 
     private static OhipReservation Reservation(string status) => new(
         ReservationIdList: [new OhipIdentifier("R-88214", "Reservation")],
