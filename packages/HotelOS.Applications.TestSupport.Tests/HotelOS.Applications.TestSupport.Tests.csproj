@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The shared test-support project's own tests — ADR 0025, which makes no
+    exception for a project that is itself test support.
+
+    **Why this exists before its consumers adopt it.** ADR 0157 lands the shared
+    project once, then Jobs and Workforce adopt it. An adoption that silently
+    changed a role name or reordered a grant would be found at a property rather
+    than here, so the names and the order are asserted now, while there is still
+    nothing depending on them.
+
+    **No database.** Every assertion here is about what the convention *says* —
+    which ADR 0054 calls a rule, not a connection. The statements are executed
+    against a cluster by each application's own fixture, and whether a grant
+    works is that suite's question.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Applications.TestSupport.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference
+      Include="..\HotelOS.Applications.TestSupport\HotelOS.Applications.TestSupport.csproj" />
+  </ItemGroup>
+
+</Project>

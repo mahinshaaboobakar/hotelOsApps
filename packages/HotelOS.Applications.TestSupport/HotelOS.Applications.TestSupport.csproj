@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Test-support shared by the applications in this repository — ADR 0157.
+
+    **Ownership, not location, is the boundary.** Platform-owned test
+    infrastructure stays in `HotelOS.Platform.TestSupport`: the scratch-database
+    lifecycle is its responsibility and is not reimplemented here. What lives
+    here is the other half — the **application-owned convention** by which an
+    installed application's roles and schema grants come to exist, which every
+    application needs identically and none of them owns alone.
+
+        HotelOS.Platform.TestSupport   scratch-database lifecycle
+        this project                   application role provisioning
+
+    **Test-only, and never a runtime dependency.** `IsPackable` is false and no
+    application's `src` project may reference it; an application ships a signed
+    `.hopkg` and binds to the platform at that one point (README, ADR 0122).
+    That constraint is what keeps a shared test project compatible with an
+    application being *fully self-contained* — it shares how the suites are
+    set up, never anything the property runs.
+
+    **One consequence, stated rather than discovered later:** an application
+    developed in its own repository "shaped exactly like this one" cannot reach
+    this project and re-derives the convention. That is the cost of ADR 0122's
+    model and not a defect in it; the duplication rule binds within a
+    repository, and this is the single copy for the three applications here.
+
+    Derived from Jobs' `InstallerConvention` (HH), which ADR 0157 names as the
+    working model. It is parameterised here and otherwise unchanged in
+    substance — the citations are corrected against the source, which had
+    drifted.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.Applications.TestSupport</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <!-- The platform is a sibling checkout, as every test project here has it.
+         Three levels up rather than four: this project sits one directory
+         nearer the repository root than an application's `backend/tests`. -->
+    <PlatformRoot>$(MSBuildThisFileDirectory)..\..\..\HosPilotOS</PlatformRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The SDK carries `SchemaMigration`; test-support carries
+         `ScratchDatabase`. Both are the platform's and neither is restated. -->
+    <ProjectReference
+      Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform\HotelOS.Platform.csproj" />
+    <ProjectReference
+      Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+  </ItemGroup>
+
+</Project>
