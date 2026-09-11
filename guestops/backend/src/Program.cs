@@ -134,9 +134,15 @@ var natsUrl = builder.Configuration["Events:NatsUrl"]
 // The generic argument binds the event appender to **this** context, so an
 // event is appended in the transaction that made the change rather than in one
 // of its own.
+// **The admission is the platform wiring's receipt** — `EVT-Q4` §E. It exists
+// so the event consumer below cannot be registered by a process the Kernel
+// never admitted: the pairing used to be held by memory, and the platform path
+// was paired correctly too, until it was not.
+ApplicationAdmission? admission = null;
+
 if (platform is not null)
 {
-    builder.Services.AddHotelOsApplication<GuestOpsDbContext>(platform);
+    admission = builder.Services.AddHotelOsApplication<GuestOpsDbContext>(platform);
 }
 else
 {
@@ -158,11 +164,21 @@ builder.Services.AddGuestOpsApplication();
 // Hub's own `RoomStayFact` — the contract is read at the edge by
 // `RoomStayFactMapper` and never restated, so a field DD changes is a compile
 // error in one file.
-builder.Services.AddApplicationEventConsumer(
-    natsUrl: natsUrl,
-    declare: events => events
-        .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
-        .Consume<JobCreated, JobCreatedHandler>("job.created"));
+//
+// **Only when something admitted this process**, which the token now makes
+// explicit. In `migrate` mode there is no Kernel, no `PlatformEnvironment` and
+// no admitted subject list — so a consumer registered there could never resolve
+// its admission, and registering one was a latent failure the required argument
+// surfaced.
+if (admission is not null)
+{
+    builder.Services.AddApplicationEventConsumer(
+        natsUrl: natsUrl,
+        admission: admission,
+        declare: events => events
+            .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
+            .Consume<JobCreated, JobCreatedHandler>("job.created"));
+}
 builder.Services.AddGuestOpsPlatformAdapters(builder.Configuration, platform);
 
 builder.Services.AddGrpc(options =>

@@ -40,6 +40,10 @@
     <ProjectReference Include="..\src\HotelOS.GuestOps.csproj" />
     <ProjectReference
       Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
+    <!-- The applications' shared test-support — ADR 0157. Test-only; the
+         service project references neither this nor the platform's. -->
+    <ProjectReference
+      Include="..\..\..\packages\HotelOS.Applications.TestSupport\HotelOS.Applications.TestSupport.csproj" />
   </ItemGroup>
 
 </Project>

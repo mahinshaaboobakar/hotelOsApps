@@ -238,9 +238,35 @@ public sealed class InstallerConvention(string schema, string run)
     /// anywhere cannot be dropped, and the grants a suite makes are in a
     /// database that is about to be dropped anyway.
     /// </para>
+    /// <para>
+    /// <b>CALL THIS AFTER DROPPING THE DATABASE, AND PASS NO
+    /// <paramref name="databaseConnection"/>.</b> That is the shape a caller
+    /// wants and it is not the obvious one, so it is written here rather than
+    /// left to be rediscovered. Clearing the roles while the database still
+    /// stands leaves <c>DROP ROLE</c> failing with <i>"cannot be dropped because
+    /// some objects depend on it"</i>: <c>DROP OWNED</c> removes what a role
+    /// owns and what it was granted, and the schema's default ACLs still name
+    /// it. Dropping the database takes every per-database dependency with it,
+    /// after which the roles go cleanly — which is why a leftover from an
+    /// earlier run, whose database is long gone, drops by hand without
+    /// complaint.
+    /// </para>
+    /// <para>
+    /// The <paramref name="databaseConnection"/> path remains for the caller
+    /// that must clear roles while a database is still standing. It re-grants
+    /// both roles <c>WITH INHERIT TRUE</c> first, because
+    /// <see cref="SchemaStatements"/> ends by revoking the provisioner's
+    /// <c>SET</c> and because <c>DROP OWNED BY</c> requires the privileges
+    /// <i>of</i> a role rather than the ability to assume it — the installer's
+    /// own <c>INHERIT FALSE</c> form fails there with an identical-looking
+    /// error.
+    /// </para>
     /// </remarks>
     /// <param name="adminConnection">A connection to the cluster, as the provisioner.</param>
-    /// <param name="databaseConnection">A connection to this run's database, as the provisioner.</param>
+    /// <param name="databaseConnection">
+    /// A connection to this run's database, as the provisioner — or null, which
+    /// is the shape to prefer: see the remarks.
+    /// </param>
     /// <returns>When both roles are gone, or when they could not be.</returns>
     public async Task DropRolesAsync(string adminConnection, string? databaseConnection)
     {
@@ -256,6 +282,36 @@ public sealed class InstallerConvention(string schema, string run)
             {
                 await using var database = new NpgsqlConnection(databaseConnection);
                 await database.OpenAsync();
+
+                // **Take back what step 4 handed in.** `SchemaStatements` ends
+                // with `REVOKE SET OPTION FOR {OwnerRole} FROM CURRENT_USER`,
+                // which is the installer's own last statement and is right: the
+                // provisioner keeps ADMIN and loses the ability to *become* the
+                // owner. But `DROP OWNED BY` requires the privileges of the role
+                // whose objects are being dropped —
+                //
+                //     ERROR:  permission denied to drop objects
+                //     DETAIL: Only roles with privileges of role "…" may drop
+                //             objects owned by it.
+                //
+                // — so teardown has to re-assume it, which ADMIN permits and
+                // which is what an uninstall does. Without this the drop failed
+                // for every run and the catch below hid it: 86 roles on a
+                // developer's cluster per passing run.
+                //
+                // **`INHERIT TRUE`, and that is the whole difference.** Step 4
+                // grants `INHERIT FALSE` so the provisioner can *become* the
+                // owner without wielding its privileges implicitly, which is
+                // right for provisioning. `DROP OWNED BY` asks the opposite
+                // question — it requires the privileges *of* the role, not the
+                // ability to assume it — so a teardown that re-granted the
+                // installer's own form failed with the identical error and
+                // looked like the same defect twice.
+                await ExecuteAsync(
+                    database, $"GRANT {OwnerRole} TO CURRENT_USER WITH SET TRUE, INHERIT TRUE");
+                await ExecuteAsync(
+                    database, $"GRANT {AppRole} TO CURRENT_USER WITH SET TRUE, INHERIT TRUE");
+
                 await ExecuteAsync(database, $"DROP OWNED BY {AppRole}, {OwnerRole} CASCADE");
             }
 
@@ -264,10 +320,19 @@ public sealed class InstallerConvention(string schema, string run)
             await ExecuteAsync(cluster, $"DROP ROLE IF EXISTS {AppRole}");
             await ExecuteAsync(cluster, $"DROP ROLE IF EXISTS {OwnerRole}");
         }
-        catch (PostgresException)
+        catch (PostgresException failure)
         {
-            // Best effort. The run id in the name is what makes a leftover
-            // findable, and a failure to tidy must not fail a suite that passed.
+            // **Best effort, and no longer silent.** A failure to tidy must not
+            // fail a suite that passed — but ADR 0156 requires that a suite
+            // which passes leaves no role behind, so a teardown that quietly
+            // gave up turned a standing violation into something nobody could
+            // see. It is reported where a test runner shows it, naming the roles
+            // so a developer can remove them and the reason so the next person
+            // fixes the cause rather than the symptom.
+            await Console.Error.WriteLineAsync(
+                $"could not remove this run's roles ({AppRole}, {OwnerRole}): "
+                + $"{failure.MessageText}. They are cluster-wide and will remain on this "
+                + "machine until dropped. ADR 0156 requires a passing suite to leave none.");
         }
     }
 
