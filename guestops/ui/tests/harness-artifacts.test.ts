@@ -46,7 +46,14 @@ function loaded(): { page: string; src: string }[] {
     const html = readFileSync(join(UI, "preview", page), "utf8");
 
     for (const m of html.matchAll(/<script[^>]*\ssrc="(?<src>[^"]+\.js)"/gu)) {
-      found.push({ page, src: m.groups!.src.replace(/^\.\//u, "") });
+      // Read the group rather than assert it: a named group is optional to the
+      // type system whatever the pattern says, and `!` here would be a claim
+      // about the regular expression that nothing checks.
+      const src = m.groups?.src;
+
+      if (src !== undefined) {
+        found.push({ page, src: src.replace(/^\.\//u, "") });
+      }
     }
   }
 
