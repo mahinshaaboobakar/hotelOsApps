@@ -1,0 +1,153 @@
+# Room Care — are the rooms ready: every room's condition, owned and announced;
+# the property's cleaning standard; today's departures, services and turndowns,
+# who has them, and what happened at every door.
+#
+# Every field is one the Kernel's parser knows (`deny_unknown_fields`); Jobs'
+# and Workforce's manifests are the siblings this follows.
+#
+# Design of record: `docs/chapters/03-the-roomcare-design.md` §5, with the two
+# build amendments recorded there on 2026-09-13 (the grant's aggregate; the
+# operating day read through the install grant). The screens are
+# `docs/mockups/01-the-roomcare-screens.html` and `02-the-roomcare-setup.html`,
+# owner-locked 2026-09-05 and re-locked 2026-09-13.
+#
+# `files:` is a placeholder the packager fills after the payload is published.
+
+manifest_version: 1
+id: roomcare
+name: "Room Care"
+version: 0.1.0
+publisher: hotelos
+category: operations
+description: >-
+  Are the rooms ready — every room's condition, owned and announced; the
+  property's cleaning standard; today's departures, services and turndowns,
+  who has them, and what happened at every door.
+
+platform:
+  min_version: "0.1.0"
+  max_version: "1.0.0"
+  sdk_version: "^0.1"
+
+runtime:
+  kind: dotnet-service
+  # Install step 6 runs `dotnet backend/<this> migrate`; it equals the csproj's AssemblyName.
+  assembly: HotelOS.RoomCare.dll
+  # AUTHZ-Q17: the principal is the certificate subject and the capability key.
+  principal: roomcare
+
+database:
+  schema: roomcare
+
+resources:
+  memory: "512Mi"
+  cpu: "0.5"
+  db_connections: 4                     # the board, an attendant, the tick, migrate
+  event_rate: 300                       # every attempt at every door is an event
+
+permissions:                            # seven — S6; room.place_out_of_order deliberately not requested
+  - id: room.clean
+    reason: "Mark your own assigned room done, partial, declined or DND"
+  - id: room.inspect
+    reason: "Apply an inspection's outcome to a room"
+  - id: roomcare.read
+    reason: "See the board, a room's day, the pending, blocked and supervision lanes"
+  - id: roomcare.assign
+    reason: "Assign or reassign rooms to attendants; accept the day's proposal"
+  - id: roomcare.amend
+    reason: "Skip, defer or reduce a room's service for the guest; re-prioritise; clear a disagreement; decide a DND room"
+  - id: roomcare.configure
+    reason: "Set this property's cleaning standard, windows, rules, trigger and who leads"
+  - id: roomcare.plan
+    reason: "Plan a deep clean — the window, the block, the job"
+
+events:
+  publishes:
+    - room.cleaned
+    - room.inspected
+    - room.condition_changed
+    - roomcare.day.prepared
+    - roomcare.task.created
+    - roomcare.task.assigned
+    - roomcare.task.started
+    - roomcare.task.attempted
+    - roomcare.task.ended
+    - roomcare.task.reduced
+    - roomcare.supervision.opened
+    - roomcare.supervision.decided
+    - roomcare.disagreement.flagged
+    - roomcare.disagreement.cleared
+    - roomcare.inspection.requested
+    - roomcare.room.restocked
+    - roomcare.issue.found
+    - roomcare.deep_clean.due
+    - roomcare.block.requested
+    - roomcare.block.release_requested
+    - roomcare.service_missed
+    - user.roomcare_manager_granted
+    - user.roomcare_manager_revoked
+  subscribes:
+    - room.state_observed
+    - stay.arrived
+    - stay.departed
+    - stay.room_changed
+    - stay.corrected
+    - user.posted
+    - user.posting_ended
+    - shift.started
+    - shift.ended
+    - job.created
+    - job.closed
+    - staff.exited
+    # added the day each owner names it — never guessed here:
+    #   the guest's cleaning wish (GuestOps) · job progress (Jobs, JOBS-Q2) ·
+    #   the inspection outcome (the inspection app) · out of order / returned (its owner)
+
+ui:
+  module: roomcare
+  icon: ui/icon.svg
+  widgets:                              # five, each one question — page 56
+    - id: rooms-ready
+      name: Rooms Ready
+      file: ui/widgets/rooms-ready.js
+    - id: arrivals-waiting
+      name: Arrivals Waiting
+      file: ui/widgets/arrivals-waiting.js
+    - id: attention
+      name: Attention
+      file: ui/widgets/attention.js
+    - id: attendants-now
+      name: Attendants Now
+      file: ui/widgets/attendants-now.js
+    - id: pending-policy
+      name: Pending
+      file: ui/widgets/pending-policy.js
+
+authorization:
+  grants:
+    # The general manager's one grant that is not a posting (frame 7g; AUTHZ-Q25).
+    #
+    # **`aggregate: roomcare_manager_grant`, not `property`** — a build amendment
+    # to chapter 03 §4.2, 2026-09-13. `event_store.events` is unique on
+    # (aggregate_type, aggregate_id, entity_version) across every writer, and
+    # Master Data already announces the property aggregate with its own
+    # versions; the grant row's id with versions 1 and 2 cannot collide.
+    # Workforce's `aggregate: posting` is the precedent. `granted:`/`revoked:` are
+    # the ACTIONS — the Kernel keys on the subject's last segment.
+    - domain: user
+      aggregate: roomcare_manager_grant
+      granted: roomcare_manager_granted
+      revoked: roomcare_manager_revoked
+      ends: both_in_body
+      body_object: property
+      relation: roomcare_manager
+
+files:
+  "backend/HotelOS.RoomCare.dll": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/module.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/icon.svg": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/rooms-ready.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/arrivals-waiting.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/attention.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/attendants-now.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+  "ui/widgets/pending-policy.js": "sha256:0000000000000000000000000000000000000000000000000000000000000000"

@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Room Care's characterisation suite — beside `backend/src/`, against a real
+    PostgreSQL on a scratch database of its own (ADR 0053: an absent database
+    FAILS). The events are appended by the SDK's real appender into the
+    platform's real event store, so a collision on
+    (aggregate_type, aggregate_id, entity_version) fails here and not at a
+    property.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HotelOS.RoomCare.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Test methods are named for what they characterise; the name is the documentation. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PlatformRoot>..\..\..\..\HosPilotOS</PlatformRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql" Version="9.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\src\HotelOS.RoomCare.csproj" />
+    <ProjectReference Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
+    <ProjectReference Include="..\..\..\packages\HotelOS.Applications.TestSupport\HotelOS.Applications.TestSupport.csproj" />
+    <!-- The Hub's generated RoomStateFact, so the room.state_observed wire is
+         asserted against the message the Hub actually appends — test-only. -->
+    <ProjectReference Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Connector\HotelOS.Connector.csproj" />
+  </ItemGroup>
+
+</Project>
