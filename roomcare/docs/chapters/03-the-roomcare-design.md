@@ -356,18 +356,27 @@ OPERATIONAL stream today (`streams.rs:73, 85`); `job.>` is on MAINTENANCE and
 |---|---|---|---|
 | `room.clean` | yes (`permissions.yaml:189`) | the assignee's *done* on their own task: start, pause, end, attempt, photo, restock, ask for extra time — **acts riding the assignment**, no separate grants | My rooms · A room |
 | `room.inspect` | yes (`:196`) | held by the inspection app's inspector; Room Care **applies** the outcome, never grants it | — |
-| `roomcare.read` | new | the board, a room's day, the pending and blocked lanes, the supervision lane | every screen |
-| `roomcare.assign` | new | assign, reassign, accept the proposal, move rooms | Board · Prepare |
-| `roomcare.amend` | new | skip / defer / reduce on the guest's behalf; re-prioritise; record an exception on another's room; clear a disagreement; the supervisor's DND decision | A room · Supervision |
-| `roomcare.configure` | new | the standard: windows, services, minutes, linen and towel rules, inspection rule, priority ladder, trigger mode, who leads, thresholds, strategies, area schedules, zones | Setup |
-| `roomcare.plan` | new | plan a deep clean: window, block request, the job | Deep clean |
-| `room.place_out_of_order` | yes (`:203`, → Maintenance) | **not requested** — Room Care requests a block by event | — |
+| `roomcare.read` | **landed** — `permissions.yaml:1451`, `property: roomcare_viewer`; `model.fga:556` `define roomcare_viewer: viewer` (`RC-Q5`: a property-scoped list is answered on the property's `*_viewer` hook, never bare `viewer` — ADR 0018; `viewer` includes the desk as a property member, which case 12 needs) | the board, a room's day, the pending and blocked lanes, the supervision lane | every screen |
+| `roomcare.assign` | **landed** — `:1413`, `room_task: can_assign` | assign, reassign, accept the proposal, move rooms | Board · Prepare |
+| `roomcare.amend` | **landed** — `:1422`, `room_task: can_amend` | skip / defer / reduce on the guest's behalf; re-prioritise; record an exception on another's room; clear a disagreement; the supervisor's DND decision; the Room states tab | A room · Supervision · Room states |
+| `roomcare.configure` | **landed** — `:1432`, `property: roomcare_configurer`; `model.fga:528` `general_manager or roomcare_manager` | the standard: windows, services, minutes, linen and towel rules, inspection rule, priority ladder, trigger mode, who leads, thresholds, strategies, area schedules, zones | Setup |
+| `roomcare.plan` | **landed** — `:1442`, `property: roomcare_planner`; `model.fga:540` `general_manager or roomcare_manager` — its own hook, resolving identically to the configurer today (`RC-Q5`, ADR 0007: one permission, one relation, a Kernel test enforces it) | plan a deep clean: window, block request, the job | Deep clean |
+| `room.place_out_of_order` | yes (`:203`, → Maintenance) | **deliberately absent** from Room Care — `permissions.yaml:1404`: *"Room Care requests a block by event and the owner of the state applies it; the permission stays Maintenance's, ADR 0056."* The request-and-apply shape is the ruled one | — |
 
 **Tiers dissolve into relations**: *act* is `assignee` on the task; *assign*
 and *amend* are `supervisor from department` (the Housekeeping department,
-`HK`); *configure* and *plan* are its manager; `roomcare_manager from property`
-across all six. No permission is called a tier. The work-session verbs are
-not permissions.
+`HK`); *configure* and *plan* are `general_manager or roomcare_manager` —
+**not the department's manager**: `type property` has no `department` to
+traverse from, and admitting one would admit every department manager to a
+property-level act (`model.fga:517–527`, transcribing this chapter over the
+walkthrough's wording); `roomcare_manager from property` across all six. No
+permission is called a tier. The work-session verbs are not permissions.
+
+**Landed, verified 2026-09-13** — `RC-Q4` minted the five rows, CC
+transcribed them, `RC-Q5` ruled the two relations the chapters had not
+named. This chapter's first draft said `room_task#viewer` for `read`; the
+artefact says `property#roomcare_viewer`, and the artefact is right (a
+property-scoped list, ADR 0018). Corrected here to the artefact.
 
 ### 4.2 · The grant kind — `property#roomcare_manager`
 
@@ -387,14 +396,14 @@ authorization:
       relation: roomcare_manager
 ```
 
-`model.fga` gains, on `type property`, `define roomcare_manager: [user]` and
-`define roomcare_configurer: general_manager or roomcare_manager` (the
-`*_configurer` idiom CC ruled for Jobs, register row `daf4294`); on
-`type room_task` (new), `assignee`, `can_assign` and `can_amend` from
-`supervisor from department`, each `or roomcare_manager from property`.
-**The registry rows are the architect's** (S6's sign-off); Room Care never
-writes the tuple. `room_task` as an object type is new to the model and is
-part of that ask.
+`model.fga` carries, on `type property` (`:513–556`): `define roomcare_manager:
+[user]` · `define roomcare_configurer: general_manager or roomcare_manager` ·
+`define roomcare_planner: general_manager or roomcare_manager` · `define
+roomcare_viewer: viewer`; and `type room_task` (`:1034–1042`): `property` ·
+`department` · `assignee: [user]` · `can_assign` and `can_amend` from
+`supervisor from department or roomcare_manager from property` — *type job*'s
+sentence with one name changed. All present, 2026-09-13. Room Care never
+writes the tuple.
 
 ---
 
@@ -766,8 +775,8 @@ concept-only carry · the trigger by button or HosPilot · deep clean a project
 
 | | State | What it blocks |
 |---|---|---|
-| **Who places the out-of-order for a deep-clean window** | the architect's, against ADR 0051/0056; `roomcare.block.requested` is the port | the deep-clean screen's *block* step; not the rest |
-| **The permission rows and `property#roomcare_manager`** | S6 signed off; the architect mints five rows, the relation, and `room_task` as an FGA object type. Jobs' install was refused until its rows landed (`JOBS-Q1`, 2026-09-05) — **the same will happen here** | the install |
+| ~~Who places the out-of-order for a deep-clean window~~ | **answered, deliberately, in `permissions.yaml:1404`** — Room Care requests by event, the state's owner applies, the permission stays Maintenance's (ADR 0056). The request-and-apply port is **final**; "may Room Care place one directly" is **no** | nothing — built as the port |
+| ~~The permission rows and `property#roomcare_manager`~~ | **landed** — `RC-Q4` minted, CC transcribed, `RC-Q5` ruled `read`/`plan`'s relations; verified in `permissions.yaml` and `model.fga` 2026-09-13 | nothing |
 | **Workforce: the zone on the posting; the on-shift-by-zone resolver** | asked in the note §2; Workforce's own Z1 proposed it IN v1 | the proposal's *who is here* — until then the proposal groups by department only and says so |
 | **GuestOps: the cleaning wish as a stay fact; the "Housekeeping today" panel + link** | asked; FF's round | the wish arrives by `roomcare.amend` until then; the desk reads Room Care directly |
 | **The inspection application** | its brief; `RC-Q1(6)` | the INSPECT phase is absent until it exists; a property's `inspection_rule` other than `NONE` is refused at Setup with *"no inspection application installed"* |
@@ -804,6 +813,17 @@ room page and "found an issue" raising a job; the areas list paged and the
 GM-only access tab kept and renamed — and locked by the owner the same day
 on the confirmation that pagination follows page 64 (§5, §6, §8). They are
 the frames the build is audited against, frame beside capture.
+
+### The word — architect, 2026-09-13: **build**
+
+The register holds the walkthrough's outcomes (`RC-Q1(3)(4)(5)(7)(9)(12)(14)`
+and the S0 rulings). The authorization rows were already landed (`RC-Q4`,
+`RC-Q5`); the out-of-order question was already answered in the registry's
+own header. The S5 assignment flow stands as written; the not-building list
+stands; the ports with no adapters are non-blocking — *"Room Care's screens
+say not installed rather than pretending"* is the ruled behaviour. The asks
+stay as filed (GG, FF, HH, the inspection brief, the shell's open-at-a-record
+— verify before asking).
 
 ### The gate, written down
 

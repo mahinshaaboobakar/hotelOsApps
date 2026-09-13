@@ -688,7 +688,7 @@ ul.flows b{color:var(--text)}
     <div class="strip"><span><b>6</b> due this month</span><span><b>2</b> planned</span><span><b>1</b> in progress</span><span>plan: Deluxe King every 6 months · Suite every 4 · Standard yearly</span><span style="margin-left:auto">05 Sep 09:12</span></div>
     <table>
       <tr><th>Room</th><th>Type</th><th>Last done</th><th>Due</th><th>Window</th><th>Block</th><th>Job</th><th>State</th></tr>
-      <tr class="sel"><td class="num">0708</td><td>Suite</td><td>02 May</td><td>02 Sep</td><td>08 – 12 Sep</td><td><span class="pill soft-warn">requested 05 Sep 08:10</span> <span class="tag port">out-of-order owner · open</span></td><td class="dimtd">raised when the block is applied</td><td><span class="pill">BLOCK REQUESTED</span></td></tr>
+      <tr class="sel"><td class="num">0708</td><td>Suite</td><td>02 May</td><td>02 Sep</td><td>08 – 12 Sep</td><td><span class="pill soft-warn">requested 05 Sep 08:10</span> <span class="tag port">applied by the state's owner</span></td><td class="dimtd">raised when the block is applied</td><td><span class="pill">BLOCK REQUESTED</span></td></tr>
       <tr><td class="num">0902</td><td>Deluxe King</td><td>01 Mar</td><td>01 Sep</td><td>01 – 05 Sep</td><td><span class="pill ok">applied 01 Sep</span></td><td class="num">J-1171 · day 5 of 5 <span class="tag port">progress · JOBS-Q2</span></td><td><span class="pill run">IN PROGRESS</span></td></tr>
       <tr><td class="num">1101</td><td>Standard</td><td>Sep 2025</td><td>Sep 2026</td><td>—</td><td>—</td><td>—</td><td><span class="pill warn">DUE · plan a window…</span></td></tr>
       <tr><td class="num">1102</td><td>Standard</td><td>Sep 2025</td><td>Sep 2026</td><td>—</td><td>—</td><td>—</td><td><span class="pill warn">DUE</span></td></tr>
@@ -706,8 +706,8 @@ ul.flows b{color:var(--text)}
     </div>
   </div>
 </div>
-<div class="note"><b>Draws S0 · deep clean as a planned project.</b> Room Care plans (due dates from the plan per room type), the supervisor picks the window, and two events leave with correlation ids: the <b>block request</b> to the owner of room out-of-order state — <span class="tag port">open with the architect against ADR 0051/0056</span> — and <b>the job</b> to Jobs. The room leaves the board into <i>Blocked</i>; nothing about the days or weeks of work is Room Care's.</div>
-<div class="note hold"><b>Two ports drawn honestly.</b> Until the architect rules who places the block, the <i>Block</i> column stays at "requested". Until Jobs' post-certification round publishes progress (<code>JOBS-Q2</code>), the progress card shows <i>job open</i> / <i>job closed</i> only — the hands-by-day line above is what it will show, not what it shows today.</div>
+<div class="note"><b>Draws S0 · deep clean as a planned project.</b> Room Care plans (due dates from the plan per room type), the supervisor picks the window, and two events leave with correlation ids: the <b>block request</b> to the owner of room out-of-order state — <b>ruled, deliberately</b>: <code>permissions.yaml:1404</code>, Room Care requests by event, the owner applies, the permission stays Maintenance's (ADR 0056) — and <b>the job</b> to Jobs. The room leaves the board into <i>Blocked</i>; nothing about the days or weeks of work is Room Care's.</div>
+<div class="note hold"><b>One port left, drawn honestly.</b> The block's shape is final (request → the owner applies → Room Care hears it); the column reads "requested" only until the owner's event arrives. Until Jobs' post-certification round publishes progress (<code>JOBS-Q2</code>), the progress card shows <i>job open</i> / <i>job closed</i> only — the hands-by-day line above is what it will show, not what it shows today.</div>
 
 <h1 class="frame">7 · <b>Setup</b>. Seven tabs — each drawn as its own frame on <code>02-the-roomcare-setup.html</code>. This is the first.</h1>
 <div class="win">
