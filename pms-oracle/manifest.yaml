@@ -100,7 +100,12 @@ category: integration
 description: "Oracle OPERA and OHIP — reservations, stays and room state, inbound."
 
 platform:
-  min_version: "0.1.0"
+  # **0.1.8, not 0.1.0** — ADR 0159. Connector admission opens there, and the
+  # Kernel refuses anything below it as `BelowFloor`: this manifest declared a
+  # floor the platform does not accept a connector at, so the package was
+  # refused rather than installed. The floor is the platform's, not a
+  # preference — the connector flow only completes at 0.1.8.
+  min_version: "0.1.8"
   max_version: "1.0.0"
   sdk_version: "^0.1"
 
