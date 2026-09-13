@@ -112,6 +112,25 @@ td.dimtd{color:var(--faint)}
 .tag.absent{color:var(--faint);border-style:dashed}
 .lane{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);color:var(--dim);margin-right:6px}
 .lane.on{color:var(--text);border-color:var(--indigo)}
+.tilegrid{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 14px}
+.tile{width:46px;height:34px;border-radius:5px;border:2px solid transparent;font:600 10px ui-monospace,Menlo,monospace;display:grid;place-items:center;position:relative;color:var(--color-ink-on-accent)}
+.tile.dirty{background:var(--bad)}.tile.clean{background:var(--ok)}.tile.insp{background:var(--indigo);color:var(--text)}
+.tile.todo{border-color:transparent}.tile.run{border-color:var(--text)}.tile.done{opacity:.55}
+.tile.pend{background:transparent;border:2px dotted var(--faint);color:var(--dim)}
+.tile.blocked{background:repeating-linear-gradient(45deg,var(--color-surface-raised),var(--color-surface-raised) 4px,var(--line) 4px,var(--line) 8px);color:var(--dim);border-color:var(--line)}
+.tile i{position:absolute;top:-6px;right:-4px;font-style:normal;font-size:10px;background:var(--color-surface);border-radius:8px;padding:0 3px;color:var(--text);border:1px solid var(--line)}
+.grp{display:flex;align-items:center;gap:14px;font-size:12px;color:var(--dim);margin-top:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.grp b{color:var(--text);font-size:13px}
+.legend{font-size:11px;color:var(--faint);margin:4px 0 0}
+.legend span{display:inline-block;margin-right:14px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:5px}
+table.wall td{padding:5px 8px;font-size:12px;line-height:1.3}
+table.wall th{padding:6px 8px}
+table.wall tr.g td{background:var(--color-surface-raised);color:var(--text);font-weight:600;font-size:12px;padding:7px 8px;position:sticky;top:0}
+.glyph{display:inline-block;width:9px;height:9px;border-radius:50%;vertical-align:middle;margin-right:5px}
+.glyph.dirty{background:var(--bad)}.glyph.clean{background:var(--ok)}.glyph.insp{background:var(--indigo)}
+.viewport{max-height:520px;overflow:hidden;position:relative}
+.viewport:after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(transparent,var(--bg))}
 ul.flows{max-width:920px;color:var(--dim)}
 ul.flows li{margin-bottom:10px}
 ul.flows b{color:var(--text)}
@@ -134,7 +153,7 @@ ul.flows b{color:var(--text)}
 <!-- ===================================================================== -->
 <h2 class="sec">A · the supervisor — the board, and the day's preparation</h2>
 
-<h1 class="frame">1 · <b>The board</b>. Every room of the property, today, by lane.</h1>
+<h1 class="frame">1 · <b>The board — the paged list</b>. Superseded pending redline 4's audit (frames 1a, 1b below); kept so the redline can be read against it.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -168,6 +187,76 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Draws S0, S3, S4, S5 c1/c3/c9.</b> A row is one room's day: <b>Condition</b> is Room Care's own with its source and time (S4: <code>room_state.condition_source</code>); <b>Occ.</b> and <b>Sold tonight</b> are observed from the PMS through the Hub and never set here; <b>Service</b> is the day's service the policy chose; <b>Pri</b> is the ladder — sold tonight first (S0); <b>Outcome so far</b> is the last attempt or the outcome (c1: done · partial · declined · DND); <b>Linen</b> is the room's own date against the property's rule (c4, c11: <i>due</i> or <i>must</i>).</div>
 <div class="note"><b>The lanes are the board's structure, not a filter.</b> <i>Pending policy</i> holds rooms the rule left waiting — 1105, an unsold departure at a property whose rule says it may wait — one click promotes it (the charter). <i>Blocked</i> holds rooms out of order (a deep clean, a burst pipe). <i>Supervision</i> holds rooms the supervisor owns today — 312 after two days of DND, 1204's disagreement (S4), and any "arrival before window".</div>
 <div class="note hold"><b>219 is "new since 08:00".</b> The PMS checkout arrived after <i>Prepare the day</i>; in <b>Prepare</b> mode nothing is created behind the manager's back — it is shown, counted, and added by the next press (frame 2). In <b>Automatic</b> mode this row would already carry a proposal.</div>
+
+<h1 class="frame">1a · <b>The board — as a map</b>. Coral Cove Resort — 250 rooms at ground level, four zones. Candidate A, for audit.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
+  </div>
+  <div class="body">
+    <div class="strip"><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>24</b> in progress</span><span><b>110</b> ready</span><span><b>14</b> pending</span><span><b>2</b> blocked</span><span><b>4</b> supervision</span><span style="margin-left:auto">PMS ok · last fact 09:11 · 05 Sep 09:12</span></div>
+    <div style="margin-bottom:6px"><span class="chip on">Map</span><span class="chip">Wall</span><span class="mono" style="margin:0 14px">group by</span><span class="chip on">Zone</span><span class="chip">Building / wing</span><span class="chip off" style="border-style:dashed">Floor — none at this property</span><span class="chip">Room type</span><span style="float:right"><span class="chip">Sold tonight</span><span class="chip">Attention</span><span class="chip">Anita P.</span></span></div>
+    <div class="legend"><span><span class="sw" style="background:var(--bad)"></span>dirty</span><span><span class="sw" style="background:var(--ok)"></span>clean</span><span><span class="sw" style="background:var(--indigo)"></span>inspected</span><span><span class="sw" style="border:2px solid var(--text);background:none"></span>in progress</span><span><span class="sw" style="border:2px dotted var(--faint);background:none"></span>pending policy</span><span><span class="sw" style="background:repeating-linear-gradient(45deg,transparent,transparent 2px,var(--line) 2px,var(--line) 4px);border:1px solid var(--line)"></span>blocked</span><span>★ sold tonight · ⏸ DND · ! disagreement · ⚑ supervision</span></div>
+    <div class="grp"><b>Zone 1 · Garden villas</b><span>18 rooms</span><span>7 dirty</span><span>2 in progress</span><span>8 ready</span><span>1 DND</span></div>
+    <div class="tilegrid"><div class="tile dirty todo">G01<i>★</i></div><div class="tile dirty todo">G02</div><div class="tile clean done">G03</div><div class="tile dirty todo">G04</div><div class="tile clean done">G05<i>⏸</i></div><div class="tile dirty todo">G06<i>⚑</i></div><div class="tile dirty todo">G07</div><div class="tile clean done">G08</div><div class="tile dirty todo">G09</div><div class="tile dirty run">G10</div><div class="tile dirty todo">G11<i>★</i></div><div class="tile dirty todo">G12</div><div class="tile dirty run">G13</div><div class="tile insp done">G14</div><div class="tile dirty todo">G15</div><div class="tile dirty todo">G16</div><div class="tile clean done">G17</div><div class="tile pend">G18</div></div>
+    <div class="grp"><b>Zone 2 · Lake wing</b><span>24 rooms</span><span>9 dirty</span><span>3 in progress</span><span>11 ready</span><span>1 blocked</span></div>
+    <div class="tilegrid"><div class="tile clean done">L01</div><div class="tile dirty run">L02</div><div class="tile pend">L03<i>★</i></div><div class="tile dirty todo">L04</div><div class="tile insp done">L05</div><div class="tile dirty todo">L06</div><div class="tile dirty todo">L07</div><div class="tile dirty todo">L08</div><div class="tile dirty todo">L09<i>!</i></div><div class="tile insp done">L10</div><div class="tile dirty todo">L11</div><div class="tile clean done">L12</div><div class="tile clean done">L13</div><div class="tile blocked">L14</div><div class="tile clean done">L15</div><div class="tile dirty todo">L16</div><div class="tile dirty todo">L17</div><div class="tile dirty todo">L18</div><div class="tile clean done">L19</div><div class="tile dirty run">L20<i>★</i></div><div class="tile dirty todo">L21</div><div class="tile clean done">L22</div><div class="tile dirty run">L23</div><div class="tile dirty todo">L24</div></div>
+    <div class="grp"><b>Zone 3 · Main block</b><span>36 rooms</span><span>14 dirty</span><span>4 in progress</span><span>17 ready</span><span>1 blocked</span></div>
+    <div class="tilegrid"><div class="tile insp done">M01</div><div class="tile clean done">M02<i>★</i></div><div class="tile dirty todo">M03</div><div class="tile clean done">M04</div><div class="tile clean done">M05</div><div class="tile insp done">M06</div><div class="tile clean done">M07<i>★</i></div><div class="tile dirty todo">M08</div><div class="tile pend">M09</div><div class="tile dirty todo">M10</div><div class="tile dirty run">M11</div><div class="tile insp done">M12</div><div class="tile dirty todo">M13</div><div class="tile clean done">M14</div><div class="tile dirty todo">M15<i>⏸</i></div><div class="tile clean done">M16</div><div class="tile insp done">M17</div><div class="tile clean done">M18</div><div class="tile insp done">M19</div><div class="tile dirty todo">M20</div><div class="tile clean done">M21</div><div class="tile blocked">M22</div><div class="tile clean done">M23</div><div class="tile dirty run">M24</div><div class="tile insp done">M25</div><div class="tile pend">M26</div><div class="tile dirty run">M27</div><div class="tile clean done">M28</div><div class="tile dirty todo">M29</div><div class="tile clean done">M30<i>★</i></div><div class="tile clean done">M31</div><div class="tile pend">M32</div><div class="tile insp done">M33</div><div class="tile dirty todo">M34</div><div class="tile dirty run">M35</div><div class="tile clean done">M36</div></div>
+    <div class="grp"><b>Zone 4 · Beach cottages</b><span>22 rooms</span><span>8 dirty</span><span>2 in progress</span><span>11 ready</span><span>1 supervision</span></div>
+    <div class="tilegrid"><div class="tile dirty todo">B01</div><div class="tile dirty run">B02</div><div class="tile dirty todo">B03</div><div class="tile dirty todo">B04<i>★</i></div><div class="tile dirty todo">B05</div><div class="tile insp done">B06</div><div class="tile dirty todo">B07</div><div class="tile dirty todo">B08</div><div class="tile dirty run">B09</div><div class="tile insp done">B10</div><div class="tile dirty todo">B11</div><div class="tile dirty run">B12<i>⚑</i></div><div class="tile clean done">B13</div><div class="tile insp done">B14</div><div class="tile insp done">B15</div><div class="tile insp done">B16</div><div class="tile dirty todo">B17</div><div class="tile dirty run">B18<i>★</i></div><div class="tile dirty todo">B19</div><div class="tile insp done">B20</div><div class="tile pend">B21</div><div class="tile dirty todo">B22</div></div>
+    <div class="grp"><b>Zones 5 – 9</b><span class="mono">150 more rooms — drawn short on this page; on the screen every zone is laid out exactly like the four above, one screen, no paging</span></div>
+  </div>
+</div>
+<div class="note"><b>Candidate A — the map.</b> One tile per room; <b>fill is the condition and only the condition</b> — dirty · clean · inspected, the thing Room Care owns; the ring is today's service state; the corner marks are the exceptions. Grouped by <b>zone</b> because every Room Care property has zones (Room Care's own <code>RoomZoneAssignment</code>); building/wing, floor or room type are offered only where Master Data's tree has them — Coral Cove has no floors, so that chip is dashed. Filters <b>dim</b> tiles, never remove them. Click a tile → the room (frame 4); hover → service · attendant · outcome so far. Answers <i>"where are we"</i> in one glance; does <b>not</b> show service, attendant or outcome without hovering — the owner's objection, which is why candidate B exists.</div>
+
+<h1 class="frame">1b · <b>The board — as a wall</b>. The same house, every room one line, no pages. Candidate B, for audit.</h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
+  </div>
+  <div class="body">
+    <div class="strip"><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>24</b> in progress</span><span><b>110</b> ready</span><span><b>14</b> pending</span><span><b>2</b> blocked</span><span><b>4</b> supervision</span><span style="margin-left:auto">PMS ok · last fact 09:11 · 05 Sep 09:12</span></div>
+    <div style="margin-bottom:6px"><span class="chip">Map</span><span class="chip on">Wall</span><span class="mono" style="margin:0 14px">group by</span><span class="chip on">Zone</span><span class="chip">Building / wing</span><span class="chip">Room type</span><span style="float:right"><span class="chip">Sold tonight</span><span class="chip">Attention</span><span class="chip">Anita P.</span><span class="chip">Collapse all</span></span></div>
+    <div class="viewport">
+    <table class="wall">
+      <tr><th>Room</th><th>Condition</th><th>Occ.</th><th>Sold tonight</th><th>Service</th><th>Pri</th><th>Attendant</th><th>Outcome so far</th><th>Linen</th></tr>
+      <tr class="g"><td colspan="9">▾ Zone 1 · Garden villas &nbsp;·&nbsp; 18 rooms · 7 dirty · 2 in progress · 8 ready · 1 DND</td></tr>
+      <tr><td class="num">G01</td><td><span class="glyph dirty"></span>dirty <span class="mono">PMS 03:02</span></td><td>vacant</td><td>★ 15:00</td><td>Departure clean</td><td>1</td><td>Anita Pillai</td><td>in progress · 09:04</td><td>—</td></tr>
+      <tr><td class="num">G02</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Anita Pillai</td><td>—</td><td>due</td></tr>
+      <tr><td class="num">G03</td><td><span class="glyph clean"></span>clean <span class="mono">Anita 08:41</span></td><td>vacant</td><td>★ 13:00</td><td>Departure clean</td><td>1</td><td>Anita Pillai</td><td>done 08:41 · inspection requested</td><td>—</td></tr>
+      <tr><td class="num">G04</td><td><span class="glyph insp"></span>inspected <span class="mono">Lakshmi 08:58</span></td><td>vacant</td><td>★ 14:00</td><td>Departure clean</td><td>1</td><td>Anita Pillai</td><td>ready 08:58</td><td>—</td></tr>
+      <tr><td class="num">G05</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Priya Das</td><td>⏸ DND 08:40 · re-check 09:40</td><td>due</td></tr>
+      <tr><td class="num">G06</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td class="dimtd">— supervisor's room</td><td>⚑ 3rd day without service</td><td>must</td></tr>
+      <tr><td class="num">G07</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service · not before 12:00</td><td>3</td><td>Anita Pillai</td><td class="dimtd">waiting for 12:00</td><td>—</td></tr>
+      <tr><td class="num">G08</td><td><span class="glyph clean"></span>clean</td><td>vacant · 4 days</td><td>★ 13:00</td><td>Refresh</td><td>2</td><td>Priya Das</td><td>—</td><td>—</td></tr>
+      <tr><td class="num">G09</td><td><span class="glyph clean"></span>clean <span class="mono">desk, Meera 09:52 ⚠ manual</span></td><td>vacant</td><td>—</td><td>Departure clean · unsold</td><td>2</td><td class="dimtd">— pending policy</td><td class="dimtd">may wait · one click</td><td>—</td></tr>
+      <tr><td class="num">G10</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service · light — no bed</td><td>3</td><td>Priya Das</td><td>—</td><td>declined day 2</td></tr>
+      <tr><td class="num">G11</td><td><span class="glyph dirty"></span>dirty <span class="mono">PMS 08:20</span></td><td>vacant</td><td>★ 16:30</td><td>Departure clean</td><td>1</td><td class="dimtd">— nobody available</td><td class="dimtd">new since 08:00</td><td>—</td></tr>
+      <tr><td class="num">G12</td><td><span class="glyph clean"></span>clean <span class="mono">Priya 08:33</span></td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Priya Das</td><td>done 08:33 · partial (bathroom)</td><td>—</td></tr>
+      <tr><td class="num">G13 – G18</td><td colspan="8" class="dimtd">six more rows — drawn short on this page; on the screen every room of the zone is a line</td></tr>
+      <tr class="g"><td colspan="9">▾ Zone 2 · Lake wing &nbsp;·&nbsp; 24 rooms · 9 dirty · 3 in progress · 11 ready · 1 blocked</td></tr>
+      <tr><td class="num">L01</td><td><span class="glyph clean"></span>clean <span class="mono">Farhan 08:20</span></td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Farhan Ali</td><td>done 08:20</td><td>—</td></tr>
+      <tr><td class="num">L02</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Farhan Ali</td><td>in progress · 09:06</td><td>due</td></tr>
+      <tr><td class="num">L03</td><td><span class="glyph dirty"></span>dirty <span class="mono">PMS 07:48</span></td><td>vacant</td><td>★ 12:00</td><td>Departure clean</td><td>1</td><td>Rohan Desai</td><td>in progress · 08:51</td><td>—</td></tr>
+      <tr><td class="num">L09</td><td><span class="glyph clean"></span>clean <span class="mono">Rohan 09:10</span> <span class="tag">!</span></td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Rohan Desai</td><td>! PMS says dirty 09:11</td><td>—</td></tr>
+      <tr><td class="num">L14</td><td class="dimtd">blocked · deep clean 01 – 05 Sep</td><td class="dimtd">out of order</td><td class="dimtd">—</td><td class="dimtd">— (Jobs J-1171, day 5 of 5)</td><td></td><td class="dimtd">—</td><td class="dimtd">off the day</td><td></td></tr>
+      <tr><td class="num">L04 – L24</td><td colspan="8" class="dimtd">nineteen more rows — drawn short on this page</td></tr>
+      <tr class="g"><td colspan="9">▸ Zone 3 · Main block &nbsp;·&nbsp; 36 rooms · 14 dirty · 4 in progress · 17 ready · 1 blocked &nbsp;<span class="mono">collapsed by the supervisor</span></td></tr>
+      <tr class="g"><td colspan="9">▾ Zone 4 · Beach cottages &nbsp;·&nbsp; 22 rooms · 8 dirty · 2 in progress · 11 ready · 1 supervision</td></tr>
+      <tr><td class="num">B01</td><td><span class="glyph dirty"></span>dirty</td><td>occupied</td><td>—</td><td>Daily service</td><td>3</td><td>Sunil Nair</td><td>—</td><td>—</td></tr>
+      <tr><td class="num">B02 – B22</td><td colspan="8" class="dimtd">… and zones 5 – 9 below, 150 rooms — one continuous wall, scrolled inside the window, the strip and the zone headers staying put</td></tr>
+    </table>
+    </div>
+    <div class="pager"><span><b>250 of 250 — no pages.</b> The whole house is one wall, 28 px a room, scrolled within the window; the strip and each zone's header stay fixed. A stated departure from page 64 §6's <i>paged by default</i>: the board is the whole house, not a list to page through — reported to the standard's owner.</span><span></span></div>
+  </div>
+</div>
+<div class="note"><b>Candidate B — the wall.</b> Every column of the old list, at twice its density, for every room, grouped by zone with sticky headers that carry the zone's counts, a zone collapsible to its header. Filters <b>dim</b>, never remove. <b>G09 shows the manual source</b>: the desk keyed <i>vacant · departed</i> during a PMS fault — "desk, Meera 09:52 ⚠ manual" — a deliberate act; when the PMS returns, an older fact is history and a newer contradicting one is flagged (S4's clause). <b>G11 is "new since 08:00"</b> with nobody available. Answers <i>"what is happening to each room, and who has it"</i> without a click — the owner's requirement.</div>
+<div class="note hold"><b>Redline 4, under audit (2026-09-13).</b> Two candidates for the board of a large property; the owner picks one, or a combination (map for the glance, wall for the work — both are the same data and the chip switches). Whichever is chosen replaces frame 1's paged list. Drawn on a flat property so no candidate can lean on floors; the grouping is by zone by default and by whatever else Master Data's tree holds. Both also carry the <i>PMS ok · last fact</i> line in the strip and the manual source, per part 1 of this redline.</div>
 
 <h1 class="frame">2 · <b>Prepare</b>. The window's state, what changed, the proposal, the button.</h1>
 <div class="win">
@@ -297,7 +386,15 @@ ul.flows b{color:var(--text)}
       <span class="pill soft-warn">DISAGREEMENT · PMS says DIRTY 09:11</span>
     </div>
     <div class="mono" style="margin-bottom:12px">occupied · stay 3B70, in house until 07 Sep · not sold tonight · linen last changed 03 Sep (due 06 Sep) · deep clean due Nov 2026</div>
-    <div style="margin:0 0 14px"><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
+    <div style="margin:0 0 14px"><span class="btn">Room state… </span><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
+    <div class="dlg" style="margin-bottom:14px">
+      <div class="sect" style="margin-top:0">Room state — enter a fact by hand (always available; the PMS is the usual source here)</div>
+      <div class="cols">
+        <div><span class="chip">Guest arrived</span><span class="chip on">Guest departed</span><span class="chip">Occupied</span><span class="chip">Vacant</span><br><label>Arrival expected today</label><div class="field" style="display:inline-block;min-width:90px">15:00</div><span class="mono"> · sets "sold tonight"</span></div>
+        <div class="kv"><div>Recorded as</div><div>source <b>manual</b> · Meera Krishnan · 05 Sep 09:52 — a deliberate act</div><div>If the PMS later says otherwise</div><div>older than this → history; newer and contradicting → a disagreement flag (S4)</div><div>Why now</div><div>the strip says <i>PMS silent since 09:40</i></div></div>
+      </div>
+      <div style="margin-top:12px"><span class="btn pri">Record</span><span class="btn">Back</span></div>
+    </div>
     <div class="subnav"><div class="on">Today</div><div>History · 14 days</div><div>Record</div></div>
     <div class="cols">
       <div>
@@ -345,6 +442,7 @@ ul.flows b{color:var(--text)}
     </div>
   </div>
 </div>
+<div class="note hold"><b>Redline 4, part 1, under audit (2026-09-13) — the manual source.</b> The owner: a PMS property with a network fault must still update room state by hand and see the current status. So <i>Room state…</i> is on every room page at every property, never gated by the "stay facts usually come from" setting (Setup › Rules, which only decides what the board expects and warns about — <i>PMS silent since</i>). A manual entry is a deliberate act with source <b>manual</b>, shown as such wherever the condition is shown; the ordering clause handles the PMS's return. It rides <code>roomcare.amend</code>; no seventh permission. Sources are now three: PMS (the Hub), GuestOps (its stay events, for a property with GuestOps and no PMS), manual (entered here).</div>
 <div class="note"><b>Draws S4 (the ordering clause, who leads), S5 c8/c11/c12, §2.1–2.4.</b> The condition line always says who set it and when — attendant, inspection, supervisor, the PMS, the desk. The PMS's 09:11 is <i>newer than a deliberate act here</i>, so under <b>Room Care leads</b> it is a flag the supervisor clears; under <b>PMS leads</b> it would have been applied with "from the PMS" on it and the overwrite recorded. The <i>Today</i> panel is the read GuestOps shows the desk through Context (c12) — <b>this screen is the link's target</b>.</div>
 
 <h1 class="frame">4b · <b>A room, inspected</b>. 401 — a departure clean whose rule says <i>arrivals only</i>, requested and answered.</h1>
@@ -536,6 +634,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-13 · redline 4, under audit</b> — (1) the manual source: <i>Room state…</i> on every room page at every property, source <b>manual</b>, the PMS's return handled by S4's clause; the board's strip shows <i>PMS ok · last fact</i> / <i>PMS silent since</i>. (2) the board for a large property: the paged list rejected; two candidates drawn on a flat 250-room resort — <b>1a the map</b> (tiles by zone) and <b>1b the wall</b> (every room one line, grouped by zone, no pages). The owner picks. The lock stands until this redline is folded.</li>
   <li><b>2026-09-05 · LOCKED</b> — owner: <i>"the pagination is based on page 64 — the pager always at the bottom — if that confirms we can lock it."</i> Confirmed (§5, §6, §8); locked with <code>02-the-roomcare-setup.html</code>.</li>
   <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
   <li><b>2026-09-05 · redline 1 folded</b> — frame 7 (Setup) had three tabs on one screen; now the first tab here and all seven on <code>02-the-roomcare-setup.html</code>.</li>
