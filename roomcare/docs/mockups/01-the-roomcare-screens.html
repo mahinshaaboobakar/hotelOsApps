@@ -141,7 +141,7 @@ ul.flows b{color:var(--text)}
 
 <div class="intro">
   <h1>Room Care · the screens</h1>
-  <p><b>LOCKED by the owner, 2026-09-05</b>, after three redline passes the same day (the log at the foot). These frames, with <code>02-the-roomcare-setup.html</code>, are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page with its date, never a silent edit.</p>
+  <p><b>LOCKED by the owner, 2026-09-05; re-locked 2026-09-13</b> after redline 4 — the board redrawn as a map and a wall for a large flat property, and the manual source given its own frame (the log at the foot). These frames, with <code>02-the-roomcare-setup.html</code>, are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page with its date, never a silent edit.</p>
   <p><b>Pagination, confirmed at the lock:</b> page 64 §6 — paged-with-total (<code>CORE-Q13</code>), a numbered pager, "1–12 of N" honest because N is on the wire; §5 — the list scrolls within the screen and the pager stays at the bottom, always visible; §8 — every list states its rows per page.</p>
   <p><b>Palette authority:</b> the seventeen tokens in <code>apps/desktop/src/styles.css</code> at the shell's own values (ADR 0106, page 64 §1). Every colour on this page is one of them; no frame names a hex of its own. Chrome is the current era — one window, a 56 px top bar, no left rail (page 64 §3); lists are bare tables with a numbered pager on <code>common.v1</code> paged-with-total (§4, §6); one <code>.btn</code> vocabulary (§2). Scaffold copied from Jobs' locked mockup.</p>
   <p><b>Design of record:</b> <code>02-the-roomcare-walkthrough-and-sign-off.md</code> (locked 2026-09-05) and <code>03-the-roomcare-design.md</code>. Each frame's caption names the walkthrough section (S0–S7) or the guest case (c1–c13) it draws.</p>
@@ -153,7 +153,8 @@ ul.flows b{color:var(--text)}
 <!-- ===================================================================== -->
 <h2 class="sec">A · the supervisor — the board, and the day's preparation</h2>
 
-<h1 class="frame">1 · <b>The board — the paged list</b>. Superseded pending redline 4's audit (frames 1a, 1b below); kept so the redline can be read against it.</h1>
+<h1 class="frame">1 · <b>The board — the paged list</b>. <span class="tag" style="color:var(--bad);border-color:var(--bad)">REMOVED BY THE OWNER · 2026-09-13</span> Kept faint only so redline 4 can be read against it; not a screen the build draws.</h1>
+<div style="opacity:.35;pointer-events:none">
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -184,11 +185,13 @@ ul.flows b{color:var(--text)}
     <div class="pager"><span>1–12 of 62 · 12 per page at this height; a maximised window shows 24</span><span><span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">4</span><span class="pg">5</span><span class="pg">6</span><span class="pg">›</span></span></div>
   </div>
 </div>
+</div>
+<div class="note stop"><b>Removed by the owner, 2026-09-13.</b> A paged list is the wrong instrument for the whole house — <i>"on a single page I need the full view of the board."</i> Replaced by frames 1a (the map) and 1b (the wall), both locked. The notes below describe the removed frame and stay for the record.</div>
 <div class="note"><b>Draws S0, S3, S4, S5 c1/c3/c9.</b> A row is one room's day: <b>Condition</b> is Room Care's own with its source and time (S4: <code>room_state.condition_source</code>); <b>Occ.</b> and <b>Sold tonight</b> are observed from the PMS through the Hub and never set here; <b>Service</b> is the day's service the policy chose; <b>Pri</b> is the ladder — sold tonight first (S0); <b>Outcome so far</b> is the last attempt or the outcome (c1: done · partial · declined · DND); <b>Linen</b> is the room's own date against the property's rule (c4, c11: <i>due</i> or <i>must</i>).</div>
 <div class="note"><b>The lanes are the board's structure, not a filter.</b> <i>Pending policy</i> holds rooms the rule left waiting — 1105, an unsold departure at a property whose rule says it may wait — one click promotes it (the charter). <i>Blocked</i> holds rooms out of order (a deep clean, a burst pipe). <i>Supervision</i> holds rooms the supervisor owns today — 312 after two days of DND, 1204's disagreement (S4), and any "arrival before window".</div>
 <div class="note hold"><b>219 is "new since 08:00".</b> The PMS checkout arrived after <i>Prepare the day</i>; in <b>Prepare</b> mode nothing is created behind the manager's back — it is shown, counted, and added by the next press (frame 2). In <b>Automatic</b> mode this row would already carry a proposal.</div>
 
-<h1 class="frame">1a · <b>The board — as a map</b>. Coral Cove Resort — 250 rooms at ground level, four zones. Candidate A, for audit.</h1>
+<h1 class="frame">1a · <b>The board — the map</b>. Coral Cove Resort — 250 rooms at ground level, four zones. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -212,7 +215,7 @@ ul.flows b{color:var(--text)}
 </div>
 <div class="note"><b>Candidate A — the map.</b> One tile per room; <b>fill is the condition and only the condition</b> — dirty · clean · inspected, the thing Room Care owns; the ring is today's service state; the corner marks are the exceptions. Grouped by <b>zone</b> because every Room Care property has zones (Room Care's own <code>RoomZoneAssignment</code>); building/wing, floor or room type are offered only where Master Data's tree has them — Coral Cove has no floors, so that chip is dashed. Filters <b>dim</b> tiles, never remove them. Click a tile → the room (frame 4); hover → service · attendant · outcome so far. Answers <i>"where are we"</i> in one glance; does <b>not</b> show service, attendant or outcome without hovering — the owner's objection, which is why candidate B exists.</div>
 
-<h1 class="frame">1b · <b>The board — as a wall</b>. The same house, every room one line, no pages. Candidate B, for audit.</h1>
+<h1 class="frame">1b · <b>The board — the wall</b>. The same house, every room one line, no pages. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
@@ -256,7 +259,7 @@ ul.flows b{color:var(--text)}
   </div>
 </div>
 <div class="note"><b>Candidate B — the wall.</b> Every column of the old list, at twice its density, for every room, grouped by zone with sticky headers that carry the zone's counts, a zone collapsible to its header. Filters <b>dim</b>, never remove. <b>G09 shows the manual source</b>: the desk keyed <i>vacant · departed</i> during a PMS fault — "desk, Meera 09:52 ⚠ manual" — a deliberate act; when the PMS returns, an older fact is history and a newer contradicting one is flagged (S4's clause). <b>G11 is "new since 08:00"</b> with nobody available. Answers <i>"what is happening to each room, and who has it"</i> without a click — the owner's requirement.</div>
-<div class="note hold"><b>Redline 4, under audit (2026-09-13).</b> Two candidates for the board of a large property; the owner picks one, or a combination (map for the glance, wall for the work — both are the same data and the chip switches). Whichever is chosen replaces frame 1's paged list. Drawn on a flat property so no candidate can lean on floors; the grouping is by zone by default and by whatever else Master Data's tree holds. Both also carry the <i>PMS ok · last fact</i> line in the strip and the manual source, per part 1 of this redline.</div>
+<div class="note fix"><b>Redline 4 folded — owner, 2026-09-13: "we can lock both."</b> The board is <b>two views of one data set</b>, switched by the Map / Wall chip: the map for the glance, the wall for the work. Both grouped by zone by default. The paged list (frame 1) is removed. Drawn on a flat property so no candidate can lean on floors; the grouping is by zone by default and by whatever else Master Data's tree holds. Both also carry the <i>PMS ok · last fact</i> line in the strip and the manual source, per part 1 of this redline.</div>
 
 <h1 class="frame">2 · <b>Prepare</b>. The window's state, what changed, the proposal, the button.</h1>
 <div class="win">
@@ -442,8 +445,53 @@ ul.flows b{color:var(--text)}
     </div>
   </div>
 </div>
-<div class="note hold"><b>Redline 4, part 1, under audit (2026-09-13) — the manual source.</b> The owner: a PMS property with a network fault must still update room state by hand and see the current status. So <i>Room state…</i> is on every room page at every property, never gated by the "stay facts usually come from" setting (Setup › Rules, which only decides what the board expects and warns about — <i>PMS silent since</i>). A manual entry is a deliberate act with source <b>manual</b>, shown as such wherever the condition is shown; the ordering clause handles the PMS's return. It rides <code>roomcare.amend</code>; no seventh permission. Sources are now three: PMS (the Hub), GuestOps (its stay events, for a property with GuestOps and no PMS), manual (entered here).</div>
+<div class="note fix"><b>Redline 4, part 1 — <i>Room state…</i> is on every room page at every property.</b> Drawn in full, with the PMS down, on frame 4c.</div>
 <div class="note"><b>Draws S4 (the ordering clause, who leads), S5 c8/c11/c12, §2.1–2.4.</b> The condition line always says who set it and when — attendant, inspection, supervisor, the PMS, the desk. The PMS's 09:11 is <i>newer than a deliberate act here</i>, so under <b>Room Care leads</b> it is a flag the supervisor clears; under <b>PMS leads</b> it would have been applied with "from the PMS" on it and the overwrite recorded. The <i>Today</i> panel is the read GuestOps shows the desk through Context (c12) — <b>this screen is the link's target</b>.</div>
+
+<h1 class="frame">4c · <b>Room state — the manual source</b>. The PMS is down; the desk records a departure by hand. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
+<div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
+  </div>
+  <div class="body">
+    <div class="strip"><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>24</b> in progress</span><span style="margin-left:auto;color:var(--warn)"><b>PMS silent since 09:40</b> · last fact 09:40 · 05 Sep 09:52</span></div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
+      <span style="font-size:18px;font-weight:600">Room G09 · Garden villa · Zone 1</span>
+      <span class="pill bad">DIRTY</span><span class="mono">set by desk · Meera Krishnan · 05 Sep 09:52 · <b>manual</b></span>
+    </div>
+    <div class="mono" style="margin-bottom:12px">vacant <span class="tag">manual</span> · departed 09:50 <span class="tag">manual</span> · arrival expected 15:00 <span class="tag">manual</span> · linen last changed 02 Sep</div>
+    <div class="dlg">
+      <div class="sect" style="margin-top:0">Room state — enter a fact by hand</div>
+      <div class="cols">
+        <div>
+          <label>What happened</label>
+          <span class="chip">Guest arrived</span><span class="chip on">Guest departed</span><span class="chip">Occupied</span><span class="chip">Vacant</span><br>
+          <label>Arrival expected today</label><div class="field" style="display:inline-block;min-width:90px">15:00</div><span class="mono"> · becomes "sold tonight" for priority</span><br>
+          <label>Note</label><div class="field" style="display:block">PMS down; guest checked out at the desk on paper</div>
+        </div>
+        <div class="kv">
+          <div>Recorded as</div><div>source <b>manual</b> · Meera Krishnan · 09:52 — a <b>deliberate act</b></div>
+          <div>Then</div><div>G09 is DIRTY · VACANT · sold 15:00 → the policy runs (or the next <i>Prepare</i> adds it) — a departure clean, priority 1</div>
+          <div>When the PMS returns</div><div>its checkout fact is <b>older</b> than this act → history, not applied. A <b>newer</b> fact that disagrees → a disagreement flag (Room Care leads) or applied with provenance (PMS leads) — S4's clause, unchanged</div>
+          <div>Available</div><div>at every property, always — never gated by where facts usually come from; rides <code>roomcare.amend</code></div>
+        </div>
+      </div>
+      <div style="margin-top:12px"><span class="btn pri">Record</span><span class="btn">Back</span></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h3>Where a property's stay facts usually come from — Setup › Rules</h3>
+      <div class="kv">
+        <div>◉ the PMS</div><div>the Hub's <code>room.state_observed</code> — checkout, arrival, occupancy, sold tonight — source <b>PMS</b>; the strip warns when it goes silent</div>
+        <div>○ GuestOps, no PMS</div><div>GuestOps's own stay events — arrived, departed, room changed, assigned for today — source <b>GuestOps</b></div>
+        <div>○ entered here</div><div>no PMS, no GuestOps — the desk keys every change on this screen — source <b>manual</b></div>
+        <div>the setting decides</div><div>only what the board <i>expects</i> and warns about. The manual control above exists in all three.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="note fix"><b>Redline 4, part 1, folded — owner, 2026-09-13.</b> Three sources of the room's stay facts — PMS, GuestOps, manual — one rule for all: every fact is a <code>room_observation</code> with its provenance, applied unless it contradicts a later deliberate act here. A manual entry <i>is</i> a deliberate act. The condition line shows <b>manual</b> wherever the condition is shown, so a hand-keyed fact is visibly hand-keyed. Chapter 03 §2.2 carries the three sources and §2.8 the <i>stay facts come from</i> row.</div>
 
 <h1 class="frame">4b · <b>A room, inspected</b>. 401 — a departure clean whose rule says <i>arrivals only</i>, requested and answered.</h1>
 <div class="win">
@@ -634,7 +682,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
-  <li><b>2026-09-13 · redline 4, under audit</b> — (1) the manual source: <i>Room state…</i> on every room page at every property, source <b>manual</b>, the PMS's return handled by S4's clause; the board's strip shows <i>PMS ok · last fact</i> / <i>PMS silent since</i>. (2) the board for a large property: the paged list rejected; two candidates drawn on a flat 250-room resort — <b>1a the map</b> (tiles by zone) and <b>1b the wall</b> (every room one line, grouped by zone, no pages). The owner picks. The lock stands until this redline is folded.</li>
+  <li><b>2026-09-13 · redline 4 folded, RE-LOCKED</b> — owner: <i>"we can lock both; mark the paged list removed by owner."</i> (1) the manual source drawn as its own frame, <b>4c</b> — <i>Room state…</i> at every property, source manual, the three sources named, S4's clause handling the PMS's return. (2) the board is <b>1a the map</b> and <b>1b the wall</b>, one data set, a chip between them; frame 1's paged list is <b>removed by the owner</b> and kept faint for the record.</li>
   <li><b>2026-09-05 · LOCKED</b> — owner: <i>"the pagination is based on page 64 — the pager always at the bottom — if that confirms we can lock it."</i> Confirmed (§5, §6, §8); locked with <code>02-the-roomcare-setup.html</code>.</li>
   <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
   <li><b>2026-09-05 · redline 1 folded</b> — frame 7 (Setup) had three tabs on one screen; now the first tab here and all seven on <code>02-the-roomcare-setup.html</code>.</li>
