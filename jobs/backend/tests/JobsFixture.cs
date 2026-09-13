@@ -1,5 +1,6 @@
 using Npgsql;
 using HotelOS.Platform;
+using HotelOS.Applications.TestSupport;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Jobs.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,7 @@ public sealed class JobsFixture : IAsyncLifetime
     /// run leaves behind is identifiable as that run's, and nothing it leaves
     /// behind is standing where a real install wants to stand.
     /// </remarks>
-    private readonly InstallerConvention _convention = new(Run);
+    private readonly InstallerConvention _convention = new(JobsDbContext.Schema, Run);
 
     /// <summary>What names this run's roles and its database alike.</summary>
     private static string Run => Guid.NewGuid().ToString("n")[..8];
@@ -54,26 +55,42 @@ public sealed class JobsFixture : IAsyncLifetime
     /// </remarks>
     private const string ProvisionerRole = "hotelos_test";
 
-    /// <summary>The development cluster's provisioner-equivalent.</summary>
+    /// <summary>The cluster's own provisioner — the role the installer uses.</summary>
     /// <remarks>
     /// <para>
-    /// The installer runs step 4 as a dedicated provisioner role holding
-    /// <c>CREATEROLE</c> — <c>02-roles.sql</c> grants it. A developer's cluster
-    /// has no such role: <c>hotelos_test</c> holds <c>CREATEDB</c> and not
-    /// <c>CREATEROLE</c>, which this suite established by being refused
-    /// <i>"42501: permission denied to create role"</i>.
+    /// <b>This connected as <c>postgres</c>/<c>devroot</c>, which ADR 0156
+    /// rejects by name</b>, and the justification written above it was false:
+    /// it said <i>"a developer's cluster has no such role"</i>, while
+    /// <c>hotelos_provisioner</c> — <c>LOGIN CREATEROLE</c> — has been in
+    /// <c>deployment/database/02-roles.sql:169</c> since the initial commit of
+    /// 2026-08-24. Verified against this cluster rather than the file:
+    /// <c>rolcreaterole</c> is true for it and false for <c>hotelos_test</c>,
+    /// which is the half the old comment got right.
     /// </para>
     /// <para>
-    /// So the <b>credential</b> differs and the <b>convention</b> does not. What
-    /// gets created, in what order, with which grants, is
-    /// <see cref="InstallerConvention"/>'s and therefore the installer's; who
-    /// runs it is whoever holds the authority on the cluster at hand. Widening
-    /// <c>hotelos_test</c> instead would hand every suite on the machine the
-    /// ability to mint roles, which is a larger change than this needs.
+    /// The comment was last edited on 2026-09-09 and nobody re-checked the claim
+    /// under it. A superuser credential in a suite is the kind of thing that
+    /// survives on a sentence nobody re-reads, which is why the sentence is
+    /// replaced by a measurement here.
+    /// </para>
+    /// <para>
+    /// <b>The convention is unchanged and was never the problem</b>: what gets
+    /// created, in what order, with which grants, is
+    /// <see cref="InstallerConvention"/>'s and therefore the installer's. Only
+    /// who runs it changes, and it now matches the installer exactly — step 4
+    /// runs as the provisioner, and so does this (FF's shape, <c>698cab8</c>).
     /// </para>
     /// </remarks>
     private static string ProvisionerConnection(string database) =>
-        $"Host={Host};Port={Port};Database={database};Username=postgres;Password=devroot";
+        $"Host={Host};Port={Port};Database={database};Username={ClusterProvisioner};"
+        + $"Password={ProvisionerPassword};Pooling=false;Include Error Detail=true";
+
+    /// <summary>The role the platform ships for this work — never a superuser.</summary>
+    private const string ClusterProvisioner = "hotelos_provisioner";
+
+    /// <summary>Its password, overridable for a cluster that sets another.</summary>
+    private static string ProvisionerPassword =>
+        Environment.GetEnvironmentVariable("HOTELOS_PROVISIONER_PASSWORD") ?? "devprovisioner";
 
     private static string Host => ScratchDatabase.Target.Split(':')[0];
 
@@ -106,6 +123,15 @@ public sealed class JobsFixture : IAsyncLifetime
         }
     }
 
+    /// <summary>One statement, as whoever holds the authority for it.</summary>
+    private static async Task GrantAsync(string connection, string sql)
+    {
+        await using var open = new Npgsql.NpgsqlConnection(connection);
+        await open.OpenAsync();
+        await using var command = new Npgsql.NpgsqlCommand(sql, open);
+        await command.ExecuteNonQueryAsync();
+    }
+
     private async Task PrepareAsync()
     {
         // The cluster roles first: they are cluster-scoped, so they must exist
@@ -120,6 +146,7 @@ public sealed class JobsFixture : IAsyncLifetime
                 {
                     [ApplicationRole] = _password,
                     [ProvisionerRole] = "devtest",
+                    [ClusterProvisioner] = ProvisionerPassword,
                 }));
 
         if (_database is null)
@@ -142,6 +169,15 @@ public sealed class JobsFixture : IAsyncLifetime
         // exists, which is true for a platform service and false for an
         // installed application. This runs the installer's step 4 instead —
         // F7, ruled 2026-08-31.
+        // **The scratch database is `hotelos_test`'s, so `hotelos_test` is who can
+        // let the provisioner work in it.** The platform grants the provisioner
+        // CREATE on the platform's own database and knows nothing about this
+        // one; asking this database's owner is the narrowest way to close that
+        // and needs no privilege either role lacks. FF's shape, 698cab8.
+        await GrantAsync(
+            $"Host={Host};Port={Port};Database=postgres;Username={ProvisionerRole};Password=devtest",
+            $"GRANT CREATE ON DATABASE \"{_database.Name}\" TO {ClusterProvisioner}");
+
         await _convention.ProvisionSchemaAsync(
             ProvisionerConnection(_database.Name), _database.Name);
 
@@ -154,7 +190,7 @@ public sealed class JobsFixture : IAsyncLifetime
         // suite does, because a job that is raised appends an event in the same
         // transaction and a round that could not write one would be proving
         // half of every operation. SHELL-Q37 held ten rows on exactly this.
-        await InstallerConvention.ProvisionEventStoreAsync(ProvisionerConnection(_database.Name));
+        await PlatformEventStore.ProvisionAsync(ProvisionerConnection(_database.Name));
 
         await using var migrator = Context(_convention.MigratorConnectionFor(_database.Name));
         await migrator.Database.MigrateAsync();
@@ -232,25 +268,30 @@ public sealed class JobsFixture : IAsyncLifetime
     /// <inheritdoc />
     public async Task DisposeAsync()
     {
-        // The roles go before the database, because DROP OWNED needs the
-        // database they own things in to still be there. Roles are cluster-wide
-        // and a scratch database is not, so this is the only cleanup that has
-        // to be asked for rather than falling out of dropping the database.
+        // **The database goes first, and this had it the other way round.** The
+        // old order reasoned that `DROP OWNED` needs the database the roles own
+        // things in — true, and insufficient: `DROP OWNED` clears what a role
+        // owns and was granted, while the database's own grants still name it,
+        // so `DROP ROLE` then failed with *"cannot be dropped because some
+        // objects depend on it"* and the teardown reported it to a stream that
+        // was not reading stderr. Two roles survived every passing run, and
+        // eight were on this cluster before the count was taken.
         //
-        // **Unconditional.** This opened `if (_database is null) return;`, so a
-        // run that threw before the database existed left its roles behind —
-        // and the first write happens before the database, which makes that the
-        // one run whose residue was guaranteed to survive (`INSTALL-Q88`). The
-        // drop takes a null database connection for exactly this case: nothing
-        // is owned in a database that was never created.
-        await _convention.DropRolesAsync(
-            ProvisionerConnection("postgres"),
-            _database is null ? null : ProvisionerConnection(_database.Name));
-
+        // Dropping the database takes every per-database dependency with it,
+        // after which the roles drop cleanly — which is why the leftovers from
+        // earlier runs, whose databases were long gone, dropped by hand without
+        // a word. `DropRolesAsync` is then passed no database connection, which
+        // is its documented shape for a run with nothing to clean inside. FF's
+        // ordering, `698cab8`.
+        //
+        // **Unconditional**, still: a run that threw before the database existed
+        // is the one whose roles are otherwise never cleaned up (`INSTALL-Q88`).
         if (_database is not null)
         {
             await _database.DisposeAsync();
         }
+
+        await _convention.DropRolesAsync(ProvisionerConnection("postgres"), null);
     }
 }
 

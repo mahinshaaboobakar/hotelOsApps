@@ -127,7 +127,19 @@ var platform = PlatformEnvironment.Read()
 // `AddHotelOsPlatform`, which a *platform service* calls and which left an
 // application with no `JwtCallerAuthenticator` — the refusal the first
 // Kernel-launched boot of Jobs died on.
-builder.Services.AddHotelOsApplication<JobsDbContext>(platform);
+// **The admission is this call's receipt** — `EVT-Q4` §E, landed 2026-09-10.
+// The event consumer below now requires it, so the pairing that used to be held
+// by memory is held by the compiler: a consumer cannot be registered by a
+// process the Kernel never admitted.
+//
+// Jobs needs no `if (admission is not null)` the way GuestOps does, and the
+// reason is three lines up rather than a difference of opinion: `migrate`
+// returns at line 48, and serving without a `PlatformEnvironment` throws rather
+// than continuing. There is no path here that reaches this line unadmitted —
+// checked when this was paired rather than assumed, because the latent defect
+// FF found in GuestOps was exactly a consumer registered where no admission
+// could resolve.
+var admission = builder.Services.AddHotelOsApplication<JobsDbContext>(platform);
 
 // Master Data is **read through the install grant, not over the wire** — the
 // client that stood here would have been refused the first time a flow reached
@@ -141,6 +153,7 @@ builder.Services.AddHotelOsApplication<JobsDbContext>(platform);
 // durable consumer, ack after commit, idempotent on the row (EVT-Q4).
 builder.Services.AddApplicationEventConsumer(
     natsUrl: platform.NatsUrl,
+    admission: admission,
     declare: events => events
         .Consume<PpmDue, PpmDueHandler>(EventTypes.PpmDue)
         .Consume<ShiftStarted, ShiftStartedHandler>(EventTypes.ShiftStarted)

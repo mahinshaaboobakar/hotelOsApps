@@ -43,6 +43,8 @@
     <!-- The recording doubles and the scratch database — one implementation, shared. -->
     <ProjectReference
       Include="$(PlatformRoot)\packages\sdk-dotnet\HotelOS.Platform.TestSupport\HotelOS.Platform.TestSupport.csproj" />
-  </ItemGroup>
+      <ProjectReference
+      Include="..\..\..\packages\HotelOS.Applications.TestSupport\HotelOS.Applications.TestSupport.csproj" />
+</ItemGroup>
 
 </Project>
