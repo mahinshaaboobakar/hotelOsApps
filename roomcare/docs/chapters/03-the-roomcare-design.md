@@ -47,7 +47,7 @@ the platform names it.
 flowchart TB
     subgraph Desktop[HotelOS Desktop]
         Shell[Desktop Shell]
-        RCUI["roomcare · ui.module<br/>board · my rooms · room · prepare · supervision · setup"]
+        RCUI["roomcare · ui.module<br/>board · prepare · room states · supervision · deep clean · setup · my rooms"]
         W["5 widgets"]
     end
 
@@ -253,7 +253,7 @@ Absent Inventory, the capability that writes this table is not shown (§8).
 |---|---|---|
 | `service_window` | property | `window` `MORNING · EVENING` · `starts` · `ends` (may cross midnight) · `enabled` · `allow_assignment_outside` (S0) |
 | `service_standard` | property × room type × service | `minutes` · `credits` · `inspection_rule` · `checklist_ref` (the inspection app's id, opaque here) · `phases[]` — ADR 0044's row, in rows not columns |
-| `property_policy` | property, one row, versioned | `trigger_mode` `PREPARE · AUTOMATIC` · `who_leads` `ROOM_CARE · PMS` · `stay_source` `PMS · GUESTOPS · MANUAL` (what the board expects and warns about — *PMS silent since*; gates nothing) · `on_departure_condition` `DIRTY` · `linen_rule` `{ kind: EVERY_N_DEFERRABLE \| MUST_BY_N, n }` · `towels` `DAILY \| GREEN_PROGRAMME` · `refresh_after_days` · `dnd_recheck_minutes` · `dnd_recheck_until` `WINDOW_END` · `supervisor_after_days` (default 2) · `priority_ladder[]` · `assignment_strategy` `CONTINUITY · SAME_ZONE · LOWEST_LOAD` · `unsold_departure` `TODAY \| MAY_WAIT` · `version` · `changed_by` · `changed_at` |
+| `property_policy` | property, one row, versioned | `trigger_mode` `PREPARE · AUTOMATIC` · `who_leads` `ROOM_CARE · PMS` · `stay_source` `PMS · GUESTOPS · MANUAL` (what the board expects and warns about — *PMS silent since*; gates nothing) · `board_default_view` `MAP · WALL` · `states_default_view` `SHEET · TAP_GRID · COMPACT` (redline 5) · `on_departure_condition` `DIRTY` · `linen_rule` `{ kind: EVERY_N_DEFERRABLE \| MUST_BY_N, n }` · `towels` `DAILY \| GREEN_PROGRAMME` · `refresh_after_days` · `dnd_recheck_minutes` · `dnd_recheck_until` `WINDOW_END` · `supervisor_after_days` (default 2) · `priority_ladder[]` · `assignment_strategy` `CONTINUITY · SAME_ZONE · LOWEST_LOAD` · `unsold_departure` `TODAY \| MAY_WAIT` · `version` · `changed_by` · `changed_at` |
 | `area_schedule` | property × location | `times[]` (`every 2 h 06:00–22:00`, `after MORNING`, `at 05:30`) · `service_standard_id` (S3) |
 | `deep_clean_plan` | property × room type | `every_months` (S0) |
 | `room_zone_assignment` | property × room | `zone_id → masterdata.zones` · `effective_from` · `effective_until` · `assigned_by` — **ADR 0044's aggregate, Room Care's** |
@@ -724,7 +724,7 @@ citations.
 | 1 | **The board — two views of one data set, a chip between them** (owner, redline 4, 2026-09-13; the paged list removed): **1a the map** — one tile per room, fill = condition, ring = today's service state, corner marks for sold tonight · DND · disagreement · blocked · supervision, grouped by zone (or building/wing, floor, room type where Master Data's tree has them), filters dim and never remove; **1b the wall** — every room one line with every column, grouped by zone with sticky headers carrying the zone's counts, a zone collapsible, **no pages** — the whole house scrolled within the window (a stated departure from page 64 §6 for a whole-house view, reported to FF); the strip carries *PMS ok · last fact* / *PMS silent since* | `roomcare.read`, scoped to what the viewer may see | S0, S3, S4, S5 c9; redline 4 |
 | 2 | **Prepare** — the window's state, "N changes since", the button (*Prepare the day* / *Add the new rooms*), the proposal: rooms by zone against attendants on shift (from Context), *nobody available* rows, accept / move | `roomcare.assign` | S0 trigger, the assignment flow |
 | 3 | **My rooms** — the attendant's list in priority order with earliest times, linen due/must, the guest's reductions; each room: Start · Pause · End as Done / Partial (what) / Declined / DND; photo; restock (only when Inventory is installed); ask for extra time; **Found an issue** → a job, when Jobs is installed and `job.create` held | the assignee (`room.clean`) | S5 c1, c4, c5; `RC-Q2`; redline 2 |
-| 4c | **Room state — the manual source** — guest arrived · departed · occupied · vacant · arrival expected today; recorded as source `MANUAL`, a deliberate act; **on every room page at every property, never gated** by `stay_source`; rides `roomcare.amend` | `roomcare.amend` | S4; redline 4 |
+| 4c–4e | **Room states — its own top tab after Prepare** (owner, redline 5, 2026-09-13): every room on one screen, four facts editable per room — condition · occupancy · sold tonight · stay — **one Save for many rooms**, each write a `room_observation` with source `MANUAL` (a deliberate act, S4's clause); a row the PMS has updated since the edit is flagged before saving; bulk *set for selected* / *select all in zone*. **Three views of one data set**, a chip between them, like the Board's Map/Wall: **4c the sheet** (the wall with editable cells, source · when on every row), **4d the tap grid** (pick a state, tap rooms), **4e compact** (segmented one-tap controls, two zones per row). Available at every property, never gated by `stay_source`; rides `roomcare.amend`. The room page's *Room state…* stays as the single-room advanced edit | `roomcare.amend` | S4; redlines 4–5 |
 | 4 | **A room** — condition with its source and time; today's task and every attempt; **the inspection card** — rule, requested, answered, what a failure does; the disagreement, if any, with *keep ours / take theirs*; the supervisor's decision box when the lane is open; the day's history including job touches and issues raised; **Raise a job for this room** (Jobs installed, `job.create` held); the linen date; the deep-clean due date | `roomcare.read`; actions by permission | S4, S5 c8, c9, c11, c12; `RC-Q1(6)`; redline 2 |
 | 5 | **Supervision** — the lane: rooms past the threshold, disagreements, arrivals before the window, nobody available; each with its decision box and reason | `roomcare.amend` | S5 c9, S4, S0 |
 | 6 | **Deep clean** — due list per room type, plan a window, the block request's state, the job's progress (as `JOBS-Q2` publishes it), return-to-sale | `roomcare.plan` | S0 deep clean |
@@ -795,11 +795,11 @@ an illustration) and `events.proto:95` (`RC-Q1(10)`, CC's).
 
 ### The mockups are locked — owner, 2026-09-05
 
-`docs/mockups/01-the-roomcare-screens.html` (twelve frames after redline 4)
+`docs/mockups/01-the-roomcare-screens.html` (fourteen frames after redline 5)
 and `02-the-roomcare-setup.html` (seven) were redlined three times on
 2026-09-05, and once more on 2026-09-13 (the board as a map and a wall for
-a large flat property, the manual source as its own frame — re-locked the
-same day) — Setup split into seven frames; inspection made visible on the
+a large flat property; then redline 5 the same day — the manual source as
+its own top tab, *Room states*, with three views — re-locked) — Setup split into seven frames; inspection made visible on the
 room page and "found an issue" raising a job; the areas list paged and the
 GM-only access tab kept and renamed — and locked by the owner the same day
 on the confirmation that pagination follows page 64 (§5, §6, §8). They are

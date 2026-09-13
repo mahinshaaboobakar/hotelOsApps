@@ -131,6 +131,50 @@ table.wall tr.g td{background:var(--color-surface-raised);color:var(--text);font
 .glyph.dirty{background:var(--bad)}.glyph.clean{background:var(--ok)}.glyph.insp{background:var(--indigo)}
 .viewport{max-height:520px;overflow:hidden;position:relative}
 .viewport:after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(transparent,var(--bg))}
+/* Room states — the three views (redline 5) */
+.states table{width:100%;border-collapse:collapse;font-size:12px}
+.states th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
+.states td{padding:4px 8px;border-bottom:1px solid var(--line);vertical-align:middle;line-height:1.3}
+.states tr.g td{background:var(--color-surface-raised);color:var(--text);font-weight:600;padding:7px 8px}
+.states tr.chg td{background:var(--color-warn-soft)}
+.states tr.conf td{background:var(--color-bad-soft)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.mono{font:11px ui-monospace,Menlo,monospace;color:var(--dim)}
+.sel{display:inline-block;border:1px solid var(--color-line-strong);border-radius:6px;padding:2px 7px;font-size:12px;color:var(--text);background:var(--color-surface);min-width:86px}
+.sel.t{min-width:56px}
+.sel.chg{border-color:var(--warn)}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px;margin:0 6px 6px 0;color:var(--dim)}
+.chip.on{border-color:var(--indigo);color:var(--text)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--text);margin-right:8px;font:inherit;background:none}
+.btn.pri{background:var(--accent);border-color:transparent;color:var(--color-ink-on-accent)}
+.btn.sm{padding:2px 8px;font-size:11px}
+.btn.off{color:var(--faint);border-style:dashed}
+.strip{display:flex;gap:22px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
+.strip b{color:var(--text);font-size:14px;margin-right:4px}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}.pill.ok{color:var(--ok);border-color:var(--ok)}.pill.insp{color:var(--indigo);border-color:var(--indigo)}
+.pill.on{background:var(--indigo);color:var(--text);border-color:var(--indigo)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:5px;vertical-align:middle}
+.tag.man{color:var(--warn);border-color:var(--warn)}
+.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
+.note b{color:var(--text)}
+.states .viewport{max-height:470px;overflow:hidden;position:relative}
+.states .viewport:after{content:"";position:absolute;left:0;right:0;bottom:0;height:50px;background:linear-gradient(transparent,var(--bg))}
+.legend{font-size:11px;color:var(--faint);margin:4px 0 8px}
+.segs{display:inline-flex;border:1px solid var(--color-line-strong);border-radius:6px;overflow:hidden;vertical-align:middle}
+.segs span{padding:2px 8px;font-size:11px;color:var(--dim);border-right:1px solid var(--line)}
+.segs span:last-child{border-right:0}
+.segs span.on{background:var(--indigo);color:var(--text)}
+.segs.bad span.on{background:var(--bad);color:var(--color-ink-on-accent)}
+.segs.ok span.on{background:var(--ok);color:var(--color-ink-on-accent)}
+.tilegrid{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 12px}
+.tile{width:52px;height:38px;border-radius:5px;border:2px solid transparent;font:600 10px ui-monospace,Menlo,monospace;display:grid;place-items:center;position:relative;color:var(--color-ink-on-accent);cursor:pointer}
+.tile.dirty{background:var(--bad)}.tile.clean{background:var(--ok)}.tile.insp{background:var(--indigo);color:var(--text)}
+.tile.picked{outline:2px solid var(--text);outline-offset:2px}
+.tile.chg:after{content:"✎";position:absolute;top:-7px;right:-4px;font-size:10px;background:var(--color-surface);color:var(--warn);border-radius:8px;padding:0 3px;border:1px solid var(--warn)}
+.tile small{position:absolute;bottom:1px;right:3px;font-size:8px;opacity:.8}
+.dock{border:1px solid var(--indigo);border-radius:12px;padding:12px 16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent);display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin:12px 0}
+
 ul.flows{max-width:920px;color:var(--dim)}
 ul.flows li{margin-bottom:10px}
 ul.flows b{color:var(--text)}
@@ -141,7 +185,7 @@ ul.flows b{color:var(--text)}
 
 <div class="intro">
   <h1>Room Care · the screens</h1>
-  <p><b>LOCKED by the owner, 2026-09-05; re-locked 2026-09-13</b> after redline 4 — the board redrawn as a map and a wall for a large flat property, and the manual source given its own frame (the log at the foot). These frames, with <code>02-the-roomcare-setup.html</code>, are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page with its date, never a silent edit.</p>
+  <p><b>LOCKED by the owner, 2026-09-05; re-locked 2026-09-13</b> after redlines 4 and 5 — the board as a map and a wall for a large flat property; the manual source as its own tab, <b>Room states</b>, with three views (the log at the foot). The bar is six tabs: Board · Prepare · Room states · Supervision · Deep clean · Setup. These frames, with <code>02-the-roomcare-setup.html</code>, are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page with its date, never a silent edit.</p>
   <p><b>Pagination, confirmed at the lock:</b> page 64 §6 — paged-with-total (<code>CORE-Q13</code>), a numbered pager, "1–12 of N" honest because N is on the wire; §5 — the list scrolls within the screen and the pager stays at the bottom, always visible; §8 — every list states its rows per page.</p>
   <p><b>Palette authority:</b> the seventeen tokens in <code>apps/desktop/src/styles.css</code> at the shell's own values (ADR 0106, page 64 §1). Every colour on this page is one of them; no frame names a hex of its own. Chrome is the current era — one window, a 56 px top bar, no left rail (page 64 §3); lists are bare tables with a numbered pager on <code>common.v1</code> paged-with-total (§4, §6); one <code>.btn</code> vocabulary (§2). Scaffold copied from Jobs' locked mockup.</p>
   <p><b>Design of record:</b> <code>02-the-roomcare-walkthrough-and-sign-off.md</code> (locked 2026-09-05) and <code>03-the-roomcare-design.md</code>. Each frame's caption names the walkthrough section (S0–S7) or the guest case (c1–c13) it draws.</p>
@@ -158,7 +202,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -195,7 +239,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
@@ -219,7 +263,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
@@ -265,7 +309,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab on">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab">Board</div><div class="tab on">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -379,7 +423,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -445,59 +489,128 @@ ul.flows b{color:var(--text)}
     </div>
   </div>
 </div>
-<div class="note fix"><b>Redline 4, part 1 — <i>Room state…</i> is on every room page at every property.</b> Drawn in full, with the PMS down, on frame 4c.</div>
+<div class="note fix"><b>Redline 4/5 — <i>Room state…</i> on the room page is the advanced edit for one room.</b> Editing many rooms at once is the <b>Room states</b> tab — frames 4c–4e.</div>
 <div class="note"><b>Draws S4 (the ordering clause, who leads), S5 c8/c11/c12, §2.1–2.4.</b> The condition line always says who set it and when — attendant, inspection, supervisor, the PMS, the desk. The PMS's 09:11 is <i>newer than a deliberate act here</i>, so under <b>Room Care leads</b> it is a flag the supervisor clears; under <b>PMS leads</b> it would have been applied with "from the PMS" on it and the overwrite recorded. The <i>Today</i> panel is the read GuestOps shows the desk through Context (c12) — <b>this screen is the link's target</b>.</div>
 
-<h1 class="frame">4c · <b>Room state — the manual source</b>. The PMS is down; the desk records a departure by hand. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="win">
+<!-- ===================================================================== -->
+<h2 class="sec">C2 · room states — every room, edited from one screen</h2>
+
+<h1 class="frame">4c · <b>Room states — the sheet</b>. Its own tab; every room a row; change the cell; save once. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
+<div class="states"><div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
-    <div class="strip"><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>24</b> in progress</span><span style="margin-left:auto;color:var(--warn)"><b>PMS silent since 09:40</b> · last fact 09:40 · 05 Sep 09:52</span></div>
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
-      <span style="font-size:18px;font-weight:600">Room G09 · Garden villa · Zone 1</span>
-      <span class="pill bad">DIRTY</span><span class="mono">set by desk · Meera Krishnan · 05 Sep 09:52 · <b>manual</b></span>
+    <div class="strip"><span><span class="chip on">Sheet</span><span class="chip">Tap grid</span><span class="chip">Compact</span></span><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>131</b> occupied</span><span><b>41</b> sold tonight</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div style="margin-bottom:6px"><span class="mono">group by</span> <span class="chip on">Zone</span><span class="chip">Building</span><span class="chip">Room type</span> <span class="mono" style="margin-left:14px">show</span> <span class="chip on">All</span><span class="chip">Dirty</span><span class="chip">Occupied</span><span class="chip">Vacant</span><span class="chip">Sold tonight</span><span class="chip" style="border-color:var(--warn);color:var(--warn)">Changed · 14</span><span class="chip" style="border-color:var(--bad);color:var(--bad)">Conflicts · 1</span></div>
+    <div class="viewport">
+    <table>
+      <tr><th style="width:26px"><input type="checkbox"></th><th>Room</th><th>Condition</th><th>Occupancy</th><th>Sold tonight</th><th>Stay</th><th>Source · when</th><th></th></tr>
+      <tr class="g"><td colspan="8">▾ Zone 1 · Garden villas · 18 rooms · 5 changed</td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G01</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">15:00</span></td><td><span class="sel">departed ▾</span></td><td class="mono">PMS 03:02</td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G02</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><span class="btn sm">▸</span></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G03 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">13:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G04 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">14:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G05</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><span class="btn sm">▸</span></td></tr>
+      <tr class="conf"><td><input type="checkbox" checked></td><td class="num">G06 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 · <b style="color:var(--bad)">PMS said "occupied" at 09:51 — newer</b></td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G07</td><td><span class="sel">clean ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">none ▾</span></td><td class="mono">Anita 08:41</td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G08</td><td><span class="sel">inspected ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">13:00</span></td><td><span class="sel">none ▾</span></td><td class="mono">Lakshmi 08:58</td><td><span class="btn sm">▸</span></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G09 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">15:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G10 – G18</td><td colspan="6" class="mono">nine more rows — drawn short here; on the screen every room is a row</td></tr>
+      <tr class="g"><td colspan="8">▾ Zone 2 · Lake wing · 24 rooms · 9 changed</td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">L01 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td></td><td class="num">L14</td><td colspan="5" class="mono">blocked · deep clean 01 – 05 Sep · out of order (its owner) — not editable here</td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">L02 – L24</td><td colspan="6" class="mono">… and zones 3 – 9 below — one continuous sheet, scrolled within the window, the strip and the zone headers fixed</td></tr>
+    </table>
     </div>
-    <div class="mono" style="margin-bottom:12px">vacant <span class="tag">manual</span> · departed 09:50 <span class="tag">manual</span> · arrival expected 15:00 <span class="tag">manual</span> · linen last changed 02 Sep</div>
-    <div class="dlg">
-      <div class="sect" style="margin-top:0">Room state — enter a fact by hand</div>
-      <div class="cols">
-        <div>
-          <label>What happened</label>
-          <span class="chip">Guest arrived</span><span class="chip on">Guest departed</span><span class="chip">Occupied</span><span class="chip">Vacant</span><br>
-          <label>Arrival expected today</label><div class="field" style="display:inline-block;min-width:90px">15:00</div><span class="mono"> · becomes "sold tonight" for priority</span><br>
-          <label>Note</label><div class="field" style="display:block">PMS down; guest checked out at the desk on paper</div>
-        </div>
-        <div class="kv">
-          <div>Recorded as</div><div>source <b>manual</b> · Meera Krishnan · 09:52 — a <b>deliberate act</b></div>
-          <div>Then</div><div>G09 is DIRTY · VACANT · sold 15:00 → the policy runs (or the next <i>Prepare</i> adds it) — a departure clean, priority 1</div>
-          <div>When the PMS returns</div><div>its checkout fact is <b>older</b> than this act → history, not applied. A <b>newer</b> fact that disagrees → a disagreement flag (Room Care leads) or applied with provenance (PMS leads) — S4's clause, unchanged</div>
-          <div>Available</div><div>at every property, always — never gated by where facts usually come from; rides <code>roomcare.amend</code></div>
-        </div>
-      </div>
-      <div style="margin-top:12px"><span class="btn pri">Record</span><span class="btn">Back</span></div>
-    </div>
-    <div class="card" style="margin-top:14px">
-      <h3>Where a property's stay facts usually come from — Setup › Rules</h3>
-      <div class="kv">
-        <div>◉ the PMS</div><div>the Hub's <code>room.state_observed</code> — checkout, arrival, occupancy, sold tonight — source <b>PMS</b>; the strip warns when it goes silent</div>
-        <div>○ GuestOps, no PMS</div><div>GuestOps's own stay events — arrived, departed, room changed, assigned for today — source <b>GuestOps</b></div>
-        <div>○ entered here</div><div>no PMS, no GuestOps — the desk keys every change on this screen — source <b>manual</b></div>
-        <div>the setting decides</div><div>only what the board <i>expects</i> and warns about. The manual control above exists in all three.</div>
-      </div>
-    </div>
+    <div class="dock"><b>3 rows selected</b><span class="mono">set for all:</span><span class="sel">condition ▾</span><span class="sel">occupancy ▾</span><span class="sel t">sold at</span><span class="sel">stay ▾</span><span class="btn sm">Apply to selected</span><span class="mono" style="margin-left:auto">250 of 250 — no pages</span></div>
   </div>
-</div>
-<div class="note fix"><b>Redline 4, part 1, folded — owner, 2026-09-13.</b> Three sources of the room's stay facts — PMS, GuestOps, manual — one rule for all: every fact is a <code>room_observation</code> with its provenance, applied unless it contradicts a later deliberate act here. A manual entry <i>is</i> a deliberate act. The condition line shows <b>manual</b> wherever the condition is shown, so a hand-keyed fact is visibly hand-keyed. Chapter 03 §2.2 carries the three sources and §2.8 the <i>stay facts come from</i> row.</div>
+</div></div>
+<div class="note"><b>The manual source, as a screen — redline 5, owner, 2026-09-13.</b> The per-room dialog was rejected (<i>"250 room updates in that design is too heavy"</i>). Room states is <b>its own top tab after Prepare</b>, and — as the Board has Map and Wall — it has <b>three views of one data set</b>: Sheet · Tap grid · Compact, a chip between them, <b>one <i>Save N changes</i> across all three</b>. Every write is a <code>room_observation</code>, source <b>manual</b>, a deliberate act under S4's clause; a row the PMS has since updated is red before you save (G06). Available at every property, never gated by where facts usually come from; rides <code>roomcare.amend</code>. ▸ opens the room page — the advanced edit, unchanged.</div>
+
+<h1 class="frame">4d · <b>Room states — the tap grid</b>. Pick a state, tap the rooms, save. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
+<div class="states"><div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
+  </div>
+  <div class="body">
+    <div class="strip"><span><span class="chip">Sheet</span><span class="chip on">Tap grid</span><span class="chip">Compact</span></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div class="dock"><b>Paint with:</b>
+      <span class="mono">condition</span><span class="segs bad"><span class="on">dirty</span><span>clean</span><span>inspected</span></span>
+      <span class="mono">occupancy</span><span class="segs"><span class="on">vacant</span><span>occupied</span></span>
+      <span class="mono">stay</span><span class="segs"><span class="on">departed</span><span>arrived</span><span>in house</span><span>none</span></span>
+      <span class="mono">sold tonight</span><span class="sel t">15:00</span>
+      <span class="mono" style="margin-left:auto">then tap rooms · tap again to undo · ✎ = unsaved</span>
+    </div>
+    <div class="legend"><span style="color:var(--bad)">■</span> dirty &nbsp; <span style="color:var(--ok)">■</span> clean &nbsp; <span style="color:var(--indigo)">■</span> inspected &nbsp; · small corner = occupancy (O / V) and sold-tonight time · hover = full state and source</div>
+    <div class="mono" style="margin:8px 0 2px;color:var(--text)">Zone 1 · Garden villas · 18</div>
+    <div class="tilegrid">
+      <div class="tile dirty">G01<small>V 15:00</small></div><div class="tile dirty">G02<small>O</small></div><div class="tile dirty chg picked">G03<small>V 13:00</small></div><div class="tile dirty chg picked">G04<small>V 14:00</small></div><div class="tile dirty">G05<small>O</small></div><div class="tile dirty chg picked" style="outline-color:var(--bad)">G06<small>V ⚠</small></div><div class="tile clean">G07<small>V</small></div><div class="tile insp">G08<small>V 13:00</small></div><div class="tile dirty chg picked">G09<small>V 15:00</small></div><div class="tile dirty">G10<small>O</small></div><div class="tile dirty">G11<small>V 16:30</small></div><div class="tile clean">G12<small>O</small></div><div class="tile clean">G13<small>O</small></div><div class="tile dirty">G14<small>O</small></div><div class="tile clean">G15<small>V</small></div><div class="tile dirty">G16<small>O</small></div><div class="tile insp">G17<small>V</small></div><div class="tile clean">G18<small>O</small></div>
+    </div>
+    <div class="mono" style="margin:8px 0 2px;color:var(--text)">Zone 2 · Lake wing · 24 &nbsp; <span class="btn sm">Select all 24</span></div>
+    <div class="tilegrid">
+      <div class="tile dirty chg picked">L01<small>V</small></div><div class="tile dirty chg picked">L02<small>V</small></div><div class="tile dirty chg picked">L03<small>V 12:00</small></div><div class="tile dirty chg picked">L04<small>V</small></div><div class="tile dirty chg picked">L05<small>V</small></div><div class="tile dirty chg picked">L06<small>V</small></div><div class="tile dirty chg picked">L07<small>V</small></div><div class="tile dirty chg picked">L08<small>V</small></div><div class="tile dirty chg picked">L09<small>V</small></div><div class="tile clean">L10<small>O</small></div><div class="tile clean">L11<small>O</small></div><div class="tile dirty">L12<small>O</small></div><div class="tile dirty">L13<small>O</small></div><div class="tile" style="background:repeating-linear-gradient(45deg,var(--color-surface-raised),var(--color-surface-raised) 4px,var(--line) 4px,var(--line) 8px);color:var(--dim);border-color:var(--line)">L14</div><div class="tile clean">L15<small>O</small></div><div class="tile clean">L16<small>V</small></div><div class="tile dirty">L17<small>O</small></div><div class="tile insp">L18<small>V 14:30</small></div><div class="tile clean">L19<small>O</small></div><div class="tile dirty">L20<small>O</small></div><div class="tile clean">L21<small>O</small></div><div class="tile dirty">L22<small>O</small></div><div class="tile clean">L23<small>O</small></div><div class="tile clean">L24<small>V</small></div>
+    </div>
+    <div class="mono" style="margin:8px 0 2px;color:var(--text)">Zones 3 – 9 · 208 rooms — laid out the same, one screen</div>
+  </div>
+</div></div>
+<div class="note"><b>The tap grid.</b> Choose what to paint — <i>dirty · vacant · departed</i>, 15:00 — then tap rooms; every tap is an undoable ✎ until Save. <i>Select all 24</i> on a zone header is the whole-wing checkout in one gesture. The facts behind a tile are on hover and on ▸.</div>
+
+<h1 class="frame">4e · <b>Room states — compact</b>. One tap per fact, two zones side by side. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
+<div class="states"><div class="win">
+  <div class="head">
+    <div class="app"><div class="mark">◫</div>Room Care</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
+  </div>
+  <div class="body">
+    <div class="strip"><span><span class="chip">Sheet</span><span class="chip">Tap grid</span><span class="chip on">Compact</span></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span class="mono">segmented controls, no dropdowns — one tap sets a value</span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+      <div>
+        <table>
+          <tr class="g"><td colspan="5">▾ Zone 1 · Garden villas · 18 · 5 changed</td></tr>
+          <tr><th>Room</th><th>Condition</th><th>Occ.</th><th>Stay · sold</th><th></th></tr>
+          <tr><td class="num">G01</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · 15:00</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G02</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">G03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">13:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">G04 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">14:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G05</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="conf"><td class="num">G06 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono" style="color:var(--bad)">⚠ PMS: occupied 09:51</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G07</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">—</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G08</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 13:00</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">G09 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">15:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G10 – G18</td><td colspan="4" class="mono">nine more</td></tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr class="g"><td colspan="5">▾ Zone 2 · Lake wing · 24 · 9 changed &nbsp; <span class="btn sm">Set all…</span></td></tr>
+          <tr><th>Room</th><th>Condition</th><th>Occ.</th><th>Stay · sold</th><th></th></tr>
+          <tr class="chg"><td class="num">L01 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">L02 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">L03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">12:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">L10</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">L14</td><td colspan="3" class="mono">blocked · deep clean — not editable here</td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">L18</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 14:30</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">L04 – L24</td><td colspan="4" class="mono">eighteen more</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="mono" style="margin-top:12px">Zones 3 – 9 continue below, two zones per row — the whole house in about half the scroll of A · the strip fixed · 250 of 250, no pages</div>
+  </div>
+</div></div>
+<div class="note"><b>Compact.</b> Segmented controls instead of dropdowns — one tap sets dirty/clean/inspected or vacant/occupied — and two zones per row, half the scroll of the sheet. Source and time move to hover to make the room.</div>
+<div class="note hold"><b>Which view opens by default</b> is a per-property choice on Setup › Rules (like the Board's default view), and the chip remembers the person's last choice on that desk — page 64's local-preference case.</div>
 
 <h1 class="frame">4b · <b>A room, inspected</b>. 401 — a departure clean whose rule says <i>arrivals only</i>, requested and answered.</h1>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -544,7 +657,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab on">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -568,7 +681,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab on">Deep clean</div><div class="tab">Setup</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab on">Deep clean</div><div class="tab">Setup</div>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -600,7 +713,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -682,6 +795,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-13 · redline 5 folded, RE-LOCKED</b> — the per-room <i>Room state</i> dialog (the earlier 4c) rejected: <i>"all room states on one screen; change from there; the advanced edit stays on the room page."</i> Three candidates drawn on a temp page; the owner: <i>"all three interesting — like the Board, a view option."</i> So <b>Room states is its own top tab after Prepare</b> with three views — Sheet (4c) · Tap grid (4d) · Compact (4e) — one data set, one Save; the six-tab bar on every frame.</li>
   <li><b>2026-09-13 · redline 4 folded, RE-LOCKED</b> — owner: <i>"we can lock both; mark the paged list removed by owner."</i> (1) the manual source drawn as its own frame, <b>4c</b> — <i>Room state…</i> at every property, source manual, the three sources named, S4's clause handling the PMS's return. (2) the board is <b>1a the map</b> and <b>1b the wall</b>, one data set, a chip between them; frame 1's paged list is <b>removed by the owner</b> and kept faint for the record.</li>
   <li><b>2026-09-05 · LOCKED</b> — owner: <i>"the pagination is based on page 64 — the pager always at the bottom — if that confirms we can lock it."</i> Confirmed (§5, §6, §8); locked with <code>02-the-roomcare-setup.html</code>.</li>
   <li><b>2026-09-05 · drawn</b> — eight frames, for the owner's audit.</li>
