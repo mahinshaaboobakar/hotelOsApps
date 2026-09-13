@@ -1,0 +1,13 @@
+{
+  "total": 1,
+  "rows": [
+    {
+      "roomId": "01a09993-a1d6-7944-9b8f-a87bafb6dc72",
+      "room": "G09",
+      "what": "departed, not sold tonight — may wait for tomorrow",
+      "at": null,
+      "tone": "warn"
+    }
+  ],
+  "at": "2026-09-05T09:12:00.0000000+05:30"
+}

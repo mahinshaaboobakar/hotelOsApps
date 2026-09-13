@@ -27,6 +27,7 @@ public static class ReadCapability
             "board" => await services.GetRequiredService<BoardProjection>().BoardAsync(scope, cancellationToken),
             "room" => await services.GetRequiredService<RoomProjection>().RoomAsync(scope, body.Id("roomId"), cancellationToken),
             "prepare" => await services.GetRequiredService<PrepareProjection>().PrepareAsync(scope, body.Number("page"), cancellationToken),
+            "attendants" => await services.GetRequiredService<PrepareProjection>().AttendantsAsync(scope, cancellationToken),
             "states" => await services.GetRequiredService<StatesProjection>().StatesAsync(scope, cancellationToken),
             "supervision" => await services.GetRequiredService<LaneProjection>().LaneAsync(scope, body.Number("page"), cancellationToken),
             "deepCleans" => await services.GetRequiredService<DeepCleanProjection>().PageAsync(scope, body.Number("page"), cancellationToken),

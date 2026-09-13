@@ -1,0 +1,97 @@
+{
+  "window": "MORNING",
+  "windowStarts": "2026-09-05T08:00:00.0000000+05:30",
+  "windowEnds": "2026-09-05T15:00:00.0000000+05:30",
+  "open": true,
+  "day": "2026-09-05",
+  "preparedAt": "2026-09-05T02:30:00.0000000+00:00",
+  "preparedBy": "Rekha Sinha",
+  "tasks": 15,
+  "changesSince": 2,
+  "triggerMode": "PREPARE",
+  "at": "2026-09-05T09:12:00.0000000+05:30",
+  "changes": [
+    {
+      "at": "2026-09-05T02:50:00.0000000+00:00",
+      "roomId": "01a09993-a1d6-727e-add5-58f46b793a69",
+      "room": "G11",
+      "source": "PMS",
+      "what": "pms · dirty · vacant · checked out",
+      "soldAt": "2026-09-05T11:00:00.0000000+00:00",
+      "onNextPress": "daily service → departure clean, priority 3 → 1; same attendant"
+    },
+    {
+      "at": "2026-09-05T03:41:00.0000000+00:00",
+      "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+      "room": "L09",
+      "source": "PMS",
+      "what": "pms · dirty · occupied · checked in",
+      "soldAt": null,
+      "onNextPress": "started — the attendant's at the door; not touched"
+    }
+  ],
+  "changesPaging": {
+    "page": 0,
+    "pageSize": 12,
+    "total": 2
+  },
+  "proposal": {
+    "strategy": "SAME_ZONE",
+    "people": [
+      {
+        "userId": "01a09993-a01d-76ab-af90-4a7c1f580731",
+        "name": "Anita Pillai",
+        "rooms": 5,
+        "roomNumbers": [
+          "G01",
+          "G03",
+          "G02",
+          "G04",
+          "G07"
+        ],
+        "minutes": 140,
+        "accepted": false
+      },
+      {
+        "userId": "01a09993-a1c5-736a-a43d-7f7776f13a03",
+        "name": "Farhan Ali",
+        "rooms": 4,
+        "roomNumbers": [
+          "G06",
+          "G11",
+          "L01",
+          "L02"
+        ],
+        "minutes": 80,
+        "accepted": false
+      },
+      {
+        "userId": "01a09993-a184-79c2-b977-48c70f78be42",
+        "name": "Priya Das",
+        "rooms": 3,
+        "roomNumbers": [
+          "G05",
+          "G10",
+          "G12"
+        ],
+        "minutes": 60,
+        "accepted": true
+      },
+      {
+        "userId": "01a09993-a1cd-71b8-90b8-dbf5de5d193d",
+        "name": "Rohan Desai",
+        "rooms": 2,
+        "roomNumbers": [
+          "L03",
+          "L09"
+        ],
+        "minutes": 60,
+        "accepted": true
+      }
+    ],
+    "nobodyAvailable": [],
+    "proposed": 3,
+    "candidates": 4,
+    "zoneOnPosting": false
+  }
+}

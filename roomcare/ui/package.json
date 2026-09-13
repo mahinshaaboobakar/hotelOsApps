@@ -1,0 +1,22 @@
+{
+  "name": "@hotelos-apps/roomcare-ui",
+  "version": "0.1.0",
+  "description": "Room Care's packaged desktop module — the board, prepare, room states, supervision, deep clean, setup, my rooms and the five widgets.",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "npm run build:module && npm run build:widgets",
+    "build:module": "node ../../scripts/build-module.mjs",
+    "build:widgets": "node ../../scripts/build-module.mjs widgets/rooms-ready.js widgets/entry/rooms-ready.ts && node ../../scripts/build-module.mjs widgets/arrivals-waiting.js widgets/entry/arrivals-waiting.ts && node ../../scripts/build-module.mjs widgets/attention.js widgets/entry/attention.ts && node ../../scripts/build-module.mjs widgets/attendants-now.js widgets/entry/attendants-now.ts && node ../../scripts/build-module.mjs widgets/pending-policy.js widgets/entry/pending-policy.ts",
+    "test": "npm run build && vitest run",
+    "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "happy-dom": "^20.12.0",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.11"
+  }
+}

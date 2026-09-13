@@ -1,0 +1,25 @@
+{
+  "onShift": null,
+  "inARoom": 3,
+  "rows": [
+    {
+      "userId": "01a09993-a1cd-71b8-90b8-dbf5de5d193d",
+      "name": "Rohan Desai",
+      "room": "L03",
+      "since": "2026-09-05T03:21:00.0000000+00:00"
+    },
+    {
+      "userId": "01a09993-a01d-76ab-af90-4a7c1f580731",
+      "name": "Anita Pillai",
+      "room": "G01",
+      "since": "2026-09-05T03:34:00.0000000+00:00"
+    },
+    {
+      "userId": "01a09993-a1c5-736a-a43d-7f7776f13a03",
+      "name": "Farhan Ali",
+      "room": "L02",
+      "since": "2026-09-05T03:36:00.0000000+00:00"
+    }
+  ],
+  "at": "2026-09-05T09:12:00.0000000+05:30"
+}

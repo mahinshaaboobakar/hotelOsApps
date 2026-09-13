@@ -1,0 +1,98 @@
+{
+  "rooms": 4,
+  "done": 1,
+  "inProgress": 1,
+  "plannedMinutes": 120,
+  "at": "2026-09-05T09:12:00.0000000+05:30",
+  "rows": [
+    {
+      "taskId": "01a09993-a86e-7f11-be31-197f44610228",
+      "version": 6,
+      "roomId": "01a09993-a1d6-7c92-9f19-f713ce159841",
+      "room": "G01",
+      "service": "DEPARTURE_CLEAN",
+      "reduction": null,
+      "soldAt": "2026-09-05T09:30:00.0000000+00:00",
+      "priority": 1,
+      "earliestAt": null,
+      "linen": "STRIP",
+      "declinedDay": null,
+      "state": {
+        "kind": "IN_PROGRESS",
+        "at": "2026-09-05T03:34:00.0000000+00:00",
+        "until": null,
+        "detail": null,
+        "days": null
+      },
+      "recheckAt": null
+    },
+    {
+      "taskId": "01a09993-a8fd-7170-9811-72a9235ba39a",
+      "version": 4,
+      "roomId": "01a09993-a1d6-72b4-b97f-b05534983279",
+      "room": "G02",
+      "service": "DAILY_SERVICE",
+      "reduction": null,
+      "soldAt": null,
+      "priority": 3,
+      "earliestAt": null,
+      "linen": "DUE",
+      "declinedDay": null,
+      "state": {
+        "kind": "NONE",
+        "at": null,
+        "until": null,
+        "detail": null,
+        "days": null
+      },
+      "recheckAt": null
+    },
+    {
+      "taskId": "01a09993-a906-724c-9bcf-c46ab87f2c0f",
+      "version": 6,
+      "roomId": "01a09993-a1d6-7234-9a34-2b9074cab32a",
+      "room": "G07",
+      "service": "DAILY_SERVICE",
+      "reduction": null,
+      "soldAt": null,
+      "priority": 3,
+      "earliestAt": "2026-09-05T06:30:00.0000000+00:00",
+      "linen": "DUE",
+      "declinedDay": null,
+      "state": {
+        "kind": "WAITING",
+        "at": null,
+        "until": "2026-09-05T06:30:00.0000000+00:00",
+        "detail": null,
+        "days": null
+      },
+      "recheckAt": null
+    },
+    {
+      "taskId": "01a09993-a8ff-7f88-9cce-3d79fa4cd611",
+      "version": 9,
+      "roomId": "01a09993-a1d6-762a-b071-910290f32464",
+      "room": "G03",
+      "service": "DEPARTURE_CLEAN",
+      "reduction": null,
+      "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+      "priority": 1,
+      "earliestAt": null,
+      "linen": "STRIP",
+      "declinedDay": null,
+      "state": {
+        "kind": "DONE",
+        "at": "2026-09-05T03:11:00.0000000+00:00",
+        "until": null,
+        "detail": null,
+        "days": null
+      },
+      "recheckAt": null
+    }
+  ],
+  "paging": {
+    "page": 0,
+    "pageSize": 24,
+    "total": 4
+  }
+}

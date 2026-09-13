@@ -1,0 +1,30 @@
+{
+  "areas": 1,
+  "withRoutine": 1,
+  "rows": [
+    {
+      "locationId": "01a09993-9f88-7cea-8d7e-ed64edd5bc62",
+      "name": "Lobby",
+      "kind": "lobby",
+      "times": [
+        "06:00",
+        "08:00",
+        "10:00",
+        "12:00",
+        "14:00",
+        "16:00",
+        "18:00",
+        "20:00",
+        "22:00"
+      ],
+      "minutes": 15,
+      "enabled": true,
+      "version": 2
+    }
+  ],
+  "paging": {
+    "page": 0,
+    "pageSize": 12,
+    "total": 1
+  }
+}

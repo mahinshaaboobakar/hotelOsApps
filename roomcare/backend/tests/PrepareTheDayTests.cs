@@ -95,6 +95,34 @@ public sealed class PrepareTheDayTests(RoomCareFixture fixture)
     }
 
     [Fact]
+    public async Task A_checkout_after_the_first_press_turns_the_unstarted_daily_service_into_a_departure_clean_for_the_same_attendant()
+    {
+        var h = new RoomCareHarness(fixture);
+        var anita = await h.PostAsync("Anita Pillai");
+        var room = h.House.Room("G11");
+        await h.SeedStateAsync(room, s => s.Condition = Condition.Dirty);
+        await h.Get<PrepareService>().PressAsync(h.As(anita), null, default);
+        await h.Get<AssignmentService>().AcceptAllAsync(h.As(anita), new DateOnly(2026, 9, 5), ServiceWindowName.Morning, default);
+
+        h.Clock.Advance(TimeSpan.FromMinutes(10));
+        await h.InScopeAsync(async s =>
+        {
+            await s.GetRequiredServiceFor<ObservationService>().ObserveAsync(h.Tick, new ObservedFact(room, ObservationSource.Pms, h.Clock.GetUtcNow(), h.Clock.GetUtcNow())
+            {
+                Condition = Condition.Dirty, Occupancy = Occupancy.Vacant, StayStatuses = [StayStatus.CheckedOut],
+                SaysNextSold = true, NextSoldAt = RoomCareHarness.Saturday(16, 30), EventId = Guid.CreateVersion7(),
+            }, default);
+            return await s.GetRequiredServiceFor<Infrastructure.RoomCareDbContext>().SaveChangesAsync();
+        });
+        await h.Get<PrepareService>().PressAsync(h.As(anita), null, default);
+
+        await using var db = h.Db();
+        var task = await db.Tasks.SingleAsync(t => t.RoomId == room);
+        Assert.Equal((Service.DepartureClean, PriorityBand.SoldTonight, anita), (task.Service, task.Priority, task.AssignedToUserId!.Value));
+        Assert.Equal([Phase.Strip, Phase.Clean, Phase.MakeUp, Phase.Done], await db.Phases.Where(p => p.TaskId == task.Id).OrderBy(p => p.Sequence).Select(p => p.Phase).ToListAsync());
+    }
+
+    [Fact]
     public async Task With_nobody_posted_a_room_sold_tonight_goes_to_the_supervisor_as_nobody_available()
     {
         var h = new RoomCareHarness(fixture);

@@ -1,0 +1,112 @@
+{
+  "strategy": "SAME_ZONE",
+  "zones": [
+    {
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf",
+      "code": "Z1",
+      "name": "Zone 1 · Garden villas",
+      "rooms": 12,
+      "firstRoom": "G01",
+      "lastRoom": "G12",
+      "since": "2026-01-01"
+    },
+    {
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc",
+      "code": "Z2",
+      "name": "Zone 2 · Lake wing",
+      "rooms": 5,
+      "firstRoom": "L01",
+      "lastRoom": "L14",
+      "since": "2026-01-01"
+    }
+  ],
+  "rooms": 17,
+  "unzoned": 0,
+  "roomsList": [
+    {
+      "roomId": "01a09993-a1d6-7c92-9f19-f713ce159841",
+      "number": "G01",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-72b4-b97f-b05534983279",
+      "number": "G02",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-762a-b071-910290f32464",
+      "number": "G03",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-78c6-a0f6-5e9a9f44ae44",
+      "number": "G04",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-75a7-9cc1-3a755b75b19f",
+      "number": "G05",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-7d01-bcbc-bfec06d30aad",
+      "number": "G06",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-7234-9a34-2b9074cab32a",
+      "number": "G07",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-77bf-9180-72faa1ce535a",
+      "number": "G08",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-7944-9b8f-a87bafb6dc72",
+      "number": "G09",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-77e0-b6a6-4fbae163075d",
+      "number": "G10",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-727e-add5-58f46b793a69",
+      "number": "G11",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d6-70dd-b03d-91e2b6a615c8",
+      "number": "G12",
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf"
+    },
+    {
+      "roomId": "01a09993-a1d7-7e22-b765-68e3ef0f3cfb",
+      "number": "L01",
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc"
+    },
+    {
+      "roomId": "01a09993-a1d7-7bcf-a297-bb1765a3e94c",
+      "number": "L02",
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc"
+    },
+    {
+      "roomId": "01a09993-a1d7-78a3-b736-ae29fc95a438",
+      "number": "L03",
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc"
+    },
+    {
+      "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+      "number": "L09",
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc"
+    },
+    {
+      "roomId": "01a09993-a1d7-7c95-b18e-7b61a6290946",
+      "number": "L14",
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc"
+    }
+  ]
+}

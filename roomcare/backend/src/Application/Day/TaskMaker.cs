@@ -5,6 +5,7 @@ using HotelOS.RoomCare.Application.Tasks;
 using HotelOS.RoomCare.Domain;
 using HotelOS.RoomCare.Events;
 using HotelOS.RoomCare.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelOS.RoomCare.Application.Day;
 
@@ -95,15 +96,22 @@ public sealed class TaskMaker(RoomCareDbContext db, IHouse house, StandardReader
     }
 
     /// <summary>Bring an unstarted task's facts up to date; a started or ended task is left as it is.</summary>
-    public Change Reconcile(
-        RequestScope scope, RoomTask task, RoomState? state, Decided decided, DecisionInputs inputs, PrepareRun run, PropertyPolicy policy)
+    /// <remarks>
+    /// A changed service — the daily service of a room whose guest has since
+    /// checked out — takes the new service's standard and phases; the attendant
+    /// the room was given keeps it. Nothing has been done in the room yet, so
+    /// there is no work to lose.
+    /// </remarks>
+    public async Task<Change> ReconcileAsync(
+        RequestScope scope, HouseRoom room, RoomTask task, RoomState? state, Decided decided, DecisionInputs inputs, PrepareRun run, PropertyPolicy policy,
+        CancellationToken cancellationToken)
     {
-        if (!RoomTaskStatus.Unstarted.Contains(task.Status))
+        if (!RoomTaskStatus.Unstarted.Contains(task.Status) || await writer.RunningAsync(task.Id, cancellationToken) is not null)
         {
             return Change.Unchanged;
         }
 
-        var linen = DayDecision.Linen(task.Service, state?.LinenLastChangedOn, task.OperatingDay, policy);
+        var linen = DayDecision.Linen(decided.Service, state?.LinenLastChangedOn, task.OperatingDay, policy);
         var band = decided.Band;
         var pending = decided.Pending && task.Status == RoomTaskStatus.PendingPolicy;
         var status = task.Status == RoomTaskStatus.PendingPolicy && !decided.Pending ? RoomTaskStatus.Planned : task.Status;
@@ -118,9 +126,17 @@ public sealed class TaskMaker(RoomCareDbContext db, IHouse house, StandardReader
         task.PriorityRank = (DayDecision.Rank(band, policy) * 1000) + (task.PriorityRank % 1000);
         task.LinenDue = linen;
         task.Status = pending ? RoomTaskStatus.PendingPolicy : status;
-        if (task.Status is RoomTaskStatus.PendingPolicy or RoomTaskStatus.Planned)
+        if (task.Service != decided.Service)
         {
+            var rule = await standard.StandardAsync(scope.PropertyId, room.RoomTypeId, decided.Service, cancellationToken);
             task.Service = decided.Service;
+            task.MinutesExpected = rule.Minutes;
+            task.Credits = rule.Credits;
+            task.InspectionRule = rule.InspectionRule;
+            task.ChecklistRef = rule.ChecklistRef;
+            db.Phases.RemoveRange(await db.Phases.Where(p => p.TaskId == task.Id).ToListAsync(cancellationToken));
+            await db.SaveChangesAsync(cancellationToken);
+            AddPhases(task, rule.Phases);
         }
 
         task.DecisionRunId = run.Id;

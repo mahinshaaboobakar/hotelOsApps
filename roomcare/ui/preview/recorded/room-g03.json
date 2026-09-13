@@ -1,0 +1,117 @@
+{
+  "line": {
+    "id": "01a09993-a1d6-762a-b071-910290f32464",
+    "number": "G03",
+    "condition": "CLEAN",
+    "source": "ATTENDANT",
+    "setBy": "Anita Pillai",
+    "setAt": "2026-09-05T03:11:00.0000000+00:00",
+    "occupancy": "VACANT",
+    "vacantDays": 0,
+    "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+    "taskId": "01a09993-a8ff-7f88-9cce-3d79fa4cd611",
+    "taskVersion": 9,
+    "service": "DEPARTURE_CLEAN",
+    "reduction": null,
+    "earliestAt": null,
+    "priority": 1,
+    "attendantId": "01a09993-a01d-76ab-af90-4a7c1f580731",
+    "attendant": "Anita Pillai",
+    "outcome": {
+      "kind": "DONE",
+      "at": "2026-09-05T03:11:00.0000000+00:00",
+      "until": null,
+      "detail": null,
+      "days": null
+    },
+    "linen": "MUST",
+    "marks": {
+      "soldTonight": true,
+      "dnd": false,
+      "disagreement": false,
+      "blocked": false,
+      "supervision": false,
+      "pending": false,
+      "inProgress": false,
+      "newSince": false,
+      "manual": false
+    },
+    "version": 2
+  },
+  "type": "Standard",
+  "zone": "Zone 1 · Garden villas",
+  "disagreement": null,
+  "facts": {
+    "occupancy": "VACANT",
+    "stayStatuses": [
+      "CHECKED_OUT"
+    ],
+    "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+    "linenLastChangedOn": "2026-09-05",
+    "linenDueOn": "2026-09-08",
+    "deepCleanDueOn": "2026-09",
+    "daysWithoutService": 0,
+    "supervisedSince": null
+  },
+  "today": [
+    {
+      "at": "2026-09-05T02:30:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "planned departed and sold tonight",
+      "by": "Rekha Sinha"
+    },
+    {
+      "at": "2026-09-05T02:31:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "assigned proposal accepted",
+      "by": "Meera Krishnan"
+    },
+    {
+      "at": "2026-09-05T02:36:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "in_progress",
+      "by": "Anita Pillai"
+    },
+    {
+      "at": "2026-09-05T03:11:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "ended",
+      "by": "Anita Pillai"
+    },
+    {
+      "at": "2026-09-05T03:11:00.0000000+00:00",
+      "kind": "ATTEMPT",
+      "what": "DONE",
+      "by": "Anita Pillai"
+    }
+  ],
+  "decision": {
+    "condition": "DIRTY",
+    "occupancy": "VACANT",
+    "stayStatuses": [
+      "CHECKED_OUT"
+    ],
+    "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+    "window": "MORNING",
+    "ruleVersion": 7,
+    "reason": "departed and sold tonight",
+    "service": "DEPARTURE_CLEAN",
+    "minutes": 40,
+    "priority": 1,
+    "inspectionRule": "NONE",
+    "decidedBy": "PREPARE",
+    "runBy": "Rekha Sinha"
+  },
+  "inspection": {
+    "applicationInstalled": false,
+    "rule": "NONE",
+    "requestedAt": null,
+    "answeredAt": null,
+    "result": null,
+    "note": null
+  },
+  "jobs": [],
+  "history": [],
+  "supervisionId": null,
+  "whoLeads": "ROOM_CARE"
+}

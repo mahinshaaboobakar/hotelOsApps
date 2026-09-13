@@ -1,0 +1,89 @@
+/**
+ * A room's acts — the single-room state sheet (the advanced edit), recording an
+ * exception on another's room, and reassigning. Each composes in a sheet and
+ * keeps it open, with the service's sentence, when refused (page 64 §9).
+ */
+
+import type { HostApi } from "@hotelos/sdk";
+
+import { control, el, option } from "../../chrome/element";
+import { act, load } from "../../chrome/load";
+import type { Nav } from "../../chrome/nav";
+import { actions, sheet } from "../../chrome/overlay";
+import type { BoardRoom } from "../../model";
+
+/** Enter a fact by hand for one room — source manual, a deliberate act (frame 4, redline 4). */
+export function roomState(host: HostApi, nav: Nav, room: BoardRoom): void {
+  const overlay = sheet(nav.frame, `Room ${room.number} — enter a fact by hand`);
+  let stay: string | null = null;
+  const choices = el("div", "row");
+  for (const [label, word] of [["Guest arrived", "ARRIVED"], ["Guest departed", "DEPARTED"], ["Occupied", "IN_HOUSE"], ["Vacant", "NONE"]] as const) {
+    const button = control("btn chip", label, () => {
+      stay = word;
+      choices.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === button));
+    });
+    choices.append(button);
+  }
+  const arrival = el("input", "field") as HTMLInputElement;
+  arrival.type = "time";
+  arrival.setAttribute("aria-label", "Arrival expected today");
+  const condition = el("select", "field") as HTMLSelectElement;
+  for (const value of ["", "DIRTY", "CLEAN", "INSPECTED"]) condition.append(option(value === "" ? "condition unchanged" : value.toLowerCase(), value));
+  overlay.body.append(
+    el("label", "lbl", "What happened"), choices,
+    el("label", "lbl", "Arrival expected today · sets sold tonight"), arrival,
+    el("label", "lbl", "Condition"), condition,
+    el("p", "dim", "Recorded as source manual — a deliberate act. If the PMS later says otherwise: older than this is history; newer and contradicting is a disagreement flag (S4)."),
+  );
+  actions(overlay, "Record", () => {
+    void (async () => {
+      const done = await act(host, "roomcare.amend", "saveStates", {
+        rooms: [{ roomId: room.id, version: room.version, stay, soldAt: arrival.value === "" ? null : arrival.value, condition: condition.value === "" ? null : condition.value }],
+      });
+      if (!done.ok) return overlay.refuse(done.because);
+      const conflicts = (done.value as { conflicts: unknown[] }).conflicts;
+      if (conflicts.length > 0) return overlay.refuse("Something changed this room after the page was drawn — close and look again before recording.");
+      overlay.close();
+      nav.show();
+    })();
+  });
+}
+
+/** Record what was found at the door, on the attendant's behalf (roomcare.amend). */
+export function recordException(host: HostApi, nav: Nav, room: BoardRoom): void {
+  const overlay = sheet(nav.frame, `Room ${room.number} — record an exception`);
+  const found = el("select", "field") as HTMLSelectElement;
+  for (const [label, value] of [["DND board", "DND"], ["Declined by guest", "DECLINED"], ["Done", "DONE"]] as const) found.append(option(label, value));
+  const note = el("textarea", "field") as HTMLTextAreaElement;
+  overlay.body.append(el("label", "lbl", "Found"), found, el("label", "lbl", "Note"), note);
+  actions(overlay, "Record", () => {
+    void (async () => {
+      const done = await act(host, "roomcare.amend", "recordOnBehalf", { taskId: room.taskId, version: room.taskVersion, found: found.value, note: note.value || null });
+      if (!done.ok) return overlay.refuse(done.because);
+      overlay.close();
+      nav.show();
+    })();
+  });
+}
+
+/** Give the room to someone else — one of the people Workforce posted to Housekeeping. */
+export async function reassign(host: HostApi, nav: Nav, room: BoardRoom): Promise<void> {
+  const overlay = sheet(nav.frame, `Room ${room.number} — reassign`);
+  const person = el("select", "field") as HTMLSelectElement;
+  person.setAttribute("aria-label", "Person");
+  const people = await load<{ userId: string; name: string }[]>(host, "attendants");
+  if (!people.ok) overlay.refuse(people.because);
+  else for (const p of people.value) person.append(option(p.name, p.userId, p.userId === room.attendantId));
+  overlay.body.append(
+    el("p", "dim", `Now: ${room.attendant ?? "nobody"}. The people posted to Housekeeping are Workforce's; whether they are on shift is Workforce's to add.`),
+    el("label", "lbl", "Person"), person,
+  );
+  actions(overlay, "Reassign", () => {
+    void (async () => {
+      const done = await act(host, "roomcare.assign", "assign", { taskId: room.taskId, version: room.taskVersion, userId: person.value });
+      if (!done.ok) return overlay.refuse(done.because);
+      overlay.close();
+      nav.show();
+    })();
+  });
+}

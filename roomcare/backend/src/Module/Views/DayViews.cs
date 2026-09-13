@@ -21,7 +21,11 @@ public sealed record PrepareView(
     ProposalView Proposal);
 
 /// <summary>One fact that arrived since the last press, and what the next press would do with it.</summary>
-public sealed record ChangeView(string At, string RoomId, string Room, string Source, string What, string OnNextPress);
+/// <remarks>Instants are fields, never inside the sentences — the screen formats them in the property's locale.</remarks>
+public sealed record ChangeView(string At, string RoomId, string Room, string Source, string What, string? SoldAt, string OnNextPress);
+
+/// <summary>One thing known about a room in the lane, with the instant it refers to when it has one.</summary>
+public sealed record KnownView(string Text, string? At);
 
 /// <summary>The proposal — per attendant, the rooms and minutes; the rooms nobody could take; who is here.</summary>
 public sealed record ProposalView(
@@ -33,6 +37,9 @@ public sealed record ProposalView(
     bool ZoneOnPosting);
 
 public sealed record ProposedPersonView(string UserId, string Name, int Rooms, IReadOnlyList<string> RoomNumbers, int Minutes, bool Accepted);
+
+/// <summary>A person posted to Housekeeping, as a reassignment names them.</summary>
+public sealed record AttendantView(string UserId, string Name);
 
 public sealed record UnassignedRoomView(string TaskId, long TaskVersion, string Room, string Service, int Priority, string? SoldAt);
 
@@ -72,7 +79,8 @@ public sealed record LaneRowView(
     long RoomVersion,
     string Reason,
     string Since,
-    string WhatWeKnow,
+    IReadOnlyList<KnownView> WhatWeKnow,
+    int? Days,
     string? TaskId,
     long? TaskVersion,
     string? Decision,

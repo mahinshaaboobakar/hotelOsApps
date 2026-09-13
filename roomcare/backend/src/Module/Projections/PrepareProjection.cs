@@ -60,6 +60,18 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
             await ProposalAsync(snapshot, tasks, policy, scope.PropertyId, cancellationToken));
     }
 
+    /// <summary>The people Workforce announced as posted to Housekeeping, by name — who a room may be given to.</summary>
+    public async Task<IReadOnlyList<AttendantView>> AttendantsAsync(RequestScope scope, CancellationToken cancellationToken)
+    {
+        var policy = await standard.PolicyAsync(scope.PropertyId, cancellationToken);
+        var people = await db.Postings
+            .Where(p => p.PropertyId == scope.PropertyId && p.EndedAt == null && p.DepartmentCode == policy.DepartmentCode)
+            .Select(p => p.UserId).Distinct().ToListAsync(cancellationToken);
+        var names = await house.NamesAsync(people, cancellationToken);
+        return people.Select(p => new AttendantView(p.ToString(), names.GetValueOrDefault(p) ?? "a person with no staff record"))
+            .OrderBy(a => a.Name).ToList();
+    }
+
     private static ChangeView Change(
         HouseSnapshot snapshot, RoomObservation seen, RoomState? state, RoomTask? task, PropertyPolicy policy, string window, DateOnly day)
     {
@@ -75,18 +87,37 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
             (null, _) => "left as it is",
             (_, null) => $"new {decided.Service.ToLowerInvariant().Replace('_', ' ')}{(decided.Pending ? " · pending" : string.Empty)}, priority {DayDecision.Rank(decided.Band, policy) + 1}, unassigned",
             (_, { } t) when !RoomTaskStatus.Unstarted.Contains(t.Status) => "started — the attendant's at the door; not touched",
-            (_, { } t) when t.Priority != decided.Band => $"priority {DayDecision.Rank(t.Priority, policy) + 1} → {DayDecision.Rank(decided.Band, policy) + 1}; same attendant",
+            (_, { } t) when t.Service != decided.Service || t.Priority != decided.Band => Updated(t, decided, policy),
             _ => "unchanged",
         };
-        return new ChangeView(seen.RecordedAt.ToString("o"), seen.RoomId.ToString(), snapshot.Number(seen.RoomId), seen.Source, what, next);
+        return new ChangeView(seen.RecordedAt.ToString("o"), seen.RoomId.ToString(), snapshot.Number(seen.RoomId), seen.Source, what,
+            HouseSnapshot.At(seen.NextSoldAt), next);
     }
+
+    /// <summary>What a reconcile does to an unstarted task whose facts changed — its service, its priority, never its attendant.</summary>
+    private static string Updated(RoomTask task, Decided decided, PropertyPolicy policy)
+    {
+        var parts = new List<string>();
+        if (task.Service != decided.Service)
+        {
+            parts.Add($"{Lower(task.Service)} → {Lower(decided.Service)}");
+        }
+
+        if (task.Priority != decided.Band)
+        {
+            parts.Add($"priority {DayDecision.Rank(task.Priority, policy) + 1} → {DayDecision.Rank(decided.Band, policy) + 1}");
+        }
+
+        return $"{string.Join(", ", parts)}; same attendant";
+    }
+
+    private static string Lower(string word) => word.ToLowerInvariant().Replace('_', ' ');
 
     private static string Words(RoomObservation seen) => string.Join(" · ", new[]
     {
         seen.Condition?.ToLowerInvariant(),
         seen.Occupancy?.ToLowerInvariant(),
-        seen.StayStatuses is { Count: > 0 } s ? string.Join("/", s.Select(x => x.ToLowerInvariant().Replace('_', ' '))) : null,
-        seen.NextSoldAt is { } sold ? $"sold {sold:o}" : null,
+        seen.StayStatuses is { Count: > 0 } s ? string.Join("/", s.Select(Lower)) : null,
     }.Where(x => x is not null));
 
     private async Task<ProposalView> ProposalAsync(

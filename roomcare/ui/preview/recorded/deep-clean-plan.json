@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "roomTypeId": "01a09993-9f88-78f7-bde8-06889852f127",
+      "roomType": "Standard",
+      "everyMonths": 12,
+      "rooms": 16,
+      "dueThisQuarter": 16,
+      "version": 1
+    },
+    {
+      "roomTypeId": "01a09993-9f88-763c-9840-2165187070ba",
+      "roomType": "Suite",
+      "everyMonths": 4,
+      "rooms": 1,
+      "dueThisQuarter": 1,
+      "version": 1
+    }
+  ]
+}

@@ -75,7 +75,11 @@ public sealed class ModuleSurface : IAsyncDisposable
     }
 
     /// <summary>Call a capability's method as the Shell forwards it — camelCase JSON, a bearer, the property header.</summary>
-    public async Task<(int Status, JsonElement? Body)> CallAsync(string capability, string method, object? parameters = null, bool withToken = true)
+    public Task<(int Status, JsonElement? Body)> CallAsync(string capability, string method, object? parameters = null, bool withToken = true) =>
+        CallAsAsync(Person, capability, method, parameters, withToken);
+
+    /// <summary>The same call, signed in as someone else — an attendant reading their own rooms.</summary>
+    public async Task<(int Status, JsonElement? Body)> CallAsAsync(Guid person, string capability, string method, object? parameters = null, bool withToken = true)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, $"/module/{capability}/{method}")
         {
@@ -83,7 +87,7 @@ public sealed class ModuleSurface : IAsyncDisposable
         };
         if (withToken)
         {
-            request.Headers.Add("Authorization", $"Bearer {Token()}");
+            request.Headers.Add("Authorization", $"Bearer {Token(person)}");
         }
 
         request.Headers.Add(ModuleEnvelope.PropertyHeader, Data.PropertyId.ToString());
@@ -92,7 +96,7 @@ public sealed class ModuleSurface : IAsyncDisposable
         return ((int)response.StatusCode, text.Length == 0 ? null : JsonDocument.Parse(text).RootElement.Clone());
     }
 
-    private string Token()
+    private string Token(Guid person)
     {
         var descriptor = new SecurityTokenDescriptor
         {
@@ -101,7 +105,7 @@ public sealed class ModuleSurface : IAsyncDisposable
             Expires = DateTime.UtcNow.AddMinutes(10),
             NotBefore = DateTime.UtcNow.AddMinutes(-1),
             IssuedAt = DateTime.UtcNow,
-            Subject = new ClaimsIdentity([new Claim("sub", Person.ToString()), new Claim("sid", Guid.CreateVersion7().ToString())]),
+            Subject = new ClaimsIdentity([new Claim("sub", person.ToString()),new Claim("sid", Guid.CreateVersion7().ToString())]),
             SigningCredentials = new SigningCredentials(_key, SecurityAlgorithms.RsaSha256),
         };
         var handler = new JwtSecurityTokenHandler { SetDefaultTimesOnTokenCreation = false };

@@ -1,0 +1,243 @@
+{
+  "rooms": 17,
+  "dirty": 13,
+  "occupied": 10,
+  "soldTonight": 5,
+  "silentSince": null,
+  "defaultView": "SHEET",
+  "zones": [
+    {
+      "zoneId": "01a09993-9f88-77e2-a253-d231d28aaccf",
+      "name": "Zone 1 · Garden villas",
+      "rooms": [
+        {
+          "roomId": "01a09993-a1d6-7c92-9f19-f713ce159841",
+          "number": "G01",
+          "condition": "DIRTY",
+          "occupancy": "VACANT",
+          "soldAt": "2026-09-05T09:30:00.0000000+00:00",
+          "stay": "DEPARTED",
+          "source": "PMS",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:32:00.0000000+00:00",
+          "version": 3,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-72b4-b97f-b05534983279",
+          "number": "G02",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-762a-b071-910290f32464",
+          "number": "G03",
+          "condition": "CLEAN",
+          "occupancy": "VACANT",
+          "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+          "stay": "DEPARTED",
+          "source": "ATTENDANT",
+          "sourceBy": "Anita Pillai",
+          "sourceAt": "2026-09-05T03:11:00.0000000+00:00",
+          "version": 2,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-78c6-a0f6-5e9a9f44ae44",
+          "number": "G04",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-75a7-9cc1-3a755b75b19f",
+          "number": "G05",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-7d01-bcbc-bfec06d30aad",
+          "number": "G06",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-7234-9a34-2b9074cab32a",
+          "number": "G07",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-77bf-9180-72faa1ce535a",
+          "number": "G08",
+          "condition": "CLEAN",
+          "occupancy": "VACANT",
+          "soldAt": "2026-09-05T07:30:00.0000000+00:00",
+          "stay": "NONE",
+          "source": "ATTENDANT",
+          "sourceBy": null,
+          "sourceAt": "2026-09-01T02:30:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-7944-9b8f-a87bafb6dc72",
+          "number": "G09",
+          "condition": "DIRTY",
+          "occupancy": "VACANT",
+          "soldAt": null,
+          "stay": "DEPARTED",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-77e0-b6a6-4fbae163075d",
+          "number": "G10",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-727e-add5-58f46b793a69",
+          "number": "G11",
+          "condition": "DIRTY",
+          "occupancy": "VACANT",
+          "soldAt": "2026-09-05T11:00:00.0000000+00:00",
+          "stay": "DEPARTED",
+          "source": "PMS",
+          "sourceBy": null,
+          "sourceAt": "2026-09-05T02:50:00.0000000+00:00",
+          "version": 3,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d6-70dd-b03d-91e2b6a615c8",
+          "number": "G12",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        }
+      ]
+    },
+    {
+      "zoneId": "01a09993-9f88-732e-8d15-90c5dcf894cc",
+      "name": "Zone 2 · Lake wing",
+      "rooms": [
+        {
+          "roomId": "01a09993-a1d7-7e22-b765-68e3ef0f3cfb",
+          "number": "L01",
+          "condition": "CLEAN",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "ATTENDANT",
+          "sourceBy": "Farhan Ali",
+          "sourceAt": "2026-09-05T02:50:00.0000000+00:00",
+          "version": 2,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d7-7bcf-a297-bb1765a3e94c",
+          "number": "L02",
+          "condition": "DIRTY",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d7-78a3-b736-ae29fc95a438",
+          "number": "L03",
+          "condition": "DIRTY",
+          "occupancy": "VACANT",
+          "soldAt": "2026-09-05T06:30:00.0000000+00:00",
+          "stay": "DEPARTED",
+          "source": "PMS",
+          "sourceBy": null,
+          "sourceAt": "2026-09-05T02:18:00.0000000+00:00",
+          "version": 3,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+          "number": "L09",
+          "condition": "CLEAN",
+          "occupancy": "OCCUPIED",
+          "soldAt": null,
+          "stay": "IN_HOUSE",
+          "source": "ATTENDANT",
+          "sourceBy": "Rohan Desai",
+          "sourceAt": "2026-09-05T03:41:00.0000000+00:00",
+          "version": 4,
+          "blocked": false
+        },
+        {
+          "roomId": "01a09993-a1d7-7c95-b18e-7b61a6290946",
+          "number": "L14",
+          "condition": "DIRTY",
+          "occupancy": "VACANT",
+          "soldAt": null,
+          "stay": "NONE",
+          "source": "SYSTEM",
+          "sourceBy": null,
+          "sourceAt": "2026-09-04T21:42:00.0000000+00:00",
+          "version": 1,
+          "blocked": true
+        }
+      ]
+    }
+  ]
+}

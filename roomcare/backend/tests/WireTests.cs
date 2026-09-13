@@ -102,7 +102,7 @@ public sealed class WireTests(RoomCareFixture fixture)
         await h.SeedStateAsync(occupied, s => s.Condition = Condition.Dirty);
         Assert.Equal(200, (await surface.CallAsync("roomcare.assign", "prepare")).Status);
 
-        string[] reads = ["me", "board", "prepare", "states", "supervision", "deepCleans", "myRooms", "setup", "services", "zones", "areas",
+        string[] reads = ["me", "board", "prepare", "attendants", "states", "supervision", "deepCleans", "myRooms", "setup", "services", "zones", "areas",
             "deepCleanPlan", "grants", "widgetRoomsReady", "widgetArrivals", "widgetAttention", "widgetAttendants", "widgetPending"];
         foreach (var method in reads)
         {

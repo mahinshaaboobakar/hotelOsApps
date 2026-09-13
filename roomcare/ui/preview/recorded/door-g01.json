@@ -1,0 +1,57 @@
+{
+  "room": {
+    "taskId": "01a09993-a86e-7f11-be31-197f44610228",
+    "version": 6,
+    "roomId": "01a09993-a1d6-7c92-9f19-f713ce159841",
+    "room": "G01",
+    "service": "DEPARTURE_CLEAN",
+    "reduction": null,
+    "soldAt": "2026-09-05T09:30:00.0000000+00:00",
+    "priority": 1,
+    "earliestAt": null,
+    "linen": "STRIP",
+    "declinedDay": null,
+    "state": {
+      "kind": "IN_PROGRESS",
+      "at": "2026-09-05T03:34:00.0000000+00:00",
+      "until": null,
+      "detail": null,
+      "days": null
+    },
+    "recheckAt": null
+  },
+  "startedAt": "2026-09-05T03:34:00.0000000+00:00",
+  "minutesExpected": 40,
+  "extraMinutes": 0,
+  "minutesWorked": 8,
+  "running": true,
+  "inspectionRule": "NONE",
+  "phases": [
+    {
+      "sequence": 1,
+      "phase": "STRIP",
+      "status": "ACTIVE"
+    },
+    {
+      "sequence": 2,
+      "phase": "CLEAN",
+      "status": "PENDING"
+    },
+    {
+      "sequence": 3,
+      "phase": "MAKE_UP",
+      "status": "PENDING"
+    },
+    {
+      "sequence": 4,
+      "phase": "DONE",
+      "status": "PENDING"
+    }
+  ],
+  "partialParts": [
+    "BATHROOM",
+    "TOWELS",
+    "RUBBISH",
+    "BED"
+  ]
+}

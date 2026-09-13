@@ -50,26 +50,49 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
         return new LaneRowView(
             lane.Id.ToString(), lane.RoomId.ToString(), snapshot.Number(lane.RoomId), state?.Version ?? 0,
             lane.Reason, lane.OpenedAt.ToString("o"), Known(day, lane, state, task),
+            lane.Reason == SupervisionReason.DaysWithoutService ? (state?.DaysWithoutService ?? 0) + 1 : null,
             task?.Id.ToString(), task?.Version, lane.Decision, decidedBy, At(lane.DecidedAt), lane.Note);
     }
 
     private static LaneRowView Disagreement(HouseSnapshot snapshot, DayFacts.Day day, RoomState state) => new(
         null, state.RoomId.ToString(), snapshot.Number(state.RoomId), state.Version, SupervisionReason.Disagreement,
         state.DisagreementObservedAt!.Value.ToString("o"),
-        $"ours {state.Condition.ToLowerInvariant()} ({state.ConditionSource.ToLowerInvariant()} {state.ConditionSetAt:o}) · "
-        + $"{(state.DisagreementSource ?? ObservationSource.Pms).ToLowerInvariant()} {state.DisagreementObservedCondition!.ToLowerInvariant()} ({state.DisagreementObservedAt:o})",
-        day.TaskOf(state.RoomId)?.Id.ToString(), day.TaskOf(state.RoomId)?.Version, null, null, null, null);
+        [
+            new KnownView($"ours {state.Condition.ToLowerInvariant()} ({day.Name(state.ConditionSetById) ?? state.ConditionSource.ToLowerInvariant()})", At(state.ConditionSetAt)),
+            new KnownView($"{(state.DisagreementSource ?? ObservationSource.Pms).ToLowerInvariant()} {state.DisagreementObservedCondition!.ToLowerInvariant()}", At(state.DisagreementObservedAt)),
+        ],
+        null, day.TaskOf(state.RoomId)?.Id.ToString(), day.TaskOf(state.RoomId)?.Version, null, null, null, null);
 
-    private static string Known(DayFacts.Day day, RoomSupervision lane, RoomState? state, RoomTask? task) => lane.Reason switch
+    private static IReadOnlyList<KnownView> Known(DayFacts.Day day, RoomSupervision lane, RoomState? state, RoomTask? task)
     {
-        SupervisionReason.DaysWithoutService =>
-            $"{state?.DaysWithoutService ?? 0} days without service · {(state?.Occupancy ?? Occupancy.Unknown).ToLowerInvariant()}"
-            + (day.LastAttempt(task) is { } last ? $" · last at the door: {last.Found.ToLowerInvariant()} {last.At:o}" : string.Empty),
-        SupervisionReason.NobodyAvailable =>
-            $"{task?.Service.ToLowerInvariant().Replace('_', ' ') ?? "service"} · nobody posted to Housekeeping could take it"
-            + (state?.NextSoldAt is { } sold ? $" · sold {sold:o}" : string.Empty),
-        SupervisionReason.ArrivalBeforeWindow =>
-            $"arrival {state?.NextSoldAt:o} · before the window opens" + (day.Window is null ? " · window closed" : string.Empty),
-        _ => lane.Note ?? string.Empty,
-    };
+        var known = new List<KnownView>();
+        switch (lane.Reason)
+        {
+            case SupervisionReason.DaysWithoutService:
+                known.Add(new KnownView($"{state?.DaysWithoutService ?? 0} days without service", null));
+                if (day.LastAttempt(task) is { } last)
+                {
+                    known.Add(new KnownView($"today at the door: {last.Found.ToLowerInvariant()}", At(last.At)));
+                }
+
+                known.Add(new KnownView((state?.Occupancy ?? Occupancy.Unknown).ToLowerInvariant(), null));
+                break;
+            case SupervisionReason.NobodyAvailable:
+                known.Add(new KnownView($"{task?.Service.ToLowerInvariant().Replace('_', ' ') ?? "service"} · nobody posted to Housekeeping could take it", null));
+                if (state?.NextSoldAt is { } sold)
+                {
+                    known.Add(new KnownView("sold", At(sold)));
+                }
+
+                break;
+            case SupervisionReason.ArrivalBeforeWindow:
+                known.Add(new KnownView("arrival before the window opens", At(state?.NextSoldAt)));
+                break;
+            default:
+                known.Add(new KnownView(lane.Note ?? string.Empty, null));
+                break;
+        }
+
+        return known;
+    }
 }

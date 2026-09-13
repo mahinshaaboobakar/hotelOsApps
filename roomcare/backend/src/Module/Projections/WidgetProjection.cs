@@ -94,7 +94,8 @@ public sealed class WidgetProjection(RoomCareDbContext db, IHouse house, Propert
             return "IN_PROGRESS";
         }
 
-        return task is null || (task.Status == RoomTaskStatus.Planned && day.Assignments.All(a => a.TaskId != task.Id)) ? "NOBODY_AVAILABLE" : task.Status;
+        var assigned = task is not null && day.Assignments.Any(a => a.TaskId == task.Id && a.Mode != AssignmentMode.Proposed);
+        return assigned ? "NOT_STARTED" : "NOBODY_AVAILABLE";
     }
 
     private static WidgetRoomView Room(HouseSnapshot snapshot, Guid roomId, string what, string? at, string tone) =>

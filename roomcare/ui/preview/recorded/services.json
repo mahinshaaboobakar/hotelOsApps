@@ -1,0 +1,75 @@
+{
+  "roomTypes": [
+    {
+      "id": "01a09993-9f88-78f7-bde8-06889852f127",
+      "code": "STD",
+      "name": "Standard",
+      "rooms": 16
+    },
+    {
+      "id": "01a09993-9f88-763c-9840-2165187070ba",
+      "code": "STE",
+      "name": "Suite",
+      "rooms": 1
+    }
+  ],
+  "roomTypeId": "01a09993-9f88-78f7-bde8-06889852f127",
+  "services": [
+    {
+      "service": "DEPARTURE_CLEAN",
+      "minutes": 40,
+      "credits": 1,
+      "phases": [
+        "STRIP",
+        "CLEAN",
+        "MAKE_UP",
+        "DONE"
+      ],
+      "inspectionRule": "NONE",
+      "checklistRef": null,
+      "version": 0,
+      "saved": false
+    },
+    {
+      "service": "DAILY_SERVICE",
+      "minutes": 20,
+      "credits": 0.5,
+      "phases": [
+        "CLEAN",
+        "MAKE_UP",
+        "DONE"
+      ],
+      "inspectionRule": "NONE",
+      "checklistRef": null,
+      "version": 0,
+      "saved": false
+    },
+    {
+      "service": "TURNDOWN",
+      "minutes": 10,
+      "credits": 0.5,
+      "phases": [
+        "CLEAN",
+        "DONE"
+      ],
+      "inspectionRule": "NONE",
+      "checklistRef": null,
+      "version": 0,
+      "saved": false
+    },
+    {
+      "service": "REFRESH",
+      "minutes": 10,
+      "credits": 0.5,
+      "phases": [
+        "CLEAN",
+        "DONE"
+      ],
+      "inspectionRule": "NONE",
+      "checklistRef": null,
+      "version": 0,
+      "saved": false
+    }
+  ],
+  "inspectionApplicationInstalled": false
+}

@@ -1,0 +1,46 @@
+{
+  "policy": {
+    "triggerMode": "PREPARE",
+    "whoLeads": "ROOM_CARE",
+    "staySource": "PMS",
+    "boardDefaultView": "MAP",
+    "statesDefaultView": "SHEET",
+    "onDepartureCondition": "DIRTY",
+    "linenRuleKind": "EVERY_N_DEFERRABLE",
+    "linenEveryDays": 3,
+    "towels": "GREEN_PROGRAMME",
+    "turndownEnabled": true,
+    "refreshAfterDays": 3,
+    "dndRecheckMinutes": 60,
+    "supervisorAfterDays": 2,
+    "priorityLadder": [
+      "SOLD_TONIGHT",
+      "DEPARTURE",
+      "DAILY",
+      "REFRESH"
+    ],
+    "assignmentStrategy": "SAME_ZONE",
+    "unsoldDeparture": "MAY_WAIT",
+    "version": 7,
+    "changedAt": "2026-09-01T11:10:00.0000000+00:00"
+  },
+  "windows": [
+    {
+      "window": "MORNING",
+      "enabled": true,
+      "starts": "08:00",
+      "ends": "15:00",
+      "allowAssignmentOutside": true,
+      "version": 3
+    },
+    {
+      "window": "EVENING",
+      "enabled": true,
+      "starts": "18:00",
+      "ends": "21:00",
+      "allowAssignmentOutside": false,
+      "version": 3
+    }
+  ],
+  "changedBy": "Rekha Sinha"
+}

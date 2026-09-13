@@ -1,0 +1,131 @@
+{
+  "line": {
+    "id": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+    "number": "L09",
+    "condition": "CLEAN",
+    "source": "ATTENDANT",
+    "setBy": "Rohan Desai",
+    "setAt": "2026-09-05T03:40:00.0000000+00:00",
+    "occupancy": "OCCUPIED",
+    "vacantDays": null,
+    "soldAt": null,
+    "taskId": "01a09993-a91b-71f8-aef3-416028899098",
+    "taskVersion": 9,
+    "service": "DAILY_SERVICE",
+    "reduction": null,
+    "earliestAt": null,
+    "priority": 3,
+    "attendantId": "01a09993-a1cd-71b8-90b8-dbf5de5d193d",
+    "attendant": "Rohan Desai",
+    "outcome": {
+      "kind": "DISAGREEMENT",
+      "at": "2026-09-05T03:41:00.0000000+00:00",
+      "until": null,
+      "detail": "DIRTY",
+      "days": null
+    },
+    "linen": null,
+    "marks": {
+      "soldTonight": false,
+      "dnd": false,
+      "disagreement": true,
+      "blocked": false,
+      "supervision": true,
+      "pending": false,
+      "inProgress": false,
+      "newSince": false,
+      "manual": false
+    },
+    "version": 4
+  },
+  "type": "Standard",
+  "zone": "Zone 2 · Lake wing",
+  "disagreement": {
+    "ours": "CLEAN",
+    "oursSource": "ATTENDANT",
+    "oursBy": "Rohan Desai",
+    "oursAt": "2026-09-05T03:40:00.0000000+00:00",
+    "theirs": "DIRTY",
+    "theirsSource": "PMS",
+    "theirsAt": "2026-09-05T03:41:00.0000000+00:00"
+  },
+  "facts": {
+    "occupancy": "OCCUPIED",
+    "stayStatuses": [
+      "CHECKED_IN"
+    ],
+    "soldAt": null,
+    "linenLastChangedOn": "2026-09-04",
+    "linenDueOn": "2026-09-07",
+    "deepCleanDueOn": "2026-09",
+    "daysWithoutService": 0,
+    "supervisedSince": null
+  },
+  "today": [
+    {
+      "at": "2026-09-05T02:30:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "planned occupied",
+      "by": "Rekha Sinha"
+    },
+    {
+      "at": "2026-09-05T02:31:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "assigned reassigned",
+      "by": "Meera Krishnan"
+    },
+    {
+      "at": "2026-09-05T03:25:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "in_progress",
+      "by": "Rohan Desai"
+    },
+    {
+      "at": "2026-09-05T03:40:00.0000000+00:00",
+      "kind": "TRANSITION",
+      "what": "ended",
+      "by": "Rohan Desai"
+    },
+    {
+      "at": "2026-09-05T03:40:00.0000000+00:00",
+      "kind": "ATTEMPT",
+      "what": "DONE",
+      "by": "Rohan Desai"
+    },
+    {
+      "at": "2026-09-05T03:41:00.0000000+00:00",
+      "kind": "OBSERVED",
+      "what": "PMS: dirty · DISAGREEMENT_FLAGGED",
+      "by": null
+    }
+  ],
+  "decision": {
+    "condition": "DIRTY",
+    "occupancy": "OCCUPIED",
+    "stayStatuses": [
+      "CHECKED_IN"
+    ],
+    "soldAt": null,
+    "window": "MORNING",
+    "ruleVersion": 7,
+    "reason": "occupied",
+    "service": "DAILY_SERVICE",
+    "minutes": 20,
+    "priority": 3,
+    "inspectionRule": "NONE",
+    "decidedBy": "PREPARE",
+    "runBy": "Rekha Sinha"
+  },
+  "inspection": {
+    "applicationInstalled": false,
+    "rule": "NONE",
+    "requestedAt": null,
+    "answeredAt": null,
+    "result": null,
+    "note": null
+  },
+  "jobs": [],
+  "history": [],
+  "supervisionId": null,
+  "whoLeads": "ROOM_CARE"
+}

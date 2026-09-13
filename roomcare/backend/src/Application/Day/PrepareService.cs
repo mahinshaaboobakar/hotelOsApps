@@ -121,7 +121,7 @@ public sealed class PrepareService(
             var current = existing.FirstOrDefault(t => t.RoomId == room.Id);
             var outcome = current is null
                 ? await factory.CreateAsync(scope, room, state, decided, inputs, day, target.Window, run, policy, cancellationToken)
-                : factory.Reconcile(scope, current, state, decided, inputs, run, policy);
+                : await factory.ReconcileAsync(scope, room, current, state, decided, inputs, run, policy, cancellationToken);
             run.TasksCreated += outcome == TaskMaker.Change.Created ? 1 : 0;
             run.TasksUpdated += outcome == TaskMaker.Change.Updated ? 1 : 0;
             run.TasksSkipped += outcome == TaskMaker.Change.Unchanged ? 1 : 0;

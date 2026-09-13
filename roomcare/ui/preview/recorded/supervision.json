@@ -1,0 +1,62 @@
+{
+  "needDecision": 2,
+  "decidedToday": 0,
+  "at": "2026-09-05T09:12:00.0000000+05:30",
+  "rows": [
+    {
+      "supervisionId": "01a09993-a26e-7b6d-af68-a66f5abdccff",
+      "roomId": "01a09993-a1d6-7d01-bcbc-bfec06d30aad",
+      "room": "G06",
+      "roomVersion": 1,
+      "reason": "DAYS_WITHOUT_SERVICE",
+      "since": "2026-09-04T22:30:00.0000000+00:00",
+      "whatWeKnow": [
+        {
+          "text": "2 days without service",
+          "at": null
+        },
+        {
+          "text": "occupied",
+          "at": null
+        }
+      ],
+      "days": 3,
+      "taskId": "01a09993-a905-7f17-8313-2f6a1e55b6f7",
+      "taskVersion": 2,
+      "decision": null,
+      "decidedBy": null,
+      "decidedAt": null,
+      "note": null
+    },
+    {
+      "supervisionId": null,
+      "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+      "room": "L09",
+      "roomVersion": 4,
+      "reason": "DISAGREEMENT",
+      "since": "2026-09-05T03:41:00.0000000+00:00",
+      "whatWeKnow": [
+        {
+          "text": "ours clean (Rohan Desai)",
+          "at": "2026-09-05T03:40:00.0000000+00:00"
+        },
+        {
+          "text": "pms dirty",
+          "at": "2026-09-05T03:41:00.0000000+00:00"
+        }
+      ],
+      "days": null,
+      "taskId": "01a09993-a91b-71f8-aef3-416028899098",
+      "taskVersion": 9,
+      "decision": null,
+      "decidedBy": null,
+      "decidedAt": null,
+      "note": null
+    }
+  ],
+  "paging": {
+    "page": 0,
+    "pageSize": 12,
+    "total": 2
+  }
+}
