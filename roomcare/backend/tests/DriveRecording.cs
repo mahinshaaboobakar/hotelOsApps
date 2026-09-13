@@ -176,6 +176,13 @@ public sealed class DriveRecording(RoomCareFixture fixture)
                 Status = DeepCleanStatus.InProgress, JobId = Guid.CreateVersion7(), JobStatusSeen = "OPEN", BlockCorrelationId = "block:l14", JobCorrelationId = "deep-clean:l14",
                 BlockRequestedAt = at.AddDays(-5), CreatedAt = at.AddDays(-5), UpdatedAt = at, Version = 3,
             });
+            foreach (var i in Enumerable.Range(1, 12))
+            {
+                // Last year's deep cleans — five of the garden villas fall due this month, the rest later.
+                var done = i <= 5 ? new DateOnly(2025, 9, i + 5) : new DateOnly(2026, 3, i);
+                db.DeepCleans.Add(new DeepClean { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, RoomId = g[i], DueOn = done, DoneOn = done, Status = DeepCleanStatus.Done, CreatedAt = at.AddYears(-1), UpdatedAt = at.AddYears(-1), Version = 5 });
+            }
+
             db.DeepCleanPlans.Add(new DeepCleanPlan { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, RoomTypeId = HouseDouble.Standard, EveryMonths = 12, Version = 1 });
             db.DeepCleanPlans.Add(new DeepCleanPlan { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, RoomTypeId = HouseDouble.Suite, EveryMonths = 4, Version = 1 });
             db.AreaSchedules.Add(new AreaSchedule
@@ -183,6 +190,16 @@ public sealed class DriveRecording(RoomCareFixture fixture)
                 Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, LocationId = HouseDouble.Lobby, Minutes = 15, Version = 2,
                 Times = [new(6, 0), new(8, 0), new(10, 0), new(12, 0), new(14, 0), new(16, 0), new(18, 0), new(20, 0), new(22, 0)],
             });
+            foreach (var (day, window, outcome) in new[] { (3, ServiceWindowName.Morning, TaskOutcome.Declined), (4, ServiceWindowName.Morning, TaskOutcome.Dnd), (4, ServiceWindowName.Evening, TaskOutcome.Dnd) })
+            {
+                db.Tasks.Add(new RoomTask
+                {
+                    Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, LocationId = g[6], RoomId = g[6], OperatingDay = new DateOnly(2026, 9, day), Window = window,
+                    Service = window == ServiceWindowName.Morning ? Service.DailyService : Service.Turndown, Status = RoomTaskStatus.ClosedByPolicy, Outcome = outcome,
+                    CreatedAt = at.AddDays(day - 5), UpdatedAt = at.AddDays(day - 5),
+                });
+            }
+
             db.Supervision.Add(new RoomSupervision { Id = Guid.CreateVersion7(), PropertyId = h.PropertyId, RoomId = g[6], OperatingDay = new DateOnly(2026, 9, 5), Reason = SupervisionReason.DaysWithoutService, OpenedAt = at.AddHours(3) });
             await db.SaveChangesAsync();
         }

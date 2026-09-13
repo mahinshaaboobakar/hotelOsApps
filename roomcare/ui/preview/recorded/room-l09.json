@@ -1,6 +1,6 @@
 {
   "line": {
-    "id": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+    "id": "01a099c0-c39e-7e8a-9e01-132c3054246d",
     "number": "L09",
     "condition": "CLEAN",
     "source": "ATTENDANT",
@@ -9,13 +9,13 @@
     "occupancy": "OCCUPIED",
     "vacantDays": null,
     "soldAt": null,
-    "taskId": "01a09993-a91b-71f8-aef3-416028899098",
+    "taskId": "01a099c0-c61d-76a0-96a2-90de3b8ca2e5",
     "taskVersion": 9,
     "service": "DAILY_SERVICE",
     "reduction": null,
     "earliestAt": null,
     "priority": 3,
-    "attendantId": "01a09993-a1cd-71b8-90b8-dbf5de5d193d",
+    "attendantId": "01a099c0-c396-7d55-8d5c-c61152a235f0",
     "attendant": "Rohan Desai",
     "outcome": {
       "kind": "DISAGREEMENT",
@@ -65,37 +65,36 @@
     {
       "at": "2026-09-05T02:30:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "planned occupied",
+      "status": "PLANNED",
+      "what": "daily service · occupied",
       "by": "Rekha Sinha"
     },
     {
       "at": "2026-09-05T02:31:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "assigned reassigned",
+      "status": "ASSIGNED",
+      "what": "reassigned",
       "by": "Meera Krishnan"
     },
     {
       "at": "2026-09-05T03:25:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "in_progress",
+      "status": "IN_PROGRESS",
+      "what": "",
       "by": "Rohan Desai"
     },
     {
       "at": "2026-09-05T03:40:00.0000000+00:00",
-      "kind": "TRANSITION",
-      "what": "ended",
-      "by": "Rohan Desai"
-    },
-    {
-      "at": "2026-09-05T03:40:00.0000000+00:00",
-      "kind": "ATTEMPT",
-      "what": "DONE",
+      "kind": "ENDED",
+      "status": "DONE",
+      "what": "linen not due · 15 min · room CLEAN, announced (room.cleaned)",
       "by": "Rohan Desai"
     },
     {
       "at": "2026-09-05T03:41:00.0000000+00:00",
       "kind": "OBSERVED",
-      "what": "PMS: dirty · DISAGREEMENT_FLAGGED",
+      "status": "DISAGREEMENT_FLAGGED",
+      "what": "pms: dirty",
       "by": null
     }
   ],

@@ -29,10 +29,17 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
         var disagreements = day.States.Values.Where(s => s.HasDisagreement).ToList();
         var deciders = await house.NamesAsync(decided.Select(d => d.DecidedByUserId!.Value).Distinct().ToList(), cancellationToken);
 
+        var rooms = open.Concat(decided).Select(s => s.RoomId).Distinct().ToList();
+        var from = day.Date.AddDays(-7);
+        var earlier = await db.Tasks
+            .Where(t => t.PropertyId == scope.PropertyId && t.RoomId != null && rooms.Contains(t.RoomId.Value) && t.OperatingDay >= from && t.OperatingDay < day.Date)
+            .Select(t => new PastService(t.RoomId!.Value, t.OperatingDay, t.Outcome))
+            .ToListAsync(cancellationToken);
+
         var rows = new List<LaneRowView>();
-        rows.AddRange(open.Select(s => Row(snapshot, day, s, null)));
+        rows.AddRange(open.Select(s => Row(snapshot, day, s, null, earlier)));
         rows.AddRange(disagreements.Select(s => Disagreement(snapshot, day, s)));
-        rows.AddRange(decided.Select(s => Row(snapshot, day, s, deciders.GetValueOrDefault(s.DecidedByUserId!.Value))));
+        rows.AddRange(decided.Select(s => Row(snapshot, day, s, deciders.GetValueOrDefault(s.DecidedByUserId!.Value), earlier)));
 
         var size = PageSize;
         return new SupervisionView(
@@ -43,13 +50,32 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
             new Views.Paging(Math.Max(0, page), size, rows.Count));
     }
 
-    private static LaneRowView Row(HouseSnapshot snapshot, DayFacts.Day day, RoomSupervision lane, string? decidedBy)
+    /// <summary>One earlier day's service on a room — what the lane tells the supervisor about the days before.</summary>
+    private sealed record PastService(Guid RoomId, DateOnly Day, string? Outcome);
+
+    private static LaneRowView Row(HouseSnapshot snapshot, DayFacts.Day day, RoomSupervision lane, string? decidedBy, IReadOnlyList<PastService> earlier)
     {
         day.States.TryGetValue(lane.RoomId, out var state);
         var task = day.TaskOf(lane.RoomId);
+        var known = new List<KnownView>();
+        if (lane.Reason == SupervisionReason.DaysWithoutService && state is not null)
+        {
+            // The days that made the count, oldest first — "declined at the door 03 Sep · DND both windows 04 Sep".
+            foreach (var past in earlier.Where(p => p.RoomId == lane.RoomId).GroupBy(p => p.Day).OrderBy(g => g.Key).TakeLast(state.DaysWithoutService))
+            {
+                var outcomes = past.Select(p => p.Outcome).Distinct().ToList();
+                var words = outcomes.Count == 1 && past.Count() > 1 ? $"{Word(outcomes[0])} both windows" : string.Join(", ", outcomes.Select(Word));
+                known.Add(new KnownView(words, null, past.Key.ToString("yyyy-MM-dd")));
+            }
+        }
+
+        known.AddRange(Known(day, lane, state, task));
+        var sinceDay = lane.Reason == SupervisionReason.DaysWithoutService && state is not null
+            ? day.Date.AddDays(-state.DaysWithoutService).ToString("yyyy-MM-dd")
+            : null;
         return new LaneRowView(
             lane.Id.ToString(), lane.RoomId.ToString(), snapshot.Number(lane.RoomId), state?.Version ?? 0,
-            lane.Reason, lane.OpenedAt.ToString("o"), Known(day, lane, state, task),
+            lane.Reason, lane.OpenedAt.ToString("o"), sinceDay, known,
             lane.Reason == SupervisionReason.DaysWithoutService ? (state?.DaysWithoutService ?? 0) + 1 : null,
             task?.Id.ToString(), task?.Version, lane.Decision, decidedBy, At(lane.DecidedAt), lane.Note);
     }
@@ -57,11 +83,22 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
     private static LaneRowView Disagreement(HouseSnapshot snapshot, DayFacts.Day day, RoomState state) => new(
         null, state.RoomId.ToString(), snapshot.Number(state.RoomId), state.Version, SupervisionReason.Disagreement,
         state.DisagreementObservedAt!.Value.ToString("o"),
+        null,
         [
             new KnownView($"ours {state.Condition.ToLowerInvariant()} ({day.Name(state.ConditionSetById) ?? state.ConditionSource.ToLowerInvariant()})", At(state.ConditionSetAt)),
             new KnownView($"{(state.DisagreementSource ?? ObservationSource.Pms).ToLowerInvariant()} {state.DisagreementObservedCondition!.ToLowerInvariant()}", At(state.DisagreementObservedAt)),
         ],
         null, day.TaskOf(state.RoomId)?.Id.ToString(), day.TaskOf(state.RoomId)?.Version, null, null, null, null);
+
+    private static string Word(string? outcome) => outcome switch
+    {
+        TaskOutcome.Declined => "declined at the door",
+        TaskOutcome.Dnd => "DND",
+        TaskOutcome.SkippedByGuest => "skipped by the guest",
+        TaskOutcome.SupervisorDndApproved => "DND approved",
+        null => "open",
+        _ => outcome.ToLowerInvariant().Replace('_', ' '),
+    };
 
     private static IReadOnlyList<KnownView> Known(DayFacts.Day day, RoomSupervision lane, RoomState? state, RoomTask? task)
     {
@@ -69,7 +106,6 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
         switch (lane.Reason)
         {
             case SupervisionReason.DaysWithoutService:
-                known.Add(new KnownView($"{state?.DaysWithoutService ?? 0} days without service", null));
                 if (day.LastAttempt(task) is { } last)
                 {
                     known.Add(new KnownView($"today at the door: {last.Found.ToLowerInvariant()}", At(last.At)));

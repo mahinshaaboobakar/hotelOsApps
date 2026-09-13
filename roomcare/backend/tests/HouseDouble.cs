@@ -5,7 +5,7 @@ namespace HotelOS.RoomCare.Tests;
 /// <summary>The house a test stands in — Coral Cove's shape: rooms, types, zones, areas and the people named in the frames.</summary>
 public sealed class HouseDouble : IHouse
 {
-    public PropertyDaySettings? Settings { get; set; } = new("ccr", "Asia/Kolkata", new TimeOnly(4, 0));
+    public PropertyDaySettings? Settings { get; set; } = new("ccr", "Coral Cove Resort", "Asia/Kolkata", new TimeOnly(4, 0));
 
     public List<HouseRoom> Rooms { get; } = [];
 

@@ -2,18 +2,20 @@
   "total": 2,
   "rows": [
     {
-      "roomId": "01a09993-a1d6-7d01-bcbc-bfec06d30aad",
+      "roomId": "01a099c0-c39d-7a8e-9528-e31d4cec2516",
       "room": "G06",
       "what": "DAYS_WITHOUT_SERVICE",
       "at": "2026-09-04T22:30:00.0000000+00:00",
-      "tone": "bad"
+      "tone": "bad",
+      "detail": "3"
     },
     {
-      "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+      "roomId": "01a099c0-c39e-7e8a-9e01-132c3054246d",
       "room": "L09",
       "what": "DISAGREEMENT",
       "at": "2026-09-05T03:41:00.0000000+00:00",
-      "tone": "warn"
+      "tone": "warn",
+      "detail": "DIRTY"
     }
   ],
   "at": "2026-09-05T09:12:00.0000000+05:30"

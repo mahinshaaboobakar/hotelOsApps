@@ -25,7 +25,7 @@ public sealed record PrepareView(
 public sealed record ChangeView(string At, string RoomId, string Room, string Source, string What, string? SoldAt, string OnNextPress);
 
 /// <summary>One thing known about a room in the lane, with the instant it refers to when it has one.</summary>
-public sealed record KnownView(string Text, string? At);
+public sealed record KnownView(string Text, string? At, string? Day = null);
 
 /// <summary>The proposal — per attendant, the rooms and minutes; the rooms nobody could take; who is here.</summary>
 public sealed record ProposalView(
@@ -79,6 +79,7 @@ public sealed record LaneRowView(
     long RoomVersion,
     string Reason,
     string Since,
+    string? SinceDay,
     IReadOnlyList<KnownView> WhatWeKnow,
     int? Days,
     string? TaskId,

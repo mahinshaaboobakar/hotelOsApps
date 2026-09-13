@@ -8,13 +8,14 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { pager } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
-import { clock, minutes } from "../../chrome/instant";
+import { clock, minutes, when } from "../../chrome/instant";
 import { act, failed, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
-import { lower, service } from "../../chrome/words";
+import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
+import { moveRooms } from "./move";
 
-interface PrepareView {
+export interface PrepareView {
   window: string | null;
   windowStarts: string | null;
   windowEnds: string | null;
@@ -47,55 +48,61 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
 
   const v = got.value;
   const said = el("p", "said");
+  const refuse = (because: string): void => { said.className = "said bad"; said.textContent = because; };
   const press = async (): Promise<void> => {
     const done = await act(host, "roomcare.assign", "prepare", { window: v.window });
     if (done.ok) nav.show();
-    else { said.className = "said bad"; said.textContent = done.because; }
+    else refuse(done.because);
   };
+  const since = v.preparedAt === null ? "—" : clock(host, v.preparedAt);
 
   const strip = el("div", "strip");
+  const bold = (b: string, rest: string, lead = ""): HTMLElement => { const s = el("span"); s.append(document.createTextNode(lead), el("b", undefined, b), document.createTextNode(rest)); return s; };
   strip.append(
-    el("span", undefined, `${lower(v.window ?? "no window")} ${clock(host, v.windowStarts)} – ${clock(host, v.windowEnds)} · ${v.open ? "open" : "closed"}`),
-    el("span", undefined, v.preparedAt === null ? "not prepared yet" : `prepared ${clock(host, v.preparedAt)} by ${v.preparedBy ?? "the system"}`),
-    el("span", undefined, `${v.tasks} tasks`),
-    el("span", undefined, `${v.changesSince} changes since ${v.preparedAt === null ? "—" : clock(host, v.preparedAt)}`),
-    el("span", undefined, `trigger: ${v.triggerMode === "AUTOMATIC" ? "automatic" : "Prepare by button / HosPilot"}`),
-    el("span", "end", clock(host, v.at)),
+    bold(v.window === "EVENING" ? "Turndown" : "Morning", ` ${clock(host, v.windowStarts)} – ${clock(host, v.windowEnds)} · ${v.open ? "open" : "closed"}`),
+    v.preparedAt === null ? el("span", undefined, "not prepared yet") : bold(since, ` by ${v.preparedBy ?? "the system"}`, "prepared "),
+    bold(String(v.tasks), " tasks"),
+    bold(String(v.changesSince), ` changes since ${since}`),
+    bold(v.triggerMode === "AUTOMATIC" ? "Automatic" : "Prepare by button / HosPilot", "", "trigger: "),
+    el("span", "end", when(host, v.at)),
   );
 
+  const changesCard = el("section", "card");
   const buttons = el("div", "row");
   buttons.style.marginBottom = "12px";
   if (holds(host, "roomcare.assign")) {
     if (v.preparedAt === null) buttons.append(control("btn pri", "Prepare the day", () => void press()));
     else {
       buttons.append(
-        v.changesSince > 0 ? control("btn pri", `Add the new rooms (${v.changesSince})`, () => void press()) : el("span", "btn off", "Add the new rooms — nothing new since the last press"),
-        el("span", "btn off", `Prepare the day — done ${clock(host, v.preparedAt)}`),
+        v.changesSince > 0 ? control("btn pri", `Add the new rooms (${v.changesSince})`, () => void press()) : el("span", "btn off", "Add the new rooms — nothing new"),
+        control("btn", "Show what changed", () => changesCard.scrollIntoView({ block: "nearest" })),
+        el("span", "btn off", `Prepare the day — done ${since}`),
       );
     }
   }
 
-  const changes = el("table", "list");
+  const table = el("table");
   const head = el("tr");
   for (const name of ["When", "Room", "What arrived", "On the next press"]) head.append(el("th", undefined, name));
-  changes.append(head);
+  table.append(head);
   for (const c of v.changes) {
     const row = el("tr", "pick");
     row.addEventListener("click", () => nav.openRoom(c.roomId));
     const what = c.soldAt === null ? c.what : `${c.what} · sold ${clock(host, c.soldAt)}`;
-    row.append(el("td", "num", clock(host, c.at)), el("td", "num", c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
-    changes.append(row);
+    row.append(el("td", "mono", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
+    table.append(row);
   }
+  changesCard.append(el("h3", undefined, `Changes since ${since} — collected, nothing created`), table, pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));
 
-  body.append(strip, buttons, said, el("h3", "sect", `Changes since ${v.preparedAt === null ? "—" : clock(host, v.preparedAt)} — collected, nothing created`), proposal(host, nav, v), changes,
-    pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));
+  const grid = el("div", "cols");
+  grid.append(changesCard, proposal(host, nav, v, refuse));
+  body.append(strip, buttons, grid, said);
 }
 
-function proposal(host: HostApi, nav: Nav, v: PrepareView): HTMLElement {
+function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: string) => void): HTMLElement {
   const p = v.proposal;
   const card = el("section", "card");
-  card.style.marginBottom = "14px";
-  card.append(el("h3", undefined, "The proposal"));
+  card.append(el("h3", undefined, `The proposal — Housekeeping (${p.people.map((x) => x.name).join(" · ") || "nobody posted"})`));
   const kv = el("div", "kv");
   kv.append(el("div", "k", "Strategy"), el("div", undefined, `${lower(p.strategy)} — the property's (Setup)`));
   for (const person of p.people) {
@@ -103,22 +110,29 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView): HTMLElement {
       `${person.rooms} rooms · ${person.roomNumbers.slice(0, 6).join(" ")}${person.roomNumbers.length > 6 ? " …" : ""} · ${minutes(person.minutes)} planned${person.accepted ? " · accepted" : ""}`));
   }
   if (p.nobodyAvailable.length > 0) {
-    kv.append(el("div", "k", "Nobody available"), el("div", undefined, p.nobodyAvailable.map((n) => `${n.room} (${service(n.service)}, priority ${n.priority})`).join(" · ")));
+    const cell = el("div");
+    for (const n of p.nobodyAvailable) {
+      cell.append(el("span", "pill bad", n.room), document.createTextNode(" "));
+      if (holds(host, "roomcare.assign")) cell.append(control("btn sm", "Assign anyway…", () => void moveRooms(host, nav, v, n.taskId)), document.createTextNode(" "));
+    }
+    kv.append(el("div", "k", "Nobody available"), cell);
   }
   const here = el("div");
   here.append(document.createTextNode(`from Workforce — ${p.candidates} posted to Housekeeping; grouped by department until the zone is on the posting `), el("span", "tag port", "Workforce ask · zone on the posting"));
   kv.append(el("div", "k", "Who is here"), here);
   card.append(kv);
-  if (holds(host, "roomcare.assign") && p.proposed > 0) {
-    const said = el("p", "said");
+  if (holds(host, "roomcare.assign")) {
     const row = el("div", "row");
     row.style.marginTop = "12px";
-    row.append(control("btn pri", "Accept the proposal", () => void (async () => {
-      const done = await act(host, "roomcare.assign", "acceptProposal", { day: v.day, window: v.window });
-      if (done.ok) nav.show();
-      else { said.className = "said bad"; said.textContent = done.because; }
-    })()));
-    card.append(row, said);
+    if (p.proposed > 0) {
+      row.append(control("btn pri", "Accept the proposal", () => void (async () => {
+        const done = await act(host, "roomcare.assign", "acceptProposal", { day: v.day, window: v.window });
+        if (done.ok) nav.show();
+        else refuse(done.because);
+      })()));
+    }
+    row.append(control("btn", "Move rooms…", () => void moveRooms(host, nav, v, null)));
+    card.append(row);
   }
   return card;
 }

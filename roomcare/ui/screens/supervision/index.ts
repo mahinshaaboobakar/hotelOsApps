@@ -6,9 +6,9 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { pager } from "../../chrome/bar";
+import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
-import { clock, when } from "../../chrome/instant";
+import { clock, shortDay, when } from "../../chrome/instant";
 import { act, failed, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog } from "../../chrome/overlay";
@@ -22,7 +22,8 @@ interface LaneRow {
   roomVersion: number;
   reason: string;
   since: string;
-  whatWeKnow: { text: string; at: string | null }[];
+  sinceDay: string | null;
+  whatWeKnow: { text: string; at: string | null; day: string | null }[];
   days: number | null;
   taskId: string | null;
   taskVersion: number | null;
@@ -57,20 +58,24 @@ export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, pa
   for (const name of ["Room", "Why it is here", "Since", "What we know", "Decision"]) head.append(el("th", undefined, name));
   table.append(head);
   for (const row of lane.rows) {
-    const tr = el("tr");
-    const roomCell = el("td");
-    roomCell.append(control("btn sm", row.room, () => nav.openRoom(row.roomId)));
-    const known = row.whatWeKnow.map((k) => (k.at === null ? k.text : `${k.text} ${clock(host, k.at)}`)).join(" · ");
-    tr.append(roomCell, el("td", undefined, why(row)), el("td", "num", clock(host, row.since)), el("td", undefined, known), decisionCell(host, nav, row));
+    const tr = el("tr", row.decision === null ? "pick" : "pick dim");
+    tr.addEventListener("click", (event) => { if ((event.target as HTMLElement).closest("button") === null) nav.openRoom(row.roomId); });
+    const known = row.whatWeKnow.map((k) => (k.day !== null ? `${k.text} ${shortDay(host, k.day)}` : k.at === null ? k.text : `${k.text} ${clock(host, k.at)}`)).join(" · ");
+    const since = el("td");
+    since.append(el("b", undefined, row.sinceDay !== null ? shortDay(host, row.sinceDay) : clock(host, row.since)));
+    tr.append(el("td", "num", row.room), why(row), since, el("td", undefined, known), decisionCell(host, nav, row));
     table.append(tr);
   }
 
-  body.append(strip, table, pager(lane.paging, lane.rows.length, "rooms in the lane", goPage));
+  body.append(strip, scroller(table), pager(lane.paging, lane.rows.length, "rooms in the lane", goPage));
 }
 
-function why(row: LaneRow): string {
-  if (row.reason !== "DAYS_WITHOUT_SERVICE") return reason(row.reason) + (row.decision === null ? "" : " — decided");
-  return `${ordinal(row.days ?? 1)} day without service`;
+function why(row: LaneRow): HTMLElement {
+  const cell = el("td");
+  if (row.decision !== null) cell.append(document.createTextNode(`${row.reason === "DAYS_WITHOUT_SERVICE" ? "Days without service" : reason(row.reason)} — decided`));
+  else if (row.reason === "DAYS_WITHOUT_SERVICE") cell.append(el("span", "pill soft-bad", `${ordinal(row.days ?? 1)} day without service`));
+  else cell.append(el("span", `pill ${row.reason === "DISAGREEMENT" ? "soft-warn" : "soft-bad"}`, reason(row.reason)));
+  return cell;
 }
 
 function decisionCell(host: HostApi, nav: Nav, row: LaneRow): HTMLElement {
@@ -84,6 +89,7 @@ function decisionCell(host: HostApi, nav: Nav, row: LaneRow): HTMLElement {
     return cell;
   }
   const buttons = el("div", "row");
+  buttons.style.gap = "4px";
   if (row.reason === "DISAGREEMENT") {
     buttons.append(control("btn sm", "Keep ours", () => void clear(host, nav, row, "OURS")), control("btn sm", "Take theirs", () => void clear(host, nav, row, "THEIRS")));
   } else if (row.reason === "NOBODY_AVAILABLE") {

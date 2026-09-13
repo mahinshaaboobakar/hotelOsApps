@@ -4,24 +4,32 @@
   "at": "2026-09-05T09:12:00.0000000+05:30",
   "rows": [
     {
-      "supervisionId": "01a09993-a26e-7b6d-af68-a66f5abdccff",
-      "roomId": "01a09993-a1d6-7d01-bcbc-bfec06d30aad",
+      "supervisionId": "01a099c0-c3e8-7c32-ac26-2e5c6329a6bf",
+      "roomId": "01a099c0-c39d-7a8e-9528-e31d4cec2516",
       "room": "G06",
       "roomVersion": 1,
       "reason": "DAYS_WITHOUT_SERVICE",
       "since": "2026-09-04T22:30:00.0000000+00:00",
+      "sinceDay": "2026-09-03",
       "whatWeKnow": [
         {
-          "text": "2 days without service",
-          "at": null
+          "text": "declined at the door",
+          "at": null,
+          "day": "2026-09-03"
+        },
+        {
+          "text": "DND both windows",
+          "at": null,
+          "day": "2026-09-04"
         },
         {
           "text": "occupied",
-          "at": null
+          "at": null,
+          "day": null
         }
       ],
       "days": 3,
-      "taskId": "01a09993-a905-7f17-8313-2f6a1e55b6f7",
+      "taskId": "01a099c0-c606-7744-905c-948d64b8c4fd",
       "taskVersion": 2,
       "decision": null,
       "decidedBy": null,
@@ -30,23 +38,26 @@
     },
     {
       "supervisionId": null,
-      "roomId": "01a09993-a1d7-7762-8ee1-aaccab3609fa",
+      "roomId": "01a099c0-c39e-7e8a-9e01-132c3054246d",
       "room": "L09",
       "roomVersion": 4,
       "reason": "DISAGREEMENT",
       "since": "2026-09-05T03:41:00.0000000+00:00",
+      "sinceDay": null,
       "whatWeKnow": [
         {
           "text": "ours clean (Rohan Desai)",
-          "at": "2026-09-05T03:40:00.0000000+00:00"
+          "at": "2026-09-05T03:40:00.0000000+00:00",
+          "day": null
         },
         {
           "text": "pms dirty",
-          "at": "2026-09-05T03:41:00.0000000+00:00"
+          "at": "2026-09-05T03:41:00.0000000+00:00",
+          "day": null
         }
       ],
       "days": null,
-      "taskId": "01a09993-a91b-71f8-aef3-416028899098",
+      "taskId": "01a099c0-c61d-76a0-96a2-90de3b8ca2e5",
       "taskVersion": 9,
       "decision": null,
       "decidedBy": null,

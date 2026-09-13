@@ -2,11 +2,12 @@
   "total": 1,
   "rows": [
     {
-      "roomId": "01a09993-a1d6-7944-9b8f-a87bafb6dc72",
+      "roomId": "01a099c0-c39d-735b-968a-d0cbea67970d",
       "room": "G09",
-      "what": "departed, not sold tonight — may wait for tomorrow",
+      "what": "UNSOLD_DEPARTURE",
       "at": null,
-      "tone": "warn"
+      "tone": "warn",
+      "detail": null
     }
   ],
   "at": "2026-09-05T09:12:00.0000000+05:30"

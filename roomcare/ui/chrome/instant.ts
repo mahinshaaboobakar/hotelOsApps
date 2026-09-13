@@ -21,6 +21,16 @@ export function day(host: HostApi, isoDate: string | null | undefined): string {
   return isoDate === null || isoDate === undefined ? "—" : formatDay(isoDate, host.property);
 }
 
+/** Half a year either side of today — near enough that a date's year is plain. */
+const NEAR_MS = 183 * 24 * 60 * 60 * 1000;
+
+/** `03 Sep` for a date near enough that its year is plain; `03 Sep 2025` otherwise, so last year never reads as this week. */
+export function shortDay(host: HostApi, isoDate: string | null | undefined): string {
+  if (isoDate === null || isoDate === undefined) return "—";
+  const noon = `${isoDate}T12:00:00Z`;
+  return Math.abs(Date.parse(noon) - Date.now()) > NEAR_MS ? formatDay(isoDate, host.property) : formatInstant(noon, host.property, "date");
+}
+
 /** `3 h 40` — minutes as a person reads a shift. */
 export function minutes(total: number): string {
   const h = Math.floor(total / 60);

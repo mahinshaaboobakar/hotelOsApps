@@ -49,9 +49,9 @@ public sealed class WidgetProjection(RoomCareDbContext db, IHouse house, Propert
     {
         var (snapshot, day) = await LoadDayAsync(scope, cancellationToken);
         var rows = day.Lane.Where(l => l.IsOpen)
-            .Select(l => Room(snapshot, l.RoomId, l.Reason, l.OpenedAt.ToString("o"), "bad"))
+            .Select(l => Room(snapshot, l.RoomId, l.Reason, l.OpenedAt.ToString("o"), "bad", DaysOf(day, l.RoomId, l.Reason)))
             .Concat(day.States.Values.Where(s => s.HasDisagreement)
-                .Select(s => Room(snapshot, s.RoomId, SupervisionReason.Disagreement, At(s.DisagreementObservedAt), "warn")))
+                .Select(s => Room(snapshot, s.RoomId, SupervisionReason.Disagreement, At(s.DisagreementObservedAt), "warn", s.DisagreementObservedCondition)))
             .ToList();
         return new AttentionView(rows.Count, rows.Take(Rows).ToList(), snapshot.Now.Instant.ToString("o"));
     }
@@ -76,7 +76,9 @@ public sealed class WidgetProjection(RoomCareDbContext db, IHouse house, Propert
         var pending = day.Tasks.Where(t => t.Status == RoomTaskStatus.PendingPolicy && t.RoomId != null).OrderBy(t => t.PriorityRank).ToList();
         return new PendingView(
             pending.Count,
-            pending.Take(Rows + 1).Select(t => Room(snapshot, t.RoomId!.Value, t.DecisionInputs.Reason ?? "no rule matched", null, "warn")).ToList(),
+            pending.Take(Rows + 1).Select(t => t.DecisionInputs.Reason == DayDecision.UnsoldMayWait
+                ? Room(snapshot, t.RoomId!.Value, PendingWord.UnsoldDeparture, null, "warn")
+                : Room(snapshot, t.RoomId!.Value, PendingWord.SeeRoom, null, "warn", t.DecisionInputs.Reason)).ToList(),
             snapshot.Now.Instant.ToString("o"));
     }
 
@@ -98,6 +100,19 @@ public sealed class WidgetProjection(RoomCareDbContext db, IHouse house, Propert
         return assigned ? "NOT_STARTED" : "NOBODY_AVAILABLE";
     }
 
-    private static WidgetRoomView Room(HouseSnapshot snapshot, Guid roomId, string what, string? at, string tone) =>
-        new(roomId.ToString(), snapshot.Number(roomId), what, at, tone);
+    /// <summary>The day this is without service — the supervision lane's own count (today included).</summary>
+    private static string? DaysOf(DayFacts.Day day, Guid roomId, string reason) =>
+        reason == SupervisionReason.DaysWithoutService && day.States.TryGetValue(roomId, out var state)
+            ? (state.DaysWithoutService + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : null;
+
+    private static WidgetRoomView Room(HouseSnapshot snapshot, Guid roomId, string what, string? at, string tone, string? detail = null) =>
+        new(roomId.ToString(), snapshot.Number(roomId), what, at, tone, detail);
+
+    /// <summary>Why a room waits on a click, as the Pending widget words it.</summary>
+    private static class PendingWord
+    {
+        public const string UnsoldDeparture = "UNSOLD_DEPARTURE";
+        public const string SeeRoom = "SEE_ROOM";
+    }
 }

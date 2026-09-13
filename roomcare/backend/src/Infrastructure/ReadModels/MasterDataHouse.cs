@@ -41,12 +41,15 @@ public static class MasterDataHouse
         });
 }
 
-/// <summary>A property's zone and day boundary — four columns.</summary>
+/// <summary>A property's name, zone and day boundary — five columns.</summary>
 public sealed class MasterDataProperty
 {
     public Guid Id { get; set; }
 
     public string Code { get; set; } = string.Empty;
+
+    /// <summary>What the bar's identity clause names — page 64 §3's property.</summary>
+    public string Name { get; set; } = string.Empty;
 
     public string Timezone { get; set; } = string.Empty;
 

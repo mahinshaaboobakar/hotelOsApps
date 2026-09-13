@@ -66,7 +66,7 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
             rooms.Select(r => new ZoneRoomView(r.Id.ToString(), r.Number, members.FirstOrDefault(m => m.RoomId == r.Id)?.ZoneId.ToString())).ToList());
     }
 
-    public async Task<AreasView> AreasAsync(RequestScope scope, int page, CancellationToken cancellationToken)
+    public async Task<AreasView> AreasAsync(RequestScope scope, int page, bool withoutRoutine, CancellationToken cancellationToken)
     {
         await gate.PropertyAsync(scope, Permissions.Configure, cancellationToken);
         var areas = await house.AreasAsync(scope.PropertyId, cancellationToken);
@@ -75,8 +75,9 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
                 ? new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, s.Times.Select(t => t.ToString("HH:mm")).ToList(), s.Minutes, s.Enabled, s.Version)
                 : new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, [], null, false, 0))
             .ToList();
+        var shown = withoutRoutine ? rows.Where(r => !r.Enabled || r.Times.Count == 0).ToList() : rows;
         return new AreasView(areas.Count, rows.Count(r => r.Enabled && r.Times.Count > 0),
-            rows.Skip(Math.Max(0, page) * AreaPageSize).Take(AreaPageSize).ToList(), new Views.Paging(Math.Max(0, page), AreaPageSize, rows.Count));
+            shown.Skip(Math.Max(0, page) * AreaPageSize).Take(AreaPageSize).ToList(), new Views.Paging(Math.Max(0, page), AreaPageSize, shown.Count));
     }
 
     public async Task<DeepCleanPlanView> PlanAsync(RequestScope scope, CancellationToken cancellationToken)

@@ -6,7 +6,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { pager } from "../../chrome/bar";
+import { pager, scroller } from "../../chrome/bar";
 import { el } from "../../chrome/element";
 import { clock, minutes } from "../../chrome/instant";
 import { failed, load } from "../../chrome/load";
@@ -52,23 +52,48 @@ export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId
   const v = got.value;
   const strip = el("div", "strip");
   const count = (text: string, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, text), document.createTextNode(label)); return c; };
-  strip.append(count(String(v.rooms), "rooms"), count(String(v.done), "done"), count(String(v.inProgress), "in progress"), count(minutes(v.plannedMinutes), "planned"), el("span", "end", clock(host, v.at)));
+  strip.append(count(String(v.rooms), "rooms"), count(String(v.done), "done"), count(String(v.inProgress), "in progress"),
+    el("span", undefined, `${minutes(v.plannedMinutes)} planned`), el("span", "end", clock(host, v.at)));
 
-  const table = el("table", "list");
+  const table = el("table");
   const head = el("tr");
   for (const name of ["Room", "Service", "Pri", "Earliest", "Linen", "State"]) head.append(el("th", undefined, name));
   table.append(head);
   for (const row of v.rows) {
     const tr = el("tr", "pick");
     tr.addEventListener("click", () => open(row.taskId));
-    const what = [service(row.service), row.soldAt === null ? null : `arrival ${clock(host, row.soldAt)}`, row.reduction].filter((x) => x !== null).join(" · ");
-    const linen = row.declinedDay !== null ? `declined day ${row.declinedDay}` : row.linen === "STRIP" ? "strip" : row.linen === "NOT_DUE" ? "—" : row.linen.toLowerCase();
-    tr.append(el("td", "num", row.room), el("td", undefined, what), el("td", "num", String(row.priority)), el("td", "num", row.earliestAt === null ? "—" : clock(host, row.earliestAt)),
-      el("td", undefined, linen), el("td", undefined, stateText(host, row)));
+    const what = el("td");
+    what.append(document.createTextNode(service(row.service)));
+    if (row.soldAt !== null) what.append(document.createTextNode(" · "), el("span", "mono", `arrival ${clock(host, row.soldAt)}`));
+    if (row.reduction !== null) what.append(document.createTextNode(" · "), el("i", undefined, row.reduction));
+    const pri = el("td");
+    pri.append(el("span", `pill p${Math.min(row.priority, 3)}`, String(row.priority)));
+    const earliest = el("td");
+    earliest.append(row.earliestAt === null ? document.createTextNode("—") : el("b", undefined, clock(host, row.earliestAt)));
+    tr.append(el("td", "num", row.room), what, pri, earliest, linen(row), stateCell(host, row));
     table.append(tr);
   }
 
-  body.append(strip, table, pager(v.paging, v.rows.length, "rooms assigned to you today", () => {}));
+  body.append(strip, scroller(table), pager(v.paging, v.rows.length, "rooms assigned to you today", () => {}));
+}
+
+function linen(row: MyRoom): HTMLElement {
+  const cell = el("td");
+  if (row.declinedDay !== null) cell.append(document.createTextNode(`declined day ${row.declinedDay}`));
+  else if (row.linen === "STRIP") cell.append(document.createTextNode("strip"));
+  else if (row.linen === "DUE" || row.linen === "MUST") cell.append(el("span", "pill warn", row.linen.toLowerCase()));
+  else cell.append(document.createTextNode("—"));
+  return cell;
+}
+
+function stateCell(host: HostApi, row: MyRoom): HTMLElement {
+  const cell = el("td");
+  const tone: Record<string, string> = { IN_PROGRESS: "run", DONE: "ok", INSPECTION_REQUESTED: "ok", READY: "ok", PARTIAL: "ok", DND: "warn", DECLINED: "warn" };
+  const text = stateText(host, row);
+  const kind = row.state.kind;
+  if (tone[kind] !== undefined) cell.append(el("span", `pill ${tone[kind]}`, text));
+  else cell.append(el("span", kind === "WAITING" ? "dim" : undefined, text));
+  return cell;
 }
 
 /** The row's state, as the attendant reads it. */

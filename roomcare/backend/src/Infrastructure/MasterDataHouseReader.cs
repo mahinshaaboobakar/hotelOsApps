@@ -18,11 +18,11 @@ public sealed class MasterDataHouseReader(RoomCareDbContext db) : IHouse
     {
         var property = await db.MasterDataProperties
             .Where(p => p.Id == propertyId)
-            .Select(p => new { p.Code, p.Timezone, p.BusinessDayBoundary })
+            .Select(p => new { p.Code, p.Name, p.Timezone, p.BusinessDayBoundary })
             .FirstOrDefaultAsync(cancellationToken);
         return property is null || string.IsNullOrWhiteSpace(property.Timezone)
             ? null
-            : new PropertyDaySettings(property.Code, property.Timezone, property.BusinessDayBoundary);
+            : new PropertyDaySettings(property.Code, property.Name, property.Timezone, property.BusinessDayBoundary);
     }
 
     public async Task<IReadOnlyList<HouseRoom>> RoomsAsync(Guid propertyId, CancellationToken cancellationToken) =>

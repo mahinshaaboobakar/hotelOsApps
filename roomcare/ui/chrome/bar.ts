@@ -39,6 +39,18 @@ export function chip(label: string, on: boolean, click: () => void): HTMLElement
 }
 
 /**
+ * A paged list's scroll container — only the list scrolls (CORE-Q28). A div
+ * around the table, never the table itself: a table given the free height
+ * stretches its rows to fill it instead of scrolling.
+ */
+export function scroller(table: HTMLElement): HTMLElement {
+  table.classList.remove("list");
+  const box = el("div", "list");
+  box.append(table);
+  return box;
+}
+
+/**
  * The numbered pager on `common.v1` paged-with-total. It draws on a single
  * page too, states the rows that are there, and sits at the list's floor
  * (§6, CORE-Q13, CORE-Q28) — the SDK's arithmetic, never a second copy.

@@ -28,7 +28,7 @@ public interface IHouse
 }
 
 /// <summary>A property's code, zone and business-day boundary.</summary>
-public sealed record PropertyDaySettings(string Code, string Timezone, TimeOnly Boundary);
+public sealed record PropertyDaySettings(string Code, string Name, string Timezone, TimeOnly Boundary);
 
 /// <summary>A room as a screen and the decision need it — identity only.</summary>
 public sealed record HouseRoom(Guid Id, string Number, Guid RoomTypeId, int SortOrder);

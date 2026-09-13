@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Room Care module realm — capture</title>
+<link rel="stylesheet" href="./tokens.css">
+<style>
+  /*
+   * The base rules the shell's realm writes into a module's document
+   * (apps/desktop/src/shell/module-host/realm.ts, rootStyle), as Jobs' harness
+   * reproduces them — so the capture shows what the module inherits, not what
+   * this page felt like giving it. The window is the mockup's 1180 px frame.
+   */
+  :root { background: var(--color-surface); color: var(--color-ink); }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: var(--font-sans); background: transparent; color: inherit; width: 1180px; height: 760px; position: relative; }
+  * { scrollbar-width: thin; scrollbar-color: var(--color-ink-faint) transparent; }
+  .rc { height: 760px !important; }
+</style>
+</head><body>
+<script>
+  // The bundle is fetched fresh on every load (ARCH-Q25): a capture of a
+  // previous build would be a real screen of code that no longer exists.
+  const s = document.createElement("script");
+  s.type = "module";
+  s.src = "./frame.js?t=" + Date.now();
+  document.body.appendChild(s);
+</script>
+</body></html>

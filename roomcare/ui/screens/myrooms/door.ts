@@ -42,23 +42,34 @@ export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: s
     else { said.className = "said bad"; said.textContent = done.because; }
   };
 
-  const title = el("h2", undefined, `Room ${r.room} · ${service(r.service)}`);
-  title.style.cssText = "margin:6px 0 4px;font-size:18px";
-  const facts = el("div", "dim", [
+  const title = el("div", "row");
+  title.style.gap = "14px";
+  const heading = el("h2", undefined, `Room ${r.room} · ${service(r.service)}`);
+  heading.style.cssText = "margin:0;font-size:18px";
+  const facts = el("span", "mono", [
     v.startedAt === null ? "not started" : `started ${clock(host, v.startedAt)}`,
     `${v.minutesExpected + v.extraMinutes} min expected`,
     r.soldAt === null ? null : `arrival ${clock(host, r.soldAt)}`,
     r.reduction,
   ].filter((x) => x !== null).join(" · "));
-  const phases = el("div", undefined, `phases: ${v.phases.map((p) => `${phase(p.phase, r.service)}${p.status === "DONE" ? " ✓" : ""}`).join(" · ")}${v.inspectionRule === "NONE" ? "" : ` · inspect (${lower(v.inspectionRule)})`}`);
-  const state = el("div", "note", stateText(host, r));
+  const running = r.state.kind === "IN_PROGRESS";
+  title.append(heading, el("span", `pill p${Math.min(r.priority, 3)}`, String(r.priority)), el("span", running ? "pill run" : "pill", running ? "IN PROGRESS" : stateText(host, r)), facts);
+  const phases = el("div", "mono");
+  phases.style.margin = "6px 0 0";
+  phases.append(document.createTextNode("phases: "));
+  v.phases.forEach((p, i) => {
+    if (i > 0) phases.append(document.createTextNode(" · "));
+    phases.append(p.status === "DONE" ? el("b", "said ok", `${phase(p.phase, r.service)} ✓`) : document.createTextNode(phase(p.phase, r.service)));
+  });
+  if (v.inspectionRule !== "NONE") phases.append(document.createTextNode(` · inspect (${lower(v.inspectionRule)})`));
 
   const buttons = el("div", "row");
   buttons.style.margin = "12px 0";
-  buttons.append(v.running ? control("btn", "Pause", () => void run("pause", {})()) : control("btn pri", v.startedAt === null ? "Start" : "Resume", () => void run("start", {})()));
-  buttons.append(control("btn", "Ask for extra time…", () => extraTime(host, nav, taskId)), control("btn", "Found an issue…", () => issue(host, nav, taskId)), control("btn", "End…", () => end(host, nav, v)));
-  body.append(control("btn sm", "‹ My rooms", back), title, facts, phases, state, buttons, said,
-    el("p", "dim", "A restock line appears here when Inventory is installed at this property."));
+  buttons.append(v.running ? control("btn", "Pause", () => void run("pause", {})()) : control("btn", v.startedAt === null ? "Start" : "Resume", () => void run("start", {})()));
+  buttons.append(el("span", "btn off", "Photo — the media service's to add"), control("btn", "Ask for extra time…", () => extraTime(host, nav, taskId)),
+    control("btn", "Found an issue…", () => issue(host, nav, taskId)), control("btn pri", "End…", () => end(host, nav, v)));
+  body.append(title, phases, buttons, said, el("p", "dim", "A restock line appears here when Inventory is installed at this property."));
+  void back;
 }
 
 function end(host: HostApi, nav: Nav, v: Door): void {
@@ -71,7 +82,7 @@ function end(host: HostApi, nav: Nav, v: Door): void {
     const button = control(value === found ? "btn chip on" : "btn chip", label, () => {
       found = value;
       choice.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === button));
-      partsRow.hidden = found !== "PARTIAL";
+      partsRow.style.display = found === "PARTIAL" ? "flex" : "none";
     });
     choice.append(button);
   }
@@ -83,14 +94,20 @@ function end(host: HostApi, nav: Nav, v: Door): void {
     label.append(box, document.createTextNode(` ${part.toLowerCase()}`));
     partsRow.append(label);
   }
-  partsRow.hidden = true;
+  partsRow.style.display = "none";
+  partsRow.style.margin = "8px 0";
   const linen = el("input") as HTMLInputElement;
   linen.type = "checkbox";
   const linenLabel = el("label");
   linenLabel.append(linen, document.createTextNode(" linen changed — resets the room's date"));
   const note = el("textarea", "field") as HTMLTextAreaElement;
-  overlay.body.append(choice, partsRow, linenLabel, el("label", "lbl", "Note"), note,
-    el("p", "dim", "Done makes the room clean, announced. DND keeps the room on your list with its re-check."));
+  const kv = el("div", "kv");
+  kv.style.marginTop = "12px";
+  kv.append(el("div", "k", "Linen"), linenLabel,
+    el("div", "k", "Then"), el("div", undefined, `${v.room.room} becomes CLEAN, announced${v.inspectionRule === "NONE" ? "" : "; inspection requested"}`),
+    el("div", "k", "Otherwise"), el("div", undefined, "a DND keeps the room on your list with its re-check; partial and declined are records too"),
+    el("div", "k", "Recorded as"), el("div", undefined, "you, at the moment you confirm, with what you chose"));
+  overlay.body.append(choice, partsRow, kv, el("label", "lbl", "Note"), note);
   actions(overlay, "Confirm", () => void (async () => {
     const done = await act(host, "room.clean", "attempt", { taskId: v.room.taskId, found, partialDone: [...parts], note: note.value || null, linenChanged: linen.checked });
     if (!done.ok) return overlay.refuse(done.because);

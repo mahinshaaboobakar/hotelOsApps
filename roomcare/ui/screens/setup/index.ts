@@ -7,8 +7,6 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { subnav } from "../../chrome/bar";
-import { el } from "../../chrome/element";
-import { when } from "../../chrome/instant";
 import { failed, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { access } from "./access";
@@ -61,15 +59,9 @@ export async function setup(host: HostApi, body: HTMLElement, nav: Nav, tab: str
     case "Services & minutes": return services(host, body, nav, data);
     case "Rules": return rules(host, body, nav, data);
     case "Assignment & zones": return zones(host, body, nav, data);
-    case "Areas": return areas(host, body, nav);
-    case "Deep clean plan": return plan(host, body, nav);
+    case "Areas": return areas(host, body, nav, data);
+    case "Deep clean plan": return plan(host, body, nav, data);
     case "Property-wide access": return access(host, body, nav);
     default: return windows(host, body, nav, data);
   }
-}
-
-/** The line every tab ends with — which version is live and who changed it last. */
-export function versionLine(host: HostApi, data: SetupData): HTMLElement {
-  const p = data.policy;
-  return el("span", "dim", p.version === 0 ? "the property's defaults — no version saved yet" : `version ${p.version} · ${data.changedBy ?? "—"} · ${when(host, p.changedAt)}`);
 }

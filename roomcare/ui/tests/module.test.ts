@@ -14,7 +14,7 @@ describe("the Room Care module", () => {
   it("names who is signed in as name · department · property", async () => {
     const root = mount(activate, host(SUPERVISOR));
     await settle();
-    expect(root.querySelector(".who")?.textContent).toBe("Meera Krishnan · Housekeeping · CCR");
+    expect(root.querySelector(".who")?.textContent).toBe("Meera Krishnan · Housekeeping · Coral Cove Resort");
   });
 
   it("opens the board as the property's default view, every zone grouped, no pager", async () => {
@@ -82,7 +82,7 @@ describe("the Room Care module", () => {
     click(root, "button.chip", "Tap grid");
     await settle();
     // Painting a room the colour it already is changes nothing, so paint clean on two dirty rooms.
-    click(root, "button.chip", "clean");
+    click(root, ".dock .segs button", "clean");
     await settle();
     click(root, "button.tile", "G02");
     await settle();
@@ -104,7 +104,7 @@ describe("the Room Care module", () => {
     const root = mount(activate, host(ATTENDANT));
     await settle();
     const mine = recorded<{ rows: { room: string }[] }>("my-rooms");
-    expect(root.querySelectorAll("table.list tr.pick").length).toBe(mine.rows.length);
+    expect(root.querySelectorAll(".list table tr.pick").length).toBe(mine.rows.length);
     click(root, "tr.pick", "G01");
     await settle();
     click(root, "button", "End…");

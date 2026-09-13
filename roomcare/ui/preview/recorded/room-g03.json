@@ -1,6 +1,6 @@
 {
   "line": {
-    "id": "01a09993-a1d6-762a-b071-910290f32464",
+    "id": "01a099c0-c39d-79d5-be62-0c437f5b789e",
     "number": "G03",
     "condition": "CLEAN",
     "source": "ATTENDANT",
@@ -9,13 +9,13 @@
     "occupancy": "VACANT",
     "vacantDays": 0,
     "soldAt": "2026-09-05T07:30:00.0000000+00:00",
-    "taskId": "01a09993-a8ff-7f88-9cce-3d79fa4cd611",
+    "taskId": "01a099c0-c601-7af7-8890-6fc52b3410cf",
     "taskVersion": 9,
     "service": "DEPARTURE_CLEAN",
     "reduction": null,
     "earliestAt": null,
     "priority": 1,
-    "attendantId": "01a09993-a01d-76ab-af90-4a7c1f580731",
+    "attendantId": "01a099c0-c371-7b88-bc42-0fe84ce4e5c5",
     "attendant": "Anita Pillai",
     "outcome": {
       "kind": "DONE",
@@ -57,31 +57,29 @@
     {
       "at": "2026-09-05T02:30:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "planned departed and sold tonight",
+      "status": "PLANNED",
+      "what": "departure clean · departed and sold tonight",
       "by": "Rekha Sinha"
     },
     {
       "at": "2026-09-05T02:31:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "assigned proposal accepted",
+      "status": "ASSIGNED",
+      "what": "proposal accepted",
       "by": "Meera Krishnan"
     },
     {
       "at": "2026-09-05T02:36:00.0000000+00:00",
       "kind": "TRANSITION",
-      "what": "in_progress",
+      "status": "IN_PROGRESS",
+      "what": "",
       "by": "Anita Pillai"
     },
     {
       "at": "2026-09-05T03:11:00.0000000+00:00",
-      "kind": "TRANSITION",
-      "what": "ended",
-      "by": "Anita Pillai"
-    },
-    {
-      "at": "2026-09-05T03:11:00.0000000+00:00",
-      "kind": "ATTEMPT",
-      "what": "DONE",
+      "kind": "ENDED",
+      "status": "DONE",
+      "what": "linen changed · 35 min · room CLEAN, announced (room.cleaned)",
       "by": "Anita Pillai"
     }
   ],

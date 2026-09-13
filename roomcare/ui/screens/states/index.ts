@@ -57,7 +57,7 @@ export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promis
       chip("Tap grid", view === "TAP_GRID", () => pick("TAP_GRID")),
       chip("Compact", view === "COMPACT", () => pick("COMPACT")),
       count(data.rooms, "rooms"), count(data.dirty, "dirty"), count(data.occupied, "occupied"), count(data.soldTonight, "sold tonight"),
-      el("span", undefined, data.silentSince === null ? "" : `PMS silent since ${clock(host, data.silentSince)}`),
+      el("b", undefined, data.silentSince === null ? "" : `PMS silent since ${clock(host, data.silentSince)}`),
     );
     const saveButton = edits.size === 0 ? el("span", "btn off", "Save — nothing changed") : control("btn pri", `Save ${edits.size} changes`, () => void save());
     const discard = control("btn", "Discard", () => { edits.discard(); conflicts = []; said = ""; redraw(); });
@@ -65,8 +65,8 @@ export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promis
     end.append(saveButton, discard);
     top.append(end);
     const conflicted = new Set(conflicts.map((c) => c.roomId));
-    const house = view === "TAP_GRID" ? grid(data, edits, conflicted, redraw) : view === "COMPACT" ? compact(data, edits, conflicted, redraw, nav) : sheetView(host, data, edits, conflicted, redraw, nav);
-    body.replaceChildren(top, ...(said === "" ? [] : [el("p", "said bad", said)]), house);
+    const house = view === "TAP_GRID" ? grid(host, data, edits, conflicted, redraw) : view === "COMPACT" ? [compact(host, data, edits, conflicted, redraw, nav)] : sheetView(host, data, edits, conflicted, redraw, nav);
+    body.replaceChildren(top, ...(said === "" ? [] : [el("p", "said bad", said)]), ...house);
   }
 
   function pick(next: string): void {

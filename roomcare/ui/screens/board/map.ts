@@ -33,6 +33,7 @@ function tile(room: BoardRoom, lit: boolean, nav: Nav): HTMLElement {
   else if (room.marks.pending) classes.push("pend");
   else classes.push(conditionClass(room.condition));
   if (room.marks.inProgress) classes.push("run");
+  else if (!room.marks.blocked && !room.marks.pending && room.condition !== "DIRTY") classes.push("done");
   if (!lit) classes.push("dim");
   const button = el("button", classes.join(" "), room.number);
   button.setAttribute("type", "button");
@@ -45,11 +46,11 @@ function tile(room: BoardRoom, lit: boolean, nav: Nav): HTMLElement {
 
 function legend(): HTMLElement {
   const line = el("div", "legend");
-  for (const [cls, label] of [["dirty", "dirty"], ["clean", "clean"], ["insp", "inspected"]] as const) {
+  for (const [cls, label] of [["dirty", "dirty"], ["clean", "clean"], ["insp", "inspected"], ["ring", "in progress"], ["pend", "pending policy"], ["blk", "blocked"]] as const) {
     const item = el("span");
     item.append(el("i", `sw ${cls}`), document.createTextNode(label));
     line.append(item);
   }
-  line.append(el("span", undefined, "▢ ring in progress · ⬚ pending policy · ▨ blocked"), el("span", undefined, "★ sold tonight · ⏸ DND · ! disagreement · ⚑ supervision"));
+  line.append(el("span", undefined, "★ sold tonight · ⏸ DND · ! disagreement · ⚑ supervision"));
   return line;
 }

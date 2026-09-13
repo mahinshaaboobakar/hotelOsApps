@@ -28,7 +28,7 @@ public sealed record RoomFactsView(
     string? SupervisedSince);
 
 /// <summary>One line of the day, in order — prepared, started, an attempt, done, observed, a job, an issue, a decision.</summary>
-public sealed record TimelineEntryView(string At, string Kind, string What, string? By);
+public sealed record TimelineEntryView(string At, string Kind, string? Status, string What, string? By);
 
 /// <summary>What the decision saw and answered — recorded, not re-derived.</summary>
 public sealed record DecisionView(

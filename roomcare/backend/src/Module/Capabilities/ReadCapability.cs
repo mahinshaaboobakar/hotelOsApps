@@ -36,7 +36,7 @@ public static class ReadCapability
             "setup" => await services.GetRequiredService<SetupProjection>().SetupAsync(scope, cancellationToken),
             "services" => await services.GetRequiredService<SetupProjection>().ServicesAsync(scope, body.OptionalId("roomTypeId"), cancellationToken),
             "zones" => await services.GetRequiredService<SetupProjection>().ZonesAsync(scope, cancellationToken),
-            "areas" => await services.GetRequiredService<SetupProjection>().AreasAsync(scope, body.Number("page"), cancellationToken),
+            "areas" => await services.GetRequiredService<SetupProjection>().AreasAsync(scope, body.Number("page"), body.Flag("withoutRoutine"), cancellationToken),
             "deepCleanPlan" => await services.GetRequiredService<SetupProjection>().PlanAsync(scope, cancellationToken),
             "grants" => await services.GetRequiredService<SetupProjection>().GrantsAsync(scope, services.GetRequiredService<ManagerGrants>(), cancellationToken),
             "widgetRoomsReady" => await services.GetRequiredService<WidgetProjection>().RoomsReadyAsync(scope, cancellationToken),
@@ -54,6 +54,6 @@ public static class ReadCapability
         var house = services.GetRequiredService<IHouse>();
         var property = await house.DaySettingsAsync(scope.PropertyId, cancellationToken);
         var name = scope.UserId is { } user ? (await house.NamesAsync([user], cancellationToken)).GetValueOrDefault(user) : null;
-        return new { name, department = "Housekeeping", property = property?.Code.ToUpperInvariant() };
+        return new { name, department = "Housekeeping", property = string.IsNullOrWhiteSpace(property?.Name) ? property?.Code.ToUpperInvariant() : property.Name };
     }
 }

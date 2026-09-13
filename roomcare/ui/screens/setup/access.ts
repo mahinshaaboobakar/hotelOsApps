@@ -2,6 +2,8 @@
  * 7g · Property-wide access — the one grant that is not a posting (S6;
  * AUTHZ-Q25). Every other role comes from Workforce; this tab says so on its
  * face. Room Care announces the grant and writes no tuple; the Kernel folds it.
+ * A person's posting is Workforce's, read through Context, which apps cannot
+ * call yet (PKG-Q8) — so the posting column says where it will come from.
  */
 
 import type { HostApi } from "@hotelos/sdk";
@@ -11,21 +13,26 @@ import { day } from "../../chrome/instant";
 import { act, failed, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
+import { panel } from "./controls";
 
 interface Grants {
   grants: { userId: string; name: string; grantedAt: string; grantedBy: string | null }[];
 }
 
 export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promise<void> {
-  const read = el("section", "card");
+  const read = el("div", "dlg-note");
   const kv = el("div", "kv");
+  const tab = el("div");
+  tab.append(el("b", undefined, "one exception only:"), document.createTextNode(" a person not posted as head of Housekeeping who must hold everything in Room Care at this property — a rooms-division manager, a GM's deputy. "),
+    el("b", undefined, "The general manager grants it."));
   kv.append(
     el("div", "k", "Attendants"), el("div", undefined, "posted to Housekeeping by Workforce → their own assigned rooms. Nothing to set here."),
     el("div", "k", "Supervisors"), el("div", undefined, "posted as supervisor in Housekeeping → assign · amend. Nothing to set here."),
+    el("div", "k", "Head of Housekeeping"), el("div", undefined, "posted as head of Housekeeping → configure · plan. Nothing to set here."),
     el("div", "k", "Opening the app"), el("div", undefined, "Core Administration › Applications — the door, not a role."),
-    el("div", "k", "This tab"), el("div", undefined, "one exception only: a person not posted in Housekeeping who must hold everything in Room Care at this property. The general manager grants it."),
+    el("div", "k", "This tab"), tab,
   );
-  read.append(el("h3", undefined, "Read this first — every role in Room Care comes from Workforce"), kv);
+  read.append(el("div", "sect", "Read this first — every role in Room Care comes from Workforce"), kv);
 
   const got = await load<Grants>(host, "grants");
   if (!got.ok) {
@@ -34,30 +41,37 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
   }
 
   const table = el("table");
-  table.style.marginTop = "14px";
   const head = el("tr");
-  for (const name of ["Person", "Holds", "Since", "Granted by", ""]) head.append(el("th", undefined, name));
+  for (const name of ["Person", "Posting (Workforce)", "Holds", "Since", "Granted by", ""]) head.append(el("th", undefined, name));
   table.append(head);
   for (const grant of got.value.grants) {
     const tr = el("tr");
+    const posting = el("td", "dim");
+    posting.append(document.createTextNode("read through Context"), el("span", "tag port", "PKG-Q8"));
+    const holds = el("td");
+    holds.append(el("span", "pill ok", "roomcare_manager"));
     const revoke = el("td");
     revoke.append(control("btn sm danger", "Revoke…", () => confirmRevoke(host, nav, grant.userId, grant.name)));
-    tr.append(el("td", undefined, grant.name), el("td", "mono", "roomcare_manager"), el("td", "num", day(host, grant.grantedAt.slice(0, 10))), el("td", undefined, grant.grantedBy ?? "—"), revoke);
+    tr.append(el("td", undefined, grant.name), posting, holds, el("td", undefined, day(host, grant.grantedAt.slice(0, 10))), el("td", undefined, grant.grantedBy ?? "—"), revoke);
     table.append(tr);
   }
-
-  const gives = el("section", "card");
-  gives.style.marginTop = "14px";
-  const g = el("div", "kv");
-  g.append(el("div", "k", "roomcare_manager"), el("div", undefined, "every Room Care capability, for every room at the property — read · assign · amend · configure · plan"),
-    el("div", "k", "Not the grant"), el("div", undefined, "an attendant's done (rides the assignment) · an inspector's sign-off · placing a room out of order"));
-  gives.append(el("h3", undefined, "What the grant gives"), g);
-
+  const n = got.value.grants.length;
+  const count = el("div", "count", `${n === 0 ? "no grants" : n === 1 ? "1 grant" : `${n} grants`} at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings come from Workforce and cannot be edited here`);
   const grantRow = el("div", "row");
-  grantRow.style.marginTop = "10px";
-  grantRow.append(control("btn", "Grant to a person…", () => grant(host, nav)));
-  const count = got.value.grants.length;
-  body.append(read, table, el("div", "legend", `${count} ${count === 1 ? "grant" : "grants"} at this property · granted and revoked by the general manager (S6; AUTHZ-Q25)`), grantRow, gives);
+  grantRow.style.marginTop = "12px";
+  grantRow.append(control("btn pri", "Grant to a person…", () => grant(host, nav)));
+
+  const gives = el("div", "kv");
+  gives.append(el("div", "k", "roomcare_manager"), el("div", undefined, "every Room Care capability, for every room at the property — read · assign · amend · configure · plan"),
+    el("div", "k", "Not the grant"), el("div", undefined, "an attendant's done (rides the assignment) · an inspector's sign-off (the inspection app's) · placing a room out of order (its owner's)"));
+  const others = el("div", "kv");
+  others.append(el("div", "k", "Floor supervisors"), el("div", undefined, "assign · amend — because Workforce posts them as supervisor in Housekeeping"),
+    el("div", "k", "Attendants"), el("div", undefined, "their own rooms — because they are assigned them"),
+    el("div", "k", "The desk"), el("div", undefined, "read — the board and a room's day; nothing to grant here"));
+  const cols = el("div", "cols");
+  cols.style.marginTop = "16px";
+  cols.append(panel("What the grant gives", gives), panel("Who else may do what — from postings, not from this tab", others));
+  body.append(read, table, count, grantRow, cols);
 }
 
 function grant(host: HostApi, nav: Nav): void {

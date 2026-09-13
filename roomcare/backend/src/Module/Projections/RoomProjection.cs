@@ -69,6 +69,20 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
             state?.SupervisedSince?.ToString("yyyy-MM-dd"));
     }
 
+    /// <summary>What an ending did — the linen, the minutes worked, and what the room became.</summary>
+    private static string Ending(DayFacts.Day day, RoomTask task)
+    {
+        var minutes = day.Sessions.Where(s => s.TaskId == task.Id).Sum(s => s.Minutes);
+        var linen = task.LinenDue switch { LinenDue.NotDue => "linen not due", LinenDue.Due => "linen due", _ => task.Outcome == TaskOutcome.Done ? "linen changed" : "linen was due to be changed" };
+        var became = task.Outcome switch
+        {
+            TaskOutcome.Done => "room CLEAN, announced (room.cleaned)",
+            TaskOutcome.Partial => $"partial ({string.Join(", ", task.PartialDone.Select(p => p.ToLowerInvariant()))})",
+            _ => null,
+        };
+        return string.Join(" · ", new[] { linen, minutes > 0 ? $"{minutes} min" : null, became }.Where(x => x is not null));
+    }
+
     private async Task<IReadOnlyList<TimelineEntryView>> TimelineAsync(DayFacts.Day day, Guid roomId, CancellationToken cancellationToken)
     {
         var taskIds = day.Tasks.Where(t => t.RoomId == roomId).Select(t => t.Id).ToList();
@@ -80,10 +94,17 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
         var names = await house.NamesAsync(people, cancellationToken);
         string? Name(Guid? id) => id is { } x && names.TryGetValue(x, out var n) ? n : day.Name(id);
 
-        return history.Select(h => new TimelineEntryView(h.At.ToString("o"), h.Kind, $"{h.ToStatus?.ToLowerInvariant() ?? string.Empty} {h.Reason}".Trim(), Name(h.ById)))
-            .Concat(day.Attempts.Where(a => taskIds.Contains(a.TaskId)).Select(a => new TimelineEntryView(a.At.ToString("o"), "ATTEMPT", a.Found, Name(a.ByUserId))))
-            .Concat(seen.Select(o => new TimelineEntryView(o.RecordedAt.ToString("o"), "OBSERVED", $"{o.Source}: {o.Condition?.ToLowerInvariant() ?? "—"} · {o.Outcome}", Name(o.ByUserId))))
-            .Concat(issues.Select(i => new TimelineEntryView(i.At.ToString("o"), "ISSUE", i.Note, Name(i.ByUserId))))
+        var service = day.Tasks.Where(t => t.RoomId == roomId).ToDictionary(t => t.Id, t => t.Service);
+        return history.Select(h => h.ToStatus == RoomTaskStatus.Ended && day.Tasks.FirstOrDefault(t => t.Id == h.TaskId) is { Outcome: not null } ended
+                ? new TimelineEntryView(h.At.ToUniversalTime().ToString("o"), "ENDED", ended.Outcome, Ending(day, ended), Name(h.ById))
+                : new TimelineEntryView(h.At.ToUniversalTime().ToString("o"), h.Kind, h.ToStatus,
+                string.Join(" · ", new[] { h.ToStatus is RoomTaskStatus.Planned or RoomTaskStatus.PendingPolicy && h.FromStatus is null ? service.GetValueOrDefault(h.TaskId)?.ToLowerInvariant().Replace('_', ' ') : null, h.Reason }.Where(x => !string.IsNullOrEmpty(x))),
+                Name(h.ById)))
+            .Concat(day.Attempts.Where(a => taskIds.Contains(a.TaskId) && a.Found is AttemptFound.Dnd or AttemptFound.Declined)
+                .Select(a => new TimelineEntryView(a.At.ToUniversalTime().ToString("o"), "ATTEMPT", a.Found, a.Note ?? string.Empty, Name(a.ByUserId))))
+            .Concat(seen.Select(o => new TimelineEntryView(o.RecordedAt.ToUniversalTime().ToString("o"), "OBSERVED", o.Outcome,
+                $"{o.Source.ToLowerInvariant()}: {o.Condition?.ToLowerInvariant() ?? o.Occupancy?.ToLowerInvariant() ?? "—"}", Name(o.ByUserId))))
+            .Concat(issues.Select(i => new TimelineEntryView(i.At.ToUniversalTime().ToString("o"), "ISSUE", null, i.Note, Name(i.ByUserId))))
             .OrderBy(e => e.At)
             .ToList();
     }

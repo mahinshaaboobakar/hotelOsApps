@@ -51,7 +51,7 @@ function line(host: HostApi, room: BoardRoom, lit: boolean, nav: Nav): HTMLEleme
   row.addEventListener("click", () => nav.openRoom(room.id));
   const condition = el("td");
   condition.append(el("i", `glyph ${conditionClass(room.condition)}`), document.createTextNode(`${room.condition.toLowerCase()} `));
-  condition.append(el("span", "dim", `${room.setBy ?? source(room.source)} ${clock(host, room.setAt)}`));
+  if (room.source !== "SYSTEM") condition.append(el("span", "src", `${room.setBy?.split(" ")[0] ?? source(room.source)} ${clock(host, room.setAt)}`));
   if (room.marks.manual) condition.append(el("span", "tag man", "manual"));
   if (room.marks.disagreement) condition.append(el("span", "tag port", "!"));
   const occ = room.marks.blocked ? "out of order" : room.vacantDays !== null && room.vacantDays > 0 ? `vacant · ${room.vacantDays} days` : room.occupancy.toLowerCase();
@@ -64,10 +64,10 @@ function line(host: HostApi, room: BoardRoom, lit: boolean, nav: Nav): HTMLEleme
     el("td", undefined, occ),
     el("td", undefined, room.soldAt !== null && room.marks.soldTonight ? `★ ${clock(host, room.soldAt)}` : "—"),
     el("td", undefined, serviceText),
-    el("td", "num", room.priority === null ? "" : String(room.priority)),
-    el("td", undefined, attendant),
-    el("td", undefined, outcome(host, room)),
-    el("td", undefined, room.linen === null ? "—" : room.linen.toLowerCase()),
+    el("td", undefined, room.priority === null ? "" : String(room.priority)),
+    el("td", room.attendant === null ? "dim" : undefined, attendant),
+    el("td", ["WAITING", "PENDING", "NEW_SINCE", "NOBODY_AVAILABLE"].includes(room.outcome.kind) ? "dim" : undefined, outcome(host, room)),
+    el("td", undefined, room.linen === null || room.service !== "DAILY_SERVICE" ? "—" : room.linen.toLowerCase()),
   );
   return row;
 }
@@ -86,7 +86,7 @@ export function outcome(host: HostApi, room: Pick<BoardRoom, "outcome">): string
     case "WAITING": return `waiting for ${clock(host, o.until)}`;
     case "SUPERVISION": return `⚑ ${ordinal(o.days ?? 1)} day without service`;
     case "DISAGREEMENT": return `! PMS says ${(o.detail ?? "").toLowerCase()} ${clock(host, o.at)}`;
-    case "PENDING": return `${o.detail ?? "pending"} · one click`;
+    case "PENDING": return `${(o.detail ?? "").includes("may wait") ? "may wait" : "pending"} · one click`;
     case "NOBODY_AVAILABLE": return "nobody available";
     case "NEW_SINCE": return `new since ${clock(host, o.at)}`;
     case "BLOCKED": return "off the day";

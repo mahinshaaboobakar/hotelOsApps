@@ -7,8 +7,8 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { chip } from "../../chrome/bar";
-import { el } from "../../chrome/element";
-import { clock } from "../../chrome/instant";
+import { el, option } from "../../chrome/element";
+import { clock, when } from "../../chrome/instant";
 import { failed, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { remember, remembered } from "../../chrome/remember";
@@ -53,10 +53,18 @@ export async function board(host: HostApi, body: HTMLElement, nav: Nav): Promise
       el("span", "lbl", "group by"),
       chip("Zone", true, () => {}),
     );
+    chips.append(el("span", "grow"));
     for (const [label] of FILTERS) chips.append(chip(label, filter === label, () => { filter = filter === label ? null : label; redraw(); }));
-    for (const [id, name] of people) {
-      const short = `${(name ?? "").split(" ")[0]} ${(name ?? "").split(" ")[1]?.[0] ?? ""}.`.trim();
-      chips.append(chip(short, person === id, () => { person = person === id ? null : id; redraw(); }));
+    if (people.length > 0) {
+      const who = el("select", person === null ? "btn chip" : "btn chip on") as HTMLSelectElement;
+      who.setAttribute("aria-label", "One attendant's rooms");
+      who.append(option("Any attendant", "", person === null));
+      for (const [id, name] of people) {
+        const short = `${(name ?? "").split(" ")[0]} ${(name ?? "").split(" ")[1]?.[0] ?? ""}.`.trim();
+        who.append(option(short, id ?? "", person === id));
+      }
+      who.addEventListener("change", () => { person = who.value === "" ? null : who.value; redraw(); });
+      chips.append(who);
     }
     if (view === "WALL") {
       chips.append(chip(collapsed.size === data.zones.length ? "Expand all" : "Collapse all", false, () => {
@@ -87,6 +95,6 @@ export function strip(host: HostApi, s: Strip): HTMLElement {
   const pms = s.silentSince !== null
     ? `PMS silent since ${clock(host, s.silentSince)}`
     : s.lastFactAt !== null ? `PMS ok · last fact ${clock(host, s.lastFactAt)}` : "no PMS fact yet";
-  line.append(el("span", "end", `${pms} · ${clock(host, s.at)}`));
+  line.append(el("span", "end", `${pms} · ${when(host, s.at)}`));
   return line;
 }

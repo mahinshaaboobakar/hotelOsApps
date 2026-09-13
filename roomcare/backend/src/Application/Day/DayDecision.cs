@@ -53,7 +53,7 @@ public static class DayDecision
             }
 
             return policy.UnsoldDeparture == UnsoldDeparture.MayWait
-                ? Pending(Domain.Service.DepartureClean, PriorityBand.Departure, "departed, not sold tonight — may wait for tomorrow")
+                ? Pending(Domain.Service.DepartureClean, PriorityBand.Departure, UnsoldMayWait)
                 : Service(Domain.Service.DepartureClean, PriorityBand.Departure, "departed");
         }
 
@@ -106,6 +106,9 @@ public static class DayDecision
         var at = policy.PriorityLadder.IndexOf(band);
         return at < 0 ? policy.PriorityLadder.Count : at;
     }
+
+    /// <summary>The reason an unsold departure waits for a click — named so the Pending widget can say it short.</summary>
+    public const string UnsoldMayWait = "departed, not sold tonight — may wait for tomorrow";
 
     private static Decided Service(string service, string band, string reason) => new(service, band, false, reason);
 

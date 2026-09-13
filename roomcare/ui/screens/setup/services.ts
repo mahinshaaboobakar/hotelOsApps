@@ -7,18 +7,13 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { chip } from "../../chrome/bar";
-import { control, el, option } from "../../chrome/element";
+import { el, option } from "../../chrome/element";
 import { act, failed, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { phase, service } from "../../chrome/words";
-import { versionLine, type SetupData } from "./index";
-
-interface Services {
-  roomTypes: { id: string; code: string; name: string; rooms: number }[];
-  roomTypeId: string | null;
-  services: { service: string; minutes: number; credits: number; phases: string[]; inspectionRule: string; checklistRef: string | null; version: number; saved: boolean }[];
-  inspectionApplicationInstalled: boolean;
-}
+import { inlineNumber, refuse, saveLine } from "./controls";
+import type { SetupData } from "./index";
+import { copyCard, phasesCard, type ServiceRow, type Services } from "./phases";
 
 const WHAT: Record<string, string> = {
   DEPARTURE_CLEAN: "the guest checked out — full turnover",
@@ -28,6 +23,7 @@ const WHAT: Record<string, string> = {
 };
 
 let chosenType: string | null = null;
+let chosenService = "DEPARTURE_CLEAN";
 
 export async function services(host: HostApi, body: HTMLElement, nav: Nav, data: SetupData): Promise<void> {
   const got = await load<Services>(host, "services", { roomTypeId: chosenType });
@@ -37,50 +33,73 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
   }
 
   const v = got.value;
-  const said = el("p", "said");
-  const chips = el("div", "chips");
+  const typeName = v.roomTypes.find((t) => t.id === v.roomTypeId)?.name ?? "this room type";
+  const chips = el("div", "tabline");
   for (const type of v.roomTypes) chips.append(chip(type.name, type.id === v.roomTypeId, () => { chosenType = type.id; nav.show(); }));
-  chips.append(el("span", "lbl", "room types are Master Data's; this tab holds Room Care's numbers for each"));
+  chips.append(el("span", "mono", "room types are Master Data's; this tab holds Room Care's numbers for each"));
 
   const table = el("table");
   const head = el("tr");
   for (const name of ["Service", "Minutes", "Credits", "Phases, in order", "Inspection", "Checklist"]) head.append(el("th", undefined, name));
   table.append(head);
+  const phaseCells = new Map<string, HTMLElement>();
+  const cols = el("div", "cols");
+  cols.style.marginTop = "16px";
+  const drawPhases = (): void => {
+    const row = v.services.find((s) => s.service === chosenService) ?? v.services[0];
+    if (row === undefined) return;
+    cols.replaceChildren(phasesCard(nav, row, () => { phaseCells.get(row.service)!.textContent = phaseLine(row); drawPhases(); }), copyCard(host, nav, v));
+  };
+
   const inputs = v.services.map((s) => {
-    const minutes = el("input", "cell") as HTMLInputElement;
-    minutes.type = "number";
-    minutes.value = String(s.minutes);
-    const credits = el("input", "cell") as HTMLInputElement;
-    credits.type = "number";
-    credits.step = "0.1";
-    credits.value = String(s.credits);
-    const inspection = el("select", "cell") as HTMLSelectElement;
+    const minutes = inlineNumber(s.minutes);
+    const credits = inlineNumber(s.credits, undefined, "0.1");
+    const inspection = el("select", "inline") as HTMLSelectElement;
     inspection.append(option("none", "NONE"));
-    const tr = el("tr");
+    const tr = el("tr", s.service === chosenService ? "pick sel" : "pick");
+    tr.addEventListener("click", (event) => {
+      if ((event.target as HTMLElement).closest("input,select") !== null) return;
+      chosenService = s.service;
+      table.querySelectorAll("tr.sel").forEach((row) => row.classList.remove("sel"));
+      tr.classList.add("sel");
+      drawPhases();
+    });
     const name = el("td");
-    name.append(el("b", undefined, service(s.service)), el("div", "dim", WHAT[s.service] ?? ""));
-    const cells = [name, el("td"), el("td"), el("td", undefined, s.phases.map((p) => phase(p, s.service)).join(" → ")), el("td"), el("td", "dim", v.inspectionApplicationInstalled ? s.checklistRef ?? "—" : "—")];
+    name.append(el("b", undefined, service(s.service)), el("div", "mono", WHAT[s.service] ?? ""));
+    const phases = el("td", undefined, phaseLine(s));
+    phaseCells.set(s.service, phases);
+    const checklist = el("td", "dim", v.inspectionApplicationInstalled ? s.checklistRef ?? "—" : "—");
+    if (!v.inspectionApplicationInstalled && s.service === "DEPARTURE_CLEAN") checklist.append(el("span", "tag absent", "inspection app"));
+    const cells = [name, el("td"), el("td"), phases, el("td"), checklist];
     cells[1]!.append(minutes);
     cells[2]!.append(credits);
     cells[4]!.append(inspection);
-    if (!v.inspectionApplicationInstalled) cells[4]!.append(el("div", "dim", "no inspection application installed"));
+    if (!v.inspectionApplicationInstalled && s.service === "DEPARTURE_CLEAN") cells[4]!.append(el("div", "mono", "none only — no inspection application installed"));
     tr.append(...cells);
     table.append(tr);
     return { s, minutes, credits, inspection };
   });
+  drawPhases();
 
-  const save = async (): Promise<void> => {
+  const count = el("div", "count");
+  count.append(el("span", undefined, `${v.services.length} of ${v.services.length} services for ${typeName} — the four a hotel has; deep clean is not a service, it is a project (Deep clean plan)`));
+
+  const { line, said } = saveLine(host, data, () => void (async () => {
     for (const i of inputs) {
       const done = await act(host, "roomcare.configure", "saveService", {
         roomTypeId: v.roomTypeId, service: i.s.service, minutes: Number(i.minutes.value), credits: Number(i.credits.value),
         inspectionRule: i.inspection.value, phases: i.s.phases, version: i.s.version,
       });
-      if (!done.ok) { said.className = "said bad"; said.textContent = `${service(i.s.service)}: ${done.because}`; return; }
+      if (!done.ok) return refuse(said, `${service(i.s.service)}: ${done.because}`);
     }
     nav.show();
-  };
-  const foot = el("div", "row");
-  foot.style.marginTop = "14px";
-  foot.append(control("btn pri", "Save", () => void save()), control("btn", "Discard", nav.show), versionLine(host, data));
-  body.append(chips, table, el("div", "legend", `${v.services.length} of ${v.services.length} services for ${v.roomTypes.find((t) => t.id === v.roomTypeId)?.name ?? "this room type"} — deep clean is a project, not a service (Deep clean plan)`), foot, said);
+  })(), nav.show);
+  body.append(chips, table, count, cols, line);
+}
+
+/** "strip → clean → make up → done", with inspect when the rule asks for it. */
+function phaseLine(s: ServiceRow): string {
+  const words = s.phases.map((p) => phase(p, s.service));
+  if (s.inspectionRule !== "NONE" && !s.phases.includes("INSPECT")) words.push("inspect");
+  return words.join(" → ");
 }
