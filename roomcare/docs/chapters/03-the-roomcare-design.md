@@ -897,6 +897,28 @@ on it**, and the ones that touch a platform matter are asked, not settled.
     `roomcare.task.*` body carries the §3.2 fields only; the `department_id` an
     earlier build added for a registration nobody has ruled is removed.
 
+### The attendant's screen — owner, 2026-09-14: **My rooms**
+
+Asked through the architect, with the assignment question: *should an
+attendant reach the board, or only My rooms?* **Ruling: My rooms.** It
+confirms walkthrough S0's two screens (*attendant: my rooms*); the walkthrough
+is not amended. The build already holds it: an attendant — `room.clean` and no
+supervisor's capability — is given one section, My rooms, and
+`ui/tests/module.test.ts` asserts it; My rooms and the door read only tasks
+assigned to the caller.
+
+**What the ruling does not change, stated so it is not assumed.** It was asked
+as a question about the screen. S6's `roomcare.read` — held by attendants, and
+landed property-scoped on `property#roomcare_viewer` — is unchanged, so the
+service still answers the board's read to an attendant who asks for it by
+another route, and the desktop widgets draw house-wide figures for anyone
+holding `roomcare.read`. If the owner meant the data and not only the screen,
+that is a change to S6 and comes back as its own ruling.
+
+The other half of the question — **may an attendant take unassigned work, and
+does anyone approve it** — the walkthrough does not settle; it stays with the
+owner, drawn, and nothing is built toward it.
+
 ### The audit — frame beside capture, 2026-09-13
 
 Every frame of both locked pages was captured beside the built screen at the
