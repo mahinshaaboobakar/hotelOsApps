@@ -50,8 +50,9 @@
  * names what it could not reach. It never reports that as success: a check that
  * could not have failed is not evidence about the thing it was pointed at.
  *
- * Whether unverified should *block* is the one part still open — see
- * {@link BLOCK_ON_UNVERIFIED}.
+ * **And unverified blocks phase-close** — ADR 0168. Not because a missing
+ * sibling is anyone's fault, but because a contract-changing round cannot
+ * certify itself without the consumers the contract is for.
  *
  * # What it says it measured
  *
@@ -60,14 +61,23 @@
  * nothing without *against what*, and the platform is a moving checkout rather
  * than a pinned artifact.
  *
- * # This is scaffolding, and it has a named end
+ * # This is scaffolding, and its end is part of the ruling
+ *
+ * ADR 0168 does not merely permit this to be retired — it says so:
+ *
+ * > **Do not let today's filesystem-based check become the permanent
+ * > contract-consumption architecture.**
  *
  * ADR 0122 calls the sibling-path reference an implementation choice *"until an
  * SDK-publishing round makes them proper artifacts"*. With a versioned SDK an
  * application pins a version, a platform change cannot break it silently, and
  * the break moves to a deliberate upgrade — which is where it belongs. **Delete
- * this script then.** Saying so here is what stops it hardening into permanent
- * infrastructure that outlives its reason.
+ * this script then.**
+ *
+ * It is written here because a check that blocks phase-close is exactly the
+ * kind that acquires permanence by being load-bearing: the more rounds it
+ * stops, the more it looks like architecture. It is not. It is a filesystem
+ * standing in for a version number.
  */
 
 import { execFileSync } from "node:child_process";
@@ -76,14 +86,23 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /**
- * Whether an unverified consumer fails the run.
+ * The exit status for a run that could not check every consumer.
  *
- * **The one branch the planner has not ruled on.** Blocking is safer and is
- * wrong on the machine of somebody working purely on the Kernel; not blocking
- * is how `716f8b10` sat red overnight. Everything either answer implies is
- * already built — flip this line when the ruling lands.
+ * **Unverified blocks, and there is no flag** — ADR 0168, 2026-09-14. This was
+ * built as a switch while the branch was open; it is not one now, because there
+ * is no configuration of anybody's machine in which a contract-changing round
+ * may legitimately certify itself without its consumers. A switch set to the
+ * right value is a switch somebody sets back, and this repository has already
+ * recorded what happens to a limit that lives in prose beside the value it
+ * fails to constrain.
+ *
+ * The distinction the ruling turns on, and it is not the obvious one:
+ * **absence stays a legitimate environmental state — certifying without the
+ * consumer does not.** ADR 0122 lets an application repository live elsewhere,
+ * so a platform author may honestly *encounter* a missing sibling. What they
+ * may not do is call that round complete.
  */
-const BLOCK_ON_UNVERIFIED = false;
+const UNVERIFIED = 2;
 
 /** This repository's root, from this file rather than from a working directory. */
 const REPO = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -288,11 +307,17 @@ if (platform === null) {
     "\nUNVERIFIED — no platform checkout was found.\n"
     + `  Looked in ${looked}\n`
     + `  for ${PLATFORM_MARKER}, which is what this repository compiles against.\n`
-    + "  ADR 0122 permits an application to be developed without one, so this is a\n"
-    + "  legitimate state and is reported rather than failed. It is not a pass:\n"
-    + "  nothing here has been checked against any platform.\n");
+    + "\n"
+    + "  ADR 0122 permits an application to be developed without a platform beside\n"
+    + "  it, so having none is a legitimate state and not a mistake. What it is not\n"
+    + "  is a pass: nothing here has been checked against any platform.\n"
+    + "\n"
+    + "  ADR 0168: this blocks phase-close. If a contract surface changed in this\n"
+    + "  round, check out the platform beside this repository (or point\n"
+    + "  HOTELOS_PLATFORM_ROOT at it) and run this again. If none did, this check\n"
+    + "  was not owed and the round does not need it.\n");
 
-  process.exit(BLOCK_ON_UNVERIFIED ? 2 : 0);
+  process.exit(UNVERIFIED);
 }
 
 process.stdout.write(
@@ -351,8 +376,11 @@ if (broken > 0) {
 if (unverified > 0) {
   process.stdout.write(
     `\nUNVERIFIED — ${unverified} consumer(s) could not be checked, named above. Nothing\n`
-    + "below that line is a statement about them.\n");
-  process.exit(BLOCK_ON_UNVERIFIED ? 2 : 0);
+    + "in this run is a statement about them, and the ones that did build say nothing\n"
+    + "on their behalf.\n"
+    + "\n"
+    + "ADR 0168: this blocks phase-close. Make them checkable and run this again.\n");
+  process.exit(UNVERIFIED);
 }
 
 process.stdout.write("\nevery consumer builds against this platform\n");
