@@ -6,10 +6,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { subnav } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock, shortDay, when } from "../../chrome/instant";
-import { act, failed, holds, load } from "../../chrome/load";
+import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { conditionClass, lower, source } from "../../chrome/words";
 import type { BoardRoom } from "../../model";
@@ -36,7 +37,7 @@ let tab = "Today";
 export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: string): Promise<void> {
   const got = await load<RoomPage>(host, "room", { roomId });
   if (!got.ok) {
-    body.append(failed("This room", got.because));
+    body.append(failed(got.failure, "this room", nav.show));
     return;
   }
 

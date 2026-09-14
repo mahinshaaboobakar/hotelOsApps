@@ -7,6 +7,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { control, el } from "../../chrome/element";
+import { sentence } from "../../chrome/failure";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
@@ -42,7 +43,7 @@ const MEANS: Record<string, string> = {
 export function phasesCard(nav: Nav, row: ServiceRow, reordered: () => void): HTMLElement {
   const kv = el("div", "kv");
   row.phases.forEach((p, i) => {
-    const means = el("div", undefined, MEANS[p] ?? (row.service === "TURNDOWN" ? "turn the bed down · lights · the evening set-up" : "a light pass over a room already clean"));
+    const means = el("div", undefined, MEANS[p] ?? "");
     if (p === "MAKE_UP") means.append(el("span", "tag absent", "Inventory"));
     kv.append(el("div", "k", `${i + 1} · ${capital(phase(p, row.service))}`), means);
   });
@@ -93,7 +94,7 @@ function copy(host: HostApi, nav: Nav, v: Services): void {
     if (chosen.length === 0) return overlay.refuse("tick at least one room type");
     for (const { type } of chosen) {
       const target = await load<Services>(host, "services", { roomTypeId: type.id });
-      if (!target.ok) return overlay.refuse(`${type.name}: ${target.because}`);
+      if (!target.ok) return overlay.refuse(`${type.name}: ${sentence(target.failure, "its numbers")} Nothing was copied to it.`);
       for (const s of v.services) {
         const version = target.value.services.find((t) => t.service === s.service)?.version ?? 0;
         const done = await act(host, "roomcare.configure", "saveService", {

@@ -7,10 +7,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { chip } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
-import { act, failed, load } from "../../chrome/load";
+import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { remember, remembered } from "../../chrome/remember";
 import type { RoomStates, StateRow } from "../../model";
@@ -29,7 +30,7 @@ export interface Conflict {
 export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promise<void> {
   const got = await load<RoomStates>(host, "states");
   if (!got.ok) {
-    body.append(failed("Room states", got.because));
+    body.append(failed(got.failure, "the room states", nav.show));
     return;
   }
 

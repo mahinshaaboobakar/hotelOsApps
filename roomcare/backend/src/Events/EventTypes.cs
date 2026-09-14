@@ -6,7 +6,7 @@ public static class EventTypes
     /// <summary>The room's aggregate — <c>entity_version</c> is <c>room_state.version</c>.</summary>
     public const string RoomAggregate = "room";
 
-    /// <summary>The task's aggregate — named as the authorization model names the object type (ADR 0061's shape).</summary>
+    /// <summary>The task's aggregate — chapter 03 §3.2; the same word <c>model.fga</c> uses for the object type.</summary>
     public const string TaskAggregate = "room_task";
 
     public const string RunAggregate = "prepare_run";

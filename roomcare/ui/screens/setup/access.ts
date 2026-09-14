@@ -8,9 +8,10 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { control, el } from "../../chrome/element";
 import { day } from "../../chrome/instant";
-import { act, failed, load } from "../../chrome/load";
+import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
 import { panel } from "./controls";
@@ -36,7 +37,7 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
 
   const got = await load<Grants>(host, "grants");
   if (!got.ok) {
-    body.append(read, failed("Property-wide access", got.because));
+    body.append(read, failed(got.failure, "the property-wide grants", nav.show));
     return;
   }
 

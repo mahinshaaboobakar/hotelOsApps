@@ -6,10 +6,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { el } from "../../chrome/element";
 import { clock, minutes } from "../../chrome/instant";
-import { failed, load } from "../../chrome/load";
+import { load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { ordinal, service } from "../../chrome/words";
 import type { Outcome, Paging } from "../../model";
@@ -45,7 +46,7 @@ export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId
   if (taskId !== null) return door(host, body, nav, taskId, () => open(null));
   const got = await load<MyRooms>(host, "myRooms", { page: 0 });
   if (!got.ok) {
-    body.append(failed("Your rooms", got.because));
+    body.append(failed(got.failure, "your rooms", nav.show));
     return;
   }
 
@@ -108,7 +109,7 @@ export function stateText(host: HostApi, row: MyRoom): string {
     case "DECLINED": return `DECLINED ${clock(host, s.at)}`;
     case "DND": return `DND ${clock(host, s.at)} · re-check due ${clock(host, row.recheckAt)}`;
     case "WAITING": return `waiting for ${clock(host, s.until)}`;
-    case "SUPERVISION": return `the supervisor's room · ${ordinal(s.days ?? 1)} day`;
+    case "SUPERVISION": return s.days === null || s.days === undefined ? "the supervisor's room" : `the supervisor's room · ${ordinal(s.days)} day`;
     case "ENDED": return (s.detail ?? "ended").toLowerCase().replaceAll("_", " ");
     default: return "to do";
   }

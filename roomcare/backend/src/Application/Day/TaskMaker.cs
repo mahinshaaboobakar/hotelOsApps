@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HotelOS.RoomCare.Application.Day;
 
 /// <summary>Turns a decision into a task with its phases, or brings an unstarted task up to date.</summary>
-public sealed class TaskMaker(RoomCareDbContext db, IHouse house, StandardReader standard, TaskWriter writer)
+public sealed class TaskMaker(RoomCareDbContext db, StandardReader standard, TaskWriter writer)
 {
     /// <summary>What a run did to one room's task.</summary>
     public enum Change
@@ -62,14 +62,13 @@ public sealed class TaskMaker(RoomCareDbContext db, IHouse house, StandardReader
         db.Tasks.Add(task);
         AddPhases(task, rule.Phases);
 
-        var department = await house.DepartmentIdAsync(scope.PropertyId, policy.DepartmentCode, cancellationToken);
         writer.Record(scope, task, HistoryKind.Transition, decided.Reason, null, task.Status);
-        writer.Announce(scope, task, EventTypes.TaskCreated, new TaskNote { Reason = decided.Reason, DepartmentId = department });
+        writer.Announce(scope, task, EventTypes.TaskCreated, new TaskNote { Reason = decided.Reason });
         return Change.Created;
     }
 
     /// <summary>A task for an area's routine at a scheduled time (S3).</summary>
-    public RoomTask CreateArea(RequestScope scope, AreaSchedule schedule, DateOnly day, string window, DateTimeOffset dueAt, Guid? department)
+    public RoomTask CreateArea(RequestScope scope, AreaSchedule schedule, DateOnly day, string window, DateTimeOffset dueAt)
     {
         var now = writer.Now;
         var task = new RoomTask
@@ -91,7 +90,7 @@ public sealed class TaskMaker(RoomCareDbContext db, IHouse house, StandardReader
         db.Tasks.Add(task);
         AddPhases(task, [Phase.Clean, Phase.Done]);
         writer.Record(scope, task, HistoryKind.Transition, "the area's schedule", null, task.Status);
-        writer.Announce(scope, task, EventTypes.TaskCreated, new TaskNote { Reason = "the area's schedule", DepartmentId = department });
+        writer.Announce(scope, task, EventTypes.TaskCreated, new TaskNote { Reason = "the area's schedule" });
         return task;
     }
 

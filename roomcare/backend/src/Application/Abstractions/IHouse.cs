@@ -21,8 +21,6 @@ public interface IHouse
     /// <summary>The public-area nodes of the location tree (S3).</summary>
     Task<IReadOnlyList<HouseArea>> AreasAsync(Guid propertyId, CancellationToken cancellationToken);
 
-    Task<Guid?> DepartmentIdAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken);
-
     /// <summary>Display names by login, read at answer time; a person with no staff row is absent.</summary>
     Task<IReadOnlyDictionary<Guid, string>> NamesAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken);
 }

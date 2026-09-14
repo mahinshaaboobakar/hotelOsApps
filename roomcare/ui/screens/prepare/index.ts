@@ -6,10 +6,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { pager } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock, minutes, when } from "../../chrome/instant";
-import { act, failed, holds, load } from "../../chrome/load";
+import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
@@ -42,7 +43,7 @@ export interface PrepareView {
 export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: number, goPage: (page: number) => void): Promise<void> {
   const got = await load<PrepareView>(host, "prepare", { page });
   if (!got.ok) {
-    body.append(failed("The day's preparation", got.because));
+    body.append(failed(got.failure, "the day's preparation", nav.show));
     return;
   }
 
@@ -60,7 +61,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
   const bold = (b: string, rest: string, lead = ""): HTMLElement => { const s = el("span"); s.append(document.createTextNode(lead), el("b", undefined, b), document.createTextNode(rest)); return s; };
   strip.append(
     bold(v.window === "EVENING" ? "Turndown" : "Morning", ` ${clock(host, v.windowStarts)} – ${clock(host, v.windowEnds)} · ${v.open ? "open" : "closed"}`),
-    v.preparedAt === null ? el("span", undefined, "not prepared yet") : bold(since, ` by ${v.preparedBy ?? "the system"}`, "prepared "),
+    v.preparedAt === null ? el("span", undefined, "not prepared yet") : bold(since, v.preparedBy === null ? "" : ` by ${v.preparedBy}`, "prepared "),
     bold(String(v.tasks), " tasks"),
     bold(String(v.changesSince), ` changes since ${since}`),
     bold(v.triggerMode === "AUTOMATIC" ? "Automatic" : "Prepare by button / HosPilot", "", "trigger: "),

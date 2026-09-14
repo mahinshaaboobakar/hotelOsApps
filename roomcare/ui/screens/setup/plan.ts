@@ -6,8 +6,9 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { el } from "../../chrome/element";
-import { act, failed, load } from "../../chrome/load";
+import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { inlineNumber, panel, refuse, saveLine } from "./controls";
 import type { SetupData } from "./index";
@@ -19,7 +20,7 @@ interface Plan {
 export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: SetupData): Promise<void> {
   const got = await load<Plan>(host, "deepCleanPlan");
   if (!got.ok) {
-    body.append(failed("The deep clean plan", got.because));
+    body.append(failed(got.failure, "the deep clean plan", nav.show));
     return;
   }
 

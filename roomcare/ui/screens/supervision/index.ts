@@ -6,10 +6,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock, shortDay, when } from "../../chrome/instant";
-import { act, failed, holds, load } from "../../chrome/load";
+import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog } from "../../chrome/overlay";
 import { ordinal, reason } from "../../chrome/words";
@@ -44,7 +45,7 @@ interface Lane {
 export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, page: number, goPage: (page: number) => void): Promise<void> {
   const got = await load<Lane>(host, "supervision", { page });
   if (!got.ok) {
-    body.append(failed("The supervision lane", got.because));
+    body.append(failed(got.failure, "the supervision lane", nav.show));
     return;
   }
 
@@ -73,7 +74,7 @@ export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, pa
 function why(row: LaneRow): HTMLElement {
   const cell = el("td");
   if (row.decision !== null) cell.append(document.createTextNode(`${row.reason === "DAYS_WITHOUT_SERVICE" ? "Days without service" : reason(row.reason)} — decided`));
-  else if (row.reason === "DAYS_WITHOUT_SERVICE") cell.append(el("span", "pill soft-bad", `${ordinal(row.days ?? 1)} day without service`));
+  else if (row.reason === "DAYS_WITHOUT_SERVICE") cell.append(el("span", "pill soft-bad", row.days === null ? "days without service" : `${ordinal(row.days)} day without service`));
   else cell.append(el("span", `pill ${row.reason === "DISAGREEMENT" ? "soft-warn" : "soft-bad"}`, reason(row.reason)));
   return cell;
 }
@@ -81,7 +82,7 @@ function why(row: LaneRow): HTMLElement {
 function decisionCell(host: HostApi, nav: Nav, row: LaneRow): HTMLElement {
   const cell = el("td");
   if (row.decision !== null) {
-    cell.append(el("span", "dim", `${row.decidedBy ?? "a supervisor"} · ${clock(host, row.decidedAt)}${row.note === null ? "" : ` · "${row.note}"`}`));
+    cell.append(el("span", "dim", `${row.decidedBy ?? "name not on record"} · ${clock(host, row.decidedAt)}${row.note === null ? "" : ` · "${row.note}"`}`));
     return cell;
   }
   if (!holds(host, "roomcare.amend")) {

@@ -4,12 +4,13 @@ namespace HotelOS.RoomCare.Application.Announcing;
 
 /// <summary>The body of every <c>roomcare.task.*</c> event — chapter 03 §3.2.</summary>
 /// <remarks>
-/// <c>property_id</c>, <c>department_id</c> and — on <c>.assigned</c> —
-/// <c>user_id</c> are carried so that the owner announces what the
-/// authorization graph needs about a <c>room_task</c>: ADR 0061's rule is that
-/// the Kernel materialises registration from the owner's lifecycle events and
-/// a service never writes a tuple. Whether the Kernel registers this
-/// application-owned type is the architect's question, raised with the build.
+/// What the chapter's table names, and nothing shaped for the authorization
+/// graph. <c>room_task</c> is not a master entity and ADR 0061 does not reach
+/// it; nothing registers it today, so its checks fail closed. Whether an
+/// application-owned authorization object registers through the lifecycle
+/// consumer as Knowledge's <c>folder</c> does (<c>tuples.rs</c>, ADR 0095/0096),
+/// and who declares its tuple shape, is unruled and asked — this body is not
+/// built toward either answer.
 /// </remarks>
 public sealed record TaskAnnouncement
 {
@@ -18,9 +19,6 @@ public sealed record TaskAnnouncement
 
     [JsonPropertyName("property_id")]
     public required Guid PropertyId { get; init; }
-
-    [JsonPropertyName("department_id")]
-    public Guid? DepartmentId { get; init; }
 
     [JsonPropertyName("room_id")]
     public Guid? RoomId { get; init; }

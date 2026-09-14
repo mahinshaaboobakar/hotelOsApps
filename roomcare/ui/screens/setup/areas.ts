@@ -7,9 +7,10 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { chip, pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
-import { act, failed, load } from "../../chrome/load";
+import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
@@ -40,7 +41,7 @@ let withoutRoutine = false;
 export async function areas(host: HostApi, body: HTMLElement, nav: Nav, data: SetupData): Promise<void> {
   const got = await load<Areas>(host, "areas", { page, withoutRoutine });
   if (!got.ok) {
-    body.append(failed("Areas", got.because));
+    body.append(failed(got.failure, "the areas", nav.show));
     return;
   }
 

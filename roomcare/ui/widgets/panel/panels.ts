@@ -27,7 +27,7 @@ interface RoomRow {
 
 export async function roomsReady(host: HostApi): Promise<HTMLElement> {
   const got = await load<{ departures: number; ready: number; inProgress: number; dirty: number; at: string }>(host, "widgetRoomsReady");
-  if (!got.ok) return unread("Rooms Ready", "today's departures", got.because);
+  if (!got.ok) return unread("Rooms Ready", "today's departures", "today's departures", got.failure, () => roomsReady(host));
   const v = got.value;
   const percent = v.departures === 0 ? 0 : Math.round((v.ready / v.departures) * 100);
   const total = el("div", "wrow");
@@ -40,7 +40,7 @@ export async function roomsReady(host: HostApi): Promise<HTMLElement> {
 
 export async function arrivalsWaiting(host: HostApi): Promise<HTMLElement> {
   const got = await load<{ total: number; rows: RoomRow[]; at: string }>(host, "widgetArrivals");
-  if (!got.ok) return unread("Arrivals Waiting", "sold, not ready", got.because);
+  if (!got.ok) return unread("Arrivals Waiting", "sold, not ready", "tonight's arrivals", got.failure, () => arrivalsWaiting(host));
   const v = got.value;
   const words: Record<string, string> = { IN_PROGRESS: "in progress", NOBODY_AVAILABLE: "nobody available", NOT_STARTED: "not started" };
   const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, `${clock(host, r.at)} · ${words[r.what] ?? r.what.toLowerCase()}`, r.what === "NOBODY_AVAILABLE" ? "bad" : "", r.roomId));
@@ -51,7 +51,7 @@ export async function arrivalsWaiting(host: HostApi): Promise<HTMLElement> {
 
 export async function attention(host: HostApi): Promise<HTMLElement> {
   const got = await load<{ total: number; rows: RoomRow[]; at: string }>(host, "widgetAttention");
-  if (!got.ok) return unread("Attention", "needs a person", got.because);
+  if (!got.ok) return unread("Attention", "needs a person", "the rooms that need a person", got.failure, () => attention(host));
   const v = got.value;
   const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, attentionWords(r), r.tone, r.roomId));
   if (v.total === 0) rows.push(el("div", "wquiet", "Nothing needs a person right now."));
@@ -61,7 +61,7 @@ export async function attention(host: HostApi): Promise<HTMLElement> {
 
 export async function attendantsNow(host: HostApi): Promise<HTMLElement> {
   const got = await load<{ onShift: number | null; inARoom: number; rows: { userId: string; name: string; room: string; since: string }[]; at: string }>(host, "widgetAttendants");
-  if (!got.ok) return unread("Attendants Now", "who is where", got.because);
+  if (!got.ok) return unread("Attendants Now", "who is where", "who is in which room", got.failure, () => attendantsNow(host));
   const v = got.value;
   const rows: (Node | null)[] = v.rows.map((r) => {
     const line = el("div", "wrow");
@@ -75,9 +75,9 @@ export async function attendantsNow(host: HostApi): Promise<HTMLElement> {
 
 export async function pendingPolicy(host: HostApi): Promise<HTMLElement> {
   const got = await load<{ total: number; rows: RoomRow[]; at: string }>(host, "widgetPending");
-  if (!got.ok) return unread("Pending", "waiting on a click", got.because);
+  if (!got.ok) return unread("Pending", "waiting on a click", "the rooms waiting on a click", got.failure, () => pendingPolicy(host));
   const v = got.value;
-  const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, r.what === "UNSOLD_DEPARTURE" ? "unsold departure · may wait" : `${r.detail ?? "no rule matched"} · see room`, "", r.roomId));
+  const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, r.what === "UNSOLD_DEPARTURE" ? "unsold departure · may wait" : r.detail === null ? "see room" : `${r.detail} · see room`, "", r.roomId));
   if (v.total === 0) rows.push(el("div", "wquiet", "No room is waiting on a click."));
   return card("Pending", "waiting on a click", rows);
 }

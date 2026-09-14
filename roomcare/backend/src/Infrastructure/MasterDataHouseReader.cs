@@ -53,12 +53,6 @@ public sealed class MasterDataHouseReader(RoomCareDbContext db) : IHouse
             .Select(l => new HouseArea(l.Id, l.Name, l.LocationType))
             .ToListAsync(cancellationToken);
 
-    public Task<Guid?> DepartmentIdAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken) =>
-        db.MasterDataDepartments
-            .Where(d => d.PropertyId == propertyId && d.DeletedAt == null && EF.Functions.ILike(d.Code, departmentCode))
-            .Select(d => (Guid?)d.Id)
-            .FirstOrDefaultAsync(cancellationToken);
-
     public async Task<IReadOnlyDictionary<Guid, string>> NamesAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken)
     {
         if (userIds.Count == 0)

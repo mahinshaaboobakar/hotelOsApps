@@ -7,6 +7,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { control, el, option } from "../../chrome/element";
+import { failed } from "../../chrome/failure";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
@@ -72,8 +73,13 @@ export async function reassign(host: HostApi, nav: Nav, room: BoardRoom): Promis
   const person = el("select", "field") as HTMLSelectElement;
   person.setAttribute("aria-label", "Person");
   const people = await load<{ userId: string; name: string }[]>(host, "attendants");
-  if (!people.ok) overlay.refuse(people.because);
-  else for (const p of people.value) person.append(option(p.name, p.userId, p.userId === room.attendantId));
+  if (!people.ok) {
+    // Nobody to choose from, so nothing to reassign to: the failure, and the way back.
+    overlay.body.append(failed(people.failure, "the people posted to Housekeeping", () => { overlay.close(); void reassign(host, nav, room); }));
+    overlay.foot.append(control("btn", "Back", () => overlay.close()));
+    return;
+  }
+  for (const p of people.value) person.append(option(p.name, p.userId, p.userId === room.attendantId));
   overlay.body.append(
     el("p", "dim", `Now: ${room.attendant ?? "nobody"}. The people posted to Housekeeping are Workforce's; whether they are on shift is Workforce's to add.`),
     el("label", "lbl", "Person"), person,

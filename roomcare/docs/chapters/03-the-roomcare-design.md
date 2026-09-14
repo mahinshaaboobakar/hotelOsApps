@@ -831,7 +831,7 @@ stay as filed (GG, FF, HH, the inspection brief, the shell's open-at-a-record
 Built on the word above: `roomcare/backend` (33 characterisations green on real
 PostgreSQL) and `roomcare/ui` (the module and five widgets, 18 tests, bundles
 verified). Where the build had to say something this page did not, it is
-written here — **each is an implementation choice until the architect rules
+written here (1–8 with the build, 9–10 on 2026-09-14) — **each is an implementation choice until the architect rules
 on it**, and the ones that touch a platform matter are asked, not settled.
 
 1. **The grant's aggregate is `roomcare_manager_grant`, not `property`** (§3.2,
@@ -867,6 +867,29 @@ on it**, and the ones that touch a platform matter are asked, not settled.
    *what we know*; Prepare reads the attendants on the day; the widgets carry
    the one fact their words need (the day count, the PMS's condition); Setup
    › Areas filters to *without a routine*.
+9. **A read is `Read<T>` — the property's data or the reason there is none,
+   never both** (owner, 2026-09-09: *"Showing a hardcoded list is wrong."*).
+   GuestOps' and Workforce's shape, with Workforce's three causes —
+   *unanswered* offers Try again; *forbidden* names the capability and offers
+   no retry, because asking again cannot change it; *faulted* shows the
+   service's own words where ADR 0041 lets them cross. There is no fallback
+   parameter; the recorded fixtures live in `ui/preview` for the harness and the
+   suite only. `ui/tests/seam.test.ts` parses the shipped source — no import of
+   a fixture, one file that calls Room Care — and `tsc` refuses a value read off
+   a failure; each guard was broken on purpose and seen to fail before its
+   green was counted. A missing name, count or status is left out or said to be
+   missing, never filled in (*a supervisor*, *1st day*, *job open* removed).
+10. **Nothing registers `room_task`, and nothing here is built toward a way it
+    might.** It is not a master entity; ADR 0061 does not reach it. Its checks
+    fail closed, and no tuple is written — by the service or by a test. The
+    precedent is Knowledge's `folder`, application-owned and registered by the
+    Kernel's lifecycle consumer with a hardcoded shape (`tuples.rs`, ADR
+    0095/0096), while `AUTHZ-Q25` moved grant kinds' shapes into the manifest.
+    **Asked as one question:** does an application-owned authorization object
+    register through the lifecycle consumer as `folder` does, and who declares
+    its tuple shape — the Kernel, or the application's manifest? The
+    `roomcare.task.*` body carries the §3.2 fields only; the `department_id` an
+    earlier build added for a registration nobody has ruled is removed.
 
 ### The audit — frame beside capture, 2026-09-13
 

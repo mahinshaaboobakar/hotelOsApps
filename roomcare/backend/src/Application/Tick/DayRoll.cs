@@ -26,7 +26,7 @@ namespace HotelOS.RoomCare.Application.Tick;
 /// </para>
 /// </remarks>
 public sealed class DayRoll(
-    RoomCareDbContext db, IHouse house, TaskMaker factory, SupervisionLane lane, StandardReader standard, IEventAppender events)
+    RoomCareDbContext db, TaskMaker factory, SupervisionLane lane, StandardReader standard, IEventAppender events)
 {
     public async Task RunAsync(RequestScope scope, PropertyNow now, CancellationToken cancellationToken)
     {
@@ -90,7 +90,6 @@ public sealed class DayRoll(
         }
 
         var policy = await standard.PolicyAsync(scope.PropertyId, cancellationToken);
-        var department = await house.DepartmentIdAsync(scope.PropertyId, policy.DepartmentCode, cancellationToken);
         var windows = await standard.WindowsAsync(scope.PropertyId, cancellationToken);
         var made = await db.Tasks
             .Where(t => t.PropertyId == scope.PropertyId && t.OperatingDay == now.Day && t.Service == Service.AreaClean)
@@ -108,7 +107,7 @@ public sealed class DayRoll(
                 }
 
                 var window = windows.FirstOrDefault(w => w.Contains(time))?.Window ?? ServiceWindowName.Morning;
-                factory.CreateArea(scope, schedule, now.Day, window, due, department);
+                factory.CreateArea(scope, schedule, now.Day, window, due);
             }
         }
     }

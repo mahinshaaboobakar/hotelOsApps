@@ -15,6 +15,7 @@ import { head } from "./chrome/bar";
 import { el } from "./chrome/element";
 import { holds, load } from "./chrome/load";
 import { stylesheet } from "./chrome/styles";
+import type { Read } from "./chrome/load";
 import type { Operator } from "./model";
 import { board } from "./screens/board";
 import { deepClean } from "./screens/deepclean";
@@ -55,7 +56,7 @@ export function sectionsFor(host: HostApi): string[] {
 
 export const activate: Activate = (host: HostApi): HostedModule => {
   let root: HTMLElement | null = null;
-  let operator: Operator | null = null;
+  let operator: Read<Operator> | null = null;
   const sections = sectionsFor(host);
   const place: Place = { section: sections[0] ?? "Board", roomId: null, taskId: null, page: 0, setupTab: "Windows & trigger" };
 
@@ -109,8 +110,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       root = element;
       show();
       void load<Operator>(host, "me").then((got) => {
-        if (!got.ok) return;
-        operator = got.value;
+        operator = got;
         show();
       });
     },

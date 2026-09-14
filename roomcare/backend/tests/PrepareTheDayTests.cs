@@ -40,7 +40,7 @@ public sealed class PrepareTheDayTests(RoomCareFixture fixture)
         Assert.Contains(h.Authorizer.Checks, c => c.Permission == "roomcare.configure" && c.ObjectType == "property");
         var created = (await h.EventsAsync(tasks[0].Id)).Single();
         Assert.Equal((EventTypes.TaskCreated, "room_task"), (created.Type, created.Aggregate));
-        Assert.Equal(h.House.Housekeeping.ToString(), created.Payload.GetProperty("department_id").GetString());
+        Assert.False(created.Payload.TryGetProperty("department_id", out _), "the body is the chapter's, not shaped for a registration nobody has ruled");
     }
 
     [Fact]

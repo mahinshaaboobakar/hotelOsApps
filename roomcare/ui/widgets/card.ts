@@ -7,7 +7,8 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
-import { sentence } from "../chrome/load";
+import { remedy, sentence, type ReadFailure } from "../chrome/failure";
+import { saying } from "../chrome/load";
 
 /** The shell's own opener — the same route Jobs' widgets take; the shell decides whether it opens. */
 const SHELL_OPEN = "shell.open";
@@ -35,6 +36,9 @@ const WIDGET_CSS = `
 .wfoot span{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-muted,#8b93a7)}
 .wquiet{color:var(--color-ok,#34d399);font-size:12px}
 .wrefusal{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
+.wrefusal b{display:block;color:var(--color-bad,#f87171);font-weight:600;margin-bottom:4px}
+.wretry{margin-top:12px;background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:5px 12px;
+      font:inherit;font-size:12px;color:var(--color-ink,#e8ebf4);cursor:pointer}
 `;
 
 export function stylesheet(): HTMLStyleElement {
@@ -71,9 +75,25 @@ export function openRow(host: HostApi, left: string, right: string, tone: string
   return row;
 }
 
-/** What a widget draws when its read failed — a failure, never a figure. */
-export function unread(title: string, scope: string, because: string): HTMLElement {
-  return card(title, scope, [el("div", "wrefusal", `Could not be read — ${because}`)]);
+/**
+ * What a widget draws when its read failed — the card it always has, with the
+ * reason where the figures were (a 320×384 canvas does not scroll, so the
+ * failure takes the place of the answer rather than sitting above one). Never
+ * a figure: a widget is the frame most likely to be glanced at and believed.
+ *
+ * @param again draw the widget afresh; offered only when asking again could work
+ */
+export function unread(title: string, scope: string, subject: string, failure: ReadFailure, again: () => Promise<HTMLElement>): HTMLElement {
+  const said = el("div", "wrefusal");
+  said.append(el("b", undefined, sentence(failure, subject)), el("div", undefined, remedy(failure)));
+  const root = card(title, scope, [said]);
+  if (failure.cause === "unanswered") {
+    const retry = el("button", "wretry", "Try again");
+    retry.setAttribute("type", "button");
+    retry.addEventListener("click", () => void again().then((fresh) => root.replaceWith(fresh)));
+    root.append(retry);
+  }
+  return root;
 }
 
 async function open(host: HostApi, row: HTMLElement, destination: string): Promise<void> {
@@ -83,6 +103,6 @@ async function open(host: HostApi, row: HTMLElement, destination: string): Promi
     const holder = row.closest(".wcard");
     if (holder === null) return;
     holder.querySelector(".wrefusal")?.remove();
-    holder.append(el("div", "wrefusal", `Not opened — ${sentence(error)}`));
+    holder.append(el("div", "wrefusal", `Not opened — ${saying(error)}`));
   }
 }

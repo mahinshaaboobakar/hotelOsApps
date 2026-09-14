@@ -6,7 +6,8 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { el, option } from "../../chrome/element";
+import { control, el, option } from "../../chrome/element";
+import { failed } from "../../chrome/failure";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
@@ -17,8 +18,12 @@ import type { PrepareView } from "./index";
 export async function moveRooms(host: HostApi, nav: Nav, v: PrepareView, onlyTask: string | null): Promise<void> {
   const overlay = sheet(nav.frame, onlyTask === null ? "Move rooms" : "Assign anyway");
   const [board, people] = await Promise.all([load<Board>(host, "board"), load<{ userId: string; name: string }[]>(host, "attendants")]);
+  // No rooms or no people to draw means no Assign to press: the failure, and the way back.
+  const again = (): void => { overlay.close(); void moveRooms(host, nav, v, onlyTask); };
+  const unread = !board.ok ? failed(board.failure, "the rooms to move", again) : !people.ok ? failed(people.failure, "the people posted to Housekeeping", again) : null;
   if (!board.ok || !people.ok) {
-    overlay.refuse(!board.ok ? board.because : people.ok ? "" : people.because);
+    if (unread !== null) overlay.body.append(unread);
+    overlay.foot.append(control("btn", "Back", () => overlay.close()));
     return;
   }
 

@@ -51,9 +51,6 @@ public sealed class HouseDouble : IHouse
     public Task<IReadOnlyList<HouseArea>> AreasAsync(Guid propertyId, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<HouseArea>>(Areas);
 
-    public Task<Guid?> DepartmentIdAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken) =>
-        Task.FromResult<Guid?>(departmentCode == "HK" ? Housekeeping : null);
-
     public Task<IReadOnlyDictionary<Guid, string>> NamesAsync(IReadOnlyCollection<Guid> userIds, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyDictionary<Guid, string>>(userIds.Where(Names.ContainsKey).ToDictionary(id => id, id => Names[id]));
 }

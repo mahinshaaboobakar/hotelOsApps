@@ -62,7 +62,7 @@ export function history(host: HostApi, page: RoomPage): HTMLElement {
   if (page.history.length === 0) card.append(el("div", "dim", "no earlier days recorded"));
   for (const d of page.history) {
     const row = el("div", "row");
-    row.append(el("span", "num", day(host, d.day)), el("span", undefined, d.services.map((s, i) => `${service(s)} — ${lower(d.outcomes[i] ?? "open")}`).join(" · ")));
+    row.append(el("span", "num", day(host, d.day)), el("span", undefined, d.services.map((s, i) => `${service(s)} — ${(d.outcomes[i] === undefined || d.outcomes[i] === null ? "no outcome recorded" : lower(d.outcomes[i]!))}`).join(" · ")));
     card.append(row);
   }
   return card;

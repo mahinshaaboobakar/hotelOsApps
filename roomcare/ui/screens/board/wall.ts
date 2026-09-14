@@ -84,7 +84,7 @@ export function outcome(host: HostApi, room: Pick<BoardRoom, "outcome">): string
     case "DECLINED": return `declined ${clock(host, o.at)}`;
     case "DND": return `⏸ DND ${clock(host, o.at)} · re-check ${clock(host, o.until)}`;
     case "WAITING": return `waiting for ${clock(host, o.until)}`;
-    case "SUPERVISION": return `⚑ ${ordinal(o.days ?? 1)} day without service`;
+    case "SUPERVISION": return o.days === null || o.days === undefined ? "⚑ days without service" : `⚑ ${ordinal(o.days)} day without service`;
     case "DISAGREEMENT": return `! PMS says ${(o.detail ?? "").toLowerCase()} ${clock(host, o.at)}`;
     case "PENDING": return `${(o.detail ?? "").includes("may wait") ? "may wait" : "pending"} · one click`;
     case "NOBODY_AVAILABLE": return "nobody available";

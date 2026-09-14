@@ -74,7 +74,6 @@ public sealed class TaskWriter(RoomCareDbContext db, IEventAppender events, Time
         {
             TaskId = task.Id,
             PropertyId = task.PropertyId,
-            DepartmentId = note.DepartmentId,
             RoomId = task.RoomId,
             LocationId = task.LocationId,
             OperatingDay = task.OperatingDay.ToString("yyyy-MM-dd"),
@@ -125,6 +124,4 @@ public sealed record TaskNote
     public IReadOnlyList<string>? PartialDone { get; init; }
 
     public Guid? UserId { get; init; }
-
-    public Guid? DepartmentId { get; init; }
 }

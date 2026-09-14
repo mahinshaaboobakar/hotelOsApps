@@ -41,12 +41,28 @@ describe("the Room Care module", () => {
     expect(root.textContent).toContain("17 of 17 — no pages");
   });
 
-  it("draws a failure when the board cannot be read — never a stand-in board", async () => {
-    const refused = new HostCallError({ kind: "unavailable", message: "down" });
+  it("draws what it could not read and why when the board does not answer — never a stand-in board — and Try again reads it", async () => {
+    const overrides: Record<string, unknown> = { board: new HostCallError({ kind: "unavailable", message: "down" }) };
+    const root = mount(activate, host(SUPERVISOR, overrides));
+    await settle();
+    expect(root.querySelector(".note.bad")?.textContent).toContain("Room Care did not answer, so the board could not be read.");
+    expect(root.querySelectorAll(".tile").length).toBe(0);
+
+    delete overrides.board;
+    click(root, ".note.bad button", "Try again");
+    await settle();
+    expect(root.querySelector(".note.bad")).toBeNull();
+    expect(root.querySelectorAll(".tile").length).toBeGreaterThan(0);
+  });
+
+  it("offers no Try again when the service refused the question, and shows the service's own words", async () => {
+    const refused = new HostCallError({ kind: "rejected", message: "this room is not at this property" });
     const root = mount(activate, host(SUPERVISOR, { board: refused }));
     await settle();
-    expect(root.querySelector(".note.bad")?.textContent).toContain("The board could not be read.");
-    expect(root.querySelectorAll(".tile").length).toBe(0);
+    const note = root.querySelector(".note.bad");
+    expect(note?.textContent).toContain("Room Care could not produce the board.");
+    expect(note?.textContent).toContain("this room is not at this property");
+    expect(note?.querySelector("button")).toBeNull();
   });
 
   it("opens a room with its disagreement, and keeps ours with the version it was drawn at", async () => {

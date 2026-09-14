@@ -28,6 +28,6 @@ describe("the five widgets", () => {
   it("draws a failure, never a figure, when its read failed", async () => {
     const card = await roomsReady(host(ALL, { widgetRoomsReady: new HostCallError({ kind: "unavailable", message: "down" }) }));
     expect(card.querySelector(".wfig")).toBeNull();
-    expect(card.textContent).toContain("Could not be read");
+    expect(card.textContent).toContain("could not be read");
   });
 });

@@ -6,10 +6,16 @@
 import { PAGER_LABELS, pagedView, type Paging } from "@hotelos/sdk";
 
 import type { Operator } from "../model";
+import { sentence } from "./failure";
+import type { Read } from "./load";
 import { control, el } from "./element";
 
-/** The top bar: the mark, the app's name, the sections, and who is here (`name · department · property`). */
-export function head(sections: readonly string[], current: string, operator: Operator | null, go: (section: string) => void): HTMLElement {
+/**
+ * The top bar: the mark, the app's name, the sections, and who is here
+ * (`name · department · property`). Null while the read is out; a failed read
+ * says so; a part the service does not have is left out, never filled in.
+ */
+export function head(sections: readonly string[], current: string, operator: Read<Operator> | null, go: (section: string) => void): HTMLElement {
   const bar = el("header", "head");
   const app = el("div", "app");
   app.append(el("div", "mark", "✓"), document.createTextNode("Room Care"));
@@ -17,9 +23,10 @@ export function head(sections: readonly string[], current: string, operator: Ope
   for (const section of sections) {
     bar.append(control(section === current ? "tab on" : "tab", section, () => go(section)));
   }
-  if (operator !== null) {
-    const parts = [operator.name ?? "signed in", operator.department, operator.property ?? "this property"];
-    bar.append(el("div", "who", parts.join(" · ")));
+  if (operator !== null && !operator.ok) bar.append(el("div", "who", sentence(operator.failure, "who is signed in")));
+  if (operator !== null && operator.ok) {
+    const o = operator.value;
+    bar.append(el("div", "who", [o.name, o.department, o.property].filter((part) => part !== null && part !== "").join(" · ")));
   }
   return bar;
 }

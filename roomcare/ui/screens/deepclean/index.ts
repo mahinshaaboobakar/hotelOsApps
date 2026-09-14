@@ -8,10 +8,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { shortDay, when } from "../../chrome/instant";
-import { act, failed, holds, load } from "../../chrome/load";
+import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
@@ -46,7 +47,7 @@ interface Page {
 export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page: number, goPage: (page: number) => void): Promise<void> {
   const got = await load<Page>(host, "deepCleans", { page });
   if (!got.ok) {
-    body.append(failed("Deep cleans", got.because));
+    body.append(failed(got.failure, "the deep cleans", nav.show));
     return;
   }
 
@@ -67,7 +68,7 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
     else if (row.blockRequestedAt !== null) block.append(el("span", "pill soft-warn", `requested ${when(host, row.blockRequestedAt)}`), el("span", "tag port", "applied by the state's owner"));
     else block.append(document.createTextNode("—"));
     const job = el("td", "mono");
-    job.append(document.createTextNode(row.jobId === null ? (row.blockRequestedAt === null ? "—" : "raised with the plan") : `job ${lower(row.jobStatus ?? "open")} `));
+    job.append(document.createTextNode(row.jobId === null ? (row.blockRequestedAt === null ? "—" : "raised with the plan") : row.jobStatus === null ? "job raised — no status heard yet " : `job ${lower(row.jobStatus)} `));
     if (row.jobId !== null) job.append(el("span", "tag port", "progress · JOBS-Q2"));
     const state = el("td");
     const tone = row.state === "DUE" ? "warn" : row.state === "IN_PROGRESS" ? "run" : row.state === "DONE" ? "ok" : "";
@@ -91,7 +92,7 @@ function progress(host: HostApi, nav: Nav, row: Row): HTMLElement {
   const kv = el("div", "kv");
   const hands = el("div");
   hands.append(document.createTextNode("today Room Care hears only job.created / job.closed "), el("span", "tag port", "hands by day · JOBS-Q2"));
-  kv.append(el("div", "k", "Job"), el("div", undefined, `job ${lower(row.jobStatus ?? "open")} · window ${shortDay(host, row.windowFrom)} – ${shortDay(host, row.windowTo)}`),
+  kv.append(el("div", "k", "Job"), el("div", undefined, `${row.jobStatus === null ? "job raised — no status heard yet" : `job ${lower(row.jobStatus)}`} · window ${shortDay(host, row.windowFrom)} – ${shortDay(host, row.windowTo)}`),
     el("div", "k", "Hands"), hands,
     el("div", "k", "On close"), el("div", undefined, `${row.room} → dirty → departure clean → clean again → release requested → sold again`));
   card.append(kv);
