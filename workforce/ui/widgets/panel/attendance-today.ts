@@ -16,10 +16,9 @@
  * exactly the person nobody planned for.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 
 import type { AttendanceToday } from "../../roster/widget";
 import { failureCard, bar, card, figures, rows, section } from "../card";

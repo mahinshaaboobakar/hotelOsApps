@@ -10,10 +10,9 @@
  * file somebody under a department they had already left.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 
 import type { OnLeave } from "../../roster/widget";
 import { failureCard, card, figures, note, rows, section } from "../card";

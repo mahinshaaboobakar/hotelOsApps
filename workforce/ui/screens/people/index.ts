@@ -8,18 +8,17 @@
  * row, never as a column that could stand alone.
  */
 
-import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, type HostApi, load, type PropertyEnvironment, type ReadFailure }
+  from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import { type People, type Posting } from "../../roster/people";
 import { endPosting } from "./end-posting";
 import { pager } from "../../chrome/pager";
 import type { PostingEnding } from "../../roster/team";
 import { failureBody } from "../../chrome/failure";
-import type { ReadFailure } from "../../chrome/failure";
 
 const COLUMNS = "1.5fr 116px 96px 1fr 1fr 116px";
 

@@ -5,12 +5,11 @@
  * swap. What it owns is the tab state and the counts.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 import { type LeaveBoard } from "../../roster/leave";
 import { queue, swapCard } from "./approvals";
 import { requestForm } from "./form";

@@ -19,6 +19,7 @@
  * level. Drawn so it can be ruled, and redlined to FF rather than settled here.
  */
 
+import { APPLICATION } from "./application";
 import { el } from "./element";
 
 /** One destination in the bar. */
@@ -71,7 +72,7 @@ export function bar(
   const head = el("div", "head");
   const app = el("div", "app");
 
-  app.append(el("div", "mark", "W"), el("div", undefined, "Workforce"));
+  app.append(el("div", "mark", "W"), el("div", undefined, APPLICATION));
   head.append(app);
 
   for (const section of sections) {

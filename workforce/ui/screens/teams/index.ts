@@ -17,13 +17,12 @@
  * `WF-Q7` put it.
  */
 
-import { formatDay, formatInstant, type HostApi, type PropertyEnvironment }
+import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import type { Team, TeamDetail, Teams } from "../../roster/team";
 
 import { detail } from "./detail";

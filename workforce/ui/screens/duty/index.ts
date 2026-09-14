@@ -13,13 +13,12 @@
  * backend refused for the same reason.
  */
 
-import { formatDay, formatInstant, type HostApi, type PropertyEnvironment }
+import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import { assignDuty } from "./dialog";
 import { type Duty, type Holder, type Register } from "../../roster/duty";
 

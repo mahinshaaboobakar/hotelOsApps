@@ -14,13 +14,12 @@
  * to it — the way back is the way in.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import { newShift } from "../policy/dialog";
 import { type CatalogueRow, type Policy } from "../../roster/policy";
 

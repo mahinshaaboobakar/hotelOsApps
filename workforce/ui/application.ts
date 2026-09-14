@@ -22,7 +22,7 @@
  * for the drawing and `roster/` for the single data seam.
  */
 
-import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
+import { type Activate, type HostApi, type HostedModule, load } from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
 import { bar, switcher, type Operator, type Section } from "./chrome/bar";
@@ -48,7 +48,6 @@ import { rota } from "./screens/rota";
 import { ROTA_CSS } from "./screens/rota/styles";
 import { schedule } from "./screens/schedule";
 import { SCHEDULE_CSS } from "./screens/schedule/styles";
-import { load } from "./roster";
 
 /** What a screen needs to draw itself. */
 interface Place {

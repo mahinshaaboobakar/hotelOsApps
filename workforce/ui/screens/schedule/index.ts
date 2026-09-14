@@ -9,12 +9,12 @@
  * rather than *"Request leave for them"*.
  */
 
-import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatInstant, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import { type Schedule, type ScheduleDay } from "../../roster/schedule";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;

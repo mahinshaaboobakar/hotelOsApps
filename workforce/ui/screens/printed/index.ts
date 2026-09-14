@@ -17,12 +17,13 @@
  * printer code.
  */
 
-import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatInstant, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load, type Week } from "../../roster";
+import { type Week } from "../../roster";
 import { type Duty, type Register } from "../../roster/duty";
 
 /**

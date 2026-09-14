@@ -18,10 +18,9 @@
  * question rather than choosing.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 
 import type { PendingRequests } from "../../roster/widget";
 import { failureCard, card, figures, note, rows, section } from "../card";

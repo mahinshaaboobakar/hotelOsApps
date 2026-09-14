@@ -12,19 +12,18 @@
  *
  * So there is no fallback here. A failed read renders a failure.
  *
- * # Three causes, three answers
+ * # The decisions moved to the SDK; the elements stayed
  *
- * They are not one error with three messages. The causes have different
- * remedies, so they get different sentences and different actions — a timeout
- * and a refusal must never share a screen.
+ * The three causes, the kind mapping, every sentence and the rule that only an
+ * unanswered read may be retried are now `@hotelos/sdk`'s, shared by the three
+ * bundles that ship a UI. What remains here is what that package cannot supply:
+ * it ships no CSS, so a function there returning an `HTMLElement` would emit
+ * class names no application defines. **What must be identical is what a person
+ * is told; the markup is ours.**
  *
- *   unanswered   the deadline expired. Nothing is known about the data,
- *                including whether any exists. Retryable
- *   forbidden    the service answered and refused. Retrying changes nothing,
- *                so no retry is offered: a button that cannot change the
- *                outcome is a second lie
- *   faulted      the service reached its own fault. Not the property's doing
- *                and it will not clear on its own
+ * The three causes still get three sentences and three actions, and a timeout
+ * and a refusal still never share a screen — that reasoning simply lives one
+ * package over now, where it can only be written once.
  *
  * # The frame stays; only the body is replaced
  *
@@ -32,40 +31,11 @@
  * the screen never pretends the list is elsewhere. This draws the body.
  */
 
+import { FAILURE_LABELS, failureDrawing, type FailureDrawing, type ReadFailure }
+  from "@hotelos/sdk";
+
+import { APPLICATION } from "./application";
 import { el } from "./element";
-
-/** Why a read did not produce data. */
-export type Cause = "unanswered" | "forbidden" | "faulted";
-
-/**
- * A read that failed, with everything the screen is allowed to say about it.
- */
-export interface ReadFailure {
-  /** Which of the three, chosen by the platform's own kind. */
-  cause: Cause;
-
-  /** The capability asked for — named on a refusal, because it is the remedy. */
-  capability: string;
-
-  /** This application's own verb, so a fault names the call that failed. */
-  method: string;
-
-  /**
-   * The platform's words, verbatim, or null when it gave none a person may see.
-   *
-   * **Null is the ordinary answer for a fault, and that is ADR 0041 working.**
-   * The boundary maps anything unrecognised to `Internal` with a *generic*
-   * message and logs the detail server-side, so the service's own sentence has
-   * already been stripped before this module could render it. The approved
-   * frame's example shows a fault line carrying the failing method and its
-   * reason; that detail does not cross the wire, and inventing it here would be
-   * the gap rule broken in the very surface written to honour it.
-   */
-  said: string | null;
-
-  /** When this screen observed the failure. Not when the fault happened. */
-  at: Date;
-}
 
 /** What the screen calls the thing it could not read — "the rota", "this board". */
 export interface Subject {
@@ -74,33 +44,19 @@ export interface Subject {
 }
 
 /**
- * Draw the failure, in place of the body.
+ * The words for a failure, with this application speaking.
  *
- * @param failure what went wrong, as the platform reported it
+ * @param failure what the read reported
  * @param subject what this screen was trying to read
- * @param retry re-run the read; omitted where a retry cannot succeed
- * @returns the body a person sees instead of rows
+ * @returns the parts of a failure surface, each already in its final words
+ *
+ * @remarks
+ * The one call that supplies {@link APPLICATION}, so no screen has to remember
+ * to. Every surface that draws a failure goes through here and they cannot
+ * drift into naming the application differently.
  */
-export function failureBody(
-  failure: ReadFailure,
-  subject: Subject,
-  retry?: () => void,
-): HTMLElement {
-  const body = el("div", "fail");
-
-  body.append(
-    mark(failure.cause),
-    el("div", "fail-said", sentence(failure, subject)),
-    el("div", "fail-why", why(failure.cause)),
-    wire(failure),
-  );
-
-  const acts = actions(failure, retry);
-  if (acts !== null) {
-    body.append(acts);
-  }
-
-  return body;
+export function drawing(failure: ReadFailure, subject: Subject): FailureDrawing {
+  return failureDrawing(failure, { app: APPLICATION, the: subject.the });
 }
 
 /**
@@ -111,92 +67,79 @@ export function failureBody(
  * and each says something a symbol cannot: whether the service was reached at
  * all. An exclamation mark in a triangle would say *something is wrong* three
  * times over.
+ *
+ * @param drawn the words and marks for this failure
+ * @returns the glyph, hidden from a screen reader — the sentence beneath it
+ *   carries the same fact in words
  */
-export function mark(cause: Cause): HTMLElement {
-  const glyph = el("div", `fail-mark fail-${cause}`);
-
-  // Drawn from characters rather than an SVG: the realm has no network, so an
-  // external sprite could not load, and an inline SVG for three marks is more
-  // to keep in agreement than the marks are worth.
-  glyph.textContent = cause === "unanswered" ? "· · ·"
-    : cause === "forbidden" ? "· |"
-    : "· ✕";
+export function markEl(drawn: FailureDrawing): HTMLElement {
+  // Characters rather than an SVG: the realm has no network, so an external
+  // sprite could not load, and the marks are the SDK's so that a person meets
+  // the same three in every application.
+  const glyph = el("div", `fail-mark fail-${drawn.cause}`, drawn.mark);
 
   glyph.setAttribute("aria-hidden", "true");
   return glyph;
 }
 
 /**
- * What could not be read, in the operator's words.
- *
- * **Careful not to claim the list is empty.** *Nothing here yet* would be a
- * measurement; this is the absence of one.
- */
-export function sentence(failure: ReadFailure, subject: Subject): string {
-  switch (failure.cause) {
-    case "unanswered":
-      return `Workforce did not answer in time`;
-    case "forbidden":
-      return `You do not have access to ${subject.the}`;
-    case "faulted":
-      return `Workforce could not build ${subject.the}`;
-  }
-}
-
-/** The paragraph under the sentence — what it means, and what it does not. */
-function why(cause: Cause): string {
-  switch (cause) {
-    case "unanswered":
-      return "Nothing is known about this — not that it is empty, and not that "
-        + "it is full.";
-    case "forbidden":
-      return "Workforce answered and refused. Nothing here is broken; this "
-        + "account has not been granted the permission this screen needs.";
-    case "faulted":
-      return "The service reached its own fault. This is not something the "
-        + "property has done, and it will not clear on its own.";
-  }
-}
-
-/**
  * The platform's own words, in the monospace line.
  *
  * This is the line a person hands to somebody who can act, so it carries only
- * what actually arrived. Where the platform gave no message a person may see —
- * every fault, by ADR 0041 — the line says what this module knows for certain:
- * the capability, the verb, and the moment the failure was observed here.
+ * what actually arrived — and where the platform gave no message a person may
+ * see, it says so. A blank where a reason should be reads as a reason nobody
+ * looked for.
+ *
+ * @param drawn the words and marks for this failure
+ * @returns the provenance line
  */
-export function wire(failure: ReadFailure): HTMLElement {
-  const parts = [failure.capability, failure.method];
+export function wireEl(drawn: FailureDrawing): HTMLElement {
+  return el("div", "fail-wire", drawn.wire);
+}
 
-  if (failure.said !== null) {
-    parts.push(failure.said);
-  } else if (failure.cause === "faulted") {
-    // Stated, not omitted. A blank where a reason should be reads as a reason
-    // nobody looked for; this says the platform withheld it deliberately and
-    // where it went instead.
-    parts.push("no reason crossed the boundary — logged by the service");
-  } else if (failure.cause === "forbidden") {
-    parts.push("no grant names this user at this property");
+/**
+ * Draw the failure, in place of the body.
+ *
+ * @param failure what went wrong, as the platform reported it
+ * @param subject what this screen was trying to read
+ * @param retry re-run the read; ignored where a retry cannot succeed
+ * @returns the body a person sees instead of rows
+ */
+export function failureBody(
+  failure: ReadFailure,
+  subject: Subject,
+  retry?: () => void,
+): HTMLElement {
+  const drawn = drawing(failure, subject);
+  const body = el("div", "fail");
+
+  body.append(
+    markEl(drawn),
+    el("div", "fail-said", drawn.said),
+    el("div", "fail-why", drawn.why),
+    wireEl(drawn),
+  );
+
+  const acts = actions(drawn, retry);
+  if (acts !== null) {
+    body.append(acts);
   }
 
-  parts.push(failure.at.toISOString());
-
-  return el("div", "fail-wire", parts.join(" · "));
+  return body;
 }
 
 /**
  * The action, and only one that could work.
  *
  * **Never a retry on a refusal.** A button that cannot change the outcome is a
- * second lie, so `forbidden` gets no *Try again* however convenient the
- * symmetry would be.
+ * second lie, and the SDK decides which failures may offer one — so a screen
+ * passing a `retry` for a refusal gets no button rather than a broken promise.
  */
-function actions(failure: ReadFailure, retry?: () => void): HTMLElement | null {
+function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement | null {
   const row = el("div", "fail-acts");
 
-  if (failure.cause === "unanswered" && retry !== undefined) {
-    const again = el("button", "btn pri", "Try again");
+  if (drawn.retryable && retry !== undefined) {
+    const again = el("button", "btn pri", FAILURE_LABELS.retry);
     again.addEventListener("click", retry);
     row.append(again);
   }
@@ -211,52 +154,13 @@ function actions(failure: ReadFailure, retry?: () => void): HTMLElement | null {
 }
 
 /**
- * The platform's kind, as one of the three causes.
- *
- * `rejected` and `invalid` are a write's business — a validation refusal a
- * person can act on — and never reach a read, so they are not mapped here.
- */
-export function causeOf(kind: string): Cause {
-  switch (kind) {
-    case "forbidden":
-      return "forbidden";
-
-    // **A refusal is not a timeout, and this arm is why the default is not one
-    // either.** `rejected` and `invalid` mean the service answered and declined
-    // - and the shell folds HTTP 404, *no handler mapped for that capability*,
-    // onto `Rejected` beside 409 and 422 (`module_call.rs:174`). Sent to
-    // `unanswered` they drew "did not answer in time" over a Try again button
-    // that could never succeed: a permanent condition dressed as a transient
-    // one, which is the second lie this file refuses everywhere else.
-    //
-    // `faulted` is the least wrong of three, not the right one. It offers no
-    // retry, which is the half that matters, and the service's own sentence
-    // reaches the screen verbatim because these two kinds are the ones ADR 0041
-    // makes client-facing - so the specifics are carried even though the
-    // heading is approximate.
-    //
-    // **The vocabulary has no way to say *no handler*** - `CORE-Q30`. A fourth
-    // cause is not this module's to mint: every application would reinvent it,
-    // and the four causes a person learns would then differ per application.
-    // Interim, and named as one.
-    case "rejected":
-    case "invalid":
-    case "internal":
-      return "faulted";
-
-    default:
-      return "unanswered";
-  }
-}
-
-/**
  * Replace a screen's contents with the failure, keeping the frame.
  *
  * @param main the screen's mount
  * @param title what this screen is, drawn where its header would be
  * @param failure what went wrong
  * @param subject what could not be read, for the sentence
- * @param retry re-run the read; omitted where a retry cannot succeed
+ * @param retry re-run the read; ignored where a retry cannot succeed
  *
  * @remarks
  * **The header is the screen's name, not its data.** A real header carries the

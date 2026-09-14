@@ -16,15 +16,14 @@
 
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
+import type { ReadFailure } from "@hotelos/sdk";
+
+import { APPLICATION } from "../chrome/application";
 import { el, fill } from "../chrome/element";
-import { mark, sentence, wire, type ReadFailure, type Subject }
-  from "../chrome/failure";
+import { drawing, markEl, wireEl, type Subject } from "../chrome/failure";
 import type { Figure, Segment, SummaryRow } from "../roster/widget";
 
 import { WIDGET_CSS } from "./styles";
-
-/** The application's name, in the header's right-hand slot. */
-const APPLICATION = "Workforce";
 
 /**
  * The capability a tap exercises — the widget entry contract's, not this
@@ -253,14 +252,11 @@ export function failureCard(
   const root = el("div", "wcard");
   const head = el("div", "whead");
 
-  head.append(el("span", "wtitle", title), el("span", "wapp", "Workforce"));
+  head.append(el("span", "wtitle", title), el("span", "wapp", APPLICATION));
 
+  const drawn = drawing(failure, subject);
   const body = el("div", "wbody wfail");
-  body.append(
-    mark(failure.cause),
-    el("div", "fail-said", sentence(failure, subject)),
-    wire(failure),
-  );
+  body.append(markEl(drawn), el("div", "fail-said", drawn.said), wireEl(drawn));
 
   root.append(head, body);
   return root;

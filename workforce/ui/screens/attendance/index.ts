@@ -9,13 +9,12 @@
  * about the day.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { codeChip } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 import { type Day, type DayRow } from "../../roster/attendance";
 
 /** Draw the screen. */

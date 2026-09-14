@@ -12,11 +12,11 @@
  * widget, not by the shell*.
  */
 
-import { formatInstant, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatInstant, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import { el, fill } from "../../chrome/element";
-import { load } from "../../roster";
 import type { Changeover } from "../../roster/widget";
 
 import type { ShiftBoard } from "../../roster/widget";

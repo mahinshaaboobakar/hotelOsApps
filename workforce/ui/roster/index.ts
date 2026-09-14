@@ -1,29 +1,36 @@
 /**
- * The roster, as this module can reach it — the one data seam.
+ * The roster, as this module can reach it — the one write seam.
  *
- * Every screen reads through `load` and writes through `write`. Nothing else in
- * this module touches `host.call`, so the transport is one file and no screen
- * knows what it is.
+ * Every screen writes through `write`. Nothing else in this module raises a
+ * refusal, so a dialog's failure path is one file and no screen knows what the
+ * transport is.
  *
- # Neither a read nor a write falls back
+ * # The read half moved to the SDK
+ *
+ * `Read<T>`, `ReadFailure` and `load` were here, and three bundles each had or
+ * would have written their own copy. They now live in `@hotelos/sdk` and every
+ * screen imports them from there — **anything two components must agree on
+ * lives in one place**, and what would have drifted is the half nobody reads
+ * until a person is standing in front of it: whether a fault offers a retry
+ * that cannot succeed, whether the service's own sentence crosses.
+ *
+ * The write half stays. A refusal is this application's vocabulary — its
+ * message is the one a supervisor acts on — and nothing outside Workforce has
+ * asked for it.
+ *
+ * # Neither a read nor a write falls back
  *
  * This said *a read falls back; a write never does*, and described `load`
- * answering from `recorded.ts` when the platform could not — telling the screen
- * which it got, so a manager could tell whether they were looking at their
- * hotel. `APPS-Q26(4)` rejected that mechanism, not merely its treatment: **a
- * screen that cannot read its data shows what failed and why, never a plausible
- * list with an apology under it.** Marking a fabrication honestly is still
- * rendering one.
+ * answering from `recorded.ts` when the platform could not. `APPS-Q26(4)`
+ * rejected that mechanism, not merely its treatment: **a screen that cannot
+ * read its data shows what failed and why, never a plausible list with an
+ * apology under it.** Marking a fabrication honestly is still rendering one.
  *
- * So a failed read returns a [`ReadFailure`] and the screen draws it, exactly as
- * a refused write raises and the screen draws the refusal. The two halves of
- * this seam now behave the same way, which is what the old comment's own
- * reasoning had always implied and stopped one step short of.
+ * So a failed read returns a `ReadFailure` and the screen draws it, exactly as
+ * a refused write raises and the screen draws the refusal.
  */
 
 import { HostCallError, type HostApi } from "@hotelos/sdk";
-
-import { causeOf, type ReadFailure } from "../chrome/failure";
 
 export * from "./model";
 // **The recorded fixtures are NOT re-exported.** They survive for previews and
@@ -40,73 +47,6 @@ export class WriteRefused extends Error {
   constructor(message: string, readonly kind: string) {
     super(message);
     this.name = "WriteRefused";
-  }
-}
-
-/**
- * What a read produced: the property's data, or the reason there is none.
- *
- * **There is no third case, and that is the change.** This was
- * `Loaded<T>` — a value, a `live` flag and a reason — and the value was a
- * recorded fixture whenever the read failed. `APPS-Q26(4)` rejected that
- * mechanism outright: *a screen that cannot read its data shows what failed
- * and why, never a plausible list with an apology under it.*
- *
- * A discriminated union rather than a flag, so a screen **cannot** reach the
- * data without having answered whether there is any. The old shape let a
- * caller read `.value` and never look at `.live`, which is exactly what five
- * of this application's eleven screens did.
- */
-export type Read<T> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly failure: ReadFailure };
-
-/**
- * Ask the platform, and report what happened when it could not answer.
- *
- * @param host the bridge, and the only route out of this realm
- * @param capability the permission the manifest requested
- * @param method the operation within it
- * @param params what the question needs — which page, for the one list that has
- *   them. Absent for every other read, which is bounded by a natural key.
- * @returns the property's data, or the reason there is none — never both, and
- *   never a stand-in for either
- */
-export async function load<T>(
-  host: HostApi,
-  capability: string,
-  method: string,
-  params?: unknown,
-): Promise<Read<T>> {
-  const at = new Date();
-
-  // Asking for a capability that was not granted is not worth a round trip,
-  // and the answer is the same one the service would give: refused, naming
-  // what is missing. `forbidden` rather than a quiet fixture.
-  if (!host.identity.capabilities.includes(capability)) {
-    return { ok: false, failure: { cause: "forbidden", capability, method, said: null, at } };
-  }
-
-  try {
-    return { ok: true, value: (await host.call(capability, method, params)) as T };
-  } catch (error) {
-    if (error instanceof HostCallError) {
-      return {
-        ok: false,
-        failure: {
-          cause: causeOf(error.kind),
-          capability,
-          method,
-          // Only what ADR 0041 permits a person to see. A fault's own words
-          // never crossed the boundary, so this is null and the screen says
-          // so rather than leaving a blank where a reason should be.
-          said: error.isForPeople ? error.message : null,
-          at: new Date(),
-        },
-      };
-    }
-
-    throw error;
   }
 }
 

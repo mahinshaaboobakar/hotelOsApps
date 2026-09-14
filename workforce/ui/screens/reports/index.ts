@@ -9,12 +9,11 @@
  * from hours against the property's threshold.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
-import { load } from "../../roster";
 import { type Month, type MonthRow } from "../../roster/reports";
 
 const HEADINGS = [

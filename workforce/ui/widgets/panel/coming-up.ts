@@ -17,10 +17,9 @@
  * The rows return the day a demand model does, and this file is where they go.
  */
 
-import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, type HostApi, load, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
-import { load } from "../../roster";
 import type { SummaryRow } from "../../roster/widget";
 
 import type { ComingUp } from "../../roster/widget";
