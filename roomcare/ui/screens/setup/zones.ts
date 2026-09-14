@@ -11,13 +11,14 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { control, el, option } from "../../chrome/element";
 import { day } from "../../chrome/instant";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
-import { inlineSelect, panel, refuse, saveLine, toggle } from "./controls";
+import { inlineSelect, refuse, saveLine, toggle } from "./controls";
 import type { SetupData } from "./index";
 
 interface Zone {
@@ -57,7 +58,7 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
     el("div", "k", "Continuity"), line(continuity, "the attendant who did the room yesterday gets it again"),
     el("div", "k", "Within"), el("div", undefined, "the shift's minutes, from Workforce through Context — never a number set here"),
     el("div", "k", "If nobody fits"), el("div", undefined, "\"nobody available\" on the board and in the supervision lane — never silence (S0)"));
-  const strategy = panel("Strategy — how the proposal matches rooms to the attendants on shift", kv, posted);
+  const strategy = card("Strategy — how the proposal matches rooms to the attendants on shift", kv, posted);
 
   const table = el("table");
   const head = el("tr");
@@ -77,8 +78,7 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
   moveRow.append(control("btn sm", "Move rooms between zones…", () => move(host, nav, v, v.zones[0]?.zoneId ?? "")));
   const title = el("span");
   title.append(document.createTextNode("Zones — which room belongs to which zone "), el("span", "mono", "(RoomZoneAssignment, ADR 0044 — Room Care's)"));
-  const zonesCard = panel("", table, count, moveRow);
-  zonesCard.querySelector("h3")!.replaceChildren(title);
+  const zonesCard = card(title, table, count, moveRow);
 
   const cols = el("div", "cols");
   cols.append(strategy, zonesCard);

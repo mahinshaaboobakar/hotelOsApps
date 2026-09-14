@@ -5,6 +5,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { el } from "../../chrome/element";
 import { clock, day, when } from "../../chrome/instant";
 import { lower, service, source } from "../../chrome/words";
@@ -42,8 +43,6 @@ function called(entry: RoomPage["today"][number]): string {
 }
 
 function timeline(host: HostApi, page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "Today — every attempt, in order"));
   const tl = el("div", "tl");
   if (page.today.length === 0) tl.append(el("div", "ev dim", "nothing has happened to this room today"));
   for (const entry of page.today) {
@@ -52,42 +51,32 @@ function timeline(host: HostApi, page: RoomPage): HTMLElement {
     ev.append(el("b", undefined, `${clock(host, entry.at)} · ${called(entry)}`), el("span", undefined, detail));
     tl.append(ev);
   }
-  card.append(tl);
-  return card;
+  return card("Today — every attempt, in order", tl);
 }
 
 export function history(host: HostApi, page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "History · 14 days"));
-  if (page.history.length === 0) card.append(el("div", "dim", "no earlier days recorded"));
+  const days = card("History · 14 days", page.history.length === 0 ? el("div", "dim", "no earlier days recorded") : null);
   for (const d of page.history) {
     const row = el("div", "row");
     row.append(el("span", "num", day(host, d.day)), el("span", undefined, d.services.map((s, i) => `${service(s)} — ${(d.outcomes[i] === undefined || d.outcomes[i] === null ? "no outcome recorded" : lower(d.outcomes[i]!))}`).join(" · ")));
-    card.append(row);
+    days.append(row);
   }
-  return card;
+  return days;
 }
 
 export function record(host: HostApi, page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "The record — who set the condition, and every fact heard today"));
   const kv = el("div", "kv");
   kv.append(el("div", "k", "Condition"), el("div", undefined, `${page.line.condition} · ${page.line.setBy ?? source(page.line.source)} · ${when(host, page.line.setAt)}`),
     el("div", "k", "Days without service"), el("div", undefined, String(page.facts.daysWithoutService)),
     el("div", "k", "Supervisor's since"), el("div", undefined, page.facts.supervisedSince === null ? "—" : day(host, page.facts.supervisedSince)));
-  card.append(kv);
-  for (const entry of page.today.filter((e) => e.kind === "OBSERVED")) card.append(el("div", "mono", `${when(host, entry.at)} · ${entry.what} · ${lower(entry.status ?? "")}`));
-  return card;
+  const heard = page.today.filter((e) => e.kind === "OBSERVED").map((entry) => el("div", "mono", `${when(host, entry.at)} · ${entry.what} · ${lower(entry.status ?? "")}`));
+  return card("The record — who set the condition, and every fact heard today", kv, ...heard);
 }
 
 function decision(page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "The decision Room Care made — recorded, not re-derived"));
+  const title = "The decision Room Care made — recorded, not re-derived";
   const d = page.decision;
-  if (d === null) {
-    card.append(el("div", "dim", "no service was decided for this room today"));
-    return card;
-  }
+  if (d === null) return card(title, el("div", "dim", "no service was decided for this room today"));
   const kv = el("div", "kv");
   const inputs = [d.condition, d.occupancy, d.stayStatuses.length > 0 ? `stays [${d.stayStatuses.map(lower).join(", ")}]` : null,
     d.soldAt !== null ? "sold tonight" : "not sold tonight", d.window !== null ? `${lower(d.window)} window` : null, `standard v${d.ruleVersion}`]
@@ -97,13 +86,10 @@ function decision(page: RoomPage): HTMLElement {
     el("div", "k", "Answer"), el("div", undefined, `${lower(d.service)} · ${d.minutes} min · priority ${d.priority} · inspection: ${lower(d.inspectionRule)}`),
     el("div", "k", "Decided by"), el("div", undefined, [lower(d.decidedBy), d.runBy].filter((x) => x !== null).join(" · ")),
   );
-  card.append(kv);
-  return card;
+  return card(title, kv);
 }
 
 function inspection(host: HostApi, page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "Inspection — today"));
   const i = page.inspection;
   const kv = el("div", "kv");
   if (!i.applicationInstalled && i.requestedAt === null) {
@@ -116,19 +102,15 @@ function inspection(host: HostApi, page: RoomPage): HTMLElement {
     );
   }
   kv.append(el("div", "k", "If it fails"), el("div", undefined, "the room goes back to dirty with the inspector's reason"));
-  card.append(kv);
-  return card;
+  return card("Inspection — today", kv);
 }
 
 function jobs(host: HostApi, page: RoomPage): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, "Jobs against this room today"));
   const tl = el("div", "tl");
   if (page.jobs.length === 0) tl.append(el("div", "ev dim", "— none raised, none closed"));
   for (const job of page.jobs) {
     const label = job.kind === "CLOSED" ? `extra service ${clock(host, job.at)} · ${job.jobNumber ?? "a job"}` : `${job.jobNumber ?? "a job"} raised ${clock(host, job.at)} · ${job.by ?? ""}`;
     tl.append(el("div", "ev", `${label}${job.summary === null ? "" : ` — ${job.summary}`}`));
   }
-  card.append(tl);
-  return card;
+  return card("Jobs against this room today", tl);
 }

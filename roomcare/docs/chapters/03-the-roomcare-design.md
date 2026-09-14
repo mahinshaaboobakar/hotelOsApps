@@ -879,6 +879,12 @@ on it**, and the ones that touch a platform matter are asked, not settled.
    a failure; each guard was broken on purpose and seen to fail before its
    green was counted. A missing name, count or status is left out or said to be
    missing, never filled in (*a supervisor*, *1st day*, *job open* removed).
+   The same round found a day built from a month: the room page's deep-clean
+   due date was sent as a year and month and drawn as the first of it. It is
+   sent as the day it is. Dates are chosen by what they are — a day with its
+   year when it may be months off, without when it is a linen date — never by
+   how far they sit from the machine's clock (page 64 §11), and a guard holds
+   that no shipped file calls `Intl` or reads the machine's date.
 10. **Nothing registers `room_task`, and nothing here is built toward a way it
     might.** It is not a master entity; ADR 0061 does not reach it. Its checks
     fail closed, and no tuple is written — by the service or by a test. The
@@ -899,14 +905,14 @@ and the divergences folded. **What still differs, and why:**
 
 | Where | The frame | The build | Why |
 |---|---|---|---|
-| Board 1a/1b, Room states 4c | group by building/wing · floor · room type | zone only | Master Data's install grant carries no building or floor for a room; room type grouping not built. **Asked** |
-| Room 4/4b, door 3b | *Room state…*, *Found an issue*, *End* drawn as inline panels | page 64 §9 sheets | the overlay pair is the standard; the frames predate it. **Asked** (composition) |
-| Room 4/4b | *More ▾* | absent | the frames do not say what it holds. **Asked** |
+| Board 1a/1b, Room states 4c | group by building/wing · floor · room type | zone only | Master Data's install grant carries no building or floor for a room. **An application design question — to the owner, drawn**; nothing is built past zone until a frame comes back |
+| Room 4/4b, door 3b | *Room state…*, *Found an issue*, *End* drawn as inline panels | sheets for those acts; the room's facts as inline cards | **Settled, not a divergence** — page 64 §9's third surface (`RC-Q6`, `a11f0227`): reading is an inline card, composing is a sheet, confirming is a dialog. The frame drew the read half and the build offers the write half; the build conforms |
+| Room 4/4b | *More ▾* | absent | no application implements an overflow menu and page 64 has no rule for one. **To the owner, drawn**; nothing is built behind a *More* until a frame comes back |
 | Room 4, door 3b | *Raise a job*, *Photo* live | drawn off, saying whose they are | whether a person holds Jobs' `job.create` is not readable here, and no media service exists |
-| Every date-time | `05 Sep 09:12` | `05 Sept, 09:12` | the SDK's `formatInstant` in this locale; the module never formats a date itself. **Asked** |
+| Every date-time | a date written in characters | the property's locale's form, through the SDK | **Settled — the frame is the divergence** (page 64 §11, `RC-Q7`, from `JOBS-Q1(8)`): a frame states a date's *shape* — that a date and a time appear, in that cell, at that width — never its characters. The characters are one locale's output |
 | Prepare 2 | *3 h 40 of 8 h*, zone-3 posting | minutes planned; grouped by department | Workforce's zone on the posting and shift minutes are Context's, not yet readable (the Workforce ask) |
-| Setup 7e | zone column and zone chips | absent | Master Data's location columns in the grant carry no zone. **Asked** |
-| Setup 7g | posting column filled; GM-only | *read through Context · PKG-Q8*; gated by `roomcare.configure` | no posting read for apps; no permission names the general manager alone. **Asked** |
+| Setup 7e | zone column and zone chips | absent | Master Data's location columns in the grant carry no zone. With the grouping row above: **to the owner, drawn** |
+| Setup 7g | posting column filled; GM-only | *read through Context · PKG-Q8*; gated by `roomcare.configure` | no posting read for apps; no permission names the general manager alone. **Asked of the planner**, with `room_task`'s registration and `roomcare.amend`'s room-level scope; nothing is built past any of the three |
 | Setup tabs 7a–7f | the seventh tab named *Managers* | *Property-wide access* | redline 3 renamed it; the other frames' subnavs were not redrawn |
 | Deep clean 6 | job number, day N of M | *job open* | `JOBS-Q2` |
 | Widgets 8 | *9 on shift* | *on shift — not announced by Workforce yet* | Workforce has never announced presence in the recorded day |

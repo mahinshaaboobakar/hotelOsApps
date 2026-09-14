@@ -8,13 +8,13 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { control, el } from "../../chrome/element";
 import { day } from "../../chrome/instant";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
-import { panel } from "./controls";
 
 interface Grants {
   grants: { userId: string; name: string; grantedAt: string; grantedBy: string | null }[];
@@ -71,7 +71,7 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
     el("div", "k", "The desk"), el("div", undefined, "read — the board and a room's day; nothing to grant here"));
   const cols = el("div", "cols");
   cols.style.marginTop = "16px";
-  cols.append(panel("What the grant gives", gives), panel("Who else may do what — from postings, not from this tab", others));
+  cols.append(card("What the grant gives", gives), card("Who else may do what — from postings, not from this tab", others));
   body.append(read, table, count, grantRow, cols);
 }
 

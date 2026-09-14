@@ -60,14 +60,6 @@ export function sentence(className: string, ...parts: readonly (Node | string)[]
   return line;
 }
 
-/** A card with its heading. */
-export function panel(title: string, ...content: readonly (Node | null)[]): HTMLElement {
-  const card = el("section", "card");
-  card.append(el("h3", undefined, title));
-  for (const part of content) if (part !== null) card.append(part);
-  return card;
-}
-
 /** The line every tab ends with — Save, Discard, and which version is live. */
 export function saveLine(host: HostApi, data: SetupData | null, save: () => void, discard: () => void): { line: HTMLElement; said: HTMLElement } {
   const line = el("div", "save");

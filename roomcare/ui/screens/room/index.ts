@@ -6,10 +6,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { failed } from "../../chrome/failure";
 import { subnav } from "../../chrome/bar";
+import { card } from "../../chrome/card";
 import { control, el } from "../../chrome/element";
-import { clock, shortDay, when } from "../../chrome/instant";
+import { clock, day, nearDay, when } from "../../chrome/instant";
+import { failed } from "../../chrome/failure";
 import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { conditionClass, lower, source } from "../../chrome/words";
@@ -56,8 +57,8 @@ export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: s
   const facts = el("div", "mono", [
     lower(f.occupancy),
     f.soldAt !== null && line.marks.soldTonight ? `sold tonight, arrival ${clock(host, f.soldAt)}` : "not sold tonight",
-    f.linenLastChangedOn !== null ? `linen last changed ${shortDay(host, f.linenLastChangedOn)} (due ${shortDay(host, f.linenDueOn)})` : "linen date not recorded",
-    f.deepCleanDueOn !== null ? `deep clean due ${shortDay(host, f.deepCleanDueOn)}` : null,
+    f.linenLastChangedOn !== null ? `linen last changed ${nearDay(host, f.linenLastChangedOn)} (due ${nearDay(host, f.linenDueOn)})` : "linen date not recorded",
+    f.deepCleanDueOn !== null ? `deep clean due ${day(host, f.deepCleanDueOn)}` : null,
   ].filter((x) => x !== null).join(" · "));
   facts.style.margin = "6px 0 0";
 
@@ -77,9 +78,8 @@ export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: s
 
 function disagreement(host: HostApi, nav: Nav, page: RoomPage): HTMLElement {
   const d = page.disagreement!;
-  const card = el("section", "card");
-  card.style.cssText = "border-color:var(--color-brand,#818cf8);background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)";
-  card.append(el("div", "sect first", `Disagreement — ${page.whoLeads === "PMS" ? "the PMS leads" : "Room Care leads"} at this property (S4)`));
+  const view = card(`Disagreement — ${page.whoLeads === "PMS" ? "the PMS leads" : "Room Care leads"} at this property (S4)`);
+  view.classList.add("accent");
   const kv = el("div", "kv");
   kv.append(
     el("div", "k", "Ours"), el("div", undefined, `${d.ours} · ${d.oursBy ?? source(d.oursSource)} · ${when(host, d.oursAt)} (a deliberate act)`),
@@ -98,6 +98,6 @@ function disagreement(host: HostApi, nav: Nav, page: RoomPage): HTMLElement {
   }
   buttons.append(el("span", "dim", "— recorded: who, when, which side won"));
   kv.append(buttons);
-  card.append(kv, said);
-  return card;
+  view.append(kv, said);
+  return view;
 }

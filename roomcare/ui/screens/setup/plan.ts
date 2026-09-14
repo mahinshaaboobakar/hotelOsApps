@@ -6,11 +6,12 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { el } from "../../chrome/element";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
-import { inlineNumber, panel, refuse, saveLine } from "./controls";
+import { inlineNumber, refuse, saveLine } from "./controls";
 import type { SetupData } from "./index";
 
 interface Plan {
@@ -54,7 +55,7 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
     el("div", "k", "Typical length"), el("div", undefined, "informational — from the last jobs of this type once Jobs publishes them, never a promise"));
 
   const cols = el("div", "cols");
-  cols.append(panel("The plan — per room type", table, count), panel("What a deep clean is, at this property", kv));
+  cols.append(card("The plan — per room type", table, count), card("What a deep clean is, at this property", kv));
   const { line, said } = saveLine(host, data, () => void (async () => {
     for (const i of inputs) {
       if (i.months.value === "" || Number(i.months.value) === i.row.everyMonths) continue;

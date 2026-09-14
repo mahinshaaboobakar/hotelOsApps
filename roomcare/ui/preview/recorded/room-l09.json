@@ -1,6 +1,6 @@
 {
   "line": {
-    "id": "01a09e79-3a6a-7cd4-8d02-725bd50ac77b",
+    "id": "01a09e9a-e7e8-7f14-bcd7-b92bf0125931",
     "number": "L09",
     "condition": "CLEAN",
     "source": "ATTENDANT",
@@ -9,13 +9,13 @@
     "occupancy": "OCCUPIED",
     "vacantDays": null,
     "soldAt": null,
-    "taskId": "01a09e79-4118-777e-9566-5a98569b85f2",
+    "taskId": "01a09e9a-ea50-77f7-92cd-0e68ac4ecb4b",
     "taskVersion": 9,
     "service": "DAILY_SERVICE",
     "reduction": null,
     "earliestAt": null,
     "priority": 3,
-    "attendantId": "01a09e79-3a50-79f0-94ea-d15431435aa0",
+    "attendantId": "01a09e9a-e7e0-7aa2-970e-96a05b76726b",
     "attendant": "Rohan Desai",
     "outcome": {
       "kind": "DISAGREEMENT",
@@ -57,7 +57,7 @@
     "soldAt": null,
     "linenLastChangedOn": "2026-09-04",
     "linenDueOn": "2026-09-07",
-    "deepCleanDueOn": "2026-09",
+    "deepCleanDueOn": "2026-09-05",
     "daysWithoutService": 0,
     "supervisedSince": null
   },

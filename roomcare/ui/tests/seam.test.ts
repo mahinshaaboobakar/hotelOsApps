@@ -65,6 +65,16 @@ describe("the read seam", () => {
     expect(callers.sort()).toEqual(["chrome/load.ts", "widgets/card.ts"]);
   });
 
+  it("renders no date itself — every one goes through the SDK (page 64 §11)", () => {
+    // The one machine fact is when this screen observed a failed read, and it is labelled as ISO on the failure's wire line.
+    const offenders = shipped().flatMap((file) =>
+      readFileSync(join(ROOT, file), "utf8").split("\n")
+        .map((line, i) => ({ line, at: `${file}:${i + 1}` }))
+        .filter(({ line }) => /\bIntl\.|\bDate\.(now|parse)\(|toLocale(Date|Time)?String\(/.test(line) || (/\bnew Date\(/.test(line) && file !== "chrome/load.ts"))
+        .map(({ at }) => at));
+    expect(offenders).toEqual([]);
+  });
+
   it("returns a reason and no value when the service does not answer", async () => {
     const got = await load(host(["roomcare.read"], { board: new HostCallError({ kind: "unavailable", message: "down" }) }), "board");
     expect(got.ok).toBe(false);

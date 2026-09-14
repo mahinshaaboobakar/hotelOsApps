@@ -210,5 +210,7 @@ input.inline[type=time]{width:112px}
 .dlg-note{border:1px solid var(--color-brand,#818cf8);border-radius:12px;padding:16px;margin-bottom:16px;flex:none;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
 .dlg-note .sect,.sect.first{margin-top:0}
+.card.accent{border-color:var(--color-brand,#818cf8);background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
+.card.accent > h3{font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
 .tabline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;flex:none}
 `;

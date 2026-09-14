@@ -1,19 +1,19 @@
 {
   "roomTypes": [
     {
-      "id": "01a09e79-2b55-76fa-998b-a1112702058c",
+      "id": "01a09e9a-deb1-773d-a416-0a2480869a79",
       "code": "STD",
       "name": "Standard",
       "rooms": 16
     },
     {
-      "id": "01a09e79-2b55-7ac1-ba92-9ada21248f62",
+      "id": "01a09e9a-deb1-787e-bfba-1094ec17bb83",
       "code": "STE",
       "name": "Suite",
       "rooms": 1
     }
   ],
-  "roomTypeId": "01a09e79-2b55-76fa-998b-a1112702058c",
+  "roomTypeId": "01a09e9a-deb1-773d-a416-0a2480869a79",
   "services": [
     {
       "service": "DEPARTURE_CLEAN",

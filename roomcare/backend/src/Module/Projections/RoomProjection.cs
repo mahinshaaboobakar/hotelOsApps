@@ -64,7 +64,7 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
             At(state?.NextSoldAt),
             state?.LinenLastChangedOn?.ToString("yyyy-MM-dd"),
             state?.LinenLastChangedOn?.AddDays(day.Policy.LinenEveryDays).ToString("yyyy-MM-dd"),
-            plan is null ? null : (lastDeep?.AddMonths(plan.EveryMonths) ?? day.Date).ToString("yyyy-MM"),
+            plan is null ? null : (lastDeep?.AddMonths(plan.EveryMonths) ?? day.Date).ToString("yyyy-MM-dd"),
             state?.DaysWithoutService ?? 0,
             state?.SupervisedSince?.ToString("yyyy-MM-dd"));
     }

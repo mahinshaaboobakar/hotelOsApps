@@ -9,7 +9,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
-import { clock, shortDay, when } from "../../chrome/instant";
+import { clock, nearDay, when } from "../../chrome/instant";
 import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog } from "../../chrome/overlay";
@@ -61,9 +61,9 @@ export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, pa
   for (const row of lane.rows) {
     const tr = el("tr", row.decision === null ? "pick" : "pick dim");
     tr.addEventListener("click", (event) => { if ((event.target as HTMLElement).closest("button") === null) nav.openRoom(row.roomId); });
-    const known = row.whatWeKnow.map((k) => (k.day !== null ? `${k.text} ${shortDay(host, k.day)}` : k.at === null ? k.text : `${k.text} ${clock(host, k.at)}`)).join(" · ");
+    const known = row.whatWeKnow.map((k) => (k.day !== null ? `${k.text} ${nearDay(host, k.day)}` : k.at === null ? k.text : `${k.text} ${clock(host, k.at)}`)).join(" · ");
     const since = el("td");
-    since.append(el("b", undefined, row.sinceDay !== null ? shortDay(host, row.sinceDay) : clock(host, row.since)));
+    since.append(el("b", undefined, row.sinceDay !== null ? nearDay(host, row.sinceDay) : clock(host, row.since)));
     tr.append(el("td", "num", row.room), why(row), since, el("td", undefined, known), decisionCell(host, nav, row));
     table.append(tr);
   }

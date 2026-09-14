@@ -5,10 +5,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { el } from "../../chrome/element";
 import { act } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
-import { panel, radio, refuse, saveLine, toggle } from "./controls";
+import { radio, refuse, saveLine, toggle } from "./controls";
 import type { SetupData } from "./index";
 
 const LABEL: Record<string, string> = { MORNING: "Morning — departures, daily service, refresh", EVENING: "Turndown — evening" };
@@ -36,7 +37,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
   });
   const count = el("div", "count");
   count.append(el("span", undefined, `${data.windows.length} of ${data.windows.length} — the two windows a hotel has; a window may cross midnight (a night shift is 22:00 → 06:00, not two ranges)`));
-  const windowsCard = panel("Windows", table, count,
+  const windowsCard = card("Windows", table, count,
     el("div", "mono aside", "A room is attempted in each window it is due in; outside a window nothing is attempted — and nothing is dropped: it is collected (S5 c2, S0)."));
 
   let trigger = data.policy.triggerMode;
@@ -48,7 +49,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
   kv.append(el("div", "k", "HosPilot"), el("div", undefined, "always on — not a mode: it presses the button as the person asking (S7)"),
     el("div", "k", "Re-run after the button"), rerun,
     el("div", "k", "Changes between presses"), el("div", undefined, "counted on the board — \"N new since 08:00\" — created by nobody"));
-  const triggerCard = panel("Trigger — who prepares the day",
+  const triggerCard = card("Trigger — who prepares the day",
     radio("trigger", "PREPARE", trigger === "PREPARE", "Prepare by button or HosPilot", "(default) — changes are collected; the housekeeping manager presses Prepare the day when the window starts; later presses add and never remove", choose),
     radio("trigger", "AUTOMATIC", trigger === "AUTOMATIC", "Automatic", "— the decision runs on every change and places the work in the next window", choose),
     kv);

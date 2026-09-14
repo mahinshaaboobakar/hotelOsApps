@@ -8,10 +8,11 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
-import { shortDay, when } from "../../chrome/instant";
+import { day, when } from "../../chrome/instant";
 import { act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
@@ -64,7 +65,7 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
   for (const row of v.rows) {
     const tr = el("tr");
     const block = el("td");
-    if (row.blockAppliedAt !== null) block.append(el("span", "pill ok", `applied ${shortDay(host, row.blockAppliedAt.slice(0, 10))}`));
+    if (row.blockAppliedAt !== null) block.append(el("span", "pill ok", `applied ${day(host, row.blockAppliedAt.slice(0, 10))}`));
     else if (row.blockRequestedAt !== null) block.append(el("span", "pill soft-warn", `requested ${when(host, row.blockRequestedAt)}`), el("span", "tag port", "applied by the state's owner"));
     else block.append(document.createTextNode("—"));
     const job = el("td", "mono");
@@ -74,8 +75,8 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
     const tone = row.state === "DUE" ? "warn" : row.state === "IN_PROGRESS" ? "run" : row.state === "DONE" ? "ok" : "";
     state.append(el("span", `pill ${tone}`, row.state.replaceAll("_", " ")));
     if (row.state === "DUE" && holds(host, "roomcare.plan")) state.append(document.createTextNode(" "), control("btn sm", "plan a window…", () => plan(host, nav, row)));
-    tr.append(el("td", "num", row.room), el("td", undefined, row.type), el("td", undefined, row.lastDone === null ? "never recorded" : shortDay(host, row.lastDone)),
-      el("td", undefined, shortDay(host, row.due)), el("td", undefined, row.windowFrom === null ? "—" : `${shortDay(host, row.windowFrom)} – ${shortDay(host, row.windowTo)}`), block, job, state);
+    tr.append(el("td", "num", row.room), el("td", undefined, row.type), el("td", undefined, row.lastDone === null ? "never recorded" : day(host, row.lastDone)),
+      el("td", undefined, day(host, row.due)), el("td", undefined, row.windowFrom === null ? "—" : `${day(host, row.windowFrom)} – ${day(host, row.windowTo)}`), block, job, state);
     table.append(tr);
   }
 
@@ -86,23 +87,22 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
 
 /** The job's progress card — open or closed only, until JOBS-Q2 publishes more (the port, drawn honestly). */
 function progress(host: HostApi, nav: Nav, row: Row): HTMLElement {
-  const card = el("section", "card");
-  card.style.cssText = "margin-top:14px;flex:none";
-  card.append(el("h3", undefined, `${row.room} — the job's progress, as Jobs publishes it`));
+  const view = card(`${row.room} — the job's progress, as Jobs publishes it`);
+  view.style.cssText = "margin-top:14px;flex:none";
   const kv = el("div", "kv");
   const hands = el("div");
   hands.append(document.createTextNode("today Room Care hears only job.created / job.closed "), el("span", "tag port", "hands by day · JOBS-Q2"));
-  kv.append(el("div", "k", "Job"), el("div", undefined, `${row.jobStatus === null ? "job raised — no status heard yet" : `job ${lower(row.jobStatus)}`} · window ${shortDay(host, row.windowFrom)} – ${shortDay(host, row.windowTo)}`),
+  kv.append(el("div", "k", "Job"), el("div", undefined, `${row.jobStatus === null ? "job raised — no status heard yet" : `job ${lower(row.jobStatus)}`} · window ${day(host, row.windowFrom)} – ${day(host, row.windowTo)}`),
     el("div", "k", "Hands"), hands,
     el("div", "k", "On close"), el("div", undefined, `${row.room} → dirty → departure clean → clean again → release requested → sold again`));
-  card.append(kv);
+  view.append(kv);
   if (holds(host, "roomcare.plan")) {
     const line = el("div", "row");
     line.style.marginTop = "10px";
     line.append(control("btn danger", "Cancel this deep clean…", () => void cancel(host, nav, row)));
-    card.append(line);
+    view.append(line);
   }
-  return card;
+  return view;
 }
 
 function plan(host: HostApi, nav: Nav, row: Row): void {

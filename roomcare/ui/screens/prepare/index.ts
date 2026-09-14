@@ -6,6 +6,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { pager } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
@@ -68,7 +69,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     el("span", "end", when(host, v.at)),
   );
 
-  const changesCard = el("section", "card");
+  const changesCard = card(`Changes since ${since} — collected, nothing created`);
   const buttons = el("div", "row");
   buttons.style.marginBottom = "12px";
   if (holds(host, "roomcare.assign")) {
@@ -93,7 +94,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     row.append(el("td", "mono", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
     table.append(row);
   }
-  changesCard.append(el("h3", undefined, `Changes since ${since} — collected, nothing created`), table, pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));
+  changesCard.append(table, pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));
 
   const grid = el("div", "cols");
   grid.append(changesCard, proposal(host, nav, v, refuse));
@@ -102,8 +103,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
 
 function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: string) => void): HTMLElement {
   const p = v.proposal;
-  const card = el("section", "card");
-  card.append(el("h3", undefined, `The proposal — Housekeeping (${p.people.map((x) => x.name).join(" · ") || "nobody posted"})`));
+  const view = card(`The proposal — Housekeeping (${p.people.map((x) => x.name).join(" · ") || "nobody posted"})`);
   const kv = el("div", "kv");
   kv.append(el("div", "k", "Strategy"), el("div", undefined, `${lower(p.strategy)} — the property's (Setup)`));
   for (const person of p.people) {
@@ -121,7 +121,7 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: str
   const here = el("div");
   here.append(document.createTextNode(`from Workforce — ${p.candidates} posted to Housekeeping; grouped by department until the zone is on the posting `), el("span", "tag port", "Workforce ask · zone on the posting"));
   kv.append(el("div", "k", "Who is here"), here);
-  card.append(kv);
+  view.append(kv);
   if (holds(host, "roomcare.assign")) {
     const row = el("div", "row");
     row.style.marginTop = "12px";
@@ -133,7 +133,7 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: str
       })()));
     }
     row.append(control("btn", "Move rooms…", () => void moveRooms(host, nav, v, null)));
-    card.append(row);
+    view.append(row);
   }
-  return card;
+  return view;
 }

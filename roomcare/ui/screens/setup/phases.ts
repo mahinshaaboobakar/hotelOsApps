@@ -6,13 +6,14 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
+import { card } from "../../chrome/card";
 import { control, el } from "../../chrome/element";
 import { sentence } from "../../chrome/failure";
 import { act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
 import { phase, service } from "../../chrome/words";
-import { panel, reorderSheet } from "./controls";
+import { reorderSheet } from "./controls";
 
 export interface ServiceRow {
   service: string;
@@ -55,7 +56,7 @@ export function phasesCard(nav: Nav, row: ServiceRow, reordered: () => void): HT
   const buttons = el("div", "row");
   buttons.style.marginTop = "8px";
   buttons.append(control("btn sm", "Reorder…", () => reorder(nav, row, reordered)), el("span", "btn sm off", "Add a phase"));
-  return panel(`Phases — ${service(row.service)}`, kv, buttons);
+  return card(`Phases — ${service(row.service)}`, kv, buttons);
 }
 
 /** A starting point for other room types — each keeps its own version after. */
@@ -64,7 +65,7 @@ export function copyCard(host: HostApi, nav: Nav, v: Services): HTMLElement {
   const line = el("div", "row");
   line.style.marginTop = "8px";
   line.append(others.length === 0 ? el("span", "btn sm off", "Copy…") : control("btn sm", "Copy…", () => copy(host, nav, v)));
-  return panel("Copy this room type's numbers to…",
+  return card("Copy this room type's numbers to…",
     el("div", "mono", others.length === 0 ? "this property has one room type" : `${others.map((t) => t.name).join(" · ")} — a starting point, edited per type after`), line);
 }
 
