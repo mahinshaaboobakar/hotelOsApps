@@ -38,17 +38,15 @@ export function day(host: HostApi, isoDate: string | null | undefined): string {
 }
 
 /**
- * A calendar day without its year — the SDK's `date` — for a day that is only
- * ever within the last or next few days by what it is: a linen date, the days a
- * supervision lane counts. Absent is `—`.
+ * A calendar day without its year — the SDK's `formatDay`, `day-month` — for a
+ * day that is near by what it is, never by a measurement against now: a linen
+ * date, the days a supervision lane counts. Absent is `—`.
  *
- * **A day is not an instant.** It is formatted at noon in UTC, so the number the
- * wire sent is the number shown, whatever the property's offset — the SDK's own
- * `formatDay` reasoning. The SDK has no yearless day style, so this goes through
- * `formatInstant` with the zone set to UTC for this one call.
+ * Through `formatDay` like `day`, so the two render a property with no locale
+ * established the same way, in two columns of one screen.
  */
 export function nearDay(host: HostApi, isoDate: string | null | undefined): string {
-  return isoDate === null || isoDate === undefined ? "—" : formatInstant(`${isoDate}T12:00:00Z`, { ...host.property, timezone: "UTC" }, "date");
+  return isoDate === null || isoDate === undefined ? "—" : formatDay(isoDate, host.property, "day-month");
 }
 
 /** Minutes as a person reads a shift — hours and minutes, or minutes alone under an hour. Room Care's words, not a date. */
