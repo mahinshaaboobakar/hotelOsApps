@@ -16,6 +16,30 @@ adds is the exact size of the gap, so it can be closed deliberately.
 
 ---
 
+## SUPERSEDED, 2026-09-14 — and the sentence above was true for six days
+
+**Every claim in the box is now false**, and it is recorded rather than edited
+because a chapter that quietly becomes correct teaches the next reader that it
+always was. Measured today, in this tree:
+
+| The claim | Now |
+|---|---|
+| *no screen is connected* | **all eight are.** Each calls `host.call` through `board/index.ts`'s `load` — 17 call sites across 8 screens, 6 widgets and the chrome's operator |
+| *the desktop has no Jobs client* | closed by `SHELL-Q37`/`SHELL-Q40`; the module envelope carries every call |
+| *every read falls to the recorded example* | only when the call **fails** — and today every call fails `403`, because no authorization tuple names the caller. That is the grant, not the wiring |
+| *not one control reaches a write* | **thirteen do**: raise, take, accept, start, pause, stop, hold, release, cancel, resolve, note, and the settings saves (`savePresence`, `saveHours`, `saveClosing`, `saveHold`, `revokeJobsManager`) |
+
+**The distinction that matters for planning**, and it is why this supersession
+is not a formality: the screens are not waiting for a read seam. They are
+waiting for **one authorization tuple**. A conversion task and a missing grant
+look identical from the outside — both show recorded data on every screen — and
+only the store can tell them apart: `openfga.tuple` holds 4,459 rows, of which
+**0** name this person and **0** carry any `job` relation.
+
+Chapter §9's own row has carried that since 2026-09-05; this box had not.
+
+---
+
 ## 1 · The two halves
 
 | | Built | Proven |
