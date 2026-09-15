@@ -4,17 +4,16 @@
  * the action row); seven tabs beneath it hold one kind of thing each.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { elapsed, when } from "../../chrome/instant";
 import { concern, priority, status } from "../../chrome/marks";
 import { JOB_AMEND, JOB_ASSIGN, JOB_CANCEL, JOB_COMPLETE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
+import { failure } from "../../chrome/failure";
 import { asking, saying } from "../../chrome/form";
 import { subnav, type Tab } from "../../chrome/tabs";
-import { act, load, may, type JobDetail } from "../../board";
-import { recordedJob, recordedRatedJob } from "../../board/recorded/job";
+import { act, may, type JobDetail } from "../../board";
 import { history } from "./history";
 import { links } from "./links";
 import { notes } from "./notes";
@@ -36,8 +35,16 @@ export interface JobPlace {
 }
 
 export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Promise<void> {
-  const recorded = place.jobId === "j388" ? recordedRatedJob : recordedJob;
-  const got = await load(host, JOB_READ, "job", recorded, { id: place.jobId });
+  const got = await load<JobDetail>(host, JOB_READ, "job", { id: place.jobId });
+
+  // One job either arrives or does not. The old line chose between two recorded
+  // jobs by id — which meant a screen whose read had failed still drew a job,
+  // and drew a DIFFERENT one depending on which had been asked for.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "this job", () => void job(host, main, place)));
+    return;
+  }
+
   const detail = got.value;
   const body = el("div", "body");
   const said = saying();
@@ -85,7 +92,6 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
     subnav(tabs(detail), place.tab, place.onTab),
     tab(host, detail, place),
   );
-  if (!got.live) body.append(standIn("job", got.because));
   main.replaceChildren(body);
 }
 

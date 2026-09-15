@@ -4,19 +4,26 @@
  * occurrence and shows the raiser (owner, 2026-09-04).
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { day, when } from "../../chrome/instant";
 import { tag } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
+import { failure } from "../../chrome/failure";
 import { pager } from "../../chrome/tabs";
-import { load } from "../../board";
-import { recordedScheduled } from "../../board/recorded/live";
+import { type ScheduledRow } from "../../board";
 
 export async function scheduled(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load(host, JOB_READ, "scheduled", recordedScheduled);
+  const got = await load<readonly ScheduledRow[]>(host, JOB_READ, "scheduled");
+
+  // A screen shows this property's own data or says why it cannot — the
+  // seam carries a value or a reason and never both, so there is nothing
+  // to render in between.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "this property's scheduled jobs"));
+    return;
+  }
   const t = el("table");
   const head = el("tr");
   for (const h of ["Scheduled for", "Job", "Where", "What", "Raised by", "Assigned to", "Due"]) head.append(el("th", undefined, h));
@@ -45,6 +52,5 @@ export async function scheduled(host: HostApi, main: HTMLElement): Promise<void>
     // controls (standard §6).
     pager(`1–${String(got.value.length)} of ${String(got.value.length)}`, 0, 1, () => {}),
   );
-  if (!got.live) body.append(standIn("scheduled list", got.because));
   main.replaceChildren(body);
 }

@@ -5,16 +5,23 @@
  * exactly as drawn.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { failure } from "../../chrome/failure";
 import { JOB_READ } from "../../chrome/permissions";
-import { load } from "../../board";
-import { recordedBoardNow } from "../../board/recorded/widgets-two";
+import { type BoardNow } from "../../board";
 import { card, figures, openRow } from "../card";
 
 export async function theBoard(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, JOB_READ, "widgetBoard", recordedBoardNow);
+  const got = await load<BoardNow>(host, JOB_READ, "widgetBoard");
+
+  // **A widget shows its property's figures or says why it cannot.**
+  // There is no recorded argument to fall back to any more, which is the
+  // point: the seam makes the old behaviour unwriteable rather than
+  // forbidden (owner, 2026-09-09).
+  if (!got.ok) return card("The Board", "this property", [failure(got.failure, "the shape of the work")]);
+
   const now = got.value;
 
   const body: (Node | null)[] = [

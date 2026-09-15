@@ -147,10 +147,20 @@ describe("the Jobs module", () => {
     expect(reader.textContent).not.toContain("Raise a job");
   });
 
-  it("says so when it is drawing the recorded example rather than the property's data", async () => {
+  it("shows why there is no board rather than showing a board there is no data for", async () => {
+    // **Rewritten, not deleted** (ADR 0034). This asserted the old contract —
+    // a banner saying "Showing the approved example board" over the recorded
+    // rows — which the owner ruled out on 2026-09-09. The screen now draws the
+    // failure the read returned, and the assertion states both halves: the
+    // reason is there, and the recorded rows are NOT.
     const offline = mount(host(ALL, {}));
     await settle();
-    expect(offline.querySelector(".note")?.textContent).toContain("Showing the approved example board");
+
+    const gap = offline.querySelector(".gap");
+    expect(gap, "a read that did not arrive draws a failure").not.toBeNull();
+    expect(gap?.textContent).toContain("Jobs");
+    expect(offline.textContent).not.toContain("Showing the approved example");
+    expect(offline.textContent).not.toContain("MRN-ENG-142");
   });
 
   it("draws Live's presence, including the department that runs on the property clock", async () => {

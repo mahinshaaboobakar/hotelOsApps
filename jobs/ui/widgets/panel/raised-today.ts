@@ -13,16 +13,23 @@
  * who took it for a job count would think the day was busier than it was.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { failure } from "../../chrome/failure";
 import { JOB_READ } from "../../chrome/permissions";
-import { load } from "../../board";
-import { recordedRaisedNow } from "../../board/recorded/widgets-three";
+import { type RaisedNow } from "../../board";
 import { card, figures, openRow } from "../card";
 
 export async function raisedToday(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, JOB_READ, "widgetRaised", recordedRaisedNow);
+  const got = await load<RaisedNow>(host, JOB_READ, "widgetRaised");
+
+  // **A widget shows its property's figures or says why it cannot.**
+  // There is no recorded argument to fall back to any more, which is the
+  // point: the seam makes the old behaviour unwriteable rather than
+  // forbidden (owner, 2026-09-09).
+  if (!got.ok) return card("Raised Today", "this property", [failure(got.failure, "today's jobs")]);
+
   const now = got.value;
 
   const body: (Node | null)[] = [

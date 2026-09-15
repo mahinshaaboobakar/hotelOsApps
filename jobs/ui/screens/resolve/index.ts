@@ -10,16 +10,14 @@
  * standard alone.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { lines, saying, values } from "../../chrome/form";
 import { elapsed } from "../../chrome/instant";
 import { JOB_COMPLETE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
-import { act, load, type Catalogue, type JobDetail } from "../../board";
-import { recordedCatalogue } from "../../board/recorded/catalogue";
-import { recordedJob } from "../../board/recorded/job";
+import { failure } from "../../chrome/failure";
+import { act, type Catalogue, type JobDetail } from "../../board";
 
 export async function resolve(
   host: HostApi,
@@ -27,8 +25,22 @@ export async function resolve(
   jobId: string,
   onDone: () => void,
 ): Promise<void> {
-  const got = await load(host, JOB_READ, "job", recordedJob, { id: jobId });
-  const catalogue = await load(host, JOB_READ, "catalogue", recordedCatalogue);
+  const got = await load<JobDetail>(host, JOB_READ, "job", { id: jobId });
+  const catalogue = await load<Catalogue>(host, JOB_READ, "catalogue");
+
+  // Both, because resolving needs the job AND the resolutions its item allows.
+  // Either missing is a failure with its own reason rather than a screen drawn
+  // half from data and half from nothing.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "this job", () => void resolve(host, main, jobId, onDone)));
+    return;
+  }
+
+  if (!catalogue.ok) {
+    main.replaceChildren(failure(catalogue.failure, "the item's resolutions"));
+    return;
+  }
+
   const job = got.value;
   const chosen = resolutions(catalogue.value, job);
 
@@ -97,8 +109,6 @@ export async function resolve(
       ? "Guest-raised: the guest will be asked to rate this after it closes. Auto-close follows the property's hours."
       : "Auto-close follows the property's hours unless it is reopened."),
   );
-
-  if (!got.live) body.append(standIn("job", got.because));
   main.replaceChildren(body);
 }
 

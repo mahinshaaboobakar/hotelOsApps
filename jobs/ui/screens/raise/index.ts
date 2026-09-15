@@ -11,18 +11,25 @@
  * standard alone.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { choose, day, lines, saying, text, toggle, values } from "../../chrome/form";
 import { when } from "../../chrome/instant";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
-import { act, load, type Catalogue, type CatalogueItem } from "../../board";
-import { recordedCatalogue } from "../../board/recorded/catalogue";
+import { failure } from "../../chrome/failure";
+import { act, type Catalogue, type CatalogueItem } from "../../board";
 
 export async function raise(host: HostApi, main: HTMLElement, onDone: () => void): Promise<void> {
-  const got = await load(host, JOB_READ, "catalogue", recordedCatalogue);
+  const got = await load<Catalogue>(host, JOB_READ, "catalogue");
+
+  // Nothing can be raised against a catalogue that did not arrive: the item
+  // decides the department, the priority and the allowance.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "the catalogue", () => void raise(host, main, onDone)));
+    return;
+  }
+
   const catalogue = got.value;
   const body = el("div", "body");
   const form = el("div", "cols");
@@ -41,7 +48,6 @@ export async function raise(host: HostApi, main: HTMLElement, onDone: () => void
   );
 
   body.append(el("div", "sect", "Raise a job"), form, actions, said.line);
-  if (!got.live) body.append(standIn("catalogue", got.because));
   main.replaceChildren(body);
 }
 

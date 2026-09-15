@@ -4,25 +4,31 @@
  * table. Cards page as they scroll; the first six people come with the screen.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { when } from "../../chrome/instant";
 import { concern } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
-import { load, type Live, type LiveDepartment } from "../../board";
-import { recordedLive } from "../../board/recorded/live";
+import { failure } from "../../chrome/failure";
+import { type Live, type LiveDepartment } from "../../board";
 
 export async function live(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load(host, JOB_READ, "live", recordedLive);
+  const got = await load<Live>(host, JOB_READ, "live");
+
+  // A screen shows this property's own data or says why it cannot — the
+  // seam carries a value or a reason and never both, so there is nothing
+  // to render in between.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "the live board"));
+    return;
+  }
   const body = el("div", "body");
   const cards = el("div", "cols3");
   for (const d of got.value.departments) cards.append(department(d));
   const heading = el("div", "sect", `Concern · property · last 60-second sweep ${when(host, got.value.sweptAt)}`);
   heading.style.marginTop = "22px";
   body.append(cards, heading, table(host, got.value));
-  if (!got.live) body.append(standIn("live board", got.because));
   main.replaceChildren(body);
 }
 

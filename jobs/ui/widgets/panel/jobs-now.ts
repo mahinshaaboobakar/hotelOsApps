@@ -4,16 +4,23 @@
  * does, and shows the viewer what their access shows them.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { failure } from "../../chrome/failure";
 import { JOB_READ } from "../../chrome/permissions";
-import { load } from "../../board";
-import { recordedEscalated } from "../../board/recorded/widget";
+import { type JobsNow } from "../../board";
 import { card, figures, openRow } from "../card";
 
 export async function jobsNow(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, JOB_READ, "jobsNow", recordedEscalated);
+  const got = await load<JobsNow>(host, JOB_READ, "jobsNow");
+
+  // **A widget shows its property's figures or says why it cannot.**
+  // There is no recorded argument to fall back to any more, which is the
+  // point: the seam makes the old behaviour unwriteable rather than
+  // forbidden (owner, 2026-09-09).
+  if (!got.ok) return card("Jobs Now", "this property", [failure(got.failure, "your department's jobs")]);
+
   const now = got.value;
   const quiet = now.breached === 0 && now.stuck === 0 && now.atRisk === 0;
 

@@ -3,15 +3,14 @@
  * concern-policy tab; numbering is a read-only line, not a tab.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { JOB_CONFIGURE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
+import { failure } from "../../chrome/failure";
 import { subnav } from "../../chrome/tabs";
 import { saying } from "../../chrome/form";
-import { act, load, may, type Settings } from "../../board";
-import { recordedSettings } from "../../board/recorded/settings";
+import { act, may, type Settings } from "../../board";
 import { concernPolicy, policies, policyFlow } from "./policies";
 import { access, closing, holds, presence, whoIsTold } from "./tabs";
 
@@ -30,7 +29,15 @@ export interface SettingsPlace {
 }
 
 export async function settings(host: HostApi, main: HTMLElement, place: SettingsPlace): Promise<void> {
-  const got = await load(host, JOB_READ, "settings", recordedSettings);
+  const got = await load<Settings>(host, JOB_READ, "settings");
+
+  // A screen shows this property's own data or says why it cannot — the
+  // seam carries a value or a reason and never both, so there is nothing
+  // to render in between.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "this property's settings"));
+    return;
+  }
   const s = got.value;
   const configure = may(host, JOB_CONFIGURE);
   const body = el("div", "body");
@@ -44,7 +51,6 @@ export async function settings(host: HostApi, main: HTMLElement, place: Settings
   };
 
   body.append(tab(s, place, configure, save, place.onChanged), said.line);
-  if (!got.live) body.append(standIn("settings", got.because));
   main.replaceChildren(body);
 }
 

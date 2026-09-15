@@ -18,15 +18,14 @@
  * `chrome/` for the drawing and `board/` for the single data seam.
  */
 
-import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
+import { load, type Activate, type HostApi, type HostedModule } from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
 import { MARKS_CSS } from "./chrome/marks";
 import { stylesheet } from "./chrome/styles";
 import { head, type Tab } from "./chrome/tabs";
 import { JOB_READ } from "./chrome/permissions";
-import { load, type Operator } from "./board";
-import { recordedMe } from "./board/recorded/me";
+import { type Operator } from "./board";
 import { board } from "./screens/board";
 import { catalogue } from "./screens/catalogue";
 import { job } from "./screens/job";
@@ -143,11 +142,18 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     mount(element) {
       root = element;
       show();
-      void load(host, JOB_READ, "me", recordedMe).then((got) => {
-        // Only what the platform actually established. Every screen that
-        // stands in says so in a note; the chrome has nowhere to say it, so a
-        // name that is not the property's own is not drawn at all.
-        if (!got.live) return;
+      void load<Operator>(host, JOB_READ, "me").then((got) => {
+        // **Only what the platform established.** The chrome has nowhere to put
+        // a failure — a head is not a surface — so a name that is not the
+        // property's own is not drawn at all. That was true when this read
+        // could fall back; it is now true because there is nothing to fall back
+        // to.
+        // **Only what the platform established.** The chrome has nowhere to put
+        // a failure — a head is not a surface — so a name that is not the
+        // property's own is not drawn at all. That was true when this read
+        // could fall back; it is now true because there is nothing to fall back
+        // to.
+        if (!got.ok) return;
 
         operator = got.value;
         show();

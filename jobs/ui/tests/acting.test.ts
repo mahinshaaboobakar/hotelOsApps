@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { activate } from "../application";
 import { recordedBoard, recordedToday } from "../board/recorded/board";
 import { recordedCatalogue } from "../board/recorded/catalogue";
+import { recordedLive, recordedScheduled } from "../board/recorded/live";
 import { recordedJob } from "../board/recorded/job";
 import { recordedSettings } from "../board/recorded/settings";
 
@@ -31,6 +32,13 @@ function watching(granted: readonly string[] = ALL): { host: HostApi; calls: Mad
     job: recordedJob,
     catalogue: recordedCatalogue,
     settings: recordedSettings,
+
+    // **These two were absent, and the screens used to fall back.** A read with
+    // no answer now draws a failure instead of the recorded example, so a test
+    // about a PAGER has to supply the list the pager is under. The old pass was
+    // measuring the stand-in.
+    scheduled: recordedScheduled,
+    live: recordedLive,
   };
 
   return {

@@ -4,18 +4,25 @@
  * resolution). Jobs' own, read by the other apps through Context.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { choose, lines, saying, text, values } from "../../chrome/form";
 import { JOB_CURATE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
+import { failure } from "../../chrome/failure";
 import { subnav } from "../../chrome/tabs";
-import { act, load, may, type Catalogue, type CatalogueItem } from "../../board";
-import { recordedCatalogue } from "../../board/recorded/catalogue";
+import { act, may, type Catalogue, type CatalogueItem } from "../../board";
 
 export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () => void): Promise<void> {
-  const got = await load(host, JOB_READ, "catalogue", recordedCatalogue);
+  const got = await load<Catalogue>(host, JOB_READ, "catalogue");
+
+  // A screen shows this property's own data or says why it cannot — the
+  // seam carries a value or a reason and never both, so there is nothing
+  // to render in between.
+  if (!got.ok) {
+    main.replaceChildren(failure(got.failure, "the organisation's catalogue"));
+    return;
+  }
   const curate = may(host, JOB_CURATE);
   const body = el("div", "body");
   const said = saying();
@@ -40,7 +47,6 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
     ),
   );
   body.append(grid, said.line);
-  if (!got.live) body.append(standIn("catalogue", got.because));
   main.replaceChildren(body);
 }
 

@@ -69,10 +69,16 @@ describe("the jobs-now widget", () => {
     expect(panel.textContent).toContain("1 unread");
   });
 
-  it("stands in when the platform cannot answer, and never renders empty", async () => {
+  it("says why it has no figures rather than showing figures it does not have", async () => {
+    // **Rewritten, not deleted** (ADR 0034). The old contract was "stands in
+    // and never renders empty" — and a widget that stands in is a widget
+    // showing a hotel numbers that are not its own, which the owner ruled out
+    // on 2026-09-09. It still never renders empty: it renders a REASON.
     const panel = await jobsNow(unavailable());
-    expect(panel.textContent).toContain("open");
-    expect(panel.querySelector(".whead")?.textContent).toContain("Jobs now");
+
+    expect(panel.querySelector(".gap"), "an unanswered read draws a failure").not.toBeNull();
+    expect(panel.textContent).toContain("Jobs");
+    expect(panel.textContent).not.toContain("escalated");
   });
 
   it("does not call the platform for a capability it was not granted", async () => {
@@ -83,8 +89,11 @@ describe("the jobs-now widget", () => {
       call: () => { called = true; return Promise.resolve(recordedQuiet); },
       on: () => () => {},
     });
+    // The seam refuses without a round trip — asking for a capability nobody
+    // granted is not worth one, and the answer is the platform's own: refused.
     expect(called).toBe(false);
-    expect(panel.textContent).toContain("Jobs now");
+    expect(panel.querySelector(".gap")).not.toBeNull();
+    expect(panel.textContent).toContain("You do not have access");
   });
 });
 

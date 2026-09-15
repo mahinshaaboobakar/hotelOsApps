@@ -14,16 +14,23 @@
  * This follows the corrected drawing: late first, furthest past due at the top.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
+import { failure } from "../../chrome/failure";
 import { JOB_READ } from "../../chrome/permissions";
-import { load } from "../../board";
-import { recordedDueNow } from "../../board/recorded/widgets-three";
+import { type DueNow } from "../../board";
 import { card, figures, openRow } from "../card";
 
 export async function dueSoon(host: HostApi): Promise<HTMLElement> {
-  const got = await load(host, JOB_READ, "widgetDue", recordedDueNow);
+  const got = await load<DueNow>(host, JOB_READ, "widgetDue");
+
+  // **A widget shows its property's figures or says why it cannot.**
+  // There is no recorded argument to fall back to any more, which is the
+  // point: the seam makes the old behaviour unwriteable rather than
+  // forbidden (owner, 2026-09-09).
+  if (!got.ok) return card("Due Soon", "this property", [failure(got.failure, "what is due")]);
+
   const now = got.value;
 
   const body: (Node | null)[] = [

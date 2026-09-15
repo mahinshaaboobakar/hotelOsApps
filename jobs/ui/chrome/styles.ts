@@ -157,7 +157,17 @@ label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07
 *+.dlg{margin-top:14px}
 .dlg{border:1px solid var(--color-brand,#818cf8);border-radius:var(--radius-panel,1rem);padding:16px;
      background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
-p.lede,.note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;color:var(--color-ink-muted,#8b93a7);font-size:13px;
+p.lede,/* The failure surface — what a screen draws when a read did not arrive. Its
+   words are the SDK's (one sentence across three applications); its geometry is
+   this module's, because a shared component would have to cross the realm. It
+   is quiet on purpose: a failure is not an alarm, and the loudest thing on a
+   screen should not be the thing that has no data behind it. */
+.gap{display:flex;flex-direction:column;gap:6px;padding:26px 22px;max-width:62ch}
+.gap-mark{font:600 15px ui-monospace,Menlo,monospace;color:var(--color-ink-faint,#5a6172);letter-spacing:.12em}
+.gap-said{font-size:14px;font-weight:600;color:var(--color-ink,#e8ebf4)}
+.gap-why{font-size:13px;color:var(--color-ink-muted,#8b93a7);line-height:1.5}
+.gap-wire{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-faint,#5a6172);margin-top:4px}
+.note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;color:var(--color-ink-muted,#8b93a7);font-size:13px;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
 .note b{color:var(--color-ink,#e8ebf4)}
 .stars{font-size:26px;letter-spacing:4px;color:var(--color-warn,#fbbf24)}

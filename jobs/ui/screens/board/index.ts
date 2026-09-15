@@ -4,16 +4,15 @@
  * the pager. Every row opens the job.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { today as dayLine, when } from "../../chrome/instant";
 import { concern, priority, status, tag } from "../../chrome/marks";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
-import { standIn } from "../../chrome/standin";
+import { failure } from "../../chrome/failure";
 import { pager } from "../../chrome/tabs";
-import { load, may, type BoardPage, type JobRow, type Today } from "../../board";
-import { recordedBoard, recordedToday } from "../../board/recorded/board";
+import { may, type BoardPage, type JobRow, type Today } from "../../board";
 
 /** What the board is told and tells back. */
 export interface BoardPlace {
@@ -59,8 +58,8 @@ function asked(filter: string): Record<string, unknown> {
 }
 
 export async function board(host: HostApi, main: HTMLElement, place: BoardPlace): Promise<void> {
-  const today = await load(host, JOB_READ, "today", recordedToday);
-  const page = await load(host, JOB_READ, "board", recordedBoard, {
+  const today = await load<Today>(host, JOB_READ, "today");
+  const page = await load<BoardPage>(host, JOB_READ, "board", {
     ...asked(place.filter),
     // CORE-Q13's shape: the page asked for, and the size the service will
     // answer with — it applies its own ceiling and says which it used.
@@ -68,8 +67,26 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
     pageSize: 12,
   });
 
+  // **The board either shows this property's jobs or says why it cannot.** It
+  // used to draw the approved example under a banner; the owner ruled that out
+  // on 2026-09-09 and the seam now makes it unwriteable — there is no fallback
+  // to pass. The strip is a second read, so a page that arrived with a strip
+  // that did not still draws the board and says what is missing above it.
+  if (!page.ok) {
+    main.replaceChildren(failure(page.failure, "this property's board", () => void board(host, main, place)));
+    return;
+  }
+
   const body = el("div", "body");
-  body.append(strip(host, today.value), filters(place, may(host, JOB_CREATE)), table(host, page.value.rows, place), pages(page.value, place));
+
+  body.append(
+    today.ok
+      ? strip(host, today.value)
+      : failure(today.failure, "today's figures", () => void board(host, main, place)),
+    filters(place, may(host, JOB_CREATE)),
+    table(host, page.value.rows, place),
+    pages(page.value, place),
+  );
 
   // An empty list is not self-explanatory, and this one has a specific cause:
   // a person's departments are their Workforce postings, and no client reaches
@@ -82,7 +99,6 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
       "Your departments are not established here — a person's postings are Workforce's, and Jobs has no client for them yet (design §6). Nothing is filtered out; nothing can be filtered in.",
     ));
   }
-  if (!page.live) body.append(standIn("board", page.because));
   main.replaceChildren(body);
 }
 
