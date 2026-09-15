@@ -25,6 +25,7 @@ import { recordedFirstRun, recordedPeople } from "../roster/people";
 import { recordedPolicy } from "../roster/policy";
 import { recordedMonth } from "../roster/reports";
 import { recordedSchedule } from "../roster/schedule";
+import type { Operator } from "../roster/model";
 import { recordedNoTeams, recordedPostingEnding, recordedTeams }
   from "../roster/teams";
 
@@ -115,12 +116,21 @@ function host(granted: readonly string[]): HostApi {
         // host, so it answers it like any other read.
         ending: recordedPostingEnding,
 
+        // **Typed, and it is the only fixture in this map that was not.** The
+        // others are `recorded*` constants declared against their own types;
+        // this one is an inline literal in a `Record<string, unknown>`, so when
+        // the `me` read grew `staffId` the harness silently kept answering
+        // without it — and Staff schedule, which now asks with that id, went on
+        // rendering because the harness answers by method and ignores params.
+        // A fixture is a claim about what the service sends; an untyped one is
+        // a claim nothing checks.
         me: {
+          staffId: "a3f1c064-5d21-4e8b-9f02-1a7c6b40d911",
           name: "Priya Thomas",
           department: "Front Office",
           property: "Kochi Beach Resort",
           role: "Head of Front Office",
-        },
+        } satisfies Operator,
         week,
         leave: recordedLeave,
         day: recordedDay,
