@@ -38,6 +38,8 @@ import {
   APP,
   failureDrawing,
   load,
+  type Activity,
+  type Payment,
   type Requests,
   type Servicing,
   type StayPage,
@@ -46,11 +48,9 @@ import {
 import { control, el, fill } from "../../chrome/element";
 import { cannot, mark, failed } from "../../chrome/marks";
 import { card, detail, tabs } from "../../chrome/panel";
-// `activityTab` and `paymentTab` are not imported: nothing calls them while
-// the two tabs have no read, and the compiler saying so is the proof the
-// fixtures are gone rather than merely unreferenced. Phase 3 brings both back
-// with the call that feeds them.
+import { activityTab } from "./activity-tab";
 import { banner } from "./banner";
+import { paymentTab } from "./payment-tab";
 import { requestsTab } from "./requests-tab";
 import { servicingTab } from "./servicing-tab";
 import { timeline } from "./activity";
@@ -142,25 +142,36 @@ export async function stay(
   } else if (tab.startsWith("Requests")) {
     fill(body, ...requestsTab(requests));
   } else if (tab === "Activity") {
-    // **The fixture is gone and the call is Phase 3's.** `activity` is served
-    // and queries `GuestOpsDbContext`; what is missing is the call, not the
-    // data. Drawing `recordedActivity` here put one stay's invented history in
-    // front of somebody reading another stay's page.
-    fill(body, cannot(
-      "This stay's activity has not been read",
-      "The record exists and this screen has not asked for it yet. Nothing is "
-      + "shown rather than somebody else's history.",
-    ));
+    // **Read when the tab is shown, not when the page is.** `requests` and
+    // `servicing` are eager because the tab *bar* needs them — a count and a
+    // dimmed label are decided before anything has been chosen. This one is
+    // needed only by the panel it fills, and a stay opened on Overview should
+    // not pay for a history nobody asked to see.
+    const history = await load<Activity>(host, "reservation.read", "activity", { stayId });
+
+    fill(
+      body,
+      ...(history.ok
+        ? activityTab(history.value)
+        : [failed(
+            failureDrawing(history.failure, { app: APP, the: "this stay's activity" }),
+            () => void stay(host, into, stayId, tab, go),
+          )]),
+    );
   } else if (tab === "Servicing") {
     fill(body, ...servicingTab(servicing));
   } else if (tab === "Payment") {
-    // Same: `payment` is served and reads the property's own terms. A fixture
-    // here is a folio — amounts, a deadline, a rate — belonging to nobody.
-    fill(body, cannot(
-      "This stay's payment has not been read",
-      "The terms exist and this screen has not asked for them yet. Nothing is "
-      + "shown rather than a folio that is not this guest's.",
-    ));
+    const folio = await load<Payment>(host, "reservation.read", "payment", { stayId });
+
+    fill(
+      body,
+      ...(folio.ok
+        ? paymentTab(folio.value)
+        : [failed(
+            failureDrawing(folio.failure, { app: APP, the: "this stay's payment" }),
+            () => void stay(host, into, stayId, tab, go),
+          )]),
+    );
   } else {
     body.append(awaiting(tab));
   }

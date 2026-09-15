@@ -154,12 +154,14 @@ public static class ModuleSurface
             "servicing" => services.GetRequiredService<ServicingView>()
                 .AnswerAsync(request.Scope, cancellationToken),
 
-            // `stay` is declared by the bundle and not served here. It needs the
-            // stay's id from the body and a projection of the whole page —
-            // banner, timeline, six tabs — which is its own round. The bundle
-            // falls back to its recorded facts and says so on screen, which is
-            // the honest state; answering with a half-built page would put a
-            // stay in front of a receptionist with pieces silently missing.
+            // **This said `stay` was not served and that the bundle fell back
+            // to its recorded facts. Both were true when written and neither is
+            // now** — `StayDetailView` is twenty lines above, and `APPS-Q42`
+            // removed the fallback mechanism rather than the banner over it.
+            // Kept as a correction rather than deleted: a reader meeting the
+            // old sentence would go looking for a fallback that no longer
+            // exists, and a silent replacement leaves nobody able to tell a
+            // live constraint from an unexamined one.
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };

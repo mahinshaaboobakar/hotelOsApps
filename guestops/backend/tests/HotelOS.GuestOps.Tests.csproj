@@ -31,6 +31,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!--
+      **Four, because `hotelos_migrator` is `CONNECTION LIMIT 4`.**
+
+      Every harness migrates a scratch schema as that role, and xUnit's default
+      is one thread per core — so more migrations ran at once than the role
+      permits and the suite failed `53300: too many connections for role
+      "hotelos_migrator"`. It had been passing on timing: 131 tests happened to
+      keep four or fewer migrations concurrent, and five more tests changed that
+      without touching anything they own.
+
+      The number is the role's limit rather than a figure that made the red go
+      away. If the limit moves, this moves with it — and a suite that is slower
+      and deterministic beats one that is quick and passes by arrangement.
+    -->
+    <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />

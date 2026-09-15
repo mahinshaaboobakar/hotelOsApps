@@ -58,10 +58,15 @@ public sealed class DeskHarness : IAsyncDisposable
     public static readonly Guid Room = Guid.Parse("33333333-3333-3333-3333-333333333333");
 
     /// <summary>A database of this test's own, and the desk services over it.</summary>
+    /// <param name="withEventStore">
+    /// True for a test that reads the platform's <c>StoredEvent</c> table. Off
+    /// by default: provisioning it on every harness slowed setup enough that
+    /// the suite exhausted <c>hotelos_migrator</c>'s connection limit.
+    /// </param>
     /// <returns>A prepared harness.</returns>
-    public static async Task<DeskHarness> CreateAsync()
+    public static async Task<DeskHarness> CreateAsync(bool withEventStore = false)
     {
-        var scratch = await GuestOpsScratch.CreateAsync();
+        var scratch = await GuestOpsScratch.CreateAsync(withEventStore);
 
         return new DeskHarness(
             scratch,

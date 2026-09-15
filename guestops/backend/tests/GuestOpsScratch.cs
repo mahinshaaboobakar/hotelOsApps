@@ -103,6 +103,10 @@ public sealed class GuestOpsScratch : IAsyncDisposable
         + "Pooling=false;Include Error Detail=true";
 
     /// <summary>Provision it as the installer would, and migrate it.</summary>
+    /// <param name="withEventStore">
+    /// True for a test that reads <c>StoredEvent</c>. It costs four of the
+    /// Kernel's migrations, so it is not the default.
+    /// </param>
     /// <returns>A prepared database.</returns>
     /// <exception cref="InvalidOperationException">PostgreSQL did not answer.</exception>
     /// <remarks>
@@ -111,7 +115,7 @@ public sealed class GuestOpsScratch : IAsyncDisposable
     /// reported "skipped" here would look green on a machine where it has never
     /// once executed, which this platform has already shipped twice.
     /// </remarks>
-    public static async Task<GuestOpsScratch> CreateAsync()
+    public static async Task<GuestOpsScratch> CreateAsync(bool withEventStore = false)
     {
         var convention = new InstallerConvention(GuestOpsDbContext.Schema, Run);
         var password = $"guestops{Guid.NewGuid():N}"[..24];
@@ -138,7 +142,7 @@ public sealed class GuestOpsScratch : IAsyncDisposable
                     + "roles with `make db-bootstrap`, or point HOTELOS_TEST_DB_PORT at another "
                     + "one. Never 15432: that is the installed product's (ADR 0104 §E2E-Q5(a)).");
 
-            await PrepareAsync(convention, database);
+            await PrepareAsync(convention, database, withEventStore);
 
             return new GuestOpsScratch(
                 convention, database, database.ConnectionFor(convention.AppRole));
@@ -159,8 +163,10 @@ public sealed class GuestOpsScratch : IAsyncDisposable
     /// <summary>Grant, create the schema, and migrate — the installer's order.</summary>
     /// <param name="convention">This run's names.</param>
     /// <param name="database">The scratch database.</param>
+    /// <param name="withEventStore">Whether the platform's event store is needed.</param>
     /// <returns>When the application role can use its schema.</returns>
-    private static async Task PrepareAsync(InstallerConvention convention, ScratchDatabase database)
+    private static async Task PrepareAsync(
+        InstallerConvention convention, ScratchDatabase database, bool withEventStore)
     {
         // The scratch database is `hotelos_test`'s, so `hotelos_test` is who can
         // let the provisioner create in it. The platform grants the provisioner
@@ -173,6 +179,27 @@ public sealed class GuestOpsScratch : IAsyncDisposable
 
         await convention.ProvisionSchemaAsync(
             As(ProvisionerRole, ProvisionerPassword, database.Name), database.Name);
+
+        // **The platform's own event store, for the tests that read it.**
+        // `AddPlatformEventStore()` puts `StoredEvent` in the model, so a read
+        // that touches it — `ActivityView` is one — fails on a database with no
+        // `event_store`. A property always has one: `03-schemas.sql` creates it
+        // and the Kernel's migrations fill it, so a scratch database is the only
+        // place it can be missing. Run from the Kernel's own migration text
+        // rather than a table shaped like it — ADR 0157's shared support.
+        //
+        // **Asked for, not always.** Provisioning it unconditionally added four
+        // migration files to every harness, which made each setup slow enough
+        // that more of them overlapped — and the suite failed with
+        // `53300: too many connections for role "hotelos_migrator"`, in
+        // `StayListTests`, which does not use the event store at all. A cost
+        // paid by every test to serve five is how one stream's addition becomes
+        // another's flake.
+        if (withEventStore)
+        {
+            await PlatformEventStore.ProvisionAsync(
+                As(ProvisionerRole, ProvisionerPassword, database.Name));
+        }
 
         // As the owner, by way of the migrator — the shape the SDK uses, where
         // the role and search path travel as libpq options so no migration can
