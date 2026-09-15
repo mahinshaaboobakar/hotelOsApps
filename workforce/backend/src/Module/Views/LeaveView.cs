@@ -148,13 +148,22 @@ public static class LeaveView
         return new { id = proposal.Id, version = proposal.Version, state = proposal.State.ToString() };
     }
 
+    /// <summary>Raise a request, for the person raising it.</summary>
+    /// <remarks>
+    /// <b>ADR 0172: the requester is derived, and there is no field for it.</b>
+    /// This took <c>staffId</c> from the bundle, which made *whose leave* a
+    /// parameter — so a caller holding <c>leave.request</c> could raise a
+    /// request in anybody's name and every record of it would agree. Removing
+    /// the field rather than validating it is the point: a request naming
+    /// somebody else is now inexpressible, not merely refused.
+    /// </remarks>
     private static async Task<object?> Raise(ModuleCall call, CancellationToken cancellationToken)
     {
         var request = await call.Service<LeaveService>().RaiseAsync(
             call.Scope,
             new RaiseLeaveCommand
             {
-                StaffId = call.Id("staffId"),
+                StaffId = await Requester.RequiredAsync(call, cancellationToken),
                 LeaveTypeId = call.Id("typeId"),
                 From = call.Date("from"),
                 To = call.Date("to"),

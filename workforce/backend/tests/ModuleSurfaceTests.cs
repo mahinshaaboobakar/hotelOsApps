@@ -1,5 +1,6 @@
 using System.Text.Json;
 using HotelOS.Platform;
+using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Domain;
 using HotelOS.Workforce.Application.Shifts;
@@ -617,6 +618,102 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         // wrong person.
         Assert.Empty(answer.GetProperty("waiting").EnumerateArray());
         Assert.Equal(JsonValueKind.Null, answer.GetProperty("swap").ValueKind);
+    }
+
+    [Fact]
+    public async Task Raising_leave_derives_the_requester_and_takes_no_field_for_them()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        var staff = await Post(harness, scope, "Anjali Menon", "FO", "Receptionist");
+        harness.Directory.WithLogin(staff, scope.UserId!.Value);
+
+        var type = await harness.Service<LeaveTypeService>().SetAsync(
+            scope,
+            new SetLeaveTypeCommand { Code = "CL", Name = "Casual", AccrualPerMonth = 2m },
+            default);
+
+        // No `staffId`. ADR 0172: the request's subject is the caller, and there
+        // is no field for it — so a request in somebody else's name is
+        // inexpressible rather than refused.
+        var raised = await harness.CallAsync(LeaveView.Request, scope, "raise", new
+        {
+            typeId = type.Id,
+            from = "2026-09-14",
+            to = "2026-09-16",
+            note = "Brother's wedding",
+        });
+
+        var stored = Assert.Single(
+            await harness.Service<LeaveService>().PendingAsync(scope, default));
+
+        // The assertion is WHOSE, read back from the store rather than from the
+        // answer: a handler that echoed an id it never persisted would satisfy
+        // a test written about its return value.
+        Assert.Equal(raised.GetProperty("id").GetGuid(), stored.Id);
+        Assert.Equal(staff, stored.StaffId);
+    }
+
+    [Fact]
+    public async Task A_supplied_staff_id_cannot_redirect_a_leave_request()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        var caller = await Post(harness, scope, "Anjali Menon", "FO", "Receptionist");
+        var other = await Post(harness, scope, "Joseph Kurian", "FO", "Porter");
+        harness.Directory.WithLogin(caller, scope.UserId!.Value);
+
+        var type = await harness.Service<LeaveTypeService>().SetAsync(
+            scope,
+            new SetLeaveTypeCommand { Code = "CL", Name = "Casual", AccrualPerMonth = 2m },
+            default);
+
+        // The field the old signature read, sent deliberately. It is not
+        // validated and not rejected — it is not looked at, which is the
+        // stronger property: nothing downstream can start honouring it again
+        // without this test failing.
+        await harness.CallAsync(LeaveView.Request, scope, "raise", new
+        {
+            staffId = other,
+            typeId = type.Id,
+            from = "2026-09-14",
+            to = "2026-09-16",
+        });
+
+        var stored = Assert.Single(
+            await harness.Service<LeaveService>().PendingAsync(scope, default));
+
+        Assert.Equal(caller, stored.StaffId);
+        Assert.NotEqual(other, stored.StaffId);
+    }
+
+    [Fact]
+    public async Task A_login_with_no_staff_record_cannot_raise_leave_for_anybody()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        var type = await harness.Service<LeaveTypeService>().SetAsync(
+            scope,
+            new SetLeaveTypeCommand { Code = "CL", Name = "Casual", AccrualPerMonth = 2m },
+            default);
+
+        // No `WithLogin`: the founding administrator's condition. The bar draws
+        // them as nobody and carries on; a write cannot, because there is no
+        // partial answer to whose request this is.
+        var refused = await Assert.ThrowsAsync<InvalidRequestException>(
+            () => harness.CallAsync(LeaveView.Request, scope, "raise", new
+            {
+                typeId = type.Id,
+                from = "2026-09-14",
+                to = "2026-09-16",
+            }));
+
+        // `invalid` is client-facing under ADR 0041, so this sentence is the one
+        // a person reads. It names the remedy rather than the mechanism.
+        Assert.Contains("no staff record", refused.Message);
     }
 
     [Fact]
