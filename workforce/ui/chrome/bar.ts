@@ -19,6 +19,8 @@
  * level. Drawn so it can be ruled, and redlined to FF rather than settled here.
  */
 
+import type { Operator } from "../roster/model";
+
 import { APPLICATION } from "./application";
 import { el } from "./element";
 
@@ -29,29 +31,6 @@ export interface Section {
 
   /** A count, when there is something to say. */
   count?: string;
-}
-
-/**
- * Who is signed in, drawn at the bar's right.
- *
- * **Three clauses, not two** — `name · department · property`, owner ruling,
- * 2026-09-04. The property looks redundant on a single-property desk and stops
- * looking redundant the day an organization has two, which the corporate model
- * already allows for. A desk machine is shared and every write on these screens
- * is attributed, so the bar says *who*, *for which department*, *at which
- * hotel*.
- */
-export interface Operator {
-  name: string | null;
-
-  /** Which department they are working in. */
-  department: string | null;
-
-  /** Which hotel. */
-  property: string | null;
-
-  /** Their role, which the bar has no room for and the rail used to show. */
-  role: string | null;
 }
 
 /**

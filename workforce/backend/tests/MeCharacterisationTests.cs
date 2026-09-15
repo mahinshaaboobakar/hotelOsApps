@@ -48,6 +48,43 @@ public class MeCharacterisationTests(WorkforceFixture fixture)
     }
 
     [Fact]
+    public async Task Me_carries_the_staff_id_the_screens_ask_their_questions_with()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+
+        var staff = await Sign(harness, scope, "Anjali Menon", "FO", "Receptionist");
+
+        var me = await harness.CallAsync(MeView.Read, scope, "me");
+
+        // The value this read used to hold and not pass on. Staff schedule takes
+        // a REQUIRED `staffId`, and the bundle has no other way to learn one —
+        // so withholding it here made that screen's call impossible to form, and
+        // the failure surfaced three components away as `'staffId' is required`.
+        Assert.Equal(staff, me.GetProperty("staffId").GetGuid());
+    }
+
+    [Fact]
+    public async Task A_person_this_property_cannot_name_carries_no_id_either()
+    {
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        harness.Directory.PropertyName = "Kochi Beach Resort";
+
+        // No `WithLogin`: the founding administrator's condition, and anyone not
+        // yet linked to a staff record.
+        var me = await harness.CallAsync(MeView.Read, scope, "me");
+
+        // **Null exactly where the name is null, and that is the assertion.**
+        // The bar folds three unknowns into one answer on purpose — a service
+        // caller, a login with no staff record, somebody no longer active — and
+        // an id carried through any of them would have split at the wire what
+        // the screen deliberately shows as one.
+        Assert.Equal(JsonValueKind.Null, me.GetProperty("staffId").ValueKind);
+        Assert.Equal(JsonValueKind.Null, me.GetProperty("name").ValueKind);
+    }
+
+    [Fact]
     public async Task Me_is_reachable_through_the_read_dispatch()
     {
         var harness = new ModuleHarness(fixture);

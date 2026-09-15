@@ -138,6 +138,13 @@ function actions(close: () => void): HTMLElement {
   const cancel = el("div", "btn", "Cancel");
 
   cancel.addEventListener("click", close);
+
+  // **Inert, and the reason is above rather than at the wire.** `leave.request ·
+  // raise` exists and now has both ids it needs — `me` carries the staff id and
+  // the board's balances carry the type's. What this sheet has no way to supply
+  // is the person's own answers: every field above is `el("div", "inp", …)`,
+  // a rendered value rather than a control, so there is nothing to read a date
+  // or a note out of. Building those is a surface, not a wiring.
   row.append(cancel, el("div", "btn pri", "Raise request"));
   return row;
 }

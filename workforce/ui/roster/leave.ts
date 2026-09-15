@@ -8,6 +8,14 @@
 
 /** A balance, as the sheet where the decision is made shows it. */
 export interface Balance {
+  /**
+   * The leave type's id — what a request is raised against.
+   *
+   * The name is what a person reads and is not a key. `raise` takes this, so
+   * the read that draws the balances is the one place the dialog can learn it.
+   */
+  id: string;
+
   /** The leave type's name. */
   type: string;
 
@@ -105,12 +113,24 @@ export interface LeaveBoard {
 
 export const recordedLeave: LeaveBoard = {
   balances: [
-    { type: "Casual", days: 4, of: 8, note: "accrues 2 / month" },
-    { type: "Sick", days: 6, of: 12, note: "" },
+    {
+      id: "3f1c0a64-5d21-4e8b-9f02-1a7c6b40d911", type: "Casual",
+      days: 4, of: 8, note: "accrues 2 / month",
+    },
+    {
+      id: "7a2e5b18-9c43-4d6f-8b10-2e5d9c7a4f36", type: "Sick",
+      days: 6, of: 12, note: "",
+    },
     // The frame's own minus sign. A screen that clamped this at zero would be
     // hiding the decision its manager already made.
-    { type: "Earned", days: -1, of: 15, note: "approved overdraw" },
-    { type: "Comp-off", days: 2, of: null, note: "granted by HR" },
+    {
+      id: "c58d3712-6b90-4a2e-97d4-8f3b1e6c05a7", type: "Earned",
+      days: -1, of: 15, note: "approved overdraw",
+    },
+    {
+      id: "e94b7f25-1a38-4c6d-b052-7d9e3f8a16c4", type: "Comp-off",
+      days: 2, of: null, note: "granted by HR",
+    },
   ],
 
   requests: [

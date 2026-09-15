@@ -16,24 +16,38 @@
  * pass. This is the ratified shape, drawn.
  */
 
+import type { HostApi } from "@hotelos/sdk";
+
 import { el } from "../../chrome/element";
 import { codeChip } from "../../chrome/code";
+import { foot } from "../../chrome/confirm";
+import { write, WriteRefused } from "../../roster";
 import type { Person, Shift, Week } from "../../roster";
 
 /**
  * Build the picker.
  *
+ * @param host the bridge
  * @param person whose cell it is
  * @param day which day of the week, zero-based from Monday
- * @param week the week it belongs to — its department, month and catalogue
+ * @param week the week it belongs to — its anchor, department and catalogue
  * @param close called when it is dismissed
+ * @param done called after the assignment lands, so the grid re-reads
  * @returns the popover
+ *
+ * @remarks
+ * **The date is arithmetic on {@link Week.monday}, never on a heading.** The
+ * column says `THU 27`; the write says `2026-08-27`. Recovering the second from
+ * the first would mean parsing a string composed for reading, which is the same
+ * mistake in the other direction as formatting one on the server.
  */
 export function picker(
+  host: HostApi,
   person: Person,
   day: number,
   week: Week,
   close: () => void,
+  done: () => void,
 ): HTMLElement {
   const scrim = el("div", "scrim");
   const pop = el("div", "pick");
@@ -60,9 +74,22 @@ export function picker(
 
   const current = person.week[day]?.shift?.id ?? null;
 
+  // What the cell already holds, so pressing Assign with nothing touched
+  // re-states the existing choice rather than refusing. A picker opened on a
+  // filled cell is a person changing it, and one opened on an empty cell has
+  // nothing to send until they choose.
+  let chosen: string | null = current;
+
   const list = el("div", "picks");
   for (const shift of week.catalogue) {
-    list.append(option(shift, shift.id === current));
+    list.append(option(shift, shift.id === current, () => {
+      chosen = shift.id;
+      for (const other of Array.from(list.querySelectorAll(".pk"))) {
+        other.classList.remove("on");
+      }
+      list.children[week.catalogue.indexOf(shift)]?.classList.add("on");
+      acts.waitingFor(null);
+    }));
   }
 
   const custom = el("div", "custom");
@@ -74,7 +101,41 @@ export function picker(
   const note = el("div", "note",
     "The property's own catalogue — Policy → Shifts adds to this list.");
 
-  pop.append(head, list, custom, note);
+  const refusal = el("div", "note warn");
+  const acts = foot("Assign", "Assigning…", close);
+  acts.waitingFor(chosen === null ? "Choose a shift" : null);
+  acts.onConfirm(() => { void submit(); });
+
+  async function submit(): Promise<void> {
+    if (chosen === null) return;
+
+    refusal.replaceChildren();
+    acts.working(true);
+
+    try {
+      await write(host, "roster.plan", "assign", {
+        staffId: person.id,
+        date: dayOf(week.monday, day),
+        shiftId: chosen,
+
+        // The CODE, which is why the read now carries it. `week.department` is
+        // "Front Office" and the command wants `FO`.
+        department: week.departmentCode,
+      });
+      done();
+    } catch (error) {
+      // Section 9: a refusal keeps the popover open, carrying the reason.
+      refusal.append(el("span", undefined,
+        error instanceof WriteRefused
+          ? error.message
+          : "That did not go through. Nothing was changed."));
+      acts.working(false);
+
+      if (!(error instanceof WriteRefused)) throw error;
+    }
+  }
+
+  pop.append(head, list, custom, note, refusal, acts.row);
   scrim.append(pop);
 
   scrim.addEventListener("click", (event) => {
@@ -91,8 +152,9 @@ export function picker(
  * choices would make a manager check the grid behind it to see what they were
  * changing from.
  */
-function option(shift: Shift, current: boolean): HTMLElement {
+function option(shift: Shift, current: boolean, pick: () => void): HTMLElement {
   const row = el("div", current ? "pk on" : "pk");
+  row.addEventListener("click", pick);
 
   row.append(
     codeChip(shift.code, shift.tone),
@@ -101,4 +163,24 @@ function option(shift: Shift, current: boolean): HTMLElement {
   );
 
   return row;
+}
+
+/**
+ * The date a column stands for.
+ *
+ * @param monday the week's anchor, `YYYY-MM-DD`
+ * @param day zero-based from Monday
+ * @returns the day's own date, in the same form
+ *
+ * @remarks
+ * UTC throughout. A local `Date` built from `YYYY-MM-DD` is midnight UTC and
+ * renders as the previous day west of Greenwich, so adding a day in local time
+ * is how a rota quietly writes to Wednesday on a Thursday cell.
+ */
+function dayOf(monday: string, day: number): string {
+  const [year, month, date] = monday.split("-").map(Number);
+  const at = new Date(Date.UTC(year ?? 0, (month ?? 1) - 1, date ?? 1));
+
+  at.setUTCDate(at.getUTCDate() + day);
+  return at.toISOString().slice(0, 10);
 }

@@ -89,6 +89,21 @@ public static class RotaView
         return new
         {
             department,
+            // The week's own anchor, machine-readable, beside the strings that
+            // render it. Every write on this screen names a DATE — `assign`,
+            // `clear`, `copyWeek` all take one — and `days` is seven display
+            // headings ("THU 27") that no client can turn back into one. A
+            // surface that had to parse its own heading to say which day it
+            // meant is the defect ADR 0152 exists to prevent, arriving through
+            // the write instead of the render.
+            monday = monday.ToString("O")[..10],
+
+            // The code, because `assign` requires `DepartmentCode` and
+            // `department` below is the name a person reads. A name is not a
+            // key: the read sent one and the write needs the other, and nothing
+            // on the screen could have bridged them.
+            departmentCode = department ?? string.Empty,
+
             label = monday.ToString("d") + " – " + sunday.ToString("d MMM") + " Week",
             month = monday.ToString("MMMM yyyy"),
             days = Enumerable.Range(0, 7)

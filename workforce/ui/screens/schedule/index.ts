@@ -9,25 +9,77 @@
  * rather than *"Request leave for them"*.
  */
 
-import { formatInstant, type HostApi, load, type PropertyEnvironment }
+import { formatInstant, type HostApi, load, type PropertyEnvironment, type Read }
   from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
-import { failureScreen } from "../../chrome/failure";
+import { failureScreen, unaskableScreen } from "../../chrome/failure";
+import type { Operator } from "../../roster/model";
 import { type Schedule, type ScheduleDay } from "../../roster/schedule";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
 
-/** Draw the screen. */
-export async function schedule(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load<Schedule>(host, ROSTER_READ, "schedule");
+/**
+ * Draw the screen.
+ *
+ * @param host the bridge
+ * @param main the mount
+ * @param me who is signed in, or the reason the platform could not say — `null`
+ *   while that read is still in flight
+ *
+ * @remarks
+ * **This read names a person, and the name has to come from somewhere.**
+ * `schedule` takes a required `staffId`; the call used to send no body at all,
+ * so against a real backend it could only ever answer *`'staffId'` is required*
+ * — an `invalid` a person met as *Workforce could not build this person's
+ * month*, three components from the omission. It was invisible here because the
+ * harness answers from a fixture and never reaches the view that requires it.
+ *
+ * Until the picker this screen's own header promises is built, the person is
+ * the signed-in one, so the id travels from the `me` read the bar already makes.
+ */
+export async function schedule(
+  host: HostApi,
+  main: HTMLElement,
+  me: Read<Operator> | null,
+): Promise<void> {
+  // The `me` read has not returned. Not an empty screen and not a failure: the
+  // module redraws when it lands, and drawing either of those first would put a
+  // state on screen that is contradicted a moment later.
+  if (me === null) return;
+
+  // It did return, and the platform could not answer it. That failure is the
+  // real one and it is reported as itself — this screen's inability to ask is a
+  // consequence of it, not a second thing that went wrong.
+  if (!me.ok) {
+    failureScreen(main, "Rota", me.failure, { the: "this person's month" },
+      () => void schedule(host, main, me));
+    return;
+  }
+
+  // Answered, and named nobody this application can post a month against. The
+  // three reasons collapse on purpose one layer down — a caller with no user, a
+  // login with no staff record, somebody no longer active — so this says what
+  // is true of all three and does not guess which.
+  if (me.value.staffId === null) {
+    unaskableScreen(main, "Rota",
+      "There is no staff record for the signed-in account",
+      "A month is a person's, and this account is not yet one of this "
+      + "property's people. Nothing is broken and nothing is missing from the "
+      + "rota — somebody has to be given a staff record before there is a "
+      + "month to show.");
+    return;
+  }
+
+  const got = await load<Schedule>(
+    host, ROSTER_READ, "schedule", { staffId: me.value.staffId });
 
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
     failureScreen(main, "Rota", got.failure, { the: "this person's month" },
-      () => void schedule(host, main));
+      () => void schedule(host, main, me));
     return;
   }
 

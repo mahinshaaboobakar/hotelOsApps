@@ -136,6 +136,11 @@ function actions(close: () => void): HTMLElement {
   const cancel = el("div", "btn", "Cancel");
 
   cancel.addEventListener("click", close);
+
+  // Inert for the same reason as Raise request, one screen over:
+  // `roster.configure · defineShift` takes a name, a code, a colour and a date,
+  // and `field()` below draws each of them as a div. The dialog shows what a
+  // shift looks like; it does not yet ask.
   row.append(cancel, el("div", "btn pri", "Create shift"));
   return row;
 }

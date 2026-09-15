@@ -100,6 +100,10 @@ button{background:transparent;color:inherit;font:inherit;border:0;
                 border-color:color-mix(in srgb, var(--color-warn) 34%, transparent)}
 .fail-faulted{color:var(--color-bad,#f87171);
               border-color:color-mix(in srgb, var(--color-bad) 34%, transparent)}
+/* Neutral on purpose, and stated rather than inherited. A question this bundle
+   never asked is not a refusal and not a fault — colouring it as either would
+   report the platform for something it was never given the chance to do. */
+.fail-unaskable{color:var(--color-ink-faint,#5a6172)}
 .fail-said{font-size:15.5px;font-weight:600;color:var(--color-ink,#e8ebf4);
            letter-spacing:-.01em}
 .fail-why{font-size:13.5px;line-height:1.6;color:var(--color-ink-muted,#8b93a7)}

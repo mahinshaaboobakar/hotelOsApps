@@ -130,8 +130,28 @@ export interface OvertimeWarning {
 
 /** A department's week, as the Team Rota draws it. */
 export interface Week {
+  /**
+   * The Monday this week starts on, as `YYYY-MM-DD`.
+   *
+   * **The only machine-readable date on this screen.** {@link Week.days} are
+   * seven display headings and {@link Week.label} is a rendered range; every
+   * write the rota makes names a date, and a surface that parsed its own
+   * heading to recover one would be deriving a fact from a presentation.
+   */
+  monday: string;
+
   /** The department this rota is for. */
   department: string;
+
+  /**
+   * The same department as a code — `FO`, `HK` — which is what a write names.
+   *
+   * {@link Week.department} is for reading and this is for sending. They are
+   * two fields because a name is not a key, and the day somebody renames a
+   * department is the day a screen that sent the name would start writing to
+   * nothing.
+   */
+  departmentCode: string;
 
   /** The week's label, as the header shows it. */
   label: string;
@@ -161,4 +181,43 @@ export interface Week {
 
   /** Anybody the plan pushes past the threshold. Empty when nothing to say. */
   overtime: readonly OvertimeWarning[];
+}
+
+/**
+ * Who is signed in, drawn at the bar's right.
+ *
+ * **Three clauses, not two** — `name · department · property`, owner ruling,
+ * 2026-09-04. The property looks redundant on a single-property desk and stops
+ * looking redundant the day an organization has two, which the corporate model
+ * already allows for. A desk machine is shared and every write on these screens
+ * is attributed, so the bar says *who*, *for which department*, *at which
+ * hotel*.
+ */
+export interface Operator {
+  /**
+   * Which staff member, when the property can say.
+   *
+   * **The bar never draws it**, and it lives here rather than beside the bar's
+   * own types for that reason: it is the `me` read's shape, and the bar is one
+   * of its readers. Three screens ask this application a question about the
+   * signed-in person — their month, their leave, a request they are raising —
+   * and each names a staff id the bundle has no other way to learn.
+   *
+   * Null exactly when {@link Operator.name} is null, which is the collapse the
+   * bar makes on purpose: a caller with no user, a login with no staff record
+   * and a person no longer active are one answer, and an id carried through any
+   * of them would have split at the wire what the screen shows as one.
+   */
+  staffId: string | null;
+
+  name: string | null;
+
+  /** Which department they are working in. */
+  department: string | null;
+
+  /** Which hotel. */
+  property: string | null;
+
+  /** Their role, which the bar has no room for and the rail used to show. */
+  role: string | null;
 }

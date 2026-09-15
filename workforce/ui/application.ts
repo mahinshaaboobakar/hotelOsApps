@@ -22,10 +22,12 @@
  * for the drawing and `roster/` for the single data seam.
  */
 
-import { type Activate, type HostApi, type HostedModule, load } from "@hotelos/sdk";
+import { type Activate, type HostApi, type HostedModule, load, type Read }
+  from "@hotelos/sdk";
 
 import { el } from "./chrome/element";
-import { bar, switcher, type Operator, type Section } from "./chrome/bar";
+import { bar, switcher, type Section } from "./chrome/bar";
+import type { Operator } from "./roster/model";
 import { stylesheet } from "./chrome/styles";
 import { attendance } from "./screens/attendance";
 import { ATTENDANCE_CSS } from "./screens/attendance/styles";
@@ -92,6 +94,16 @@ interface Place {
   /** Open the end-posting dialog on somebody. */
   onWho: (who: string) => void;
 
+  /**
+   * Who is signed in, or the reason the platform could not say — `null` while
+   * that read is in flight.
+   *
+   * The whole read, not the person: a screen whose own question names a staff
+   * id needs the reason as much as the value, and the three states are three
+   * different surfaces.
+   */
+  me: Read<Operator> | null;
+
   /** Which page of the one list that has them. */
   page: number;
 
@@ -131,7 +143,7 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
           h, m, () => place.open("print"),
           place.pick, place.onPick, place.close),
       },
-      { label: "Staff schedule", draw: (h, m) => void schedule(h, m) },
+      { label: "Staff schedule", draw: (h, m, place) => void schedule(h, m, place.me) },
     ],
   },
   {
@@ -212,7 +224,12 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // Null is the starting truth rather than a placeholder to be swapped out: the
   // bar draws no operator line at all until there is one, so the first paint
   // states what it knows instead of stating something it does not.
-  let operator: Operator | null = null;
+  // Held as the whole read rather than as its value, because two consumers want
+  // different halves of it. The bar wants the person and is content to draw
+  // nothing when there is none; Staff schedule cannot ask its own question
+  // without the staff id, so it needs the reason as well — and `null` here is a
+  // third state both of them need: the read has not come back yet.
+  let me: Read<Operator> | null = null;
   let tab = "Requests";
   let dialog = false;
   let which: string | null = null;
@@ -247,7 +264,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     const strip = switcher(section.views, screen.label,
       (label) => { show(current, label); });
 
-    frame.append(bar(sections(), current, operator, show));
+    frame.append(bar(sections(), current, me?.ok === true ? me.value : null, show));
     if (strip !== null) frame.append(strip);
     frame.append(main);
 
@@ -282,6 +299,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       onWho: (person) => { who = person; show(current); },
       // Which page of the one list that has them. Held here rather than in the
       // screen, because a screen is redrawn from scratch on every change.
+      me,
       page,
       onPage: (chosen) => { page = chosen; show(current); },
       team,
@@ -346,10 +364,12 @@ export const activate: Activate = (host: HostApi): HostedModule => {
    * service caller, and it is what the bar shows either way.
    */
   async function naming(): Promise<void> {
-    const read = await load<Operator>(host, "roster.read", "me");
-    if (!read.ok) return;
-
-    operator = read.value;
+    // Kept whole, failure included. The bar still draws nothing on a failure —
+    // that reasoning is above and is unchanged — but discarding the read here
+    // left a screen that DEPENDS on it unable to say why it could not ask, and
+    // a blank screen standing in for a failure is the thing this module spent
+    // `APPS-Q26(4)` removing.
+    me = await load<Operator>(host, "roster.read", "me");
 
     // Redrawn only if the module is still mounted. The answer can arrive after
     // an unmount, and `show` returns on a null root — held here as well so

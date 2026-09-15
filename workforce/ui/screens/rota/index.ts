@@ -65,7 +65,13 @@ export async function rota(
     const person = week.people.find((candidate) => candidate.id === pick.person);
 
     if (person !== undefined) {
-      main.append(picker(person, pick.day, week, closePick));
+      // Closed and re-read on success: the grid behind the popover is the
+      // thing that changed, and a picker that dismissed without re-reading
+      // would leave the old cell on screen under a write that landed.
+      main.append(picker(host, person, pick.day, week, closePick, () => {
+        closePick();
+        void rota(host, main, print, null, onPick, closePick);
+      }));
     }
   }
 }
@@ -102,6 +108,19 @@ function header(week: Week, print: () => void): HTMLElement {
   picker.append(el("span", undefined, week.department), el("i", undefined, "▾"));
 
   const grow = el("div", "grow");
+
+  // **Three inert controls, and each says which piece is missing.** A control
+  // that looks live and does nothing is worse than one that is absent: a person
+  // presses it. `＋ Assign shift` below is live because the picker it opens
+  // captures everything `assign` requires; these three do not.
+  //
+  //   ‹ Week ›   one element for two directions. The `week` read accepts an
+  //              anchor, so the call is available — the control is not, and
+  //              splitting it into two arrows is the frame's decision
+  //   Copy       `copyWeek` writes across a whole week and there is no confirm
+  //              surface in front of it. §9 is not optional for that
+  //   Swap       needs two assignments named by id, and `Cell` carries none.
+  //              Both the read and a two-cell selection are missing
   const week_ = el("div", "btn", `‹ ${week.label}  Week ›`);
   const copy = el("div", "btn", "⧉ Copy last week");
   const swap = el("div", "btn", "⇄ Swap");

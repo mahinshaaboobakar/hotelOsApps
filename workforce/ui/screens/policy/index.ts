@@ -78,6 +78,11 @@ function header(config: Policy, open: () => void): HTMLElement {
   const add = el("div", "btn", "＋ New shift");
   add.addEventListener("click", open);
 
+  // **Inert, and this one has nothing to save.** `setOvertime` and
+  // `setLeaveType` are both served, and every row on this screen is read-only:
+  // the overtime threshold renders as a `div.field`, and the shift and leave
+  // tables are listings. A Save with no editable field in front of it is a
+  // button that could only ever re-send what is already stored.
   head.append(title, grow, add, el("div", "btn pri", "Save changes"));
   return head;
 }

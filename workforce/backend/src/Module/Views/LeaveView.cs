@@ -77,6 +77,13 @@ public static class LeaveView
         {
             balances = catalogue.Select(type => new
             {
+                // The id travels beside the name because the write needs it and
+                // the name is not a key: `raise` takes a `typeId`, and a screen
+                // that had only ever been sent names would have to match one
+                // back to an id it was never given. A read that withholds what
+                // its own screen's write requires is a defect three components
+                // from where it surfaces.
+                id = type.Id,
                 type = type.Name,
                 days = balances.TryGetValue(type.Id, out var held) ? held : 0m,
                 // The entitlement, where the type accrues. Null where HR grants

@@ -183,3 +183,42 @@ export function failureScreen(
 
   main.replaceChildren(head, failureBody(failure, subject, retry));
 }
+
+/**
+ * What a screen draws when it has nothing to ask WITH.
+ *
+ * @param main the screen's mount
+ * @param title what this screen is
+ * @param said what cannot be shown, and why, in one sentence
+ * @param why what it means for the person reading it
+ *
+ * @remarks
+ * **Not a {@link failureScreen}, and the difference is the whole point.** That
+ * one reports what the platform answered — a timeout, a refusal, a fault — and
+ * carries the wire line a person hands to somebody who can act. This one
+ * reports that *this bundle could not make the call at all*, because a value it
+ * needs to ask with was never established. Nothing crossed the boundary, so
+ * there is no capability, no method and no reason to quote, and drawing an
+ * empty wire line would invent a call that never happened.
+ *
+ * Two absences that mean different things are two surfaces. Folding this into a
+ * `ReadFailure` would have dressed a question nobody asked as an answer the
+ * platform gave, and the remedies differ: one is retried or granted, this one
+ * is somebody's record being made.
+ */
+export function unaskableScreen(
+  main: HTMLElement,
+  title: string,
+  said: string,
+  why: string,
+): void {
+  const head = el("div", "title");
+  head.append(el("div", "ht", title));
+
+  const body = el("div", "fail");
+  const glyph = el("div", "fail-mark fail-unaskable", "· ?");
+  glyph.setAttribute("aria-hidden", "true");
+
+  body.append(glyph, el("div", "fail-said", said), el("div", "fail-why", why));
+  main.replaceChildren(head, body);
+}

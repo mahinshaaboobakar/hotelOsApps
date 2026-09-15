@@ -70,7 +70,7 @@ public static class MeView
         // caller who is not there.
         if (call.Scope.UserId is not { } userId)
         {
-            return Answer(null, null, null, property);
+            return Answer(null, null, null, null, property);
         }
 
         var resolved = await directory.FindStaffIdAsync(
@@ -81,7 +81,7 @@ public static class MeView
         // them, and says so by naming nobody.
         if (resolved is not StaffResolution.Resolved found)
         {
-            return Answer(null, null, null, property);
+            return Answer(null, null, null, null, property);
         }
 
         var names = await directory.FindNamesAsync(
@@ -112,17 +112,36 @@ public static class MeView
                 ? known
                 : primary.DepartmentCode;
 
-        return Answer(name, department, primary?.JobRole, property);
+        return Answer(found.StaffId, name, department, primary?.JobRole, property);
     }
 
     /// <summary>One shape, so every path answers the same question.</summary>
     /// <remarks>
+    /// <para>
     /// Built here rather than at each return so the unknowns cannot diverge:
     /// three of the four paths above differ only in how much they could
     /// establish, and a caller reading the answer should not be able to tell
     /// which one it came from except by the nulls.
+    /// </para>
+    /// <para>
+    /// <b>The id is null exactly when the name is</b>, which is what keeps the
+    /// bar's deliberate collapse intact. A service caller with no user, a login
+    /// with no staff record and a person no longer active are one answer here on
+    /// purpose — the bar has no business explaining an employment status to
+    /// whoever is looking at it — and carrying an id through any of those three
+    /// would have split them at the wire while the screen still read as one.
+    /// </para>
+    /// <para>
+    /// <b>Why the id travels at all.</b> It is not decoration: three screens ask
+    /// this application a question about the signed-in person — their month,
+    /// their leave, a request they are raising — and every one of those calls
+    /// names a staff id the bundle has no other way to learn. Withholding a
+    /// value this function already holds made the Staff schedule read fail three
+    /// components away, with a message that was correct and about the wrong
+    /// party.
+    /// </para>
     /// </remarks>
     private static object Answer(
-        string? name, string? department, string? role, string? property)
-        => new { name, department, role, property };
+        Guid? staffId, string? name, string? department, string? role, string? property)
+        => new { staffId, name, department, role, property };
 }

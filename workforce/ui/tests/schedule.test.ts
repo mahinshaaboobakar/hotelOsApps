@@ -1,0 +1,119 @@
+import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { describe, expect, it } from "vitest";
+
+import { schedule } from "../screens/schedule";
+
+/**
+ * The one read on this module that could not succeed, and the two states around
+ * it.
+ *
+ * `ScheduleView.Month` opens `call.Id("staffId")` — required, and absent is an
+ * `InvalidRequestException` rather than a default. This screen sent **no body
+ * at all**, so against a real backend it could only ever answer *`'staffId'` is
+ * required*, which a person met as *Workforce could not build this person's
+ * month* three components from the omission.
+ *
+ * Nothing in the module could see it. The harness answers from a fixture and
+ * never reaches the view that requires the field, and the backend's own test
+ * passes a `staffId` — written from the same reading as the view, so it asserts
+ * the call the screen does not make. What follows asserts the call it does.
+ */
+
+/** A host that records what it was asked, and answers a month. */
+function host(): { api: HostApi; asked: { method: string; params: unknown }[] } {
+  const asked: { method: string; params: unknown }[] = [];
+
+  return {
+    asked,
+    api: {
+      identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
+      property: { timezone: "Asia/Kolkata", locale: "en-IN" },
+      call: (_capability: string, method: string, params?: unknown) => {
+        asked.push({ method, params });
+
+        return method === "schedule"
+          // Built from `Schedule`'s own declaration rather than from what the
+          // screen appeared to need: a stub written from a reading shares the
+          // reading's gaps, and the first version of this one was three fields
+          // short in exactly the places the screen does not guard.
+          ? Promise.resolve({
+            who: "Anjali Menon", initials: "AM", month: "August 2026",
+            shifts: 18, leaveDays: 2, duty: 1,
+            dutyFrom: null, dutyTo: null,
+            balance: "4 of 8 casual remaining",
+            days: [],
+          })
+          : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" }));
+      },
+      on: () => () => {},
+    },
+  };
+}
+
+const PERSON = {
+  staffId: "a3f1c064-5d21-4e8b-9f02-1a7c6b40d911",
+  name: "Anjali Menon", department: "Front Office",
+  role: "Receptionist", property: "Kochi Beach Resort",
+};
+
+describe("staff schedule", () => {
+  it("names the person its own read requires", async () => {
+    const main = document.createElement("div");
+    const { api, asked } = host();
+
+    await schedule(api, main, { ok: true, value: PERSON });
+
+    // The assertion is the PARAMS, not the render. A screen that drew a month
+    // while sending no id would pass any test written about what it shows.
+    expect(asked).toEqual([
+      { method: "schedule", params: { staffId: PERSON.staffId } },
+    ]);
+  });
+
+  it("asks nothing at all while the operator read is still in flight", async () => {
+    const main = document.createElement("div");
+    const { api, asked } = host();
+
+    await schedule(api, main, null);
+
+    // Not an empty screen and not a failure: both would be contradicted a
+    // moment later when `me` lands and the module redraws.
+    expect(asked).toEqual([]);
+    expect(main.childElementCount).toBe(0);
+  });
+
+  it("says there is no staff record rather than asking with nothing", async () => {
+    const main = document.createElement("div");
+    const { api, asked } = host();
+
+    await schedule(api, main, { ok: true, value: { ...PERSON, staffId: null } });
+
+    expect(asked).toEqual([]);
+
+    // A question this bundle never asked is not a platform failure, so there is
+    // no wire line to quote and none is drawn. Asserting its ABSENCE is the
+    // point: a failure surface here would report the platform for something it
+    // was never given the chance to do.
+    expect(main.querySelector(".fail-wire")).toBeNull();
+    expect(main.querySelector(".fail-said")?.textContent)
+      .toBe("There is no staff record for the signed-in account");
+  });
+
+  it("reports the operator read's own failure, not a second one of its own", async () => {
+    const main = document.createElement("div");
+    const { api } = host();
+
+    await schedule(api, main, {
+      ok: false,
+      failure: {
+        cause: "forbidden", capability: "roster.read", method: "me",
+        said: null, at: new Date("2026-09-15T04:25:00.000Z"),
+      },
+    });
+
+    // The failure that happened, carried whole — including the wire line, which
+    // names `me` rather than `schedule`. This screen's inability to ask is a
+    // consequence of that refusal and not a separate thing that went wrong.
+    expect(main.querySelector(".fail-wire")?.textContent).toContain("roster.read · me");
+  });
+});

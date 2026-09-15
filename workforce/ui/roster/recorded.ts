@@ -57,7 +57,12 @@ function spanAt(day: number, localHour: number): string {
 }
 
 export const recordedWeek: Week = {
+  // 24 August 2026 is a Monday, so the anchor and the headings below name the
+  // same week. A fixture whose date disagreed with its own day names would
+  // teach every capture a week that does not exist.
+  monday: "2026-08-24",
   department: "Front Office",
+  departmentCode: "FO",
   label: "24 – 30 Aug",
   month: "Aug",
   days: ["Mon 24", "Tue 25", "Wed 26", "Thu 27", "Fri 28", "Sat 29", "Sun 30"],
