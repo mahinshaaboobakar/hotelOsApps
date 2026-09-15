@@ -33,7 +33,7 @@
  * justification.
  */
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { beforeEach, describe, expect, it } from "vitest";
@@ -212,5 +212,111 @@ describe("the bundle npm run build produces", () => {
     expect(running.isReady()).toBe(true);
     expect(document.getElementById("hotelos-module-root")?.childElementCount ?? 0).toBeGreaterThan(0);
     expect(thrown).toEqual([]);
+  });
+});
+
+/**
+ * Every string literal in a file, crudely but consistently.
+ *
+ * Crude is the right level here: this is a *comparison* between two sets built
+ * the same way, so whatever the pattern misses it misses on both sides. It is
+ * not trying to parse TypeScript.
+ */
+function literals(source: string): Set<string> {
+  // **Match every literal, then filter by length — never the other way round.**
+  // The first version asked for `{8,}` inside the pattern, so a short literal
+  // was skipped and its closing quote paired with the *next* literal's opening
+  // quote: `label: "Room", value: "203"` yielded `", value: "`. The instrument
+  // then reported code fragments as fixture data — a detector inventing its own
+  // findings, and the reason to prove one against the artefact before trusting
+  // a clean report from it.
+  return new Set(
+    // Double-quoted only. This module is written in double quotes throughout,
+    // and admitting the single-quoted form made every apostrophe in ordinary
+    // prose a delimiter: `the seller's control` opened a "string" that closed
+    // at the next apostrophe, so the instrument reported `s control. The Deluxe
+    // King` as fixture data. A pattern that can misread its own input reports
+    // findings that are its own.
+    [...source.matchAll(/"([^"\\\n]*)"/gu)]
+      .map((match) => match[1])
+      .filter((one): one is string => one !== undefined && one.length >= 8),
+  );
+}
+
+/** Every `.ts` under a directory, recursively. */
+function sources(from: string): string[] {
+  return readdirSync(from, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(from, entry.name);
+
+    if (entry.isDirectory()) return sources(path);
+    return entry.name.endsWith(".ts") ? [readFileSync(path, "utf8")] : [];
+  });
+}
+
+describe("the fixtures do not reach the property", () => {
+  /**
+   * Strings that exist in the approved frames' data and nowhere else.
+   *
+   * **Derived, not listed.** A hand-written list of names to look for is a list
+   * somebody must extend the day a fixture gains a guest, and the one nobody
+   * extends is the one that ships. Subtracting the rest of the source is what
+   * makes the set *fixture-only*: a label the book and a screen share — a tab
+   * name, a column heading — is legitimately in the bundle, and would be a
+   * false positive on every run until somebody deleted the test.
+   */
+  function fixtureOnly(): string[] {
+    const inFixtures = new Set<string>();
+    for (const source of sources(resolve(process.cwd(), "book/recorded"))) {
+      for (const one of literals(source)) inFixtures.add(one);
+    }
+
+    const elsewhere = new Set<string>();
+    for (const dir of ["application.ts", "screens", "chrome", "widgets", "book/model"]) {
+      const at = resolve(process.cwd(), dir);
+      const found = dir.endsWith(".ts") ? [readFileSync(at, "utf8")] : sources(at);
+      for (const source of found) for (const one of literals(source)) elsewhere.add(one);
+    }
+
+    // **Substring, not equality.** A fixture says `"Deluxe King"` on its own;
+    // a screen says *"the seller's control. The Deluxe King's out-of-order room
+    // is a different thing"* as explanatory copy. Subtracting only exact
+    // matches left the short one in the set, and it then matched inside the
+    // long one in the bundle — the guard reporting a sentence it wrote itself.
+    const embedded = [...elsewhere];
+
+    return [...inFixtures].filter(
+      (one) => !elsewhere.has(one) && !embedded.some((other) => other.includes(one)),
+    );
+  }
+
+  it("has fixture-only strings to look for, so the check cannot be vacuous", () => {
+    // A zero here would mean the derivation found nothing, and a guard that
+    // searches for nothing passes forever — the shape this repository has
+    // recorded under "a pattern that matches nothing returns zero".
+    expect(fixtureOnly().length).toBeGreaterThan(20);
+  });
+
+  it("ships none of them in module.js", () => {
+    const shipped = bundle();
+
+    // **The quoted form, not a substring.** A bare `includes` matched
+    // `standing` inside *outstanding* and `complete` inside *incomplete*, so
+    // the guard reported the module's own prose as fixture data. What "shipped
+    // as data" actually means is that the string is a *literal* in the
+    // artifact — delimited — and a word occurring inside a sentence is not.
+    const leaked = fixtureOnly().filter((one) => shipped.includes(JSON.stringify(one)));
+
+    // **The bundle, not the source.** `load<typeof recordedToday>` is a type
+    // argument and erases at build, so reading the source would flag every
+    // screen that names a fixture to borrow its shape — which is the exact
+    // false positive that made a grep report fourteen files when six were
+    // real. What a property runs is the artifact, and the artifact either
+    // carries a guest's invented name or it does not.
+    expect(
+      leaked,
+      "the built module carries strings that exist only in the approved frames' "
+      + "data — a screen is drawing a fixture on a property's desk: "
+      + leaked.slice(0, 5).join(" · "),
+    ).toEqual([]);
   });
 });

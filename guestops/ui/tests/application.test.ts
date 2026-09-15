@@ -13,7 +13,7 @@
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
-import { recordedAttention, recordedStay, recordedToday } from "../book";
+import { recordedAttention, recordedStay, recordedToday } from "../book/recorded";
 import type { HostApi } from "@hotelos/sdk";
 
 const GRANTED = ["reservation.read", "stay.override", "registration.capture", "request.handle"];

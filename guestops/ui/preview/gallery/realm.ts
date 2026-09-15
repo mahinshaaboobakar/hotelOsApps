@@ -25,7 +25,7 @@ import {
   recordedStay,
   recordedToday,
   recordedTodayConnected,
-} from "../../book";
+} from "../../book/recorded";
 
 /** One click on the way to a screen. */
 interface Step {

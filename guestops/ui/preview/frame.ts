@@ -39,7 +39,7 @@ import {
   recordedStay,
   recordedToday,
   recordedTodayConnected,
-} from "../book";
+} from "../book/recorded";
 
 /**
  * A host that grants what the manifest requests and answers from the fixtures.

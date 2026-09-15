@@ -17,11 +17,12 @@ import type { HostApi } from "@hotelos/sdk";
 import { pager } from "../../chrome/pager";
 
 import {
+  APP,
+  failureDrawing,
   load,
   perform,
-  recordedBooking,
-  recordedCancelPlan,
   type BookingDetail,
+  type CancelPlan,
   type GroupFact,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
@@ -55,12 +56,16 @@ export async function booking(
   close: () => void,
   done: () => void,
 ): Promise<void> {
-  const loaded = await load<typeof recordedBooking>(
+  const loaded = await load<BookingDetail>(
     host, "reservation.read", "booking", { bookingId: id });
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
   if (!loaded.ok) {
-    into.replaceChildren(failed(loaded.because));
+    into.replaceChildren(
+      failed(
+        failureDrawing(loaded.failure, { app: APP, the: "this booking" }),
+        () => turn(page),
+      ));
     return;
   }
 
@@ -121,13 +126,17 @@ export async function booking(
   // computes penalties from the stored offset **at the moment it is shown**
   // (R18), so fetching it with the page would put a stale number in front of
   // somebody about to agree to it.
-  const plan = await load<typeof recordedCancelPlan>(
+  const plan = await load<CancelPlan>(
     host, "reservation.read", "cancelPlan", { bookingId: id });
 
   // The dialog is a decision about a booking; without the plan there is nothing
   // to decide from, so it says why rather than opening over recorded terms.
   if (!plan.ok) {
-    into.append(failed(plan.because));
+    into.append(
+      failed(failureDrawing(plan.failure, {
+        app: APP,
+        the: "what cancelling this booking would do",
+      })));
     return;
   }
 

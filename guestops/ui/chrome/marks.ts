@@ -17,6 +17,8 @@
  * meant read-only (GUEST-Q1, as amended).
  */
 
+import { FAILURE_LABELS, type FailureDrawing } from "@hotelos/sdk";
+
 import type { Chip, Tag } from "../book/model";
 import { control, el } from "./element";
 
@@ -91,9 +93,58 @@ function one(tag: Tag): HTMLElement {
  * So there is no data beneath this. The reason is the content, and it names
  * what failed rather than apologising: a capability the property declined says
  * so, and a platform that could not be reached says that.
+ *
+ * **It now draws the SDK's structured failure rather than a sentence** —
+ * `38c5855e`. The heading used to be *"GuestOps could not load this"* whatever
+ * had happened, which is the same sentence for a refusal, a timeout and a
+ * fault — three different things with three different remedies, and a person
+ * told the middle one waits for something that is never coming. The drawing
+ * carries which it was, why, the wire line somebody can quote to whoever can
+ * act on it, and whether a retry could work at all.
+ *
+ * @param drawing what the SDK says this failure looks like
+ * @param retry offered only where the drawing says a retry could succeed
+ * @returns the element to put where the data would have gone
  */
-export function failed(because: string): HTMLElement {
+/**
+ * A screen that cannot draw, for a reason that is not a read.
+ *
+ * **Separate from {@link failed} because it has no wire line and must not
+ * invent one.** A stay opened without an id never reached the platform: there
+ * is no capability, no method, no cause and no time of asking, and passing it
+ * through the SDK's failure drawing would print a provenance line for a call
+ * nobody made. That is the gap rule in a surface — a value standing in for a
+ * measurement nobody took.
+ *
+ * @param said what a person is told
+ * @param why what they can do about it
+ * @returns the element to put where the screen would have gone
+ */
+export function cannot(said: string, why: string): HTMLElement {
   const box = el("div", "fail");
-  box.append(el("div", "fh", "GuestOps could not load this."), el("div", "fb", because));
+  box.append(el("div", "fh", said), el("div", "fb", why));
+  return box;
+}
+
+export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement {
+  const box = el("div", "fail");
+
+  box.append(
+    el("div", "fm", drawing.mark),
+    el("div", "fh", drawing.said),
+    el("div", "fb", drawing.why),
+
+    // **Stated, never omitted.** A failure surface that shows no provenance
+    // reads as one that did not bother to ask — and this line is the only part
+    // a person can carry to somebody able to fix it.
+    el("div", "fw", drawing.wire),
+  );
+
+  // No button on a refusal or a fault. Offering one is the second lie a failure
+  // surface tells, after the first one that something was read at all.
+  if (drawing.retryable && retry !== undefined) {
+    box.append(control("btn sm", FAILURE_LABELS.retry, retry));
+  }
+
   return box;
 }

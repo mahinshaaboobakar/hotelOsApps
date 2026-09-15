@@ -47,20 +47,25 @@
 
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
-import { load, recordedFirstRun, recordedRegistration, recordedWalkIn } from "./book";
+// **Three fixtures and the three screens that drew them are not imported.**
+// `firstRun`, `walkIn` and `registration` each took an approved frame's data
+// and put it on the property's screen; none of the three has a method behind
+// it, so there is nothing to call and nothing true to draw. The screens
+// themselves are kept in the tree — they are the drawings Part A audits — and
+// they return here with the reads that feed them.
+import { load } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem, type Operator } from "./chrome/bar";
+import { cannot } from "./chrome/marks";
+import { sheet } from "./chrome/overlay";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
-import { firstRun } from "./screens/firstrun";
 import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
-import { registration } from "./screens/registration";
 import { setup } from "./screens/setup";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
-import { walkIn } from "./screens/walkin";
 
 /**
  * Where the module is.
@@ -225,7 +230,19 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     // truthful drawing of an empty hotel, which is the one wrong thing to show
     // a property with two thousand reservations waiting.
     if (where.filling) {
-      main.replaceChildren(firstRun(recordedFirstRun));
+      // **The fixture is gone and nothing serves this yet.** It drew
+      // `recordedFirstRun` — a progress figure, a count of what had arrived, a
+      // source name — none of it measured. A first-run screen is read by
+      // somebody waiting to know whether their property's book is coming in,
+      // which is the worst possible audience for an invented number.
+      //
+      // No module method answers a fill, so there is no call to make: this is a
+      // gap, reported rather than filled.
+      main.replaceChildren(cannot(
+        "The book is being brought in",
+        "GuestOps cannot yet report how far along this is. Nothing here is "
+        + "measured, so nothing is shown.",
+      ));
       return;
     }
 
@@ -239,14 +256,48 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     // the walk-in on top of it.
     const overlay = (): void => {
       if (where.overlay === "walkin") {
-        main.append(walkIn(recordedWalkIn, () => show({ overlay: null })));
+        // **A door with nothing on the other side of it, and it is reported as
+        // that rather than built.** `stay.create/walkIn` is declared in the
+        // manifest and served by `ModuleSurface` — and this sheet rendered
+        // `recordedWalkIn` and called `perform` nowhere, so no control in this
+        // module could ever reach it. That is not a missing call; it is a
+        // capability with no caller, and adding a submit here would be feature
+        // work wearing a conversion's clothes.
+        main.append(sheet({
+          title: "Walk-in",
+          subtitle: "not available at this desk yet",
+          body: [cannot(
+            "A walk-in cannot be taken here yet",
+            "GuestOps can record one — the platform serves it — but this sheet "
+            + "has nothing to capture a guest with, and it will not show a draft "
+            + "belonging to nobody.",
+          )],
+          foot: null,
+          actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
+          onDismiss: () => show({ overlay: null }),
+        }));
       }
 
       // The card stands over the day, because that is where a check-in starts:
       // a receptionist opens it from the arrival they are looking at, and the
       // list stays behind it.
       if (where.overlay === "registration") {
-        main.append(registration(recordedRegistration, () => show({ overlay: null })));
+        // Same shape and a worse fixture: a registration card carries a guest's
+        // name, document and signature state. `registration.capture` is
+        // declared and no module method serves it, so there is nothing to call
+        // and nothing true to draw.
+        main.append(sheet({
+          title: "Registration",
+          subtitle: "not available at this desk yet",
+          body: [cannot(
+            "This registration cannot be opened yet",
+            "No method answers a registration card, so GuestOps would be showing "
+            + "a guest's details that belong to nobody.",
+          )],
+          foot: null,
+          actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
+          onDismiss: () => show({ overlay: null }),
+        }));
       }
     };
 

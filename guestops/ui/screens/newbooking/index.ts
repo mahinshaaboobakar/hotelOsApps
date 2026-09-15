@@ -18,11 +18,10 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { pager } from "../../chrome/pager";
-import { load, recordedAvailability, recordedConflict } from "../../book";
+import { APP, failureDrawing, load, type Availability } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
 import { availability } from "./availability";
-import { conflict } from "./conflict";
 import { sources } from "./sources";
 
 /**
@@ -42,23 +41,35 @@ export async function newBooking(
   turn: (page: number) => void,
   walkIn: () => void,
 ): Promise<void> {
-  // **The dates travel, and the backend refuses a request without them.** A
-  // missing arrival could be read as *today*, and the answer would then be
-  // availability for dates nobody asked about — in the column a guest is
-  // quoted from. These are the dates the recorded query names until the sheet
-  // captures a person's own.
-  const loaded = await load<typeof recordedAvailability>(
-    host, "reservation.read", "availability", {
-      arrive: recordedAvailability.query.arriveOn,
-      depart: recordedAvailability.query.departOn,
-      page,
-      pageSize: PAGE,
-    });
+  // **THE DATES ARE NOT SUPPLIED, AND THAT IS THE FIX RATHER THAN AN
+  // OMISSION.** This asked with `recordedAvailability.query.arriveOn` and
+  // `departOn` — the fixture's dates — because the backend refuses a request
+  // without them and nothing on this screen captures a person's own yet.
+  //
+  // It is a different defect from the five fixtures that were being *drawn*,
+  // and the remedy is the opposite one: those stop drawing, this stops
+  // supplying. A fixture reaching a screen shows a person data that is not
+  // theirs; invented input reaching a real query returns **a plausible answer
+  // to a question nobody asked** — availability for a fortnight in the column
+  // a guest is quoted a rate from. Of the two, this is the one a person acts
+  // on without noticing.
+  //
+  // So the screen asks without them and lets the service answer. The backend
+  // refuses a request with no dates, and **that refusal is the truth about this
+  // screen today** — a person sees the service's own sentence rather than a
+  // fortnight nobody chose. The date capture is Phase 3's; building it here
+  // would be feature work wearing a conversion's clothes.
+  const loaded = await load<Availability>(
+    host, "reservation.read", "availability", { page, pageSize: PAGE });
 
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
   if (!loaded.ok) {
-    into.replaceChildren(failed(loaded.because));
+    into.replaceChildren(
+      failed(
+        failureDrawing(loaded.failure, { app: APP, the: "this property's availability" }),
+        () => turn(page),
+      ));
     return;
   }
 
@@ -77,8 +88,13 @@ export async function newBooking(
     party(answer.query.party),
   );
 
+  // **The conflict panel is gone, not emptied.** It drew `recordedConflict`
+  // unconditionally, beside a live availability read — so on a real property
+  // the rooms were the property's and the clash beneath them was a fixture's.
+  // No method serves a conflict, so there is nothing to call: the panel returns
+  // when the backend has one to answer with.
   const cards = el("div", "cols");
-  cards.append(sources(), conflict(recordedConflict));
+  cards.append(sources());
 
   const body = el("div", "body");
   fill(

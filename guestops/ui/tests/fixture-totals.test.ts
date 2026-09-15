@@ -5,7 +5,7 @@ import {
   recordedAvailability,
   recordedBooking,
   recordedGroup,
-} from "../book";
+} from "../book/recorded";
 
 /**
  * A fixture's `total` is the length of what it holds, and nothing else.

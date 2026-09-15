@@ -25,7 +25,7 @@
  * would be a dark-theme decision frozen into a card a light property will run.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import type { FailureDrawing, HostApi } from "@hotelos/sdk";
 
 /** What a tap opens: the app's own word for a screen, resolved by the module. */
 export type Destination = string;
@@ -216,8 +216,18 @@ export function stylesheet(): HTMLStyleElement {
  * has not granted a capability is not broken, and a widget that shouts at a
  * receptionist about it has made a configuration choice look like an outage.
  */
-export function unanswered(title: string, because: string): HTMLElement {
+export function unanswered(title: string, drawing: FailureDrawing): HTMLElement {
   const { root, body } = card(title);
-  body.append(el("div", "wf", because));
+
+  // **Two lines where there was one** — `38c5855e`. It took a sentence, so a
+  // refusal, a timeout and a fault all read alike on a card, and the one a
+  // person can do something about looked exactly like the two they cannot. The
+  // heading now says which happened and the line beneath says what it means.
+  //
+  // No wire line and no retry: a card is 320×384 and a person glances at it.
+  // The provenance and the button belong on the screen the card taps through
+  // to, where there is room to read them.
+  body.append(el("div", "wf", drawing.said), el("div", "wfw", drawing.why));
+
   return root;
 }

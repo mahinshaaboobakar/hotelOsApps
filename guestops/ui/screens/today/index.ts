@@ -14,7 +14,8 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import {
-  load, recordedToday, type DayRow, type Stat, type Staleness, type Today,
+  APP, failureDrawing, load,
+  type DayRow, type Stat, type Staleness, type Today,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
@@ -58,7 +59,7 @@ export async function today(
   // The page travels as this application's own body — `{page, pageSize}` — and
   // comes back clamped by the same `Paging.Of` the gRPC surface uses, so the
   // module route and the wire cannot disagree about what page 0 means.
-  const loaded = await load<typeof recordedToday>(host, "reservation.read", "today", {
+  const loaded = await load<Today>(host, "reservation.read", "today", {
     page,
     pageSize: PAGE,
   });
@@ -66,7 +67,11 @@ export async function today(
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
   if (!loaded.ok) {
-    into.replaceChildren(failed(loaded.because));
+    into.replaceChildren(
+      failed(
+        failureDrawing(loaded.failure, { app: APP, the: "today at this property" }),
+        () => turn(page),
+      ));
     return;
   }
   const day = loaded.value;

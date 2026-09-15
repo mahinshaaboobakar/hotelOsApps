@@ -21,7 +21,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { load, recordedSetup, type Setup } from "../../book";
+import { APP, failureDrawing, load, type Setup } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
@@ -41,12 +41,18 @@ export async function setup(
   section: string,
   go: (section: string) => void,
 ): Promise<void> {
-  const loaded = await load<typeof recordedSetup>(host, "desk.configure", "setup", );
+  const loaded = await load<Setup>(host, "desk.configure", "setup", );
 
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
   if (!loaded.ok) {
-    into.replaceChildren(failed(loaded.because));
+    // Re-asking is the whole retry: this read takes no parameters, so the
+    // second attempt is the identical question.
+    into.replaceChildren(
+      failed(
+        failureDrawing(loaded.failure, { app: APP, the: "this desk's settings" }),
+        () => void setup(host, into, section, go),
+      ));
     return;
   }
   const config = loaded.value;

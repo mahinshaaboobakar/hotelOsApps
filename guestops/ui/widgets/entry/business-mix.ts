@@ -19,7 +19,10 @@
 
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
-import { read, serve } from "../answer";
+import { failureDrawing, load } from "@hotelos/sdk";
+
+import { APP } from "../../app";
+import { serve } from "../mount";
 import { card, el, label, note, opener, row, stylesheet, unanswered } from "../card";
 
 /** One line of the mix: a code the source sent, and how many arrived on it. */
@@ -56,13 +59,16 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Mix>(host, "reservation.read", "mix");
+    const answer = await load<Mix>(host, "reservation.read", "mix");
 
     // A read that did not answer IS the card — APPS-Q42. The canvas is
     // 320x384 and does not scroll, so a failure cannot sit above content;
     // it takes the place of it.
     if (!answer.ok) {
-      into.replaceChildren(stylesheet(), unanswered("Business Mix", answer.because));
+      into.replaceChildren(stylesheet(), unanswered(
+        "Business Mix",
+        failureDrawing(answer.failure, { app: APP, the: "this property's business mix" }),
+      ));
       return;
     }
     const mix = answer.value;

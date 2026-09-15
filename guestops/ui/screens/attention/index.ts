@@ -16,7 +16,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { load, recordedAttention, type AttentionCard } from "../../book";
+import { APP, failureDrawing, load, type AttentionCard, type AttentionPage } from "../../book";
 import { pager } from "../../chrome/pager";
 import { el, fill } from "../../chrome/element";
 import { mark, failed } from "../../chrome/marks";
@@ -39,15 +39,22 @@ export async function attention(
   page: number,
   turn: (page: number) => void,
 ): Promise<void> {
-  const loaded = await load<typeof recordedAttention>(host, "reservation.read", "attention", {
+  const loaded = await load<AttentionPage>(host, "reservation.read", "attention", {
     page,
     pageSize: PAGE,
   });
 
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
+  //
+  // The retry is offered only where the SDK says one could succeed: this list
+  // is a page, so re-asking for the same page is the whole of it.
   if (!loaded.ok) {
-    into.replaceChildren(failed(loaded.because));
+    into.replaceChildren(
+      failed(
+        failureDrawing(loaded.failure, { app: APP, the: "this property's attention list" }),
+        () => turn(page),
+      ));
     return;
   }
 

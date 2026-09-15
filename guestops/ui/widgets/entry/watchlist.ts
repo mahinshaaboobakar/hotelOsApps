@@ -14,7 +14,10 @@
 
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
-import { read, serve } from "../answer";
+import { failureDrawing, load } from "@hotelos/sdk";
+
+import { APP } from "../../app";
+import { serve } from "../mount";
 import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** A departure that has not happened, and how late it is. */
@@ -48,13 +51,16 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await read<Watchlist>(host, "reservation.read", "watchlist");
+    const answer = await load<Watchlist>(host, "reservation.read", "watchlist");
 
     // A read that did not answer IS the card — APPS-Q42. The canvas is
     // 320x384 and does not scroll, so a failure cannot sit above content;
     // it takes the place of it.
     if (!answer.ok) {
-      into.replaceChildren(stylesheet(), unanswered("Watchlist", answer.because));
+      into.replaceChildren(stylesheet(), unanswered(
+        "Watchlist",
+        failureDrawing(answer.failure, { app: APP, the: "this property's watchlist" }),
+      ));
       return;
     }
     const list = answer.value;
