@@ -9,9 +9,35 @@ using PmsOracle.Vocabularies;
 namespace PmsOracle.Adapters;
 
 /// <summary>
-/// The OHIP flavour — we dial out, and the queue empties as we read it.
+/// The OHIP flavour — we would dial out, and the queue empties as we read it.
 /// </summary>
 /// <remarks>
+/// <para>
+/// <b>NOTHING ON THE DATA PATH DIALS ORACLE TODAY, and this paragraph is here
+/// because the line above used to say it did.</b> <see cref="IOhipQueue"/> and
+/// <see cref="IOhipGuarantees"/> are declared at the foot of this file and
+/// implemented <b>nowhere in <c>backend/</c></b> — every implementation in the
+/// repository is a test double. A port with no adapter is the house pattern and
+/// is not a defect; a summary line reading <i>we dial out</i> over one is.
+/// </para>
+/// <para>
+/// <b>One path does dial, and it is real</b> — <see cref="TestAsync"/> reaches
+/// <c>OhipTokenAttempt</c>, which POSTs a password grant to OHIP's token
+/// endpoint over a live <see cref="HttpClient"/>. So this adapter is not
+/// entirely unwired: it can prove a credential set against Oracle, and it
+/// cannot yet fetch a reservation.
+/// </para>
+/// <para>
+/// <b>What it is waiting for, measured rather than assumed.</b> The obvious
+/// answer — the per-property token read from the Token Vault — is what the
+/// <see cref="IOhipQueue"/> comment has said for weeks, and it is not the
+/// binding one. <b>The Integration Hub composes no connector adapter at all</b>:
+/// <c>ConnectorHost</c> takes <c>IEnumerable&lt;IConnectorAdapter&gt;</c>,
+/// the Hub's <c>Program.cs</c> registers none, and the service loads no
+/// assembly (<c>Assembly.</c> appears zero times in its source). So
+/// <c>PollScheduler</c> starts zero loops, and a finished transport here would
+/// still never be called.
+/// </para>
 /// <para>
 /// <b>The queue is destructive, and that is the requirement this adapter is
 /// shaped by</b> (R22). Reading a business-event notification removes it: there
@@ -310,12 +336,23 @@ public sealed class OracleCloudAdapter(
 /// OHIP's business-event queue, as this connector reaches it.
 /// </summary>
 /// <remarks>
-/// <b>A seam, because the transport needs credentials nothing can supply
-/// yet.</b> OHIP is reached with a per-property token from the Token Vault
-/// (`HUB-Q6`: the Kernel secret store's <c>connector/</c> namespace), and that
-/// read is unimplemented. Everything above this line — validation, the dedupe
-/// promise, normalisation, the destructive-queue shape — is finished and
-/// testable against a double; only the socket is owed.
+/// <b>A port with no adapter. Nothing in <c>backend/</c> implements this</b> —
+/// the only implementations in the repository are test doubles, and that is
+/// stated here rather than left for a reader to infer from an empty search.
+///
+/// <b>Two things are owed, and they are not the same size.</b> The one this
+/// comment used to name alone is the credential: OHIP is reached with a
+/// per-property token from the Token Vault (`HUB-Q6`, the Kernel secret
+/// store's <c>connector/</c> namespace). The larger one is that <b>the
+/// Integration Hub composes no connector adapter</b> — measured, not recalled:
+/// <c>ConnectorHost</c> is handed <c>IEnumerable&lt;IConnectorAdapter&gt;</c>,
+/// the Hub registers none, and it loads no assembly. An implementation of this
+/// interface would compile, pass its tests, and never be constructed.
+///
+/// Everything above this line — validation, the dedupe promise, normalisation,
+/// the destructive-queue shape, the guarantee key — is finished and testable
+/// against a double. What is owed is a socket <i>and</i> somewhere for it to be
+/// plugged in.
 /// </remarks>
 public interface IOhipQueue
 {
