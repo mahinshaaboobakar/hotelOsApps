@@ -90,9 +90,10 @@ public static class LeaveView
                 // it by hand: "2 of null" is drawn as a bare number, and a zero
                 // would claim an allowance of none.
                 of = type.AccrualPerMonth is { } rate ? rate * 12 : (decimal?)null,
-                note = type.AccrualPerMonth is { } monthly
-                    ? "accrues " + monthly.ToString("0.##") + " / month"
-                    : "granted by HR",
+                // The rate, not the sentence about it - ADR 0174. This built
+                // "accrues 2 / month" here, which put an English sentence, a
+                // unit and a locale's decimal mark in a service.
+                accruesPerMonth = type.AccrualPerMonth,
             }).ToList(),
             requests = mine.Select(one => Request(one, byId)).ToList(),
             waiting = Queue(waiting, proposals, byId, names),

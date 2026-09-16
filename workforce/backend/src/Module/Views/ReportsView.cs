@@ -93,10 +93,13 @@ public static class ReportsView
             earned = Taken(period, leaveCodes, "EL"),
             comp = Taken(period, leaveCodes, "CO"),
             holidays = (int?)null,
-            hours = period.HoursWorked.ToString("0.0"),
-            overtime = period.OvertimeHours == 0
-                ? "0"
-                : period.OvertimeHours.ToString("0.0"),
+            // Numbers, not sentences - ADR 0174. These were "0.0"-formatted
+            // through the machine's culture, which emits 7,5 where a property
+            // reads 7.5; and `overtime` emitted the magic string "0" so that
+            // the surface's `row.overtime === "0"` could match, which made a
+            // screen's styling depend on an exact server-rendered string.
+            hours = period.HoursWorked,
+            overtime = period.OvertimeHours,
         };
 
     /// <summary>Days of one leave code, or zero when the property has no such type.</summary>

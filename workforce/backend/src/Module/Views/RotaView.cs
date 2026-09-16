@@ -117,7 +117,12 @@ public static class RotaView
             overtime = warnings.Select(one => new
             {
                 who = names.TryGetValue(one.StaffId, out var name) ? name : null,
-                planned = one.PlannedHours.ToString("0.#") + " h planned",
+                // The number alone. This carried " h planned" and the surface
+                // wrote "is planned {planned} hours against {threshold}", so the
+                // sentence rendered "is planned 9 h planned hours against 8" -
+                // two words composed here and the rest there, stuttering where
+                // they met.
+                planned = one.PlannedHours,
                 // The threshold is the property's, not the warning's: the check
                 // returns what was planned and which days exceeded, and the
                 // number it was measured against is read from policy once.

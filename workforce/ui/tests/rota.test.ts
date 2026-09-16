@@ -73,8 +73,15 @@ describe("the Team Rota", () => {
 
     // WF-Q14, warn-never-block. "Vishnu is over" tells a manager nothing they
     // can act on; the number tells them how much to move.
-    expect(text).toContain("60.0");
-    expect(text).toContain("48");
+    //
+    // **The whole sentence, not the figure inside it** — ADR 0034, rewritten
+    // rather than deleted. This asserted `"60.0"`, which was the FIXTURE's
+    // spelling: the service formatted `"0.#"`, so it would have sent `60` and
+    // no test could have seen the difference. And a fragment assertion cannot
+    // see a join — this sentence used to render "is planned 60 h planned hours
+    // against 48", because the service composed two of its words and the
+    // surface composed the rest.
+    expect(text).toContain("Vishnu Das is planned 60 hours against 48.");
     expect(root.querySelectorAll("[disabled]")).toHaveLength(0);
   });
 

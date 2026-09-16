@@ -1060,8 +1060,12 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
 
         var answer = await harness.CallAsync(PolicyView.Read, scope, "policy");
 
-        Assert.Equal("9 h / day", answer.GetProperty("overtimeDaily").GetString());
-        Assert.Equal("48 h / week", answer.GetProperty("overtimeWeekly").GetString());
+        // **Numbers, and the sentence is the surface's** — ADR 0174, rewritten
+        // rather than deleted (ADR 0034). These asserted "9 h / day", which was
+        // this service composing a unit, a separator and an English word for
+        // the period, in one locale's decimal notation.
+        Assert.Equal(9m, answer.GetProperty("overtimeDaily").GetDecimal());
+        Assert.Equal(48m, answer.GetProperty("overtimeWeekly").GetDecimal());
     }
 
     [Fact]

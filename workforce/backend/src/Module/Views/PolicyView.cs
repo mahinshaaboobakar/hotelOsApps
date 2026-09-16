@@ -71,8 +71,11 @@ public static class PolicyView
             property = (string?)null,
             catalogue = rows,
             leave = leave.Select(Type).ToList(),
-            overtimeDaily = Hours(threshold?.OvertimeDailyHours, "day"),
-            overtimeWeekly = Hours(threshold?.OvertimeWeeklyHours, "week"),
+            // The thresholds as numbers, null where a property set none - ADR
+            // 0174. These were "9 h / day" built here, so the unit, the "/" and
+            // the word for the period were all this service's, in one language.
+            overtimeDaily = threshold?.OvertimeDailyHours,
+            overtimeWeekly = threshold?.OvertimeWeeklyHours,
             // The declared-holiday list has no owner in this application and no
             // service answers it. Absent rather than an empty sentence: the
             // screen renders nothing where a fabricated "0 declared holidays"
@@ -220,21 +223,22 @@ public static class PolicyView
     }
 
     /// <summary>One leave type, as the table draws it.</summary>
+    /// <remarks>
+    /// <b>Numbers, and null where a type does not accrue</b> - ADR 0174. These
+    /// were <c>"0.##"</c> through the machine's culture and carried their own
+    /// units: <c>" / month"</c>, and an em-dash standing in for absence. The
+    /// unit, the separator and what absence looks like are all the reader's,
+    /// and a surface handed <c>"granted by HR"</c> cannot say it any other way.
+    /// </remarks>
     private static object Type(LeaveType type) => new
     {
         type = type.Name,
-        accrues = type.AccrualPerMonth is { } monthly
-            ? monthly.ToString("0.##") + " / month"
-            : "granted by HR",
-        perYear = type.AccrualPerMonth is { } rate
-            ? (rate * 12).ToString("0.##")
-            : "—",
+        accruesPerMonth = type.AccrualPerMonth,
+        perYear = type.AccrualPerMonth is { } rate ? rate * 12 : (decimal?)null,
         note = string.Empty,
     };
 
-    /// <summary>"9 h / day", or an em-dash where a property set none.</summary>
-    private static string Hours(decimal? threshold, string per)
-        => threshold is { } value ? value.ToString("0.##") + " h / " + per : "—";
+
 
     /// <summary>The four times a shift may carry, as one command.</summary>
     /// <remarks>

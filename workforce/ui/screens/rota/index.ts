@@ -11,7 +11,7 @@ import { legend } from "../../chrome/legend";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type Week } from "../../roster";
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 import { grid } from "./grid";
 import { picker } from "./picker";
 import { ribbon } from "./ribbon";
@@ -54,7 +54,7 @@ export async function rota(
   body.append(view, legend(week.catalogue, "edit a shift → effective forward only"));
 
   if (week.overtime.length > 0) {
-    body.append(overtime(week));
+    body.append(overtime(week, host));
   }
 
   main.replaceChildren(header(week, print), body);
@@ -139,7 +139,7 @@ function header(week: Week, print: () => void): HTMLElement {
  * they can act on and *"60.0 against 48"* tells them how much to move. Nothing
  * on this screen is disabled by it.
  */
-function overtime(week: Week): HTMLElement {
+function overtime(week: Week, host: HostApi): HTMLElement {
   const panel = el("div", "panel");
   const note = el("div", "note");
 
@@ -147,7 +147,9 @@ function overtime(week: Week): HTMLElement {
 
   for (const warning of week.overtime) {
     note.append(el("span", undefined,
-      `${warning.who} is planned ${warning.planned} hours against ${warning.threshold}. `));
+      `${warning.who} is planned `
+      + `${formatNumber(warning.planned, host.property, "at-most-1")} hours `
+      + `against ${warning.threshold}. `));
   }
 
   note.append(el("span", undefined,

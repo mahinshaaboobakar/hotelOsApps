@@ -9,7 +9,7 @@
  * from hours against the property's threshold.
  */
 
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -38,7 +38,7 @@ export async function reports(host: HostApi, main: HTMLElement): Promise<void> {
   const month = got.value;
 
   const body = el("div", "body");
-  body.append(table(month.rows), boundary());
+  body.append(table(month.rows, host), boundary());
 
   const absent = missing(month);
   if (absent !== null) body.append(absent);
@@ -63,7 +63,7 @@ function header(month: Month): HTMLElement {
   return head;
 }
 
-function table(rows: readonly MonthRow[]): HTMLElement {
+function table(rows: readonly MonthRow[], host: HostApi): HTMLElement {
   const list = el("div", "rows");
 
   const head = el("div", "row hd");
@@ -92,8 +92,13 @@ function table(rows: readonly MonthRow[]): HTMLElement {
     // difference between those two from a figure alone.
     item.append(el("div", "quiet", row.holidays === null ? "—" : String(row.holidays)));
 
-    item.append(el("div", undefined, row.hours),
-      el("div", row.overtime === "0" ? "quiet" : "otv", row.overtime));
+    // `=== 0` on a number, where this compared against the string "0" that the
+    // service emitted instead of "0.0" precisely so this line would match. A
+    // screen's styling keyed to the exact characters a service chose.
+    item.append(
+      el("div", undefined, formatNumber(row.hours, host.property, "exactly-1")),
+      el("div", row.overtime === 0 ? "quiet" : "otv",
+        formatNumber(row.overtime, host.property, "exactly-1")));
 
     list.append(item);
   }

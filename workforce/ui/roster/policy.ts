@@ -18,8 +18,17 @@ export interface CatalogueRow {
 /** A leave type and how it accrues. */
 export interface LeaveRow {
   type: string;
-  accrues: string;
-  perYear: string;
+  /**
+   * How much accrues each month, or null where HR grants it by hand.
+   *
+   * A number, because the decimal mark, the unit and the word for *month* are
+   * all the reader's. It arrived as `"accrues 2 / month"` — an English sentence
+   * built in a service, which a surface could not have said any other way.
+   */
+  accruesPerMonth: number | null;
+
+  /** The whole year's entitlement, or null where the type does not accrue. */
+  perYear: number | null;
   note: string;
 }
 
@@ -28,8 +37,11 @@ export interface Policy {
   property: string;
   catalogue: readonly CatalogueRow[];
   leave: readonly LeaveRow[];
-  overtimeDaily: string;
-  overtimeWeekly: string;
+  /** The daily overtime threshold in hours, or null where none is set. */
+  overtimeDaily: number | null;
+
+  /** The weekly one. */
+  overtimeWeekly: number | null;
 
   /**
    * The holiday calendar — **read-only, and not this application's**.
@@ -54,19 +66,19 @@ export const recordedPolicy: Policy = {
   ],
 
   leave: [
-    { type: "Casual", accrues: "2 / month", perYear: "24", note: "—" },
-    { type: "Sick", accrues: "1 / month", perYear: "12", note: "—" },
-    { type: "Earned", accrues: "1.25 / month", perYear: "15", note: "—" },
+    { type: "Casual", accruesPerMonth: 2, perYear: 24, note: "—" },
+    { type: "Sick", accruesPerMonth: 1, perYear: 12, note: "—" },
+    { type: "Earned", accruesPerMonth: 1.25, perYear: 15, note: "—" },
     // No accrual row, because HR grants it — WF-Q13. Null would be wrong here:
     // the property configured a type that is granted, which is a decision.
     {
-      type: "Comp-off", accrues: "granted by HR", perYear: "—",
+      type: "Comp-off", accruesPerMonth: null, perYear: null,
       note: "Holidays worked are counted; HR grants the credit",
     },
   ],
 
-  overtimeDaily: "9 h / day",
-  overtimeWeekly: "48 h / week",
+  overtimeDaily: 9,
+  overtimeWeekly: 48,
 
   // What Core Administration establishes. Shown so a manager knows the rota
   // plans around it — and shown as text, because this screen cannot edit it.

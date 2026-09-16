@@ -124,7 +124,15 @@ export interface DutySpan {
  */
 export interface OvertimeWarning {
   who: string;
-  planned: string;
+  /**
+   * Hours planned, as a number.
+   *
+   * It carried `" h planned"` and the surface wrote *"is planned … hours
+   * against …"* around it, so the sentence rendered **"is planned 9 h planned
+   * hours against 8"**. Two words composed in a service and the rest here,
+   * stuttering where they met.
+   */
+  planned: number;
   threshold: string;
 }
 

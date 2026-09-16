@@ -138,5 +138,5 @@ export const recordedWeek: Week = {
 /** The same week, with somebody planned past the threshold. */
 export const recordedOvertime: Week = {
   ...recordedWeek,
-  overtime: [{ who: "Vishnu Das", planned: "60.0", threshold: "48" }],
+  overtime: [{ who: "Vishnu Das", planned: 60, threshold: "48" }],
 };

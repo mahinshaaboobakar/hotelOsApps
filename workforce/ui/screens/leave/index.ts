@@ -55,7 +55,7 @@ export async function leave(
     split.append(queue(board.waiting, host.property), swapCard(board.swap));
     body.append(split);
   } else {
-    body.append(balances(board.balances), requests(board.requests, host.property));
+    body.append(balances(board.balances, host.property), requests(board.requests, host.property));
   }
 
   main.replaceChildren(header(board, open), tabs(board, tab, go), body);

@@ -7,7 +7,7 @@
  * front of them, and a balance one click away is a number nobody checks.
  */
 
-import type { PropertyEnvironment } from "@hotelos/sdk";
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { days } from "../../chrome/dates";
 import { el } from "../../chrome/element";
@@ -19,7 +19,10 @@ import type { Balance, LeaveRow } from "../../roster/leave";
  * @param balances the property's leave types, with this person's days
  * @returns the row of cards
  */
-export function balances(balances_: readonly Balance[]): HTMLElement {
+export function balances(
+  balances_: readonly Balance[],
+  property: PropertyEnvironment,
+): HTMLElement {
   const row = el("div", "bals");
 
   for (const balance of balances_) {
@@ -35,9 +38,11 @@ export function balances(balances_: readonly Balance[]): HTMLElement {
       el("div", undefined, balance.type),
     );
 
-    if (balance.note !== "") {
-      card.append(el("s", undefined, balance.note));
-    }
+    // Composed here — the verb, the unit and the decimal mark are the
+    // reader's, and the service sends only the rate (ADR 0174).
+    card.append(el("s", undefined, balance.accruesPerMonth === null
+      ? "Granted by HR"
+      : `Accrues ${formatNumber(balance.accruesPerMonth, property, "at-most-2")} / month`));
 
     row.append(card);
   }

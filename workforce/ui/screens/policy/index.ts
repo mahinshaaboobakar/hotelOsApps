@@ -13,7 +13,7 @@
  * elsewhere.
  */
 
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -58,7 +58,7 @@ export async function policy(
   const config = got.value;
 
   const body = el("div", "body");
-  body.append(shifts(config.catalogue), leave(config.leave), overtime(config), holidays(config));
+  body.append(shifts(config.catalogue), leave(config.leave, host), overtime(config, host), holidays(config));
 
   main.replaceChildren(header(config, open), body);
 
@@ -127,7 +127,7 @@ function shifts(rows: readonly CatalogueRow[]): HTMLElement {
 }
 
 /** Leave types — a rate, never an annual allowance. */
-function leave(rows: readonly LeaveRow[]): HTMLElement {
+function leave(rows: readonly LeaveRow[], host: HostApi): HTMLElement {
   const section = el("div", "sect");
   const columns = "1fr 150px 100px 1.6fr";
 
@@ -146,8 +146,15 @@ function leave(rows: readonly LeaveRow[]): HTMLElement {
     item.style.gridTemplateColumns = columns;
     item.append(
       el("b", undefined, row.type),
-      el("div", undefined, row.accrues),
-      el("div", "quiet", row.perYear),
+      // Composed here, because the unit and the word for the period are the
+      // reader's. The service sends the rate and says nothing about how it
+      // reads - ADR 0174, and ADR 0152's argument applied to composition.
+      el("div", undefined, row.accruesPerMonth === null
+        ? "Granted by HR"
+        : `${formatNumber(row.accruesPerMonth, host.property, "at-most-2")} / month`),
+      el("div", "quiet", row.perYear === null
+        ? "—"
+        : formatNumber(row.perYear, host.property, "at-most-2")),
       el("div", "quiet", row.note),
     );
     list.append(item);
@@ -163,7 +170,7 @@ function leave(rows: readonly LeaveRow[]): HTMLElement {
 }
 
 /** One threshold, warning at planning time. */
-function overtime(config: Policy): HTMLElement {
+function overtime(config: Policy, host: HostApi): HTMLElement {
   const section = el("div", "sect");
 
   section.append(el("div", "stitle", "Overtime"));
@@ -171,8 +178,8 @@ function overtime(config: Policy): HTMLElement {
   const row = el("div", "otrow");
   row.append(
     el("span", "quiet", "Overtime begins after"),
-    el("div", "field", config.overtimeDaily),
-    el("div", "field", config.overtimeWeekly),
+    el("div", "field", threshold(config.overtimeDaily, "day", host)),
+    el("div", "field", threshold(config.overtimeWeekly, "week", host)),
     el("span", "quiet", "Warns while the rota is being built. Never blocks."),
   );
 
@@ -199,4 +206,24 @@ function holidays(config: Policy): HTMLElement {
 
   section.append(title, note);
   return section;
+}
+
+/**
+ * An overtime threshold, or the absence of one.
+ *
+ * @param hours the threshold, null where the property set none
+ * @param per the period it is measured over
+ * @param host for the property's locale
+ * @returns the sentence a person reads
+ *
+ * @remarks
+ * This was `Hours(decimal?, string)` in the service, building `"9 h / day"` —
+ * so the unit, the separator and the English word for the period were all
+ * decided one component away from the reader, in one language, and an em-dash
+ * stood in for absence with no way for a surface to say it differently.
+ */
+function threshold(hours: number | null, per: string, host: HostApi): string {
+  return hours === null
+    ? "—"
+    : `${formatNumber(hours, host.property, "at-most-2")} h / ${per}`;
 }

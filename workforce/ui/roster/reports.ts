@@ -30,8 +30,18 @@ export interface MonthRow {
    */
   holidays: number | null;
 
-  hours: string;
-  overtime: string;
+  /** Hours worked in the period. */
+  hours: number;
+
+  /**
+   * Overtime hours, zero included.
+   *
+   * It used to arrive as a string, and as the magic value `"0"` rather than
+   * `"0.0"` when there was none — so the screen's own `=== "0"` test, which
+   * decides whether the figure is drawn quietly, depended on the exact
+   * characters a service chose.
+   */
+  overtime: number;
 }
 
 /** The month. */
@@ -48,32 +58,32 @@ export const recordedMonth: Month = {
     {
       who: "Priya Thomas", role: "Supervisor", posted: 26, present: 26, late: 1,
       casual: 0, sick: 0, earned: 0, comp: 0, holidays: null,
-      hours: "208.5", overtime: "6.5",
+      hours: 208.5, overtime: 6.5,
     },
     {
       who: "Anjali Menon", role: "Receptionist", posted: 24, present: 22, late: 4,
       casual: 2, sick: 0, earned: 0, comp: 0, holidays: null,
-      hours: "176.0", overtime: "0",
+      hours: 176.0, overtime: 0,
     },
     {
       who: "Vishnu Das", role: "Night auditor", posted: 26, present: 26, late: 0,
       casual: 0, sick: 0, earned: 0, comp: 1, holidays: null,
-      hours: "212.0", overtime: "10.0",
+      hours: 212.0, overtime: 10.0,
     },
     {
       who: "Sneha Iyer", role: "Receptionist", posted: 23, present: 21, late: 3,
       casual: 0, sick: 2, earned: 0, comp: 0, holidays: null,
-      hours: "168.0", overtime: "0",
+      hours: 168.0, overtime: 0,
     },
     {
       who: "Joseph Kurian", role: "Bell captain", posted: 25, present: 25, late: 0,
       casual: 0, sick: 0, earned: 5, comp: 0, holidays: null,
-      hours: "200.0", overtime: "2.0",
+      hours: 200.0, overtime: 2.0,
     },
     {
       who: "Rani Rajan", role: "Guest relations", posted: 24, present: 23, late: 2,
       casual: 1, sick: 0, earned: 0, comp: 0, holidays: null,
-      hours: "184.0", overtime: "0",
+      hours: 184.0, overtime: 0,
     },
   ],
 };

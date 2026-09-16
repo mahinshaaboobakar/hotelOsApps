@@ -29,8 +29,15 @@ export interface Balance {
   /** The whole entitlement, when the type accrues one. */
   of: number | null;
 
-  /** How it accrues, or how it is granted. */
-  note: string;
+  /**
+   * How much accrues each month, or null where HR grants it by hand.
+   *
+   * This was `note: string`, carrying `"accrues 2 / month"` — a sentence built
+   * in a service, with an English verb, a unit and a locale's decimal mark in
+   * it. The surface composes it now, which is the only place that knows how a
+   * reader says any of the three.
+   */
+  accruesPerMonth: number | null;
 }
 
 /** Where a request has got to. */
@@ -115,21 +122,21 @@ export const recordedLeave: LeaveBoard = {
   balances: [
     {
       id: "3f1c0a64-5d21-4e8b-9f02-1a7c6b40d911", type: "Casual",
-      days: 4, of: 8, note: "accrues 2 / month",
+      days: 4, of: 8, accruesPerMonth: 2,
     },
     {
       id: "7a2e5b18-9c43-4d6f-8b10-2e5d9c7a4f36", type: "Sick",
-      days: 6, of: 12, note: "",
+      days: 6, of: 12, accruesPerMonth: null,
     },
     // The frame's own minus sign. A screen that clamped this at zero would be
     // hiding the decision its manager already made.
     {
       id: "c58d3712-6b90-4a2e-97d4-8f3b1e6c05a7", type: "Earned",
-      days: -1, of: 15, note: "approved overdraw",
+      days: -1, of: 15, accruesPerMonth: null,
     },
     {
       id: "e94b7f25-1a38-4c6d-b052-7d9e3f8a16c4", type: "Comp-off",
-      days: 2, of: null, note: "granted by HR",
+      days: 2, of: null, accruesPerMonth: null,
     },
   ],
 
