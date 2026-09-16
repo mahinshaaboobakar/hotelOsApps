@@ -104,7 +104,26 @@ const FRAMES = [
 const run = promisify(execFile);
 
 async function sweep(url, out, root) {
-  await run(process.execPath, [MEASURE, "--sweep", url, out, "1220", "900", root]);
+  // **Retried, because the browser launch is a race the instrument sometimes
+  // loses.** Edge is spawned and then polled at `/json` for a page target; when
+  // that poll gives up, `targets` is undefined and the sweep dies on
+  // `Cannot read properties of undefined`. It took out frame 12 of a
+  // seventeen-frame run and left eleven comparisons that still added up — a
+  // partial run whose columns close is exactly what this audit cannot afford to
+  // read as a result.
+  //
+  // Three attempts, and the third failure is raised rather than swallowed: a
+  // sweep that quietly gave up would leave a frame uncompared with no line
+  // saying so, which is worse than the crash.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await run(process.execPath, [MEASURE, "--sweep", url, out, "1220", "900", root]);
+      return;
+    } catch (failure) {
+      if (attempt === 3) throw failure;
+      process.stdout.write(`    retrying ${root} — attempt ${attempt} started no browser\n`);
+    }
+  }
 }
 
 const only = process.argv[2];
