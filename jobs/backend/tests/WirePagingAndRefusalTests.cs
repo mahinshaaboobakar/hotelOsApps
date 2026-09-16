@@ -34,7 +34,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
         => await h.Client.RaiseJobAsync(new RaiseJobRequest
         {
             Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = summary,
-            RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = h.PropertyId.ToString(),
+            RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff,
         });
 
     private static ListJobsRequest Page(WireHarness h, int page, int size) => new()

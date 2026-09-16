@@ -112,7 +112,6 @@ message RaiseJobRequest {
   string flow_priority = 8;   // the flow's, or empty
   string raised_via    = 9;
   string raised_kind   = 10;
-  string raised_by_id  = 11;
   string stay_id       = 12;
   string scheduled_for = 13;  // ISO date or empty
   string cycle         = 14;
@@ -120,6 +119,19 @@ message RaiseJobRequest {
   string assign_to_user_id = 16;
   string assign_to_team_id = 17;
   string parent_job_id = 18;
+
+  // **`raised_by_id` was field 11 and is gone — ADR 0172.** Who raised a job is
+  // the caller, and the caller is established by the session the request
+  // already carries; a field for it is a place to put somebody else's id.
+  // Validating it against the scope would have been the smaller change and the
+  // weaker one: the API has nowhere to put them is a stronger statement than
+  // the API refuses them.
+  //
+  // Reserved rather than deleted, because a number that comes back means a new
+  // field silently inherits an old field's meaning on every client that was
+  // not rebuilt.
+  reserved 11;
+  reserved "raised_by_id";
 }
 
 message JobRequest {

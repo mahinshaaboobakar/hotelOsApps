@@ -44,7 +44,15 @@ public sealed class PpmDueHandler(JobsDbContext db, JobService jobs) : IEventHan
                 Priority = payload.Priority,
                 RaisedVia = RaisedVia.App,
                 RaisedKind = RaisedKind.Application,
-                RaisedById = payload.PlanId,
+                // **Not the plan.** `RaisedById` names the PERSON who raised a
+                // job, and a PPM plan is not one — writing its id here put a
+                // maintenance plan in a column every screen renders as a
+                // colleague, and `Naming.Raiser` would have called it "Staff
+                // member". Nobody raised this: the Engineering app's plan fell
+                // due and the application acted, which `RaisedKind.Application`
+                // already says. ADR 0172, and the gap rule: no value stands in
+                // for a measurement nobody took.
+                RaisedById = null,
                 ScheduledFor = payload.ScheduledFor,
                 Cycle = cycle,
             },

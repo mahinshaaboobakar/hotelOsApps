@@ -37,7 +37,12 @@ public class WireCrudTests(JobsFixture fixture)
     private static RaiseJobRequest Raise(WireHarness h, string itemId, string summary = "Room feels warm since noon") => new()
     {
         Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = summary,
-        RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff, RaisedById = h.PropertyId.ToString(),
+        // **`RaisedById` is off the wire — ADR 0172.** It was set here to the
+        // property id, which was never a person and never noticed, because
+        // nothing downstream reads it as one until a screen renders the raiser.
+        // The caller is the session's now, so a test cannot supply it and does
+        // not need to.
+        RaisedVia = RaisedVia.App, RaisedKind = RaisedKind.Staff,
     };
 
     [Fact]
@@ -153,7 +158,6 @@ public class WireCrudTests(JobsFixture fixture)
         var arjun = Guid.CreateVersion7();
         var request = Raise(h, itemId);
         request.RaisedKind = RaisedKind.Guest;
-        request.RaisedById = string.Empty;
         request.StayId = stay.ToString();
         request.RaisedVia = RaisedVia.GuestApp;
         var job = await h.Client.RaiseJobAsync(request);

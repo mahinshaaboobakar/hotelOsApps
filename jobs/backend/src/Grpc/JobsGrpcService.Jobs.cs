@@ -16,7 +16,11 @@ public partial class JobsGrpcService
             ItemId = ParseId(r.ItemId, "item_id"), LocationId = ParseId(r.LocationId, "location_id"),
             AssetId = ParseOptionalId(r.AssetId, "asset_id"), Summary = r.Summary, Details = Blank(r.Details),
             Priority = Blank(r.Priority), FlowPriority = Blank(r.FlowPriority), RaisedVia = r.RaisedVia, RaisedKind = r.RaisedKind,
-            RaisedById = ParseOptionalId(r.RaisedById, "raised_by_id"), StayId = ParseOptionalId(r.StayId, "stay_id"),
+            // **Derived, never accepted** — ADR 0172. The module surface has
+            // done this since it was built (`WriteCapabilities.cs:55`); this
+            // door still took it from the wire, so the same fact had two
+            // sources and only one of them was the caller.
+            RaisedById = scope.UserId, StayId = ParseOptionalId(r.StayId, "stay_id"),
             ScheduledFor = ParseOptionalDate(r.ScheduledFor, "scheduled_for"), Cycle = Blank(r.Cycle),
             Restricted = r.HasRestricted ? r.Restricted : null,
             AssignToUserId = ParseOptionalId(r.AssignToUserId, "assign_to_user_id"),
