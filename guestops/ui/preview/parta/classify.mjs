@@ -211,7 +211,15 @@ for (const file of readdirSync(dir).filter((f) => /^cmp-.+\.json$/u.test(f))) {
   for (const name of Object.keys(totals)) totals[name] += report.counts[name];
 
   for (const one of report.differing) {
-    nodes.push({ frame: report.label.replace(/^frame /u, ""), text: one.text, props: one.properties });
+    // **The frame's number, not its whole label.** `NAMED` is keyed on the
+    // number an earlier round used — `2|holds no room` — and this run labels
+    // frames `2 · Bookings`, so every hand-named difference fell through as
+    // unclassified and read as two new build errors. Taking the leading token
+    // keeps those namings and their reasons attached to the nodes they were
+    // written for, instead of re-adjudicating a question already answered.
+    const frame = report.label.replace(/^frame /u, "").split(" · ")[0];
+
+    nodes.push({ frame, text: one.text, props: one.properties });
   }
 }
 
