@@ -40,6 +40,49 @@ Chapter §9's own row has carried that since 2026-09-05; this box had not.
 
 ---
 
+## 0.3.0, published 2026-09-16 — what a fresh install of it shows
+
+The package in the registry is `jobs-0.3.0.hopkg`. **An administrator who
+installs it gets a working application whose every screen refuses, and the
+refusal is the honest one.** Stated here because a first install that looks
+broken and a first install that is broken are different facts, and only this
+page can tell an administrator which one they have.
+
+**What it shows.** All eight screens render, the six widgets appear, the
+settings tabs draw, and the module and its six widget bundles load as separate
+realms. The backend migrates its schema, answers its health probe, consumes its
+five subscribed events and publishes its fourteen, and the general manager's
+grant and revoke controls are present.
+
+**What it does not show — for anyone but a general manager.** Every board,
+every widget and every read answers **403**, and each surface says so on its
+face with the cause, the capability and the method that was refused. There is
+no longer a recorded example behind them: Phase 2 deleted the fallback
+argument, so a screen that cannot read *cannot* draw a hotel that does not
+exist. A person holding `property#general_manager` reads real data; a person
+created by `scripts/seed-user` reads nothing, and that is the tool's defect
+(§9), not this package's.
+
+**Measured today against `7a4b8620`**, which landed `job.read`'s property scope
+in `model.fga` and regenerated `model.json`. Nine reads driven at the module
+door with a real bearer and a real property:
+
+```text
+401  no token
+400  a token, no X-HotelOS-Property
+403  board · today · live · widgetBoard · widgetBlocked · jobsNow
+     · widgetPriority · widgetDue · widgetRaised        "permission denied"
+```
+
+Nine `AuthorizeBatch` calls left the module in that window and **none of them
+failed** — zero gRPC error statuses. That is the whole measurement: the Kernel
+is now *answering* the question and answering it *no*, where before the
+registry refused the question itself as malformed. **A denial and an
+unanswerable check reach a caller looking identical**, and the difference
+between them is the difference between a missing tuple and a missing design.
+
+---
+
 ## 1 · The two halves
 
 | | Built | Proven |

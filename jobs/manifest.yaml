@@ -26,7 +26,32 @@ name: "Jobs"
 # The minor rather than the patch because this is the first build that is not a
 # probe: six widgets, the general manager's grant, and Master Data read through
 # the install grant.
-version: 0.2.0
+#
+# **0.3.0 — the content moved, so the version had to.** `jobs-0.2.0.hopkg` is in
+# the registry and is what this property installed; re-publishing today would
+# write different bytes under a filename that already means something, and
+# nobody could then say which build a hotel is running. Three changes are in
+# this one and none of them is a patch:
+#
+#   * **The wire lost a field** — ADR 0172 took `raised_by_id` off `raise` and
+#     reserved its number, because the raiser is derived from the caller's scope
+#     and a wire field invited a client to name somebody else. A consumer that
+#     sent one breaks here, which is what a minor bump is for.
+#   * **The read seam is the SDK's**, and a widget that cannot read now says so
+#     rather than drawing a recorded example. The old fallback is not forbidden,
+#     it is unwriteable: there is no argument left to pass.
+#   * **`job.read` carries a property scope**, so the six board reads are asked
+#     of the property rather than of an object type the permission never
+#     declared.
+#
+# The payload is also trimmed in this build, which changes no behaviour and
+# would not on its own have moved the number — it lands in the same one, and the
+# number moves once. `dotnet publish -c Release -r win-x64 --self-contained
+# false` is what produces it: the untrimmed publish carried six copies of the
+# Temporal core bridge, one per RID, of which five are `.so` and `.dylib` files
+# that cannot execute on the only platform this product runs on. Workforce met
+# the identical payload and trimmed it the same way (`b471a2c`).
+version: 0.3.0
 publisher: hotelos
 category: operations
 description: >-
