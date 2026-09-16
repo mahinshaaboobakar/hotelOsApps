@@ -30,13 +30,28 @@ namespace PmsOracle.Adapters;
 /// <para>
 /// <b>What it is waiting for, measured rather than assumed.</b> The obvious
 /// answer — the per-property token read from the Token Vault — is what the
-/// <see cref="IOhipQueue"/> comment has said for weeks, and it is not the
-/// binding one. <b>The Integration Hub composes no connector adapter at all</b>:
-/// <c>ConnectorHost</c> takes <c>IEnumerable&lt;IConnectorAdapter&gt;</c>,
-/// the Hub's <c>Program.cs</c> registers none, and the service loads no
-/// assembly (<c>Assembly.</c> appears zero times in its source). So
-/// <c>PollScheduler</c> starts zero loops, and a finished transport here would
-/// still never be called.
+/// <see cref="IOhipQueue"/> comment said for weeks, and it is not the binding
+/// one. <b>Nothing constructs this adapter</b>: <c>ConnectorHost</c> takes
+/// <c>IEnumerable&lt;IConnectorAdapter&gt;</c>, the Hub registers none, and
+/// the Hub loads no assembly — <c>Assembly.</c> appears zero times in its
+/// source. So <c>PollScheduler</c> starts zero loops, and a finished transport
+/// here would still never be called.
+/// </para>
+/// <para>
+/// <b>And the remedy is NOT for the Hub to register one</b> — ADR 0092, as
+/// clarified 2026-09-16, forbids it in as many words: <i>"it MUST NOT load
+/// third-party connector assemblies into the Integration Hub process."</i> A
+/// connector runs out of process (ADR 0173); <c>IConnectorAdapter</c> is the
+/// SDK contract its <b>worker</b> implements, and the Hub launches and manages
+/// that process rather than importing it.
+///
+/// <b>So the measurement above is right and the conclusion a reader would draw
+/// from it was wrong, which is why this paragraph exists.</b> *Nothing
+/// registers an adapter* reads as *somebody should add a registration*, and
+/// that reading cost two contradictory instructions before the ambiguity was
+/// removed from ADR 0092. What is missing is the Hub's **runtime launcher and
+/// IPC configuration** — an implementation gap on the Hub's side, named by
+/// ADR 0173 and not this package's to invent.
 /// </para>
 /// <para>
 /// <b>The queue is destructive, and that is the requirement this adapter is
@@ -343,16 +358,19 @@ public sealed class OracleCloudAdapter(
 /// <b>Two things are owed, and they are not the same size.</b> The one this
 /// comment used to name alone is the credential: OHIP is reached with a
 /// per-property token from the Token Vault (`HUB-Q6`, the Kernel secret
-/// store's <c>connector/</c> namespace). The larger one is that <b>the
-/// Integration Hub composes no connector adapter</b> — measured, not recalled:
-/// <c>ConnectorHost</c> is handed <c>IEnumerable&lt;IConnectorAdapter&gt;</c>,
-/// the Hub registers none, and it loads no assembly. An implementation of this
-/// interface would compile, pass its tests, and never be constructed.
+/// store's <c>connector/</c> namespace). The larger one is that <b>nothing
+/// constructs the adapter this port is injected into</b> — and the reason is
+/// the one a reader is most likely to get wrong.
+///
+/// <b>Not because a registration is missing from the Hub.</b> ADR 0092, as
+/// clarified 2026-09-16, forbids that: <i>"it MUST NOT load third-party
+/// connector assemblies into the Integration Hub process."</i> A connector runs
+/// out of process (ADR 0173) and the Hub launches it; what is absent is the
+/// Hub's runtime launcher and IPC configuration, which is the Hub's work.
 ///
 /// Everything above this line — validation, the dedupe promise, normalisation,
 /// the destructive-queue shape, the guarantee key — is finished and testable
-/// against a double. What is owed is a socket <i>and</i> somewhere for it to be
-/// plugged in.
+/// against a double. What is owed is a socket, and a process for it to live in.
 /// </remarks>
 public interface IOhipQueue
 {
