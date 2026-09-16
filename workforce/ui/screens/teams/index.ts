@@ -188,7 +188,7 @@ function header(
       // weekday, and a strip that says "Fri 04" says nothing when the paging
       // crosses a month. Reported rather than composed here: building the
       // string myself would put culture-sensitive formatting straight back
-      // into this module, which is the thing ADR 0152 just removed.
+      // into this module, which is the thing ADR 0175 removes.
       `‹ ${formatDay(board.onDate, property, "day-month-year")} ›`), form);
     return head;
   }

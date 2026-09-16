@@ -150,7 +150,7 @@ export const recordedPostingEnding: PostingEnding = {
   who: "Rajan Pillai",
   department: "Kitchen",
 
-  // ISO, like every other day on the wire - ADR 0152. It read
+  // ISO, like every other day on the wire - ADR 0175. It read
   // "Thu 4 Sep 2026", which is a Friday, and the word "member since 19 Aug"
   // put the sentence inside the value where no locale could reach it.
   lastDay: "2026-09-04",

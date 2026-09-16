@@ -48,7 +48,7 @@ export interface LeaveRow {
   type: string;
   note: string;
   /**
-   * The two ends of the leave, as the wire carries them - ADR 0152.
+   * The two ends of the leave, as the wire carries them - ADR 0175.
    *
    * The service used to join them, in its own culture, and compress a
    * same-month range to "7 - 8 Sep". That compression assumes the month

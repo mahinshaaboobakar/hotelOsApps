@@ -94,7 +94,7 @@ public static class RotaView
             // `clear`, `copyWeek` all take one — and `days` is seven display
             // headings ("THU 27") that no client can turn back into one. A
             // surface that had to parse its own heading to say which day it
-            // meant is the defect ADR 0152 exists to prevent, arriving through
+            // meant is the defect ADR 0175 exists to prevent, arriving through
             // the write instead of the render.
             monday = monday.ToString("O")[..10],
 

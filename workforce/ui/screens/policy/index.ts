@@ -148,7 +148,8 @@ function leave(rows: readonly LeaveRow[], host: HostApi): HTMLElement {
       el("b", undefined, row.type),
       // Composed here, because the unit and the word for the period are the
       // reader's. The service sends the rate and says nothing about how it
-      // reads - ADR 0174, and ADR 0152's argument applied to composition.
+      // reads - ADR 0174, and ADR 0175's rule that the wire carries the value
+      // while the reader-facing layer composes the presentation.
       el("div", undefined, row.accruesPerMonth === null
         ? "Granted by HR"
         : `${formatNumber(row.accruesPerMonth, host.property, "at-most-2")} / month`),

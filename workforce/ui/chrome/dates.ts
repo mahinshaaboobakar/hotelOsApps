@@ -19,9 +19,19 @@
  * a number, because a number that does not say what the sentence claims is
  * worse than no number at all.
  *
- * The neighbouring rule, which does have an authority: instants cross the wire
- * machine-readable and each surface renders them through one shared utility
- * deriving locale and timezone from the property — `JOBS-Q1(8)`, 2026-09-04.
+ * **Ruled since: ADR 0175** — *the wire carries the value; the reader-facing
+ * layer composes the presentation*. The false citation was load-bearing in 18
+ * places across this application and nowhere else, and all 18 were migrated to
+ * 0175 in one sweep rather than moved to the nearest plausible number: the two
+ * adjacent rulings are `JOBS-Q1(8)` (instants render through one shared utility
+ * deriving locale and timezone from the property) and `PKG-Q46(4)` (which of
+ * the two formatters a screen uses), and **neither states that the service
+ * sends a value rather than a rendered string** — which is what fifteen of the
+ * eighteen asserted. Implied by both, stated by neither.
+ *
+ * The composition rule this file's own sentence names — a locale's word order
+ * is a grammar, not a format — remains the recorded finding of 2026-09-10 and
+ * is not what 0175 rules.
  *
  * **That compression does not come across the bridge, and the reason is the
  * ruling in miniature.** Putting the month only at the second end assumes the

@@ -54,7 +54,7 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         Assert.Equal("Receptionist", row.GetProperty("role").GetString());
         Assert.Equal("FO", row.GetProperty("departments")[0].GetString());
 
-        // **A date and a count, not a sentence** — ADR 0152. This answered
+        // **A date and a count, not a sentence** — ADR 0175. This answered
         // "Since 1 Sep 2026 · 2 postings" as one string, so a row's vocabulary
         // travelled in the payload, the month name came from the account the
         // service runs under, and a screen wanting the date had to take the
@@ -260,7 +260,7 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         // showed nothing. The value was on the membership row the query threw
         // away.
         //
-        // ISO on the wire — ADR 0152 — and ordered by when they joined, which
+        // ISO on the wire — ADR 0175 — and ordered by when they joined, which
         // was previously whatever the database returned.
         Assert.Equal(
             [("Deepa Menon", "2026-09-01"), ("Ravi Kurian", "2026-09-04")],
@@ -381,16 +381,29 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
     }
 
     [Fact]
-    public async Task An_unset_overtime_threshold_reads_as_an_em_dash_and_not_as_zero()
+    public async Task An_unset_overtime_threshold_crosses_as_absent_and_not_as_zero()
     {
         var harness = new ModuleHarness(fixture);
 
         var answer = await harness.CallAsync(
             PolicyView.Read, ModuleHarness.Property(), "policy");
 
-        // A property that has set no threshold and one that set zero are
-        // different facts, and zero is the one that reads as "never warn".
-        Assert.Equal("—", answer.GetProperty("overtimeDaily").GetString());
+        var daily = answer.GetProperty("overtimeDaily");
+
+        // **Rewritten, not deleted — ADR 0034.** This asserted the em-dash,
+        // which was this service choosing a character for absence; ADR 0174
+        // moved that choice to the surface, where a reader's own notation for
+        // "nothing here" lives. The RULE the test exists for is untouched and
+        // is the half that matters: *a property that has set no threshold and
+        // one that set zero are different facts, and zero is the one that reads
+        // as "never warn"*.
+        Assert.Equal(JsonValueKind.Null, daily.ValueKind);
+
+        // Stated rather than implied. `Null` already excludes zero, and writing
+        // it out is what stops a future "helpful" default — the gap rule's own
+        // test, which a numeric field is exactly where somebody reaches for.
+        Assert.NotEqual(JsonValueKind.Number, daily.ValueKind);
+
         Assert.Equal(JsonValueKind.Null, answer.GetProperty("holidays").ValueKind);
     }
 

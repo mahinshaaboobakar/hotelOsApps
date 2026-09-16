@@ -191,7 +191,7 @@ public static class PeopleView
         };
     }
 
-    /// <summary>When the primary posting began — ADR 0152.</summary>
+    /// <summary>When the primary posting began — ADR 0175.</summary>
     /// <remarks>
     /// **The word and the count are the screen's; the date is the wire's.**
     /// This composed the whole line — <c>"Since 4 Jan 2025 · 2 postings"</c> —

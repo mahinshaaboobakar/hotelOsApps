@@ -58,7 +58,7 @@ public static class DutyView
 
         return new
         {
-            // **The seven days, as the wire carries them** — ADR 0152. This sent
+            // **The seven days, as the wire carries them** — ADR 0175. This sent
             // a rendered range (`1 Sep – 7 Sep`) and seven rendered headers
             // (`ddd d`), both in the culture of whichever account the service
             // runs under. The screen composes the range from the first and the

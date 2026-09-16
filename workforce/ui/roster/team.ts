@@ -51,7 +51,7 @@ export interface Team {
   members: number;
 
   /**
-   * When it was formed, as the wire carries it - ADR 0152.
+   * When it was formed, as the wire carries it - ADR 0175.
    *
    * ISO, rendered by the screen against the property's locale. It used to
    * arrive as `d MMM yyyy` from the service, where the month name came from
@@ -131,7 +131,7 @@ export interface Teams {
   teams: readonly Team[];
 
   /**
-   * The day the counts are for, as the wire carries it - ADR 0152.
+   * The day the counts are for, as the wire carries it - ADR 0175.
    *
    * **One spelling of one fact.** For one commit this arrived twice, once
    * rendered and once ISO, because a write needs a day it can send and the

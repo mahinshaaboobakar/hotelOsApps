@@ -28,7 +28,7 @@ export interface Posting {
 
   /** When the posting began, and whether the person holds more than one. */
   /**
-   * When the primary posting began, as the wire carries it - ADR 0152.
+   * When the primary posting began, as the wire carries it - ADR 0175.
    *
    * The service used to send the whole sentence, `"Since 4 Jan 2025 - 2
    * postings"`, so a row's vocabulary lived in the payload and the month name

@@ -60,7 +60,7 @@ export interface Register {
   /**
    * The seven days of the week being viewed, as the wire carries them.
    *
-   * ADR 0152. This arrived as a rendered range plus seven rendered headers,
+   * ADR 0175. This arrived as a rendered range plus seven rendered headers,
    * both in the culture of the account the service runs under. The range is
    * composed by the screen from the first and the last of these - the dash and
    * the word order are the screen's, and the days are the service's.

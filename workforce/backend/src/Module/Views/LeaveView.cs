@@ -336,7 +336,7 @@ public static class LeaveView
     /// <summary>The two ends of a leave, as the wire carries them.</summary>
     /// <remarks>
     /// <para>
-    /// **The range is the screen's to compose** — ADR 0152. This joined it
+    /// **The range is the screen's to compose** — ADR 0175. This joined it
     /// here, in the culture of whichever account the service runs under, and
     /// compressed a same-month range to <c>"7 – 8 Sep"</c>.
     /// </para>

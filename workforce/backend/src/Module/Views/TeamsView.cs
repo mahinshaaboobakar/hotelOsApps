@@ -63,7 +63,7 @@ public static class TeamsView
             property = call.Optional("property")?.GetString(),
             teams = rows,
 
-            // **The day, once, as the wire carries it** — ADR 0152. This
+            // **The day, once, as the wire carries it** — ADR 0175. This
             // carried a rendering (`ddd d MMM`) beside the ISO value for one
             // commit, which was one commit of two spellings of one fact. The
             // rendering used the process's current culture, so a hotel's own
@@ -284,7 +284,7 @@ public static class TeamsView
             // date and every real property showed nothing, and the two could
             // not be told apart from either side.
             //
-            // ISO, per ADR 0152: the screen renders it against the property's
+            // ISO, per ADR 0175: the screen renders it against the property's
             // locale.
             since = member.JoinedOn.ToString("yyyy-MM-dd"),
         };
