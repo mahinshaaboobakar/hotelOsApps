@@ -39,11 +39,40 @@ public static class InstallerConvention
     /// <summary>The schema this application's manifest declares.</summary>
     public const string Schema = "workforce";
 
+    /// <summary>
+    /// What distinguishes THIS run's cluster roles from every other one's.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Required, not a precaution.</b> <c>CLAUDE.md</c>: <i>tests touching
+    /// shared machine state — a CNG key container, a certificate-store entry, a
+    /// database row — must name that state per test.</i> A cluster-scoped role
+    /// is shared machine state more thoroughly than a row is: it outlives the
+    /// scratch database entirely, so a fixed name collides on two axes at once —
+    /// with a parallel run, and with a real installation.
+    /// </para>
+    /// <para>
+    /// <b>This file argued the other way and was wrong.</b> Its case was that
+    /// <i>a role invented for the tests would be a role no property has</i>, and
+    /// that the suite would then characterise against something that does not
+    /// exist. What the suite proves is the SHAPE of the installer's step 4 —
+    /// which role owns the schema, which connects, which grants are in place —
+    /// and the shape is unchanged by a suffix. What the fixed name bought was a
+    /// resemblance; what it cost was a real property's application role, reset
+    /// to a test password while the Kernel's sealed secret held the real one.
+    /// </para>
+    /// <para>
+    /// Computed once per process, so every test in a run shares one pair and a
+    /// second run on the same cluster shares nothing with it.
+    /// </para>
+    /// </remarks>
+    private static readonly string Run = Guid.NewGuid().ToString("n")[..8];
+
     /// <summary><c>NOLOGIN</c>. Owns the schema; migrations assume it — ADR 0029.</summary>
-    public const string OwnerRole = "hotelos_owner_workforce";
+    public static readonly string OwnerRole = $"hotelos_owner_workforce_{Run}";
 
     /// <summary><c>LOGIN</c>. What the running application connects as.</summary>
-    public const string AppRole = "hotelos_app_workforce";
+    public static readonly string AppRole = $"hotelos_app_workforce_{Run}";
 
     /// <summary>The role a migration runs as — <c>store/mod.rs:53</c>.</summary>
     public const string MigrationRole = "hotelos_migrator";
@@ -259,18 +288,34 @@ public static class InstallerConvention
         //
         // The guard's old message named the hazard exactly right and then
         // pointed the suite at the cluster where it was about to happen.
+        //
+        // **And its stated reason has since expired, which is recorded rather
+        // than quietly replaced.** It said: *this harness creates roles under the
+        // INSTALLER's own names, so they collide with that property's by
+        // construction.* Since the roles became run-suffixed that is false - the
+        // names are unique per run, cannot collide with a property's, and are
+        // dropped by a teardown gated on having created them.
+        //
+        // A justification that decays into an argument for REMOVING the thing it
+        // justifies is its own hazard: a reader meeting a dead reason concludes
+        // the constraint expired. So the reason is corrected here and the
+        // refusal is kept, because whether it should still refuse is a decision
+        // and not a repair. What survives it is the PORT check above, whose
+        // reason is untouched: 15432 is a real property's data whatever this
+        // harness names its roles.
         if (await command.ExecuteScalarAsync() is not true)
         {
             return;
         }
 
         throw new InvalidOperationException(
-            $"the cluster on port {port} holds a HotelOS installation - it has a "
-            + "hotelos database. This harness creates roles under the INSTALLER's own "
-            + "names, so they collide with that property's by construction and survive "
-            + "every teardown, roles being cluster-scoped. Point the suite at a cluster "
-            + "with no installation (ADR 0104 E2E-Q5(a)); INSTALL-Q88 is the round this "
-            + "cost the first time.");
+            $"the cluster on port {port} holds a HotelOS installation - it has a hotelos "
+            + "database, and this harness creates roles and a scratch database on the "
+            + "cluster it is pointed at. Point the suite at a cluster with no "
+            + "installation (ADR 0104 E2E-Q5(a)); INSTALL-Q88 is the round this cost the "
+            + "first time. NOTE: this refusal's original reason no longer holds - see the "
+            + "remark at RefuseInstallationAsync - and it is retained pending a ruling "
+            + "rather than because that reason still stands.");
     }
 
     /// <summary>Create a role, or report that somebody else already had.</summary>

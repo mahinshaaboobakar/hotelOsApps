@@ -35,10 +35,17 @@ public sealed class WorkforceFixture : IAsyncLifetime
     /// <remarks>
     /// <c>hotelos_app_workforce</c> — <b>the installer's own name</b>, derived
     /// from <c>naming.rs:45-48</c> rather than chosen here. The suite provisions
-    /// it to the installer's convention (see <see cref="InstallerConvention"/>),
-    /// because a role invented for the tests would be a role no property has.
+    /// it to the installer's convention (see <see cref="InstallerConvention"/>)
+    /// and suffixes it per run.
     /// </remarks>
-    private const string ApplicationRole = InstallerConvention.AppRole;
+    /// <remarks>
+    /// <b>The suffix is why this is safe to run at all.</b> This said the name
+    /// was the installer's own "because a role invented for the tests would be
+    /// a role no property has" — and that is exactly what made it collide with
+    /// the property that does have it. The convention being proved is the shape
+    /// of step 4, which a suffix does not change.
+    /// </remarks>
+    private static readonly string ApplicationRole = InstallerConvention.AppRole;
 
     /// <summary>The provisioner, which is also the harness's admin role.</summary>
     /// <remarks>
