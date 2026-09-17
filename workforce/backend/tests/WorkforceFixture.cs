@@ -76,6 +76,7 @@ public sealed class WorkforceFixture : IAsyncLifetime
     private readonly string _password = $"wf{Guid.NewGuid():N}"[..24];
 
     private ScratchDatabase? _database;
+    private InstallerConvention.Provisioned _created = new(false, false);
 
     /// <summary>The property every posting in this suite belongs to.</summary>
     public Guid PropertyId { get; private set; }
@@ -104,7 +105,10 @@ public sealed class WorkforceFixture : IAsyncLifetime
     {
         // The cluster roles first: they are cluster-scoped, so they must exist
         // before the scratch database can grant either of them CONNECT.
-        await InstallerConvention.EnsureRolesAsync(
+        // What this run created, carried to the teardown. By the time the suite
+        // finishes, "does this role exist" no longer distinguishes MINE from an
+        // installation's — and that is the question the drop has to answer.
+        _created = await InstallerConvention.EnsureRolesAsync(
             ProvisionerConnection("postgres"), _password);
 
         _database = await ScratchDatabase.CreateAsync(
@@ -215,7 +219,11 @@ public sealed class WorkforceFixture : IAsyncLifetime
             await _database.DisposeAsync();
         }
 
-        await InstallerConvention.DropRolesAsync(ProvisionerConnection("postgres"));
+        // Nothing was created if initialisation never reached that far, and the
+        // teardown runs anyway — so the default drops nothing, which is the safe
+        // direction for this particular error to fall.
+        await InstallerConvention.DropRolesAsync(
+            ProvisionerConnection("postgres"), _created);
     }
 }
 

@@ -86,31 +86,46 @@ public static class InstallerConvention
     /// only on the value that usually feeds it.
     /// </para>
     /// </remarks>
-    public static async Task EnsureRolesAsync(string adminConnection, string password)
+    public static async Task<Provisioned> EnsureRolesAsync(
+        string adminConnection, string password)
     {
-        RefuseInstalledProduct(adminConnection);
+        await RefuseInstallationAsync(adminConnection);
 
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
 
-        // PostgreSQL has no `CREATE ROLE IF NOT EXISTS`, and the alternative —
-        // catching 42710 — would also swallow a genuine permission failure.
-        await ExecuteAsync(
-            connection,
-            $"""
-             DO $$
-             BEGIN
-                 IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{OwnerRole}') THEN
-                     CREATE ROLE {OwnerRole} NOLOGIN;
-                 END IF;
-                 IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{AppRole}') THEN
-                     CREATE ROLE {AppRole} LOGIN;
-                 END IF;
-             END
-             $$;
-             """);
+        // **Created with its password, never ALTERed into one.** This ran an
+        // unconditional ALTER ROLE after an idempotent create - so on a cluster
+        // that already held an installation it reset a REAL property's
+        // application role to a test value, while the Kernel's sealed secret
+        // went on holding the real one. That is a 28P01 at the next start of an
+        // application this suite never touched, and it cost a day to trace.
+        //
+        // The password now exists only on the CREATE, which the role's absence
+        // gates. A role this fixture did not create is one whose password it
+        // does not know and must not decide.
+        var owner = await CreateIfAbsentAsync(
+            connection, OwnerRole, $"CREATE ROLE {OwnerRole} NOLOGIN");
 
-        await ExecuteAsync(connection, $"ALTER ROLE {AppRole} PASSWORD '{password}'");
+        var app = await CreateIfAbsentAsync(
+            connection, AppRole, $"CREATE ROLE {AppRole} LOGIN PASSWORD '{password}'");
+
+        // Found rather than created, so somebody else owns it - an installation,
+        // or a previous run that never reached its teardown. The suite cannot
+        // connect as it either way, and saying so here beats a 28P01 from three
+        // layers down that reads like a broken test rather than a dirty cluster.
+        if (!app)
+        {
+            throw new InvalidOperationException(
+                $"the role {AppRole} already exists on this cluster, so this harness did "
+                + "not create it and does not know its password. It will NOT reset it: "
+                + "resetting it is what put a real property's application role out of "
+                + "step with the Kernel's sealed secret and produced 28P01 at the next "
+                + "start of an application this suite never ran against. Either the "
+                + "cluster holds an installation, or a previous run left the role "
+                + $"behind - DROP ROLE {AppRole}; as a superuser clears the second, and "
+                + "the first is not this suite's cluster to use.");
+        }
 
         // The two group roles an application is added to at install. They are
         // **cluster bootstrap**, not installer output — `02-roles.sql:227-263`
@@ -137,6 +152,11 @@ public static class InstallerConvention
              END
              $$;
              """);
+
+        // The two group roles above are left out deliberately: they are cluster
+        // bootstrap that `02-roles.sql` owns, shared by every application, and
+        // dropping them on one suite's teardown would take them from the others.
+        return new Provisioned(app, owner);
     }
 
     /// <summary>
@@ -204,23 +224,92 @@ public static class InstallerConvention
     /// without an explicit port cannot silently be the product's.
     /// </para>
     /// </remarks>
-    private static void RefuseInstalledProduct(string adminConnection)
+    private static async Task RefuseInstallationAsync(string adminConnection)
     {
         var port = new NpgsqlConnectionStringBuilder(adminConnection).Port;
 
-        if (port != InstalledProductPort)
+        // **The port first, without dialling anything.** It was never wrong,
+        // only insufficient — and it is the half that still works on a cluster
+        // this harness cannot reach. A guard that had to connect in order to
+        // refuse would be unable to refuse a refused connection, and would dial
+        // the installed product in the course of deciding not to touch it.
+        if (port == InstalledProductPort)
+        {
+            throw new InvalidOperationException(
+                $"port {InstalledProductPort} is the INSTALLED product's PostgreSQL — a "
+                + "real property's database on this machine. This harness creates roles "
+                + "under the installer's own names, so they collide with that property's "
+                + "by construction and survive every teardown, roles being cluster-scoped "
+                + "(ADR 0104 §E2E-Q5(a); INSTALL-Q88 is the round this cost the first "
+                + "time).");
+        }
+
+        await using var connection = new NpgsqlConnection(adminConnection);
+        await connection.OpenAsync();
+
+        await using var command = new NpgsqlCommand(
+            "SELECT EXISTS (SELECT FROM pg_database WHERE datname = 'hotelos')", connection);
+
+        // **Keyed on what the cluster HOLDS, not on which port it answers.**
+        // This compared against 15432 and returned early for anything else - so
+        // it allowed 25432, and the owner drives the development stack as their
+        // product: desktop to 25051 to the dev Kernel to 25432. The port and the
+        // hazard coincided only while a development machine had no property on
+        // it, and stopped coinciding the day one did.
+        //
+        // The guard's old message named the hazard exactly right and then
+        // pointed the suite at the cluster where it was about to happen.
+        if (await command.ExecuteScalarAsync() is not true)
         {
             return;
         }
 
         throw new InvalidOperationException(
-            $"this harness was asked to create cluster roles on port {InstalledProductPort}, "
-            + "which is the INSTALLED product's PostgreSQL — a real property's database on "
-            + "this machine. It creates roles under the installer's own names, so they would "
-            + "collide with that property's and survive every teardown, roles being "
-            + "cluster-scoped. Point the suite at the development cluster (ADR 0104 "
-            + "§E2E-Q5(a)); INSTALL-Q88 is the round this cost.");
+            $"the cluster on port {port} holds a HotelOS installation - it has a "
+            + "hotelos database. This harness creates roles under the INSTALLER's own "
+            + "names, so they collide with that property's by construction and survive "
+            + "every teardown, roles being cluster-scoped. Point the suite at a cluster "
+            + "with no installation (ADR 0104 E2E-Q5(a)); INSTALL-Q88 is the round this "
+            + "cost the first time.");
     }
+
+    /// <summary>Create a role, or report that somebody else already had.</summary>
+    /// <param name="connection">An open admin connection.</param>
+    /// <param name="role">The role name.</param>
+    /// <param name="create">The <c>CREATE ROLE</c> to run when it is absent.</param>
+    /// <returns>Whether THIS call created it.</returns>
+    /// <remarks>
+    /// Two statements rather than one idempotent <c>DO</c> block, because the
+    /// answer is the point: a block that creates-if-absent cannot tell its caller
+    /// which happened, and both dangerous operations here turn on that
+    /// distinction. PostgreSQL has no <c>CREATE ROLE IF NOT EXISTS</c>, and
+    /// catching 42710 would also swallow a genuine permission failure.
+    /// </remarks>
+    private static async Task<bool> CreateIfAbsentAsync(
+        NpgsqlConnection connection, string role, string create)
+    {
+        await using var exists = new NpgsqlCommand(
+            $"SELECT EXISTS (SELECT FROM pg_roles WHERE rolname = '{role}')", connection);
+
+        if (await exists.ExecuteScalarAsync() is true)
+        {
+            return false;
+        }
+
+        await ExecuteAsync(connection, create);
+        return true;
+    }
+
+    /// <summary>Which of the two cluster roles this run brought into being.</summary>
+    /// <param name="AppRole">Whether this run created the application role.</param>
+    /// <param name="OwnerRole">Whether this run created the owner role.</param>
+    /// <remarks>
+    /// Carried from provisioning to teardown rather than re-derived there: by the
+    /// time the suite finishes, <i>does this role exist</i> no longer
+    /// distinguishes <i>mine</i> from <i>an installation's</i>, and that is
+    /// exactly the question the drop has to answer.
+    /// </remarks>
+    public sealed record Provisioned(bool AppRole, bool OwnerRole);
 
     /// <summary>
     /// Remove the two roles this convention created.
@@ -244,16 +333,34 @@ public static class InstallerConvention
     /// reliable rather than a dependency error at the end of a green run.
     /// </para>
     /// </remarks>
-    public static async Task DropRolesAsync(string adminConnection)
+    public static async Task DropRolesAsync(string adminConnection, Provisioned created)
     {
-        RefuseInstalledProduct(adminConnection);
+        await RefuseInstallationAsync(adminConnection);
 
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
 
-        foreach (var role in new[] { AppRole, OwnerRole })
+        // **Only what this run created.** Roles are cluster-scoped and the
+        // scratch database is not, so a teardown that dropped by NAME would take
+        // an installation's role with it - and DROP OWNED BY first, which is
+        // what makes the drop reliable, would take what that role owns as well.
+        // Sixteen tables, in the case this was measured against.
+        var mine = new (string Role, bool Created)[]
         {
-            await ExecuteAsync(
+            (AppRole, created.AppRole),
+            (OwnerRole, created.OwnerRole),
+        };
+
+        foreach (var (role, _) in mine.Where(one => one.Created))
+        {
+            await DropAsync(connection, role);
+        }
+    }
+
+    /// <summary>Drop one role, and what it owns in this database.</summary>
+    private static async Task DropAsync(NpgsqlConnection connection, string role)
+    {
+        await ExecuteAsync(
                 connection,
                 $"""
                  DO $$
@@ -265,7 +372,6 @@ public static class InstallerConvention
                  END
                  $$;
                  """);
-        }
     }
 
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)

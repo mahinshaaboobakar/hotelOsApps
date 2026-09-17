@@ -44,7 +44,8 @@ public sealed class InstallerConventionGuardTests
         // after a failed run — so an unguarded drop would be a suite deleting
         // roles a real property depends on, which is worse than the create.
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => InstallerConvention.DropRolesAsync(InstalledProduct));
+            () => InstallerConvention.DropRolesAsync(
+                InstalledProduct, new InstallerConvention.Provisioned(true, true)));
     }
 
     [Fact]
