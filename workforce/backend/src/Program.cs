@@ -42,6 +42,33 @@ using Serilog;
 // it; GuestOps reads it. This is the third reader, not a fourth spelling.
 const string PlatformConnection = "HotelOS";
 
+// **Whatever kills this process says so on STDOUT, before anything else is
+// arranged.**
+//
+// The Kernel captures the child's streams into `logspps\<id>\current.jsonl`
+// and creates that directory when the first line arrives. On this property
+// `logspps\jobs\` and `logspps\guestops\` exist and
+// `logspps\workforce\` never did — so Workforce failed to start three times
+// and produced not one line to say why.
+//
+// Serilog cannot cover this. `UseSerilog` registers a logger with the host, and
+// the host does not exist until `Build()` — so every throw before that point,
+// which includes the platform-environment read that is the likeliest reason an
+// installed application stops, bypasses it entirely. The console sink below is
+// necessary and is not sufficient.
+//
+// Stdout rather than stderr deliberately: stdout is the stream the capture is
+// documented against, and a diagnostic that depends on which of the two a
+// supervisor happens to read is a diagnostic that goes missing in exactly the
+// conditions it exists for. Flushed, because a process about to die owes no
+// buffer anything.
+AppDomain.CurrentDomain.UnhandledException += (_, fatal) =>
+{
+    Console.Out.WriteLine(
+        "workforce_failed_to_start: " + (fatal.ExceptionObject as Exception)?.ToString());
+    Console.Out.Flush();
+};
+
 var builder = WebApplication.CreateBuilder(args);
 
 // `dotnet HotelOS.Workforce.dll migrate` — ADR 0039, and install step 6.
@@ -87,6 +114,34 @@ if (args is ["migrate", ..])
 // application ships no endpoint configuration at all — peers come from
 // discovery, and the Kernel's own address is the one thing discovery cannot
 // answer, so it is handed over.
+// A console sink FIRST, then whatever configuration adds.
+//
+// This read configuration alone, and an installed package ships no
+// `appsettings.json` — so Serilog found no sinks, the application logged
+// **nothing**, and the Kernel's capture of a failed start was a directory that
+// was never created. `logspps\jobs\` and `logspps\guestops\` exist on
+// this property and `logspps\workforce\` does not, which is not a quieter
+// application: it is the one that cannot say why it stopped.
+//
+// The console is the sink the Kernel actually reads — `process.rs` captures the
+// child's stdout into `logspps\<id>\current.jsonl` (`OPS-Q10`) — so a sink
+// that exists only in a configuration file the package does not ship is a sink
+// that exists nowhere.
+//
+// Jobs met this at its first real install and fixed it in `Program.cs:65`.
+// Workforce kept the defect, and the comment there is the only reason this took
+// minutes rather than an afternoon.
+//
+// **And it is FIRST for a second reason.** The platform-environment read below
+// throws when the Kernel has not set its three variables, and that throw used to
+// happen twenty-five lines before this logger existed — so the one failure most
+// likely to stop an installed application was the one it could never report.
+// A logger configured after the thing that can fail is a logger for the happy
+// path.
+builder.Host.UseSerilog((context, configuration) => configuration
+    .WriteTo.Console()
+    .ReadFrom.Configuration(context.Configuration));
+
 //
 // Read once, through the SDK, because a second copy of a contract is the copy
 // that stops matching on the day somebody renames a variable in `process.rs`.
@@ -97,9 +152,6 @@ var platform = PlatformEnvironment.Read()
         + "Every surface here authenticates its caller by client certificate, so there "
         + "is no honest half-configured mode — run this through an install rather than "
         + "from a checkout. `migrate` above needs none of them and runs either way.");
-
-builder.Host.UseSerilog((context, configuration) =>
-    configuration.ReadFrom.Configuration(context.Configuration));
 
 builder.Services.AddGrpc(options =>
 {

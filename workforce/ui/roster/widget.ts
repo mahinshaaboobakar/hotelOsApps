@@ -51,6 +51,19 @@ export interface SummaryRow {
    */
   on?: string;
 
+  /**
+   * The two ends of a span, as clock strings — only rows that are one.
+   *
+   * Carried beside the row rather than joined into it, for the reason `on`
+   * above is: the service cannot say a range in the property's form, because
+   * the separator, the order and the hour cycle are all the reader's. It sent
+   * `07:00–15:00` and the en-dash was a service's choice (ADR 0175). The panel
+   * whose rows are spans composes them; every other widget leaves these
+   * undefined.
+   */
+  from?: string;
+  to?: string;
+
   /** The qualifier beside it, or null when the row has none. */
   meta: string | null;
 

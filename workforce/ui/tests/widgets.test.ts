@@ -38,10 +38,13 @@ function unavailable(): HostApi {
 }
 
 /** A host that answers, so the live path is exercised too. */
-function answering(answer: unknown): HostApi {
+function answering(
+  answer: unknown,
+  property: HostApi["property"] = { timezone: "Asia/Kolkata", locale: null },
+): HostApi {
   return {
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
-    property: { timezone: "Asia/Kolkata", locale: null },
+    property,
     call: () => Promise.resolve(answer),
     on: () => () => {},
   };
@@ -99,6 +102,32 @@ describe("every Workforce widget", () => {
     expect(live.querySelector(".wapp")?.textContent).toBe("Workforce");
     expect(live.querySelector(".wfail")).toBeNull();
     expect(live.querySelectorAll(".wrow").length).toBeGreaterThan(0);
+  });
+
+  it("composes a shift's hours here, from the two ends the service sends", async () => {
+    // An established locale, deliberately. The default host has `locale: null`
+    // and `formatClock` returns its input unchanged there — so a test written
+    // against it would assert a PASSTHROUGH and pass with the formatting gone.
+    const live = await shiftBoard(answering(
+      recordedShiftBoard, { timezone: "Asia/Kolkata", locale: "en-GB" }));
+    const meta = Array.from(live.querySelectorAll(".wmeta"))
+      .map((one) => one.textContent);
+
+    // The service sends `from` and `to` and joins nothing — the separator and
+    // the hour cycle are the reader's (ADR 0175). Asserted on the composed
+    // OUTPUT rather than on the presence of a `.wmeta`, because a row that had
+    // stopped composing would still have the element and no hours in it.
+    expect(meta).toContain("07:00–15:00");
+    expect(meta).toContain("06:00–14:00");
+
+    // And under a 12-hour locale the same two ends read differently, which is
+    // the whole reason this moved: a service that had joined them would have
+    // shipped one property's clock to every property.
+    const american = await shiftBoard(
+      answering(recordedShiftBoard, { timezone: "America/New_York", locale: "en-US" }));
+
+    expect(Array.from(american.querySelectorAll(".wmeta"))
+      .map((one) => one.textContent)).toContain("07:00 AM–03:00 PM");
   });
 
   it("gives every row a screen to open, and makes every row operable", async () => {

@@ -46,8 +46,9 @@ function row(
   value: string,
   tone: SummaryRow["tone"],
   opens: string,
+  span?: { from: string; to: string },
 ): SummaryRow {
-  return { name, meta, value, tone, opens };
+  return { name, meta, value, tone, opens, ...span };
 }
 
 /** Shift Board — who is on now, by department. */
@@ -58,10 +59,14 @@ export const recordedShiftBoard: ShiftBoard = {
   // counts the property and the list shows what the frame holds.
   departments: 6,
   rows: [
-    row("Housekeeping", "07:00–15:00", "9", "muted", "rota?department=HK"),
-    row("Front Office", "07:00–15:00", "5", "muted", "rota?department=FO"),
-    row("Kitchen", "06:00–14:00", "6", "muted", "rota?department=KIT"),
-    row("Engineering", "08:00–17:00", "4", "muted", "rota?department=ENG"),
+    row("Housekeeping", null, "9", "muted", "rota?department=HK",
+        { from: "07:00", to: "15:00" }),
+    row("Front Office", null, "5", "muted", "rota?department=FO",
+        { from: "07:00", to: "15:00" }),
+    row("Kitchen", null, "6", "muted", "rota?department=KIT",
+        { from: "06:00", to: "14:00" }),
+    row("Engineering", null, "4", "muted", "rota?department=ENG",
+        { from: "08:00", to: "17:00" }),
   ],
   // **An instant, in the form the service sends.** The fixture carries what
   // the wire carries, so the recorded card and the live one render through

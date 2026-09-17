@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Summaries;
 
@@ -45,10 +46,12 @@ public static class WidgetViews
             departments = view.Departments,
             rows = view.Rows.Select(one => Row(
                 one.DepartmentCode,
-                Span(one.StartsAt, one.EndsAt),
+                null,
                 one.OnNow.ToString(),
                 "muted",
-                "rota?department=" + one.DepartmentCode)).ToList(),
+                "rota?department=" + one.DepartmentCode,
+                Clock(one.StartsAt),
+                Clock(one.EndsAt))).ToList(),
             nextChange = view.NextChange is null ? null : new
             {
                 // The instant, in the form `formatInstant` reads. The widget
@@ -199,7 +202,14 @@ public static class WidgetViews
         => new { name, on, meta, value, tone, opens };
 
     /// <summary>One row of a widget's list.</summary>
-    private static object Row(string? name, string? meta, string value, string tone, string opens)
+    private static object Row(
+        string? name,
+        string? meta,
+        string value,
+        string tone,
+        string opens,
+        string? from = null,
+        string? to = null)
         => new
         {
             name,
@@ -207,6 +217,12 @@ public static class WidgetViews
             value,
             tone,
             opens,
+
+            // The two ends, carried rather than joined — ADR 0175, and the same
+            // shape `on` already uses for a date. The panel that knows its rows
+            // are spans composes them; every other widget leaves these null.
+            from,
+            to,
         };
 
     /// <summary>One of a card's headline numbers.</summary>
@@ -216,13 +232,29 @@ public static class WidgetViews
     /// <summary>One band of the proportion bar.</summary>
     private static object Segment(int count, string tone) => new { count = Math.Max(0, count), tone };
 
-    /// <summary>"07:00–15:00", the property's own wall clock.</summary>
+    /// <summary>One end of a span, as the wire carries it.</summary>
     /// <remarks>
-    /// A shift's hours are clock times rather than instants: they have no date
-    /// and no zone, because a Morning shift starts at 07:00 wherever the
-    /// property is. Rendering them through an instant formatter would attach a
-    /// timezone to something that never had one.
+    /// <para>
+    /// <b>ADR 0175.</b> This was <c>Span(from, to)</c>, joining the two ends
+    /// with an en-dash here — so the separator, the order and the hour cycle
+    /// were all decided in a service, in one culture. The surface composes
+    /// them now, through <c>formatClock</c>.
+    /// </para>
+    /// <para>
+    /// <b>Invariant, and that is the half a reviewer misses.</b> <c>HH</c> and
+    /// <c>mm</c> are culture-neutral numerics, but the <c>:</c> between them is
+    /// <c>CurrentCulture</c>'s time separator — a period in several — so an
+    /// uninvariant <c>"HH:mm"</c> emits a value the reader cannot parse back.
+    /// </para>
+    /// <para>
+    /// The comment this replaces was right about the type and is kept, because
+    /// it is why <c>formatClock</c> exists rather than <c>formatInstant</c>: a
+    /// shift's hours are clock times, not instants — they have no date and no
+    /// zone, because a Morning shift starts at 07:00 wherever the property is,
+    /// and rendering them through an instant formatter would attach a timezone
+    /// to something that never had one.
+    /// </para>
     /// </remarks>
-    private static string Span(TimeOnly from, TimeOnly to)
-        => from.ToString("HH:mm") + "–" + to.ToString("HH:mm");
+    private static string Clock(TimeOnly at)
+        => at.ToString("HH:mm", CultureInfo.InvariantCulture);
 }
