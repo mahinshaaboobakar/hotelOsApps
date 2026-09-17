@@ -39,6 +39,7 @@
  */
 
 import { DERIVED } from "./derived";
+import { FAILURE } from "./failure";
 import { FORMS } from "./forms";
 import { MARKS } from "./marks";
 import { PANEL } from "./panel";
@@ -56,6 +57,6 @@ import { TABLE } from "./table";
  */
 export function stylesheet(): HTMLStyleElement {
   const style = document.createElement("style");
-  style.textContent = [DERIVED, SHELL, TABLE, PANEL, FORMS, SHEET, MARKS].join("");
+  style.textContent = [DERIVED, SHELL, TABLE, PANEL, FORMS, SHEET, MARKS, FAILURE].join("");
   return style;
 }

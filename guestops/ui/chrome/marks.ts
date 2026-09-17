@@ -17,7 +17,7 @@
  * meant read-only (GUEST-Q1, as amended).
  */
 
-import { FAILURE_LABELS, type FailureDrawing } from "@hotelos/sdk";
+import { type Fact, type FailureDrawing, type Glyph } from "@hotelos/sdk";
 
 import type { Chip, Tag } from "../book/model";
 import { control, el } from "./element";
@@ -82,6 +82,26 @@ function one(tag: Tag): HTMLElement {
 }
 
 /**
+ * A screen that cannot draw, for a reason that is not a read.
+ *
+ * **Separate from {@link failed} because it has no wire line and must not
+ * invent one.** A stay opened without an id never reached the platform: there
+ * is no capability, no method, no cause and no time of asking, and passing it
+ * through the SDK's failure drawing would print a provenance line for a call
+ * nobody made. That is the gap rule in a surface — a value standing in for a
+ * measurement nobody took.
+ *
+ * @param said what a person is told
+ * @param why what they can do about it
+ * @returns the element to put where the screen would have gone
+ */
+export function cannot(said: string, why: string): HTMLElement {
+  const box = el("div", "fail");
+  box.append(el("div", "fh", said), el("div", "fb", why));
+  return box;
+}
+
+/**
  * A read that did not answer, drawn as the failure it is.
  *
  * **This replaced `standIn`, and the difference is what is on the screen** —
@@ -106,45 +126,80 @@ function one(tag: Tag): HTMLElement {
  * @param retry offered only where the drawing says a retry could succeed
  * @returns the element to put where the data would have gone
  */
-/**
- * A screen that cannot draw, for a reason that is not a read.
- *
- * **Separate from {@link failed} because it has no wire line and must not
- * invent one.** A stay opened without an id never reached the platform: there
- * is no capability, no method, no cause and no time of asking, and passing it
- * through the SDK's failure drawing would print a provenance line for a call
- * nobody made. That is the gap rule in a surface — a value standing in for a
- * measurement nobody took.
- *
- * @param said what a person is told
- * @param why what they can do about it
- * @returns the element to put where the screen would have gone
- */
-export function cannot(said: string, why: string): HTMLElement {
-  const box = el("div", "fail");
-  box.append(el("div", "fh", said), el("div", "fb", why));
+export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement {
+  // The cause rides on the element so the mark takes the state's colour.
+  const tone = drawing.cause === "unanswered" ? "wait"
+    : drawing.cause === "faulted" ? "fault" : "no";
+  const box = el("div", `fail ${tone}`);
+  const doing = el("div", "fd");
+
+  // **The affordance is what separates the three states, not the wording.** A
+  // timeout gets a button because waiting can work; a refusal and a fault get a
+  // sentence, because a retry on either is a promise the platform cannot keep.
+  if (drawing.act.kind === "retry" && retry !== undefined) {
+    doing.append(control("btn pri", drawing.act.label, retry));
+  } else if (drawing.act.kind === "copy") {
+    doing.append(control("btn", drawing.act.label, () => {
+      void navigator.clipboard?.writeText(drawing.wire);
+    }));
+  }
+
+  doing.append(el("div", "fn", drawing.act.note));
+
+  box.append(
+    stateMark(drawing.glyph),
+    el("div", "fl", drawing.label),
+    el("div", "fh", drawing.said),
+    el("div", "fb", drawing.why),
+    doing,
+
+    // **The four facts, labelled.** They were one dotted line and the owner read
+    // it as a log entry — every fact right, the most useful part set as the
+    // least readable. Stated, never omitted: this is what a person carries to
+    // whoever can act on it.
+    facts(drawing.facts),
+  );
+
   return box;
 }
 
-export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement {
-  const box = el("div", "fail");
+/**
+ * The state's mark, drawn from the SDK's geometry.
+ *
+ * `createElementNS`, because `createElement("svg")` makes an unknown HTML
+ * element that renders nothing — a silent blank where the mark belongs. The
+ * geometry is the SDK's so three applications cannot draw it three ways; the
+ * element is this module's, because the SDK ships no DOM.
+ */
+function stateMark(glyph: Glyph): SVGElement {
+  const NS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(NS, "svg");
 
-  box.append(
-    el("div", "fm", drawing.mark),
-    el("div", "fh", drawing.said),
-    el("div", "fb", drawing.why),
+  svg.setAttribute("class", "fg");
+  svg.setAttribute("viewBox", glyph.viewBox);
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.6");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("aria-hidden", "true");
 
-    // **Stated, never omitted.** A failure surface that shows no provenance
-    // reads as one that did not bother to ask — and this line is the only part
-    // a person can carry to somebody able to fix it.
-    el("div", "fw", drawing.wire),
-  );
-
-  // No button on a refusal or a fault. Offering one is the second lie a failure
-  // surface tells, after the first one that something was read at all.
-  if (drawing.retryable && retry !== undefined) {
-    box.append(control("btn sm", FAILURE_LABELS.retry, retry));
+  for (const d of glyph.paths) {
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute("d", d);
+    svg.append(path);
   }
 
-  return box;
+  return svg;
+}
+
+/** What was asked, what came back, and when — as a grid, not a line. */
+function facts(list: readonly Fact[]): HTMLElement {
+  const grid = el("dl", "fp");
+
+  for (const fact of list) {
+    grid.append(el("dt", undefined, fact.label), el("dd", undefined, fact.value));
+  }
+
+  return grid;
 }
