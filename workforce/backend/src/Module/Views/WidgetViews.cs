@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Summaries;
 
@@ -50,8 +49,8 @@ public static class WidgetViews
                 one.OnNow.ToString(),
                 "muted",
                 "rota?department=" + one.DepartmentCode,
-                Clock(one.StartsAt),
-                Clock(one.EndsAt))).ToList(),
+                Wire.Clock(one.StartsAt),
+                Wire.Clock(one.EndsAt))).ToList(),
             nextChange = view.NextChange is null ? null : new
             {
                 // The instant, in the form `formatInstant` reads. The widget
@@ -231,30 +230,4 @@ public static class WidgetViews
 
     /// <summary>One band of the proportion bar.</summary>
     private static object Segment(int count, string tone) => new { count = Math.Max(0, count), tone };
-
-    /// <summary>One end of a span, as the wire carries it.</summary>
-    /// <remarks>
-    /// <para>
-    /// <b>ADR 0175.</b> This was <c>Span(from, to)</c>, joining the two ends
-    /// with an en-dash here — so the separator, the order and the hour cycle
-    /// were all decided in a service, in one culture. The surface composes
-    /// them now, through <c>formatClock</c>.
-    /// </para>
-    /// <para>
-    /// <b>Invariant, and that is the half a reviewer misses.</b> <c>HH</c> and
-    /// <c>mm</c> are culture-neutral numerics, but the <c>:</c> between them is
-    /// <c>CurrentCulture</c>'s time separator — a period in several — so an
-    /// uninvariant <c>"HH:mm"</c> emits a value the reader cannot parse back.
-    /// </para>
-    /// <para>
-    /// The comment this replaces was right about the type and is kept, because
-    /// it is why <c>formatClock</c> exists rather than <c>formatInstant</c>: a
-    /// shift's hours are clock times, not instants — they have no date and no
-    /// zone, because a Morning shift starts at 07:00 wherever the property is,
-    /// and rendering them through an instant formatter would attach a timezone
-    /// to something that never had one.
-    /// </para>
-    /// </remarks>
-    private static string Clock(TimeOnly at)
-        => at.ToString("HH:mm", CultureInfo.InvariantCulture);
 }

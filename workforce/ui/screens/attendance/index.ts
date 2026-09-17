@@ -9,10 +9,10 @@
  * about the day.
  */
 
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatClock, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
-import { codeChip } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type Day, type DayRow } from "../../roster/attendance";
@@ -33,7 +33,7 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
   const day = got.value;
   const body = el("div", "body");
 
-  body.append(marks(day), table(day.rows));
+  body.append(marks(day), table(day.rows, host));
   main.replaceChildren(header(day), body);
 }
 
@@ -57,11 +57,11 @@ function header(day: Day): HTMLElement {
 function marks(day: Day): HTMLElement {
   const row = el("div", "marks");
 
-  const posted = day.rows.filter((r) => r.posted !== null);
+  const posted = day.rows.filter((r) => r.rostered);
   const present = posted.filter((r) => r.in !== null).length;
   const late = day.rows.filter((r) => r.against.startsWith("Late")).length;
   const absent = day.rows.filter((r) => r.against === "Absent").length;
-  const unplanned = day.rows.filter((r) => r.posted === null && r.in !== null).length;
+  const unplanned = day.rows.filter((r) => !r.rostered && r.in !== null).length;
 
   row.append(
     mark(`${present} of ${posted.length}`, "present against posted", "ok"),
@@ -87,35 +87,42 @@ function mark(figure: string, label: string, tone: string): HTMLElement {
 }
 
 /**
- * What the rota planned, as the rota draws it.
+ * What the rota planned.
  *
- * The chip and the time, not a string: this column is read against the rota
- * beside it, and a code that looks different here than it does there makes a
- * person check whether it is the same shift.
+ * @param row the person's day
+ * @param property for the locale the clock is read in
+ * @returns the cell
+ *
+ * @remarks
+ * **The shift code is gone, and its absence is the finding.** This split
+ * `"M 07:00"` on a space and drew a {@link codeChip} from the first half — but
+ * the service sends no code: `DayComparison.DayRow` carries a department code,
+ * a rostered flag and a scheduled start, and nothing else. Only the fixture
+ * ever had one, so against a real property this drew an empty chip beside a
+ * time. Reported rather than invented; the chip returns when the wire carries
+ * something to put in it.
+ *
+ * Three states, because the wire now distinguishes them: nothing rostered, a
+ * day rostered with no start, and a start.
  */
-function posted(value: string | null): HTMLElement {
+function posted(row: DayRow, property: PropertyEnvironment): HTMLElement {
   const cell = el("div", "postedcell");
 
-  if (value === null) {
+  if (!row.rostered) {
     cell.append(el("span", "quiet", "not rostered"));
-    return cell;
+  } else if (row.postedAt === null) {
+    // Rostered, start unknown. Not the same as "not rostered", and the old
+    // shape said this with the word `rostered` chosen in a service.
+    cell.append(el("span", "quiet", "rostered"));
+  } else {
+    cell.append(el("span", "quiet", formatClock(row.postedAt, property)));
   }
 
-  const [code = "", ...time] = value.split(" ");
-  cell.append(codeChip(code, tone(code)), el("span", "quiet", time.join(" ")));
   return cell;
 }
 
-/** The catalogue's tone for a code the row carries. */
-function tone(code: string): string {
-  if (code === "M") return "brand";
-  if (code === "A") return "ok";
-  if (code === "N") return "warn";
-  return "neutral";
-}
-
 /** The day's rows, planned beside actual. */
-function table(rows: readonly DayRow[]): HTMLElement {
+function table(rows: readonly DayRow[], host: HostApi): HTMLElement {
   const list = el("div", "rows");
   const columns = "1.5fr 96px 78px 78px 1fr";
 
@@ -144,9 +151,11 @@ function table(rows: readonly DayRow[]): HTMLElement {
 
     item.append(
       who,
-      posted(row.posted),
-      el("div", undefined, row.in ?? "—"),
-      el("div", undefined, row.out ?? (row.in === null ? "—" : "— still in")),
+      posted(row, host.property),
+      el("div", undefined, row.in === null ? "—" : formatClock(row.in, host.property)),
+      el("div", undefined, row.out === null
+        ? (row.in === null ? "—" : "— still in")
+        : formatClock(row.out, host.property)),
       against,
     );
 

@@ -135,11 +135,14 @@ public static class AttendanceView
         {
             who = names.TryGetValue(row.StaffId, out var name) ? name : null,
             role = roles.TryGetValue(row.StaffId, out var job) ? job : null,
-            posted = row.Rostered && row.ScheduledStart is { } start
-                ? start.ToString("HH:mm")
-                : row.Rostered ? "rostered" : null,
-            @in = row.ActualIn?.ToString("HH:mm"),
-            @out = record?.OutAt?.ToString("HH:mm"),
+            // **Two fields, because it was three states in one string** — a
+            // clock, the sentinel word `rostered`, and null. A surface handed
+            // that cannot tell a time it must render from a word it must not,
+            // and could not say "rostered" in any other language. ADR 0175.
+            rostered = row.Rostered,
+            postedAt = row.Rostered ? Wire.Clock(row.ScheduledStart) : null,
+            @in = Wire.Clock(row.ActualIn),
+            @out = Wire.Clock(record?.OutAt),
             against,
             tone,
             // The source is the record's own, and null where no record exists —
