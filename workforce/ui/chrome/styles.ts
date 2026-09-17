@@ -131,7 +131,11 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    button — a refusal cannot name who grants it — so on that state this note is
    the whole of the act, and it must read as a sentence rather than as a caption
    under a missing thing. */
-.fail-note{font-size:12.5px;line-height:1.55;color:var(--color-ink-muted,#8b93a7);
+/* The same role, so the same two values. I wrote this at 12.5px/1.55 the day
+   AFTER the ruling that says explanatory text is 12px and there is one size for
+   it - a divergence introduced rather than inherited, which is the kind worth
+   naming. */
+.fail-note{font-size:12px;line-height:19.8px;color:var(--color-ink-muted,#8b93a7);
            max-width:52ch}
 /* The line a person hands to somebody who can act, so it selects cleanly and
    wraps rather than truncating - a fault id cut off at the edge is a fault id
@@ -529,7 +533,15 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
    and it was styled inside Attendance under the name dim, where Leave's own
    .acell.dim met it in the one stylesheet they share. */
 .quiet{color:var(--color-ink-muted,#8b93a7)}
-.note{font-size:12px;line-height:1.6;color:var(--color-ink-muted,#8b93a7)}
+/* Note text: 12px, and a line-height of 19.8px as a VALUE rather than a ratio
+   - page 64 S5, RULED owner 2026-09-16, APPS-Q35. This was 1.6, which computes
+   to 19.2px at this size and is one of the two divergences the ruling names
+   (20.4 -> 19.8 and 19.2 -> 19.8).
+   A ratio is what made it a MASKED divergence: while the font-size disagreed
+   the line-height underneath was never reported, so settling the size revealed
+   this rather than closing it. Written as a value so the two cannot drift apart
+   again the next time a size moves. */
+.note{font-size:12px;line-height:19.8px;color:var(--color-ink-muted,#8b93a7)}
 .note b{color:var(--color-ink,#e8ebf4)}
 
 .legend{display:flex;gap:16px;align-items:center;flex-wrap:wrap;

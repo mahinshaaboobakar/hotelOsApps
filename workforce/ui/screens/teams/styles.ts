@@ -110,5 +110,6 @@ button.tgrid:focus-visible,button.tnarrow:focus-visible{
 .tvoid .big{font-size:30px;color:var(--color-brand,#818cf8)}
 .tvoid p{font-size:13px;line-height:1.6;color:var(--color-ink-muted,#8b93a7);margin:0}
 .tvoid p b{color:var(--color-ink,#e8ebf4)}
-.tvoid p.quiet{color:var(--color-ink-faint,#5a6172)}
+/* No override, for the reason in people/styles.ts: quiet is --color-ink-muted,
+   ruled, and this said otherwise without saying why. */
 `;

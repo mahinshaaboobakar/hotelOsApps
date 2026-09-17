@@ -17,7 +17,7 @@
 manifest_version: 1
 id: workforce
 name: "Workforce"
-version: 0.2.3
+version: 0.2.4
 publisher: hotelos
 category: operations
 description: >-

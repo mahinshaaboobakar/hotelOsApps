@@ -8,7 +8,11 @@ export const PEOPLE_CSS = `
            text-transform:uppercase;color:var(--color-bad,#f87171);margin-bottom:8px}
 .conseq .cr{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:4px 0}
 .conseq .note{margin-top:8px}
-.conseq .quiet{color:var(--color-ink-faint,#5a6172)}
+/* No override. Quiet text is --color-ink-muted - page 64 S5, RULED owner
+   2026-09-16. This pushed it to --color-ink-faint inside the consequence panel
+   and recorded no reason, and an unlabelled divergence from a ruled value is
+   the kind a later reader tidies back without knowing what it cost. If the
+   fainter tone was deliberate it comes back with the argument attached. */
 .deps{display:flex;gap:4px;flex-wrap:wrap}
 
 .first{display:flex;flex-direction:column;align-items:center;gap:10px;
