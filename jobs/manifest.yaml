@@ -51,7 +51,22 @@ name: "Jobs"
 # Temporal core bridge, one per RID, of which five are `.so` and `.dylib` files
 # that cannot execute on the only platform this product runs on. Workforce met
 # the identical payload and trimmed it the same way (`b471a2c`).
-version: 0.3.0
+#
+# **0.4.0 — the failure surface is redrawn, and it was unstyled where it matters
+# most.** The minor rather than the patch because a person sees something
+# different, not because anything was broken in the wire: page 64 §13 was ruled
+# on 2026-09-17 and the seam's `FailureDrawing` now carries a glyph, a state
+# label, four labelled facts and an act, in place of a character, a sentence and
+# a dotted line.
+#
+# The part that is a fix rather than a redraw: those rules lived in the module
+# realm's stylesheet, and **the six widgets are a separate realm with a separate
+# sheet that had none of them** — so every widget failure this application has
+# ever shown a property was unstyled text, in the realm where every read is
+# refused today. The rules travel with the surface now, and both sheets take
+# them from there. FF found the same defect in GuestOps, one layer out, and
+# routed it here rather than assuming these files were fine.
+version: 0.4.0
 publisher: hotelos
 category: operations
 description: >-

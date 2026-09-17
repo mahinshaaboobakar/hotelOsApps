@@ -7,6 +7,7 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
+import { FAILURE_CSS } from "../chrome/failure";
 
 const SHELL_OPEN = "shell.open";
 
@@ -34,10 +35,19 @@ const WIDGET_CSS = `
 .wrefusal{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
 `;
 
-/** The widget's stylesheet, added once per draw. */
+/**
+ * The widget's stylesheet, added once per draw.
+ *
+ * **`FAILURE_CSS` is not optional here, and its absence is what made this
+ * round.** All six widgets call `failure()` when a read does not arrive, and
+ * today every read is refused — so the state this realm is *always* in was the
+ * one state it had no rules for. A widget is its own realm and shares no sheet
+ * with the module, which is exactly why the rules travel with the surface
+ * rather than with either sheet.
+ */
 export function stylesheet(): HTMLStyleElement {
   const style = document.createElement("style");
-  style.textContent = WIDGET_CSS;
+  style.textContent = [WIDGET_CSS, FAILURE_CSS].join("\n");
   return style;
 }
 

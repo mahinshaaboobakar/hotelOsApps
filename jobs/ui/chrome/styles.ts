@@ -5,10 +5,12 @@
  * harness only and match the approved dark frames.
  */
 
-/** One `<style>` holding the chrome and the screens' own sheets. */
+import { FAILURE_CSS } from "./failure";
+
+/** One `<style>` holding the chrome, the failure surface and the screens' own sheets. */
 export function stylesheet(parts: readonly string[] = []): HTMLStyleElement {
   const style = document.createElement("style");
-  style.textContent = [CHROME, ...parts].join("\n");
+  style.textContent = [CHROME, FAILURE_CSS, ...parts].join("\n");
   return style;
 }
 
@@ -85,6 +87,16 @@ tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transpare
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .dim{color:var(--color-ink-faint,#5a6172)}
 table+.mono,.kv+.mono{margin-top:8px}
+/* Four classes the build emitted that no rule defined and no frame ever drew —
+   found 2026-09-17 by tests/styled.test.ts, written after FF's GuestOps finding.
+   They are the build's own names, so there is no drawing to derive them from;
+   each takes the treatment its neighbours already use rather than a new one.
+
+   .main held its layout in inline styles, which is the same defect from the
+   other side: the rule was empty because the element carried its own. */
+.main{display:flex;flex-direction:column;min-height:0}
+.hint{margin-top:4px}
+.title{font-weight:600;color:var(--color-ink,#e8ebf4)}
 /* The pager is the list's floor — the standard's §6, ported 2026-09-05.
    Two halves, and neither works alone: the list grows so a short one still
    puts the pager at the bottom, and the pager sticks so a full page does not
@@ -157,16 +169,18 @@ label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07
 *+.dlg{margin-top:14px}
 .dlg{border:1px solid var(--color-brand,#818cf8);border-radius:var(--radius-panel,1rem);padding:16px;
      background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
-p.lede,/* The failure surface — what a screen draws when a read did not arrive. Its
-   words are the SDK's (one sentence across three applications); its geometry is
-   this module's, because a shared component would have to cross the realm. It
-   is quiet on purpose: a failure is not an alarm, and the loudest thing on a
-   screen should not be the thing that has no data behind it. */
-.gap{display:flex;flex-direction:column;gap:6px;padding:26px 22px;max-width:62ch}
-.gap-mark{font:600 15px ui-monospace,Menlo,monospace;color:var(--color-ink-faint,#5a6172);letter-spacing:.12em}
-.gap-said{font-size:14px;font-weight:600;color:var(--color-ink,#e8ebf4)}
-.gap-why{font-size:13px;color:var(--color-ink-muted,#8b93a7);line-height:1.5}
-.gap-wire{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-faint,#5a6172);margin-top:4px}
+/* The failure surface used to be written out here, and that was the defect:
+   this sheet dresses the module realm, the six widgets are their own realm with
+   their own sheet, and both draw the same surface. Its rules live with the
+   surface now, in chrome/failure.ts, and both sheets take them from there.
+
+   Removed with them: p.lede, which sat on the front of .gap's rule, welded to
+   it by a comment that came between the selector and the brace. Nothing emits
+   lede and nothing else defines it, so one rule dressed a class that does not
+   exist and quietly widened to the one that does. It is FF's finding inverted —
+   a class with no rule there, a rule with no class here — and both are
+   invisible to a fidelity sweep, which compares two renderings and cannot see a
+   selector that matches nothing. */
 .note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;color:var(--color-ink-muted,#8b93a7);font-size:13px;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
 .note b{color:var(--color-ink,#e8ebf4)}

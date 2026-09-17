@@ -79,10 +79,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     if (root === null) return;
 
     const frame = el("div", "jb");
+    // The layout is `.main`'s rule now. It was three inline styles, which is why
+    // that class had none — an element dressing itself is a stylesheet nobody
+    // can find, and it reads from outside exactly like a class with no rule.
     const main = el("div", "main");
-    main.style.display = "flex";
-    main.style.flexDirection = "column";
-    main.style.minHeight = "0";
     frame.append(head(TABS, place.tab, operator, go), main);
     root.replaceChildren(style, frame);
     void draw(main);

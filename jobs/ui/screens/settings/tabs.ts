@@ -224,7 +224,9 @@ export function access(
   return fill(
     el("div"),
     table(["Label", "Who", "Comes from"], s.access.map((a) => [a.label, a.who, a.from])),
-    el("div", "hd", "Jobs managers"),
+    // `sect`, not `hd`: the sheet already names this treatment, and `hd` was a
+    // second name for it that no rule defined.
+    el("div", "sect", "Jobs managers"),
     s.jobsManagers.length > 0
       ? table(["User", "Granted", ""], held)
       : el("div", "dim", "Nobody at this property holds it."),

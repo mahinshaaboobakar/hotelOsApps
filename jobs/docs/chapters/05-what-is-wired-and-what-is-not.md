@@ -40,6 +40,34 @@ Chapter §9's own row has carried that since 2026-09-05; this box had not.
 
 ---
 
+## 0.4.0, published 2026-09-17 — the same account, with one claim withdrawn
+
+Everything the 0.3.0 section below says still holds, **except its confidence
+that the refusal was drawn at all.** It says each surface "says so on its face";
+in the six widgets it did not. Those widgets are their own realm with their own
+stylesheet, the failure surface's rules were in the *module* realm's sheet, and
+nothing joined them — so every widget failure this application has shown a
+property was unstyled text, in the realm where every read is refused today.
+
+FF found the identical defect in GuestOps and routed it here rather than
+assuming these files were fine. It is a defect no fidelity sweep can see: a
+sweep compares a drawing against a rendering, and a class that resolves to
+nothing is missing from both. `tests/styled.test.ts` now builds each realm's
+sheet with that realm's own builder and fails if either stops carrying the
+rules — proved to fail before this was reported green.
+
+Four more classes turned out to be emitted with no rule anywhere — `.main`,
+`.hint`, `.title`, `.hd` — and one rule, `p.lede`, dressed a class nothing
+emits. The same gap, in both directions.
+
+The surface itself is redrawn to page 64 §13 (ruled 2026-09-17): a stroked
+glyph, a state label, the four facts as labelled rows rather than one dotted
+line, and an act that is an affordance rather than a wording — a refusal offers
+no button, because naming who can grant would disclose who holds authority in
+this property.
+
+---
+
 ## 0.3.0, published 2026-09-16 — what a fresh install of it shows
 
 The package in the registry is `jobs-0.3.0.hopkg`. **An administrator who
