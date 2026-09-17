@@ -17,6 +17,7 @@ using HotelOS.Workforce.Grpc;
 using HotelOS.Workforce.Infrastructure;
 using HotelOS.Workforce.Module;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 
 // Workforce — who is posted where, as an installable application.
@@ -188,8 +189,7 @@ builder.Services.AddDbContext<WorkforceDbContext>(options =>
 // Chapter 13: every component exposes health. The Kernel probes this, and the
 // desktop greys out what depends on the application when it fails — so a user
 // sees why a screen is unavailable rather than clicking into an error.
-builder.Services.AddHealthChecks()
-    .AddDbContextCheck<WorkforceDbContext>("postgresql");
+builder.Services.AddHealthChecks().AddCheck<DatabaseReachable>("postgresql");
 
 // One call: the Kernel client, the authorizer, the event appender bound to this
 // application's DbContext, the identity its events and certificate carry, and
@@ -311,7 +311,27 @@ app.MapApplicationDoors(
         // Plain HTTP rather than gRPC health, because the probe runs before the
         // Kernel has reason to trust this process and a liveness check should
         // need nothing but a socket.
-        door.MapHealthChecks("/health");
+        //
+        // **The body carries what was found, not merely whether it was well.**
+        // The default writer sends the aggregate status and nothing else, so a
+        // check that had a reason still answered a bare `Unhealthy` — and on
+        // this property that cost two rounds, because the sentence naming the
+        // cause existed and never left the process.
+        door.MapHealthChecks("/health", new HealthCheckOptions
+        {
+            ResponseWriter = async (http, report) =>
+            {
+                http.Response.ContentType = "text/plain";
+
+                var lines = report.Entries.Select(entry =>
+                    $"{entry.Key}: {entry.Value.Status}"
+                    + (entry.Value.Description is { } said ? $" — {said}" : string.Empty));
+
+                await http.Response.WriteAsync(
+                    $"{report.Status}{Environment.NewLine}"
+                    + string.Join(Environment.NewLine, lines));
+            },
+        });
     });
 
 app.Run();
