@@ -43,6 +43,28 @@ internal static class Wire
     public static string Clock(TimeOnly at)
         => at.ToString("HH:mm", CultureInfo.InvariantCulture);
 
+    /// <summary>Two ends of a span, carried rather than joined.</summary>
+    /// <param name="from">The start.</param>
+    /// <param name="to">The end.</param>
+    /// <returns>The pair, or null when either end is absent.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>The separator is the reader's.</b> Four views joined these with an
+    /// en-dash - one of them with spaces around it and three without - so the
+    /// character, the spacing and the order were decided in a service, in one
+    /// culture, and a screen could not have said it any other way.
+    /// </para>
+    /// <para>
+    /// Null when either end is missing rather than a half-span: a range with one
+    /// end is not a shorter range, and a surface handed one would have to invent
+    /// what the other end means.
+    /// </para>
+    /// </remarks>
+    public static object? Span(TimeOnly? from, TimeOnly? to)
+        => from is { } start && to is { } end
+            ? new { from = Clock(start), to = Clock(end) }
+            : null;
+
     /// <summary>The same, where the value may be absent.</summary>
     /// <param name="at">The time, or null.</param>
     /// <returns>The clock string, or null — never a placeholder.</returns>

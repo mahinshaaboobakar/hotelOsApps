@@ -13,6 +13,8 @@
  * would drift in the direction nobody checks.
  */
 
+import type { Span } from "../chrome/clock";
+
 /** A shift as the catalogue defines it — `WF-Q11`, property-created. */
 export interface Shift {
   /** The catalogue entry's id. */
@@ -34,7 +36,13 @@ export interface Shift {
   tone: "brand" | "ok" | "warn" | "bad" | "neutral";
 
   /** The hours, as a person reads them. Absent for an off entry — `WF-Q12`. */
-  hours: string | null;
+  /**
+   * The shift's hours, as two ends — null on an off day.
+   *
+   * It arrived joined (`07:00–15:00`), so the separator and the hour cycle were
+   * a service's (ADR 0175). The surface composes it through `chrome/clock`.
+   */
+  hours: Span | null;
 }
 
 /** One person's one day on the rota. */
@@ -51,7 +59,8 @@ export interface Cell {
    * the chip rather than replacing it, because the frame's cell must still
    * carry a colour and a short code.
    */
-  override: string | null;
+  /** A one-off span for this day, as two ends — null when the cell has none. */
+  override: Span | null;
 
   /** Approved leave covering the day, by its type's name. */
   leave: string | null;

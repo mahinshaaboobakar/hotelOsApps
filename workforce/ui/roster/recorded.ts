@@ -20,15 +20,17 @@
 import type { Shift, Week } from "./model";
 
 /** This property's catalogue — frame 9's five, as frame 2 uses them. */
-const MORNING: Shift = { id: "s-m", code: "M", name: "Morning", tone: "brand", hours: "07:00–15:00" };
-const AFTERNOON: Shift = { id: "s-a", code: "A", name: "Afternoon", tone: "ok", hours: "15:00–23:00" };
-const NIGHT: Shift = { id: "s-n", code: "N", name: "Night", tone: "warn", hours: "23:00–07:00" };
+const MORNING: Shift = { id: "s-m", code: "M", name: "Morning", tone: "brand", hours: { from: "07:00", to: "15:00" } };
+const AFTERNOON: Shift = { id: "s-a", code: "A", name: "Afternoon", tone: "ok", hours: { from: "15:00", to: "23:00" } };
+const NIGHT: Shift = { id: "s-n", code: "N", name: "Night", tone: "warn", hours: { from: "23:00", to: "07:00" } };
 const OFF: Shift = { id: "s-off", code: "OFF", name: "Week-off", tone: "neutral", hours: null };
 const SPLIT: Shift = {
-  id: "s-sb", code: "SB", name: "Split — Banquet", tone: "warn", hours: "10–14, 18–22",
+  id: "s-sb", code: "SB", name: "Split — Banquet", tone: "warn",
+  hours: { from: "10:00", to: "14:00" },
 };
 const GENERAL: Shift = {
-  id: "s-g", code: "G", name: "General", tone: "ok", hours: "09:00 – 18:00",
+  id: "s-g", code: "G", name: "General", tone: "ok",
+  hours: { from: "09:00", to: "18:00" },
 };
 
 /** A day with a shift and nothing else true of it. */

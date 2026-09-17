@@ -15,6 +15,7 @@
 
 import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 
+import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
@@ -58,7 +59,7 @@ export async function policy(
   const config = got.value;
 
   const body = el("div", "body");
-  body.append(shifts(config.catalogue), leave(config.leave, host), overtime(config, host), holidays(config));
+  body.append(shifts(config.catalogue, host), leave(config.leave, host), overtime(config, host), holidays(config));
 
   main.replaceChildren(header(config, open), body);
 
@@ -88,7 +89,7 @@ function header(config: Policy, open: () => void): HTMLElement {
 }
 
 /** The catalogue, and the sentence that makes editing it safe. */
-function shifts(rows: readonly CatalogueRow[]): HTMLElement {
+function shifts(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
   const section = el("div", "sect");
   const columns = "1.4fr 100px 140px 1fr 140px";
 
@@ -108,7 +109,10 @@ function shifts(rows: readonly CatalogueRow[]): HTMLElement {
     item.append(
       el("b", undefined, row.name),
       cell(codeChip(row.code, swatch(row.colour))),
-      el("div", "quiet", row.times),
+      // Composed here: the separator between the two windows of a split shift
+      // is the reader's too, and the service used to send ", " between them.
+      el("div", "quiet", [span(row.hours, host.property), span(row.second, host.property)]
+        .filter((one) => one !== null).join(", ") || "—"),
       cell(colourDot(`${row.colour} · ${row.kind}`, swatch(row.colour)), "quiet"),
       // Why retiring a shift is not deleting it: these assignments still name it,
       // and a rota worked under it has to stay readable.

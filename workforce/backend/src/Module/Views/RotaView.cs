@@ -254,9 +254,9 @@ public static class RotaView
             shift = assigned is null || !shifts.TryGetValue(assigned.CatalogueEntryId, out var entry)
                 ? null
                 : Shift(entry, hours),
+            // The two ends, not a joined string - ADR 0175.
             @override = assigned?.IsOverridden == true
-                ? assigned.OverrideStartsAt!.Value.ToString("HH:mm")
-                  + "–" + assigned.OverrideEndsAt!.Value.ToString("HH:mm")
+                ? Wire.Span(assigned.OverrideStartsAt, assigned.OverrideEndsAt)
                 : null,
             leave = away is null ? null : "Leave",
             // A gap is a day with neither a shift nor leave on it — an
@@ -278,8 +278,7 @@ public static class RotaView
             name = entry.Name,
             tone = Wording.Tone(entry.Colour),
             hours = window?.IsWorking == true
-                ? window.StartsAt!.Value.ToString("HH:mm")
-                  + "–" + window.EndsAt!.Value.ToString("HH:mm")
+                ? Wire.Span(window.StartsAt, window.EndsAt)
                 : null,
         };
     }

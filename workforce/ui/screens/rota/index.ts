@@ -49,9 +49,9 @@ export async function rota(
 
   view.append(
     ribbon(week.duty, host.property),
-    grid(week.days, week.people, (person, day) => onPick(person.id, day)),
+    grid(week.days, week.people, host.property, (person, day) => onPick(person.id, day)),
   );
-  body.append(view, legend(week.catalogue, "edit a shift → effective forward only"));
+  body.append(view, legend(week.catalogue, host.property, "edit a shift → effective forward only"));
 
   if (week.overtime.length > 0) {
     body.append(overtime(week, host));

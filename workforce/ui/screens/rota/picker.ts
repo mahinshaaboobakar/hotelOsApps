@@ -16,8 +16,9 @@
  * pass. This is the ratified shape, drawn.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import type { HostApi, PropertyEnvironment } from "@hotelos/sdk";
 
+import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
 import { codeChip } from "../../chrome/code";
 import { foot } from "../../chrome/confirm";
@@ -82,7 +83,7 @@ export function picker(
 
   const list = el("div", "picks");
   for (const shift of week.catalogue) {
-    list.append(option(shift, shift.id === current, () => {
+    list.append(option(shift, shift.id === current, host.property, () => {
       chosen = shift.id;
       for (const other of Array.from(list.querySelectorAll(".pk"))) {
         other.classList.remove("on");
@@ -152,14 +153,19 @@ export function picker(
  * choices would make a manager check the grid behind it to see what they were
  * changing from.
  */
-function option(shift: Shift, current: boolean, pick: () => void): HTMLElement {
+function option(
+  shift: Shift,
+  current: boolean,
+  property: PropertyEnvironment,
+  pick: () => void,
+): HTMLElement {
   const row = el("div", current ? "pk on" : "pk");
   row.addEventListener("click", pick);
 
   row.append(
     codeChip(shift.code, shift.tone),
     el("span", undefined, shift.name),
-    el("s", undefined, shift.hours ?? "—"),
+    el("s", undefined, span(shift.hours, property) ?? "—"),
   );
 
   return row;

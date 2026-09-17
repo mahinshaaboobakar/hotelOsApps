@@ -12,7 +12,7 @@
  * widget, not by the shell*.
  */
 
-import { formatClock, formatInstant, type HostApi, load, type PropertyEnvironment }
+import { formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -20,6 +20,7 @@ import { el, fill } from "../../chrome/element";
 import type { Changeover } from "../../roster/widget";
 
 import type { ShiftBoard } from "../../roster/widget";
+import { span } from "../../chrome/clock";
 import { failureCard, card, figures, rows, section } from "../card";
 
 /**
@@ -47,7 +48,7 @@ export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
     // the hour cycle are the reader's (ADR 0175).
     rows(board.rows.map((row) => row.from === undefined || row.to === undefined
       ? row
-      : { ...row, meta: span(row.from, row.to, host.property) }), host),
+      : { ...row, meta: span({ from: row.from, to: row.to }, host.property) }), host),
     changeover(board.nextChange, host.property),
   ]);
 }
@@ -83,21 +84,4 @@ function changeover(
     block,
     section(`Next change · ${formatInstant(change.at, property, "time")}`),
     switching);
-}
-
-/**
- * A shift's hours, in the property's own form.
- *
- * @param from the start, as a clock string
- * @param to the end
- * @param property for the locale
- * @returns the span as a person reads it
- *
- * @remarks
- * The en-dash is chosen here rather than received: the service used to send
- * `07:00–15:00` whole, which put a separator and a 24-hour cycle in one
- * culture's terms into every property's screen.
- */
-function span(from: string, to: string, property: PropertyEnvironment): string {
-  return `${formatClock(from, property)}–${formatClock(to, property)}`;
 }

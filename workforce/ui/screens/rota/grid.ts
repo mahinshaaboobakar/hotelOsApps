@@ -10,6 +10,9 @@
  * told about.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
+import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
 import type { Cell, Person } from "../../roster";
 
@@ -24,6 +27,7 @@ import type { Cell, Person } from "../../roster";
 export function grid(
   days: readonly string[],
   people: readonly Person[],
+  property: PropertyEnvironment,
   open: (person: Person, day: number) => void,
 ): HTMLElement {
   const table = el("div", "rgrid");
@@ -37,7 +41,7 @@ export function grid(
     table.append(who(person));
 
     person.week.forEach((cell, day) => {
-      const node = draw(cell);
+      const node = draw(cell, property);
       node.addEventListener("click", () => open(person, day));
       table.append(node);
     });
@@ -70,7 +74,7 @@ function who(person: Person): HTMLElement {
 }
 
 /** One cell, in whichever of its four states it is in. */
-function draw(cell: Cell): HTMLElement {
+function draw(cell: Cell, property: PropertyEnvironment): HTMLElement {
   if (cell.leave !== null) {
     return el("div", "away", cell.leave);
   }
@@ -92,9 +96,9 @@ function draw(cell: Cell): HTMLElement {
   // belongs to — WF-Q17. Rendering it as its own cell would lose the colour and
   // the code, which is what a rota is read by.
   if (cell.override !== null) {
-    chip.append(el("u", undefined, cell.override));
+    chip.append(el("u", undefined, span(cell.override, property) ?? ""));
   } else if (cell.shift.hours !== null) {
-    chip.append(el("i", undefined, cell.shift.hours));
+    chip.append(el("i", undefined, span(cell.shift.hours, property) ?? ""));
   }
 
   return chip;

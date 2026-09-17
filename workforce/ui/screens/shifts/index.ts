@@ -16,6 +16,7 @@
 
 import { type HostApi, load } from "@hotelos/sdk";
 
+import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
@@ -61,7 +62,7 @@ export async function shifts(
   const catalogue = got.value.catalogue;
 
   const body = el("div", "body");
-  body.append(table(catalogue), note());
+  body.append(table(catalogue, host), note());
 
   main.replaceChildren(header(catalogue, open), body);
 
@@ -85,7 +86,7 @@ function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLEleme
   return head;
 }
 
-function table(rows: readonly CatalogueRow[]): HTMLElement {
+function table(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
   const list = el("div", "rows");
 
   const head = el("div", "row hd");
@@ -111,7 +112,8 @@ function table(rows: readonly CatalogueRow[]): HTMLElement {
     item.append(
       name,
       cell(codeChip(row.code, swatch(row.colour))),
-      el("div", "quiet", row.times),
+      el("div", "quiet", [span(row.hours, host.property), span(row.second, host.property)]
+        .filter((one) => one !== null).join(", ") || "—"),
       cell(colourDot(row.colour, swatch(row.colour)), "quiet"),
       el("div", "quiet", row.inUse),
     );

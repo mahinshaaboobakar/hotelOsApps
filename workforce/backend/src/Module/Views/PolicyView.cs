@@ -56,7 +56,8 @@ public static class PolicyView
             {
                 name = shift.Name,
                 code = shift.ShortCode,
-                times = Times(hours),
+                hours = Wire.Span(hours?.StartsAt, hours?.EndsAt),
+                second = Wire.Span(hours?.SecondStartsAt, hours?.SecondEndsAt),
                 colour = string.IsNullOrEmpty(shift.Colour) ? "None" : shift.Colour,
                 kind = hours?.IsWorking == true ? "working" : "off",
                 inUse = (usage.TryGetValue(shift.Id, out var count) ? count : 0) + " assignments",
@@ -204,22 +205,6 @@ public static class PolicyView
             cancellationToken);
 
         return new { version = policy.Version };
-    }
-
-    /// <summary>"07:00 – 15:00", "10–14, 18–22", or an em-dash for an off day.</summary>
-    private static string Times(ShiftHours? hours)
-    {
-        if (hours is null || !hours.IsWorking)
-        {
-            return "—";
-        }
-
-        var first = hours.StartsAt!.Value.ToString("HH:mm")
-                    + " – " + hours.EndsAt!.Value.ToString("HH:mm");
-
-        return hours.SecondStartsAt is { } second && hours.SecondEndsAt is { } close
-            ? first + ", " + second.ToString("HH:mm") + " – " + close.ToString("HH:mm")
-            : first;
     }
 
     /// <summary>One leave type, as the table draws it.</summary>

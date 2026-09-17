@@ -10,6 +10,9 @@
  * drift, and a legend that disagreed with another legend is worse than none.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
+import { span } from "./clock";
 import { el } from "./element";
 import { codeChip } from "./code";
 import type { Shift } from "../roster";
@@ -21,7 +24,11 @@ import type { Shift } from "../roster";
  * @param note a sentence to close with, when the screen has one
  * @returns the legend
  */
-export function legend(catalogue: readonly Shift[], note?: string): HTMLElement {
+export function legend(
+  catalogue: readonly Shift[],
+  property: PropertyEnvironment,
+  note?: string,
+): HTMLElement {
   const strip = el("div", "legend");
 
   strip.append(el("div", "llab", "This property's shifts"));
@@ -32,7 +39,7 @@ export function legend(catalogue: readonly Shift[], note?: string): HTMLElement 
     entry.append(
       codeChip(shift.code, shift.tone),
       el("span", undefined, shift.name),
-      el("s", undefined, shift.hours ?? ""),
+      el("s", undefined, span(shift.hours, property) ?? ""),
     );
 
     strip.append(entry);

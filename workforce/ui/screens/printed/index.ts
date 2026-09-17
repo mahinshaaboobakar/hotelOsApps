@@ -20,6 +20,7 @@
 import { formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
+import { span } from "../../chrome/clock";
 import { el, fill } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
@@ -63,7 +64,7 @@ export async function printed(
 
   const page = el("div", "page");
   page.append(
-    masthead(week), grid(week, gotDuty.value, host.property), legend(week), changes());
+    masthead(week), grid(week, gotDuty.value, host.property), legend(week, host.property), changes());
 
   const paper = el("div", "paper");
   paper.append(page);
@@ -163,11 +164,11 @@ function grid(
 }
 
 /** The legend — doing more work here than it does on screen. */
-function legend(week: Week): HTMLElement {
+function legend(week: Week, property: PropertyEnvironment): HTMLElement {
   const box = el("div", "plegend");
 
   for (const shift of week.catalogue) {
-    box.append(entry(shift.code, shift.name, shift.hours));
+    box.append(entry(shift.code, shift.name, span(shift.hours, property)));
   }
 
   box.append(entry("—", "Not assigned", null));

@@ -3,11 +3,17 @@
  * and the one it does not.
  */
 
+import type { Span } from "../chrome/clock";
+
 /** A shift in the property's catalogue. */
 export interface CatalogueRow {
   name: string;
   code: string;
-  times: string;
+  /** The working hours, as two ends — null on an off day. */
+  hours: Span | null;
+
+  /** A split shift's second window, or null. */
+  second: Span | null;
   colour: string;
   kind: "working" | "off";
 
@@ -57,12 +63,36 @@ export const recordedPolicy: Policy = {
   property: "Kochi Beach Resort · applies to every department",
 
   catalogue: [
-    { name: "Morning", code: "M", times: "07:00 – 15:00", colour: "Cyan", kind: "working", inUse: "412 assignments" },
-    { name: "Afternoon", code: "A", times: "15:00 – 23:00", colour: "Indigo", kind: "working", inUse: "380 assignments" },
-    { name: "Night", code: "N", times: "23:00 – 07:00", colour: "Violet", kind: "working", inUse: "196 assignments" },
-    { name: "Split — Banquet", code: "SB", times: "10–14, 18–22", colour: "Amber", kind: "working", inUse: "44 assignments" },
-    { name: "General", code: "G", times: "09:00 – 18:00", colour: "Emerald", kind: "working", inUse: "88 assignments" },
-    { name: "Week-off", code: "OFF", times: "—", colour: "None", kind: "off", inUse: "203 assignments" },
+    {
+      name: "Morning", code: "M",
+      hours: { from: "07:00", to: "15:00" }, second: null,
+      colour: "Cyan", kind: "working", inUse: "412 assignments"
+    },
+    {
+      name: "Afternoon", code: "A",
+      hours: { from: "15:00", to: "23:00" }, second: null,
+      colour: "Indigo", kind: "working", inUse: "380 assignments"
+    },
+    {
+      name: "Night", code: "N",
+      hours: { from: "23:00", to: "07:00" }, second: null,
+      colour: "Violet", kind: "working", inUse: "196 assignments"
+    },
+    {
+      name: "Split — Banquet", code: "SB",
+      hours: { from: "10:00", to: "14:00" },
+      second: { from: "18:00", to: "22:00" },
+      colour: "Amber", kind: "working", inUse: "44 assignments"
+    },
+    {
+      name: "General", code: "G",
+      hours: { from: "09:00", to: "18:00" }, second: null,
+      colour: "Emerald", kind: "working", inUse: "88 assignments"
+    },
+    {
+      name: "Week-off", code: "OFF", hours: null, second: null,
+      colour: "None", kind: "off", inUse: "203 assignments"
+    },
   ],
 
   leave: [
