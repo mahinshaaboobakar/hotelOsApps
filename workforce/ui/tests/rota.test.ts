@@ -107,7 +107,9 @@ describe("the Team Rota", () => {
     // the fabricated week is still drawn behind it, and that is exactly what
     // the old shape did.
     expect(text).toContain("did not answer in time");
-    expect(root.querySelector(".fail-wire")).not.toBeNull();
+    // The provenance, which moved from a dotted line to labelled rows — the
+    // run-on survives for the clipboard, where one line is the right shape.
+    expect(root.querySelector(".fail-facts")).not.toBeNull();
     expect(root.querySelector(".rota")).toBeNull();
   });
 

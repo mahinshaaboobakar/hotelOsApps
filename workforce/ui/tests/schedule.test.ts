@@ -90,11 +90,11 @@ describe("staff schedule", () => {
 
     expect(asked).toEqual([]);
 
-    // A question this bundle never asked is not a platform failure, so there is
-    // no wire line to quote and none is drawn. Asserting its ABSENCE is the
+    // A question this bundle never asked is not a platform failure, so there
+    // are no facts to quote and none are drawn. Asserting the ABSENCE is the
     // point: a failure surface here would report the platform for something it
     // was never given the chance to do.
-    expect(main.querySelector(".fail-wire")).toBeNull();
+    expect(main.querySelector(".fail-facts")).toBeNull();
     expect(main.querySelector(".fail-said")?.textContent)
       .toBe("There is no staff record for the signed-in account");
   });
@@ -111,9 +111,16 @@ describe("staff schedule", () => {
       },
     });
 
-    // The failure that happened, carried whole — including the wire line, which
-    // names `me` rather than `schedule`. This screen's inability to ask is a
-    // consequence of that refusal and not a separate thing that went wrong.
-    expect(main.querySelector(".fail-wire")?.textContent).toContain("roster.read · me");
+    // The failure that happened, carried whole — and the facts name `me`
+    // rather than `schedule`. This screen's inability to ask is a consequence
+    // of that refusal, not a separate thing that went wrong.
+    //
+    // Asserted on the VALUE of the "Asked for" row rather than on the body's
+    // whole text: a substring search across the block would also match the
+    // sentence above it, and would keep passing if the facts stopped rendering.
+    const asked_for = Array.from(main.querySelectorAll(".fail-fact"))
+      .find((row) => row.querySelector(".fail-fk")?.textContent === "Asked for");
+
+    expect(asked_for?.querySelector(".fail-fv")?.textContent).toBe("roster.read · me");
   });
 });

@@ -104,9 +104,35 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    never asked is not a refusal and not a fault — colouring it as either would
    report the platform for something it was never given the chance to do. */
 .fail-unaskable{color:var(--color-ink-faint,#5a6172)}
+/* The mark is geometry now, not characters — page 64 §13. A fixed box so the
+   three glyphs occupy the same space and the block below never shifts. */
+.fail-mark svg{width:26px;height:26px;display:block}
+/* The state, in two or three words, above the sentence: a person meeting a
+   screen they did not expect reads WHAT happened before WHY. */
+.fail-label{font-size:11px;font-weight:650;letter-spacing:.08em;
+            text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
+/* No rule for fail-unanswered, deliberately: a timeout is the neutral one of
+   the three and inherits the mark's own colour, where the refusal and the fault
+   are tinted. Stated because the absence is a decision, not an omission. */
 .fail-said{font-size:15.5px;font-weight:600;color:var(--color-ink,#e8ebf4);
            letter-spacing:-.01em}
 .fail-why{font-size:13.5px;line-height:1.6;color:var(--color-ink-muted,#8b93a7)}
+/* The four facts, labelled. They were one dotted line — a log entry set as the
+   most prominent thing on the screen — and the owner said so. Rows, with the
+   label quiet and the value readable; the run-on survives for the clipboard,
+   where a single line is the right shape. */
+.fail-facts{display:grid;gap:5px;width:100%;max-width:52ch;margin-top:3px}
+.fail-fact{display:grid;grid-template-columns:8.5rem 1fr;gap:10px;align-items:baseline}
+.fail-fk{font-size:11.5px;letter-spacing:.04em;color:var(--color-ink-faint,#5a6172)}
+.fail-fv{font-size:12.5px;color:var(--color-ink-muted,#8b93a7);
+         font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+         overflow-wrap:anywhere}
+/* What to do next, beside the control or in place of one. the grant state draws no
+   button — a refusal cannot name who grants it — so on that state this note is
+   the whole of the act, and it must read as a sentence rather than as a caption
+   under a missing thing. */
+.fail-note{font-size:12.5px;line-height:1.55;color:var(--color-ink-muted,#8b93a7);
+           max-width:52ch}
 /* The line a person hands to somebody who can act, so it selects cleanly and
    wraps rather than truncating - a fault id cut off at the edge is a fault id
    nobody can quote. */

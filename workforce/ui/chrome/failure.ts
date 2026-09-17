@@ -31,8 +31,7 @@
  * the screen never pretends the list is elsewhere. This draws the body.
  */
 
-import { FAILURE_LABELS, failureDrawing, type FailureDrawing, type ReadFailure }
-  from "@hotelos/sdk";
+import { failureDrawing, type FailureDrawing, type ReadFailure } from "@hotelos/sdk";
 
 import { APPLICATION } from "./application";
 import { el } from "./element";
@@ -73,13 +72,61 @@ export function drawing(failure: ReadFailure, subject: Subject): FailureDrawing 
  *   carries the same fact in words
  */
 export function markEl(drawn: FailureDrawing): HTMLElement {
-  // Characters rather than an SVG: the realm has no network, so an external
-  // sprite could not load, and the marks are the SDK's so that a person meets
-  // the same three in every application.
-  const glyph = el("div", `fail-mark fail-${drawn.cause}`, drawn.mark);
+  // **Geometry, not a character** — page 64 §13. This drew `· · ·`, `· |` and
+  // `· ✕` on a stated constraint: *the realm has no network, so an external
+  // sprite could not load*. That was true about the NETWORK and was read as a
+  // constraint about CHARACTERS. An inline `<svg>` loads nothing either, so the
+  // reason never ruled out the better mark.
+  const box = el("div", `fail-mark fail-${drawn.cause}`);
+  const svg = document.createElementNS(SVG, "svg");
 
-  glyph.setAttribute("aria-hidden", "true");
-  return glyph;
+  svg.setAttribute("viewBox", drawn.glyph.viewBox);
+  svg.setAttribute("fill", "none");
+  svg.setAttribute("stroke", "currentColor");
+  svg.setAttribute("stroke-width", "1.6");
+
+  // Round caps are load-bearing rather than decorative: the SDK draws a dot as
+  // a zero-length segment, which renders as nothing under a butt cap.
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+
+  for (const d of drawn.glyph.paths) {
+    const path = document.createElementNS(SVG, "path");
+    path.setAttribute("d", d);
+    svg.append(path);
+  }
+
+  box.append(svg);
+  box.setAttribute("aria-hidden", "true");
+  return box;
+}
+
+/** The SVG namespace — `createElement` builds an HTML element that never draws. */
+const SVG = "http://www.w3.org/2000/svg";
+
+/**
+ * The four facts, each with its label.
+ *
+ * @param drawn the words and marks for this failure
+ * @returns a definition list a person can read one line at a time
+ *
+ * @remarks
+ * **They were one dotted line and that is what the owner objected to.** Every
+ * fact in `roster.read · me · no grant names this user · 2026-09-17T08:53:23Z`
+ * was correct, and the most useful part of it was set as the least readable —
+ * a log entry on a screen. The line survives for the clipboard, where a run-on
+ * is the right shape, and the screen gets rows.
+ */
+export function factsEl(drawn: FailureDrawing): HTMLElement {
+  const list = el("div", "fail-facts");
+
+  for (const fact of drawn.facts) {
+    const row = el("div", "fail-fact");
+    row.append(el("dt", "fail-fk", fact.label), el("dd", "fail-fv", fact.value));
+    list.append(row);
+  }
+
+  return list;
 }
 
 /**
@@ -95,6 +142,16 @@ export function markEl(drawn: FailureDrawing): HTMLElement {
  */
 export function wireEl(drawn: FailureDrawing): HTMLElement {
   return el("div", "fail-wire", drawn.wire);
+}
+
+/**
+ * The state, in two or three words — `Not permitted`.
+ *
+ * Above the sentence rather than inside it: a person scanning a screen they did
+ * not expect reads the state first and the explanation second.
+ */
+export function labelEl(drawn: FailureDrawing): HTMLElement {
+  return el("div", `fail-label fail-${drawn.cause}`, drawn.label);
 }
 
 /**
@@ -115,16 +172,13 @@ export function failureBody(
 
   body.append(
     markEl(drawn),
+    labelEl(drawn),
     el("div", "fail-said", drawn.said),
     el("div", "fail-why", drawn.why),
-    wireEl(drawn),
+    factsEl(drawn),
   );
 
-  const acts = actions(drawn, retry);
-  if (acts !== null) {
-    body.append(acts);
-  }
-
+  body.append(actions(drawn, retry));
   return body;
 }
 
@@ -134,23 +188,50 @@ export function failureBody(
  * **Never a retry on a refusal.** A button that cannot change the outcome is a
  * second lie, and the SDK decides which failures may offer one — so a screen
  * passing a `retry` for a refusal gets no button rather than a broken promise.
+ *
+ * @remarks
+ * **Switched on `kind`, never read for a `label`.** `grant` deliberately
+ * carries none: a refusal does not name who can grant, so there is nothing to
+ * put on a button, and the owner's ruling is expressed as the field's absence
+ * rather than as a rule somebody has to remember. Code that reached for
+ * `act.label` here would compile against the old shape and fail on this one —
+ * so the note is drawn for every kind and the button only where a label exists
+ * to sit on it.
  */
-function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement | null {
+function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement {
   const row = el("div", "fail-acts");
+  const act = drawn.act;
 
-  if (drawn.retryable && retry !== undefined) {
-    const again = el("button", "btn pri", FAILURE_LABELS.retry);
-    again.addEventListener("click", retry);
-    row.append(again);
+  switch (act.kind) {
+    case "retry":
+      // The SDK says a retry is offerable; the screen says whether it has one
+      // to run. Both are required, and neither implies the other.
+      if (retry !== undefined) {
+        const again = el("button", "btn pri", act.label);
+        again.addEventListener("click", retry);
+        row.append(again);
+      }
+      break;
+
+    case "copy": {
+      const copy = el("button", "btn", act.label);
+      copy.addEventListener("click", () => {
+        void navigator.clipboard?.writeText(drawn.wire);
+      });
+      row.append(copy);
+      break;
+    }
+
+    case "grant":
+      // No control, on purpose. The approved frame offered *Request access* and
+      // *Who can grant this*; a bundle calls only its own backend (design page
+      // 63 §3), so neither could act — and the platform does not know who holds
+      // the grant either, which is why this arm has no label to draw.
+      break;
   }
 
-  // Deliberately no second button. The approved frame offers *Open Operations
-  // Center*, *Request access* and *Who can grant this* — none of which this
-  // module can reach: a bundle calls only its own backend (design page 63 §3),
-  // and Operations Center is another application. Drawing a control that
-  // cannot act is the same defect as a retry that cannot succeed, so they are
-  // absent and reported rather than drawn dead.
-  return row.childElementCount > 0 ? row : null;
+  row.append(el("div", "fail-note", act.note));
+  return row;
 }
 
 /**
