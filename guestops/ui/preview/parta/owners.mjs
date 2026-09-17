@@ -85,6 +85,18 @@ window.document.write(readFileSync(DRAWING, "utf8"));
  *
  * Each comparison names its frame, and the frames carry ids, so the search is
  * scoped to the subtree the node was actually measured in.
+ *
+ * **AND THAT IS NOT ENOUGH, WHICH COST A WRONG CORRECTION TO THE OWNER.** The
+ * collision this fixed was across frames; the one that remains is *inside* one.
+ * Frame 4 carries `<span class="n">31 Aug</span>` on the Today tab and `31 Aug`
+ * on several timeline rows, so `find` still takes the badge. Six date nodes were
+ * reported as tab badges on that basis, and the report was wrong: changing
+ * `.act .tm b` alone closed all ten.
+ *
+ * **So this reports candidates, not identities.** A repeated string within a
+ * frame is exactly where it is wrong while looking right, and the only thing
+ * that settled it was changing one rule and counting. Treat the output as where
+ * to look, and let the count decide.
  */
 function leavesOf(frame) {
   const root = window.document.querySelector(`#f${frame}`);
