@@ -69,9 +69,39 @@ public static class InstallerConvention
     private static readonly string Run = Guid.NewGuid().ToString("n")[..8];
 
     /// <summary><c>NOLOGIN</c>. Owns the schema; migrations assume it — ADR 0029.</summary>
-    public static readonly string OwnerRole = $"hotelos_owner_workforce_{Run}";
+    /// <remarks>
+    /// <para>
+    /// <b>NOT suffixed, and the asymmetry is forced rather than chosen.</b> The
+    /// SDK derives this name from the schema —
+    /// <c>SchemaMigration.OwnerOf(schema) => $"hotelos_owner_{schema}"</c> — and
+    /// the migrator connection assumes it through libpq options before the first
+    /// statement runs. A suffixed owner is a role that migration path cannot
+    /// name, so suffixing it does not make the harness safer; it makes it stop
+    /// exercising the platform's own migration, which is the thing this fixture
+    /// exists to run.
+    /// </para>
+    /// <para>
+    /// <b>What makes it safe instead is operation-specific, per ADR 0185.</b>
+    /// This role is <c>NOLOGIN</c> and has no password, so the operation that
+    /// did the damage cannot apply to it; it is created only when absent and
+    /// dropped only when this run created it. On a cluster that holds an
+    /// installation it is therefore found, left alone, and left behind.
+    /// </para>
+    /// <para>
+    /// The schema it owns lives inside a per-run scratch database, so
+    /// <c>CREATE SCHEMA … AUTHORIZATION</c> collides with nothing.
+    /// </para>
+    /// </remarks>
+    public const string OwnerRole = "hotelos_owner_workforce";
 
     /// <summary><c>LOGIN</c>. What the running application connects as.</summary>
+    /// <remarks>
+    /// <b>Suffixed, because this is the one that can be damaged.</b> It is the
+    /// role with a password, and an unconditional <c>ALTER ROLE … PASSWORD</c>
+    /// on the fixed name is what put a real property's application out of step
+    /// with the Kernel's sealed secret. Nothing derives this name, so a suffix
+    /// costs the harness nothing.
+    /// </remarks>
     public static readonly string AppRole = $"hotelos_app_workforce_{Run}";
 
     /// <summary>The role a migration runs as — <c>store/mod.rs:53</c>.</summary>
@@ -118,7 +148,7 @@ public static class InstallerConvention
     public static async Task<Provisioned> EnsureRolesAsync(
         string adminConnection, string password)
     {
-        await RefuseInstallationAsync(adminConnection);
+        RefuseInstalledProduct(adminConnection);
 
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
@@ -253,69 +283,31 @@ public static class InstallerConvention
     /// without an explicit port cannot silently be the product's.
     /// </para>
     /// </remarks>
-    private static async Task RefuseInstallationAsync(string adminConnection)
+    private static void RefuseInstalledProduct(string adminConnection)
     {
         var port = new NpgsqlConnectionStringBuilder(adminConnection).Port;
 
-        // **The port first, without dialling anything.** It was never wrong,
-        // only insufficient — and it is the half that still works on a cluster
-        // this harness cannot reach. A guard that had to connect in order to
-        // refuse would be unable to refuse a refused connection, and would dial
-        // the installed product in the course of deciding not to touch it.
-        if (port == InstalledProductPort)
-        {
-            throw new InvalidOperationException(
-                $"port {InstalledProductPort} is the INSTALLED product's PostgreSQL — a "
-                + "real property's database on this machine. This harness creates roles "
-                + "under the installer's own names, so they collide with that property's "
-                + "by construction and survive every teardown, roles being cluster-scoped "
-                + "(ADR 0104 §E2E-Q5(a); INSTALL-Q88 is the round this cost the first "
-                + "time).");
-        }
-
-        await using var connection = new NpgsqlConnection(adminConnection);
-        await connection.OpenAsync();
-
-        await using var command = new NpgsqlCommand(
-            "SELECT EXISTS (SELECT FROM pg_database WHERE datname = 'hotelos')", connection);
-
-        // **Keyed on what the cluster HOLDS, not on which port it answers.**
-        // This compared against 15432 and returned early for anything else - so
-        // it allowed 25432, and the owner drives the development stack as their
-        // product: desktop to 25051 to the dev Kernel to 25432. The port and the
-        // hazard coincided only while a development machine had no property on
-        // it, and stopped coinciding the day one did.
-        //
-        // The guard's old message named the hazard exactly right and then
-        // pointed the suite at the cluster where it was about to happen.
-        //
-        // **And its stated reason has since expired, which is recorded rather
-        // than quietly replaced.** It said: *this harness creates roles under the
-        // INSTALLER's own names, so they collide with that property's by
-        // construction.* Since the roles became run-suffixed that is false - the
-        // names are unique per run, cannot collide with a property's, and are
-        // dropped by a teardown gated on having created them.
-        //
-        // A justification that decays into an argument for REMOVING the thing it
-        // justifies is its own hazard: a reader meeting a dead reason concludes
-        // the constraint expired. So the reason is corrected here and the
-        // refusal is kept, because whether it should still refuse is a decision
-        // and not a repair. What survives it is the PORT check above, whose
-        // reason is untouched: 15432 is a real property's data whatever this
-        // harness names its roles.
-        if (await command.ExecuteScalarAsync() is not true)
+        if (port != InstalledProductPort)
         {
             return;
         }
 
+        // **The reason is the DATA, not a collision.** This message used to say
+        // the harness creates roles under the installer's own names and would
+        // collide with the property's - which stopped being true when the roles
+        // became run-suffixed, and would have read to the next person as a
+        // constraint that had expired.
+        //
+        // What justifies it now is untouched by any of that: 15432 is a real
+        // property's database on this machine, whatever this harness names its
+        // roles. The harness creates a database and cluster roles on whatever it
+        // is pointed at, and that is not a thing to do to a hotel's data.
         throw new InvalidOperationException(
-            $"the cluster on port {port} holds a HotelOS installation - it has a hotelos "
-            + "database, and this harness creates roles and a scratch database on the "
-            + "cluster it is pointed at. Point the suite at a cluster with no "
-            + "installation (ADR 0104 E2E-Q5(a)); INSTALL-Q88 is the round this cost the "
-            + "first time. NOTE: this refusal's original reason no longer holds - see the "
-            + "remark at RefuseInstallationAsync - and it is retained pending a ruling "
-            + "rather than because that reason still stands.");
+            $"port {InstalledProductPort} is the INSTALLED product's PostgreSQL - a real "
+            + "property's database on this machine, and this harness creates a scratch "
+            + "database and cluster roles on the cluster it is pointed at. Point the "
+            + "suite at the development cluster (ADR 0104 SS E2E-Q5(a)); INSTALL-Q88 is "
+            + "the round this cost the first time.");
     }
 
     /// <summary>Create a role, or report that somebody else already had.</summary>
@@ -380,7 +372,7 @@ public static class InstallerConvention
     /// </remarks>
     public static async Task DropRolesAsync(string adminConnection, Provisioned created)
     {
-        await RefuseInstallationAsync(adminConnection);
+        RefuseInstalledProduct(adminConnection);
 
         await using var connection = new NpgsqlConnection(adminConnection);
         await connection.OpenAsync();
