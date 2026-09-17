@@ -9,7 +9,7 @@
  * from hours against the property's threshold.
  */
 
-import { formatNumber, type HostApi, load } from "@hotelos/sdk";
+import { formatDay, formatNumber, type HostApi, load } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -43,15 +43,23 @@ export async function reports(host: HostApi, main: HTMLElement): Promise<void> {
   const absent = missing(month);
   if (absent !== null) body.append(absent);
 
-  main.replaceChildren(header(month), body);
+  main.replaceChildren(header(month, host), body);
 }
 
-function header(month: Month): HTMLElement {
+function header(month: Month, host: HostApi): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
   title.append(
-    el("div", "hsub", `${month.label} · ${month.rows.length} people`),
+    // Composed here — the month's name, the day forms, the range separator and
+    // the dots between the clauses are all the reader's (ADR 0175).
+    el("div", "hsub", [
+      formatDay(month.month, host.property, "month-year"),
+      month.department,
+      `${formatDay(month.from, host.property, "day-month")}`
+      + ` – ${formatDay(month.to, host.property, "day-month")}`,
+      `${month.rows.length} people`,
+    ].filter((one) => one !== null).join(" · ")),
   );
 
   const picker = el("div", "sel");

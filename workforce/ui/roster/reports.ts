@@ -46,13 +46,30 @@ export interface MonthRow {
 
 /** The month. */
 export interface Month {
-  label: string;
+  /**
+   * The month the report covers, as `YYYY-MM-DD` on its first day.
+   *
+   * The header sentence was built in the service — *"September 2026 · Front
+   * Office · 01 Sep – 30 Sep"* — so a month name, two day formats, a range
+   * separator and the middle dots joining them were all one culture's. Three of
+   * those five are the reader's and the other two are punctuation a reader's
+   * script may not use (ADR 0175).
+   */
+  month: string;
+
+  /** The first day the report covers. */
+  from: string;
+
+  /** The last. */
+  to: string;
   department: string;
   rows: readonly MonthRow[];
 }
 
 export const recordedMonth: Month = {
-  label: "August 2026 · Front Office · business days 1–31",
+  month: "2026-08-01",
+  from: "2026-08-01",
+  to: "2026-08-31",
   department: "Front Office",
   rows: [
     {

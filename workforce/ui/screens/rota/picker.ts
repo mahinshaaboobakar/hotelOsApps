@@ -16,7 +16,7 @@
  * pass. This is the ratified shape, drawn.
  */
 
-import type { HostApi, PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
@@ -54,8 +54,14 @@ export function picker(
   const pop = el("div", "pick");
 
   // The day, with its month: this names one particular day, and a column
-  // heading's "Thu 27" is not a date somebody can act on.
-  const heading = `${week.days[day] ?? ""} ${week.month}`.trim();
+  // heading's "Thu 27" is not a date somebody can act on. It used to append a
+  // separate `month` field that existed only because the headings were rendered
+  // too short to carry one; the day is a date now and the style says how much
+  // of it to show.
+  const property = host.property;
+  const heading = week.days[day] === undefined
+    ? ""
+    : formatDay(week.days[day], property, "day-month-year");
 
   // The DEPARTMENT, not the job role. The rota is a department's, and what makes
   // a zone mean anything is the department beside it — WF-Q7's whole argument,

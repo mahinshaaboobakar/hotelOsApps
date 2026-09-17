@@ -47,6 +47,13 @@ export interface ScheduleDay {
 export interface Schedule {
   who: string;
   initials: string;
+  /**
+   * The month, as `YYYY-MM-DD` on its first day — the surface names it.
+   *
+   * A day rather than an instant: a month is a calendar fact with no zone, and
+   * `month-year` moved to `DayStyle` on 2026-09-16 for exactly that reason. Sent
+   * as `"MMMM yyyy"` it carried one language's month name to every property.
+   */
   month: string;
 
   /** The four figures above the grid. */
@@ -90,7 +97,7 @@ function blank(date: number): ScheduleDay {
 export const recordedSchedule: Schedule = {
   who: "Anjali Menon",
   initials: "AM",
-  month: "August 2026",
+  month: "2026-08-01",
 
   shifts: 22,
   leaveDays: 2,

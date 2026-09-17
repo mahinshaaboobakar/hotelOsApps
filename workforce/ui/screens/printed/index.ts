@@ -17,7 +17,7 @@
  * printer code.
  */
 
-import { formatInstant, type HostApi, load, type PropertyEnvironment }
+import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
@@ -124,7 +124,7 @@ function grid(
 
   table.append(el("div", "pcell hd", "Staff"));
   for (const day of week.days) {
-    table.append(el("div", "pcell hd", day));
+    table.append(el("div", "pcell hd", formatDay(day, property, "weekday-day")));
   }
 
   // The MOD row shows TWO names on most days, because the duty crosses midnight

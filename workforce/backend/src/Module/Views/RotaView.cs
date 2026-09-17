@@ -104,10 +104,25 @@ public static class RotaView
             // on the screen could have bridged them.
             departmentCode = department ?? string.Empty,
 
-            label = monday.ToString("d") + " – " + sunday.ToString("d MMM") + " Week",
-            month = monday.ToString("MMMM yyyy"),
+            // **Three rendered strings become two dates and seven days** - ADR
+            // 0175. `label` was `monday.ToString("d")`, which is the LOCALE'S
+            // FULL SHORT-DATE PATTERN: 24/08/2026 in en-GB, 8/24/2026 in en-US,
+            // 24.08.2026 in de-DE - rendered in the machine's culture and shipped
+            // to every property. It was also the worst site in this file and no
+            // census of mine ever saw it, because it shares a line with another
+            // ToString and a per-line count keeps only the last.
+            //
+            // And it appended " Week" while the surface wrote "Week" too, so a
+            // real property read "24/08/2026 – 30 Aug Week  Week". The word
+            // belongs to whichever side says it once; it is the surface's.
+            //
+            // `days` was "MON 24", uppercased HERE - and case is a script's
+            // property, not a style: a locale whose weekday names have no case
+            // distinction gets the same string back, and one whose uppercase
+            // rules differ from the invariant gets the wrong letters.
+            sunday = Wire.Day(sunday),
             days = Enumerable.Range(0, 7)
-                .Select(offset => monday.AddDays(offset).ToString("ddd d").ToUpperInvariant())
+                .Select(offset => Wire.Day(monday.AddDays(offset)))
                 .ToList(),
             duty = spans.Select(one => Span(one, monday, names)).ToList(),
             people = people

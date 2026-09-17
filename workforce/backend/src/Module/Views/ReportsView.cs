@@ -67,9 +67,15 @@ public static class ReportsView
 
         return new
         {
-            label = from.ToString("MMMM yyyy")
-                    + (department is null ? "" : " · " + department)
-                    + " · " + from.ToString("d MMM") + " – " + to.ToString("d MMM"),
+            // **The parts, not the sentence** - ADR 0175. This built
+            // "September 2026 · Front Office · 01 Sep – 30 Sep" here, so a month
+            // name, two day formats, a range separator and the middle dots
+            // joining them were all decided in a service, in one culture. Three
+            // of those five are the reader's and the other two are punctuation
+            // a reader's script may not even use.
+            month = Wire.Day(from),
+            from = Wire.Day(from),
+            to = Wire.Day(to),
             department,
             rows = computed.Select(one => Row(one, names, role, byCode)).ToList(),
         };

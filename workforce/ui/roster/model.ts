@@ -150,10 +150,10 @@ export interface Week {
   /**
    * The Monday this week starts on, as `YYYY-MM-DD`.
    *
-   * **The only machine-readable date on this screen.** {@link Week.days} are
-   * seven display headings and {@link Week.label} is a rendered range; every
-   * write the rota makes names a date, and a surface that parsed its own
-   * heading to recover one would be deriving a fact from a presentation.
+   * **Every date on this screen is machine-readable now.** It was the only
+   * one: `days` were seven rendered headings and `label` a rendered range, and
+   * a surface that parsed its own heading to recover a date would be deriving
+   * a fact from a presentation.
    */
   monday: string;
 
@@ -170,21 +170,22 @@ export interface Week {
    */
   departmentCode: string;
 
-  /** The week's label, as the header shows it. */
-  label: string;
+  /** The Sunday this week ends on, as `YYYY-MM-DD`. */
+  sunday: string;
 
   /**
-   * The month the week sits in, spelled as a person reads it.
+   * The week's seven days, Monday first, each as `YYYY-MM-DD`.
    *
-   * Stated rather than sliced off the label: the grid's day headings are short
-   * by design ("Thu 27"), and the picker needs the month ("Thu 27 Aug") because
-   * it is naming one particular day rather than heading a column. Deriving it
-   * from a display string is the kind of thing that survives until a label is
-   * reworded.
+   * They arrived as `"MON 24"` — rendered AND uppercased in the service, and
+   * case is a script's property rather than a style: a locale whose weekday
+   * names carry no case distinction gets the same string back, and one whose
+   * uppercase rules differ from the invariant gets the wrong letters.
+   *
+   * The screen chooses how short to draw them. A column heading wants
+   * `weekday-day`; the picker names one particular day and wants the month with
+   * it, which is why `month` is gone — it existed only because the headings
+   * were too short to carry one.
    */
-  month: string;
-
-  /** Seven day headings, Monday first. */
   days: readonly string[];
 
   /** The MOD ribbon across the same seven days. */

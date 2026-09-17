@@ -72,7 +72,10 @@ public static class ScheduleView
         {
             who = name,
             initials = name is null ? "" : Wording.Initials(name),
-            month = first.ToString("MMMM yyyy"),
+            // The month as a DAY on the wire, formatted by the surface - ADR
+            // 0175. "MMMM yyyy" through the machine's culture put one language's
+            // month name on every property's screen.
+            month = Wire.Day(first),
             shifts = cells.Count,
             leaveDays = (int)mine.Sum(one => one.Days),
             // The count is a fact; the instant is the screen's to say. A

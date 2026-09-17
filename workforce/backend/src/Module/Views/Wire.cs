@@ -43,6 +43,18 @@ internal static class Wire
     public static string Clock(TimeOnly at)
         => at.ToString("HH:mm", CultureInfo.InvariantCulture);
 
+    /// <summary>A calendar day, as the wire carries it.</summary>
+    /// <param name="on">The day.</param>
+    /// <returns><c>yyyy-MM-dd</c>, culture-invariant.</returns>
+    /// <remarks>
+    /// The parts are numeric and the separators are literals, so this is
+    /// invariant with or without the culture - which is exactly why it is
+    /// stated: the next reader should not have to work that out, and the
+    /// neighbouring <c>Clock</c> is NOT invariant without it.
+    /// </remarks>
+    public static string Day(DateOnly on)
+        => on.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+
     /// <summary>Two ends of a span, carried rather than joined.</summary>
     /// <param name="from">The start.</param>
     /// <param name="to">The end.</param>

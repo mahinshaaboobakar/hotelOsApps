@@ -465,7 +465,15 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
 
         Assert.Equal("Vishnu Das", answer.GetProperty("who").GetString());
         Assert.Equal("VD", answer.GetProperty("initials").GetString());
-        Assert.Equal("August 2026", answer.GetProperty("month").GetString());
+        // **Rewritten, not deleted — ADR 0034.** This asserted "August 2026",
+        // which was this service naming a month in one language through the
+        // machine's culture. ADR 0175 sends the day and the surface formats it.
+        //
+        // The rule the test was protecting is untouched and is the half that
+        // matters: the answer is about the month that was ASKED for, not about
+        // today. Asserting the ISO is what keeps that checkable — a rendered
+        // name would pass in August whatever the request said.
+        Assert.Equal("2026-08-01", answer.GetProperty("month").GetString());
         Assert.Equal(1, answer.GetProperty("shifts").GetInt32());
 
         // The grid is padded to start on a Monday, so its length depends on

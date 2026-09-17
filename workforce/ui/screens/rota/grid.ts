@@ -10,7 +10,7 @@
  * told about.
  */
 
-import type { PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
@@ -19,7 +19,7 @@ import type { Cell, Person } from "../../roster";
 /**
  * Build the grid.
  *
- * @param days the seven headings
+ * @param days the seven days, each as an ISO date
  * @param people the rows, in the rota's order
  * @param open called with a person and a day index when a cell is chosen
  * @returns the grid element
@@ -33,8 +33,11 @@ export function grid(
   const table = el("div", "rgrid");
 
   table.append(el("div", "rhd", ""));
+  // Formatted here. `days` are ISO now, and a heading that rendered one raw
+  // would read "2026-08-24" — which the compiler cannot catch, both being
+  // strings, and which no test asserting "a heading exists" would either.
   for (const day of days) {
-    table.append(el("div", "rhd", day));
+    table.append(el("div", "rhd", formatDay(day, property, "weekday-day")));
   }
 
   for (const person of people) {

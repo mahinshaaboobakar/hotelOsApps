@@ -11,7 +11,7 @@ import { legend } from "../../chrome/legend";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type Week } from "../../roster";
-import { formatNumber, type HostApi, load } from "@hotelos/sdk";
+import { formatDay, formatNumber, type HostApi, load } from "@hotelos/sdk";
 import { grid } from "./grid";
 import { picker } from "./picker";
 import { ribbon } from "./ribbon";
@@ -57,7 +57,7 @@ export async function rota(
     body.append(overtime(week, host));
   }
 
-  main.replaceChildren(header(week, print), body);
+  main.replaceChildren(header(week, host, print), body);
 
   // Over the cell it belongs to, because the week behind it is what makes the
   // choice legible — which shift the person has either side of this day.
@@ -83,7 +83,7 @@ export async function rota(
  * that carried its own totals would eventually disagree with the grid beneath
  * it, and the header is the one a manager reads first.
  */
-function header(week: Week, print: () => void): HTMLElement {
+function header(week: Week, host: HostApi, print: () => void): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -121,7 +121,13 @@ function header(week: Week, print: () => void): HTMLElement {
   //              surface in front of it. §9 is not optional for that
   //   Swap       needs two assignments named by id, and `Cell` carries none.
   //              Both the read and a two-cell selection are missing
-  const week_ = el("div", "btn", `‹ ${week.label}  Week ›`);
+  // Composed here, and the word "Week" appears ONCE. The service sent
+  // "24/08/2026 – 30 Aug Week" — a locale's full short-date pattern, a second
+  // format for the other end, and a word this line was already writing — so a
+  // real property read "… Week  Week" (ADR 0175).
+  const week_ = el("div", "btn",
+    `‹ ${formatDay(week.monday, host.property, "day-month")}`
+    + ` – ${formatDay(week.sunday, host.property, "day-month")} Week ›`);
   const copy = el("div", "btn", "⧉ Copy last week");
   const swap = el("div", "btn", "⇄ Swap");
   const printBtn = el("div", "btn", "⎙ Print");

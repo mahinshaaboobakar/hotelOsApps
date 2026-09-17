@@ -9,7 +9,8 @@
  * rather than *"Request leave for them"*.
  */
 
-import { formatInstant, type HostApi, load, type PropertyEnvironment, type Read }
+import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment,
+  type Read }
   from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
@@ -97,10 +98,10 @@ export async function schedule(
     figures(month, host.property),
     calendar(month, host.property));
 
-  main.replaceChildren(header(month), body);
+  main.replaceChildren(header(month, host.property), body);
 }
 
-function header(month: Schedule): HTMLElement {
+function header(month: Schedule, property: PropertyEnvironment): HTMLElement {
   const head = el("div", "tools");
 
   // No sub-line either: the picker below names the person, and a line above it
@@ -114,7 +115,9 @@ function header(month: Schedule): HTMLElement {
 
   const grow = el("div", "grow");
   head.append(picker, grow,
-    el("div", "btn", `‹ ${month.month} ›`),
+    // Formatted here. `month` is an ISO day now, and rendering it raw would
+    // print "2026-08-01" — which the compiler cannot see, both being strings.
+    el("div", "btn", `‹ ${formatDay(month.month, property, "month-year")} ›`),
     el("div", "btn", "⇄ Propose swap"),
     el("div", "btn pri", "＋ Request leave"));
   return head;

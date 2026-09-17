@@ -65,9 +65,11 @@ export const recordedWeek: Week = {
   monday: "2026-08-24",
   department: "Front Office",
   departmentCode: "FO",
-  label: "24 – 30 Aug",
-  month: "Aug",
-  days: ["Mon 24", "Tue 25", "Wed 26", "Thu 27", "Fri 28", "Sat 29", "Sun 30"],
+  sunday: "2026-08-30",
+  days: [
+    "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27",
+    "2026-08-28", "2026-08-29", "2026-08-30",
+  ],
 
   // The ribbon is a timeline, not seven day cells — a duty running 20:00→08:00
   // covers two dates and fits in neither. The uncovered Saturday stretch is
