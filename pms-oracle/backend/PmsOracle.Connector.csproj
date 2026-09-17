@@ -6,11 +6,40 @@
     # Why `Microsoft.NET.Sdk` and not `Sdk.Web`, today
 
     The manifest declares `runtime.kind: dotnet-service`, and this will be a
-    hosted service. It is a library right now because **the surface it would
-    host does not exist**: the Integration Hub is designed (platform brief
-    §7–§20) and unbuilt, `shared/protos/hotelos/integration/` carries no
-    contract, and there is no `integration-service` for this process to
-    register with.
+    hosted service. It is a library right now because **there is no channel for
+    a process to host**.
+
+    # This reason was three facts, and two of them have expired
+
+    Until 2026-09-17 the sentence above read: *"the Integration Hub is designed
+    (platform brief §7–§20) and unbuilt, `shared/protos/hotelos/integration/`
+    carries no contract, and there is no `integration-service` for this process
+    to register with."*
+
+    Measured at HEAD, two of those three are now false:
+    `shared/protos/hotelos/integration/v1/` carries `dto.proto` and
+    `service.proto`, and `services/integration-service/` exists with its own
+    `Program.cs`. **The old words are kept because a reader meeting a
+    justification that no longer holds concludes the constraint has expired** —
+    and this one has not. It survives on the third fact, which is narrower and
+    is the operative one.
+
+    # What actually holds it, stated so it can be checked
+
+    **ADR 0173, at HEAD:** *"the Hub has no runtime launcher or IPC
+    configuration that takes an installed connector package and starts and
+    manages its isolated process."*
+
+    **ADR 0186 leaves the transport open on purpose** — *"pipes, gRPC, NATS or
+    another channel is not frozen here"* — and `CONN-Q27` forbids the opposite
+    repair by name: *do not let this connector define its own entry point.* A
+    `Main` must bind to a channel, so writing one here would settle a platform
+    choice from inside a third-party package.
+
+    So ADR 0186 gives the connector's **capability** something to implement —
+    `request_credentials(...)`, per invocation, credentials discarded after —
+    and gives the **process** nothing to host. Those are different halves, and
+    only the first is unblocked.
 
     What *is* buildable today is everything ADR 0128 §5 makes the connector's
     own — "the connector supplies protocol and business mapping: endpoints, the
