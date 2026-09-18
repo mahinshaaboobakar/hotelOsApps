@@ -46,12 +46,21 @@ const GRANTS = ["job.read", "job.create", "job.assign", "job.complete", "job.can
 const KINDS = ["unavailable", "forbidden", "internal"] as const;
 const FAIL = KINDS.find((kind) => kind === params.get("fail")) ?? null;
 
+/**
+ * `&only=<method>` — refuse that one call and answer the rest.
+ *
+ * For the placement 64b does not draw: the Board's figures strip (`today`)
+ * failing inside a board that loaded. With every call refused the board never
+ * renders, so the strip's own failure could not be photographed at all.
+ */
+const ONLY = params.get("only");
+
 function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine"): HostApi {
   return {
     identity: { id: "jobs", version: "0.1.0", capabilities: granted },
     property: PROPERTY,
     call(capability: string, method: string): Promise<unknown> {
-      if (FAIL !== null) {
+      if (FAIL !== null && (ONLY === null || ONLY === method)) {
         return Promise.reject(new HostCallError({ kind: FAIL, message: `${capability}/${method} refused for the audit` }));
       }
 
@@ -228,7 +237,7 @@ async function drive(): Promise<void> {
   // the screen's back.
   // A failing board has no row to open — the drive is skipped rather than
   // recorded as a miss, because the miss would be the audit's own doing.
-  if ((screen === null || screen === "Board") && FAIL === null) {
+  if ((screen === null || screen === "Board") && (FAIL === null || ONLY !== null)) {
     if (params.get("open") === null) {
       click(".num", "MRN-ENG-142");
       await settle();

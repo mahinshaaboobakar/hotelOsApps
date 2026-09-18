@@ -95,6 +95,18 @@ separately and draws the board when only the strip failed — a failure *inside*
 a screen that rendered. The frame has a screen size and a widget size and
 nothing for this. It gets the state block without the screen's centring, which
 is the least that is not invented, and it is **undrawn rather than settled**.
+Going to page 64d with the other three placements; the captures are
+`docs/mockups/64d/strip-failed-{forbidden,unanswered,faulted}.png`, taken with
+the harness's `?fail=<kind>&only=today`. **They show a consequence as well as
+the placement:** the block keeps the screen size's full height, and pushes the
+list far enough that a row is visible beneath the pager's floor.
+
+**GG's widget defect (`787560f`) is not in Jobs** — checked 2026-09-18 by
+`tests/widget-failure.test.ts`, which renders all six widgets in all three
+causes and matches every class in the DOM against the one sheet `serve()`
+loads beside it. 18 of 18. Proved both ways: deleting the widget's mark rule
+fails all 18, naming `wfail-mark`; a host that can only time out fails exactly
+the 12 forbidden and faulted rows, so the harness does produce all three.
 
 ---
 
