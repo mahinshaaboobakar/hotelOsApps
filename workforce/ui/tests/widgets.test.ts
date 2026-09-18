@@ -335,14 +335,20 @@ describe("a widget that cannot read", () => {
     }
   });
 
-  it("names the capability and the moment, and invents no reason", async () => {
-    // ADR 0041 strips a fault's own sentence at the boundary and logs it, so
-    // the wire line carries what actually arrived. The module is not declining
-    // to show a reason; there was none to show, and the line says which.
+  it("leaves the facts to the screen it opens, and offers the one thing a glance can do", async () => {
+    // **Rewritten, not deleted — ADR 0034.** This asserted the wire line inside
+    // the card. Page 64b, ruled 2026-09-17, moves the four facts OFF the widget
+    // to the screen the card opens — *a provenance line at this size is
+    // unreadable rather than quiet* — and the owner approved that divergence by
+    // name. The rule the old test protected, that the facts are shown and
+    // invent no reason, still holds; it holds on the screen, and
+    // `schedule.test.ts` asserts the facts there.
     const card = await shiftBoard(unavailable());
-    const wire = card.querySelector(".fail-wire")?.textContent ?? "";
 
-    expect(wire).toContain("roster.read");
-    expect(wire).toContain("shiftBoard");
+    expect(card.querySelector(".fail-facts, .fail-wire")).toBeNull();
+
+    // An unanswered read is the one a retry could fix, so it is the one that
+    // offers it — and the word is the SDK's, never a second copy of it here.
+    expect(card.querySelector(".wf-open")?.textContent).toBe("Try again →");
   });
 });

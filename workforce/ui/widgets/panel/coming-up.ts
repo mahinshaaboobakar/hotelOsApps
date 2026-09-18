@@ -34,7 +34,8 @@ import { failureCard, card, figures, note, rows, section } from "../card";
 export async function comingUp(host: HostApi): Promise<HTMLElement> {
   const got = await load<ComingUp>(host, ROSTER_READ, "comingUp");
   if (!got.ok) {
-    return failureCard('Coming Up', got.failure, { the: 'the next seven days' });
+    return failureCard('Coming Up', got.failure, { the: 'the next seven days' },
+      { host, opens: "leave", again: () => comingUp(host) });
   }
 
   const ahead = got.value;

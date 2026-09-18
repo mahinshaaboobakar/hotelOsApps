@@ -14,13 +14,14 @@
  * and says six — that is the guarantee working, not a truncation defect.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
 
-import type { ReadFailure } from "@hotelos/sdk";
+import {
+  FAILURE_LABELS, HostCallError, type FailureDrawing, type HostApi, type ReadFailure,
+} from "@hotelos/sdk";
 
 import { APPLICATION } from "../chrome/application";
 import { el, fill } from "../chrome/element";
-import { drawing, markEl, wireEl, type Subject } from "../chrome/failure";
+import { drawing, markEl, type Subject } from "../chrome/failure";
 import type { Figure, Segment, SummaryRow } from "../roster/widget";
 
 import { WIDGET_CSS } from "./styles";
@@ -248,6 +249,7 @@ export function failureCard(
   title: string,
   failure: ReadFailure,
   subject: Subject,
+  reach: Reach,
 ): HTMLElement {
   const root = el("div", "wcard");
   const head = el("div", "whead");
@@ -256,8 +258,60 @@ export function failureCard(
 
   const drawn = drawing(failure, subject);
   const body = el("div", "wbody wfail");
-  body.append(markEl(drawn), el("div", "fail-said", drawn.said), wireEl(drawn));
+
+  // The mark reuses the screen's geometry under the widget's own class, so the
+  // two sizes cannot drift into two sets of glyphs.
+  const mark = markEl(drawn);
+  mark.className = `wf-mark fail-${drawn.cause}`;
+
+  // **No facts, and no wire line.** 64b moves the four facts to the screen the
+  // card opens: a widget is glanced at, and a provenance line at this size is
+  // unreadable rather than quiet. The owner approved that divergence by name.
+  body.append(
+    mark,
+    el("div", "wf-said", drawn.said),
+    el("div", "wf-why", drawn.why),
+    act(drawn, root, reach),
+  );
 
   root.append(head, body);
   return root;
+}
+
+/** What a failure card can reach, from the panel that drew it. */
+export interface Reach {
+  /** The bridge, to open a screen. */
+  host: HostApi;
+
+  /** The screen this card's subject lives on — the one with the four facts. */
+  opens: string;
+
+  /** Draw the panel again. Used only where a retry could succeed. */
+  again: () => Promise<HTMLElement>;
+}
+
+/**
+ * The one thing a glance can do.
+ *
+ * @remarks
+ * **Only an unanswered read is retried** — the SDK decides that, and a retry
+ * on a refusal or a fault is a promise the platform cannot keep. The other two
+ * OPEN the screen, which is where the facts went; that is not a grant and does
+ * not route the reader to a person, which a later ruling the same day refused.
+ */
+function act(drawn: FailureDrawing, card: HTMLElement, reach: Reach): HTMLElement {
+  const link = el("button", "wf-open");
+  link.setAttribute("type", "button");
+
+  if (drawn.retryable) {
+    link.textContent = `${FAILURE_LABELS.retry} →`;
+    link.addEventListener("click", () => {
+      void reach.again().then((fresh) => { card.replaceWith(fresh); });
+    });
+  } else {
+    link.textContent = `Open ${APPLICATION} \u2192`;
+    link.addEventListener("click", () => { void open(reach.host, link, reach.opens); });
+  }
+
+  return link;
 }

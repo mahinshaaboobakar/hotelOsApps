@@ -118,7 +118,7 @@ const SVG = "http://www.w3.org/2000/svg";
  * is the right shape, and the screen gets rows.
  */
 export function factsEl(drawn: FailureDrawing): HTMLElement {
-  const list = el("div", "fail-facts");
+  const list = el("dl", "fail-facts");
 
   for (const fact of drawn.facts) {
     const row = el("div", "fail-fact");
@@ -130,28 +130,16 @@ export function factsEl(drawn: FailureDrawing): HTMLElement {
 }
 
 /**
- * The platform's own words, in the monospace line.
- *
- * This is the line a person hands to somebody who can act, so it carries only
- * what actually arrived — and where the platform gave no message a person may
- * see, it says so. A blank where a reason should be reads as a reason nobody
- * looked for.
- *
- * @param drawn the words and marks for this failure
- * @returns the provenance line
- */
-export function wireEl(drawn: FailureDrawing): HTMLElement {
-  return el("div", "fail-wire", drawn.wire);
-}
-
-/**
  * The state, in two or three words — `Not permitted`.
  *
  * Above the sentence rather than inside it: a person scanning a screen they did
  * not expect reads the state first and the explanation second.
  */
 export function labelEl(drawn: FailureDrawing): HTMLElement {
-  return el("div", `fail-label fail-${drawn.cause}`, drawn.label);
+  // Untinted, deliberately — page 64b's `.st-label` is faint in all three
+  // states. It carried the cause's colour class, so a refusal's label was amber
+  // beside a mark that was also coloured: one fact, two signals.
+  return el("div", "fail-label", drawn.label);
 }
 
 /**
@@ -170,15 +158,18 @@ export function failureBody(
   const drawn = drawing(failure, subject);
   const body = el("div", "fail");
 
+  // Page 64b's order: what happened, what it means, what to do about it — and
+  // only then the facts. This drew the facts before the action, so a person
+  // read the provenance before they learned what they could do.
   body.append(
     markEl(drawn),
     labelEl(drawn),
     el("div", "fail-said", drawn.said),
     el("div", "fail-why", drawn.why),
+    actions(drawn, retry),
     factsEl(drawn),
   );
 
-  body.append(actions(drawn, retry));
   return body;
 }
 
@@ -262,7 +253,13 @@ export function failureScreen(
   const head = el("div", "title");
   head.append(el("div", "ht", title));
 
-  main.replaceChildren(head, failureBody(failure, subject, retry));
+  // Centred in what is left of the window — page 64b's `.body`. It sat
+  // top-left, which is the position of a list that failed to load rather than
+  // of a screen in the state it is actually in.
+  const centre = el("div", "fail-body");
+  centre.append(failureBody(failure, subject, retry));
+
+  main.replaceChildren(head, centre);
 }
 
 /**
@@ -301,5 +298,10 @@ export function unaskableScreen(
   glyph.setAttribute("aria-hidden", "true");
 
   body.append(glyph, el("div", "fail-said", said), el("div", "fail-why", why));
-  main.replaceChildren(head, body);
+
+  // Centred like the three platform causes, so the fourth state does not read
+  // as a different product.
+  const centre = el("div", "fail-body");
+  centre.append(body);
+  main.replaceChildren(head, centre);
 }

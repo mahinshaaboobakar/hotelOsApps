@@ -51,6 +51,35 @@ body{margin:0}
 .wbody{flex-grow:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;
        overflow:hidden}
 
+/* # A widget that could not read - page 64b, widget size, RULED 2026-09-17.
+
+   THESE RULES LIVED IN chrome/styles.ts, WHICH NO WIDGET LOADS. A widget mounts
+   WIDGET_CSS and nothing else, so every failure card on a real property drew
+   its lock with no size at all - filling the card - and its sentence unstyled
+   at the floor. The module's stylesheet guard passed throughout, because it
+   asks whether a class is defined in SOME sheet of the module, not in the one
+   the bundle that emits it actually mounts.
+
+   Values are 64b's .card .in, .w-said, .w-why and .w-open. */
+.wfail{justify-content:center;gap:7px;padding:14px}
+.wfail .wf-mark{color:var(--color-ink-muted,#8b93a7)}
+.wfail .wf-mark svg{width:20px;height:20px;display:block}
+/* The same three colours as the screen: a refusal neutral, a timeout amber, a
+   fault red. */
+.wfail .wf-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
+/* Stated, not inherited: the refusal is the neutral one, and a class with no
+   rule reads the same whether that was decided or forgotten. */
+.wfail .wf-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.wfail .wf-mark.fail-faulted{color:var(--color-bad,#f87171)}
+.wf-said{font-size:13px;font-weight:600;line-height:1.4}
+.wf-why{font-size:11.5px;line-height:1.5;color:var(--color-ink-muted,#8b93a7)}
+/* The one thing a glance can do: open the screen, where the four facts are, or
+   try again. A link's weight rather than a button's, as 64b draws it. */
+.wf-open{align-self:flex-start;margin-top:2px;padding:0;border:0;background:none;
+         font:inherit;font-size:11.5px;color:var(--color-brand,#818cf8);cursor:pointer}
+.wf-open:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:2px;
+                       border-radius:3px}
+
 /* The headline figures. Two or four, and the grid is the same either way. */
 .wfigures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .wfigures.four{grid-template-columns:repeat(4,minmax(0,1fr))}

@@ -47,6 +47,20 @@ const PANELS: readonly { id: string; panel: (host: HostApi) => Promise<HTMLEleme
  * would photograph whatever a property happened to hold that afternoon, and the
  * frames it is set beside were drawn against stated content.
  */
+/** The host error kind a `fail=<cause>` capture answers with. */
+/**
+ * The host's own error kind, taken from the SDK's constructor rather than
+ * spelled out here, so a kind the protocol adds or removes is a build error in
+ * the harness instead of a capture that silently cannot reach it.
+ */
+type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
+
+const WIDGET_FAIL: Record<string, Kind> = {
+  unanswered: "unavailable",
+  forbidden: "forbidden",
+  faulted: "internal",
+};
+
 function host(): HostApi {
   return {
     identity: {
@@ -58,8 +72,13 @@ function host(): HostApi {
     // A `HostCallError`, not a plain one: `load` re-throws anything else, so a
     // bare Error takes the panel down instead of falling back — which is how
     // the first version of this harness drew a stylesheet and no cards.
+    // The kind is chosen by `fail=`, and defaults to the one this harness has
+    // always sent. It could draw only the unanswered card before, so two of
+    // page 64b's three widget states had never been captured.
     call: () => Promise.reject(new HostCallError({
-      kind: "unavailable", message: "the capture pass serves recorded facts",
+      kind: WIDGET_FAIL[new URLSearchParams(location.search).get("fail") ?? ""]
+        ?? "unavailable",
+      message: "the capture pass serves recorded facts",
     })),
     on: () => () => {},
   };

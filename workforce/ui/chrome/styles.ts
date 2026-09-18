@@ -88,83 +88,80 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    in the state it is actually in, and a red panel would make an unanswered
    read look like damage. The mark carries the difference between the three
    causes; the colour does not have to. */
-.fail{display:flex;flex-direction:column;align-items:flex-start;gap:10px;
-      padding:34px 2px;max-width:62ch}
-.fail-mark{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;font-size:15px;
-           letter-spacing:.22em;color:var(--color-ink-faint,#5a6172);
-           padding:5px 9px;border:1px solid var(--color-line,rgb(255 255 255/.07));
-           border-radius:7px}
-/* The three causes read differently at a glance without relying on colour
-   alone: the refusal is the only one drawn on a line that stops. */
-.fail-forbidden{color:var(--color-warn,#fbbf24);
-                border-color:color-mix(in srgb, var(--color-warn) 34%, transparent)}
-.fail-faulted{color:var(--color-bad,#f87171);
-              border-color:color-mix(in srgb, var(--color-bad) 34%, transparent)}
-/* Neutral on purpose, and stated rather than inherited. A question this bundle
-   never asked is not a refusal and not a fault — colouring it as either would
-   report the platform for something it was never given the chance to do. */
-.fail-unaskable{color:var(--color-ink-faint,#5a6172)}
-/* The mark is geometry now, not characters — page 64 §13. A fixed box so the
-   three glyphs occupy the same space and the block below never shifts. */
+/* Page 64b, Treatment A - RULED, owner, 2026-09-17. Every value in this block
+   is read from that page's own stylesheet, and the class it came from is named
+   beside it so the next audit can re-read the source rather than this file.
+
+   CENTRED IN THE WINDOW (.body): the block sat top-left and two pixels from
+   the edge, which is a list that failed to load. Centred it is the screen, in
+   the state it is actually in. */
+.fail-body{flex-grow:1;min-height:330px;display:grid;place-items:center}
+/* .state - one column, left-aligned inside a centred box. Per-element margins
+   rather than one gap, because 64b spaces the five parts differently and a
+   uniform gap flattens the hierarchy it draws. */
+.fail{width:min(560px,92%);padding:34px 0;text-align:left}
+/* .st-mark - the glyph ON ITS OWN LINE, bare. It was a boxed chip; the frame
+   draws no box, and a bordered mark reads as a badge, which is Treatment B -
+   drawn, argued against, and not ruled. */
+.fail-mark{margin-bottom:12px;color:var(--color-ink-muted,#8b93a7)}
 .fail-mark svg{width:26px;height:26px;display:block}
-/* The state, in two or three words, above the sentence: a person meeting a
-   screen they did not expect reads WHAT happened before WHY. */
-.fail-label{font-size:11px;font-weight:650;letter-spacing:.08em;
-            text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
-/* No rule for fail-unanswered, deliberately: a timeout is the neutral one of
-   the three and inherits the mark's own colour, where the refusal and the fault
-   are tinted. Stated because the absence is a decision, not an omission. */
-.fail-said{font-size:15.5px;font-weight:600;color:var(--color-ink,#e8ebf4);
-           letter-spacing:-.01em}
-.fail-why{font-size:13.5px;line-height:1.6;color:var(--color-ink-muted,#8b93a7)}
-/* The four facts, labelled. They were one dotted line — a log entry set as the
-   most prominent thing on the screen — and the owner said so. Rows, with the
-   label quiet and the value readable; the run-on survives for the clipboard,
-   where a single line is the right shape. */
-.fail-facts{display:grid;gap:5px;width:100%;max-width:52ch;margin-top:3px}
-.fail-fact{display:grid;grid-template-columns:8.5rem 1fr;gap:10px;align-items:baseline}
-.fail-fk{font-size:11.5px;letter-spacing:.04em;color:var(--color-ink-faint,#5a6172)}
-.fail-fv{font-size:12.5px;color:var(--color-ink-muted,#8b93a7);
-         font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+/* The colours are 64b's and were not what this said: a REFUSAL is the neutral
+   one (.st-mark.no - dim), a TIMEOUT is amber (.wait), a FAULT is red. This had
+   the refusal amber and the timeout grey - two of three inverted, with a
+   comment above it arguing for the inversion. */
+.fail-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
+.fail-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-faulted{color:var(--color-bad,#f87171)}
+/* Neutral on purpose, and stated rather than inherited. A question this bundle
+   never asked is not a refusal and not a fault. 64b draws no such state; this
+   is the app's own, and it takes the quietest colour available. */
+.fail-mark.fail-unaskable{color:var(--color-ink-faint,#5a6172);
+                          font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+                          font-size:15px;letter-spacing:.24em}
+/* .st-label - monospace, uppercase, faint, and NEVER tinted by the cause. It
+   was sans at weight 650 and carried the cause's colour class, so a refusal's
+   label was amber: the mark says which state, the label says it in words, and
+   two coloured signals for one fact is the badge again. */
+.fail-label{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+            font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+            color:var(--color-ink-faint,#5a6172);margin-bottom:6px}
+/* .st-said - 19px. It was 15.5px, and 13px inside a widget. The headline is the
+   largest thing on the screen because it is the thing the screen is about. */
+.fail-said{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.4;
+           color:var(--color-ink,#e8ebf4);margin-bottom:8px}
+/* .st-why */
+.fail-why{font-size:14px;color:var(--color-ink-muted,#8b93a7);max-width:52ch;
+          margin-bottom:18px}
+/* .st-do - the thing to do, BEFORE the facts. This drew the facts first and the
+   action below them, so a person read the provenance before they read what
+   they could do about it. */
+.fail-acts{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+/* .st-ask - 13px, the frame's own size for this sentence. Page 64a rules
+   explanatory NOTE text at 12px/19.8px; 64b, ruled a day later for this exact
+   surface, draws this line at 13px. This follows the drawing that governs the
+   surface, and the tension between the two rulings is reported rather than
+   picked here. */
+.fail-note{font-size:13px;color:var(--color-ink-muted,#8b93a7)}
+.fail-note b{color:var(--color-ink,#e8ebf4)}
+/* .prov - the four facts, labelled, UNDER A THIN RULE. They were one dotted log
+   line, and then rows with no rule above them that read as more body text.
+   One grid across all rows (auto 1fr), so the labels share a column. */
+.fail-facts{margin:0;border-top:1px solid var(--color-line,rgb(255 255 255/.07));
+            padding-top:13px;display:grid;grid-template-columns:auto 1fr;gap:3px 16px;
+            font-size:12px}
+.fail-fact{display:contents}
+/* .prov dt */
+.fail-fk{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;
+         font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+         color:var(--color-ink-faint,#5a6172)}
+/* .prov dd - the VALUE is sans with tabular figures, not monospace. It was
+   monospace, which set the most useful part of the block as the least readable
+   - the objection 64b opens with. */
+.fail-fv{margin:0;color:var(--color-ink-muted,#8b93a7);font-variant-numeric:tabular-nums;
          overflow-wrap:anywhere}
-/* What to do next, beside the control or in place of one. the grant state draws no
-   button — a refusal cannot name who grants it — so on that state this note is
-   the whole of the act, and it must read as a sentence rather than as a caption
-   under a missing thing. */
-/* The same role, so the same two values. I wrote this at 12.5px/1.55 the day
-   AFTER the ruling that says explanatory text is 12px and there is one size for
-   it - a divergence introduced rather than inherited, which is the kind worth
-   naming. */
-.fail-note{font-size:12px;line-height:19.8px;color:var(--color-ink-muted,#8b93a7);
-           max-width:52ch}
-/* The line a person hands to somebody who can act, so it selects cleanly and
-   wraps rather than truncating - a fault id cut off at the edge is a fault id
-   nobody can quote. */
-/* **A literal stack, and not a token.** The published set has no monospace
-   family: TOKEN_NAMES carries the sans one and nothing beside it. A custom
-   property for mono would therefore resolve to its own fallback on every
-   property forever - the defect the token guard exists to catch, and it caught
-   this one.
-
-   Reported rather than worked around. The wire line is exactly the surface a
-   platform monospace token would serve, and an application must not mint a
-   name the shell does not inject.
-
-   Written without the property syntax on purpose: the guard scans text, so a
-   comment spelling the name in full would count as using it. That is the
-   guard being right - one that skipped comments could be fooled by one. */
-.fail-wire{font-family:ui-monospace,SFMono-Regular,"JetBrains Mono",Menlo,monospace;font-size:11.5px;
-           line-height:1.7;color:var(--color-ink-faint,#5a6172);
-           background:var(--color-surface-raised,#11141f);
-           border:1px solid var(--color-line,rgb(255 255 255/.07));
-           border-radius:6px;padding:7px 10px;overflow-wrap:anywhere;user-select:text}
-.fail-acts{display:flex;gap:9px;margin-top:2px}
-/* The widget's form of the same thing, in 320x384: no paragraph and no action,
-   because neither fits and the sentence is what a glance needs. */
-.wfail{display:flex;flex-direction:column;align-items:flex-start;gap:9px;
-       padding:18px 2px}
-.wfail .fail-said{font-size:13px}
-.wfail .fail-wire{font-size:10.5px;padding:6px 8px}
+/* The wire line - the same facts as one line - is no longer drawn on a screen
+   at all; it is what the copy action puts on the clipboard. The rule stays for
+   no element and is removed rather than kept "in case". */
 
 /* # The app bar — an installed application navigates from the top
    The platform's own four keep the left rail, because they are the desktop's

@@ -34,7 +34,8 @@ import { failureCard, card, figures, note, rows, section } from "../card";
 export async function pendingRequests(host: HostApi): Promise<HTMLElement> {
   const got = await load<PendingRequests>(host, ROSTER_READ, "pendingRequests");
   if (!got.ok) {
-    return failureCard('Pending Requests', got.failure, { the: 'what is waiting' });
+    return failureCard('Pending Requests', got.failure, { the: 'what is waiting' },
+      { host, opens: "leave", again: () => pendingRequests(host) });
   }
 
   const queue = got.value;

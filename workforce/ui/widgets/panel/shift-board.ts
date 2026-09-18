@@ -32,7 +32,8 @@ import { failureCard, card, figures, rows, section } from "../card";
 export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
   const got = await load<ShiftBoard>(host, ROSTER_READ, "shiftBoard");
   if (!got.ok) {
-    return failureCard('Shift Board', got.failure, { the: 'who is on now' });
+    return failureCard('Shift Board', got.failure, { the: 'who is on now' },
+      { host, opens: "rota", again: () => shiftBoard(host) });
   }
 
   const board = got.value;

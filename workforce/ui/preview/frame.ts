@@ -31,6 +31,35 @@ import { recordedNoTeams, recordedPostingEnding, recordedTeams }
 
 const params = new URLSearchParams(location.search);
 
+/**
+ * Which failure every read answers with, when the capture asks for one.
+ *
+ * **The harness could not show two of the three causes.** It rejected only a
+ * method it did not know, and always as `unavailable` — so `forbidden` and
+ * `faulted` had never been drawn by it, and page 64b's frame-beside-capture
+ * audit could run against one state in three. A harness's CAPABILITY is a
+ * population nobody enumerates, and this is the member that was missing.
+ *
+ * Mapped to the host error KIND rather than to the SDK's cause, because the
+ * kind is what a real host sends and `causeOf` is what turns it into a cause.
+ * Driving the cause directly would skip the one mapping the audit should
+ * exercise.
+ */
+/**
+ * The host's own error kind, taken from the SDK's constructor rather than
+ * spelled out here, so a kind the protocol adds or removes is a build error in
+ * the harness instead of a capture that silently cannot reach it.
+ */
+type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
+
+const FAIL: Record<string, Kind> = {
+  unanswered: "unavailable",
+  forbidden: "forbidden",
+  faulted: "internal",
+};
+
+const failing = FAIL[params.get("fail") ?? ""] ?? null;
+
 /** Which week the host answers with — the harness varies the DATA, not the module. */
 const week = params.get("state") === "overtime" ? recordedOvertime : recordedWeek;
 
@@ -64,6 +93,12 @@ function host(granted: readonly string[]): HostApi {
      * The harness has to be as complete as the host it stands in for.
      */
     call(capability: string, method: string): Promise<unknown> {
+      if (failing !== null) {
+        return Promise.reject(new HostCallError({
+          kind: failing, message: `the capture asked for ${failing}`,
+        }));
+      }
+
       // The first run is a data state, not a screen: the same People screen,
       // answered with a property that has posted nobody.
       if (method === "people") {

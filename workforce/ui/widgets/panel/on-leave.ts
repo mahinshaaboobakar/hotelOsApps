@@ -26,7 +26,8 @@ import { failureCard, card, figures, note, rows, section } from "../card";
 export async function onLeave(host: HostApi): Promise<HTMLElement> {
   const got = await load<OnLeave>(host, ROSTER_READ, "onLeave");
   if (!got.ok) {
-    return failureCard('On Leave', got.failure, { the: 'who is away' });
+    return failureCard('On Leave', got.failure, { the: 'who is away' },
+      { host, opens: "leave", again: () => onLeave(host) });
   }
 
   const away = got.value;

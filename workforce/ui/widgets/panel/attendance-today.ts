@@ -32,7 +32,8 @@ import { failureCard, bar, card, figures, rows, section } from "../card";
 export async function attendanceToday(host: HostApi): Promise<HTMLElement> {
   const got = await load<AttendanceToday>(host, ROSTER_READ, "attendanceToday");
   if (!got.ok) {
-    return failureCard('Attendance Today', got.failure, { the: "today's attendance" });
+    return failureCard('Attendance Today', got.failure, { the: "today's attendance" },
+      { host, opens: "attendance", again: () => attendanceToday(host) });
   }
 
   const day = got.value;
