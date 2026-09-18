@@ -18,6 +18,7 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 
+import { FRAMES } from "./frames.mjs";
 import { read } from "./read.mjs";
 
 const INK = "color(srgb 0.909804 0.921569 0.956863";
@@ -191,7 +192,28 @@ const totals = {
 let key = null;
 const open = [];
 
-for (const file of readdirSync(dir).filter((f) => /^cmp-.+\.json$/u.test(f))) {
+// **A complete run, or no verdict at all.**
+//
+// This iterated whatever `cmp-*.json` files it found, so a sweep that stopped
+// at frame seven produced "2 differing nodes · every difference is named" and
+// exit 0 — a partial run whose columns close, which is the one shape this audit
+// cannot afford to read as a result. The expected set is derived from
+// `frames.mjs`, the same list the sweep drives from, so the two cannot disagree
+// about what complete means.
+const found = readdirSync(dir).filter((f) => /^cmp-.+\.json$/u.test(f));
+const missing = FRAMES
+  .map((frame) => `cmp-${frame.id}.json`)
+  .filter((name) => !found.includes(name));
+
+if (missing.length > 0) {
+  process.stderr.write(
+    `${found.length} of ${FRAMES.length} frames compared — ${missing.length} missing: `
+    + `${missing.join(", ")}\n`
+    + "A count over a partial run measures how far the sweep got, not the drawings.\n");
+  process.exit(2);
+}
+
+for (const file of found) {
   const report = read(join(dir, file));
 
   // Every run in a certificate carries one key, or the runs are not comparable
