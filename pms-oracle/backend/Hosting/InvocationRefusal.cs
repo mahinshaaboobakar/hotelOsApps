@@ -13,7 +13,8 @@ namespace PmsOracle.Hosting;
 /// strings exists anywhere: not in <c>HotelOS.Connector</c>, not in the Hub, not
 /// on the Runtime side. Mapping <c>"test"</c> to <c>TestAsync</c> here would make
 /// this package the author of the Hub ↔ connector contract, which is the same
-/// fault as serialising a <c>CredentialRequest</c> ahead of its ruling:
+/// fault as serialising a
+/// <see cref="HotelOS.Contracts.Integration.V1.CredentialRequest"/> ahead of its ruling:
 /// whatever a third-party package picks first becomes what everyone else has to
 /// match.
 /// </para>
@@ -25,24 +26,30 @@ namespace PmsOracle.Hosting;
 /// </para>
 /// <para>
 /// <b>This is where <see cref="ConnectorInvocation.RequestAsync"/> will be
-/// reached from</b>, and it is not reached yet for two separate reasons: there is
-/// no ruled invocation to make a credential request inside (<c>CONN-Q34</c>,
-/// open), and the message itself does not exist yet. ADR 0189 ruled the encoding
-/// — <c>CredentialRequest</c> is a Protobuf message in <c>shared/protos</c>,
-/// opaque to the Runtime, and it carries <b>no id of any kind</b>: the session
-/// stamps the frame, so a connector has no say over which invocation its request
-/// belongs to. The proto is not written yet. <c>OhipPasswordGrant</c> serialises
-/// that message once it lands, and waits on both.
+/// reached from</b>, and it is not reached yet: there is no ruled invocation to
+/// make a credential request inside — <c>CONN-Q34</c>, open. The message itself
+/// is ruled and landed. ADR 0189:
+/// <see cref="HotelOS.Contracts.Integration.V1.CredentialRequest"/> is the
+/// Protobuf message in <c>shared/protos/hotelos/integration/v1/credential.proto</c>
+/// — <c>credential_name</c> and <c>purpose</c>, opaque to the Runtime, and <b>no
+/// id of any kind</b>: the session stamps the frame, so a connector has no say
+/// over which invocation its request belongs to. The reply is granted (opaque
+/// material, and an <c>expires_at</c> whose absence means no lifetime was
+/// <i>stated</i>, not that it never expires) or denied (<c>NOT_DECLARED</c>,
+/// <c>NOT_CONFIGURED</c>). <c>OhipPasswordGrant</c> serialises that message once
+/// there is an invocation to send it from.
 /// </para>
 /// <para>
-/// <b>Named here, not referenced.</b> Until 2026-09-18 this read
-/// <c>&lt;see cref="CredentialRequest"/&gt;</c> against a C# record in
-/// <c>HotelOS.Connector</c>, and said the encoding was open. ADR 0189 removed
-/// the record (<c>08d2d737</c>) and the cref stopped resolving — which under
-/// <c>TreatWarningsAsErrors</c> made this package fail to build, from a commit in
-/// another repository that nothing here could see. A code reference to a type
-/// whose ruled home is a proto that does not exist yet is a reference to a moving
-/// target; the name is what is stable.
+/// <b>What this paragraph used to say, kept so the correction is checkable.</b>
+/// At <c>ab2097c</c> it read <i>"how a <c>&lt;see cref="CredentialRequest"/&gt;</c>
+/// is encoded as bytes is <c>CONN-Q28</c>, open"</i>, against a C# record in
+/// <c>HotelOS.Connector</c>. ADR 0189 ruled <c>CONN-Q28</c> and <c>08d2d737</c>
+/// replaced the record with the generated type, so that cref stopped resolving —
+/// CS1574, a build failure under <c>TreatWarningsAsErrors</c>, from a commit in
+/// another repository. At <c>7eb361b</c> it was then named rather than referenced,
+/// on the belief the proto was not yet written; it was, in the same commit. The
+/// cref above now points at the generated type, so the next change to it fails the
+/// build here instead of reading as current.
 /// </para>
 /// </remarks>
 public static class InvocationRefusal
