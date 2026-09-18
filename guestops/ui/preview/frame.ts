@@ -19,7 +19,7 @@
  * nothing and exercises the fallback.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { start } from "../application";
 import {
@@ -91,6 +91,17 @@ function host(granted: readonly string[]): HostApi {
         me: { name: "Anitha Menon", where: "Front Office · Avenue Regent" },
       };
 
+      // **One method fails, by the cause asked for, and nothing else does** —
+      // so a screen reached by clicking through two others can still be
+      // photographed failing. Failing every call would stop the drive at the
+      // first screen and photograph that one, whatever `screen=` said.
+      if (failing !== null && method === failing.method) {
+        return Promise.reject(new HostCallError({
+          kind: failing.kind,
+          message: `the harness failed ${method} as ${failing.kind}`,
+        }));
+      }
+
       return method in answers
         ? Promise.resolve(answers[method])
         : Promise.reject(new Error(`unhandled ${capability}/${method}`));
@@ -113,6 +124,23 @@ const group = params.get("group") === "true";
 
 /** Frame 11 — PMS-connected, with check-ins late. */
 const connected = params.get("connected") === "true";
+
+/**
+ * `?fail=<cause>&at=<method>` — the three failure states of `64b`, reached
+ * through the real read.
+ *
+ * Each cause is the host error kind the SDK maps to it, so the drawing under
+ * test comes from `load` and `failureDrawing` exactly as it would on a property
+ * rather than from a drawing built here. `forbidden` is the host's refusal, not
+ * `granted=none`: an ungranted capability stops the drive at the first screen,
+ * and a stay's Payment tab could then never be photographed refused.
+ */
+const KINDS = { unanswered: "unavailable", forbidden: "forbidden", faulted: "internal" } as const;
+
+const fail = params.get("fail");
+const failing = fail !== null && fail in KINDS
+  ? { kind: KINDS[fail as keyof typeof KINDS], method: params.get("at") ?? "" }
+  : null;
 
 const granted = params.get("granted") === "none"
   ? []

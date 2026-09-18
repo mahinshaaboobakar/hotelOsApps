@@ -12,7 +12,24 @@
  * a retry only where waiting could work.
  */
 export const FAILURE = `
-.fail{max-width:560px;padding:34px 0;margin:0 auto}
+/* The STAGE, and the defect it replaced — owner report, 2026-09-18. This was
+   .fail{max-width:560px;padding:34px 0;margin:0 auto}, which centres left to
+   right only: every failure in the application sat at the top of its window
+   with the lower two thirds empty. 64b draws the state inside
+   .body{min-height:330px;display:grid;place-items:center} — both ways — and
+   the auto margins were never the same instruction.
+
+   A stage of its own rather than a rule on .body, because the failure lands in
+   two different parents: in .main, replacing a whole screen, and inside a
+   stay's .body under its tab bar. flex:1 takes whatever height either parent
+   has left; the 330 is the frame's floor for a parent with none. */
+.fs{flex:1 0 auto;min-height:330px;display:grid;place-items:center}
+/* A stay's tab keeps its bar, so its .body must take the window's remaining
+   height for the stage to centre in — without this the body is only as tall as
+   the state and there is nothing to centre within. :has, because it is the
+   body's HEIGHT that depends on what it holds, and nothing else changes. */
+.body:has(>.fs){flex:1 1 auto}
+.fail{width:min(560px,92%);padding:34px 0;text-align:left}
 
 /* The mark, drawn from the SDK's geometry. Its colour is the state's and is set
    per cause below, so the three are distinguishable before a word is read. */

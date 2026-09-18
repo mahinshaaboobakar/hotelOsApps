@@ -132,11 +132,16 @@ export async function booking(
   // The dialog is a decision about a booking; without the plan there is nothing
   // to decide from, so it says why rather than opening over recorded terms.
   if (!plan.ok) {
+    // **`ask` is the retry, and there was none** — found auditing `64b` on
+    // 2026-09-18. Without it an unanswered plan said *"If it keeps happening,
+    // the platform is slow or down"* beside no button at all: the one state
+    // where trying again can work, drawn with nothing to try. Opening the
+    // dialog again is what asks for the plan again.
     into.append(
       failed(failureDrawing(plan.failure, {
         app: APP,
         the: "what cancelling this booking would do",
-      })));
+      }), ask));
     return;
   }
 

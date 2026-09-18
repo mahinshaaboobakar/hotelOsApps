@@ -60,6 +60,8 @@ connectToHost((host: HostApi) => {
       into.replaceChildren(stylesheet(), unanswered(
         "Watchlist",
         failureDrawing(answer.failure, { app: APP, the: "this property's watchlist" }),
+        // **No screen makes this card's read** — see occupancy.ts; reported.
+        { retry: () => void draw(into), open: () => open("today") },
       ));
       return;
     }

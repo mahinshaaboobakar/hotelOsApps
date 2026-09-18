@@ -63,6 +63,10 @@ connectToHost((host: HostApi) => {
       into.replaceChildren(stylesheet(), unanswered(
         "Occupancy",
         failureDrawing(answer.failure, { app: APP, the: "this property's occupancy" }),
+        // **No screen makes this card's read**, so the one opened cannot show
+        // this failure's facts — the approved divergence assumes it can.
+        // Reported with 0.3.1 rather than papered over here.
+        { retry: () => void draw(into), open: () => open("today") },
       ));
       return;
     }

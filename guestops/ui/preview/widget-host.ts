@@ -34,6 +34,16 @@ const BASE = `<style>${TOKENS}
 const only = new URLSearchParams(location.search).get("only");
 const drawn = only === null ? WIDGETS : WIDGETS.filter((w) => w === only);
 
+/**
+ * `?fail=unanswered|forbidden|faulted` — which of `64b`'s three states the read
+ * returns. The harness answers no widget read with data, so without this every
+ * card could only ever be photographed not answering, and the other two states
+ * would ship unseen.
+ */
+const KINDS = { unanswered: "unavailable", forbidden: "forbidden", faulted: "internal" } as const;
+const cause = new URLSearchParams(location.search).get("fail") ?? "unanswered";
+const kind = KINDS[cause as keyof typeof KINDS] ?? "unavailable";
+
 for (const name of drawn) {
   const bundle = await (await fetch(`../widgets/${name}.js`)).text();
 
@@ -115,7 +125,7 @@ function handshake(frame: HTMLIFrameElement, capabilities: readonly string[]): v
 
       channel.port1.postMessage(message.capability === "reservation.read"
         ? { type: "hotelos.result", id: message.id, ok: false,
-            error: { kind: "unavailable", message: "no client yet" } }
+            error: { kind, message: `the harness failed this read as ${kind}` } }
         : { type: "hotelos.result", id: message.id, ok: false,
             error: { kind: "rejected", message: "the desk is not open in this harness" } });
     });
@@ -136,4 +146,10 @@ function handshake(frame: HTMLIFrameElement, capabilities: readonly string[]): v
   }
 }
 
-setTimeout(() => document.documentElement.setAttribute("data-ready", "true"), 900);
+// `data-review-ready` beside the private flag, as `frame.ts` sets both — the
+// shared instruments wait on that one, and a page setting only its own is a
+// page they photograph on a timeout.
+setTimeout(() => {
+  document.documentElement.setAttribute("data-ready", "true");
+  document.documentElement.setAttribute("data-review-ready", "true");
+}, 900);

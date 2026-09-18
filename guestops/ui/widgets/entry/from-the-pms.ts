@@ -71,6 +71,8 @@ connectToHost((host: HostApi) => {
       into.replaceChildren(stylesheet(), unanswered(
         "From the PMS",
         failureDrawing(answer.failure, { app: APP, the: "what the PMS has sent" }),
+        // Attention is where this card's rows already tap through to.
+        { retry: () => void draw(into), open: () => open("attention") },
       ));
       return;
     }

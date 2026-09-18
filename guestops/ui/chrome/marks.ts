@@ -17,10 +17,11 @@
  * meant read-only (GUEST-Q1, as amended).
  */
 
-import { type Fact, type FailureDrawing, type Glyph } from "@hotelos/sdk";
+import { type Fact, type FailureDrawing } from "@hotelos/sdk";
 
 import type { Chip, Tag } from "../book/model";
 import { control, el } from "./element";
+import { stateMark } from "./glyph";
 
 /**
  * A mark: a coloured dot and a word.
@@ -98,7 +99,19 @@ function one(tag: Tag): HTMLElement {
 export function cannot(said: string, why: string): HTMLElement {
   const box = el("div", "fail");
   box.append(el("div", "fh", said), el("div", "fb", why));
-  return box;
+  return staged(box);
+}
+
+/**
+ * The state, on the stage that centres it both ways — `64b`'s `.body`.
+ *
+ * Every failure this module draws goes through here, so none can be placed the
+ * way all of them were until 2026-09-18: at the top of the window.
+ */
+function staged(state: HTMLElement): HTMLElement {
+  const stage = el("div", "fs");
+  stage.append(state);
+  return stage;
 }
 
 /**
@@ -147,7 +160,7 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   doing.append(el("div", "fn", drawing.act.note));
 
   box.append(
-    stateMark(drawing.glyph),
+    stateMark(drawing.glyph, "fg"),
     el("div", "fl", drawing.label),
     el("div", "fh", drawing.said),
     el("div", "fb", drawing.why),
@@ -160,37 +173,7 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
     facts(drawing.facts),
   );
 
-  return box;
-}
-
-/**
- * The state's mark, drawn from the SDK's geometry.
- *
- * `createElementNS`, because `createElement("svg")` makes an unknown HTML
- * element that renders nothing — a silent blank where the mark belongs. The
- * geometry is the SDK's so three applications cannot draw it three ways; the
- * element is this module's, because the SDK ships no DOM.
- */
-function stateMark(glyph: Glyph): SVGElement {
-  const NS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(NS, "svg");
-
-  svg.setAttribute("class", "fg");
-  svg.setAttribute("viewBox", glyph.viewBox);
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "1.6");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
-  svg.setAttribute("aria-hidden", "true");
-
-  for (const d of glyph.paths) {
-    const path = document.createElementNS(NS, "path");
-    path.setAttribute("d", d);
-    svg.append(path);
-  }
-
-  return svg;
+  return staged(box);
 }
 
 /** What was asked, what came back, and when — as a grid, not a line. */

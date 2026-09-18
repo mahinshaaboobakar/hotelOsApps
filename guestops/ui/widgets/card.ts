@@ -27,6 +27,8 @@
 
 import type { FailureDrawing, HostApi } from "@hotelos/sdk";
 
+import { stateMark } from "../chrome/glyph";
+
 /** What a tap opens: the app's own word for a screen, resolved by the module. */
 export type Destination = string;
 
@@ -196,7 +198,18 @@ export function stylesheet(): HTMLStyleElement {
     .bar{height:5px;border-radius:99px;overflow:hidden;
       background:color-mix(in srgb, var(--color-ink,#e8ebf4) 10%, transparent)}
     .bar i{display:block;height:100%;background:var(--color-brand,#818cf8)}
-    .wf{font-size:11.5px;color:var(--color-ink-muted,#8b93a7);line-height:1.6}
+    /* A failed read, as 64b's widget frame draws it: centred in the card, a
+       20px mark in the state's colour, the headline, the short reason, and one
+       action. */
+    .wb.wx{padding:14px;gap:7px;justify-content:center}
+    .wg{width:20px;height:20px;display:block;flex:none;color:var(--color-ink-muted,#8b93a7)}
+    .wx.wait .wg{color:var(--color-warn,#fbbf24)}
+    .wx.fault .wg{color:var(--color-bad,#f87171)}
+    .wf{font-size:13px;font-weight:600;line-height:1.4}
+    .wfw{font-size:11.5px;color:var(--color-ink-muted,#8b93a7);line-height:1.5}
+    .wo{align-self:flex-start;margin-top:2px;padding:0;border:0;background:none;
+      font-family:inherit;font-size:11.5px;line-height:inherit;text-align:left;
+      color:var(--color-brand,#818cf8);cursor:pointer}
     .wn{margin-top:auto;padding-top:8px;font-size:10.5px;line-height:1.5;
       color:var(--color-ink-faint,#5a6172)}
   `;
@@ -216,18 +229,45 @@ export function stylesheet(): HTMLStyleElement {
  * has not granted a capability is not broken, and a widget that shouts at a
  * receptionist about it has made a configuration choice look like an outage.
  */
-export function unanswered(title: string, drawing: FailureDrawing): HTMLElement {
+export function unanswered(
+  title: string,
+  drawing: FailureDrawing,
+  act: { retry: () => void; open: () => void },
+): HTMLElement {
   const { root, body } = card(title);
 
-  // **Two lines where there was one** — `38c5855e`. It took a sentence, so a
-  // refusal, a timeout and a fault all read alike on a card, and the one a
-  // person can do something about looked exactly like the two they cannot. The
-  // heading now says which happened and the line beneath says what it means.
-  //
-  // No wire line and no retry: a card is 320×384 and a person glances at it.
-  // The provenance and the button belong on the screen the card taps through
-  // to, where there is room to read them.
-  body.append(el("div", "wf", drawing.said), el("div", "wfw", drawing.why));
+  // **`64b`'s widget frame, which this did not draw until 2026-09-18.** It had
+  // the two sentences and nothing else: no mark, so the three states differed
+  // only in words; no action, so the card was a dead end; and `.wfw` was styled
+  // by no rule, so the reason rendered as the loudest text on the card while
+  // the headline sat small and muted above it. Pinned to the top, too, where
+  // the frame centres the state in the card.
+  const tone = drawing.cause === "unanswered" ? "wait"
+    : drawing.cause === "faulted" ? "fault" : "no";
+  body.classList.add("wx", tone);
+
+  // **The facts are NOT here, by the approved divergence**: a card is glanced
+  // at, and the frame moves the four facts to the screen the card opens. So the
+  // action for a refusal and a fault is to open that screen; only a wait gets a
+  // retry, for the same reason the screen gives only a wait a button.
+  const action = drawing.act.kind === "retry"
+    ? tap(`${drawing.act.label} →`, act.retry)
+    : tap("Open GuestOps →", act.open);
+
+  body.append(
+    stateMark(drawing.glyph, "wg"),
+    el("div", "wf", drawing.said),
+    el("div", "wfw", drawing.brief),
+    action,
+  );
 
   return root;
+}
+
+/** The card's one action, as a control a keyboard can reach. */
+function tap(text: string, then: () => void): HTMLElement {
+  const button = el("button", "wo", text);
+  button.setAttribute("type", "button");
+  button.addEventListener("click", then);
+  return button;
 }

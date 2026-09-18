@@ -68,6 +68,8 @@ connectToHost((host: HostApi) => {
       into.replaceChildren(stylesheet(), unanswered(
         "Business Mix",
         failureDrawing(answer.failure, { app: APP, the: "this property's business mix" }),
+        // **No screen makes this card's read** — see occupancy.ts; reported.
+        { retry: () => void draw(into), open: () => open("today") },
       ));
       return;
     }

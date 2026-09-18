@@ -53,6 +53,8 @@ connectToHost((host: HostApi) => {
       into.replaceChildren(stylesheet(), unanswered(
         "Today at the Desk",
         failureDrawing(answer.failure, { app: APP, the: "today at this property" }),
+        // The screen that makes the same read, so it carries the same facts.
+        { retry: () => void draw(into), open: () => open("today") },
       ));
       return;
     }
