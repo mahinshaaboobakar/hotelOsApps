@@ -13,7 +13,7 @@ namespace PmsOracle.Hosting;
 /// strings exists anywhere: not in <c>HotelOS.Connector</c>, not in the Hub, not
 /// on the Runtime side. Mapping <c>"test"</c> to <c>TestAsync</c> here would make
 /// this package the author of the Hub ↔ connector contract, which is the same
-/// fault as serialising a <see cref="CredentialRequest"/> ahead of its ruling:
+/// fault as serialising a <c>CredentialRequest</c> ahead of its ruling:
 /// whatever a third-party package picks first becomes what everyone else has to
 /// match.
 /// </para>
@@ -26,10 +26,23 @@ namespace PmsOracle.Hosting;
 /// <para>
 /// <b>This is where <see cref="ConnectorInvocation.RequestAsync"/> will be
 /// reached from</b>, and it is not reached yet for two separate reasons: there is
-/// no ruled invocation to make a credential request inside, and how a
-/// <see cref="CredentialRequest"/> is encoded as bytes is <c>CONN-Q28</c>, open.
-/// <c>OhipPasswordGrant</c> waits on both. The type is ready for its caller; it
-/// is not evidence of one.
+/// no ruled invocation to make a credential request inside (<c>CONN-Q34</c>,
+/// open), and the message itself does not exist yet. ADR 0189 ruled the encoding
+/// — <c>CredentialRequest</c> is a Protobuf message in <c>shared/protos</c>,
+/// opaque to the Runtime, and it carries <b>no id of any kind</b>: the session
+/// stamps the frame, so a connector has no say over which invocation its request
+/// belongs to. The proto is not written yet. <c>OhipPasswordGrant</c> serialises
+/// that message once it lands, and waits on both.
+/// </para>
+/// <para>
+/// <b>Named here, not referenced.</b> Until 2026-09-18 this read
+/// <c>&lt;see cref="CredentialRequest"/&gt;</c> against a C# record in
+/// <c>HotelOS.Connector</c>, and said the encoding was open. ADR 0189 removed
+/// the record (<c>08d2d737</c>) and the cref stopped resolving — which under
+/// <c>TreatWarningsAsErrors</c> made this package fail to build, from a commit in
+/// another repository that nothing here could see. A code reference to a type
+/// whose ruled home is a proto that does not exist yet is a reference to a moving
+/// target; the name is what is stable.
 /// </para>
 /// </remarks>
 public static class InvocationRefusal
