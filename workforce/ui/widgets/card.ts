@@ -270,7 +270,9 @@ export function failureCard(
   // unreadable rather than quiet. The owner approved that divergence by name.
   body.append(
     mark,
-    el("div", "wf-said", drawn.said),
+    // `briefSaid`, not `said`: a fault's headline drops its subject at card
+    // size — "Workforce could not build this" — as 64b's widget frame draws it.
+    el("div", "wf-said", drawn.briefSaid),
     // `brief`, not `why`: 64b's widget sentence is written to fit a card, not
     // the screen's sentence cut down to one.
     el("div", "wf-why", drawn.brief),

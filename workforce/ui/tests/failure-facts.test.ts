@@ -95,6 +95,14 @@ describe("the widget's failure card", () => {
     expect(card.querySelector(".wf-open")?.textContent).toBe("Open Workforce →");
   });
 
+  it("drops the subject from a fault's headline, and keeps it for a refusal", () => {
+    const fault = failureCard("Shift board", failure("faulted"), { the: "the rota" }, reach);
+    const refusal = failureCard("Shift board", failure("forbidden"), { the: "the rota" }, reach);
+
+    expect(fault.querySelector(".wf-said")?.textContent).toBe("Workforce could not build this");
+    expect(refusal.querySelector(".wf-said")?.textContent).toBe("You do not have access to the rota");
+  });
+
   it("offers to try again only where the read went unanswered", () => {
     const card = failureCard("Shift board", failure("unanswered"), { the: "the rota" }, reach);
 
