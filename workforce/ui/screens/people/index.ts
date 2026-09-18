@@ -51,7 +51,7 @@ export async function people(
   // No fallback - `APPS-Q26(4)`. The page is carried into the retry: a retry
   // that dropped it would move a person to page one and call it a retry.
   if (!got.ok) {
-    failureScreen(main, "People", got.failure, { the: "the people here" },
+    failureScreen(main, "People", got.failure, { the: "the people here" }, host.property,
       () => void people(host, main, ending, close, onEnd, onPage, page));
     return;
   }
@@ -93,7 +93,7 @@ export async function people(
       // A dialog that cannot read what it is about does not open a destructive
       // button over a guess. It says what it could not read, and offers the way
       // out — the same rule the screens follow, one surface in.
-      : cannotRead(got.failure, close));
+      : cannotRead(got.failure, host.property, close));
   }
 }
 
@@ -179,15 +179,18 @@ function table(
  * which is the same rule the screens follow one surface further in.
  *
  * @param failure what the read reported
+ * @param property the locale and zone the facts are read in
  * @param close the way out
  * @returns the overlay
  */
-function cannotRead(failure: ReadFailure, close: () => void): HTMLElement {
+function cannotRead(
+  failure: ReadFailure, property: PropertyEnvironment, close: () => void,
+): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
 
   dialog.append(
-    failureBody(failure, { the: "what ending this posting would close" }));
+    failureBody(failure, { the: "what ending this posting would close" }, property));
 
   const acts = el("div", "acts");
   const cancel = el("button", "btn", "Close");

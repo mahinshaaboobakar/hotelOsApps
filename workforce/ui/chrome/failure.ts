@@ -31,7 +31,10 @@
  * the screen never pretends the list is elsewhere. This draws the body.
  */
 
-import { failureDrawing, type FailureDrawing, type ReadFailure } from "@hotelos/sdk";
+import {
+  failureDrawing, formatInstant, type Fact, type FailureDrawing, type Phrase,
+  type PropertyEnvironment, type ReadFailure,
+} from "@hotelos/sdk";
 
 import { APPLICATION } from "./application";
 import { el } from "./element";
@@ -117,16 +120,63 @@ const SVG = "http://www.w3.org/2000/svg";
  * a log entry on a screen. The line survives for the clipboard, where a run-on
  * is the right shape, and the screen gets rows.
  */
-export function factsEl(drawn: FailureDrawing): HTMLElement {
+export function factsEl(drawn: FailureDrawing, property: PropertyEnvironment): HTMLElement {
   const list = el("dl", "fail-facts");
 
   for (const fact of drawn.facts) {
     const row = el("div", "fail-fact");
-    row.append(el("dt", "fail-fk", fact.label), el("dd", "fail-fv", fact.value));
+    const value = el("dd", "fail-fv");
+    value.append(...factValue(fact, property));
+    row.append(el("dt", "fail-fk", fact.label), value);
     list.append(row);
   }
 
   return list;
+}
+
+/**
+ * One fact's value, composed for the reader from its typed parts.
+ *
+ * @remarks
+ * **The SDK hands over values, not only finished strings.** That lets this
+ * screen set the permission apart, as page 64b draws it, and format the instant
+ * in the property's locale and timezone (JOBS-Q1(8)) instead of showing ISO. The
+ * separator between a permission and its method belongs to this surface
+ * (ADR 0175).
+ *
+ * **`date-time` is the closest style available, and it is not what 64b
+ * draws.** The frame shows the year and the seconds, and no InstantStyle
+ * carries seconds. That is noted here, not approximated. Whether to add the
+ * style is the SDK's decision, not something an application should invent.
+ */
+function factValue(fact: Fact, property: PropertyEnvironment): Node[] {
+  switch (fact.kind) {
+    case "asked":
+      return [el("b", undefined, fact.permission), document.createTextNode(` · ${fact.method}`)];
+    case "at":
+      return [document.createTextNode(formatInstant(fact.at, property, "date-time"))];
+    case "answer":
+      return [document.createTextNode(fact.value)];
+  }
+}
+
+/**
+ * A phrase, with its permission and its emphasis set apart.
+ *
+ * Both are drawn bold because 64b draws both bold. They are two run kinds in the
+ * SDK because they are two facts — a name a person quotes, a clause the
+ * sentence stresses — and this is where the choice to draw them alike is made.
+ */
+function phraseEl(phrase: Phrase, className: string): HTMLElement {
+  const line = el("div", className);
+
+  for (const run of phrase) {
+    if (typeof run === "string") line.append(document.createTextNode(run));
+    else if ("permission" in run) line.append(el("b", undefined, run.permission));
+    else line.append(el("b", undefined, run.emphasis));
+  }
+
+  return line;
 }
 
 /**
@@ -147,12 +197,14 @@ export function labelEl(drawn: FailureDrawing): HTMLElement {
  *
  * @param failure what went wrong, as the platform reported it
  * @param subject what this screen was trying to read
+ * @param property the locale and zone the facts are read in
  * @param retry re-run the read; ignored where a retry cannot succeed
  * @returns the body a person sees instead of rows
  */
 export function failureBody(
   failure: ReadFailure,
   subject: Subject,
+  property: PropertyEnvironment,
   retry?: () => void,
 ): HTMLElement {
   const drawn = drawing(failure, subject);
@@ -165,9 +217,9 @@ export function failureBody(
     markEl(drawn),
     labelEl(drawn),
     el("div", "fail-said", drawn.said),
-    el("div", "fail-why", drawn.why),
+    phraseEl(drawn.whyPhrase, "fail-why"),
     actions(drawn, retry),
-    factsEl(drawn),
+    factsEl(drawn, property),
   );
 
   return body;
@@ -221,7 +273,9 @@ function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement {
       break;
   }
 
-  row.append(el("div", "fail-note", act.note));
+  // The phrase, not the note: the same words, with the permission kept as a
+  // name so it can be set apart. 64b draws "needs **roster.read**".
+  row.append(phraseEl(act.phrase, "fail-note"));
   return row;
 }
 
@@ -232,6 +286,7 @@ function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement {
  * @param title what this screen is, drawn where its header would be
  * @param failure what went wrong
  * @param subject what could not be read, for the sentence
+ * @param property the locale and zone the facts are read in
  * @param retry re-run the read; ignored where a retry cannot succeed
  *
  * @remarks
@@ -248,6 +303,7 @@ export function failureScreen(
   title: string,
   failure: ReadFailure,
   subject: Subject,
+  property: PropertyEnvironment,
   retry?: () => void,
 ): void {
   const head = el("div", "title");
@@ -257,7 +313,7 @@ export function failureScreen(
   // top-left, which is the position of a list that failed to load rather than
   // of a screen in the state it is actually in.
   const centre = el("div", "fail-body");
-  centre.append(failureBody(failure, subject, retry));
+  centre.append(failureBody(failure, subject, property, retry));
 
   main.replaceChildren(head, centre);
 }

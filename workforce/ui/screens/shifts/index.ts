@@ -54,7 +54,7 @@ export async function shifts(
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Policy", got.failure, { the: "the shift catalogue" },
+    failureScreen(main, "Policy", got.failure, { the: "the shift catalogue" }, host.property,
       () => void shifts(host, main, dialog, open, close));
     return;
   }

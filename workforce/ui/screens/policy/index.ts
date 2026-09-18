@@ -51,7 +51,7 @@ export async function policy(
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Policy", got.failure, { the: "this property's policy" },
+    failureScreen(main, "Policy", got.failure, { the: "this property's policy" }, host.property,
       () => void policy(host, main, dialog, close, open));
     return;
   }

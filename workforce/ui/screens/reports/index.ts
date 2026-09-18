@@ -30,7 +30,7 @@ export async function reports(host: HostApi, main: HTMLElement): Promise<void> {
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Reports", got.failure, { the: "this month's numbers" },
+    failureScreen(main, "Reports", got.failure, { the: "this month's numbers" }, host.property,
       () => void reports(host, main));
     return;
   }

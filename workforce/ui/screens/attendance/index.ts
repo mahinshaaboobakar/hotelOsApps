@@ -25,7 +25,7 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
   // screen's header carries the day it is about and a read that failed produced
   // no day to name.
   if (!got.ok) {
-    failureScreen(main, "Attendance", got.failure, { the: "today's attendance" },
+    failureScreen(main, "Attendance", got.failure, { the: "today's attendance" }, host.property,
       () => void attendance(host, main));
     return;
   }

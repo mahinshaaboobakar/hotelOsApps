@@ -54,7 +54,7 @@ export async function schedule(
   // real one and it is reported as itself — this screen's inability to ask is a
   // consequence of it, not a second thing that went wrong.
   if (!me.ok) {
-    failureScreen(main, "Rota", me.failure, { the: "this person's month" },
+    failureScreen(main, "Rota", me.failure, { the: "this person's month" }, host.property,
       () => void schedule(host, main, me));
     return;
   }
@@ -79,7 +79,7 @@ export async function schedule(
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Rota", got.failure, { the: "this person's month" },
+    failureScreen(main, "Rota", got.failure, { the: "this person's month" }, host.property,
       () => void schedule(host, main, me));
     return;
   }

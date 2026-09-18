@@ -65,7 +65,7 @@ export async function teams(
   const got = await load<Teams>(host, ROSTER_READ, "teams");
 
   if (!got.ok) {
-    failureScreen(main, "People", got.failure, { the: "this property's teams" },
+    failureScreen(main, "People", got.failure, { the: "this property's teams" }, host.property,
       () => void teams(host, main, place));
     return;
   }

@@ -58,7 +58,7 @@ export async function duty(
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Duty", got.failure, { the: "the duty register" },
+    failureScreen(main, "Duty", got.failure, { the: "the duty register" }, host.property,
       () => void duty(host, main, dialog, open, close));
     return;
   }

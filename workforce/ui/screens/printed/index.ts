@@ -54,7 +54,7 @@ export async function printed(
   const failed = !gotWeek.ok ? gotWeek : !gotDuty.ok ? gotDuty : null;
   if (failed !== null && !failed.ok) {
     failureScreen(root, "The printed week", failed.failure,
-      { the: "the week to print" }, () => void printed(host, root, back));
+      { the: "the week to print" }, host.property, () => void printed(host, root, back));
     return;
   }
 

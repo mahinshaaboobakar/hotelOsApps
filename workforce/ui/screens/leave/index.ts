@@ -37,7 +37,7 @@ export async function leave(
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
-    failureScreen(main, "Leave & Requests", got.failure, { the: "leave" },
+    failureScreen(main, "Leave & Requests", got.failure, { the: "leave" }, host.property,
       () => void leave(host, main, tab, go, dialog, open, close));
     return;
   }

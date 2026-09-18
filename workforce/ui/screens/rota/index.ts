@@ -37,7 +37,7 @@ export async function rota(
   // recorded week as a DEFAULT ARGUMENT put the fabrication in the shipped
   // signature, where a caller passing nothing got one without deciding to.
   if (!got.ok) {
-    failureScreen(main, "Rota", got.failure, { the: "the team rota" },
+    failureScreen(main, "Rota", got.failure, { the: "the team rota" }, host.property,
       () => void rota(host, main, print, pick, onPick, closePick));
     return;
   }

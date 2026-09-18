@@ -16,7 +16,7 @@
 
 
 import {
-  FAILURE_LABELS, HostCallError, type FailureDrawing, type HostApi, type ReadFailure,
+  HostCallError, type FailureDrawing, type HostApi, type ReadFailure,
 } from "@hotelos/sdk";
 
 import { APPLICATION } from "../chrome/application";
@@ -237,9 +237,10 @@ export function note(text: string): HTMLElement {
  * @remarks
  * **The screen treatment does not fit and would not help.** A card is 320x384
  * and IS the frame - there is no header to keep and no column names to hold a
- * person's bearings, so what survives is the sentence and the wire line. No
- * action: the three the approved frame offers all leave this application, and
- * the bridge carries no navigation.
+ * person's bearings, so what survives is 64b's card: the mark, the sentence, the
+ * short why, and one link onward. (This said *the sentence and the wire line, no
+ * action* until 2026-09-18; 64b moved the wire line to the screen and gave the
+ * card its link.)
  *
  * **The card no longer says `recorded`.** That header existed to mark a
  * fabrication honestly, and marking one is still rendering one - so the
@@ -270,7 +271,9 @@ export function failureCard(
   body.append(
     mark,
     el("div", "wf-said", drawn.said),
-    el("div", "wf-why", drawn.why),
+    // `brief`, not `why`: 64b's widget sentence is written to fit a card, not
+    // the screen's sentence cut down to one.
+    el("div", "wf-why", drawn.brief),
     act(drawn, root, reach),
   );
 
@@ -300,17 +303,27 @@ export interface Reach {
  * not route the reader to a person, which a later ruling the same day refused.
  */
 function act(drawn: FailureDrawing, card: HTMLElement, reach: Reach): HTMLElement {
-  const link = el("button", "wf-open");
+  // The words and the choice are the SDK's `onward`; what this wires is the
+  // screen to open.
+  const onward = drawn.onward;
+  const link = el("button", "wf-open", onward.label);
   link.setAttribute("type", "button");
 
-  if (drawn.retryable) {
-    link.textContent = `${FAILURE_LABELS.retry} →`;
-    link.addEventListener("click", () => {
-      void reach.again().then((fresh) => { card.replaceWith(fresh); });
-    });
-  } else {
-    link.textContent = `Open ${APPLICATION} \u2192`;
-    link.addEventListener("click", () => { void open(reach.host, link, reach.opens); });
+  switch (onward.kind) {
+    case "retry":
+      link.addEventListener("click", () => {
+        void reach.again().then((fresh) => { card.replaceWith(fresh); });
+      });
+      break;
+    case "open":
+      link.addEventListener("click", () => { void open(reach.host, link, reach.opens); });
+      break;
+    default: {
+      // A kind this bundle was built without: `never` makes it a compile error
+      // against a newer SDK, instead of a link that silently does nothing.
+      const unknown: never = onward;
+      throw new Error(`unknown onward ${JSON.stringify(unknown)}`);
+    }
   }
 
   return link;
