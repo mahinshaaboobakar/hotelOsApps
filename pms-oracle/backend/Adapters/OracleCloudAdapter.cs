@@ -207,14 +207,6 @@ public sealed class OracleCloudAdapter(
 
     /// <inheritdoc />
     /// <remarks>
-    /// Exactly the set <see cref="OhipCredentials"/> needs for a password
-    /// grant, and no more. The Token Vault prefix is shared with the ingress,
-    /// whose shared secret has no business reaching an outbound dial.
-    /// </remarks>
-    public IReadOnlyList<string> RequiredSecrets => OhipCredentials.SecretNames;
-
-    /// <inheritdoc />
-    /// <remarks>
     /// <para>
     /// <b>Completeness first, because it is the failure that actually
     /// happens.</b> A half-filled form is answered here, while somebody is

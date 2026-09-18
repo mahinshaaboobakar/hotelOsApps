@@ -230,6 +230,17 @@ dependencies: []
 # property". Whether a source allow-list should be declared beside it is the
 # architect's call, not this file's.
 
+# `required_secrets:` is declared HERE and nowhere else — ADR 0176.
+#
+# It was `ITestableConnection.RequiredSecrets`, a property on connector code,
+# and the Hub asked the connector which secrets to read for it. The Hub now
+# reads this list from the registration it materialised from the signed
+# manifest, because **a connector naming its own secrets is the party being
+# authorized describing its own authorization.** The manifest is signed; the
+# running process is third-party code.
+#
+# Declared per integration rather than per package, because they differ: only
+# `oracle-cloud` dials OHIP.
 integrations:
   # we pull from OHIP’s business-event queue
   - id: oracle-cloud
@@ -237,6 +248,11 @@ integrations:
     capabilities: [bookings, room_state]
     accepts_push: false
     ingress_authentication: []
+    # Exactly the set `OhipCredentials` needs for a password grant, and no more.
+    # `ManifestDeclarationTests` asserts this list against
+    # `OhipCredentials.SecretNames`, because after ADR 0176 they are two
+    # hand-kept lists that must agree and nothing else compares them.
+    required_secrets: [application-key, pms-password, client-secret]
 
   # the on-site agent posts to the property ingress
   - id: oracle-onpremise
