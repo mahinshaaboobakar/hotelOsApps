@@ -36,6 +36,9 @@ export const FAILURE = `
 .fg{width:26px;height:26px;display:block;margin-bottom:12px;color:var(--color-ink-muted,#8b93a7)}
 .fail.wait .fg{color:var(--color-warn,#fbbf24)}
 .fail.fault .fg{color:var(--color-bad,#f87171)}
+/* Stated, though it repeats the base — the refusal's tone class matched no rule;
+   see widgets/card.ts, where a per-realm class check found the same gap. */
+.fail.no .fg{color:var(--color-ink-muted,#8b93a7)}
 
 /* The state, in two or three words. Quiet, because the sentence under it is what
    a person actually reads. */

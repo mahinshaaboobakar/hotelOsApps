@@ -205,6 +205,10 @@ export function stylesheet(): HTMLStyleElement {
     .wg{width:20px;height:20px;display:block;flex:none;color:var(--color-ink-muted,#8b93a7)}
     .wx.wait .wg{color:var(--color-warn,#fbbf24)}
     .wx.fault .wg{color:var(--color-bad,#f87171)}
+    /* Stated, though it repeats the base: the refusal's tone class matched no
+       rule, so its colour was an inheritance nobody wrote down. A check matching
+       every rendered class against THIS realm's sheet found it (2026-09-18). */
+    .wx.no .wg{color:var(--color-ink-muted,#8b93a7)}
     .wf{font-size:13px;font-weight:600;line-height:1.4}
     .wfw{font-size:11.5px;color:var(--color-ink-muted,#8b93a7);line-height:1.5}
     .wo{align-self:flex-start;margin-top:2px;padding:0;border:0;background:none;
