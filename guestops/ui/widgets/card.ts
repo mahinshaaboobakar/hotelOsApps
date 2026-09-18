@@ -251,12 +251,17 @@ export function unanswered(
   body.classList.add("wx", tone);
 
   // **The facts are NOT here, by the approved divergence**: a card is glanced
-  // at, and the frame moves the four facts to the screen the card opens. So the
-  // action for a refusal and a fault is to open that screen; only a wait gets a
-  // retry, for the same reason the screen gives only a wait a button.
-  const action = drawing.act.kind === "retry"
-    ? tap(`${drawing.act.label} →`, act.retry)
-    : tap("Open GuestOps →", act.open);
+  // at, and the frame moves the four facts to the screen the card opens.
+  //
+  // **The words and the choice are the SDK's `onward`** (`885677ec`). This card
+  // used to write both — `"Open GuestOps →"` as a literal, and the retry label
+  // with an arrow appended — which was one of the three ways three applications
+  // had spelled 64b's link line. What stays here is only what the SDK cannot
+  // know: which of this widget's callbacks each kind wires to.
+  const action = tap(
+    drawing.onward.label,
+    drawing.onward.kind === "retry" ? act.retry : act.open,
+  );
 
   body.append(
     stateMark(drawing.glyph, "wg"),
