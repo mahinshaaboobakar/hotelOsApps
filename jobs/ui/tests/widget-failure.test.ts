@@ -33,10 +33,19 @@ import { stylesheet } from "../widgets/sheet";
  * that belong to its cause, so a host that failed every call the same way would
  * fail two thirds of this file rather than pass it.
  *
- * **Proved to fail both ways before its green was reported** (2026-09-18):
- * deleting `.wfail-mark svg` from the widget sheet — GG's probe — fails all 18
- * state rows, each naming `wfail-mark`; and a host that answers every call as
- * a timeout fails exactly the 12 forbidden and faulted rows.
+ * **Proved to fail before its green was reported** (2026-09-18), each probe
+ * restored after it:
+ *
+ * ```text
+ * delete .wfail-mark svg (GG's probe)             18 fail · wfail-mark
+ * a host that can only time out                   12 fail · forbidden + faulted
+ * delete .wfail-said                              18 fail · wfail-said
+ * .wfail-mark svg → .wfail-mark i (hangs nothing)  18 fail · wfail-mark
+ * .wfail-said → .wrow .wfail-said (compound trap) 18 fail · wfail-said
+ * ```
+ *
+ * The last is the one a text search of the sheet cannot see: the name is still
+ * in it, so GG's method and this file's own first version both pass it.
  */
 
 const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
@@ -64,16 +73,65 @@ const WIDGETS: Record<string, (host: HostApi) => Promise<HTMLElement>> = { ...PA
 
 const ui = join(import.meta.dirname, "..");
 
-/** Every class any selector in the widget's own sheet names. */
-const own = new Set(
-  [...(stylesheet().textContent ?? "").matchAll(/\.([A-Za-z][\w-]*)/g)].flatMap((match) => match[1] ?? []),
-);
-
 /** Every class on the rendered card and everything inside it, SVG included. */
 function drawn(root: Element): string[] {
   return [root, ...Array.from(root.querySelectorAll("*"))].flatMap((node) =>
     (node.getAttribute("class") ?? "").split(/\s+/).filter((name: string) => name !== ""),
   );
+}
+
+/**
+ * Mount the card beside the one sheet a widget loads, as `serve()` does, and
+ * return that sheet's selectors as the browser parsed them.
+ */
+function mounted(card: HTMLElement): string[] {
+  const sheet = stylesheet();
+  document.body.replaceChildren(sheet, card);
+
+  return Array.from((sheet.sheet as CSSStyleSheet).cssRules).flatMap((rule) =>
+    "selectorText" in rule ? String(rule.selectorText).split(",").map((s) => s.trim()) : [],
+  );
+}
+
+/**
+ * The classes on the card that no rule in its own sheet **applies** to.
+ *
+ * **Applies, not merely mentions** — the step beyond GG's method, and the reason
+ * is FF's finding in GuestOps: a refusal-tone class that matched no rule and
+ * drew correctly only by inheritance. A class can appear in a sheet inside a
+ * compound selector that never matches the element carrying it — `.wrow .bad`
+ * on a `.bad` outside any row — and a check that searches the sheet's text
+ * finds the name and passes. This asks, for each class on each element,
+ * whether some selector naming that class actually matches that element.
+ *
+ * **Or is a hook for one that matches inside it — narrowed, not removed.** The
+ * first run of this fired on all 18 cases for `.wfail-mark`, which the sheet
+ * names only in `.wfail-mark svg`: a class whose job is to be the ancestor of a
+ * rule, on a wrapper that draws nothing of its own (its colour is inline, as
+ * 64b draws it). That is a legitimate case, and a guard that fires on one is
+ * narrowed. The narrowing is exact: the class must sit in the **ancestor** part
+ * of a selector that matches a real element below this one — a hook nothing
+ * hangs from still fails.
+ */
+function unapplied(card: HTMLElement, selectors: readonly string[]): string[] {
+  const missing = new Set<string>();
+
+  for (const node of [card, ...Array.from(card.querySelectorAll("*"))]) {
+    for (const cls of drawn(node).filter((c) => node.classList.contains(c))) {
+      const names = new RegExp(String.raw`\.${cls}(?![\w-])`);
+      const naming = selectors.filter((s) => names.test(s));
+
+      const own = naming.some((s) => node.matches(s));
+      const hook = naming.some((s) => {
+        const target = s.split(/\s+|>|\+|~/).filter((part) => part !== "").pop() ?? "";
+        return !names.test(target) && node.querySelectorAll(s).length > 0;
+      });
+
+      if (!own && !hook) missing.add(cls);
+    }
+  }
+
+  return [...missing];
 }
 
 describe("each widget's failure draws only what its own sheet styles", () => {
@@ -107,8 +165,12 @@ describe("each widget's failure draws only what its own sheet styles", () => {
         expect(card.querySelector(".wfail-said")?.textContent).toContain(state.said);
         expect(card.querySelector(".wfail-open")?.textContent).toBe(state.onward);
 
-        const unstyled = [...new Set(drawn(card))].filter((cls) => !own.has(cls));
-        expect(unstyled, `${name} draws classes its own sheet does not define`).toEqual([]);
+        // A silent zero cannot pass for conformance — GG's floor. A card that
+        // drew almost nothing would match every rule it had.
+        expect(new Set(drawn(card)).size, `${name} draws enough to judge`).toBeGreaterThan(5);
+
+        const selectors = mounted(card);
+        expect(unapplied(card, selectors), `${name}: classes no rule in its own sheet applies to`).toEqual([]);
 
         // The mark is an SVG with no class of its own, so a class match alone
         // cannot see it drawn at full card size — which is exactly what GG's
