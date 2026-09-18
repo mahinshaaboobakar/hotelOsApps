@@ -22,7 +22,7 @@ import { recordedMe } from "../board/recorded/me";
 import { recordedEscalated, recordedMine, recordedQuiet } from "../board/recorded/widget";
 import { jobsNow } from "../widgets/panel/jobs-now";
 import { PANELS } from "./widgets";
-import { stylesheet } from "../widgets/card";
+import { stylesheet } from "../widgets/sheet";
 
 const params = new URLSearchParams(location.search);
 
@@ -31,11 +31,30 @@ const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
 
 const GRANTS = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel", "job.amend", "job.configure", "job.curate"];
 
+/**
+ * `?fail=<kind>` — every call refused with that kind, for the page-64b audit.
+ *
+ * **The real screens, failing, rather than a page that draws the surface on its
+ * own.** What the owner saw on 2026-09-18 was the Board failing — a surface
+ * placed by a screen inside the module's window — and a harness that rendered
+ * the surface in isolation would have photographed the part that was right and
+ * missed the placement that was wrong. The kinds are the ones `causeOf` maps:
+ * `unavailable` → unanswered, `forbidden` → forbidden, `internal` → faulted —
+ * none of them for people, so the Answer fact is the seam's own sentence, as the
+ * frame draws it.
+ */
+const KINDS = ["unavailable", "forbidden", "internal"] as const;
+const FAIL = KINDS.find((kind) => kind === params.get("fail")) ?? null;
+
 function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine"): HostApi {
   return {
     identity: { id: "jobs", version: "0.1.0", capabilities: granted },
     property: PROPERTY,
     call(capability: string, method: string): Promise<unknown> {
+      if (FAIL !== null) {
+        return Promise.reject(new HostCallError({ kind: FAIL, message: `${capability}/${method} refused for the audit` }));
+      }
+
       const answers: Record<string, unknown> = {
         me: recordedMe,
         today: recordedToday,
@@ -207,7 +226,9 @@ async function drive(): Promise<void> {
   // back — that is why its row is tinted. The capture is driven to the same
   // state the way a person reaches it, rather than the state being set behind
   // the screen's back.
-  if (screen === null || screen === "Board") {
+  // A failing board has no row to open — the drive is skipped rather than
+  // recorded as a miss, because the miss would be the audit's own doing.
+  if ((screen === null || screen === "Board") && FAIL === null) {
     if (params.get("open") === null) {
       click(".num", "MRN-ENG-142");
       await settle();

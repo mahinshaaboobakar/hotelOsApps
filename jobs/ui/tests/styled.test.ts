@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 
 import { MARKS_CSS } from "../chrome/marks";
 import { stylesheet as moduleSheet } from "../chrome/styles";
-import { stylesheet as widgetSheet } from "../widgets/card";
+import { stylesheet as widgetSheet } from "../widgets/sheet";
 
 /**
  * Every class this module puts on a screen resolves to a rule — **in the realm
@@ -31,7 +31,7 @@ import { stylesheet as widgetSheet } from "../widgets/card";
  *
  * ```text
  * module   application.ts, chrome/, screens/, board/   CHROME + FAILURE_CSS + MARKS
- * widget   widgets/                                    WIDGET_CSS + FAILURE_CSS
+ * widget   widgets/                                    WIDGET_CSS + FAILED_CSS
  * ```
  *
  * **No sweep could have caught either.** A fidelity sweep compares a drawing
@@ -137,25 +137,30 @@ describe("every emitted class is defined in the realm that emits it", () => {
   }
 
   /**
-   * Proved to fail before this green was reported: removing `FAILURE_CSS` from
-   * `widgets/card.ts`'s builder fails the check below with *".gap is missing
-   * from the widget realm"*, and the two realm walks stay green — because the
-   * surface lives in `chrome/` and the widget realm's walk reads `widgets/`.
-   * That is the walk's limit and the reason this named check is not redundant
-   * with it: a walk can only see the classes in the files it lists.
+   * Each realm carries the rules for **its own size** of the failure surface.
+   *
+   * 64b draws two sizes — a screen and a widget — and since 0.4.1 each is its
+   * own surface with its own rules beside it. The module realm draws the screen
+   * size (`chrome/failure.ts`), the widget realm the card (`widgets/failed.ts`).
+   *
+   * Named rather than left to the walks, because this surface is drawn only
+   * when something has already gone wrong and no ordinary run reaches it. Proved
+   * to fail in 0.4.0 — dropping the rules from the widget builder failed with
+   * *".gap is missing from the widget realm"* — and proved again against this
+   * shape before 0.4.1 was reported green; the chapter records both runs.
    */
-  it("both realms carry the failure surface's rules", () => {
-    // Named rather than left to the walks above, because this is the surface the
-    // finding was about, it is drawn only when something has already gone wrong,
-    // and no ordinary run of the application reaches it. A widget realm that
-    // stopped importing FAILURE_CSS would pass every other test in this package.
+  const SIZES: Readonly<Record<string, readonly string[]>> = {
+    module: [
+      "gap", "gap-state", "gap-mark", "gap-label", "gap-said", "gap-why",
+      "gap-do", "gap-ask", "gap-facts", "gap-unanswered", "gap-forbidden", "gap-faulted",
+    ],
+    widget: ["wfail", "wfail-mark", "wfail-said", "wfail-why", "wfail-open"],
+  };
+
+  it("each realm carries the rules for its own size of the failure surface", () => {
     for (const { realm, css } of REALMS) {
       const rules = defined(...css());
-      for (const part of [
-        "gap", "gap-head", "gap-mark", "gap-label", "gap-said", "gap-why",
-        "gap-facts", "gap-fact-label", "gap-fact-value", "gap-note",
-        "gap-unanswered", "gap-forbidden", "gap-faulted",
-      ]) {
+      for (const part of SIZES[realm] ?? []) {
         expect(rules, `.${part} is missing from the ${realm} realm`).toContain(part);
       }
     }

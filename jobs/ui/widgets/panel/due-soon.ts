@@ -17,7 +17,7 @@
 import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
-import { failure } from "../../chrome/failure";
+import { failedCard } from "../failed";
 import { JOB_READ } from "../../chrome/permissions";
 import { type DueNow } from "../../board";
 import { card, figures, openRow } from "../card";
@@ -29,7 +29,7 @@ export async function dueSoon(host: HostApi): Promise<HTMLElement> {
   // There is no recorded argument to fall back to any more, which is the
   // point: the seam makes the old behaviour unwriteable rather than
   // forbidden (owner, 2026-09-09).
-  if (!got.ok) return card("Due Soon", "this property", [failure(got.failure, "what is due")]);
+  if (!got.ok) return failedCard(host, "Due Soon", "this property", got.failure, "the due list", () => dueSoon(host));
 
   const now = got.value;
 

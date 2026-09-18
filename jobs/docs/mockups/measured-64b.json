@@ -1,0 +1,1799 @@
+{
+  "schema": 1,
+  "frame": "docs/working/64b-when-a-screen-cannot-read.html",
+  "states": [
+    {
+      "cause": "forbidden",
+      "screen": {
+        "layout": [
+          {
+            "role": "the area",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "justify-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "min-height",
+            "drawn": "330px",
+            "built": "330px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "width",
+            "drawn": "560px",
+            "built": "560px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-top",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-bottom",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "text-align",
+            "drawn": "left",
+            "built": "left",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "margin-bottom",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "display",
+            "drawn": "block",
+            "built": "block",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "font-size",
+            "drawn": "11px",
+            "built": "11px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "letter-spacing",
+            "drawn": "1.1px",
+            "built": "1.1px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "margin-bottom",
+            "drawn": "6px",
+            "built": "6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "19px",
+            "built": "19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "letter-spacing",
+            "drawn": "-0.19px",
+            "built": "-0.19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "26.6px",
+            "built": "26.6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "margin-bottom",
+            "drawn": "8px",
+            "built": "8px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "14px",
+            "built": "14px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "max-width",
+            "drawn": "392.438px",
+            "built": "392.438px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "margin-bottom",
+            "drawn": "18px",
+            "built": "18px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "column-gap",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "margin-bottom",
+            "drawn": "22px",
+            "built": "22px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "flex-wrap",
+            "drawn": "wrap",
+            "built": "wrap",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the note's capability",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-width",
+            "drawn": "1px",
+            "built": "1px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-color",
+            "drawn": "rgba(255, 255, 255, 0.07)",
+            "built": "rgba(255, 255, 255, 0.07)",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "padding-top",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "column-gap",
+            "drawn": "16px",
+            "built": "16px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "row-gap",
+            "drawn": "3px",
+            "built": "3px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "font-size",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "font-size",
+            "drawn": "10.5px",
+            "built": "10.5px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "letter-spacing",
+            "drawn": "0.84px",
+            "built": "0.84px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "margin-left",
+            "drawn": "0px",
+            "built": "0px",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "font-variant-numeric",
+            "drawn": "tabular-nums",
+            "built": "tabular-nums",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "font-weight",
+            "drawn": "500",
+            "built": "500",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "label",
+            "drawn": "Not permitted",
+            "built": "Not permitted",
+            "same": true
+          },
+          {
+            "role": "sentence",
+            "drawn": "You do not have access to this person's month",
+            "built": "You do not have access to this board",
+            "same": false
+          },
+          {
+            "role": "why",
+            "drawn": "The service answered and refused. Nothing is broken and noth",
+            "built": "The service answered and refused. Nothing is broken and noth",
+            "same": true
+          },
+          {
+            "role": "control",
+            "drawn": "(absent)",
+            "built": "(absent)",
+            "same": true
+          },
+          {
+            "role": "note",
+            "drawn": "This screen needs roster.read, and no grant at this property",
+            "built": "This screen needs job.read, and no grant at this property na",
+            "same": false
+          },
+          {
+            "role": "answer",
+            "drawn": "no grant names this user at this property",
+            "built": "no grant names this user at this property",
+            "same": true
+          },
+          {
+            "role": "at",
+            "drawn": "17 Sep 2026, 08:53:23 UTC",
+            "built": "2026-09-18T11:05:00.404Z",
+            "same": false
+          }
+        ]
+      },
+      "widget": {
+        "layout": [
+          {
+            "role": "the body",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "flex-direction",
+            "drawn": "column",
+            "built": "column",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "justify-content",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "row-gap",
+            "drawn": "7px",
+            "built": "7px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "18.2px",
+            "built": "18.2px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "line-height",
+            "drawn": "17.25px",
+            "built": "17.25px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "color",
+            "drawn": "rgb(129, 140, 248)",
+            "built": "rgb(129, 140, 248)",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "margin-top",
+            "drawn": "2px",
+            "built": "2px",
+            "same": true
+          },
+          {
+            "role": "no facts at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "no state label at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "sentence",
+            "drawn": "You do not have access to this month",
+            "built": "You do not have access to this board",
+            "same": false
+          },
+          {
+            "role": "why",
+            "drawn": "The service refused. Nothing is broken; a permission is miss",
+            "built": "The service answered and refused. Nothing is broken and noth",
+            "same": false
+          },
+          {
+            "role": "onward",
+            "drawn": "Open Workforce →",
+            "built": "Open Jobs →",
+            "same": false
+          }
+        ]
+      }
+    },
+    {
+      "cause": "unanswered",
+      "screen": {
+        "layout": [
+          {
+            "role": "the area",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "justify-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "min-height",
+            "drawn": "330px",
+            "built": "330px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "width",
+            "drawn": "560px",
+            "built": "560px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-top",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-bottom",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "text-align",
+            "drawn": "left",
+            "built": "left",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "margin-bottom",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(251, 191, 36)",
+            "built": "rgb(251, 191, 36)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "display",
+            "drawn": "block",
+            "built": "block",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "font-size",
+            "drawn": "11px",
+            "built": "11px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "letter-spacing",
+            "drawn": "1.1px",
+            "built": "1.1px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "margin-bottom",
+            "drawn": "6px",
+            "built": "6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "19px",
+            "built": "19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "letter-spacing",
+            "drawn": "-0.19px",
+            "built": "-0.19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "26.6px",
+            "built": "26.6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "margin-bottom",
+            "drawn": "8px",
+            "built": "8px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "14px",
+            "built": "14px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "max-width",
+            "drawn": "392.438px",
+            "built": "392.438px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "margin-bottom",
+            "drawn": "18px",
+            "built": "18px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "column-gap",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "margin-bottom",
+            "drawn": "22px",
+            "built": "22px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "flex-wrap",
+            "drawn": "wrap",
+            "built": "wrap",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "padding-top",
+            "drawn": "7px",
+            "built": "7px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "padding-left",
+            "drawn": "15px",
+            "built": "15px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "border-top-left-radius",
+            "drawn": "9px",
+            "built": "9px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "border-top-color",
+            "drawn": "color(srgb 0.505882 0.54902 0.972549 / 0.5)",
+            "built": "color(srgb 0.505882 0.54902 0.972549 / 0.5)",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "background-color",
+            "drawn": "color(srgb 0.505882 0.54902 0.972549 / 0.18)",
+            "built": "color(srgb 0.505882 0.54902 0.972549 / 0.18)",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the note's capability",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-width",
+            "drawn": "1px",
+            "built": "1px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-color",
+            "drawn": "rgba(255, 255, 255, 0.07)",
+            "built": "rgba(255, 255, 255, 0.07)",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "padding-top",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "column-gap",
+            "drawn": "16px",
+            "built": "16px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "row-gap",
+            "drawn": "3px",
+            "built": "3px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "font-size",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "font-size",
+            "drawn": "10.5px",
+            "built": "10.5px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "letter-spacing",
+            "drawn": "0.84px",
+            "built": "0.84px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "margin-left",
+            "drawn": "0px",
+            "built": "0px",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "font-variant-numeric",
+            "drawn": "tabular-nums",
+            "built": "tabular-nums",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "font-weight",
+            "drawn": "500",
+            "built": "500",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "label",
+            "drawn": "No answer yet",
+            "built": "No answer yet",
+            "same": true
+          },
+          {
+            "role": "sentence",
+            "drawn": "GuestOps did not answer in time",
+            "built": "Jobs did not answer in time",
+            "same": false
+          },
+          {
+            "role": "why",
+            "drawn": "Nothing is known about this — not that it is empty, and not ",
+            "built": "Nothing is known about this — not that it is empty, and not ",
+            "same": true
+          },
+          {
+            "role": "control",
+            "drawn": "Try again",
+            "built": "Try again",
+            "same": true
+          },
+          {
+            "role": "note",
+            "drawn": "If it keeps happening, the platform is slow or down.",
+            "built": "If it keeps happening, the platform is slow or down.",
+            "same": true
+          },
+          {
+            "role": "answer",
+            "drawn": "none within the time allowed",
+            "built": "none within the time allowed",
+            "same": true
+          },
+          {
+            "role": "at",
+            "drawn": "17 Sep 2026, 08:53:23 UTC",
+            "built": "2026-09-18T11:05:25.362Z",
+            "same": false
+          }
+        ]
+      },
+      "widget": {
+        "layout": [
+          {
+            "role": "the body",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "flex-direction",
+            "drawn": "column",
+            "built": "column",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "justify-content",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "row-gap",
+            "drawn": "7px",
+            "built": "7px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(251, 191, 36)",
+            "built": "rgb(251, 191, 36)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "18.2px",
+            "built": "18.2px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "line-height",
+            "drawn": "17.25px",
+            "built": "17.25px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "color",
+            "drawn": "rgb(129, 140, 248)",
+            "built": "rgb(129, 140, 248)",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "margin-top",
+            "drawn": "2px",
+            "built": "2px",
+            "same": true
+          },
+          {
+            "role": "no facts at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "no state label at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "sentence",
+            "drawn": "GuestOps did not answer in time",
+            "built": "Jobs did not answer in time",
+            "same": false
+          },
+          {
+            "role": "why",
+            "drawn": "Nothing is known about this — not empty, not full.",
+            "built": "Nothing is known about this — not that it is empty, and not ",
+            "same": false
+          },
+          {
+            "role": "onward",
+            "drawn": "Try again →",
+            "built": "Try again →",
+            "same": true
+          }
+        ]
+      }
+    },
+    {
+      "cause": "faulted",
+      "screen": {
+        "layout": [
+          {
+            "role": "the area",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "justify-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the area",
+            "prop": "min-height",
+            "drawn": "330px",
+            "built": "330px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "width",
+            "drawn": "560px",
+            "built": "560px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-top",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "padding-bottom",
+            "drawn": "34px",
+            "built": "34px",
+            "same": true
+          },
+          {
+            "role": "the block",
+            "prop": "text-align",
+            "drawn": "left",
+            "built": "left",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "margin-bottom",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(248, 113, 113)",
+            "built": "rgb(248, 113, 113)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "26px",
+            "built": "26px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "display",
+            "drawn": "block",
+            "built": "block",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "font-size",
+            "drawn": "11px",
+            "built": "11px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "letter-spacing",
+            "drawn": "1.1px",
+            "built": "1.1px",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "the label",
+            "prop": "margin-bottom",
+            "drawn": "6px",
+            "built": "6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "19px",
+            "built": "19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "letter-spacing",
+            "drawn": "-0.19px",
+            "built": "-0.19px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "26.6px",
+            "built": "26.6px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "margin-bottom",
+            "drawn": "8px",
+            "built": "8px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "14px",
+            "built": "14px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "max-width",
+            "drawn": "392.438px",
+            "built": "392.438px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "margin-bottom",
+            "drawn": "18px",
+            "built": "18px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "align-items",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "column-gap",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "margin-bottom",
+            "drawn": "22px",
+            "built": "22px",
+            "same": true
+          },
+          {
+            "role": "what to do",
+            "prop": "flex-wrap",
+            "drawn": "wrap",
+            "built": "wrap",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "padding-top",
+            "drawn": "7px",
+            "built": "7px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "padding-left",
+            "drawn": "15px",
+            "built": "15px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "border-top-left-radius",
+            "drawn": "9px",
+            "built": "9px",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "border-top-color",
+            "drawn": "rgba(255, 255, 255, 0.14)",
+            "built": "rgba(255, 255, 255, 0.14)",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "background-color",
+            "drawn": "color(srgb 0.909804 0.921569 0.956863 / 0.02)",
+            "built": "color(srgb 0.909804 0.921569 0.956863 / 0.02)",
+            "same": true
+          },
+          {
+            "role": "the control",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the note",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the note's capability",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-width",
+            "drawn": "1px",
+            "built": "1px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "border-top-color",
+            "drawn": "rgba(255, 255, 255, 0.07)",
+            "built": "rgba(255, 255, 255, 0.07)",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "padding-top",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "display",
+            "drawn": "grid",
+            "built": "grid",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "column-gap",
+            "drawn": "16px",
+            "built": "16px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "row-gap",
+            "drawn": "3px",
+            "built": "3px",
+            "same": true
+          },
+          {
+            "role": "the facts",
+            "prop": "font-size",
+            "drawn": "12px",
+            "built": "12px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "font-size",
+            "drawn": "10.5px",
+            "built": "10.5px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "letter-spacing",
+            "drawn": "0.84px",
+            "built": "0.84px",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "text-transform",
+            "drawn": "uppercase",
+            "built": "uppercase",
+            "same": true
+          },
+          {
+            "role": "a fact's label",
+            "prop": "color",
+            "drawn": "rgb(90, 97, 114)",
+            "built": "rgb(90, 97, 114)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "margin-left",
+            "drawn": "0px",
+            "built": "0px",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "a fact's value",
+            "prop": "font-variant-numeric",
+            "drawn": "tabular-nums",
+            "built": "tabular-nums",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "color",
+            "drawn": "rgb(232, 235, 244)",
+            "built": "rgb(232, 235, 244)",
+            "same": true
+          },
+          {
+            "role": "the asked-for capability",
+            "prop": "font-weight",
+            "drawn": "500",
+            "built": "500",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "label",
+            "drawn": "Service fault",
+            "built": "Service fault",
+            "same": true
+          },
+          {
+            "role": "sentence",
+            "drawn": "Jobs could not build this board",
+            "built": "Jobs could not build this board",
+            "same": true
+          },
+          {
+            "role": "why",
+            "drawn": "The service reached its own fault. This is not something the",
+            "built": "The service reached its own fault. This is not something the",
+            "same": true
+          },
+          {
+            "role": "control",
+            "drawn": "Copy these details",
+            "built": "Copy these details",
+            "same": true
+          },
+          {
+            "role": "note",
+            "drawn": "Send them to whoever supports this property.",
+            "built": "Send them to whoever supports this property.",
+            "same": true
+          },
+          {
+            "role": "answer",
+            "drawn": "no reason crossed the boundary — logged by the service",
+            "built": "no reason crossed the boundary — logged by the service",
+            "same": true
+          },
+          {
+            "role": "at",
+            "drawn": "17 Sep 2026, 08:53:23 UTC",
+            "built": "2026-09-18T11:05:48.691Z",
+            "same": false
+          }
+        ]
+      },
+      "widget": {
+        "layout": [
+          {
+            "role": "the body",
+            "prop": "display",
+            "drawn": "flex",
+            "built": "flex",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "flex-direction",
+            "drawn": "column",
+            "built": "column",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "justify-content",
+            "drawn": "center",
+            "built": "center",
+            "same": true
+          },
+          {
+            "role": "the body",
+            "prop": "row-gap",
+            "drawn": "7px",
+            "built": "7px",
+            "same": true
+          },
+          {
+            "role": "the mark",
+            "prop": "color",
+            "drawn": "rgb(248, 113, 113)",
+            "built": "rgb(248, 113, 113)",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "width",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the glyph",
+            "prop": "height",
+            "drawn": "20px",
+            "built": "20px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-size",
+            "drawn": "13px",
+            "built": "13px",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "font-weight",
+            "drawn": "600",
+            "built": "600",
+            "same": true
+          },
+          {
+            "role": "the sentence",
+            "prop": "line-height",
+            "drawn": "18.2px",
+            "built": "18.2px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "color",
+            "drawn": "rgb(139, 147, 167)",
+            "built": "rgb(139, 147, 167)",
+            "same": true
+          },
+          {
+            "role": "the why",
+            "prop": "line-height",
+            "drawn": "17.25px",
+            "built": "17.25px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "font-size",
+            "drawn": "11.5px",
+            "built": "11.5px",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "color",
+            "drawn": "rgb(129, 140, 248)",
+            "built": "rgb(129, 140, 248)",
+            "same": true
+          },
+          {
+            "role": "the onward line",
+            "prop": "margin-top",
+            "drawn": "2px",
+            "built": "2px",
+            "same": true
+          },
+          {
+            "role": "no facts at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          },
+          {
+            "role": "no state label at this size",
+            "prop": "(absent)",
+            "drawn": "absent",
+            "built": "absent",
+            "same": true
+          }
+        ],
+        "text": [
+          {
+            "role": "sentence",
+            "drawn": "Jobs could not build this",
+            "built": "Jobs could not build this board",
+            "same": false
+          },
+          {
+            "role": "why",
+            "drawn": "A service fault, not something the property has done.",
+            "built": "The service reached its own fault. This is not something the",
+            "same": false
+          },
+          {
+            "role": "onward",
+            "drawn": "Open Jobs →",
+            "built": "Open Jobs →",
+            "same": true
+          }
+        ]
+      }
+    }
+  ]
+}

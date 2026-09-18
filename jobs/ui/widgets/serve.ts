@@ -5,7 +5,7 @@
 
 import { connectToHost, type HostApi } from "@hotelos/sdk";
 
-import { stylesheet } from "./card";
+import { stylesheet } from "./sheet";
 
 /** A widget's whole content, drawn from the host. */
 export type Panel = (host: HostApi) => Promise<HTMLElement>;

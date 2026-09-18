@@ -76,9 +76,19 @@ describe("the jobs-now widget", () => {
     // on 2026-09-09. It still never renders empty: it renders a REASON.
     const panel = await jobsNow(unavailable());
 
-    expect(panel.querySelector(".gap"), "an unanswered read draws a failure").not.toBeNull();
-    expect(panel.textContent).toContain("Jobs");
+    // **Rewritten again for 0.4.1** (ADR 0034): this asserted `.gap`, the
+    // SCREEN-size surface, inside a card — which is exactly what 0.4.0 shipped
+    // and what 64b draws against. At widget size the frame has its own drawing.
+    expect(panel.querySelector(".wfail"), "an unanswered read draws the widget-size failure").not.toBeNull();
+    expect(panel.querySelector(".gap"), "and not the screen surface squeezed into a card").toBeNull();
+    expect(panel.textContent).toContain("Jobs did not answer in time");
     expect(panel.textContent).not.toContain("escalated");
+
+    // The frame's one divergence, approved: the facts move to the screen the
+    // card opens, so none of them is on the card — and the only line that goes
+    // anywhere is the one the seam says could work.
+    expect(panel.querySelector("dl"), "no facts at widget size").toBeNull();
+    expect(panel.querySelector(".wfail-open")?.textContent).toBe("Try again →");
   });
 
   it("does not call the platform for a capability it was not granted", async () => {
@@ -92,8 +102,12 @@ describe("the jobs-now widget", () => {
     // The seam refuses without a round trip — asking for a capability nobody
     // granted is not worth one, and the answer is the platform's own: refused.
     expect(called).toBe(false);
-    expect(panel.querySelector(".gap")).not.toBeNull();
+    expect(panel.querySelector(".wfail")).not.toBeNull();
     expect(panel.textContent).toContain("You do not have access");
+
+    // A refusal cannot be retried, so the card sends a person to the screen
+    // that carries the facts — "Open Jobs →", never "Try again →".
+    expect(panel.querySelector(".wfail-open")?.textContent).toBe("Open Jobs →");
   });
 });
 

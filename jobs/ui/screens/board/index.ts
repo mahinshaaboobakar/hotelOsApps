@@ -10,7 +10,7 @@ import { control, el, fill } from "../../chrome/element";
 import { today as dayLine, when } from "../../chrome/instant";
 import { concern, priority, status, tag } from "../../chrome/marks";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
-import { failure } from "../../chrome/failure";
+import { failure, failureState } from "../../chrome/failure";
 import { pager } from "../../chrome/tabs";
 import { may, type BoardPage, type JobRow, type Today } from "../../board";
 
@@ -73,7 +73,10 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
   // to pass. The strip is a second read, so a page that arrived with a strip
   // that did not still draws the board and says what is missing above it.
   if (!page.ok) {
-    main.replaceChildren(failure(page.failure, "this property's board", () => void board(host, main, place)));
+    // "this board" is 64b's own noun — the frame draws Jobs' Board failing as
+    // "Jobs could not build this board", and the noun is the one word of the
+    // sentence this module supplies rather than the SDK.
+    main.replaceChildren(failure(page.failure, "this board", () => void board(host, main, place)));
     return;
   }
 
@@ -82,7 +85,11 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
   body.append(
     today.ok
       ? strip(host, today.value)
-      : failure(today.failure, "today's figures", () => void board(host, main, place)),
+      // The strip failing inside a board that did render is a placement 64b
+      // does not draw — it has a screen size and a widget size. The state block
+      // without the screen's centring is the least that is not invented, and
+      // it is reported as undrawn in chapter 05 rather than treated as settled.
+      : failureState(today.failure, "today's figures", () => void board(host, main, place)),
     filters(place, may(host, JOB_CREATE)),
     table(host, page.value.rows, place),
     pages(page.value, place),

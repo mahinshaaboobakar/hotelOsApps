@@ -7,7 +7,7 @@
 import { load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
-import { failure } from "../../chrome/failure";
+import { failedCard } from "../failed";
 import { JOB_READ } from "../../chrome/permissions";
 import { type JobsNow } from "../../board";
 import { card, figures, openRow } from "../card";
@@ -19,7 +19,7 @@ export async function jobsNow(host: HostApi): Promise<HTMLElement> {
   // There is no recorded argument to fall back to any more, which is the
   // point: the seam makes the old behaviour unwriteable rather than
   // forbidden (owner, 2026-09-09).
-  if (!got.ok) return card("Jobs Now", "this property", [failure(got.failure, "your department's jobs")]);
+  if (!got.ok) return failedCard(host, "Jobs Now", "this property", got.failure, "your department's jobs", () => jobsNow(host));
 
   const now = got.value;
   const quiet = now.breached === 0 && now.stuck === 0 && now.atRisk === 0;

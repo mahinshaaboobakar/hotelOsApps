@@ -7,11 +7,11 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
-import { FAILURE_CSS } from "../chrome/failure";
 
 const SHELL_OPEN = "shell.open";
 
-const WIDGET_CSS = `
+/** The card's own rules. `widgets/sheet.ts` composes them with the failed card's. */
+export const WIDGET_CSS = `
 .wcard{font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);color:var(--color-ink,#e8ebf4);
        background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums}
 .whead{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:12px}
@@ -34,22 +34,6 @@ const WIDGET_CSS = `
 .wquiet{color:var(--color-ok,#34d399);font-size:12px}
 .wrefusal{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
 `;
-
-/**
- * The widget's stylesheet, added once per draw.
- *
- * **`FAILURE_CSS` is not optional here, and its absence is what made this
- * round.** All six widgets call `failure()` when a read does not arrive, and
- * today every read is refused — so the state this realm is *always* in was the
- * one state it had no rules for. A widget is its own realm and shares no sheet
- * with the module, which is exactly why the rules travel with the surface
- * rather than with either sheet.
- */
-export function stylesheet(): HTMLStyleElement {
-  const style = document.createElement("style");
-  style.textContent = [WIDGET_CSS, FAILURE_CSS].join("\n");
-  return style;
-}
 
 /** The card shell: a title, a scope, and whatever the panel drew. */
 export function card(title: string, scope: string, body: readonly (Node | null)[]): HTMLElement {
@@ -82,7 +66,13 @@ export function openRow(host: HostApi, left: string, right: string, tone: string
   return row;
 }
 
-async function open(host: HostApi, row: HTMLElement, destination: string): Promise<void> {
+/**
+ * Ask the shell to open a screen, and say so on the card if it will not.
+ *
+ * Exported for the failed card, whose *"Open Jobs →"* is the same act as a
+ * row's — one opener, so both refuse the same way.
+ */
+export async function open(host: HostApi, row: HTMLElement, destination: string): Promise<void> {
   try {
     await host.call(SHELL_OPEN, "at", { destination });
   } catch (error) {

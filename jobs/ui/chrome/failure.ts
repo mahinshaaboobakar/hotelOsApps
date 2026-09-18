@@ -1,128 +1,97 @@
-import { failureDrawing, type FailureDrawing, type Glyph, type ReadFailure } from "@hotelos/sdk";
+import { failureDrawing, type Cause, type FailureDrawing, type Glyph, type ReadFailure } from "@hotelos/sdk";
 
 import { control, el, fill } from "./element";
 
 /**
- * What a screen draws when a read did not arrive — the SDK's words, this
- * module's geometry.
+ * What a screen draws when a read did not arrive — page 64b, Treatment A.
  *
- * **No screen renders recorded rows. Ever** (owner, 2026-09-09: *"showing a
- * hardcoded list is wrong"*). This replaces `standIn()`, which drew the
- * approved example under a banner saying so: honest about the page, and still
- * a list of jobs that do not exist, in a hotel where somebody may act on it.
+ * **The frame is the authority, and this file is measured against it**:
+ * `docs/working/64b-when-a-screen-cannot-read.html` in HosPilotOS, approved by
+ * the owner on 2026-09-17. The class names below are this module's; every
+ * size, weight, colour and order is the frame's, and each rule names the frame
+ * rule it answers to so the next reader can hold one beside the other.
  *
- * The sentence, the mark, the four facts and what may be offered are
- * {@link failureDrawing}'s, so three applications say one thing; the elements
- * are this chrome's, because a module's surface is its own. The split is
- * deliberate — a shared component would cross the realm, and shared *words* do
- * not.
+ * **No screen renders recorded rows. Ever** (owner, 2026-09-09). The words, the
+ * mark and the three facts are {@link failureDrawing}'s, so three applications
+ * say one thing; the elements are this chrome's, because a shared component
+ * would cross the realm.
  *
- * # Three things the redraw of 2026-09-17 moved, and why each is here
+ * # What 0.4.0 drew, and the owner saw on 2026-09-18
  *
- * **The mark is geometry now, not a character.** The seam's old preset said *"a
- * mark, in characters — the realm has no network, so no sprite can load"*, and
- * that constraint is about the network: an inline `<svg>` fetches nothing and
- * needs no font. So this builds the `<svg>` from `drawing.glyph` rather than
- * setting text, and strokes it in `currentColor`, which carries the state's
- * colour to it without the geometry having to know what the state is.
+ * *NOT PERMITTED*, in the top-left corner of the Board. 0.4.0 was built from
+ * the SDK's *types* — a glyph, a label, some facts, an act — and styled from
+ * this module's habits, so every part was present and the composition was
+ * nobody's: no centring, the glyph inline with the label, a 14px headline, the
+ * note after the facts, and no rule above them. **A surface that has every part
+ * of an approved drawing is not the approved drawing**, and nothing that reads
+ * a type can tell the two apart. The page-64 audit that caught it is recorded
+ * in `docs/chapters/05`.
  *
- * **The four facts are rows, not a dotted line.** They were one run-on string;
- * the owner read it and said the surface was not good. Every fact in it was
- * right and the most useful part was set as the least readable. The dotted form
- * survives as `drawing.wire` — for the clipboard, which is the only place a log
- * line belongs.
+ * # One size this frame does not draw
  *
- * **A refusal offers no button, and that is a ruling rather than an omission.**
- * `act.kind === "grant"` carries no label, because naming who can grant would
- * tell whoever is standing at the terminal who holds authority in this
- * property — a fact about the organisation, on a screen that was only asked why
- * a board would not load. The note still names the capability, so an operator
- * knows what to ask for; the screen does not decide whom they ask.
+ * 64b draws a failure at **screen** size and at **widget** size. The Board also
+ * reads a second thing — the figures strip — and draws the board even when only
+ * the strip failed. That is a third placement, inside a screen that did render,
+ * and the frame has nothing for it. {@link failureState} gives it the frame's
+ * state block without the screen's centring, which is the least that is not
+ * invented; it is reported as undrawn rather than treated as settled.
  */
+
 /**
- * The failure surface's own rules, in the file that draws it.
+ * Screen size — the frame's `.body` holding its `.state`.
  *
- * **Not in `chrome/styles.ts`, and that is the whole repair.** They were there,
- * and `chrome/styles.ts` builds the *module* realm's sheet — while the six
- * widgets are their own realm with their own sheet (`widgets/card.ts`), and
- * every one of them calls {@link failure} on a read that does not arrive. So
- * every widget failure this application has ever shown a property was unstyled
- * text, in the realm where **every** read is refused today.
- *
- * FF found the same thing in GuestOps on 2026-09-17, one layer out: classes
- * emitted with no rule anywhere. Here the rules existed and the realm that
- * needed them could not see them, which reads identically from outside and has
- * the same cause — a stylesheet and the markup it dresses living in files that
- * never refer to each other. A surface that carries its own rules cannot be
- * assembled into a realm that lacks them, so both sheets import this and
- * `tests/styled.test.ts` fails the build if either stops.
+ * `.body { display:grid; place-items:center; min-height:330px }` and
+ * `.state { width:min(560px, 92%); padding:34px 0; text-align:left }`: the block
+ * sits in the middle of the content area and reads left-aligned inside it.
  */
-export const FAILURE_CSS = `
-.gap{display:flex;flex-direction:column;gap:6px;padding:26px 22px;max-width:62ch}
-.gap-head{display:flex;align-items:center;gap:8px;color:var(--color-ink-faint,#5a6172)}
-.gap-unanswered .gap-head{color:var(--color-warn,#fbbf24)}
-.gap-forbidden .gap-head{color:var(--color-ink-muted,#8b93a7)}
-.gap-faulted .gap-head{color:var(--color-bad,#f87171)}
-.gap-mark{width:18px;height:18px;flex:none}
-.gap-label{font-size:11px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
-.gap-said{font-size:14px;font-weight:600;color:var(--color-ink,#e8ebf4)}
-.gap-why{font-size:13px;color:var(--color-ink-muted,#8b93a7);line-height:1.5}
-.gap-facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:10px 0 2px}
-.gap-fact-label{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
-.gap-fact-value{margin:0;font-size:12px;color:var(--color-ink-muted,#8b93a7);
-                font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere}
-.gap-note{font-size:12px;color:var(--color-ink-faint,#5a6172);line-height:1.5;margin-top:4px}
-/* A widget is narrow, so the surface loses its page padding there and keeps
-   everything else. One rule rather than a second copy of the surface. */
-.wcard .gap{padding:4px 0 2px;max-width:none}
-`;
-
-export function failure(
-  said: ReadFailure,
-  the: string,
-  again?: () => void,
-): HTMLElement {
-  const drawing = failureDrawing(said, { app: "Jobs", the });
-  const panel = el("div", `gap gap-${drawing.cause}`);
-
-  panel.append(
-    fill(el("div", "gap-head"), mark(drawing.glyph), el("div", "gap-label", drawing.label)),
-    el("div", "gap-said", drawing.said),
-    el("div", "gap-why", drawing.why),
-    facts(drawing),
-  );
-
-  const offered = offer(drawing, again);
-  if (offered !== null) panel.append(offered);
-
-  panel.append(el("div", "gap-note", drawing.act.note));
-  return panel;
+export function failure(said: ReadFailure, the: string, again?: () => void): HTMLElement {
+  return fill(el("div", "gap"), failureState(said, the, again));
 }
 
 /**
- * The mark, stroked from the seam's paths.
+ * The state block alone, in the frame's order — mark, label, sentence, why,
+ * **what to do, then** the facts.
  *
- * `createElementNS` rather than `el`, because an `<svg>` built with
- * `createElement` is an unknown HTML element that renders nothing — which is
- * this round's own failure one layer down.
+ * The order is the point of the redraw rather than a detail of it: FF's note on
+ * the frame is that *"the action becomes the loudest thing after the
+ * sentence"*, and 0.4.0 put the note below the facts, where it read as a
+ * footnote to the log line.
  */
-function mark(glyph: Glyph): SVGSVGElement {
+export function failureState(said: ReadFailure, the: string, again?: () => void): HTMLElement {
+  const drawing = failureDrawing(said, { app: "Jobs", the });
+
+  return fill(
+    el("div", `gap-state gap-${drawing.cause}`),
+    fill(el("div", "gap-mark"), glyph(drawing.glyph)),
+    el("div", "gap-label", drawing.label),
+    el("div", "gap-said", drawing.said),
+    el("div", "gap-why", drawing.why),
+    todo(drawing, said.capability, again),
+    facts(drawing, said.capability),
+  );
+}
+
+/**
+ * The mark, stroked from the seam's paths — shared by both sizes.
+ *
+ * `createElementNS` rather than `el`: an `<svg>` made with `createElement` is an
+ * unknown HTML element and renders nothing. Colour arrives through
+ * `currentColor`, so the geometry never knows which state it is drawing.
+ */
+export function glyph(shape: Glyph): SVGSVGElement {
   const SVG = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(SVG, "svg");
 
-  svg.setAttribute("class", "gap-mark");
-  svg.setAttribute("viewBox", glyph.viewBox);
-  svg.setAttribute("fill", "none");
-  svg.setAttribute("stroke", "currentColor");
-  svg.setAttribute("stroke-width", "1.6");
-  svg.setAttribute("stroke-linecap", "round");
-  svg.setAttribute("stroke-linejoin", "round");
+  for (const [name, value] of [
+    ["viewBox", shape.viewBox], ["fill", "none"], ["stroke", "currentColor"],
+    ["stroke-width", "1.6"], ["stroke-linecap", "round"], ["stroke-linejoin", "round"],
+    // Decorative: the state is in words beside it at both sizes.
+    ["aria-hidden", "true"],
+  ] as const) {
+    svg.setAttribute(name, value);
+  }
 
-  // Decorative: the state is already in `gap-label` beside it, and a screen
-  // reader announcing "lock" before "Not permitted" says one thing twice.
-  svg.setAttribute("aria-hidden", "true");
-
-  for (const path of glyph.paths) {
+  for (const path of shape.paths) {
     const element = document.createElementNS(SVG, "path");
     element.setAttribute("d", path);
     svg.append(element);
@@ -131,42 +100,112 @@ function mark(glyph: Glyph): SVGSVGElement {
   return svg;
 }
 
-/** The four facts, each labelled, in the order the seam puts them. */
-function facts(drawing: FailureDrawing): HTMLElement {
+/**
+ * A sentence with the capability set in bold, as the frame sets it.
+ *
+ * The frame draws `This screen needs <b>roster.read</b>…` and `Asked for
+ * <b>roster.read</b> · me`: the capability is the one word a person can take to
+ * somebody who can grant it. The seam hands over plain strings, so the emphasis
+ * is found by the capability's own value rather than by position — a sentence
+ * that does not contain it is returned untouched rather than guessed at.
+ */
+export function emphasised(sentence: string, capability: string): Node[] {
+  const at = sentence.indexOf(capability);
+  if (at < 0) return [document.createTextNode(sentence)];
+
+  return [
+    document.createTextNode(sentence.slice(0, at)),
+    el("b", undefined, capability),
+    document.createTextNode(sentence.slice(at + capability.length)),
+  ];
+}
+
+/**
+ * The frame's `.st-do` — the control first when there is one, then the note.
+ *
+ * The `Act` union is exhausted rather than read through. `grant` has no label
+ * and so no control: a refusal names the grant and stops (owner, 2026-09-17),
+ * because naming who can grant would tell whoever is at the terminal who holds
+ * authority in this property.
+ */
+function todo(drawing: FailureDrawing, capability: string, again?: () => void): HTMLElement {
+  const row = el("div", "gap-do");
+  const act = drawing.act;
+
+  switch (act.kind) {
+    case "retry":
+      // `.btn.pri` in the frame — the one state where trying again can work.
+      if (drawing.retryable && again !== undefined) row.append(control("btn pri", act.label, again));
+      break;
+
+    case "grant":
+      break;
+
+    case "copy": {
+      const wire = drawing.wire;
+      row.append(control("btn", act.label, () => void navigator.clipboard?.writeText(wire)));
+      break;
+    }
+  }
+
+  row.append(fill(el("span", "gap-ask"), ...emphasised(act.note, capability)));
+  return row;
+}
+
+/** The frame's `.prov` — the facts as a labelled grid, under a rule. */
+function facts(drawing: FailureDrawing, capability: string): HTMLElement {
   const list = el("dl", "gap-facts");
 
   for (const fact of drawing.facts) {
-    list.append(el("dt", "gap-fact-label", fact.label), el("dd", "gap-fact-value", fact.value));
+    list.append(el("dt", undefined, fact.label), fill(el("dd"), ...emphasised(fact.value, capability)));
   }
 
   return list;
 }
 
+/** The colour each state's mark takes — `.st-mark.wait / .no / .fault`. */
+export const TONE: Readonly<Record<Cause, string>> = {
+  unanswered: "var(--color-warn,#fbbf24)",
+  forbidden: "var(--color-ink-muted,#8b93a7)",
+  faulted: "var(--color-bad,#f87171)",
+};
+
 /**
- * What the surface offers, which is the affordance and never the wording.
+ * The screen-size surface's rules, in the file that draws it.
  *
- * The union is exhausted deliberately: a `grant` arm that fell through to a
- * shared button would compile, and would promise a person something the
- * platform cannot do.
+ * **Rules travel with their surface** (`144df2e`): a sheet cannot be assembled
+ * without them, which is what stopped the widget realm drawing unstyled text.
+ * The widget size has its own drawing in 64b and its own rules beside it, in
+ * `widgets/failed.ts`.
+ *
+ * Every value is the frame's. The two monospace roles (`.st-label`, `.prov dt`)
+ * name the frame's stack, because ADR 0106 publishes no mono token.
  */
-function offer(drawing: FailureDrawing, again?: () => void): HTMLElement | null {
-  switch (drawing.act.kind) {
-    case "retry":
-      // The seam decides whether trying again could work; this only honours it,
-      // and a screen that passed no retry gets no button either.
-      if (!drawing.retryable || again === undefined) return null;
-      return fill(el("div", "row"), control("btn", drawing.act.label, again));
-
-    case "grant":
-      // No button. There is no route to a person that does not disclose one.
-      return null;
-
-    case "copy": {
-      const wire = drawing.wire;
-      return fill(
-        el("div", "row"),
-        control("btn", drawing.act.label, () => void navigator.clipboard?.writeText(wire)),
-      );
-    }
-  }
-}
+export const FAILURE_CSS = `
+.gap{display:grid;place-items:center;min-height:330px}
+.gap-state{width:min(560px, 92%);padding:34px 0;text-align:left}
+.gap-mark{margin-bottom:12px}
+.gap-mark svg{width:26px;height:26px;display:block}
+.gap-unanswered .gap-mark{color:${TONE.unanswered}}
+.gap-forbidden .gap-mark{color:${TONE.forbidden}}
+.gap-faulted .gap-mark{color:${TONE.faulted}}
+.gap-label{font-family:ui-monospace,"Cascadia Mono",Menlo,monospace;font-size:11px;letter-spacing:.1em;
+           text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin-bottom:6px}
+.gap-said{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:8px;
+          color:var(--color-ink,#e8ebf4)}
+.gap-why{color:var(--color-ink-muted,#8b93a7);font-size:14px;max-width:52ch;margin-bottom:18px}
+.gap-do{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
+.gap-do .btn{font-size:13px;font-weight:600;padding:7px 15px;border-radius:9px;
+             border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));
+             background:color-mix(in srgb, var(--color-ink,#e8ebf4) 2%, transparent);color:var(--color-ink,#e8ebf4)}
+.gap-do .btn.pri{background:color-mix(in srgb, var(--color-brand,#818cf8) 18%, transparent);
+                 border-color:color-mix(in srgb, var(--color-brand,#818cf8) 50%, transparent)}
+.gap-ask{color:var(--color-ink-muted,#8b93a7);font-size:13px}
+.gap-ask b{color:var(--color-ink,#e8ebf4)}
+.gap-facts{border-top:1px solid var(--color-line,rgb(255 255 255 / 0.07));padding-top:13px;margin:0;
+           display:grid;grid-template-columns:auto 1fr;gap:3px 16px;font-size:12px}
+.gap-facts dt{font-family:ui-monospace,"Cascadia Mono",Menlo,monospace;font-size:10.5px;letter-spacing:.08em;
+              text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
+.gap-facts dd{margin:0;color:var(--color-ink-muted,#8b93a7);font-variant-numeric:tabular-nums}
+.gap-facts dd b{color:var(--color-ink,#e8ebf4);font-weight:500}
+`;

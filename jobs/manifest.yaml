@@ -66,7 +66,17 @@ name: "Jobs"
 # refused today. The rules travel with the surface now, and both sheets take
 # them from there. FF found the same defect in GuestOps, one layer out, and
 # routed it here rather than assuming these files were fine.
-version: 0.4.0
+#
+# **0.4.1 — the surface 0.4.0 drew was not the one the owner approved.** A patch,
+# because the approved design did not change and the build moves onto it: the
+# owner saw *NOT PERMITTED* in the top-left corner of the Board on 2026-09-18,
+# against 64b's Treatment A, which centres the block, gives the mark its own
+# line, sets the sentence at 19px, puts what to do before the facts and rules a
+# line above them. 0.4.0 had every part of the drawing and none of its
+# composition. The widget size is now its own surface, as 64b draws it.
+# Measured by role against the frame's own declarations: 224 of 224, in
+# `docs/mockups/measured-64b.json`.
+version: 0.4.1
 publisher: hotelos
 category: operations
 description: >-

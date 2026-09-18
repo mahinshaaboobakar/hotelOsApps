@@ -40,6 +40,64 @@ Chapter §9's own row has carried that since 2026-09-05; this box had not.
 
 ---
 
+## 0.4.1, staged 2026-09-18 — the page-64b audit, and what 0.4.0 got wrong
+
+**0.4.0's failure surface was not the approved one, and the owner saw it**: a
+screenshot at 16:09 on 2026-09-18, *NOT PERMITTED* in the top-left corner of the
+Board. The frame is `docs/working/64b-when-a-screen-cannot-read.html` in
+HosPilotOS, Treatment A, approved 2026-09-17. 0.4.0 was built from the seam's
+*types* — a glyph, a label, facts, an act — and styled from this module's habits,
+so it had every part of the drawing and none of its composition. **Nothing that
+reads a type could have told the two apart**; only a measurement against the
+frame could, and none was taken before 0.4.0 shipped.
+
+**The audit** (`docs/mockups/failure-audit.mjs`, ledger `measured-64b.json`):
+the real Board and The Board widget, failing with each of the three causes,
+against the frame's windows and cards, one role at a time — **only the
+properties the frame's rule declares**, because 64b is a design page with its
+own body type and an undeclared property is that page's, not the drawing's.
+
+```text
+                       declared   as drawn
+forbidden   screen         52         52
+            widget         18         18
+unanswered  screen         59         59
+            widget         18         18
+faulted     screen         59         59
+            widget         18         18
+                          224        224
+```
+
+**Proved to fail before this green was reported**: with the screen's centring
+removed — the defect the owner photographed — it fails 9 declarations across
+the three states, on the area's `display`, `justify-items` and `align-items`,
+and exits 1. The nine absent-on-both-sides rows are deliberate: a refusal has no
+control, a widget carries no facts and no state label, and two notes name no
+capability.
+
+**The words, which this module does not own.** Every remaining text difference
+is one of two kinds, and neither is a layout failure:
+
+| | The frame | The build | Whose |
+|---|---|---|---|
+| another application drawn | Workforce's *"this person's month"*, GuestOps' *"did not answer"* | Jobs' own | nobody's — the frame draws three apps |
+| **the time** | *17 Sep 2026, 08:53:23 UTC* | `2026-09-18T11:05:48.691Z` | **the SDK's** `facts()` — every state, every app |
+| **widget-size sentences** | shortened — *"A service fault, not something the property has done."* | the screen's sentence | **the SDK's** — `failureDrawing` has one set of words |
+| **the emphasis** | *"**This is not something the property has done**"* in bold | plain | **the SDK's** — `why` is a string |
+| **the onward line** | *"Open Workforce →"*, *"Try again →"* | composed here from the app's name and `FAILURE_LABELS.retry` | **the SDK's to own** — the frame draws it and the seam has no field |
+
+The one frame that draws Jobs itself — the Board, faulted — now matches word
+for word except the time: the noun was *"this property's board"* and the frame
+says *"this board"*, which is the one word this module supplies.
+
+**One placement 64b does not draw.** The Board reads its figures strip
+separately and draws the board when only the strip failed — a failure *inside*
+a screen that rendered. The frame has a screen size and a widget size and
+nothing for this. It gets the state block without the screen's centring, which
+is the least that is not invented, and it is **undrawn rather than settled**.
+
+---
+
 ## 0.4.0, published 2026-09-17 — the same account, with one claim withdrawn
 
 Everything the 0.3.0 section below says still holds, **except its confidence
