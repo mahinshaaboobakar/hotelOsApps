@@ -3,13 +3,35 @@
   <!--
     pms-oracle — the Oracle PMS connector.
 
-    # Why `Microsoft.NET.Sdk` and not `Sdk.Web`, today
+    # An executable since b12194e8, and not before it
 
-    The manifest declares `runtime.kind: dotnet-service`, and this will be a
-    hosted service. It is a library right now because **there is no channel for
-    a process to host**.
+    `OutputType` is `Exe` because the thing a `Main` binds to now exists:
+    `HotelOS.Connector` carries `ConnectorBootstrap`, `IConnectorTransport`,
+    `ConnectorSession` and `ConnectorInvocation` (ADR 0188). `Program.cs` reads
+    the Runtime-provided bootstrap, attaches, and serves — and names no
+    transport, because none is chosen.
 
-    # This reason was three facts, and two of them have expired
+    **`Microsoft.NET.Sdk`, still not `Sdk.Web`.** The process hosts a channel,
+    not an HTTP surface, and ADR 0188 keeps the transport out of this package:
+    `Main` never learns whether the platform chose pipes, sockets or gRPC.
+
+    **What the executable cannot do yet, by design.** Nothing implements
+    `IConnectorTransport`, so a launched process reports that it has no
+    transport and exits; the platform supplies one. And no invocation kind is
+    ruled, so every invocation is refused with a sentence rather than
+    dispatched on a guess — see `Hosting/InvocationRefusal.cs`.
+
+    # The history of this hold, kept because each reason was once true
+
+    ADR 0188's own words: it was *nothing for the entry point to implement*,
+    then *something for the capability and nothing for the process to host*,
+    then *a named thing to bind to that has not been built* — and at b12194e8,
+    built. The paragraphs below are the state before that commit.
+
+    Until b12194e8 this project was a library because **there was no channel
+    for a process to host**.
+
+    # That reason was three facts, and two of them had expired
 
     Until 2026-09-17 the sentence above read: *"the Integration Hub is designed
     (platform brief §7–§20) and unbuilt, `shared/protos/hotelos/integration/`
@@ -61,6 +83,8 @@
   -->
 
   <PropertyGroup>
+    <!-- ADR 0188, from b12194e8 — see the header for what it binds to. -->
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
