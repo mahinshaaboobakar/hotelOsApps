@@ -8,7 +8,7 @@ names for it.
 Kernel. *Corrected: this said Room Care was installed on no Kernel. 0.1.2 had
 been installed earlier today, and I did not know it, so the audit's real-Kernel
 states were never attempted. It stays a harness run, and Part B on 0.1.3 is
-the real-Kernel evidence.* The list states (E0, E1, 1P, MP, ML) are **derived from the
+the real-Kernel evidence.* *Corrected again, 2026-09-19, measured: Room Care is installed on no Kernel. The owner's running platform (`.tmp/devrun`, the dev cluster on 25432) has `platform.packages` = guestops 0.3.2, jobs 0.4.2, openai 1.1.0, workforce 0.3.3. `%LOCALAPPDATA%\HotelOS\packages\installed` holds guestops, jobs and workforce. The `roomcare` schema has 0 tables, and the running Kernel's log (since 2026-09-08) has 0 lines naming `roomcare`. The installed-product Kernel under ProgramData has been stopped since 2026-09-18 and loaded 0 applications. "0.1.2 was already installed" was a relayed premise, and I wrote it in without checking. 0.1.2 and 0.1.3 (digest `c3485aa2…`, matching) are on the shelf, not installed.* The list states (E0, E1, 1P, MP, ML) are **derived from the
 recorded Coral Cove morning**: rows repeated to fill a page, and `total` stated. The
 harness stamps each derived capture. Failed reads are produced through the
 host's own six error kinds, so the SDK's `load` classifies them.
@@ -362,7 +362,7 @@ UI bundles             module.js and the five widgets are byte-for-byte what the
 
 **Staged, 2026-09-19.** Part B certifies 0.1.3, the version that carries the fixes; the owner updates
 to it from 0.1.2. *Corrected: this said "not staged — the owner installs 0.1.2 at tonight's restart".
-That premise was wrong. 0.1.2 was already installed earlier today.* The table is still not clean, so
+That premise was wrong. 0.1.2 was already installed earlier today.* *Corrected again, 2026-09-19, measured: Room Care is installed on no Kernel. The owner's running platform (`.tmp/devrun`, the dev cluster on 25432) has `platform.packages` = guestops 0.3.2, jobs 0.4.2, openai 1.1.0, workforce 0.3.3. `%LOCALAPPDATA%\HotelOS\packages\installed` holds guestops, jobs and workforce. The `roomcare` schema has 0 tables, and the running Kernel's log (since 2026-09-08) has 0 lines naming `roomcare`. The installed-product Kernel under ProgramData has been stopped since 2026-09-18 and loaded 0 applications. "0.1.2 was already installed" was a relayed premise, and I wrote it in without checking. 0.1.2 and 0.1.3 (digest `c3485aa2…`, matching) are on the shelf, not installed.* The table is still not clean, so
 the audit is not shown to the owner as done.
 
 ## Captures
