@@ -42,8 +42,28 @@ const { serve } = await import(pathToFileURL(
 
 // Async for the reason parta-run gives: the servers live in this process, and a
 // blocking child would stop them answering the very probe they were started for.
-const run = async (args) =>
-  (await promisify(execFile)("node", args, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })).stdout;
+//
+// **A failing step names itself.** On 2026-09-19 a run exited 1 having printed
+// no result, and five reruns — the same inputs, including the same
+// capture-then-audit sequence — all passed. Its cause is not known. Two things
+// are: the error was not silent, it went to stderr and the caller's filter
+// dropped it; and every probe and crop launches its own headless Edge, which
+// `review-measure.mjs` gives ten seconds to appear, on a machine that had 2.1 GB
+// free with the owner's desktop running. So a failure now says which state,
+// size and step it was, and what the instrument itself said, on stdout AND
+// stderr — the next one is diagnosable from whatever a reader kept.
+const run = async (args) => {
+  try {
+    return (await promisify(execFile)("node", args, { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 })).stdout;
+  } catch (failure) {
+    const step = args.slice(1, 4).join(" ");
+    const said = `${failure.stderr ?? ""}${failure.stdout ?? ""}`.trim() || failure.message;
+    const line = `failure-audit: STEP FAILED — ${step}\n  exit ${failure.code ?? "?"}: ${said.slice(0, 600)}`;
+    console.log(line);
+    console.error(line);
+    throw failure;
+  }
+};
 
 const MEASURE = "C:/Users/Mahin Aboobakker/PycharmProjects/HosPilotOS/scripts/review-measure.mjs";
 const WORKING = "C:/Users/Mahin Aboobakker/PycharmProjects/HosPilotOS/docs/working";
