@@ -86,10 +86,13 @@ public static class ConnectorEntry
 
         if (transport is null)
         {
+            // *This said the platform's transport was "none … implemented yet"
+            // until the SDK's Named Pipe adapter landed (platform 84a74011).
+            // Now the only way here is a platform the adapter does not run on.*
             await diagnostics.WriteLineAsync(
                 "pms-oracle was given a channel bootstrap but has no transport to attach it with. " +
-                "The transport is the platform's to supply and none is implemented yet, so nothing " +
-                "was attached and no invocation was served.");
+                "The platform's transport is a Windows Named Pipe (ADR 0196), and this process is " +
+                "not running on Windows, so nothing was attached and no invocation was served.");
             return NoTransport;
         }
 
