@@ -207,6 +207,10 @@ the widgets. **Failing first**: at `991b032` it failed on ten screens with every
    length* on Deep clean plan, which always shows a dash. Keep them, or remove them until they have data?
 4. **The Photo button's reason**, "the media service's to add". It names a service. Plain words are needed, for
    example "not available yet".
+6. **Status words in capitals.** The approved frames draw IN PROGRESS, DONE, READY, DUE, DIRTY, CLEAN and
+   DISAGREEMENT in capitals, and the build follows. Read on a live screen, they may look like a backend's codes rather
+   than words. Keep the capitals as a style, or use sentence case ("in progress", "dirty")? (Found 2026-09-19 while
+   checking HH's point that screens print backend values as sent.)
 5. **"Recorded as source manual…"** on the Room state sheet, and **"whether they are on shift is Workforce's to
    add"** on Reassign. Both are explanations of how the system works rather than something a person acts on.
 

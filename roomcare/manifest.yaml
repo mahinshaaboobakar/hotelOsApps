@@ -56,7 +56,8 @@
 #     request a screen got wrong says "Room Care could not read that request,
 #     so nothing was changed". A source guard reads every refusal message.
 #   * **No developer note on any screen**: no register ids, design sections,
-#     event names, relation ids or system names.
+#     event names, relation ids or system names. A room's timeline no longer
+#     ends a clean with the platform event's name.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.
 #
 # Still true in 0.1.4, and said here so nobody reads the package as more than

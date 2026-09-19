@@ -15,7 +15,7 @@
   "defaultView": "MAP",
   "zones": [
     {
-      "zoneId": "01a0aaf4-0a3f-778a-b274-b5ba6e0d1ad4",
+      "zoneId": "01a0bada-6ba5-79fa-84f8-a958005dc65e",
       "name": "Zone 1 · Garden villas",
       "counts": {
         "rooms": 12,
@@ -29,7 +29,7 @@
       },
       "rooms": [
         {
-          "id": "01a0aaf4-1e5d-72d4-9ede-9fdec6e5b7c0",
+          "id": "01a0bada-720c-7831-9dca-89972b72ede7",
           "number": "G01",
           "condition": "DIRTY",
           "source": "PMS",
@@ -38,13 +38,13 @@
           "occupancy": "VACANT",
           "vacantDays": null,
           "soldAt": "2026-09-05T09:30:00.0000000+00:00",
-          "taskId": "01a0aaf4-21e9-741f-822c-05aa4bf807c7",
+          "taskId": "01a0bada-73d9-75b4-9af1-99e514418d5b",
           "taskVersion": 6,
           "service": "DEPARTURE_CLEAN",
           "reduction": null,
           "earliestAt": null,
           "priority": 1,
-          "attendantId": "01a0aaf4-1e0e-7631-b751-23432c3f9235",
+          "attendantId": "01a0bada-71e3-7505-8c81-33a9964cec16",
           "attendant": "Anita Pillai",
           "outcome": {
             "kind": "IN_PROGRESS",
@@ -68,7 +68,7 @@
           "version": 3
         },
         {
-          "id": "01a0aaf4-1e5f-733e-95aa-863dd74162e7",
+          "id": "01a0bada-720c-773d-8d1f-8eefe3ed006a",
           "number": "G02",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -77,13 +77,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22a6-7782-bb6f-ba071d33991c",
+          "taskId": "01a0bada-741b-7acf-911d-5b62eea3f358",
           "taskVersion": 4,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e0e-7631-b751-23432c3f9235",
+          "attendantId": "01a0bada-71e3-7505-8c81-33a9964cec16",
           "attendant": "Anita Pillai",
           "outcome": {
             "kind": "NONE",
@@ -107,7 +107,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-75b7-8ae7-f9a8d5eb30d6",
+          "id": "01a0bada-720c-79a7-a2ce-44c57eabb684",
           "number": "G03",
           "condition": "CLEAN",
           "source": "ATTENDANT",
@@ -116,13 +116,13 @@
           "occupancy": "VACANT",
           "vacantDays": 0,
           "soldAt": "2026-09-05T07:30:00.0000000+00:00",
-          "taskId": "01a0aaf4-22aa-718b-b5d3-5369288ce4d0",
+          "taskId": "01a0bada-741d-78aa-925e-27f10e7b9c69",
           "taskVersion": 9,
           "service": "DEPARTURE_CLEAN",
           "reduction": null,
           "earliestAt": null,
           "priority": 1,
-          "attendantId": "01a0aaf4-1e0e-7631-b751-23432c3f9235",
+          "attendantId": "01a0bada-71e3-7505-8c81-33a9964cec16",
           "attendant": "Anita Pillai",
           "outcome": {
             "kind": "DONE",
@@ -146,7 +146,7 @@
           "version": 2
         },
         {
-          "id": "01a0aaf4-1e5f-7df4-a687-5aefd5801eb1",
+          "id": "01a0bada-720c-7aef-8612-f79a95cb8eed",
           "number": "G04",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -155,7 +155,7 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22ae-7b0f-b597-03bea33d79d6",
+          "taskId": "01a0bada-741f-76c4-9cdd-ddb65fec1b76",
           "taskVersion": 2,
           "service": "DAILY_SERVICE",
           "reduction": null,
@@ -185,7 +185,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-79dc-9822-138f1f599d29",
+          "id": "01a0bada-720c-7be3-a135-8557f5e56106",
           "number": "G05",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -194,13 +194,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22b1-74a2-802c-9356bd929dcb",
+          "taskId": "01a0bada-7420-7930-901e-ee5c75ce73cd",
           "taskVersion": 5,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e42-7965-b9b5-3b0d9819494b",
+          "attendantId": "01a0bada-71f8-70bf-a166-68f5e1cf5299",
           "attendant": "Priya Das",
           "outcome": {
             "kind": "DND",
@@ -224,7 +224,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-7a78-8eb3-5dab9f83e2ef",
+          "id": "01a0bada-720c-7d3a-9c4f-7378a9496460",
           "number": "G06",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -233,7 +233,7 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22b4-7a80-b55e-8b25ec1b595f",
+          "taskId": "01a0bada-7422-72a9-92cc-ff4667f7d8f1",
           "taskVersion": 2,
           "service": "DAILY_SERVICE",
           "reduction": null,
@@ -263,7 +263,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-777e-9719-b71461742ec6",
+          "id": "01a0bada-720c-7c3d-afd7-fe0df997af86",
           "number": "G07",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -272,13 +272,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22b8-7822-bd6f-f2de97ee363d",
+          "taskId": "01a0bada-7423-7870-ad1c-7ec7635bdef7",
           "taskVersion": 6,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": "2026-09-05T06:30:00.0000000+00:00",
           "priority": 3,
-          "attendantId": "01a0aaf4-1e0e-7631-b751-23432c3f9235",
+          "attendantId": "01a0bada-71e3-7505-8c81-33a9964cec16",
           "attendant": "Anita Pillai",
           "outcome": {
             "kind": "WAITING",
@@ -302,7 +302,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-7018-9ab8-341967b711b7",
+          "id": "01a0bada-720c-7e7d-9b2b-fd4d5537a03d",
           "number": "G08",
           "condition": "CLEAN",
           "source": "ATTENDANT",
@@ -341,7 +341,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-7ea4-adf2-d89fbf3dee29",
+          "id": "01a0bada-720c-7ac1-8269-53782d333eed",
           "number": "G09",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -350,7 +350,7 @@
           "occupancy": "VACANT",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22bc-77f2-af2f-5ecd9d341cf5",
+          "taskId": "01a0bada-7425-77fe-b969-cc44c5614d3f",
           "taskVersion": 2,
           "service": "DEPARTURE_CLEAN",
           "reduction": null,
@@ -380,7 +380,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-7ca6-a719-ca7d09a4adf6",
+          "id": "01a0bada-720c-77c0-8ff1-d8a76ff2ab1a",
           "number": "G10",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -389,13 +389,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22c1-7af7-b092-ae7f16eb972d",
+          "taskId": "01a0bada-7427-72db-85a7-10439abc4a8b",
           "taskVersion": 6,
           "service": "DAILY_SERVICE",
           "reduction": "light — no bed",
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e42-7965-b9b5-3b0d9819494b",
+          "attendantId": "01a0bada-71f8-70bf-a166-68f5e1cf5299",
           "attendant": "Priya Das",
           "outcome": {
             "kind": "NONE",
@@ -419,7 +419,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e5f-74ca-bb7a-35b761f51b2d",
+          "id": "01a0bada-720c-7511-a8ab-fddb797835de",
           "number": "G11",
           "condition": "DIRTY",
           "source": "PMS",
@@ -428,7 +428,7 @@
           "occupancy": "VACANT",
           "vacantDays": null,
           "soldAt": "2026-09-05T11:00:00.0000000+00:00",
-          "taskId": "01a0aaf4-22c4-7fd5-b023-f608af4cba14",
+          "taskId": "01a0bada-7428-716c-a4ff-79d3d0ef0813",
           "taskVersion": 2,
           "service": "DAILY_SERVICE",
           "reduction": null,
@@ -458,7 +458,7 @@
           "version": 3
         },
         {
-          "id": "01a0aaf4-1e5f-7c4a-a452-4296fd90ec05",
+          "id": "01a0bada-720c-731a-8ecc-f3edf3182d12",
           "number": "G12",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -467,13 +467,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22c8-7591-aac9-4e179c64fc61",
+          "taskId": "01a0bada-742a-7599-b8e1-ca8242cdcb77",
           "taskVersion": 9,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e42-7965-b9b5-3b0d9819494b",
+          "attendantId": "01a0bada-71f8-70bf-a166-68f5e1cf5299",
           "attendant": "Priya Das",
           "outcome": {
             "kind": "PARTIAL",
@@ -499,7 +499,7 @@
       ]
     },
     {
-      "zoneId": "01a0aaf4-0a3f-7345-8aa9-cc56beb143a0",
+      "zoneId": "01a0bada-6ba5-7183-aff3-25c290d48351",
       "name": "Zone 2 · Lake wing",
       "counts": {
         "rooms": 5,
@@ -513,7 +513,7 @@
       },
       "rooms": [
         {
-          "id": "01a0aaf4-1e60-7d41-b2d6-27da2faf49df",
+          "id": "01a0bada-720d-7580-bdac-53d4add200ec",
           "number": "L01",
           "condition": "CLEAN",
           "source": "ATTENDANT",
@@ -522,13 +522,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22cb-7af9-9a71-454dcf3596f1",
+          "taskId": "01a0bada-742c-7ed1-9f9d-50e0de710add",
           "taskVersion": 9,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e4b-7d93-8bb6-49fbf8461760",
+          "attendantId": "01a0bada-71ff-77af-b2b5-6c0375efbab1",
           "attendant": "Farhan Ali",
           "outcome": {
             "kind": "DONE",
@@ -552,7 +552,7 @@
           "version": 2
         },
         {
-          "id": "01a0aaf4-1e60-7d13-aba6-b3472d3f2d51",
+          "id": "01a0bada-720d-7d71-bf69-4dea323d1396",
           "number": "L02",
           "condition": "DIRTY",
           "source": "SYSTEM",
@@ -561,13 +561,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22cf-7fdd-aeeb-cb05d8d56e3b",
+          "taskId": "01a0bada-742d-72e0-b5f0-81d9801bd308",
           "taskVersion": 6,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e4b-7d93-8bb6-49fbf8461760",
+          "attendantId": "01a0bada-71ff-77af-b2b5-6c0375efbab1",
           "attendant": "Farhan Ali",
           "outcome": {
             "kind": "IN_PROGRESS",
@@ -591,7 +591,7 @@
           "version": 1
         },
         {
-          "id": "01a0aaf4-1e60-745e-adca-81b41da45eb3",
+          "id": "01a0bada-720d-76cc-b1ba-09f8a854e379",
           "number": "L03",
           "condition": "DIRTY",
           "source": "PMS",
@@ -600,13 +600,13 @@
           "occupancy": "VACANT",
           "vacantDays": null,
           "soldAt": "2026-09-05T06:30:00.0000000+00:00",
-          "taskId": "01a0aaf4-22d3-7afe-8912-8e8a462bf7fe",
+          "taskId": "01a0bada-742e-7511-8e3a-ee4666802c97",
           "taskVersion": 6,
           "service": "DEPARTURE_CLEAN",
           "reduction": null,
           "earliestAt": null,
           "priority": 1,
-          "attendantId": "01a0aaf4-1e53-7132-ab4c-b3eb2392f07f",
+          "attendantId": "01a0bada-7205-723a-bb83-642b976cf6c7",
           "attendant": "Rohan Desai",
           "outcome": {
             "kind": "IN_PROGRESS",
@@ -630,7 +630,7 @@
           "version": 3
         },
         {
-          "id": "01a0aaf4-1e60-7636-a671-7e8551d65a36",
+          "id": "01a0bada-720d-7df3-be4b-a6973f2cd8c1",
           "number": "L09",
           "condition": "CLEAN",
           "source": "ATTENDANT",
@@ -639,13 +639,13 @@
           "occupancy": "OCCUPIED",
           "vacantDays": null,
           "soldAt": null,
-          "taskId": "01a0aaf4-22d8-7767-b700-a8586a8f1fb6",
+          "taskId": "01a0bada-7430-75bb-9fae-0d3fb494c55f",
           "taskVersion": 9,
           "service": "DAILY_SERVICE",
           "reduction": null,
           "earliestAt": null,
           "priority": 3,
-          "attendantId": "01a0aaf4-1e53-7132-ab4c-b3eb2392f07f",
+          "attendantId": "01a0bada-7205-723a-bb83-642b976cf6c7",
           "attendant": "Rohan Desai",
           "outcome": {
             "kind": "DISAGREEMENT",
@@ -669,7 +669,7 @@
           "version": 4
         },
         {
-          "id": "01a0aaf4-1e60-72b9-873a-d18ed246db31",
+          "id": "01a0bada-720d-7c3e-bcef-6830369b11e7",
           "number": "L14",
           "condition": "DIRTY",
           "source": "SYSTEM",

@@ -1,6 +1,6 @@
 {
   "line": {
-    "id": "01a0aaf4-1e60-7636-a671-7e8551d65a36",
+    "id": "01a0bada-720d-7df3-be4b-a6973f2cd8c1",
     "number": "L09",
     "condition": "CLEAN",
     "source": "ATTENDANT",
@@ -9,13 +9,13 @@
     "occupancy": "OCCUPIED",
     "vacantDays": null,
     "soldAt": null,
-    "taskId": "01a0aaf4-22d8-7767-b700-a8586a8f1fb6",
+    "taskId": "01a0bada-7430-75bb-9fae-0d3fb494c55f",
     "taskVersion": 9,
     "service": "DAILY_SERVICE",
     "reduction": null,
     "earliestAt": null,
     "priority": 3,
-    "attendantId": "01a0aaf4-1e53-7132-ab4c-b3eb2392f07f",
+    "attendantId": "01a0bada-7205-723a-bb83-642b976cf6c7",
     "attendant": "Rohan Desai",
     "outcome": {
       "kind": "DISAGREEMENT",
@@ -87,7 +87,7 @@
       "at": "2026-09-05T03:40:00.0000000+00:00",
       "kind": "ENDED",
       "status": "DONE",
-      "what": "linen not due · 15 min · room CLEAN, announced (room.cleaned)",
+      "what": "linen not due · 15 min · room CLEAN",
       "by": "Rohan Desai"
     },
     {
