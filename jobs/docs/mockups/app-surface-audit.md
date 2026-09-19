@@ -30,7 +30,7 @@ One bucket per line; the five add to 86.
 
 | | Lines |
 |---|---|
-| **PASS** | 57 — of which four have an OPEN half, recorded: C4 (card half) · X4 (mono stack) · X7 (fill, *needs…* size) · X8 (the moment); and **O7 passes as an approved deviation** (APPS-Q27), labelled at both sites |
+| **PASS** | 57 — of which four have an OPEN half, recorded: C4 (card half) · X4 (mono stack) · X7 (fill, *needs…* size) · X8 (the moment); and **O7**: New item compliant with §9 as amended (APPS-Q53), Add a step allowed but not yet a composer — it passed as an APPS-Q27 deviation until §9 was amended on 2026-09-19 |
 | **FAIL → fixed in 0.4.2** (each shown failing first) | 14 — C2 · C8 · C11 · D2 · D3 · D4 · G1 · G2 · I3 · I5 · I6 · N4 · P5 · U1 |
 | **FAIL → fixed after 0.4.2** (shown failing first; in no package yet) | 1 — N5, with its department clause OPEN on ADR 0203 |
 | **FAIL → the frames; drawn for the owner** (APPS-Q44) | 2 — H3 · H6 |
@@ -185,11 +185,30 @@ One bucket per line; the five add to 86.
 ## Routed, not fixed — each needs a decision that is not Jobs'
 
 1. **N5's department** — waits on ADR 0203 (BB's Context change). Drawn as *not established*.
-2. **O7's count** — two §9 deviations in one application, and Room Care's L1 a third on the same
-   day. APPS-Q27: *"repeated or intentional deviations trigger a standards-amendment question"*.
-   That question is the architect's to raise; it is not raised here.
+2. **O7's count — raised and ruled.** Two §9 deviations in one application, and Room Care's L1 a
+   third on the same day, were APPS-Q27's *"repeated or intentional deviations trigger a
+   standards-amendment question"*. The architect raised it as APPS-Q53; the planner amended §9
+   (`8726f39a`, page 64 at `045402b4`), and the two are no longer deviations. The seven conditions
+   are audited below, one row each.
 3. **H3, H6** — the frame revision, drawn under APPS-Q44 for the owner:
    `jobs/docs/mockups/06-the-frame-revision.html`.
+
+
+### O7 against §9's seven conditions (APPS-Q53) — one row each
+
+Read from the code at `15373799`; a ✓ is what the code does, not what a person was seen to do (the live walk records that).
+
+| Condition | New item (`catalogue/index.ts`) | Add a step (`policies.ts`) |
+|---|---|---|
+| 1 · creates or edits an item of the current list | ✓ — an item of the catalogue it sits beside | ✓ — a step of the policy it sits under |
+| 2 · clearly associated with the list | ✓ — under the item detail, in the catalogue's column | ✓ — directly under the P1 ladder it adds to |
+| 3 · explicit submit and cancel | ✓ — Create item and Cancel (Cancel added 2026-09-19, shown failing first; it closes on nothing else) | ✗ — Add is off and there is no Cancel |
+| 4 · keyboard and focus stay accessible | ✓ — real inputs, a select and two buttons, in tab order; measured by the walk, not by a keyboard session | ✗ — its two fields are drawn as text, so a keyboard reaches nothing |
+| 5 · validation and error visible | partly — a missing name or code, and a refused write, are said on the Catalogue's line under the page, not inside the composer; what was typed is kept | — nothing can be submitted, so nothing can be refused |
+| 6 · nothing destructive or approval-bearing inside | ✓ | ✓ |
+| 7 · same permissions as the full-page action | ✓ — written through `job.curate`, as every item write is | — nothing is written |
+
+**New item meets six outright and 5 in part**: the ruling's own gloss on (5) — *"a refused write keeps the composer open and shows the reason in it"* — puts the reason inside the composer, and Jobs says it on the page's line below. That is a finding for the next build, not fixed here. **Add a step meets none of the conditions that need it to work**, and is built to all seven when it is built.
 
 ## About the checklist itself — for GG and the architect
 
