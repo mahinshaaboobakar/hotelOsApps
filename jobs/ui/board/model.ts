@@ -104,8 +104,12 @@ export interface Note {
  * (audit finding, 2026-09-04).
  */
 export interface Operator {
-  name: string;
-  where: string;
+  /** Master Data's display name for this login, as Room Care reads it; null when no staff row carries it. */
+  name: string | null;
+  /** Always null until ADR 0203 gives Jobs a posting to read (CTX-Q9) — drawn as not established. */
+  department: string | null;
+  /** The property's name, else its code. */
+  property: string | null;
 }
 
 export interface Step {

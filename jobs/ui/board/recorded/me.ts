@@ -6,4 +6,6 @@
 
 import type { Operator } from "../model";
 
-export const recordedMe: Operator = { name: "Priya Nair", where: "ENG supervisor" };
+// The frame's "ENG supervisor" is not reproduced: no read establishes a
+// department yet (ADR 0203), and an example that shows one hid that (N5).
+export const recordedMe: Operator = { name: "Priya Nair", department: null, property: "MRN" };

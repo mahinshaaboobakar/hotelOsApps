@@ -36,6 +36,7 @@ const CHROME = `
      padding:19px 2px;font:inherit;line-height:inherit;font-size:13px;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
 .who{color:var(--color-ink-muted,#8b93a7);font-size:12px}
+.who .unset{font-style:italic}
 /* A row's opener — standard §2's reset on the class (checklist C8): a real
    button that draws as the text it replaces, so the number reads as before and
    a keyboard reaches it. */

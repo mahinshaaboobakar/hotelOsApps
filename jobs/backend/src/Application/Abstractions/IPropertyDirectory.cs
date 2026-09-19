@@ -11,6 +11,17 @@ public interface IPropertyDirectory
     /// <summary>The property's code as Master Data has it — the job number's first part.</summary>
     Task<string?> FindPropertyCodeAsync(Guid propertyId, CancellationToken cancellationToken);
 
+    /// <summary>What the property is called — the bar's third clause — or null when Master Data has no name for it.</summary>
+    Task<string?> FindPropertyNameAsync(Guid propertyId, CancellationToken cancellationToken);
+
+    /// <summary>The display name of the person signed in as <paramref name="userId"/>, or null when no staff row carries that login.</summary>
+    /// <remarks>
+    /// Room Care's reading (<c>MasterDataHouseReader.NamesAsync</c>): Master
+    /// Data's staff row linked by login, a deleted row not counted. Null, never
+    /// a stand-in — "Signed in" was drawn where a name belongs and read as one.
+    /// </remarks>
+    Task<string?> FindStaffNameAsync(Guid userId, CancellationToken cancellationToken);
+
     /// <summary>The property's IANA zone — a scheduled job's day begins in it (S2 D3).</summary>
     Task<string?> FindTimezoneAsync(Guid propertyId, CancellationToken cancellationToken);
 

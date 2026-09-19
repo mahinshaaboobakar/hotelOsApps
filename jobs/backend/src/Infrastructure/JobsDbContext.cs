@@ -84,6 +84,10 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
     public DbSet<ReadModels.MasterDataLocation> MasterDataLocations =>
         Set<ReadModels.MasterDataLocation>();
 
+    /// <inheritdoc cref="MasterDataProperties" />
+    public DbSet<ReadModels.MasterDataStaff> MasterDataStaff =>
+        Set<ReadModels.MasterDataStaff>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
@@ -104,5 +108,6 @@ public class JobsDbContext(DbContextOptions<JobsDbContext> options) : DbContext(
         modelBuilder.ApplyConfiguration(new ReadModels.MasterDataPropertyConfiguration());
         modelBuilder.ApplyConfiguration(new ReadModels.MasterDataDepartmentConfiguration());
         modelBuilder.ApplyConfiguration(new ReadModels.MasterDataLocationConfiguration());
+        modelBuilder.ApplyConfiguration(new ReadModels.MasterDataStaffConfiguration());
     }
 }

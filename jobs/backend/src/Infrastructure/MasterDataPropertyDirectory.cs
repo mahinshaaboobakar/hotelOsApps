@@ -51,6 +51,29 @@ public class MasterDataPropertyDirectory(JobsDbContext db) : IPropertyDirectory
         return string.IsNullOrWhiteSpace(code) ? null : code;
     }
 
+    public async Task<string?> FindPropertyNameAsync(Guid propertyId, CancellationToken cancellationToken)
+    {
+        var name = await db.MasterDataProperties
+            .Where(p => p.Id == propertyId)
+            .Select(p => p.Name)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return string.IsNullOrWhiteSpace(name) ? null : name;
+    }
+
+    public async Task<string?> FindStaffNameAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        // By login and not by property, as Room Care reads it: the table carries
+        // no property column in either read model, and a login is one person
+        // across every hotel the organisation runs.
+        var name = await db.MasterDataStaff
+            .Where(s => s.UserId == userId && s.DeletedAt == null)
+            .Select(s => s.DisplayName)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return string.IsNullOrWhiteSpace(name) ? null : name;
+    }
+
     public async Task<string?> FindTimezoneAsync(Guid propertyId, CancellationToken cancellationToken)
     {
         var timezone = await db.MasterDataProperties

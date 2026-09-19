@@ -69,6 +69,20 @@ describe("app surface checklist — automated lines, Jobs", () => {
     expect(root.querySelector(".head .search"), "a search box over no search").toBeNull();
   });
 
+  it("N5 — the bar reads name · department · property, and says the department is not established", async () => {
+    // Page 64 §3. The name and property as Room Care reads them; the department
+    // is ADR 0203's, so the clause says it is not established — never a stand-in.
+    const root = await mounted(host({ ...ANSWERS, me: { name: "Priya Nair", department: null, property: "Marina" } }));
+    const who = root.querySelector(".head .who");
+    expect(who?.textContent).toBe("Priya Nair · department not established · Marina");
+    expect(who?.querySelector(".unset")?.textContent, "the gap is marked as a gap, not as a value").toBe("department not established");
+  });
+
+  it("N5 — a name nobody established is not drawn, and nothing stands in for it", async () => {
+    const root = await mounted(host({ ...ANSWERS, me: { name: null, department: null, property: "MRN" } }));
+    expect(root.querySelector(".head .who")?.textContent).toBe("department not established · MRN");
+  });
+
   it("C8 — a board row that opens a job is reachable as a real button", async () => {
     const root = await mounted(host(ANSWERS));
     const rows = Array.from(root.querySelectorAll("tr.pick"));

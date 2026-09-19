@@ -37,9 +37,29 @@ export function head(
   // that does nothing is not an appearance a frame can approve, and it returns
   // with a search that answers. The spacer keeps the operator at the right.
   bar.append(el("span", "grow"));
-  // Nothing, rather than a name nobody established.
-  if (operator !== null) bar.append(el("div", "who", `${operator.name} · ${operator.where}`));
+  if (operator !== null) bar.append(who(operator));
   return bar;
+}
+
+/**
+ * Page 64 §3's identity clause: `name · department · property` (checklist N5).
+ *
+ * Room Care's reading — the parts the service established, joined — with one
+ * clause Room Care does not have: Jobs spans departments and has no posting to
+ * read until ADR 0203, so the department is said to be **not established**, in
+ * words, rather than dropped (which would read as two clauses by design) or
+ * filled with a stand-in (which would read as a fact). A missing name or
+ * property is dropped, as Room Care drops it.
+ */
+function who(operator: Operator): HTMLElement {
+  const parts: (string | HTMLElement)[] = [];
+  if (operator.name) parts.push(operator.name);
+  parts.push(operator.department ? operator.department : el("span", "unset", "department not established"));
+  if (operator.property) parts.push(operator.property);
+
+  const clause = el("div", "who");
+  parts.forEach((part, i) => clause.append(...(i === 0 ? [part] : [" · ", part])));
+  return clause;
 }
 
 /** A sub-navigation under a screen's header — the job view's tabs, the settings tabs. */

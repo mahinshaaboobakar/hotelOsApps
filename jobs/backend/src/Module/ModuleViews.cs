@@ -80,8 +80,13 @@ public static class ModuleViews
     /// <summary>A note, and whether it is the text the job was raised with.</summary>
     public sealed record NoteView(string Who, string At, string Text, string? Photo, bool Raising);
 
-    /// <summary>Who is signed in, as the service knows them.</summary>
-    public sealed record OperatorView(string Name, string Where);
+    /// <summary>The bar's identity clause — <c>name · department · property</c>, page 64 §3.</summary>
+    /// <remarks>
+    /// Each part is null when nothing established it, and the bar says so rather
+    /// than drawing a stand-in. <see cref="Department"/> is always null until
+    /// ADR 0203 gives Jobs a posting to read.
+    /// </remarks>
+    public sealed record OperatorView(string? Name, string? Department, string? Property);
 
     /// <summary>A child step of a job.</summary>
     public sealed record StepView(int No, string Number, string What, string Status, string Clock, string AssignedTo);

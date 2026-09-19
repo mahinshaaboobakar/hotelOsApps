@@ -9,6 +9,12 @@ public sealed class DirectoryDouble : IPropertyDirectory
 
     public string? Timezone { get; set; } = "Asia/Qatar";
 
+    /// <summary>What Master Data calls the property — null is a property with no name set.</summary>
+    public string? PropertyName { get; set; } = "Marina";
+
+    /// <summary>Master Data's staff rows by login — the display name a person reads in the bar.</summary>
+    public Dictionary<Guid, string> Staff { get; } = [];
+
     public HashSet<string> Departments { get; } = ["ENG", "HK", "FO"];
 
     public HashSet<Guid> Locations { get; } = [];
@@ -29,6 +35,12 @@ public sealed class DirectoryDouble : IPropertyDirectory
 
     public Task<string?> FindPropertyCodeAsync(Guid propertyId, CancellationToken cancellationToken) =>
         Task.FromResult(PropertyCode);
+
+    public Task<string?> FindPropertyNameAsync(Guid propertyId, CancellationToken cancellationToken) =>
+        Task.FromResult(PropertyName);
+
+    public Task<string?> FindStaffNameAsync(Guid userId, CancellationToken cancellationToken) =>
+        Task.FromResult(Staff.GetValueOrDefault(userId));
 
     public Task<string?> FindTimezoneAsync(Guid propertyId, CancellationToken cancellationToken) =>
         Unreachable.Contains(propertyId)

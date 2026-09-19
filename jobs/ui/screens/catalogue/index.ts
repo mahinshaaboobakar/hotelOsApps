@@ -133,6 +133,12 @@ function newItem(
   doing: (method: string, params: unknown) => void,
   say: (message: string) => void,
 ): HTMLElement {
+  // **APPROVED DEVIATION from page 64 §9** (*"composing happens in a sheet"*;
+  // checklist O7) — APPS-Q27: an owner-locked, countersigned artifact
+  // establishes a surface-specific deviation and does not amend the standard.
+  // The artifact: mockup 01, frame 7 (*New item in Air conditioning*, drawn
+  // inline), owner-locked 2026-09-04, Part A countersigned (APPS-Q18). This
+  // surface only; every other composer follows §9.
   const dlg = el("div", "dlg");
   dlg.append(el("h3", undefined, "New item"));
   const grid = el("div", "cols");

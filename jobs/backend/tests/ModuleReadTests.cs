@@ -136,7 +136,7 @@ public class ModuleReadTests(JobsFixture fixture)
 
         var me = await module.CallAsync(Permissions.Read, "me");
         Assert.Equal(200, me.Status);
-        Assert.NotEmpty(me.Text("where"));
+        Assert.NotEmpty(me.Text("property"));
     }
 
     [Fact]
@@ -181,6 +181,40 @@ public class ModuleReadTests(JobsFixture fixture)
         Assert.Equal(2, answer.At("rows").GetArrayLength());
         Assert.Equal(3, answer.At("paging").GetProperty("total").GetInt32());
         Assert.Equal(2, answer.At("paging").GetProperty("pageSize").GetInt32());
+    }
+
+    [Fact]
+    public async Task Me_names_the_person_and_the_property_and_leaves_the_department_unestablished()
+    {
+        // Page 64 §3: `name · department · property`. Room Care's reading is the
+        // precedent (the architect, 2026-09-19): the name is Master Data's staff
+        // row for the signed-in login, the property its name before its code.
+        // The department is ADR 0203's to establish — Jobs spans departments and
+        // has no posting to read — so it is absent, never a stand-in.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        module.Data.Directory.PropertyName = "Marina Bay";
+        module.Data.Directory.Staff[module.Caller] = "Priya Nair";
+
+        var me = await module.CallAsync(Permissions.Read, "me");
+
+        Assert.Equal(200, me.Status);
+        Assert.Equal("Priya Nair", me.Text("name"));
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, me.At("department").ValueKind);
+        Assert.Equal("Marina Bay", me.Text("property"));
+    }
+
+    [Fact]
+    public async Task Me_says_nothing_it_does_not_know_and_falls_back_to_the_code()
+    {
+        // No staff row for this login and no property name: no name at all —
+        // never "Signed in", which read as one — and the code, as Room Care does.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        module.Data.Directory.PropertyName = null;
+
+        var me = await module.CallAsync(Permissions.Read, "me");
+
+        Assert.Equal(System.Text.Json.JsonValueKind.Null, me.At("name").ValueKind);
+        Assert.Equal("MRN", me.Text("property"));
     }
 
     [Fact]

@@ -114,16 +114,25 @@ public static class ReadCapability
     /// Who is signed in, as the service knows them.
     /// </summary>
     /// <remarks>
-    /// The caller is established — the envelope validated their token — so the
-    /// person's id is a fact. Their <i>name</i> is Workforce's and there is no
-    /// client, so the header says where they are rather than inventing who they
-    /// are: the audit's finding about a fabricated operator name is why.
+    /// <para>
+    /// Page 64 §3's three clauses, read as Room Care reads them (the architect's
+    /// direction, 2026-09-19): the name from Master Data's staff row for this
+    /// login, the property by name and else by code.
+    /// </para>
+    /// <para>
+    /// <b>The department is not established, and is sent as null.</b> Room Care
+    /// can name one because it is one department; Jobs spans them, and which a
+    /// person is posted to is the Context change ADR 0203 is to make (CTX-Q9).
+    /// </para>
     /// </remarks>
     private static async Task<object?> MeAsync(
         IServiceProvider services, ModuleRequest request, CancellationToken cancellationToken)
     {
         var directory = services.GetRequiredService<IPropertyDirectory>();
-        var code = await directory.FindPropertyCodeAsync(request.Scope.PropertyId, cancellationToken);
-        return new ModuleViews.OperatorView("Signed in", code is null ? "this property" : code.ToUpperInvariant());
+        var property = request.Scope.PropertyId;
+        var name = request.Scope.UserId is { } user ? await directory.FindStaffNameAsync(user, cancellationToken) : null;
+        var called = await directory.FindPropertyNameAsync(property, cancellationToken)
+            ?? (await directory.FindPropertyCodeAsync(property, cancellationToken))?.ToUpperInvariant();
+        return new ModuleViews.OperatorView(name, Department: null, called);
     }
 }

@@ -164,6 +164,10 @@ function ladderStep(): HTMLElement {
     box.append(fill(el("div", "row"), control("btn sm", "＋ step"), el("span", "mono", "drag to reorder")));
     grid.append(box);
   }
+  // **APPROVED DEVIATION from page 64 §9** (*"composing happens in a sheet"*;
+  // checklist O7) — APPS-Q27, as the Catalogue's New item: mockup 02, the
+  // ladder frame (*Add a step to P1*, drawn inline), owner-locked 2026-09-04,
+  // Part A countersigned (APPS-Q18). This surface only.
   const dlg = el("div", "dlg");
   dlg.append(el("h3", undefined, "Add a step to P1"), el("label", "lbl", "Role"), el("div", "field", "Department manager ▾"), el("label", "lbl", "Becomes accountable"), el("div", "field", "when breached ▾ + 15 min"),
     fill(el("div", "row"), unavailable("Add", "Adding a step is not built yet.")));

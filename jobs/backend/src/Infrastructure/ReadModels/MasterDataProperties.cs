@@ -17,8 +17,9 @@ namespace HotelOS.Jobs.Infrastructure.ReadModels;
 /// <c>hotelos_app_jobs</c>. Workforce met the same refusal on the same day.
 /// </para>
 /// <para>
-/// <b>Four columns, and only four.</b> Everything a job needs of a property: the
-/// organisation it belongs to, the code that prefixes a job number, and the
+/// <b>Five columns, and only five.</b> Everything a job needs of a property: the
+/// organisation it belongs to, the code that prefixes a job number, the name the
+/// bar's identity clause reads (page 64 §3, as Room Care reads it), and the
 /// timezone every displayed instant is rendered in. A read model that mirrored
 /// the property would drift into being a copy of master data, which the
 /// constitution forbids — this application may <i>read</i> master data and may
@@ -38,6 +39,8 @@ public sealed class MasterDataProperty
     public Guid OrganizationId { get; set; }
 
     public string Code { get; set; } = string.Empty;
+
+    public string Name { get; set; } = string.Empty;
 
     public string Timezone { get; set; } = string.Empty;
 }

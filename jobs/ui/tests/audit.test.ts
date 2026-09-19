@@ -342,10 +342,10 @@ describe("the header's operator", () => {
   });
 
   it("draws the person the platform named, once it has", async () => {
-    const root = mount(host({ ...live(), me: { name: "Rohan Desai", where: "property jobs manager" } }));
+    const root = mount(host({ ...live(), me: { name: "Rohan Desai", department: "Engineering", property: "Marina" } }));
     await settle();
     await settle();
-    expect(root.querySelector(".who")?.textContent).toBe("Rohan Desai · property jobs manager");
+    expect(root.querySelector(".who")?.textContent).toBe("Rohan Desai · Engineering · Marina");
   });
 });
 
