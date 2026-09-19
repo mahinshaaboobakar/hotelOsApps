@@ -78,9 +78,14 @@ describe("app surface checklist — automated lines, Jobs", () => {
     expect(who?.querySelector(".unset")?.textContent, "the gap is marked as a gap, not as a value").toBe("department not established");
   });
 
-  it("N5 — a name nobody established is not drawn, and nothing stands in for it", async () => {
-    const root = await mounted(host({ ...ANSWERS, me: { name: null, department: null, property: "MRN" } }));
-    expect(root.querySelector(".head .who")?.textContent).toBe("department not established · MRN");
+  it("N5 — a name Master Data does not hold is said, in the name's place, and nothing stands in for it", async () => {
+    // Room Care's reading (df8d44f): the clause is never dropped, so two clauses
+    // never pass for three. Null and blank are the same unknown.
+    for (const name of [null, "", "   "]) {
+      const root = await mounted(host({ ...ANSWERS, me: { name, department: null, property: "MRN" } }));
+      expect(root.querySelector(".head .who")?.textContent).toBe("no name in Master Data · department not established · MRN");
+      expect(root.querySelector(".head .who .unset")?.textContent).toBe("no name in Master Data");
+    }
   });
 
   it("C8 — a board row that opens a job is reachable as a real button", async () => {

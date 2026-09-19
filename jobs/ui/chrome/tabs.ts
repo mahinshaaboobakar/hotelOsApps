@@ -48,12 +48,15 @@ export function head(
  * clause Room Care does not have: Jobs spans departments and has no posting to
  * read until ADR 0203, so the department is said to be **not established**, in
  * words, rather than dropped (which would read as two clauses by design) or
- * filled with a stand-in (which would read as a fact). A missing name or
+ * filled with a stand-in (which would read as a fact). A name Master Data does
+ * not hold — no staff record for the login, or a blank one — is said in the
+ * name's place, as Room Care says it (df8d44f), for the same reason. A missing
  * property is dropped, as Room Care drops it.
  */
 function who(operator: Operator): HTMLElement {
   const parts: (string | HTMLElement)[] = [];
-  if (operator.name) parts.push(operator.name);
+  const name = operator.name?.trim() ?? "";
+  parts.push(name === "" ? el("span", "unset", "no name in Master Data") : name);
   parts.push(operator.department ? operator.department : el("span", "unset", "department not established"));
   if (operator.property) parts.push(operator.property);
 
