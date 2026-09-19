@@ -177,10 +177,10 @@ One bucket per line; the five add to 86.
 |---|---|---|---|
 | H1 | PASS | T | the harness injects exactly the published set (`tokens.test.ts`) |
 | H2 | PASS | C · the paged frames | the Board frame draws a full page (*1–12 of 47*); no paged frame draws fewer rows than its count |
-| H3 | **FAIL — drawn for the owner** | frames | mockups 01 and 02 draw 65 dates and name no locale for them. Revision in `06-the-frame-revision.html`: every date through the SDK in en-GB · Asia/Qatar, labelled; four dates carried 2025's weekday; two shapes no SDK style draws (D1, D2) are the owner's |
+| H3 | **FAIL → fixed by redline 6** (`c7ebc945`) | frames | mockups 01 and 02 draw 65 dates and name no locale for them. Revision in `06-the-frame-revision.html`: every date through the SDK in en-GB · Asia/Qatar, labelled; four dates carried 2025's weekday; two shapes no SDK style draws (D1, D2) are the owner's |
 | H4 | PASS | T | the drive withholds *ready* on a missed step (`frame.ts`) |
 | H5 | PASS | T | the harness rejects a route it does not answer; the screen draws the failure, never a stand-in |
-| H6 | **FAIL — drawn for the owner** | frames | both frames' `:root` declare 13 names of their own beside the published 19 (`--bad --bg --cyan --defer --dim --faint --glass --grad --indigo --line --ok --text --violet --warn`) |
+| H6 | **FAIL → fixed by redline 6** (`c7ebc945`) | frames | both frames' `:root` declare 13 names of their own beside the published 19 (`--bad --bg --cyan --defer --dim --faint --glass --grad --indigo --line --ok --text --violet --warn`) |
 
 ## Routed, not fixed — each needs a decision that is not Jobs'
 

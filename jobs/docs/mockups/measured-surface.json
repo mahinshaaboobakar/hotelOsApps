@@ -300,7 +300,16 @@
         "missing": true
       },
       "mono": {
-        "missing": true
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
+        "font-size": "12px",
+        "line-height": "19.8px",
+        "color": "rgb(139, 147, 167)",
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -316,14 +325,14 @@
         "text": "clock stopped"
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,
@@ -469,19 +478,19 @@
         "missing": true
       },
       "note": {
-        "width": 1396,
-        "height": 40,
-        "top": 210,
-        "bottom": 250,
-        "scrollHeight": 40,
-        "clientHeight": 40,
+        "missing": true
+      },
+      "mono": {
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
         "font-size": "12px",
         "line-height": "19.8px",
         "color": "rgb(139, 147, 167)",
-        "text": "Your departments are not established here — a person's posti"
-      },
-      "mono": {
-        "missing": true
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -490,14 +499,14 @@
         "missing": true
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,
@@ -643,19 +652,19 @@
         "missing": true
       },
       "note": {
-        "width": 1396,
-        "height": 40,
-        "top": 210,
-        "bottom": 250,
-        "scrollHeight": 40,
-        "clientHeight": 40,
+        "missing": true
+      },
+      "mono": {
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
         "font-size": "12px",
         "line-height": "19.8px",
         "color": "rgb(139, 147, 167)",
-        "text": "Your departments are not established here — a person's posti"
-      },
-      "mono": {
-        "missing": true
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -664,14 +673,14 @@
         "missing": true
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,
@@ -834,7 +843,16 @@
         "missing": true
       },
       "mono": {
-        "missing": true
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
+        "font-size": "12px",
+        "line-height": "19.8px",
+        "color": "rgb(139, 147, 167)",
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -843,14 +861,14 @@
         "missing": true
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,
@@ -1013,7 +1031,16 @@
         "missing": true
       },
       "mono": {
-        "missing": true
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
+        "font-size": "12px",
+        "line-height": "19.8px",
+        "color": "rgb(139, 147, 167)",
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -1029,14 +1056,14 @@
         "text": "clock stopped"
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,
@@ -4360,7 +4387,16 @@
         "missing": true
       },
       "mono": {
-        "missing": true
+        "width": 323,
+        "height": 20,
+        "top": 137,
+        "bottom": 157,
+        "scrollHeight": 20,
+        "clientHeight": 20,
+        "font-size": "12px",
+        "line-height": "19.8px",
+        "color": "rgb(139, 147, 167)",
+        "text": "My departments: your departments aren't known yet"
       },
       "hint": {
         "missing": true
@@ -4376,14 +4412,14 @@
         "text": "clock stopped"
       },
       "who": {
-        "width": 141,
+        "width": 234,
         "height": 18,
         "top": 19,
         "bottom": 37,
         "scrollHeight": 18,
         "clientHeight": 18,
         "color": "rgb(139, 147, 167)",
-        "text": "Priya Nair · ENG supervisor"
+        "text": "Priya Nair · department not known yet · MRN"
       },
       "tbl": {
         "width": 1440,

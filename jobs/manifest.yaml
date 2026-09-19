@@ -106,6 +106,20 @@ name: "Jobs"
 # name, as Room Care reads them; the department is drawn as *not established*
 # until ADR 0203 gives Jobs a posting to read. Also in it: the two inline
 # composers labelled as APPS-Q27 deviations (comments, no behaviour).
+#
+# And three more changes a person sees, all from the owner's rulings of
+# 2026-09-19:
+#
+#   * **No developer note on any screen.** Design-section references, an ADR,
+#     a service's name and a data source were built as UI in nine places; they
+#     are gone or said in plain words, and a walk of every screen guards it.
+#     The Access tab loses its "Comes from" column.
+#   * **My departments is drawn off** with "your departments aren't known yet",
+#     and the Board opens on All departments. It always answered no rows; the
+#     paragraph that explained why was the clipped notice in the owner's
+#     screenshot, and it is gone.
+#   * **Redline 6's dates:** a day is "03 Sept", the strip's time "02 Sept,
+#     14:24". A name Master Data does not hold reads "no name on record".
 version: 0.4.3
 publisher: hotelos
 category: operations
