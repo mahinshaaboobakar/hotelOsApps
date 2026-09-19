@@ -86,9 +86,17 @@ export interface Waiting {
   accepted?: string | null;
 }
 
-/** The swap the approver has open — its three steps, and both cells. */
+/**
+ * The swap the approver has open — its three steps, and both cells.
+ *
+ * **Nothing produces one yet.** `LeaveView.Board` sends `swap: null` on every
+ * call, because no proposal is open until somebody picks one and nothing on
+ * the wire picks one. This is the shape the card draws when one arrives; it is
+ * not evidence that one does.
+ */
 export interface SwapDetail {
-  when: string;
+  /** The day both cells change, as an ISO date — the screen writes it (ADR 0175). */
+  on: string;
   proposer: string;
   colleague: string;
 
@@ -115,7 +123,9 @@ export interface LeaveBoard {
   balances: readonly Balance[];
   requests: readonly LeaveRow[];
   waiting: readonly Waiting[];
-  swap: SwapDetail;
+
+  /** The open proposal — null, which is what the service sends every time. */
+  swap: SwapDetail | null;
 }
 
 export const recordedLeave: LeaveBoard = {
@@ -170,16 +180,8 @@ export const recordedLeave: LeaveBoard = {
     },
   ],
 
-  swap: {
-    when: "Thursday 27 August",
-    proposer: "Anjali Menon",
-    colleague: "Sneha Iyer",
-    proposerWhere: "Receptionist · Zone 3",
-    colleagueWhere: "Receptionist · Zone 2",
-    proposerShifts: ["A", "M"],
-    colleagueShifts: ["M", "A"],
-    provenance:
-      "Anjali proposed it on 24 Aug, 18:40, from My Schedule. "
-      + "Sneha accepted on 24 Aug, 19:02. Your approval commits both cells at once.",
-  },
+  // What the service sends (`LeaveView.cs`, `swap = null`). This carried a whole
+  // open proposal the wire has never produced, so the Approvals tab rendered
+  // only here and threw on every real property.
+  swap: null,
 };

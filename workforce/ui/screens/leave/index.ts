@@ -11,7 +11,7 @@ import { control, el } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type LeaveBoard } from "../../roster/leave";
-import { queue, swapCard } from "./approvals";
+import { noSwap, queue, swapCard } from "./approvals";
 import { requestForm } from "./form";
 import { balances, requests } from "./requests";
 
@@ -52,7 +52,8 @@ export async function leave(
     // simply could not be reached, which is the worst shape a layout
     // divergence takes.
     const split = el("div", "asplit");
-    split.append(queue(board.waiting, host.property), swapCard(board.swap));
+    split.append(queue(board.waiting, host.property),
+      board.swap === null ? noSwap() : swapCard(board.swap, host.property));
     body.append(split);
   } else {
     body.append(balances(board.balances, host.property), requests(board.requests, host.property));

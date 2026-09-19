@@ -109,8 +109,6 @@ const FIGURE = { selector: ".wvalue", why: "Figure.value is a string the service
 const ROW_VALUE = { selector: ".wfig", why: "SummaryRow.value is a string the service formatted" };
 
 const OWED: Record<string, readonly { selector: string; why: string }[]> = {
-  "leave · approvals": [{ selector: ".agrid > .rhd:first-child",
-    why: "SwapDetail.when is a composed date (\"Thursday 27 August\"), split for the heading" }],
   schedule: [
     { selector: ".mpush", why: "Schedule.balance is a composed sentence (\"4 of 8 casual remaining\")" },
     { selector: ".cduty.tail", why: "ScheduleDay.tail is a composed clock (\"…08:00\")" },

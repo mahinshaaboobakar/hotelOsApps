@@ -62,12 +62,12 @@ export function queue(items: readonly Waiting[],
  * never commit somebody who did not agree, so the strip shows exactly where the
  * proposal stands rather than presenting it as a fresh decision.
  */
-export function swapCard(swap: SwapDetail): HTMLElement {
+export function swapCard(swap: SwapDetail, property: PropertyEnvironment): HTMLElement {
   const card = el("div", "swap");
 
   const title = el("div");
   title.append(
-    el("div", "ht", `Shift swap · ${swap.when}`),
+    el("div", "ht", `Shift swap · ${formatDay(swap.on, property, "day-month-year")}`),
     el("div", "hsub", `Proposed by ${swap.proposer} · accepted by ${swap.colleague}`),
   );
 
@@ -102,45 +102,20 @@ export function swapCard(swap: SwapDetail): HTMLElement {
     unavailable("btn", "Decline…", "Swaps cannot be decided here yet."),
     unavailable("btn pri", "Approve swap", "Swaps cannot be decided here yet."));
 
-  card.append(title, steps, pair, preview(swap), note, atomic, acts);
+  // **No "day after" grid.** There was one — the day's four shift columns, the
+  // two people placed into them, and an "Also on duty" row — and every name in
+  // it but the two was a literal ("Vishnu", "Priya", "Joseph"), under column
+  // names that were the drawing's rather than the property's catalogue. Nothing
+  // on the wire says who else is on that day, so the row could only ever be
+  // invented (owner ruling, 2026-09-09: no fabricated rows). The two cells the
+  // swap changes are the chips above, before and after.
+  card.append(title, steps, pair, note, atomic, acts);
   return card;
 }
 
-/**
- * The day after the swap, before anybody agrees to it.
- *
- * **The two-cell atomic exchange, shown rather than described.** Approval writes
- * both cells together, so what an approver needs is the shift the day ends up
- * in — not a sentence promising it. A decision surface that described its own
- * effect and did not draw it is the one somebody approves twice to see what
- * happened.
- */
-function preview(swap: SwapDetail): HTMLElement {
-  const box = el("div", "after");
-
-  const grid = el("div", "agrid");
-  for (const heading of [swap.when.split(" ").slice(-2).join(" "),
-    "Morning", "Afternoon", "Night", "Cover"]) {
-    grid.append(el("div", "rhd", heading));
-  }
-
-  // After: the proposer takes what the colleague held, and the reverse.
-  grid.append(el("div", "alab", "After the swap"));
-  grid.append(
-    el("div", "acell", swap.proposerShifts[1] === "M" ? swap.proposer.split(" ")[0] ?? "" : ""),
-    el("div", "acell", swap.colleagueShifts[1] === "A" ? swap.colleague.split(" ")[0] ?? "" : ""),
-    el("div", "acell", "Vishnu"),
-    el("div", "acell dim", "—"),
-  );
-
-  grid.append(el("div", "alab", "Also on duty"));
-  grid.append(
-    el("div", "acell", "Priya"), el("div", "acell", "Joseph"),
-    el("div", "acell dim", "—"), el("div", "acell dim", "—"),
-  );
-
-  box.append(grid);
-  return box;
+/** Where the open swap would be, when none is — which is always, today. */
+export function noSwap(): HTMLElement {
+  return el("div", "note", "No swap is open.");
 }
 
 /** One side of the exchange, before and after. */

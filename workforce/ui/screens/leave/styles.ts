@@ -41,17 +41,4 @@ export const LEAVE_CSS = `
 .move{display:flex;gap:8px;align-items:center;font-size:12.5px;
       color:var(--color-ink-muted,#8b93a7);margin-top:4px}
 .arrow{display:grid;place-items:center;font-size:16px;color:var(--color-ink-faint,#5a6172)}
-
-.warnrow{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:8px;
-         font-size:12px;line-height:1.6;
-         background:color-mix(in srgb, var(--color-warn) 10%, transparent);
-         color:var(--color-warn,#fbbf24)}
-
-.after{border-top:1px solid var(--color-line,rgb(255 255 255/.07));padding-top:12px}
-.agrid{display:grid;grid-template-columns:130px repeat(4,1fr);gap:6px;align-items:center}
-.alab{font-size:11.5px;color:var(--color-ink-muted,#8b93a7)}
-.acell{padding:6px 9px;border-radius:8px;font-size:12px;
-       background:var(--color-surface,#0b0d14);
-       border:1px solid var(--color-line,rgb(255 255 255/.07))}
-.acell.dim{color:var(--color-ink-faint,#5a6172);background:transparent;border-style:dashed}
 `;
