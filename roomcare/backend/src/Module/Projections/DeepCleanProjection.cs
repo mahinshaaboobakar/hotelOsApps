@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Days;
@@ -55,12 +56,13 @@ public sealed class DeepCleanProjection(RoomCareDbContext db, IHouse house, Prop
 
         var ordered = rows.OrderBy(r => r.Row.State == "DUE" ? 1 : 0).ThenBy(r => r.Due).Select(r => r.Row).ToList();
         var monthEnd = new DateOnly(today.Year, today.Month, 1).AddMonths(1);
+        var slice = HotelOS.Platform.Paging.Of(new PagedRequest { Page = page, PageSize = PageSize });
         return new DeepCleanPageView(
             rows.Count(r => r.Row.State == "DUE" && r.Due < monthEnd),
             ordered.Count(r => r.State is DeepCleanStatus.BlockRequested or DeepCleanStatus.Blocked or DeepCleanStatus.Planned),
             ordered.Count(r => r.State is DeepCleanStatus.InProgress or DeepCleanStatus.Returning),
             plans.Values.Select(p => new PlanLineView(snapshot.Types.TryGetValue(p.RoomTypeId, out var t) ? t.Name : "—", p.EveryMonths)).ToList(),
-            ordered.Skip(Math.Max(0, page) * PageSize).Take(PageSize).ToList(),
-            new Views.Paging(Math.Max(0, page), PageSize, ordered.Count));
+            ordered.Skip(slice.Skip).Take(slice.PageSize).ToList(),
+            new Views.Paging(slice.Page, slice.PageSize, ordered.Count));
     }
 }

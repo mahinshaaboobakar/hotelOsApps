@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Days;
@@ -34,14 +35,15 @@ public sealed class WorkProjection(RoomCareDbContext db, IHouse house, PropertyC
             rows.Add(await RowAsync(snapshot, day, task, cancellationToken));
         }
 
+        var slice = HotelOS.Platform.Paging.Of(new PagedRequest { Page = page, PageSize = PageSize });
         return new MyRoomsView(
             mine.Count,
             mine.Count(t => t.Outcome is TaskOutcome.Done or TaskOutcome.SupervisorCleaned),
             mine.Count(t => t.Status == RoomTaskStatus.InProgress),
             mine.Sum(t => t.MinutesExpected + t.ExtraMinutes),
             day.Now.Instant.ToString("o"),
-            rows.Skip(Math.Max(0, page) * PageSize).Take(PageSize).ToList(),
-            new Views.Paging(Math.Max(0, page), PageSize, rows.Count));
+            rows.Skip(slice.Skip).Take(slice.PageSize).ToList(),
+            new Views.Paging(slice.Page, slice.PageSize, rows.Count));
     }
 
     public async Task<DoorView> DoorAsync(RequestScope scope, Guid taskId, CancellationToken cancellationToken)

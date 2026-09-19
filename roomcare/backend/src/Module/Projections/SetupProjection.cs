@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Standard;
@@ -76,8 +77,9 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
                 : new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, [], null, false, 0))
             .ToList();
         var shown = withoutRoutine ? rows.Where(r => !r.Enabled || r.Times.Count == 0).ToList() : rows;
+        var slice = HotelOS.Platform.Paging.Of(new PagedRequest { Page = page, PageSize = AreaPageSize });
         return new AreasView(areas.Count, rows.Count(r => r.Enabled && r.Times.Count > 0),
-            shown.Skip(Math.Max(0, page) * AreaPageSize).Take(AreaPageSize).ToList(), new Views.Paging(Math.Max(0, page), AreaPageSize, shown.Count));
+            shown.Skip(slice.Skip).Take(slice.PageSize).ToList(), new Views.Paging(slice.Page, slice.PageSize, shown.Count));
     }
 
     public async Task<DeepCleanPlanView> PlanAsync(RequestScope scope, CancellationToken cancellationToken)

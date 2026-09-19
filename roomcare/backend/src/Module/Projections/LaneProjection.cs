@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Days;
@@ -41,13 +42,13 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
         rows.AddRange(disagreements.Select(s => Disagreement(snapshot, day, s)));
         rows.AddRange(decided.Select(s => Row(snapshot, day, s, deciders.GetValueOrDefault(s.DecidedByUserId!.Value), earlier)));
 
-        var size = PageSize;
+        var slice = HotelOS.Platform.Paging.Of(new PagedRequest { Page = page, PageSize = PageSize });
         return new SupervisionView(
             open.Count + disagreements.Count,
             decided.Count,
             day.Now.Instant.ToString("o"),
-            rows.Skip(Math.Max(0, page) * size).Take(size).ToList(),
-            new Views.Paging(Math.Max(0, page), size, rows.Count));
+            rows.Skip(slice.Skip).Take(slice.PageSize).ToList(),
+            new Views.Paging(slice.Page, slice.PageSize, rows.Count));
     }
 
     /// <summary>One earlier day's service on a room — what the lane tells the supervisor about the days before.</summary>

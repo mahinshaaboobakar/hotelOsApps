@@ -1,3 +1,4 @@
+using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Day;
@@ -39,8 +40,8 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
             ? []
             : await db.Observations.Where(o => o.PropertyId == scope.PropertyId && o.RecordedAt > run.At).OrderBy(o => o.RecordedAt).ToListAsync(cancellationToken);
         var states = await db.RoomStates.Where(r => r.PropertyId == scope.PropertyId).ToDictionaryAsync(r => r.RoomId, cancellationToken);
-        var size = Math.Max(1, PageSize);
-        var shown = changes.Skip(Math.Max(0, page) * size).Take(size)
+        var slice = HotelOS.Platform.Paging.Of(new PagedRequest { Page = page, PageSize = PageSize });
+        var shown = changes.Skip(slice.Skip).Take(slice.PageSize)
             .Select(o => Change(snapshot, o, states.GetValueOrDefault(o.RoomId), tasks.FirstOrDefault(t => t.RoomId == o.RoomId), policy, window.Window, day))
             .ToList();
         var byName = run?.ById is { } by ? (await house.NamesAsync([by], cancellationToken)).GetValueOrDefault(by) : null;
@@ -56,7 +57,7 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
             policy.TriggerMode,
             now.Instant.ToString("o"),
             shown,
-            new Views.Paging(Math.Max(0, page), size, changes.Count),
+            new Views.Paging(slice.Page, slice.PageSize, changes.Count),
             await ProposalAsync(snapshot, tasks, policy, scope.PropertyId, cancellationToken));
     }
 
