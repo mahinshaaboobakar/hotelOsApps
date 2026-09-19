@@ -51,23 +51,13 @@ import { readable, SURFACES, surfaceHost } from "./surfaces";
  * `scripts/developer-content.ts` (15e2654), which this check was merged into
  * (architect, 2026-09-19).
  *
- * **One shape stays here until it can move**: the platform systems by name.
- * The owner's ruling covers them, but in the shared list they would turn Jobs'
- * and Room Care's suites red on lines that are theirs to clear; the script's
- * header names those lines. When they are cleared, this list moves there and
- * `found` becomes one call.
+ * The platform systems by name were kept here as a local list until the
+ * lines that would have turned Room Care red were cleared. They joined the
+ * shared list in `0681839`, so the local copy is gone: two copies of one
+ * pattern would report every system name twice, and drift.
  */
-const SYSTEMS: readonly (readonly [string, RegExp])[] = [
-  ["a platform system", /\b(?:Master Data|Kernel|OpenFGA|Context Service|Integration Hub)\b/g],
-];
-
 function found(root: HTMLElement): string[] {
-  const text = readableText(readable(root));
-  return [
-    ...developerContent(text),
-    ...SYSTEMS.flatMap(([what, pattern]) =>
-      [...text.matchAll(pattern)].map((match) => `${what}: ${match[0]}`)),
-  ];
+  return developerContent(readableText(readable(root)));
 }
 
 const host = surfaceHost("en-GB");
