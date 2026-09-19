@@ -12,6 +12,37 @@
 # owner-locked 2026-09-05 and re-locked 2026-09-13.
 #
 # `files:` is a placeholder the packager fills after the payload is published.
+#
+# **0.1.4 — the first Room Care the owner installs.** 0.1.2 and 0.1.3 were
+# only ever on the shelf. Everything since 0.1.3 (`16bdeed`) that a person
+# meets, from the owner's rulings of 2026-09-19 and the page-64 audit:
+#
+#   * **A name the staff record does not hold** reads "no name on record" in
+#     the bar, never a stand-in name, and never the name of a system.
+#   * **Access that could not be checked** says so, and says nothing was
+#     refused; it no longer reads "not permitted".
+#   * **Nothing looks live and does nothing.** A walk presses every control on
+#     every screen. It found the Zone chips (now the words "grouped by zone"),
+#     Discard and Apply to selected with nothing to act on (now drawn off with
+#     their reason), and My rooms' pager (it went nowhere). **Found this round
+#     rather than by that walk:** the zone headers on the Room states sheet and
+#     Compact showed a hand but folded nothing. The walk only pressed what was
+#     a button, and those headers were table cells. The hand now appears only
+#     on the Board's Wall, where a header folds its zone.
+#   * **A row that opens something has a real button** in its main cell
+#     (APPS-Q50), so a keyboard reaches it: the Wall, Prepare's changes,
+#     Supervision, My rooms and Services.
+#   * **A selection on the Room states sheet is forgotten** when the person
+#     leaves, so a bulk change cannot act on rows nobody is looking at.
+#   * **No developer note on any screen**: no register ids, design sections,
+#     event names, relation ids or system names.
+#   * **Chips are spaced as the owner approved**, 6px beside and below.
+#
+# Still true in 0.1.4, and said here so nobody reads the package as more than
+# it is: assigning rooms and changing a room's service are refused for
+# everyone until the platform can register an installed application's own
+# object types. Prepare, Room states and Supervision are expected not to
+# appear. See `docs/capability-ledger.md`.
 
 manifest_version: 1
 id: roomcare
