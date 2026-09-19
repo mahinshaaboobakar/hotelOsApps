@@ -14,16 +14,39 @@ import { type Week } from "../../roster";
 import type { OvertimeWarning } from "../../roster/model";
 import { formatDay, formatNumber, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
+import { copyWeek, shifted } from "./copy";
 import { grid } from "./grid";
 import { picker } from "./picker";
 import { ribbon } from "./ribbon";
+
+/**
+ * Which week, and whether Copy is being confirmed — the application's state.
+ *
+ * Held by the application rather than here, so the week a person stepped to
+ * survives a redraw, and the read is asked for it.
+ */
+export interface RotaNav {
+  /** Any day of the week to show, or null for the one the service calls current. */
+  week: string | null;
+
+  /** Step to another week — the Monday of the one to open. */
+  onWeek: (monday: string) => void;
+
+  /** Whether the Copy last week dialog is open. */
+  copying: boolean;
+
+  /** Open it. */
+  onCopy: () => void;
+}
+
+const HERE: RotaNav = { week: null, onWeek: () => {}, copying: false, onCopy: () => {} };
 
 /**
  * Draw the rota into `main`.
  *
  * @param host the bridge
  * @param main the screen's container
- * @param fixture the week to fall back to — the harness varies it
+ * @param nav which week, and the copy dialog
  */
 export async function rota(
   host: HostApi,
@@ -32,15 +55,17 @@ export async function rota(
   pick: { person: string; day: number } | null = null,
   onPick: (person: string, day: number) => void = () => {},
   closePick: () => void = () => {},
+  nav: RotaNav = HERE,
 ): Promise<void> {
-  const got = await load<Week>(host, ROSTER_READ, "week");
+  const got = await load<Week>(
+    host, ROSTER_READ, "week", nav.week === null ? undefined : { week: nav.week });
 
   // No fallback - `APPS-Q26(4)`. The `fixture` parameter went with it: a
   // recorded week as a DEFAULT ARGUMENT put the fabrication in the shipped
   // signature, where a caller passing nothing got one without deciding to.
   if (!got.ok) {
     failureScreen(main, "Rota", got.failure, { the: "the team rota" }, host.property,
-      () => void rota(host, main, print, pick, onPick, closePick));
+      () => void rota(host, main, print, pick, onPick, closePick, nav));
     return;
   }
 
@@ -59,7 +84,14 @@ export async function rota(
     body.append(overtime(week, host));
   }
 
-  main.replaceChildren(header(week, host, print), body);
+  main.replaceChildren(header(week, host, print, nav), body);
+
+  // Closed and re-read, as the picker is: the grid is what a copy changes.
+  if (nav.copying) {
+    main.append(copyWeek(host, week, closePick, () => {
+      closePick();
+    }));
+  }
 
   // Over the cell it belongs to, because the week behind it is what makes the
   // choice legible — which shift the person has either side of this day.
@@ -72,7 +104,7 @@ export async function rota(
       // would leave the old cell on screen under a write that landed.
       main.append(picker(host, person, pick.day, week, closePick, () => {
         closePick();
-        void rota(host, main, print, null, onPick, closePick);
+        void rota(host, main, print, null, onPick, closePick, nav);
       }));
     }
   }
@@ -85,7 +117,7 @@ export async function rota(
  * that carried its own totals would eventually disagree with the grid beneath
  * it, and the header is the one a manager reads first.
  */
-function header(week: Week, host: HostApi, print: () => void): HTMLElement {
+function header(week: Week, host: HostApi, print: () => void, nav: RotaNav): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -113,28 +145,34 @@ function header(week: Week, host: HostApi, print: () => void): HTMLElement {
 
   const grow = el("div", "grow");
 
-  // **Three inert controls, and each says which piece is missing.** A control
-  // that looks live and does nothing is worse than one that is absent: a person
-  // presses it. `＋ Assign shift` below is live because the picker it opens
-  // captures everything `assign` requires; these three do not.
+  // **The week and Copy work; Swap is off, and says what is missing.** All
+  // three were dead on the owner's 0.3.3 (2026-09-19).
   //
-  //   ‹ Week ›   one element for two directions. The `week` read accepts an
-  //              anchor, so the call is available — the control is not, and
-  //              splitting it into two arrows is the frame's decision
-  //   Copy       `copyWeek` writes across a whole week and there is no confirm
-  //              surface in front of it. §9 is not optional for that
-  //   Swap       needs two assignments named by id, and `Cell` carries none.
-  //              Both the read and a two-cell selection are missing
-  // Composed here, and the word "Week" appears ONCE. The service sent
-  // "24/08/2026 – 30 Aug Week" — a locale's full short-date pattern, a second
-  // format for the other end, and a word this line was already writing — so a
-  // real property read "… Week  Week" (ADR 0175).
-  const week_ = unavailable("btn",
-    `‹ ${formatDay(week.monday, host.property, "day-month")}`
-    + ` – ${formatDay(week.sunday, host.property, "day-month")} Week ›`,
-    "Other weeks cannot be opened here yet.");
-  const copy = unavailable("btn", "⧉ Copy last week", "A week cannot be copied here yet.");
-  const swap = unavailable("btn", "⇄ Swap", "Swaps cannot be proposed from here yet.");
+  //   ‹ Week ›   one control, as the frame draws it, with the two arrows real
+  //              buttons inside it: the `week` read takes the week to answer
+  //   Copy       `copyWeek` fills empty cells only, and still writes a whole
+  //              week — so it opens a §9 dialog saying so, never acts on a press
+  //   Swap       needs two assignments named by id, and the week read's cells
+  //              carry none (`RotaView.Cell`) — and picking two cells is an
+  //              interaction nobody has drawn. The read and a design are
+  //              missing, so it stays off with that reason
+  //
+  // The range is composed here, and the word "Week" appears ONCE. The service
+  // sent "24/08/2026 – 30 Aug Week" — a locale's full short-date pattern, a
+  // second format for the other end, and a word this line was already writing
+  // — so a real property read "… Week  Week" (ADR 0175).
+  const week_ = el("div", "wknav");
+  week_.append(
+    step("‹", "Previous week", () => { nav.onWeek(shifted(week.monday, -7)); }),
+    el("span", undefined,
+      `${formatDay(week.monday, host.property, "day-month")}`
+      + ` – ${formatDay(week.sunday, host.property, "day-month")} Week`),
+    step("›", "Next week", () => { nav.onWeek(shifted(week.monday, 7)); }),
+  );
+  const copy = control("btn", "⧉ Copy last week", nav.onCopy);
+  const swap = unavailable("btn", "⇄ Swap",
+    "Choosing two cells to exchange is not built — the week does not yet say which "
+    + "assignment each cell holds.");
   const printBtn = control("btn", "⎙ Print", print);
   // Shifts are assigned by picking a cell, which works; this header button
   // was never wired to anything (the app surface audit, 2026-09-19, C8 · C11).
@@ -142,6 +180,15 @@ function header(week: Week, host: HostApi, print: () => void): HTMLElement {
 
   head.append(title, picker, grow, week_, copy, swap, printBtn, assign);
   return head;
+}
+
+/** One arrow of the week control — a real button, named for a screen reader. */
+function step(glyph: string, label: string, go: () => void): HTMLElement {
+  const button = el("button", "wkstep", glyph);
+  button.setAttribute("type", "button");
+  button.setAttribute("aria-label", label);
+  button.addEventListener("click", go);
+  return button;
 }
 
 /**

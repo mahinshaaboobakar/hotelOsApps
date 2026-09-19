@@ -33,18 +33,23 @@ import { type Duty, type Register } from "../../roster/duty";
  * @param host the bridge
  * @param root where it mounts
  * @param back leave the preview
+ * @param anchor the week the rota had open — a day in it — or null for the
+ *   current one. **Both reads ask for it**: once the rota's arrows could step
+ *   to another week, a print that asked for none printed the current week
+ *   under a person who was looking at next week's.
  */
 export async function printed(
-  host: HostApi, root: HTMLElement, back: () => void = () => {},
+  host: HostApi, root: HTMLElement, back: () => void = () => {}, anchor: string | null = null,
 ): Promise<void> {
   // **Both reads, because the page shows both.** The week was already read
   // here; the Manager-on-Duty band was taken from a recorded fixture whatever
   // the service said, so a printed rota could carry a real week over invented
   // duty rows — and paper is exactly where nobody would notice, because there
   // is no live screen beside it to disagree.
+  const asked = anchor === null ? undefined : { week: anchor };
   const [gotWeek, gotDuty] = await Promise.all([
-    load<Week>(host, ROSTER_READ, "week"),
-    load<Register>(host, ROSTER_READ, "register"),
+    load<Week>(host, ROSTER_READ, "week", asked),
+    load<Register>(host, ROSTER_READ, "register", asked),
   ]);
 
   // **Either read failing means no page.** This is paper: a fabricated row
@@ -54,7 +59,7 @@ export async function printed(
   const failed = !gotWeek.ok ? gotWeek : !gotDuty.ok ? gotDuty : null;
   if (failed !== null && !failed.ok) {
     failureScreen(root, "The printed week", failed.failure,
-      { the: "the week to print" }, host.property, () => void printed(host, root, back));
+      { the: "the week to print" }, host.property, () => void printed(host, root, back, anchor));
     return;
   }
 

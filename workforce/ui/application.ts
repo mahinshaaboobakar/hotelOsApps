@@ -109,6 +109,12 @@ interface Place {
 
   /** Turn to a page of a list, 0-based. */
   onPage: (page: number) => void;
+
+  /** Which rota week is open — a day in it — or null for the current one. */
+  week: string | null;
+
+  /** Open another rota week. */
+  onWeek: (monday: string) => void;
 }
 
 /** One view, and the screen it opens. */
@@ -141,7 +147,12 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
         label: "Team rota",
         draw: (h, m, place) => void rota(
           h, m, () => place.open("print"),
-          place.pick, place.onPick, place.close),
+          place.pick, place.onPick, place.close, {
+            week: place.week,
+            onWeek: place.onWeek,
+            copying: place.dialog && place.which === "copy",
+            onCopy: () => { place.open("copy"); },
+          }),
       },
       { label: "Staff schedule", draw: (h, m, place) => void schedule(h, m, place.me) },
     ],
@@ -236,6 +247,8 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let detail: string | null = null;
   let pick: { person: string; day: number } | null = null;
   let who: string | null = null;
+  // The rota week a person stepped to; null asks for the service's current one.
+  let week: string | null = null;
   let page = 0;
   let team: string | null = null;
 
@@ -302,6 +315,8 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       me,
       page,
       onPage: (chosen) => { page = chosen; show(current); },
+      week,
+      onWeek: (monday) => { week = monday; show(current); },
       team,
       // Clicking the open team closes it, which is the only way back to the
       // plain list: neither level of navigation reaches a state it has no
@@ -333,7 +348,8 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       // handed in — a preview a person cannot leave is worse than one whose
       // Print does not work yet.
       root.replaceChildren(style);
-      void printed(host, root, () => { show(current); });
+      // The week the rota has open, so paper and screen are the same week.
+      void printed(host, root, () => { show(current); }, week);
       return;
     }
 

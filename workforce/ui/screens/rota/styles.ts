@@ -10,6 +10,14 @@
 
 export const ROTA_CSS = `
 .rota{display:flex;flex-direction:column;gap:10px;min-width:0}
+/* The week control: the frame's one element, drawn as the chrome's .btn box,
+   with its two arrows real buttons inside it rather than one inert pill. */
+.wknav{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
+       border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
+       border-radius:8px;padding:3px 6px;font-size:13px;color:var(--color-ink,#e8ebf4)}
+.wkstep{cursor:pointer;border-radius:6px;padding:4px 8px;color:var(--color-ink-muted,#8b93a7)}
+.wkstep:hover{color:var(--color-ink,#e8ebf4)}
+.wkstep:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-1px}
 
 .rgrid{display:grid;grid-template-columns:230px repeat(7,1fr);gap:6px;min-width:0}
 /* person, not who: the app bar owns .who for the signed-in person, which
