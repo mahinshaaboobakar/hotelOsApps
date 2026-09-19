@@ -37,13 +37,48 @@
 # with confidence are declared: a model omitted is a model the Gateway will not
 # route to, which is recoverable, while a model declared at a guessed price
 # sorts wrongly against every other rung and nobody finds out from a failure.
+#
+# # Sources — read 2026-09-19, from OpenAI's own documentation only
+#
+#   pricing   https://developers.openai.com/api/docs/pricing
+#   models    https://developers.openai.com/api/docs/models/<model-id>
+#
+# (`platform.openai.com/docs/...` answers 301 to `developers.openai.com`.)
+#
+# **Every figure on the four GPT-5-family lines below was read from both**, and
+# the two agreed. Prices are the pricing page's **Standard** tier, rows labelled
+# "Short context" — no long-context price is published for these four, and the
+# page names no default tier, so the tier is written down rather than assumed.
+#
+# **Re-read on the same date and unchanged:** the prices of `gpt-4o` and
+# `gpt-4o-mini` match the pricing page's Standard rows. Their limits and
+# capabilities, the embedding models and the speech models were NOT re-read in
+# that pass, and the header's warning still applies to them.
+#
+# **How each field was taken, so it can be checked the same way:**
+#
+#   capabilities   only what the model page lists as supported:
+#                    function_calling -> tools · structured_outputs -> json_schema
+#                    streaming -> streaming · image_input -> vision
+#                  `long_context` is NOT declared on any of the four. It is the
+#                  platform's word ("a context window the platform treats as
+#                  large"), not OpenAI's, and no threshold for it is ruled — so
+#                  it is not something OpenAI's documentation can state.
+#   context_limit  the page's "context window", the convention `gpt-4o` uses
+#   max_output     the page's "max output tokens"
+#   latency_class  from the page's own description: `fast` only where it claims
+#                  speed ("low latency", "Fastest"); otherwise `standard`, the
+#                  schema's ordinary case. OpenAI publishes no latency class.
+#   id             the alias the owner named. Each page also lists a dated
+#                  snapshot, quoted on its line; an alias can move to a newer
+#                  snapshot, and a moved alias can move its price.
 
 manifest_version: 1
 kind: provider
 
 id: openai
 name: "OpenAI"
-version: 1.0.0
+version: 1.1.0
 publisher: hotelos
 category: ai
 description: >-
@@ -106,6 +141,70 @@ provider:
       latency_class: fast
       cost_per_input_token: 0.00000015
       cost_per_output_token: 0.0000006
+
+    # ── The GPT-5 family — sources and method in the header, read 2026-09-19 ──
+
+    # gpt-5-mini — snapshot gpt-5-mini-2025-08-07.
+    # "Strong intelligence for cost sensitive, low latency, high volume workloads"
+    # Standard, short context: $0.25 / 1M input, $2.00 / 1M output
+    #   (cached input $0.025 / 1M — not declarable in this schema).
+    # 400,000 context window · 128,000 max output tokens.
+    # Chat Completions: Supported. Features: streaming, function_calling,
+    #   structured_outputs, image_input.
+    - id: gpt-5-mini
+      capabilities: [tools, json_schema, vision, streaming]
+      context_limit: 400000
+      max_output: 128000
+      latency_class: fast
+      cost_per_input_token: 0.00000025
+      cost_per_output_token: 0.000002
+
+    # gpt-5-nano — snapshot gpt-5-nano-2025-08-07.
+    # "Fastest, most cost-efficient version of GPT-5"
+    # Standard, short context: $0.05 / 1M input, $0.40 / 1M output
+    #   (cached input $0.005 / 1M).
+    # 400,000 context window · 128,000 max output tokens.
+    # Chat Completions: Supported. Features: streaming, function_calling,
+    #   structured_outputs, image_input.
+    - id: gpt-5-nano
+      capabilities: [tools, json_schema, vision, streaming]
+      context_limit: 400000
+      max_output: 128000
+      latency_class: fast
+      cost_per_input_token: 0.00000005
+      cost_per_output_token: 0.0000004
+
+    # gpt-5.4-mini — snapshot gpt-5.4-mini-2026-03-17.
+    # "Our strongest mini model yet for coding, computer use, and subagents"
+    #   — no speed claim, so `standard`.
+    # Standard, short context: $0.75 / 1M input, $4.50 / 1M output
+    #   (cached input $0.075 / 1M).
+    # 400,000 context window · 128,000 max output tokens.
+    # Chat Completions: Supported. Features: streaming, structured_outputs,
+    #   function_calling, image_input.
+    - id: gpt-5.4-mini
+      capabilities: [tools, json_schema, vision, streaming]
+      context_limit: 400000
+      max_output: 128000
+      latency_class: standard
+      cost_per_input_token: 0.00000075
+      cost_per_output_token: 0.0000045
+
+    # gpt-5.4-nano — snapshot gpt-5.4-nano-2026-03-17.
+    # "Our cheapest GPT-5.4-class model for simple high-volume tasks"
+    #   — no speed claim, so `standard`.
+    # Standard, short context: $0.20 / 1M input, $1.25 / 1M output
+    #   (cached input $0.02 / 1M).
+    # 400,000 context window · 128,000 max output tokens.
+    # Chat Completions: Supported. Features: streaming, structured_outputs,
+    #   function_calling, image_input.
+    - id: gpt-5.4-nano
+      capabilities: [tools, json_schema, vision, streaming]
+      context_limit: 400000
+      max_output: 128000
+      latency_class: standard
+      cost_per_input_token: 0.0000002
+      cost_per_output_token: 0.00000125
 
     # Published at $0.02 / 1M. Embeddings have no output tokens, so the output
     # cost is a true zero rather than an unknown.

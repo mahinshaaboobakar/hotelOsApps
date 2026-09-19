@@ -74,16 +74,62 @@ listing (ADR 0090 §Q29). The command prints the path back and never the value.
 ## 3 · The catalogue, and why the costs matter more than they look
 
 The degradation ladder **orders by cost**, so these numbers decide what a
-property's money is spent on. Four models are declared:
+property's money is spent on. `manifest.yaml` is the list; this table mirrors it:
 
-| Model | Latency | Published per 1M in / out | For |
-|---|---|---|---|
-| `gpt-4o` | standard | $2.50 / $10.00 | the capable rung |
-| `gpt-4o-mini` | fast | $0.15 / $0.60 | the cheap rung the ladder steps down to |
-| `text-embedding-3-small` | fast | $0.02 / — | retrieval |
-| `text-embedding-3-large` | fast | $0.13 / — | retrieval, when quality beats storage |
+| Model | Latency | Published per 1M in / out | Context · max out | For |
+|---|---|---|---|---|
+| `gpt-4o` | standard | $2.50 / $10.00 | 128,000 · 16,384 | the capable rung |
+| `gpt-4o-mini` | fast | $0.15 / $0.60 | 128,000 · 16,384 | the cheap rung the ladder steps down to |
+| `gpt-5-mini` | fast | $0.25 / $2.00 | 400,000 · 128,000 | GPT-5, low latency |
+| `gpt-5-nano` | fast | $0.05 / $0.40 | 400,000 · 128,000 | the cheapest chat rung declared |
+| `gpt-5.4-mini` | standard | $0.75 / $4.50 | 400,000 · 128,000 | GPT-5.4, coding and agents |
+| `gpt-5.4-nano` | standard | $0.20 / $1.25 | 400,000 · 128,000 | GPT-5.4, simple high-volume |
+| `text-embedding-3-small` | fast | $0.02 / — | 8,191 | retrieval |
+| `text-embedding-3-large` | fast | $0.13 / — | 8,191 | retrieval, when quality beats storage |
+| `whisper-1` | fast | $0.006 per minute | — | speech to text |
+| `tts-1` | fast | $15.00 per 1M characters | — | text to speech |
 
-`gpt-4o-mini` is sixteen times cheaper in, and that is what makes degradation
+*This table said "Four models are declared" until 1.1.0, while the manifest
+declared six — a count in prose goes stale the day the list grows, so it no
+longer carries one.*
+
+### 3.0 Where the GPT-5-family figures come from — read 2026-09-19
+
+Only OpenAI's own documentation, and every figure from two pages that agreed:
+
+```text
+pricing   https://developers.openai.com/api/docs/pricing       Standard tier, "Short context"
+models    https://developers.openai.com/api/docs/models/<id>   context, max output, features
+```
+
+- **Prices are the Standard tier.** The page also lists Batch and Flex at half
+  price, names no default tier, and publishes no long-context price for these
+  four — so the tier is stated, not assumed.
+- **Capabilities are only what each model page lists as supported:**
+  `function_calling` → `tools`, `structured_outputs` → `json_schema`,
+  `streaming` → `streaming`, `image_input` → `vision`. Every one of the four
+  lists Chat Completions as *Supported*, which is the dialect this package speaks.
+- **`long_context` is not declared on any of them**, although each takes
+  400,000 tokens. It is the platform's term — *"a context window the platform
+  treats as large"* — with no ruled threshold, so it is not something OpenAI's
+  documentation can state. (The older lines already disagree about it:
+  `gpt-4o` declares it at 128,000 and `gpt-4o-mini` does not, at the same
+  128,000.)
+- **Latency** comes from each page's own description: `fast` where OpenAI claims
+  speed (*"low latency"*, *"Fastest"*), `standard` otherwise. OpenAI publishes no
+  latency class.
+- **Cached-input prices** exist for all four and have no field in this schema.
+
+**Not established from OpenAI's documentation, and it matters.** The Gateway's
+`openai_chat_completions` dialect sends `max_tokens`. Whether the GPT-5 family
+accepts `max_tokens` on Chat Completions, or requires `max_completion_tokens`,
+could not be read: the Chat Completions API reference answered 403 at
+`platform.openai.com` and 404 at `developers.openai.com`, and the reasoning guide
+does not say. If they refuse it, every call to them comes back
+`refused (client, 400)` and the ladder steps past them — recoverable, and
+visible in §5's taxonomy, rather than a misroute.
+
+`gpt-4o-mini` is sixteen times cheaper in than `gpt-4o`, and that is what makes degradation
 mean something: a cheap rung that is still capable is the difference between
 degrading and refusing.
 
