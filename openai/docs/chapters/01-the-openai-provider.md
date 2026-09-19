@@ -109,12 +109,13 @@ models    https://developers.openai.com/api/docs/models/<id>   context, max outp
   `function_calling` → `tools`, `structured_outputs` → `json_schema`,
   `streaming` → `streaming`, `image_input` → `vision`. Every one of the four
   lists Chat Completions as *Supported*, which is the dialect this package speaks.
-- **`long_context` is not declared on any of them**, although each takes
-  400,000 tokens. It is the platform's term — *"a context window the platform
-  treats as large"* — with no ruled threshold, so it is not something OpenAI's
-  documentation can state. (The older lines already disagree about it:
-  `gpt-4o` declares it at 128,000 and `gpt-4o-mini` does not, at the same
-  128,000.)
+- **`long_context` follows the platform's threshold, not OpenAI's wording** —
+  ADR 0205 (AI-Q30): `long_context` = `context_window >= 128,000` tokens. It is
+  a platform capability with a ruled meaning, so it is derived from each
+  model's context window: `gpt-4o`, `gpt-4o-mini` and the four GPT-5 models
+  declare it, the embedding and speech models do not. *In 1.1.0 it was on
+  `gpt-4o` alone — at the same 128,000 as `gpt-4o-mini` — which is the
+  inconsistency that raised AI-Q30.*
 - **Latency** comes from each page's own description: `fast` where OpenAI claims
   speed (*"low latency"*, *"Fastest"*), `standard` otherwise. OpenAI publishes no
   latency class.

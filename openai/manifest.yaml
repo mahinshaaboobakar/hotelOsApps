@@ -60,10 +60,14 @@
 #   capabilities   only what the model page lists as supported:
 #                    function_calling -> tools · structured_outputs -> json_schema
 #                    streaming -> streaming · image_input -> vision
-#                  `long_context` is NOT declared on any of the four. It is the
-#                  platform's word ("a context window the platform treats as
-#                  large"), not OpenAI's, and no threshold for it is ruled — so
-#                  it is not something OpenAI's documentation can state.
+#                  plus `long_context`, which is NOT OpenAI's word but the
+#                  platform's, with a ruled meaning — ADR 0205 (AI-Q30):
+#                  `long_context` = `context_window >= 128,000` tokens. So it
+#                  follows from `context_limit` below, never from a provider's
+#                  label: gpt-4o and gpt-4o-mini (128,000) and the four GPT-5
+#                  models (400,000) declare it; the embedding and speech models
+#                  do not. Until 1.2.0 it was absent from all but gpt-4o, which
+#                  is the inconsistency that raised AI-Q30.
 #   context_limit  the page's "context window", the convention `gpt-4o` uses
 #   max_output     the page's "max output tokens"
 #   latency_class  from the page's own description: `fast` only where it claims
@@ -78,7 +82,11 @@ kind: provider
 
 id: openai
 name: "OpenAI"
-version: 1.1.0
+# 1.2.0 is NOT built yet. It carries ADR 0205's `long_context` now; its
+# cached-input prices arrive with ADR 0205 part 2 (a declaration.proto and
+# schema change), and the package is cut from a clean export after that —
+# so no archive of this version exists until then, and 1.1.0 is the latest.
+version: 1.2.0
 publisher: hotelos
 category: ai
 description: >-
@@ -135,7 +143,7 @@ provider:
     # cheap rung that is still capable is the difference between degrading and
     # refusing.
     - id: gpt-4o-mini
-      capabilities: [tools, json_schema, vision, streaming]
+      capabilities: [tools, json_schema, vision, streaming, long_context]
       context_limit: 128000
       max_output: 16384
       latency_class: fast
@@ -152,7 +160,7 @@ provider:
     # Chat Completions: Supported. Features: streaming, function_calling,
     #   structured_outputs, image_input.
     - id: gpt-5-mini
-      capabilities: [tools, json_schema, vision, streaming]
+      capabilities: [tools, json_schema, vision, streaming, long_context]
       context_limit: 400000
       max_output: 128000
       latency_class: fast
@@ -167,7 +175,7 @@ provider:
     # Chat Completions: Supported. Features: streaming, function_calling,
     #   structured_outputs, image_input.
     - id: gpt-5-nano
-      capabilities: [tools, json_schema, vision, streaming]
+      capabilities: [tools, json_schema, vision, streaming, long_context]
       context_limit: 400000
       max_output: 128000
       latency_class: fast
@@ -183,7 +191,7 @@ provider:
     # Chat Completions: Supported. Features: streaming, structured_outputs,
     #   function_calling, image_input.
     - id: gpt-5.4-mini
-      capabilities: [tools, json_schema, vision, streaming]
+      capabilities: [tools, json_schema, vision, streaming, long_context]
       context_limit: 400000
       max_output: 128000
       latency_class: standard
@@ -199,7 +207,7 @@ provider:
     # Chat Completions: Supported. Features: streaming, structured_outputs,
     #   function_calling, image_input.
     - id: gpt-5.4-nano
-      capabilities: [tools, json_schema, vision, streaming]
+      capabilities: [tools, json_schema, vision, streaming, long_context]
       context_limit: 400000
       max_output: 128000
       latency_class: standard
