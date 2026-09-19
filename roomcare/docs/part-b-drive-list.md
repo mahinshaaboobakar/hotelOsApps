@@ -23,15 +23,12 @@ two certificates read alike.
 
 A third value is used and is neither pass nor fail:
 
-> **BLOCKED BY AUTHZ-Q37a** — the operation is authorized against Room Care's
-> own object type, `room_task`, which no installable package has ever had
-> registered; it is refused for every caller by construction. Recorded, never
-> scored. **The label is the architect's, relayed 2026-09-19.** The register at
-> `ad4213f0` records AUTHZ-Q37a *ruled* (declared types compile into the
-> installed model; applications never write tuples) and **AUTHZ-Q37b** returned,
-> holding the manifest schema and the model compiler — and Q37b names Room
-> Care's four `roomcare_*` relations on `type property`. Which of the two
-> labels this row carries is asked, not chosen.
+> **BLOCKED — ADR 0193 (ruled, unbuilt)** — the operation is authorized against
+> Room Care's own object type, `room_task`. ADR 0193 rules that an installed
+> application declares the types it owns and the Kernel registers them; the
+> manifest schema (II) and the model composer (CC) that carry it are not built,
+> so nothing registers `room_task` and the check is refused for every caller by
+> construction. Recorded, never scored.
 
 ## Where authorization is enforced — read, not assumed
 
@@ -54,8 +51,9 @@ answers the **first** *Prepare the day* on a property — when no `room_task`
 exists to ask on — with `roomcare.configure` **on the property**. That is an
 assign-gated act answered at property scope, which CLAUDE.md names *"a privilege
 expansion wearing a repair's clothes"*. It was an implementation choice of the
-build (2026-09-13), raised then with the architect; it is not driven here as
-evidence that `roomcare.assign` works, and whether it stays is the architect's.
+build (2026-09-13), now **RC-Q8**, with the planner. The code stays as it is
+until the ruling, and it is not driven here as evidence that `roomcare.assign`
+works.
 
 ## Preconditions, checked at the start and quoted
 
@@ -115,9 +113,9 @@ lists proves the pipe and not the logic, and will say so.
 
 | # | Operation | Status |
 |---|---|---|
-| D1 | `prepare` (a later press) · `acceptProposal` · `assign` · `unassign` | **BLOCKED BY AUTHZ-Q37a** |
-| D2 | `skip` · `defer` · `reduce` · `reprioritise` · `recordOnBehalf` | **BLOCKED BY AUTHZ-Q37a** |
-| D3 | `clearDisagreement` · `decide` · `saveStates` | **BLOCKED BY AUTHZ-Q37a** — asked on the room's latest task |
+| D1 | `prepare` (a later press) · `acceptProposal` · `assign` · `unassign` | **BLOCKED — ADR 0193 (ruled, unbuilt)** |
+| D2 | `skip` · `defer` · `reduce` · `reprioritise` · `recordOnBehalf` | **BLOCKED — ADR 0193 (ruled, unbuilt)** |
+| D3 | `clearDisagreement` · `decide` · `saveStates` | **BLOCKED — ADR 0193 (ruled, unbuilt)** — asked on the room's latest task |
 
 Each is driven once to capture the refusal as evidence, and read back as
 unchanged; none is scored.
