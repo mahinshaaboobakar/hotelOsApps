@@ -7,7 +7,34 @@
 > evidence. **At this run, Room Care is not installed on the owner's platform** (`platform.packages` holds guestops,
 > jobs, openai and workforce), so no live comparison exists yet.
 
-## Run from `07eb133` — the dead controls removed, chip spacing as approved
+## Run from `15e2654` — developer notes removed from the screens
+
+Run 2026-09-19 by KK, **built by the run from `15e2654`, clean** (`module.js` `5b94be02…`), against the frames as
+re-locked at `fff2d96b`. Drawing fidelity only, as above.
+
+```text
+drawn 1,657 · built 1,563 · paired 542 (32.7%) · identical 403 · differing 139
+every one of the 139 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+| Class | n | Moves |
+|---|---|---|
+| sticky-header-ground | 23 | neither |
+| font-shorthand-line-height | 37 | drawing |
+| flex-blockified | 20 | neither |
+| button-type-size | 21 | drawing |
+| selected-row-example | 2 | neither |
+| named, one each | 36 | 27 drawing · 6 neither · 3 adjudicate |
+
+- **Paired fell by 17 (559 → 542)** because the screens no longer render the frames' developer notes: register ids,
+  ADR and design-section citations, event names, correlation ids and the relation id `roomcare_manager` (owner
+  ruling, 2026-09-19). The frames still draw them. They are notes, and the drawing moves by removing them.
+- **One new named difference**, `7g|Property-wide access`, is not a change of style. It is a collision by text: the grant
+  card's key, renamed from `roomcare_manager` to the tab's own words, now pairs with the frame's Setup tab.
+
+## Superseded by `15e2654` — the run from `07eb133`
+
+### Run from `07eb133` — the dead controls removed, chip spacing as approved
 
 Run 2026-09-19 by KK against the frames as re-locked at `fff2d96b`, **built by the run from `07eb133`, clean**
 (`module.js` `36f0e205…`). This is the next cut's source, not 0.1.3.

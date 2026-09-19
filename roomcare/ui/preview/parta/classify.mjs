@@ -81,6 +81,12 @@ const NAMED = new Map([
     + "(3f1cfbd, the owner's 'match', c69fde42), its size differed too."]],
   ["6|Suite", ["adjudicate", "The frame draws this row selected and its cell at 12px; the build draws the table at "
     + "the drawing's own table size, 13px (its line 46). Not settled by the standard."]],
+  // 15e2654 renamed the grant card's key from the relation id `roomcare_manager` (developer content, owner ruling
+  // 2026-09-19) to the tab's own words, so the text key now meets two build nodes and pairs the frame's TAB with
+  // the card's KEY label. A collision, not a style difference; the frame follows when its note is removed.
+  ["7g|Property-wide access", ["neither", "A collision by text: the frame's Setup tab paired with the build's grant-card key, "
+    + "renamed from the relation id roomcare_manager to 'Property-wide access' when developer content left the screens "
+    + "(15e2654). The tab itself is unchanged."]],
   // The pairs the re-lock (65762c95) created: tiles and chips are <button> in frame and build, so they pair for
   // the first time. Each is named on its own, with what it differs in and which side moves (2026-09-19).
   ["1a|Attention", ["drawing", "A chip, a <button> on both sides since the re-lock (65762c95), so it pairs for the first time. Display: the frame's inline-block computes block in the build's flex row (blockified; neither). Spacing: drawn as the chip's own 6px bottom margin, built as the row's 6px gap; nothing rules which (adjudicate); border: --line in the frame, line-strong in the build, and page 64 \u00a72 gives every .btn line-strong (the drawing moves)"]],
