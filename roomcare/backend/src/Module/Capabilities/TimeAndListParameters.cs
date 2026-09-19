@@ -9,19 +9,19 @@ namespace HotelOS.RoomCare.Module.Capabilities;
 public static class TimeAndListParameters
 {
     public static TimeOnly Time(this JsonElement? body, string name) =>
-        OptionalTime(body, name) ?? throw new InvalidRequestException($"{name} must be a time of day, HH:mm");
+        OptionalTime(body, name) ?? throw new InvalidRequestException(ModuleParameters.Unreadable);
 
     public static TimeOnly? OptionalTime(this JsonElement? body, string name) =>
         body.OptionalText(name) is { } text
             ? TimeOnly.TryParseExact(text, ["HH:mm", "HH:mm:ss"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
                 ? time
-                : throw new InvalidRequestException($"{name} must be a time of day, HH:mm")
+                : throw new InvalidRequestException(ModuleParameters.Unreadable)
             : null;
 
     public static DateOnly Date(this JsonElement? body, string name) =>
         DateOnly.TryParseExact(body.Text(name), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day)
             ? day
-            : throw new InvalidRequestException($"{name} must be a date, yyyy-MM-dd");
+            : throw new InvalidRequestException(ModuleParameters.Unreadable);
 
     /// <summary>An instant, which must carry its offset — <c>Z</c> or <c>±hh:mm</c>.</summary>
     /// <remarks>
@@ -35,12 +35,12 @@ public static class TimeAndListParameters
         var text = body.Text(name);
         if (!OffsetAtEnd.IsMatch(text))
         {
-            throw new InvalidRequestException($"{name} must be an ISO 8601 instant with its offset (Z or ±hh:mm)");
+            throw new InvalidRequestException(ModuleParameters.Unreadable);
         }
 
         return DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
             ? at
-            : throw new InvalidRequestException($"{name} must be an ISO 8601 instant with its offset (Z or ±hh:mm)");
+            : throw new InvalidRequestException(ModuleParameters.Unreadable);
     }
 
     private static readonly System.Text.RegularExpressions.Regex OffsetAtEnd = new(@"T.*(Z|[+-][0-9]{2}:[0-9]{2})$");
@@ -60,12 +60,12 @@ public static class TimeAndListParameters
         };
 
     public static IReadOnlyList<Guid> Ids(this JsonElement? body, string name) =>
-        body.Texts(name).Select(t => Guid.TryParse(t, out var id) && id != Guid.Empty ? id : throw new InvalidRequestException($"{name} must be ids")).ToList();
+        body.Texts(name).Select(t => Guid.TryParse(t, out var id) && id != Guid.Empty ? id : throw new InvalidRequestException(ModuleParameters.Unreadable)).ToList();
 
     public static IReadOnlyList<TimeOnly> Times(this JsonElement? body, string name) =>
         body.Texts(name).Select(t => TimeOnly.TryParseExact(t, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time)
             ? time
-            : throw new InvalidRequestException($"{name} must be times of day, HH:mm")).ToList();
+            : throw new InvalidRequestException(ModuleParameters.Unreadable)).ToList();
 
     /// <summary>An array of objects, each read with the same helpers.</summary>
     public static IReadOnlyList<JsonElement?> Objects(this JsonElement? body, string name) =>

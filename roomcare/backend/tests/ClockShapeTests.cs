@@ -32,6 +32,10 @@ public sealed class ClockShapeTests
             ["Domain/OperatingDay.cs", "Application/Days/PropertyClock.cs"]),
         ("an instant parsed without requiring its offset — a bare time would be read in the server's zone",
             new(@"\bDateTimeOffset\.(Try)?Parse\s*\("), ["Module/Capabilities/TimeAndListParameters.cs"]),
+        // Found after the sweep, by HH's refusal-words rule: "not before {at:HH:mm} UTC" in a refusal and in a room's
+        // history. An instant formatted in its own offset and labelled UTC is a time a person reads in the wrong zone.
+        ("an instant formatted as a time of day in words — say it in the property's time", new(@"\{[^}""]*:HH"), []),
+        ("a time said to a person in UTC", new(@"""[^""]*\bUTC\b[^""]*"""), []),
     ];
 
     private static IEnumerable<string> Hits(string relative, string text) =>
@@ -78,7 +82,9 @@ public sealed class ClockShapeTests
             "var now = DateTime.UtcNow;",
             "var at = DateTime.SpecifyKind(local, DateTimeKind.Utc);",
             "var shift = new DateTimeOffset(date.ToDateTime(time), TimeSpan.Zero);",
-            "var parsed = DateTimeOffset.Parse(text);");
+            "var parsed = DateTimeOffset.Parse(text);",
+            "var said = $\"not before {at:HH:mm}\";",
+            "var label = \"at 09:00 UTC\";");
         var hits = Hits("Planted.cs", planted).Select(h => h.Split(" :: ")[1]).Distinct().ToList();
         Assert.Equal(Rules.Select(r => r.What), hits);
     }
@@ -90,7 +96,7 @@ public sealed class ClockShapeTests
     {
         JsonElement? body = JsonDocument.Parse($"{{\"notBefore\":\"{bare}\"}}").RootElement;
         var refused = Assert.Throws<InvalidRequestException>(() => body.Instant("notBefore"));
-        Assert.Contains("offset", refused.Message, StringComparison.Ordinal);
+        Assert.Equal(ModuleParameters.Unreadable, refused.Message);
     }
 
     [Theory]

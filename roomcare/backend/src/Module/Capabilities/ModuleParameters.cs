@@ -22,13 +22,25 @@ namespace HotelOS.RoomCare.Module.Capabilities;
 /// </remarks>
 public static class ModuleParameters
 {
+    /// <summary>
+    /// A request Room Care could not read: a field missing or not in its form. Only a screen's mistake reaches this,
+    /// because every form holds its primary back until it has something to send, and the words are for the person
+    /// in front of it, who cannot fix a field name. So no field, format or value is named, and "nothing was
+    /// changed" is true because the refusal came before anything ran (owner ruling on developer content,
+    /// 2026-09-19; tests/RefusalWordsTests).
+    /// </summary>
+    public const string Unreadable = "Room Care could not read that request, so nothing was changed";
+
+    /// <summary>A capability asked for an action it does not have, which is a screen's mistake too, in the same words' spirit.</summary>
+    public const string NotOffered = "Room Care does not offer that here, so nothing was changed";
+
     /// <summary>A required GUID.</summary>
     public static Guid Id(this JsonElement? body, string name)
     {
         var text = Text(body, name);
         return Guid.TryParse(text, out var id) && id != Guid.Empty
             ? id
-            : throw new InvalidRequestException($"{name} must be an id");
+            : throw new InvalidRequestException(Unreadable);
     }
 
     /// <summary>An optional GUID — absent, null or empty all mean nothing was named.</summary>
@@ -44,7 +56,7 @@ public static class ModuleParameters
     {
         var value = OptionalText(body, name);
         return string.IsNullOrWhiteSpace(value)
-            ? throw new InvalidRequestException($"{name} is required")
+            ? throw new InvalidRequestException(Unreadable)
             : value;
     }
 
@@ -87,8 +99,7 @@ public static class ModuleParameters
     public static long Version(this JsonElement? body, string name = "version") =>
         Property(body, name) is { ValueKind: JsonValueKind.Number } value
             ? value.GetInt64()
-            : throw new InvalidRequestException(
-                "the row version this edit is based on is required — without it a conflict cannot be seen");
+            : throw new InvalidRequestException(Unreadable);
 
     private static JsonElement? Property(JsonElement? body, string name) =>
         body is { ValueKind: JsonValueKind.Object } document

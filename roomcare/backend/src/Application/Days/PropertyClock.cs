@@ -19,8 +19,7 @@ public sealed class PropertyClock(IHouse house, TimeProvider clock)
     {
         var settings = await house.DaySettingsAsync(propertyId, cancellationToken)
             ?? throw new InvalidRequestException(
-                "Master Data holds no time zone and day boundary for this property, and a business date cannot be "
-                + "derived without them");
+                "this property has no time zone and day boundary set up, so its day cannot be worked out");
         var (date, local) = OperatingDay.At(instant, settings.Timezone, settings.Boundary);
         return new PropertyNow(instant, date, TimeOnly.FromDateTime(local), settings);
     }

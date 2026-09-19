@@ -46,7 +46,7 @@ public static class StandardCapabilities
                 var taken = await grants.RevokeAsync(scope, body.Id("userId"), cancellationToken);
                 return new { revoked = taken is not null, revokedAt = taken?.RevokedAt };
             default:
-                throw new InvalidRequestException($"roomcare.configure has no method '{request.Method}'");
+                throw new InvalidRequestException(ModuleParameters.NotOffered);
         }
     }
 
@@ -58,7 +58,7 @@ public static class StandardCapabilities
         {
             "planDeepClean" => await deepCleans.PlanAsync(request.Scope, body.Id("roomId"), body.Date("from"), body.Date("to"), cancellationToken),
             "cancelDeepClean" => await deepCleans.CancelAsync(request.Scope, body.Id("deepCleanId"), body.Version(), cancellationToken),
-            _ => throw new InvalidRequestException($"roomcare.plan has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException(ModuleParameters.NotOffered),
         };
         return new { id = project.Id.ToString(), version = project.Version, status = project.Status };
     }

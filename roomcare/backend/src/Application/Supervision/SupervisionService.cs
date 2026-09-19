@@ -24,7 +24,7 @@ public sealed class SupervisionService(RoomCareDbContext db, Gate gate, TaskWrit
     {
         if (!SupervisionDecision.All.Contains(decision))
         {
-            throw new InvalidRequestException("a supervisor decides DND_APPROVED, CLEAN or OTHER");
+            throw new InvalidRequestException("a supervisor decides: DND approved, clean it, or other");
         }
 
         if (decision == SupervisionDecision.Other && string.IsNullOrWhiteSpace(note))

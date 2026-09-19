@@ -36,7 +36,7 @@ public sealed class TaskEnding(
     {
         if (!AttemptFound.All.Contains(command.Found))
         {
-            throw new InvalidRequestException("an attempt finds DONE, PARTIAL, DECLINED or DND");
+            throw new InvalidRequestException("an attempt ends done, partial, declined by the guest, or DND");
         }
 
         if (command.Found == AttemptFound.Partial && command.PartialDone.Count == 0)
@@ -46,7 +46,7 @@ public sealed class TaskEnding(
 
         if (command.PartialDone.FirstOrDefault(p => !PartialPart.All.Contains(p)) is { } bad)
         {
-            throw new InvalidRequestException($"'{bad}' is not part of a service");
+            throw new InvalidRequestException("that is not part of a service");
         }
 
         db.Attempts.Add(new TaskAttempt

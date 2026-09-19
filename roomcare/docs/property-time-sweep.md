@@ -59,6 +59,22 @@ Swept by call shape with no limit, at the commit that carries this page. Non-tes
 **`new DateTimeOffset(wallClock, TimeSpan.Zero)`, Workforce's worst shape: none in Room Care.** Its only
 `new DateTimeOffset(` is #25, at the zone's offset.
 
+## Found after the sweep: two times said to a person in UTC
+
+The call shapes above find where a time is read or made. They do not find where an instant is **turned into words**.
+HH's refusal-words rule (Jobs, the same day) turned up two such lines. Both formatted an instant in whatever offset
+it carried, then labelled it UTC:
+
+| Line | What a person read | Now |
+|---|---|---|
+| `Application/Work/AttendantWork.cs:35` | at the door: "the guest asked for this room not before 09:00 UTC" (the stored instant, in UTC) | "…not before 14:30", in the property's time |
+| `Application/Work/AmendService.cs:40` | in the room's history: "not before 14:30 UTC" (the sender's offset, mislabelled), or "20:30 UTC" when sent in UTC | "not before 14:30", in the property's time |
+
+Both are class **defect: property wall-clock time treated as UTC**, and both are fixed. Held by `NotBeforeWordsTests`,
+in Kolkata and Guatemala, which was red first ("14:30 UTC"; "20:30 UTC"). `ClockShapeTests` now also refuses an
+interpolated `{…:HH…}` and a string saying "UTC". The two lines are not in the 26 above: that count is of the
+listed call shapes, and these are formatting.
+
 ## UI — 0 lines of Room Care's own
 
 No `new Date(`, `Date.now()`, `toISOString`, `getUTC…`, `setUTC…` or `getTimezoneOffset` in Room Care's own UI

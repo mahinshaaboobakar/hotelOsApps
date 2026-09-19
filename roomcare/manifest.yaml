@@ -49,6 +49,12 @@
 #     calendar day or the hotel's operating day is with the planner (WF-Q21);
 #     until then it is the operating day, as Room Care's chapters specify, in
 #     one function.
+#   * **"Not before" is said in the property's time.** The door's refusal and
+#     the room's history said it in UTC and labelled it so.
+#   * **Every refusal is in a person's words.** No field names, enum words
+#     (OURS, DONE, DND_APPROVED), capability ids, formats or "Master Data". A
+#     request a screen got wrong says "Room Care could not read that request,
+#     so nothing was changed". A source guard reads every refusal message.
 #   * **No developer note on any screen**: no register ids, design sections,
 #     event names, relation ids or system names.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.

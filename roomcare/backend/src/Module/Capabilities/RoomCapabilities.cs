@@ -25,7 +25,7 @@ public static class RoomCapabilities
             "extraTime" => DayCapabilities.Task(await work.AskExtraTimeAsync(scope, body.Id("taskId"), body.Number("minutes"), body.OptionalText("reason"), cancellationToken)),
             "restock" => Restocked(await acts.RestockAsync(scope, body.Id("taskId"), Items(body), body.OptionalId("stayId"), cancellationToken)),
             "issue" => Issue(await acts.IssueAsync(scope, body.Id("taskId"), body.Text("note"), body.OptionalText("itemHint"), body.OptionalId("mediaId"), cancellationToken)),
-            _ => throw new InvalidRequestException($"room.clean has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException(ModuleParameters.NotOffered),
         };
     }
 
@@ -33,7 +33,7 @@ public static class RoomCapabilities
     {
         if (request.Method != "applyInspection")
         {
-            throw new InvalidRequestException($"room.inspect has no method '{request.Method}'");
+            throw new InvalidRequestException(ModuleParameters.NotOffered);
         }
 
         var body = request.Body;

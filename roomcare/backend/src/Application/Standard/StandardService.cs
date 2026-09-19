@@ -49,7 +49,7 @@ public sealed class StandardService(RoomCareDbContext db, Gate gate, TimeProvide
         await gate.PropertyAsync(scope, Permissions.Configure, cancellationToken);
         if (!ServiceWindowName.All.Contains(window))
         {
-            throw new InvalidRequestException($"'{window}' is not a service window");
+            throw new InvalidRequestException("that is not a service window");
         }
 
         if (starts == ends)
@@ -114,7 +114,7 @@ public sealed record ServiceEdit(Guid? RoomTypeId, string Service, int Minutes, 
     {
         if (!Domain.Service.All.Contains(Service))
         {
-            throw new InvalidRequestException($"'{Service}' is not a service");
+            throw new InvalidRequestException("that is not a service");
         }
 
         if (Minutes is < 1 or > 600 || Credits < 0)
@@ -129,7 +129,7 @@ public sealed record ServiceEdit(Guid? RoomTypeId, string Service, int Minutes, 
 
         if (Phases.Count == 0 || Phases.Any(p => !Phase.All.Contains(p) || p == Phase.Inspect) || Phases[^1] != Phase.Done)
         {
-            throw new InvalidRequestException("a service walks one or more phases and ends at DONE; inspection is added by its rule");
+            throw new InvalidRequestException("a service walks one or more phases and ends when it is done; inspection is added by its rule");
         }
     }
 }
@@ -182,7 +182,7 @@ public sealed record PolicyEdit
     }
 
     private static string? Word(string? value, IReadOnlyList<string> words, string what) =>
-        value is null || words.Contains(value) ? value : throw new InvalidRequestException($"'{value}' is not a {what}");
+        value is null || words.Contains(value) ? value : throw new InvalidRequestException($"that is not a {what}");
 
     private static int? Positive(int? value, int max, string what) =>
         value is null || (value >= 1 && value <= max) ? value : throw new InvalidRequestException($"{what} is between 1 and {max}");

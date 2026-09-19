@@ -16,7 +16,7 @@ public sealed class DisagreementService(
     {
         if (!DisagreementKept.All.Contains(kept))
         {
-            throw new InvalidRequestException("a disagreement is cleared by keeping OURS or taking THEIRS");
+            throw new InvalidRequestException("a disagreement is cleared by keeping ours or taking theirs");
         }
 
         await gate.RoomAsync(scope, Permissions.Amend, roomId, cancellationToken);

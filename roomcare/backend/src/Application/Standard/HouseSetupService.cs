@@ -22,7 +22,7 @@ public sealed class HouseSetupService(RoomCareDbContext db, Gate gate, IHouse ho
 
         if ((await house.ZonesAsync(scope.PropertyId, cancellationToken)).All(z => z.Id != zoneId))
         {
-            throw new InvalidRequestException("that zone is not one of this property's zones in Master Data");
+            throw new InvalidRequestException("that zone is not one of this property's zones");
         }
 
         var person = Actor.PersonOf(scope, "assigning rooms to a zone");
@@ -61,7 +61,7 @@ public sealed class HouseSetupService(RoomCareDbContext db, Gate gate, IHouse ho
         await gate.PropertyAsync(scope, Permissions.Configure, cancellationToken);
         if ((await house.AreasAsync(scope.PropertyId, cancellationToken)).All(a => a.Id != locationId))
         {
-            throw new InvalidRequestException("that place is not one of this property's public areas in Master Data");
+            throw new InvalidRequestException("that place is not one of this property's public areas");
         }
 
         if (times.Count > 24 || minutes is < 1 or > 480)

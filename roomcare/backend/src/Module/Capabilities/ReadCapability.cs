@@ -44,7 +44,7 @@ public static class ReadCapability
             "widgetAttention" => await services.GetRequiredService<WidgetProjection>().AttentionAsync(scope, cancellationToken),
             "widgetAttendants" => await services.GetRequiredService<WidgetProjection>().AttendantsAsync(scope, cancellationToken),
             "widgetPending" => await services.GetRequiredService<WidgetProjection>().PendingAsync(scope, cancellationToken),
-            _ => throw new InvalidRequestException($"roomcare.read has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException(ModuleParameters.NotOffered),
         };
     }
 

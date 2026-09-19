@@ -1,5 +1,7 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
+using HotelOS.RoomCare.Application.Days;
 using HotelOS.RoomCare.Application.Tasks;
 using HotelOS.RoomCare.Domain;
 using HotelOS.RoomCare.Events;
@@ -15,7 +17,7 @@ namespace HotelOS.RoomCare.Application.Work;
 /// verbs are the precedent). The time accumulates across pauses as separate
 /// stretches (survey F24).
 /// </remarks>
-public sealed class AttendantWork(RoomCareDbContext db, TaskWriter writer, TaskEnding ending)
+public sealed class AttendantWork(RoomCareDbContext db, TaskWriter writer, TaskEnding ending, PropertyClock clock)
 {
     public async Task<RoomTask> StartAsync(RequestScope scope, Guid taskId, CancellationToken cancellationToken)
     {
@@ -32,7 +34,9 @@ public sealed class AttendantWork(RoomCareDbContext db, TaskWriter writer, TaskE
 
         if (task.EarliestAt is { } earliest && writer.Now < earliest)
         {
-            throw new InvalidRequestException($"the guest asked for this room not before {earliest:HH:mm} UTC");
+            // Said in the property's time: the attendant reads this at the door.
+            var local = (await clock.AtAsync(task.PropertyId, earliest, cancellationToken)).LocalTime;
+            throw new InvalidRequestException($"the guest asked for this room not before {local.ToString("HH:mm", CultureInfo.InvariantCulture)}");
         }
 
         db.WorkSessions.Add(new TaskWorkSession

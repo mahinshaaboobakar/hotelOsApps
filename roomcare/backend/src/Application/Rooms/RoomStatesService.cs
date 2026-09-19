@@ -79,17 +79,17 @@ public sealed class RoomStatesService(RoomCareDbContext db, Gate gate, Observati
     {
         if (edit.Condition is { } c && !Condition.All.Contains(c))
         {
-            throw new InvalidRequestException($"'{c}' is not a condition a room can be set to here");
+            throw new InvalidRequestException("that is not a condition a room can be set to here");
         }
 
         if (edit.Occupancy is { } o && !Occupancy.All.Contains(o))
         {
-            throw new InvalidRequestException($"'{o}' is not an occupancy");
+            throw new InvalidRequestException("that is not an occupancy");
         }
 
         if (edit.Stay is { } stay && !StayWords.Contains(stay))
         {
-            throw new InvalidRequestException($"'{stay}' is not a stay — departed, arrived, in house or none");
+            throw new InvalidRequestException("a stay is departed, arrived, in house or none");
         }
     }
 

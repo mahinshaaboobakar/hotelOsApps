@@ -1,5 +1,7 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
+using HotelOS.RoomCare.Application.Days;
 using HotelOS.RoomCare.Application.Tasks;
 using HotelOS.RoomCare.Domain;
 using HotelOS.RoomCare.Events;
@@ -14,7 +16,7 @@ namespace HotelOS.RoomCare.Application.Work;
 /// standard, never opt out of a stay (S5 c2): a skip is one task, one window,
 /// recorded as <c>SKIPPED_BY_GUEST</c>. Every change keeps its reason.
 /// </remarks>
-public sealed class AmendService(RoomCareDbContext db, Gate gate, TaskWriter writer, TaskEnding ending)
+public sealed class AmendService(RoomCareDbContext db, Gate gate, TaskWriter writer, TaskEnding ending, PropertyClock clock)
 {
     /// <summary>"No service today" said at the desk — this window's task ends skipped by the guest.</summary>
     public async Task<RoomTask> SkipAsync(RequestScope scope, Guid taskId, long expectedVersion, string reason, CancellationToken cancellationToken)
@@ -37,7 +39,9 @@ public sealed class AmendService(RoomCareDbContext db, Gate gate, TaskWriter wri
     {
         var task = await OpenAsync(scope, taskId, expectedVersion, cancellationToken);
         task.EarliestAt = notBefore;
-        writer.Record(scope, task, HistoryKind.Reduction, $"not before {notBefore:HH:mm} UTC{Suffix(reason)}");
+        // The time at the property, never the instant's own offset and never labelled UTC: a person reads this line.
+        var local = (await clock.AtAsync(task.PropertyId, notBefore, cancellationToken)).LocalTime;
+        writer.Record(scope, task, HistoryKind.Reduction, $"not before {local.ToString("HH:mm", CultureInfo.InvariantCulture)}{Suffix(reason)}");
         writer.Announce(scope, task, EventTypes.TaskReduced, new TaskNote { What = "EARLIEST_AT", Reason = reason });
         await db.SaveChangesAsync(cancellationToken);
         return task;
@@ -66,7 +70,7 @@ public sealed class AmendService(RoomCareDbContext db, Gate gate, TaskWriter wri
     {
         if (!PriorityBand.All.Contains(band))
         {
-            throw new InvalidRequestException($"'{band}' is not a priority");
+            throw new InvalidRequestException("that is not a priority");
         }
 
         var task = await OpenAsync(scope, taskId, expectedVersion, cancellationToken);

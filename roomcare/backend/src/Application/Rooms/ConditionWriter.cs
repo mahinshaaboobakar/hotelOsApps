@@ -58,7 +58,7 @@ public sealed class ConditionWriter(RoomCareDbContext db, IEventAppender events)
     {
         if (!Condition.All.Contains(change.To))
         {
-            throw new InvalidRequestException($"'{change.To}' is not a condition Room Care sets");
+            throw new InvalidRequestException("that is not a condition Room Care sets");
         }
 
         var from = room.Condition;

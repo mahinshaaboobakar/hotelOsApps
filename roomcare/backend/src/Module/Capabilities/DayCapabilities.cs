@@ -24,7 +24,7 @@ public static class DayCapabilities
             "acceptProposal" => new { accepted = await assignment.AcceptAllAsync(request.Scope, body.Date("day"), body.Text("window"), cancellationToken) },
             "assign" => Task(await assignment.AssignAsync(request.Scope, body.Id("taskId"), body.Version(), body.Id("userId"), cancellationToken)),
             "unassign" => Task(await assignment.UnassignAsync(request.Scope, body.Id("taskId"), body.Version(), cancellationToken)),
-            _ => throw new InvalidRequestException($"roomcare.assign has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException(ModuleParameters.NotOffered),
         };
     }
 
@@ -45,7 +45,7 @@ public static class DayCapabilities
             "decide" => Lane(await services.GetRequiredService<SupervisionService>()
                 .DecideAsync(scope, body.Id("supervisionId"), body.Text("decision"), body.OptionalText("note"), cancellationToken)),
             "saveStates" => await services.GetRequiredService<RoomStatesService>().SaveAsync(scope, Edits(body), cancellationToken),
-            _ => throw new InvalidRequestException($"roomcare.amend has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException(ModuleParameters.NotOffered),
         };
     }
 
