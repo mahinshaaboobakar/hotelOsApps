@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>New Booking Flow</title>
+<!-- The published tokens at the shell's own values — the harness's file, held equal to
+     TOKEN_NAMES by tests/tokens.test.ts. The frame chrome below is the approved gold
+     frame's stylesheet with its own copy of the published palette removed (page 64 §8). -->
+<link rel="stylesheet" href="../../ui/preview/tokens.css">
+<style>
+  
+  :root{
+--color-surface-raised:#11141f;
+--color-line-strong:rgb(255 255 255 / 0.14);
+--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
+
+--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
+    
+
+
+
+
+
+
+    /* Derived, never declared — mirrors guestops/ui/chrome/styles.ts stop for
+       stop, so the drawing and the module cannot disagree about a colour. */
+    --pms:var(--color-brand);
+    --ovr:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --accent:linear-gradient(135deg,var(--color-brand),var(--ovr));
+    --pms-wash:color-mix(in srgb, var(--color-brand) 13%, transparent);
+    --ovr-wash:color-mix(in srgb, var(--ovr) 15%, transparent);
+    --brand-wash:color-mix(in srgb, var(--color-brand) 18%, transparent);
+    --brand-edge:color-mix(in srgb, var(--color-brand) 50%, transparent);
+    --bad-edge:color-mix(in srgb, var(--color-bad) 45%, transparent);
+    --row-hover:color-mix(in srgb, var(--color-brand) 6%, transparent);
+
+    /* The quiet fills, mixed from the ink rather than from white — APPS-Q31 F3.
+       Four selectors carried rgba(255,255,255,.02/.03/.06) beside this block,
+       which is a literal sitting next to a variable that already holds the
+       right base. The alpha was never wrong; the white was. --color-ink is
+       #e8ebf4, so a 2% mix of it is not a 2% mix of #ffffff, and the two
+       diverge further the moment a property runs a light theme. */
+    --field:color-mix(in srgb, var(--color-ink) 2%, transparent);
+    --ink-wash:color-mix(in srgb, var(--color-ink) 6%, transparent);
+    --ic-wash:color-mix(in srgb, var(--color-ink) 3%, transparent);
+    --sunken:color-mix(in srgb, #000 26%, transparent);
+
+    /* The drawing's older names, pointed at the published ones. A selector not
+       yet migrated therefore cannot drift back to a private colour. */
+    --bg:var(--color-surface);--text:var(--color-ink);--dim:var(--color-ink-muted);
+    --faint:var(--color-ink-faint);--line:var(--color-line);--line2:var(--color-line-strong);
+    --indigo:var(--color-brand);--ok:var(--color-ok);--warn:var(--color-warn);
+    --bad:var(--color-bad);--grad:var(--accent);--glass:var(--color-surface-raised);
+    --cyan:var(--pms);--violet:var(--ovr);--other:var(--color-ok);
+    --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;margin:0}
+  /* ARCH-Q20 / 64 §8: this drawing renders its controls as <button>, because
+     the build does and the sweep pairs on tag + text. The UA resets the font
+     and the line-height on every button, so the reset follows the tag -- DD's
+     caveat, which cost them a run: retagging without carrying the styling
+     measures the drawing against a browser default rather than against itself. */
+  button{font-family:inherit;line-height:inherit}
+  ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}::-webkit-scrollbar-button{display:none}
+  body{background:#04050a;color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
+  h1{font-size:16px;font-weight:600;max-width:1220px;margin:38px auto 12px;color:var(--dim);text-wrap:balance}
+  h1 b{color:var(--text)}
+  .cap{max-width:1220px;margin:10px auto 0;color:var(--dim);font-size:12.5px;line-height:1.7}
+  .cap b{color:var(--text)}
+  .lead{max-width:1220px;margin:0 auto 6px;color:var(--dim);font-size:13px;line-height:1.7}
+  .lead b{color:var(--text)}
+  .win{max-width:1220px;margin:0 auto;border-radius:18px;position:relative;overflow:hidden;
+       background:radial-gradient(900px 420px at 10% 118%, rgba(79,70,229,.28), transparent 60%),radial-gradient(700px 360px at 94% 106%, rgba(8,145,178,.20), transparent 55%),var(--bg);
+       border:1px solid var(--line2);box-shadow:var(--shadow)}
+
+  /* # The app bar — Jobs' `.head`, and the rail is gone
+     An INSTALLED application navigates from the TOP. The platform's own four
+     — Core Administration, Operations Center, My Hotel, Software Center —
+     keep their left rail, because they are the desktop's own furniture rather
+     than something a property installed.
+     This was a 240px rail with pill-shaped items and an inset brand bar: a
+     second navigation design for the same job, which is visible the moment a
+     receptionist has Jobs and GuestOps open side by side. Owner direction,
+     2026-09-04; the standard is docs/working/64. */
+  .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;
+        border-bottom:1px solid var(--line)}
+  .app{display:flex;gap:10px;align-items:center;font-weight:600;margin-right:14px}
+  .mark{width:22px;height:22px;border-radius:6px;background:var(--accent);
+        display:grid;place-items:center;font-size:11px;font-weight:700;
+        color:var(--color-ink-on-accent)}
+  /* Scoped to the bar, because `.tab` already means the body's view switcher.
+     Two meanings, one class, and specificity is what keeps them apart —
+     the alternative was renaming 68 items to say the same thing twice. */
+  .head .tab{display:flex;align-items:center;gap:7px;padding:19px 2px;
+             font-size:13px;color:var(--dim);border-bottom:2px solid transparent;
+             font-weight:400}
+  .head .tab.on{color:var(--text);border-bottom-color:var(--color-brand)}
+  .head .tab .n{margin-left:0;font-size:11px;color:var(--faint)}
+  .head .tab .n.att{color:var(--warn)}
+  /* No search box in this bar. Jobs has one; inventing one here would be a
+     control nobody designed, drawn into a specification. */
+  /* 2026-09-04 — amended to the CODE, not the other way round. This drawing
+     said "Anitha Menon · Front Office"; the module rendered a third clause,
+     the property. The owner picked the code: NAME · DEPARTMENT · PROPERTY,
+     because the property clause matters the day an organization has two and
+     the corporate model already exists. Noted rather than changed silently —
+     the drawing lost this one and should say so. */
+  .who{margin-left:auto;color:var(--faint);font-size:12px;white-space:nowrap}
+  .main{position:relative;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+  /* The page's own title row, inside the frame rather than in the bar. */
+  .title{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
+  .ht{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  /* APPS-Q45 · RECORD. The build's sub-heading row is a flex line with a 7px
+     gap (chrome/styles/shell.ts); this drawing had the colour and the size and
+     not the layout, so its parts measured as one block. */
+  .hsub{color:var(--faint);font-size:12px;margin-top:2px;
+        display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  /* APPS-Q45 · RECORD. The build's base .grow is margin-left:auto with
+     display:flex and gap:8px (chrome/styles/shell.ts); this drawing carried the
+     flex only in the scoped .ban .grow below, so every other grow measured
+     block-with-no-gap against a flex row — 17 of the run's 81 differences, one
+     declaration. The scoped rule stays: it now repeats the base rather than
+     contradicting it, and deleting it is a separate edit nobody asked for. */
+  .grow{margin-left:auto;display:flex;gap:8px}
+  /* One control, modified — docs/working/64 §2. This drawing used to carry four
+     base classes (.btn2 .create .danger .mini) at three geometries, and the two
+     sibling apps each invented a fourth; a second base class is a second
+     geometry within a week. Geometry is Jobs', colour is the shell's. */
+  .btn{display:inline-flex;gap:8px;align-items:center;white-space:nowrap;
+       border:1px solid var(--color-line-strong);border-radius:8px;
+       padding:7px 14px;font:inherit;font-size:13px;color:var(--color-ink);background:none}
+  .btn.pri{border-color:transparent;color:var(--color-ink-on-accent);
+           font-weight:600;background:var(--accent)}
+  .btn.off{color:var(--color-ink-faint);border-style:dashed}
+  .btn.danger{border-color:var(--bad-edge);color:var(--color-bad)}
+  .btn.sm{padding:2px 8px;font-size:11px;gap:6px}
+  .btn.sm.pri{background:var(--brand-wash);border-color:var(--brand-edge);
+              color:var(--color-ink);font-weight:500}
+  .pill{padding:3px 11px;border-radius:99px;font-size:11px;font-weight:600;width:fit-content;white-space:nowrap}
+  .ok{background:rgba(52,211,153,.12);color:var(--ok)}.warn{background:rgba(251,191,36,.12);color:var(--warn)}
+  .bad2{background:rgba(248,113,113,.12);color:var(--bad)}.neu{background:var(--ink-wash);color:var(--dim)}
+  /* Top padding restored. It was 0 because the page-title row above supplied
+     it — `22px 26px 14px` — so removing that row left the numbers strip flush
+     against the app bar's rule. Jobs pads its body evenly on all four sides,
+     which is what a body with nothing above it needs. */
+  .body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+  /* summary strip */
+  /* One thin bar, not four cards — Jobs' board, docs/working/64 §3.
+     Four stat cards cost ~68px at the top of every list screen, which is two
+     guests' worth of rows, and they repeated the counts the tabs immediately
+     below already carry. Same facts, one line. */
+  .strip{display:flex;gap:24px;align-items:center;flex-wrap:wrap;
+         font-size:12px;color:var(--dim);padding:8px 12px;
+         border:1px solid var(--line);border-radius:8px}
+  .strip b{color:var(--text);font-size:14px;font-weight:600;margin-right:5px}
+  /* The day's context, pushed right — Jobs' board carries "ENG · Tue 2 Sep ·
+     02 Sep 14:24" in exactly this slot. It used to be a `.hsub` under a page
+     heading that repeated the section name already in the top bar. */
+  .strip .ctx{margin-left:auto;color:var(--faint)}
+  .strip .ctx b{font-size:12px;color:var(--dim);margin-right:0}
+  .strip .on b{color:var(--indigo)}
+  .strip .on{color:var(--text)}
+  /* tabs */
+  /* The view switcher, and the screen's actions on the same line — Jobs puts
+     its primary action at the right of the filter row rather than in a page
+     header, and with the section named in the top bar there is no header left
+     to put it in. */
+  .tabs{display:flex;gap:4px;align-items:center;border-bottom:1px solid var(--line);
+        margin-top:2px;flex-wrap:wrap}
+  .tabs .btn{margin-bottom:6px}
+  /* Where a screen has no view switcher to hang its actions on. */
+  .acts{display:flex;gap:9px;justify-content:flex-end;margin-top:12px}
+  .tab{padding:8px 14px;font-size:12.5px;color:var(--faint);border:0;
+       border-bottom:2px solid transparent;background:none;cursor:pointer;
+       white-space:nowrap}
+  .tab.on{color:var(--text);border-bottom-color:var(--indigo);font-weight:600}
+  .tab.gone{opacity:.38}
+  .tab .n{color:var(--faint);font-weight:400;margin-left:5px;font-size:11px}
+  /* chips */
+  .sh{display:inline-flex;gap:6px;align-items:center;padding:3px 9px;border-radius:7px;font-size:11.5px;font-weight:500;white-space:nowrap;border:1px solid transparent}
+  .sh i{width:6px;height:6px;border-radius:50%;display:inline-block}
+  .sh.pms{background:rgba(125,211,252,.13);color:var(--pms)}.sh.pms i{background:var(--pms)}
+  .sh.ovr{background:rgba(192,132,252,.15);color:var(--ovr)}.sh.ovr i{background:var(--ovr)}
+  .sh.dis{background:rgba(251,191,36,.14);color:var(--warn)}.sh.dis i{background:var(--warn)}
+  .sh.oth{background:rgba(52,211,153,.12);color:var(--other)}.sh.oth i{background:var(--other)}
+  .sh.miss{color:var(--faint);border-color:var(--line);border-style:dashed}
+  .sh.wi{background:rgba(52,211,153,.12);color:var(--ok)}
+  .sh.unk{background:rgba(248,113,113,.10);color:var(--bad);border:1px solid rgba(248,113,113,.3)}
+  .lock{font-size:10px;color:var(--faint);border:1px solid var(--line);border-radius:5px;padding:1px 5px;letter-spacing:.04em}
+  .lock.no{color:var(--bad);border-color:var(--bad-edge)}
+  /* table */
+  /* Density — docs/working/64 §3. This drawing fitted five guests where Jobs
+     fits twelve, because a row was given a card's worth of air. A card is for a
+     thing you are looking AT; a row is one of many you are looking THROUGH. */
+  /* No box — Jobs' board, docs/working/64 §3. This was a card: a filled
+     background, a 1px border and a 14px radius wrapped around every list,
+     with the header row filled again inside it. Jobs' table sits bare on the
+     page and separates rows with a single bottom rule, and two applications
+     drawing a list two ways is visible in one glance at the dock.
+     The rules below are Jobs' th/td, with only the vertical padding reduced —
+     a GuestOps row carries two lines (the guest, then how to reach them) where
+     a Jobs row carries one, so equal padding would make this list half as
+     dense as the board it is matching. */
+  .tbl{font-size:13px}
+  .tr{display:grid;grid-template-columns:1.5fr .9fr .8fr .7fr .8fr 1.5fr;border-bottom:1px solid var(--line)}
+  /* Jobs keeps the rule on every row, including the last: with no card around
+     the list, that final line is what closes it. */
+  /* `align-items:flex-start` is Jobs' `td{vertical-align:top}`. It matters
+     here more than it does there: a GuestOps row's first cell is two lines,
+     so centring pushed every other cell down against the guest's name — the
+     booking number sat between the two lines rather than beside the name. */
+  .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+  .tr.hd>div{align-items:center;font-size:11px;font-weight:500;text-transform:uppercase;
+             letter-spacing:.08em;color:var(--faint);padding:8px 10px}
+  .tr .nm{display:flex;flex-direction:column;gap:0;align-items:flex-start;line-height:1.25}
+  .tr .nm b{font-weight:600}
+  .tr .nm span{font-size:10.5px;color:var(--faint)}
+  /* A frame drawn short says so, in the list, rather than letting the pager
+     and the visible rows disagree. The drawing is a specification, so an
+     elision it does not state reads as the screen's own answer. */
+  .tr.more{grid-template-columns:1fr}
+  .tr.more>div{color:var(--faint);font-style:italic;font-size:11.5px;padding:6px 12px}
+  /* Jobs tints the selected row and nothing else — the 2.5px inset brand bar
+     that used to be here was this application's own invention. */
+  .tr.sel{background:color-mix(in srgb, var(--color-brand) 8%, transparent)}
+  .tr.list{grid-template-columns:1.5fr 1fr .9fr 1fr .8fr 1.3fr}
+  /* Added 2026-09-05, APPS-Q4 group 3: the seven-column stays grid the union
+     above needs. Matches the module's own `.tr.stays` exactly. */
+  .tr.stays{grid-template-columns:1.4fr .9fr 1fr .5fr 1fr .8fr 1.1fr}
+  .un{color:var(--faint);font-style:italic}
+  /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
+     No page numbers and no total: PageResponse carries next_cursor and
+     has_more and nothing else, so "page 3 of 12" cannot be computed and a
+     count there would be fiction. Previous is a client-held stack of cursors,
+     so it is dim until you have been somewhere to go back to. */
+  /* The pager, generic and NUMBERED — CORE-Q13, ruled 2026-09-04.
+     EVERY list screen gets this one; a pager invented per screen is four
+     pagers by the fourth screen.
+     "showing 1-25 of N" is honest here because N exists: stays moved from the
+     platform's opaque cursor to its paged pair (PagedRequest{page,page_size}
+     -> PagedResponse{page,page_size,total}), so both the ordinal and the count
+     are on the wire. The Previous/Next drawing this replaces was correct for
+     the cursor and was superseded by the ruling, not by a redesign.
+     Drawn to Jobs' board, which the owner's choice made canonical: the range
+     on the left, the numbers on the right, the current page carrying the brand
+     border. Matches components/design/pager.tsx rather than importing it — a
+     hosted module is styled by tokens, never by importing components. */
+  .pager{display:flex;justify-content:space-between;align-items:center;gap:9px;
+         padding:10px 4px 0;font-size:12px;color:var(--faint)}
+  .pager .pnav{display:flex;align-items:center}
+  .pager .pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);
+             border-radius:6px;margin-left:4px;color:var(--dim);
+             background:none;font-size:12px;cursor:pointer}
+  .pager .pg.on{color:var(--text);border-color:var(--color-brand)}
+  /* Both, because the markup carries both: `off` is the drawing's word and
+     `disabled` is what the build sets, and the sweep reads the computed style
+     rather than either name. */
+  .pager .pg.off,
+  .pager .pg[disabled]{color:var(--faint);opacity:.45;cursor:default}
+  .pager .gap{margin-left:4px;color:var(--faint)}
+  .link{color:var(--indigo);background:none;border:0;padding:0;font:inherit;cursor:pointer}
+  /* banner */
+  .ban{display:flex;gap:11px;align-items:center;border-radius:12px;padding:10px 14px;font-size:12.5px;border:1px solid}
+  .ban.stale{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.3);color:var(--warn)}
+  .ban.dis{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.35)}
+  .ban.info{background:rgba(125,211,252,.06);border-color:rgba(125,211,252,.25);color:var(--cyan)}
+  .ban.gone{background:rgba(248,113,113,.06);border-color:rgba(248,113,113,.3);color:var(--bad)}
+  .ban b{color:var(--text)}
+  .ban .grow{margin-left:auto;display:flex;gap:8px}
+  /* .mini folded into .btn.sm above — one control, modified. */
+  /* two column */
+  .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
+  .cols.even{grid-template-columns:1fr 1fr}
+  /* Amended 2026-09-05, APPS-Q4 gallery: the three radii below collapse to ONE.
+     The contract publishes exactly one shape token — `--radius-panel`, whose
+     live value in the shell is 1rem = 16px — and docs/working/64 §1's fallback
+     rule is that a mock's private value cannot reach a running module. This
+     drawing wrote 14px for a card, 16px for a dialog and 12px for the nights
+     strip; the build consumes the token for all three and the 17x17 measured
+     card radius as frame=14px build=16px in ten of the seventeen pairs.
+     The DIALOG keeps its +2px relationship to a card, which is what the
+     drawing expressed; the nights strip loses its own number, because nothing
+     publishes a second radius and inventing one is what §1 forbids. */
+  .card{background:var(--glass);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+  .card.ghost{background:rgba(255,255,255,.015);border-style:dashed}
+  .ch{padding:11px 15px;border-bottom:1px solid var(--line);font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);display:flex;align-items:center;gap:8px}
+  .ch .grow{margin-left:auto;text-transform:none;letter-spacing:0;font-size:11.5px}
+  .cb{padding:13px 15px;display:flex;flex-direction:column;gap:11px}
+  .fr{display:flex;align-items:flex-start;gap:10px;font-size:12.5px}
+  .fr .k{color:var(--faint);width:118px;flex:none;font-size:12px}
+  .fr .v{color:var(--text);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .fr.big .v b{font-size:15px}
+  /* timeline */
+  .tl{display:flex;flex-direction:column;gap:0}
+  .te{display:grid;grid-template-columns:58px 16px 1fr;gap:0;font-size:12.5px}
+  .te .t{color:var(--faint);padding:7px 0;font-size:11.5px}
+  .te .g{display:flex;flex-direction:column;align-items:center}
+  .te .g i{width:7px;height:7px;border-radius:50%;background:var(--faint);margin-top:12px}
+  .te .g u{flex:1;width:1px;background:var(--line2)}
+  .te.pms .g i{background:var(--pms)}.te.ovr .g i{background:var(--ovr)}.te.dis .g i{background:var(--warn)}
+  .te.oth .g i{background:var(--other)}
+  .te .d{padding:7px 0 7px 12px;display:flex;flex-direction:column;gap:3px}
+  .te .d span{color:var(--faint);font-size:11.5px}
+  /* activity rows */
+  .act{display:grid;grid-template-columns:118px 118px 1fr;border-bottom:1px solid var(--line);font-size:12.5px}
+  .act:last-child{border-bottom:none}
+  .act>div{padding:10px 14px;display:flex;align-items:flex-start;gap:7px;min-width:0}
+  /* Amended 2026-09-05, APPS-Q4 group 2: the fill is REMOVED. This was the only
+     header row in the file that carried one — every other table's `.tr.hd` is
+     bare — and docs/working/64 §4 rules a list a bare table, header included.
+     GG's precedent: the standard three applications read outranks one frame's
+     outlier, so the drawing conforms rather than the rule bending. The build
+     stands; this is the frame catching up to it. */
+  .act.hd>div{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);padding:8px 14px}
+  .act .w{flex-direction:column;align-items:flex-start;gap:3px}
+  .act .w span{color:var(--faint);font-size:11.5px}
+  .act .tm{color:var(--faint);font-size:11.5px;flex-direction:column;align-items:flex-start;gap:1px}
+  /* APPS-Q45 · RECORD, the same cause two frames over: a bare <b> inside a
+     field and inside a night's date, each taking the UA's 700 where the build
+     states 600. */
+  .inp b{font-weight:600}
+  .ng .dt b{font-weight:600}
+
+  /* APPS-Q31 F5. The date was a bare <b>, so it took the UA's bold — 700 — where
+     this drawing's own emphasis is 600 everywhere it is stated (.app, .btn.pri).
+     Not a wrong value so much as an unstated one: the browser chose it. */
+  .act .tm b{font-weight:600;color:var(--dim)}
+  /* nights strip */
+  .nights{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--glass)}
+  .ng{border-right:1px solid var(--line);padding:11px 12px;display:flex;flex-direction:column;gap:7px;min-height:104px}
+  .ng:last-child{border-right:none}
+  .ng .dt{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em}
+  .ng .dt b{color:var(--dim);font-weight:600}
+  .ng .st{font-size:12px;display:flex;flex-direction:column;gap:5px}
+  .ng.now{box-shadow:inset 0 0 0 1.5px rgba(129,140,248,.45)}
+  /* dialog */
+  .scrim{position:absolute;inset:0;background:rgba(4,5,10,.55);display:flex;align-items:flex-start;justify-content:flex-end}
+  .scrim.mid{align-items:center;justify-content:center}
+  .sheet{width:440px;height:100%;background:#0d1018;border-left:1px solid var(--line2);display:flex;flex-direction:column;box-shadow:-30px 0 70px rgba(0,0,0,.5)}
+  .dlg{width:520px;background:#0d1018;border:1px solid var(--line2);border-radius:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;overflow:hidden}
+  .sh_h{padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+  .sh_h b{font-size:15.5px;font-weight:600}
+  .sh_h span{display:block;color:var(--faint);font-size:11.5px;margin-top:3px}
+  .sh_b{padding:16px 20px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+  .fld{display:flex;flex-direction:column;gap:6px}
+  /* .07em, and NOT section 4's .08em — APPS-Q31 F6, withdrawn.
+     Section 4 states .08em for a TABLE HEADER. This is a field label, which is
+     section 10's, and section 10 states no tracking. Moving it to .08em broke
+     twenty-four nodes that had been identical and left the drawing disagreeing
+     with the build on every label of every form. The rule was real and it
+     governs a different element. */
+  .fld label{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint)}
+  .inp{border:1px solid var(--line2);border-radius:10px;padding:9px 12px;font-size:13px;color:var(--text);background:var(--field);display:flex;align-items:center;gap:8px}
+  .inp.ph{color:var(--faint)}
+  .inp.tall{min-height:64px;align-items:flex-start}
+  .inp .grow{margin-left:auto;color:var(--faint);font-size:11.5px}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .sh_f{margin-top:auto;padding:14px 20px;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}
+  .sh_f .grow{margin-left:auto}
+  .hint{font-size:12px;color:var(--faint);line-height:19.8px}
+  .hint b{color:var(--dim);font-weight:500}
+  /* empty */
+  .empty{margin:auto;text-align:center;padding:60px 20px;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:480px}
+  .empty.sm{padding:26px 20px;gap:10px}
+  .empty .ic{width:52px;height:52px;border-radius:16px;border:1px solid var(--line2);background:var(--ic-wash);display:grid;place-items:center;font-size:20px;color:var(--faint)}
+  .empty b{font-size:16px}
+  .empty.sm b{font-size:13.5px}
+  .empty p{color:var(--faint);font-size:12.5px;line-height:1.7}
+  /* caveat */
+  .caveat{max-width:1220px;margin:0 auto;border:1px dashed rgba(248,113,113,.45);border-radius:14px;padding:12px 16px;background:rgba(248,113,113,.05);color:var(--dim);font-size:12.5px;line-height:1.7}
+  .caveat b{color:var(--bad)}
+  .dimwin{opacity:.62;filter:saturate(.65)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .note{background:var(--field);border:1px dashed var(--line2);border-radius:12px;padding:12px 14px;font-size:12px;color:var(--dim);line-height:19.8px}
+  .note b{color:var(--text)}
+  .note.no{border-color:var(--bad-edge);background:color-mix(in srgb, var(--color-bad) 4%, transparent)}
+  .note.no b{color:var(--bad)}
+  .sub{max-width:1220px;margin:14px auto 0;color:var(--faint);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase}
+
+  /* This page's own layout, around the frames. */
+  body{background:var(--color-surface);color:var(--color-ink);padding:34px 22px 80px}
+  .page{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:40px}
+  .lede h1{font-size:24px;font-weight:600;margin:0 0 8px}
+  .lede p, .says{max-width:80ch;color:var(--color-ink-muted);line-height:1.6;margin:0 0 12px}
+  .lede p b, .says b{color:var(--color-ink)}
+  .step h2{display:flex;align-items:center;gap:12px;font-size:18px;font-weight:600;margin:0 0 8px}
+  .num{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;
+    background:var(--brand-wash);color:var(--color-brand);font-size:14px}
+  .dev{margin-top:14px;max-width:90ch;border:1px dashed var(--color-warn);border-radius:12px;
+    padding:12px 16px;font-size:13px;line-height:1.6;color:var(--color-ink-muted);
+    background:color-mix(in srgb, var(--color-warn) 5%, transparent)}
+  .dev b{color:var(--color-warn)}
+  .dev ul{margin:6px 0 0 18px;padding:0;display:flex;flex-direction:column;gap:4px}
+  .dev code{color:var(--color-ink)}
+  .refs{display:grid;grid-template-columns:repeat(auto-fit,minmax(560px,1fr));gap:26px}
+  .ref h3{font-size:15px;margin:0 0 6px}
+  .win{position:relative}
+</style></head>
+<body><div class="page">
+<div class="lede">
+  <h1>New booking — the booking flow, drawn for you</h1>
+  <p><b>Today New booking cannot take a guest's own dates, so it cannot make a booking.</b> This is the flow drawn in the approved frames' style, for you to approve before anything is built: dates and guests, room type, guest details, confirm, and what a refusal looks like.</p>
+  <p>Each step is one screen as a person at the desk would see it. <b>The yellow dashed boxes are notes for the architect</b> — which part of GuestOps each step would call, and what does not exist yet. They are not part of the screen.</p>
+  <p>Dates are drawn as a property in India would show them (en-IN). Nothing here is priced: rates are not part of this round.</p>
+</div>
+<section class="step">
+  <h2><span class="num">1</span>Dates and guests</h2>
+  <p class="says">The person picks the arrival and departure on a calendar and says how many rooms and guests. Nothing is searched until they press <b>Check availability</b>.</p>
+  <div class="win" style="min-height:460px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp" style="border-color:var(--color-brand)"><b>03 Sept 2026</b><span class="grow">▾</span></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults · 0 children <span class="grow">▾</span></div></div>
+        <button class="btn pri" type="button">Check availability</button>
+      </div>
+      <div class="card" style="width:300px;margin-top:-6px">
+        <div class="ch">September 2026<span class="grow"></span>‹ ›</div>
+        <div class="cb" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font-size:12px;text-align:center">
+          <span class="hint">Mo</span><span class="hint">Tu</span><span class="hint">We</span><span class="hint">Th</span><span class="hint">Fr</span><span class="hint">Sa</span><span class="hint">Su</span>
+          <span></span><span>1</span><span>2</span><span style="border-radius:6px;background:var(--color-brand);color:var(--color-ink-on-accent)">3</span><span style="background:var(--brand-wash)">4</span><span style="background:var(--brand-wash)">5</span><span style="background:var(--brand-wash)">6</span>
+          <span style="border-radius:6px;background:var(--color-brand);color:var(--color-ink-on-accent)">7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <aside class="dev"><b>Note to the architect — not on the screen.</b><ul><li><code>availability</code> read — <b>exists</b> (<code>reservation.read</code>), takes <code>arrive</code>/<code>depart</code> ISO days. Today the screen sends none, so the service refuses; this step is what supplies them.</li><li>The guest count is sent and <b>not used</b> — availability counts rooms, not capacity. Say whether it should filter room types by occupancy, or only be carried to the booking.</li></ul></aside>
+</section>
+<section class="step">
+  <h2><span class="num">2</span>Room type</h2>
+  <p class="says">Every room type, with what is free for those dates. Only a type with rooms free can be chosen; the others say none are free.</p>
+  <div class="win" style="min-height:460px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm" type="button">Choose</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <aside class="dev"><b>Note to the architect — not on the screen.</b><ul><li>Same <code>availability</code> read. <b>Missing on the wire:</b> each row sends the room type's name and not its <b>id</b>, which creating a booking needs.</li><li>Column "Held back" is the stop-sell count, renamed from "Stop-sell" for the desk — the owner's call.</li></ul></aside>
+</section>
+<section class="step">
+  <h2><span class="num">3</span>Guest details</h2>
+  <p class="says">The person types the guest's name as given, and a phone or email. A second guest in the room can be added. The room and dates stay visible at the top.</p>
+  <div class="win" style="min-height:640px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list sel"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm pri" type="button">Chosen</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Guest details</b><span>Deluxe King · 03 → 07 Sept 2026 · 4 nights · 2 adults</span></div>
+        <div class="sh_b">
+          <div class="fld"><label>Guest name</label><div class="inp" style="border-color:var(--color-brand)">Fatima Sheikh</div>
+            <div class="hint">As the guest gives it. A name can be added later — a booking without one shows "Not yet named".</div></div>
+          <div class="row2">
+            <div class="fld"><label>Phone</label><div class="inp">+91 98470 11234</div></div>
+            <div class="fld"><label>Email</label><div class="inp ph">optional</div></div>
+          </div>
+          <div class="fld"><label>Second guest</label><div class="inp ph">＋ add a guest in this room</div></div>
+        </div>
+        <div class="sh_f"><div class="grow"></div><button class="btn sm" type="button">Back</button><button class="btn sm pri" type="button">Review booking</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <aside class="dev"><b>Note to the architect — not on the screen.</b><ul><li>Nothing is called here. The fields are the ones <code>BookingService.CreateAsync</code>'s <code>NewGuest</code> already takes (name as given · given · family · phone · email · primary); contacts are encrypted on write by the existing protector.</li></ul></aside>
+</section>
+<section class="step">
+  <h2><span class="num">4</span>Confirm</h2>
+  <p class="says">One screen that says exactly what will be created, before anything is. Nothing is charged and no price is shown.</p>
+  <div class="win" style="min-height:560px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list sel"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm pri" type="button">Chosen</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Create this booking?</b><span>Check it with the guest before you confirm</span></div>
+        <div class="sh_b">
+          <div class="fr"><div class="k">Guest</div><div class="v"><b>Fatima Sheikh</b> · +91 98470 11234</div></div>
+          <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King · one room</div></div>
+          <div class="fr"><div class="k">Dates</div><div class="v"><b>03 Sept</b> → <b>07 Sept 2026</b> · 4 nights</div></div>
+          <div class="fr"><div class="k">Guests</div><div class="v">2 adults</div></div>
+          <div class="fr"><div class="k">Room</div><div class="v">assigned at check-in</div></div>
+          <div class="note" style="padding:10px 12px">No payment is taken and no price is quoted here.</div>
+        </div>
+        <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Back</button><button class="btn sm pri" type="button">Create booking</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <aside class="dev"><b>Note to the architect — not on the screen.</b><ul><li><b>Create booking</b> calls <code>BookingService.CreateAsync</code> — <b>exists</b>, and is reachable over gRPC and inside the walk-in command, but has <b>no module door</b>: the screen cannot call it. Needs a module method under <code>stay.create</code>, as <code>walkIn</code> has.</li><li><code>CreateAsync</code> does <b>not re-check availability</b>: a type sold out between steps 2 and 4 is booked anyway. Say whether creation must refuse, or the desk may overbook knowingly.</li><li>It asks Context for the business day first, so on the owner's platform it fails until the SDK authenticator defect (BB) is fixed.</li><li>No price: rates are out of this round (GUEST-Q7). A booking made here carries no commercial terms.</li></ul></aside>
+</section>
+<section class="step">
+  <h2><span class="num">5</span>Done</h2>
+  <p class="says">The booking opens, with a line saying it was created and where to find it. The room is assigned at check-in.</p>
+  <div class="win" style="min-height:380px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">Fatima Sheikh · booking created here</div><div class="hsub">One stay · 03 → 07 Sept 2026</div></div><div class="grow"></div><button class="btn danger" type="button">Cancel…</button></div>
+    <div class="body">
+      <div class="ban info"><div><b>Booking created.</b> It is in Bookings and on the arrivals list for 03 Sept.</div></div>
+      <div class="tbl">
+        <div class="tr list stays hd"><div>Guest</div><div>Stay</div><div>Room type</div><div>Room</div><div>Dates</div><div>Status</div><div></div></div>
+        <div class="tr list stays"><div class="nm"><b>Fatima Sheikh</b><span>2 adults</span></div><div>01J9Q…8C21</div><div>Deluxe King</div><div>—</div><div>03 Sept → 07 Sept</div><div><span class="pill">Booked</span></div><div><span class="sh miss"><i></i>no room</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+  <aside class="dev"><b>Note to the architect — not on the screen.</b><ul><li>Opens with the existing <code>booking</code> read. A booking made at the desk has no PMS reference, so it is titled by guest and the stay's short id.</li></ul></aside>
+</section>
+<section class="step">
+  <h2><span class="num">!</span>When it cannot be done</h2>
+  <p class="says">Every refusal keeps what the person typed, says in plain words what happened and whether anything was created, and offers the action that could help.</p>
+  <div class="refs"><div class="ref"><h3>Not permitted</h3><p class="says">The service refuses before writing. Wording as GuestOps already says it for every refused write.</p><div class="win" style="min-height:520px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list sel"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm pri" type="button">Chosen</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Create this booking?</b><span>Check it with the guest before you confirm</span></div>
+        <div class="sh_b">
+          <div class="note" style="padding:10px 12px;border-color:var(--color-line-strong)"><b>That was not permitted, so nothing was created.</b> Your role does not allow creating bookings — an administrator can grant it.</div>
+          <div class="fr"><div class="k">Guest</div><div class="v"><b>Fatima Sheikh</b> · +91 98470 11234</div></div>
+          <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King · one room</div></div>
+          <div class="fr"><div class="k">Dates</div><div class="v"><b>03 Sept</b> → <b>07 Sept 2026</b> · 4 nights</div></div>
+        </div>
+        <div class="sh_f"><div class="grow"></div><button class="btn sm" type="button">Back</button><button class="btn sm pri" type="button">Try again</button></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="ref"><h3>Could not be checked</h3><p class="says">The permission check itself failed. Red, and never worded as the person lacking permission.</p><div class="win" style="min-height:520px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list sel"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm pri" type="button">Chosen</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Create this booking?</b><span>Check it with the guest before you confirm</span></div>
+        <div class="sh_b">
+          <div class="note" style="padding:10px 12px;border-color:var(--bad-edge)"><b>Whether that is permitted could not be checked, so nothing was created.</b> Try again in a moment.</div>
+          <div class="fr"><div class="k">Guest</div><div class="v"><b>Fatima Sheikh</b> · +91 98470 11234</div></div>
+          <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King · one room</div></div>
+          <div class="fr"><div class="k">Dates</div><div class="v"><b>03 Sept</b> → <b>07 Sept 2026</b> · 4 nights</div></div>
+        </div>
+        <div class="sh_f"><div class="grow"></div><button class="btn sm" type="button">Back</button><button class="btn sm pri" type="button">Try again</button></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="ref"><h3>No answer</h3><p class="says">The request may have reached the service. The screen does not claim nothing happened, and says what trying again could do.</p><div class="win" style="min-height:520px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>03 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp"><b>07 Sept 2026</b><span class="grow">4 nights</span></div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn" type="button">Check again</button>
+      </div>
+      <div class="tbl">
+        <div class="tr list hd"><div>Room type</div><div>Total rooms</div><div>Sold</div><div>Out of order</div><div>Held back</div><div>Free</div></div>
+        <div class="tr list sel"><div class="nm"><b>Deluxe King</b></div><div>24</div><div>19</div><div>1</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">4</b><button class="btn sm pri" type="button">Chosen</button></div></div>
+        <div class="tr list"><div class="nm"><b>Deluxe Twin</b></div><div>18</div><div>18</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Executive Suite</b></div><div>6</div><div>2</div><div>0</div><div>4</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--faint);font-size:15px">0</b><span class="hint">none free</span></div></div>
+        <div class="tr list"><div class="nm"><b>Superior Double</b></div><div>12</div><div>7</div><div>0</div><div>0</div><div style="display:flex;gap:12px;align-items:center"><b style="color:var(--ok);font-size:15px">5</b><button class="btn sm" type="button">Choose</button></div></div>
+      </div>
+    </div>
+    <div class="scrim">
+      <div class="sheet">
+        <div class="sh_h"><b>Create this booking?</b><span>Check it with the guest before you confirm</span></div>
+        <div class="sh_b">
+          <div class="note" style="padding:10px 12px;border-color:var(--color-warn)"><b>GuestOps did not answer, so whether the booking was made is not known.</b> Check Bookings for Fatima Sheikh before trying again — trying again could make a second booking.</div>
+          <div class="fr"><div class="k">Guest</div><div class="v"><b>Fatima Sheikh</b> · +91 98470 11234</div></div>
+          <div class="fr"><div class="k">Room type</div><div class="v">Deluxe King · one room</div></div>
+          <div class="fr"><div class="k">Dates</div><div class="v"><b>03 Sept</b> → <b>07 Sept 2026</b> · 4 nights</div></div>
+        </div>
+        <div class="sh_f"><div class="grow"></div><button class="btn sm" type="button">Back</button><button class="btn sm pri" type="button">Try again</button></div>
+      </div>
+    </div>
+  </div>
+</div></div>
+<div class="ref"><h3>Dates the wrong way round</h3><p class="says">Caught before anything is sent; the search stays off until the dates make sense. The service refuses the same case with the same sentence.</p><div class="win" style="min-height:300px">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today</button>
+    <button class="tab on" type="button">Bookings</button>
+    <button class="tab" type="button">Guests</button>
+    <button class="tab" type="button">Attention</button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">New booking</div></div><div class="grow"></div><button class="btn" type="button">Walk-in</button></div>
+    <div class="body">
+      <div class="fltr" style="display:flex;gap:10px;align-items:flex-end">
+        <div class="fld" style="flex:1"><label>Arrive</label><div class="inp"><b>07 Sept 2026</b></div></div>
+        <div class="fld" style="flex:1"><label>Depart</label><div class="inp" style="border-color:var(--bad-edge)"><b>03 Sept 2026</b></div>
+          <div class="hint" style="color:var(--bad)">The departure is before the arrival.</div></div>
+        <div class="fld" style="flex:1"><label>Guests</label><div class="inp">1 room · 2 adults <span class="grow">▾</span></div></div>
+        <button class="btn pri off" type="button" disabled>Check availability</button>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+</section>
+</div></body></html>
