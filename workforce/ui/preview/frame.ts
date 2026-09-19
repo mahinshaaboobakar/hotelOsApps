@@ -128,6 +128,29 @@ function host(granted: readonly string[]): HostApi {
           });
         }
 
+        // **The three list states the app surface checklist names and this
+        // harness could not reach** (HotelOsApps `docs/app-surface-checklist.md`,
+        // G3–G7). §6's pager failed in Jobs in exactly the state nobody opened,
+        // so each is a fixture here rather than an argument about it:
+        //
+        //   single   1P  a list that fits one page — "showing 1–4 of 4"
+        //   last     ML  the short last page of 42 — "26–42 of 42", 17 rows
+        //   barren   E1  a page with no rows in a list that has some
+        //
+        // Totals are stated with the rows, so the pager says what a service
+        // would say for them; these are geometry fixtures, not a property.
+        const state = params.get("state");
+        const rows = recordedPeople.postings;
+        if (state === "single") {
+          return Promise.resolve({ paging: { page: 0, pageSize: 25, total: 4 }, postings: rows.slice(0, 4) });
+        }
+        if (state === "last") {
+          return Promise.resolve({ paging: { page: 1, pageSize: 25, total: 42 }, postings: rows.slice(0, 17) });
+        }
+        if (state === "barren") {
+          return Promise.resolve({ paging: { page: 2, pageSize: 25, total: 42 }, postings: [] });
+        }
+
         return Promise.resolve(recordedPeople);
       }
 
