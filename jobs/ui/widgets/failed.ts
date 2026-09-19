@@ -8,21 +8,23 @@
  * place they are not all on screen. 0.4.0 drew the whole screen surface inside
  * a card instead, so a glance at a dashboard got a log grid at 12px.
  *
- * # Two things the frame draws that the seam does not carry
+ * # The words are the seam's, at this size too — since 0.4.2
  *
- * The frame's widget sentences are **shorter** than the screen's — *"The
- * service refused. Nothing is broken; a permission is missing."* against the
- * screen's two clauses — and `failureDrawing` has one set of words, not two.
- * This draws the seam's words rather than writing a second set here, because a
- * second set is how three applications come to say three things; the gap is
- * reported for the SDK's owner to close once for all of them.
+ * Until 0.4.1 this card drew the SCREEN's sentences, because the seam had one
+ * set of words, and composed *"Open Jobs →"* / *"Try again →"* itself from the
+ * application's name and `FAILURE_LABELS.retry` — both reported from the 0.4.1
+ * audit rather than written a second way here. GG closed both in the SDK
+ * (`885677ec`, `71458056`): `briefSaid` and `brief` are the frame's shorter
+ * sentences, and `onward` is the link line, decided beside the rule that
+ * decides the screen's button — only an unanswered read can be tried again. So
+ * three applications' cards now say one thing, and this file writes no words.
  *
- * The *"Open Jobs →"* and *"Try again →"* lines are composed here from the
- * application's name and `FAILURE_LABELS.retry`, for the same reason and with
- * the same report: the frame draws them and the seam has no field for them.
+ * What stays this file's is the wiring: `retry` redraws the card, `open` asks
+ * the shell for the screen that carries the facts — which screen is Jobs' to
+ * say, since the SDK does not know Jobs' screens.
  */
 
-import { FAILURE_LABELS, failureDrawing, type HostApi, type ReadFailure } from "@hotelos/sdk";
+import { failureDrawing, type HostApi, type Onward, type ReadFailure } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
 import { TONE, glyph } from "../chrome/failure";
@@ -51,19 +53,39 @@ export function failedCard(
   const mark = fill(el("div", "wfail-mark"), glyph(drawing.glyph));
   mark.style.color = TONE[drawing.cause];
 
-  const onward = drawing.retryable
-    ? link(`${FAILURE_LABELS.retry} →`, (self) => void again().then((fresh) => self.closest(".wcard")?.replaceWith(fresh)))
-    : link("Open Jobs →", (self) => void open(host, self, THE_SCREEN));
-
   return card(title, scope, [
     fill(
       el("div", "wfail"),
       mark,
-      el("div", "wfail-said", drawing.said),
-      el("div", "wfail-why", drawing.why),
-      onward,
+      // `briefSaid`, not `said`: a fault's headline drops its subject at card
+      // size — "Jobs could not build this" — as 64b's widget frame draws it.
+      el("div", "wfail-said", drawing.briefSaid),
+      // `brief`, not `why`: the frame's sentence written to fit a card, not the
+      // screen's wrapped across four lines.
+      el("div", "wfail-why", drawing.brief),
+      onward(host, drawing.onward, again),
     ),
   ]);
+}
+
+/**
+ * The seam's `onward`, wired — the frame's `.w-open`.
+ *
+ * Exhausted rather than read through: an `Onward` kind added to the SDK stops
+ * this compiling, where a default branch would quietly draw a link that does
+ * the wrong thing.
+ */
+function onward(
+  host: HostApi,
+  line: Onward,
+  again: () => Promise<HTMLElement>,
+): HTMLElement {
+  switch (line.kind) {
+    case "retry":
+      return link(line.label, (self) => void again().then((fresh) => self.closest(".wcard")?.replaceWith(fresh)));
+    case "open":
+      return link(line.label, (self) => void open(host, self, THE_SCREEN));
+  }
 }
 
 /** The frame's `.w-open` — a line that goes somewhere, set as a link. */

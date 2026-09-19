@@ -1,4 +1,14 @@
-import { failureDrawing, type Cause, type FailureDrawing, type Glyph, type ReadFailure } from "@hotelos/sdk";
+import {
+  failureDrawing,
+  formatInstant,
+  type Cause,
+  type Fact,
+  type FailureDrawing,
+  type Glyph,
+  type Phrase,
+  type PropertyEnvironment,
+  type ReadFailure,
+} from "@hotelos/sdk";
 
 import { control, el, fill } from "./element";
 
@@ -35,6 +45,20 @@ import { control, el, fill } from "./element";
  * and the frame has nothing for it. {@link failureState} gives it the frame's
  * state block without the screen's centring, which is the least that is not
  * invented; it is reported as undrawn rather than treated as settled.
+ *
+ * # What 0.4.2 takes from the SDK instead of doing here
+ *
+ * The 0.4.1 audit found four places where Jobs' words differed from 64b and
+ * the difference was the SDK's to close. GG closed them (`885677ec`,
+ * `71458056`), and this surface now uses what the seam hands over rather than
+ * working around its absence — the same shape as Workforce (`665bfcc`):
+ *
+ *   the time           the `at` fact, formatted for the PROPERTY's locale and
+ *                      zone, where it used to reach a screen as raw ISO
+ *   marked runs        the permission and 64b's bold clause come as runs; this
+ *                      used to find the capability by searching the sentence
+ *   widget sentences   `briefSaid` / `brief` — `widgets/failed.ts`
+ *   the link line      `onward` — `widgets/failed.ts`
  */
 
 /**
@@ -43,9 +67,16 @@ import { control, el, fill } from "./element";
  * `.body { display:grid; place-items:center; min-height:330px }` and
  * `.state { width:min(560px, 92%); padding:34px 0; text-align:left }`: the block
  * sits in the middle of the content area and reads left-aligned inside it.
+ *
+ * @param property the locale and zone the facts are read in — `host.property`
  */
-export function failure(said: ReadFailure, the: string, again?: () => void): HTMLElement {
-  return fill(el("div", "gap"), failureState(said, the, again));
+export function failure(
+  property: PropertyEnvironment,
+  said: ReadFailure,
+  the: string,
+  again?: () => void,
+): HTMLElement {
+  return fill(el("div", "gap"), failureState(property, said, the, again));
 }
 
 /**
@@ -57,7 +88,12 @@ export function failure(said: ReadFailure, the: string, again?: () => void): HTM
  * sentence"*, and 0.4.0 put the note below the facts, where it read as a
  * footnote to the log line.
  */
-export function failureState(said: ReadFailure, the: string, again?: () => void): HTMLElement {
+export function failureState(
+  property: PropertyEnvironment,
+  said: ReadFailure,
+  the: string,
+  again?: () => void,
+): HTMLElement {
   const drawing = failureDrawing(said, { app: "Jobs", the });
 
   return fill(
@@ -65,9 +101,9 @@ export function failureState(said: ReadFailure, the: string, again?: () => void)
     fill(el("div", "gap-mark"), glyph(drawing.glyph)),
     el("div", "gap-label", drawing.label),
     el("div", "gap-said", drawing.said),
-    el("div", "gap-why", drawing.why),
-    todo(drawing, said.capability, again),
-    facts(drawing, said.capability),
+    fill(el("div", "gap-why"), ...phrase(drawing.whyPhrase)),
+    todo(drawing, again),
+    facts(drawing, property),
   );
 }
 
@@ -101,23 +137,26 @@ export function glyph(shape: Glyph): SVGSVGElement {
 }
 
 /**
- * A sentence with the capability set in bold, as the frame sets it.
+ * A phrase as the frame sets it: plain words, and runs set apart in bold.
  *
- * The frame draws `This screen needs <b>roster.read</b>…` and `Asked for
- * <b>roster.read</b> · me`: the capability is the one word a person can take to
- * somebody who can grant it. The seam hands over plain strings, so the emphasis
- * is found by the capability's own value rather than by position — a sentence
- * that does not contain it is returned untouched rather than guessed at.
+ * The frame draws `This screen needs <b>roster.read</b>…` and the fault's
+ * `<b>This is not something the property has done</b>`. Both arrive marked, as
+ * a `permission` run and an `emphasis` run. They are drawn alike today because
+ * 64b draws them alike; they stay two branches because they are two different
+ * facts, and a permission is the one word a person may quote to somebody who
+ * can grant it.
+ *
+ * **This replaces `emphasised()`**, which found the capability by searching
+ * the sentence for it. It could only bold the permission, never the emphasis,
+ * and it would have bolded the first match if a capability's name also
+ * appeared elsewhere in the words.
  */
-export function emphasised(sentence: string, capability: string): Node[] {
-  const at = sentence.indexOf(capability);
-  if (at < 0) return [document.createTextNode(sentence)];
-
-  return [
-    document.createTextNode(sentence.slice(0, at)),
-    el("b", undefined, capability),
-    document.createTextNode(sentence.slice(at + capability.length)),
-  ];
+function phrase(runs: Phrase): Node[] {
+  return runs.map((run) => {
+    if (typeof run === "string") return document.createTextNode(run);
+    if ("permission" in run) return el("b", undefined, run.permission);
+    return el("b", undefined, run.emphasis);
+  });
 }
 
 /**
@@ -128,7 +167,7 @@ export function emphasised(sentence: string, capability: string): Node[] {
  * because naming who can grant would tell whoever is at the terminal who holds
  * authority in this property.
  */
-function todo(drawing: FailureDrawing, capability: string, again?: () => void): HTMLElement {
+function todo(drawing: FailureDrawing, again?: () => void): HTMLElement {
   const row = el("div", "gap-do");
   const act = drawing.act;
 
@@ -148,19 +187,41 @@ function todo(drawing: FailureDrawing, capability: string, again?: () => void): 
     }
   }
 
-  row.append(fill(el("span", "gap-ask"), ...emphasised(act.note, capability)));
+  // The phrase, not the note: the same words, with the permission kept as a
+  // run the surface can set apart.
+  row.append(fill(el("span", "gap-ask"), ...phrase(act.phrase)));
   return row;
 }
 
 /** The frame's `.prov` — the facts as a labelled grid, under a rule. */
-function facts(drawing: FailureDrawing, capability: string): HTMLElement {
+function facts(drawing: FailureDrawing, property: PropertyEnvironment): HTMLElement {
   const list = el("dl", "gap-facts");
 
   for (const fact of drawing.facts) {
-    list.append(el("dt", undefined, fact.label), fill(el("dd"), ...emphasised(fact.value, capability)));
+    list.append(el("dt", undefined, fact.label), fill(el("dd"), ...factValue(fact, property)));
   }
 
   return list;
+}
+
+/**
+ * One fact's value, composed here from the values the seam hands over.
+ *
+ * `asked` sets the permission apart from its method, as 64b draws *Asked for
+ * <b>roster.read</b> · me*; the separator is this surface's, not the SDK's.
+ * `at` is the instant, formatted in the property's locale and zone (JOBS-Q1(8))
+ * — it reached a hotel's screen as `2026-09-18T11:05:48.691Z` until 0.4.2, and
+ * the clipboard's `wire` keeps the ISO form, which is the quotable one.
+ */
+function factValue(fact: Fact, property: PropertyEnvironment): Node[] {
+  switch (fact.kind) {
+    case "asked":
+      return [el("b", undefined, fact.permission), document.createTextNode(` · ${fact.method}`)];
+    case "at":
+      return [document.createTextNode(formatInstant(fact.at, property, "date-time"))];
+    case "answer":
+      return [document.createTextNode(fact.value)];
+  }
 }
 
 /**
@@ -209,6 +270,7 @@ ${Object.entries(TONE).map(([cause, tone]) => `.gap-${cause} .gap-mark{color:${t
 .gap-said{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:8px;
           color:var(--color-ink,#e8ebf4)}
 .gap-why{color:var(--color-ink-muted,#8b93a7);font-size:14px;max-width:52ch;margin-bottom:18px}
+.gap-why b{color:var(--color-ink,#e8ebf4);font-weight:600}
 .gap-do{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap}
 .gap-do .btn{font-size:13px;font-weight:600;padding:7px 15px;border-radius:9px;
              border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));

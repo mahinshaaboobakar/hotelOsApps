@@ -32,12 +32,12 @@ export async function resolve(
   // Either missing is a failure with its own reason rather than a screen drawn
   // half from data and half from nothing.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "this job", () => void resolve(host, main, jobId, onDone)));
+    main.replaceChildren(failure(host.property, got.failure, "this job", () => void resolve(host, main, jobId, onDone)));
     return;
   }
 
   if (!catalogue.ok) {
-    main.replaceChildren(failure(catalogue.failure, "the item's resolutions"));
+    main.replaceChildren(failure(host.property, catalogue.failure, "the item's resolutions"));
     return;
   }
 

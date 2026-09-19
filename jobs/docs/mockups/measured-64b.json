@@ -411,7 +411,7 @@
           {
             "role": "at",
             "drawn": "17 Sep 2026, 08:53:23 UTC",
-            "built": "2026-09-18T11:05:00.404Z",
+            "built": "19 Sept, 09:19",
             "same": false
           }
         ]
@@ -555,8 +555,8 @@
           {
             "role": "why",
             "drawn": "The service refused. Nothing is broken; a permission is miss",
-            "built": "The service answered and refused. Nothing is broken and noth",
-            "same": false
+            "built": "The service refused. Nothing is broken; a permission is miss",
+            "same": true
           },
           {
             "role": "onward",
@@ -1025,7 +1025,7 @@
           {
             "role": "at",
             "drawn": "17 Sep 2026, 08:53:23 UTC",
-            "built": "2026-09-18T11:05:25.362Z",
+            "built": "19 Sept, 09:19",
             "same": false
           }
         ]
@@ -1169,8 +1169,8 @@
           {
             "role": "why",
             "drawn": "Nothing is known about this — not empty, not full.",
-            "built": "Nothing is known about this — not that it is empty, and not ",
-            "same": false
+            "built": "Nothing is known about this — not empty, not full.",
+            "same": true
           },
           {
             "role": "onward",
@@ -1639,7 +1639,7 @@
           {
             "role": "at",
             "drawn": "17 Sep 2026, 08:53:23 UTC",
-            "built": "2026-09-18T11:05:48.691Z",
+            "built": "19 Sept, 09:19",
             "same": false
           }
         ]
@@ -1777,14 +1777,14 @@
           {
             "role": "sentence",
             "drawn": "Jobs could not build this",
-            "built": "Jobs could not build this board",
-            "same": false
+            "built": "Jobs could not build this",
+            "same": true
           },
           {
             "role": "why",
             "drawn": "A service fault, not something the property has done.",
-            "built": "The service reached its own fault. This is not something the",
-            "same": false
+            "built": "A service fault, not something the property has done.",
+            "same": true
           },
           {
             "role": "onward",

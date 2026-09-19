@@ -20,7 +20,7 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
   // seam carries a value or a reason and never both, so there is nothing
   // to render in between.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "the organisation's catalogue"));
+    main.replaceChildren(failure(host.property, got.failure, "the organisation's catalogue"));
     return;
   }
   const curate = may(host, JOB_CURATE);

@@ -20,7 +20,7 @@ export async function live(host: HostApi, main: HTMLElement): Promise<void> {
   // seam carries a value or a reason and never both, so there is nothing
   // to render in between.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "the live board"));
+    main.replaceChildren(failure(host.property, got.failure, "the live board"));
     return;
   }
   const body = el("div", "body");

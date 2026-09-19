@@ -41,7 +41,7 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
   // jobs by id — which meant a screen whose read had failed still drew a job,
   // and drew a DIFFERENT one depending on which had been asked for.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "this job", () => void job(host, main, place)));
+    main.replaceChildren(failure(host.property, got.failure, "this job", () => void job(host, main, place)));
     return;
   }
 

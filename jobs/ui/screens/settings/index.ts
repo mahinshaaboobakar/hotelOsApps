@@ -35,7 +35,7 @@ export async function settings(host: HostApi, main: HTMLElement, place: Settings
   // seam carries a value or a reason and never both, so there is nothing
   // to render in between.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "this property's settings"));
+    main.replaceChildren(failure(host.property, got.failure, "this property's settings"));
     return;
   }
   const s = got.value;

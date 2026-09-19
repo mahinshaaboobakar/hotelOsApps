@@ -76,7 +76,7 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
     // "this board" is 64b's own noun — the frame draws Jobs' Board failing as
     // "Jobs could not build this board", and the noun is the one word of the
     // sentence this module supplies rather than the SDK.
-    main.replaceChildren(failure(page.failure, "this board", () => void board(host, main, place)));
+    main.replaceChildren(failure(host.property, page.failure, "this board", () => void board(host, main, place)));
     return;
   }
 
@@ -89,7 +89,7 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
       // does not draw — it has a screen size and a widget size. The state block
       // without the screen's centring is the least that is not invented, and
       // it is reported as undrawn in chapter 05 rather than treated as settled.
-      : failureState(today.failure, "today's figures", () => void board(host, main, place)),
+      : failureState(host.property, today.failure, "today's figures", () => void board(host, main, place)),
     filters(place, may(host, JOB_CREATE)),
     table(host, page.value.rows, place),
     pages(page.value, place),

@@ -26,7 +26,7 @@ export async function raise(host: HostApi, main: HTMLElement, onDone: () => void
   // Nothing can be raised against a catalogue that did not arrive: the item
   // decides the department, the priority and the allowance.
   if (!got.ok) {
-    main.replaceChildren(failure(got.failure, "the catalogue", () => void raise(host, main, onDone)));
+    main.replaceChildren(failure(host.property, got.failure, "the catalogue", () => void raise(host, main, onDone)));
     return;
   }
 
