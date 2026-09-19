@@ -12,6 +12,7 @@ import { chip, pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
@@ -47,7 +48,7 @@ export async function areas(host: HostApi, body: HTMLElement, nav: Nav, data: Se
 
   const v = got.value;
   const strip = el("div", "strip");
-  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, String(n)), document.createTextNode(label)); return c; };
+  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, whole(host, n)), document.createTextNode(label)); return c; };
   strip.append(count(v.areas, "public areas at this property"), count(v.withRoutine, "with a routine"), count(v.areas - v.withRoutine, "without"),
     el("span", "end", "from Master Data's location tree · read, never created here"));
   const chips = el("div", "chips");
@@ -79,7 +80,7 @@ export async function areas(host: HostApi, body: HTMLElement, nav: Nav, data: Se
     }
     nav.show();
   })(), nav.show);
-  body.append(strip, chips, scroller(table), pager(v.paging, v.rows.length, withoutRoutine ? "public areas without a routine" : "public areas", (p) => { page = p; nav.show(); }), line);
+  body.append(strip, chips, scroller(table), pager(host, v.paging, v.rows.length, withoutRoutine ? "public areas without a routine" : "public areas", (p) => { page = p; nav.show(); }), line);
 }
 
 function routine(host: HostApi, nav: Nav, area: Area): void {

@@ -14,6 +14,7 @@ import { control, el } from "../../chrome/element";
 import { day } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, dialog, sheet } from "../../chrome/overlay";
 
 interface Grants {
@@ -57,7 +58,7 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
     table.append(tr);
   }
   const n = got.value.grants.length;
-  const count = el("div", "count", `${n === 0 ? "no grants" : n === 1 ? "1 grant" : `${n} grants`} at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings come from Workforce and cannot be edited here`);
+  const count = el("div", "count", `${n === 0 ? "no grants" : n === 1 ? "1 grant" : `${whole(host, n)} grants`} at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings come from Workforce and cannot be edited here`);
   const grantRow = el("div", "row");
   grantRow.style.marginTop = "12px";
   grantRow.append(control("btn pri", "Grant to a person…", () => grant(host, nav)));

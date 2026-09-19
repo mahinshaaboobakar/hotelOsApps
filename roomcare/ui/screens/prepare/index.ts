@@ -13,6 +13,7 @@ import { control, el } from "../../chrome/element";
 import { clock, minutes, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
 import { moveRooms } from "./move";
@@ -63,8 +64,8 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
   strip.append(
     bold(v.window === "EVENING" ? "Turndown" : "Morning", ` ${clock(host, v.windowStarts)} – ${clock(host, v.windowEnds)} · ${v.open ? "open" : "closed"}`),
     v.preparedAt === null ? el("span", undefined, "not prepared yet") : bold(since, v.preparedBy === null ? "" : ` by ${v.preparedBy}`, "prepared "),
-    bold(String(v.tasks), " tasks"),
-    bold(String(v.changesSince), ` changes since ${since}`),
+    bold(whole(host, v.tasks), " tasks"),
+    bold(whole(host, v.changesSince), ` changes since ${since}`),
     bold(v.triggerMode === "AUTOMATIC" ? "Automatic" : "Prepare by button / HosPilot", "", "trigger: "),
     el("span", "end", when(host, v.at)),
   );
@@ -76,7 +77,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     if (v.preparedAt === null) buttons.append(control("btn pri", "Prepare the day", () => void press()));
     else {
       buttons.append(
-        v.changesSince > 0 ? control("btn pri", `Add the new rooms (${v.changesSince})`, () => void press()) : el("span", "btn off", "Add the new rooms — nothing new"),
+        v.changesSince > 0 ? control("btn pri", `Add the new rooms (${whole(host, v.changesSince)})`, () => void press()) : el("span", "btn off", "Add the new rooms — nothing new"),
         control("btn", "Show what changed", () => changesCard.scrollIntoView({ block: "nearest" })),
         el("span", "btn off", `Prepare the day — done ${since}`),
       );
@@ -94,7 +95,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     row.append(el("td", "num", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
     table.append(row);
   }
-  changesCard.append(table, pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));
+  changesCard.append(table, pager(host, v.changesPaging, v.changes.length, "changes since the last press", goPage));
 
   const grid = el("div", "cols");
   grid.append(changesCard, proposal(host, nav, v, refuse));
@@ -108,7 +109,7 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: str
   kv.append(el("div", "k", "Strategy"), el("div", undefined, `${lower(p.strategy)} — the property's (Setup)`));
   for (const person of p.people) {
     kv.append(el("div", "k", person.name), el("div", undefined,
-      `${person.rooms} rooms · ${person.roomNumbers.slice(0, 6).join(" ")}${person.roomNumbers.length > 6 ? " …" : ""} · ${minutes(person.minutes)} planned${person.accepted ? " · accepted" : ""}`));
+      `${whole(host, person.rooms)} rooms · ${person.roomNumbers.slice(0, 6).join(" ")}${person.roomNumbers.length > 6 ? " …" : ""} · ${minutes(host, person.minutes)} planned${person.accepted ? " · accepted" : ""}`));
   }
   if (p.nobodyAvailable.length > 0) {
     const cell = el("div");
@@ -119,7 +120,7 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: str
     kv.append(el("div", "k", "Nobody available"), cell);
   }
   const here = el("div");
-  here.append(document.createTextNode(`from Workforce — ${p.candidates} posted to Housekeeping; grouped by department until the zone is on the posting `), el("span", "tag port", "Workforce ask · zone on the posting"));
+  here.append(document.createTextNode(`from Workforce — ${whole(host, p.candidates)} posted to Housekeeping; grouped by department until the zone is on the posting `), el("span", "tag port", "Workforce ask · zone on the posting"));
   kv.append(el("div", "k", "Who is here"), here);
   view.append(kv);
   if (holds(host, "roomcare.assign")) {

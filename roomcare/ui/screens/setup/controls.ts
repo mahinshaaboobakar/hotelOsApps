@@ -9,6 +9,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { control, el, option } from "../../chrome/element";
 import { when } from "../../chrome/instant";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import type { SetupData } from "./index";
 
@@ -71,7 +72,7 @@ export function saveLine(host: HostApi, data: SetupData | null, save: () => void
 }
 
 /** A sheet that reorders a short list with ↑ and ↓; the tab's Save keeps the order as a new version. */
-export function reorderSheet(nav: Nav, title: string, items: readonly string[], word: (item: string) => string, note: string,
+export function reorderSheet(host: HostApi, nav: Nav, title: string, items: readonly string[], word: (item: string) => string, note: string,
   keep: (order: string[]) => string | null): void {
   const overlay = sheet(nav.frame, title);
   const order = [...items];
@@ -90,7 +91,7 @@ export function reorderSheet(nav: Nav, title: string, items: readonly string[], 
       const down = control("btn sm", "↓", () => swap(i, i + 1));
       if (i === 0) up.setAttribute("disabled", "");
       if (i === order.length - 1) down.setAttribute("disabled", "");
-      line.append(up, down, el("span", undefined, `${i + 1} · ${word(item)}`));
+      line.append(up, down, el("span", undefined, `${whole(host, i + 1)} · ${word(item)}`));
       return line;
     }));
   };
@@ -111,5 +112,5 @@ export function refuse(said: HTMLElement, because: string): void {
 
 function versionLine(host: HostApi, data: SetupData): HTMLElement {
   const p = data.policy;
-  return el("span", "mono", p.version === 0 ? "the property's defaults — no version saved yet" : `version ${p.version} · ${data.changedBy ?? "—"} · ${when(host, p.changedAt)}`);
+  return el("span", "mono", p.version === 0 ? "the property's defaults — no version saved yet" : `version ${whole(host, p.version)} · ${data.changedBy ?? "—"} · ${when(host, p.changedAt)}`);
 }

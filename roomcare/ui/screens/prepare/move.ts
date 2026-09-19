@@ -10,6 +10,7 @@ import { control, el, option } from "../../chrome/element";
 import { failed } from "../../chrome/failure";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import { service } from "../../chrome/words";
 import type { Board } from "../../model";
@@ -29,7 +30,7 @@ export async function moveRooms(host: HostApi, nav: Nav, v: PrepareView, onlyTas
 
   const rooms = board.value.zones.flatMap((z) => z.rooms)
     .filter((r) => r.taskId !== null && (onlyTask === null ? !r.marks.inProgress && r.outcome.kind !== "DONE" : r.taskId === onlyTask));
-  overlay.body.append(el("p", "dim", `${v.proposal.candidates} people posted to Housekeeping. A room already started stays with its attendant.`));
+  overlay.body.append(el("p", "dim", `${whole(host, v.proposal.candidates)} people posted to Housekeeping. A room already started stays with its attendant.`));
   const choices = rooms.map((room) => {
     const select = el("select", "cell") as HTMLSelectElement;
     select.append(option("— nobody", ""));

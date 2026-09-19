@@ -13,6 +13,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import { READ, load } from "../../chrome/load";
+import { whole } from "../../chrome/number";
 import { ordinal, reason } from "../../chrome/words";
 import { card, figures, openRow, unread } from "../card";
 
@@ -31,9 +32,9 @@ export async function roomsReady(host: HostApi): Promise<HTMLElement> {
   const v = got.value;
   const percent = v.departures === 0 ? 0 : Math.round((v.ready / v.departures) * 100);
   const total = el("div", "wrow");
-  total.append(el("span", undefined, `${v.departures} departures`), el("span", "num", `${percent}% ready · ${clock(host, v.at)}`));
+  total.append(el("span", undefined, `${whole(host, v.departures)} departures`), el("span", "num", `${whole(host, percent)}% ready · ${clock(host, v.at)}`));
   return card("Rooms Ready", "today's departures", [
-    figures([{ value: String(v.ready), label: "ready", tone: "ok" }, { value: String(v.inProgress), label: "in progress", tone: "warn" }, { value: String(v.dirty), label: "dirty", tone: "bad" }]),
+    figures([{ value: whole(host, v.ready), label: "ready", tone: "ok" }, { value: whole(host, v.inProgress), label: "in progress", tone: "warn" }, { value: whole(host, v.dirty), label: "dirty", tone: "bad" }]),
     total,
   ]);
 }
@@ -45,7 +46,7 @@ export async function arrivalsWaiting(host: HostApi): Promise<HTMLElement> {
   const words: Record<string, string> = { IN_PROGRESS: "in progress", NOBODY_AVAILABLE: "nobody available", NOT_STARTED: "not started" };
   const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, `${clock(host, r.at)} · ${words[r.what] ?? r.what.toLowerCase()}`, r.what === "NOBODY_AVAILABLE" ? "bad" : "", r.roomId));
   if (v.total === 0) rows.push(el("div", "wquiet", "Every room sold tonight is ready."));
-  if (v.total > v.rows.length) rows.push(foot(`${v.total - v.rows.length} more`, "soonest first"));
+  if (v.total > v.rows.length) rows.push(foot(`${whole(host, v.total - v.rows.length)} more`, "soonest first"));
   return card("Arrivals Waiting", "sold, not ready", rows);
 }
 
@@ -55,7 +56,7 @@ export async function attention(host: HostApi): Promise<HTMLElement> {
   const v = got.value;
   const rows: (Node | null)[] = v.rows.map((r) => openRow(host, r.room, attentionWords(r), r.tone, r.roomId));
   if (v.total === 0) rows.push(el("div", "wquiet", "Nothing needs a person right now."));
-  if (v.total > v.rows.length) rows.push(foot(`${v.total - v.rows.length} more`, "in the supervision lane"));
+  if (v.total > v.rows.length) rows.push(foot(`${whole(host, v.total - v.rows.length)} more`, "in the supervision lane"));
   return card("Attention", "needs a person", rows);
 }
 
@@ -69,7 +70,7 @@ export async function attendantsNow(host: HostApi): Promise<HTMLElement> {
     return line;
   });
   if (v.rows.length === 0) rows.push(el("div", "wnone", "Nobody is in a room right now."));
-  rows.push(foot(v.onShift === null ? "on shift — not announced by Workforce yet" : `${v.onShift} on shift`, `${v.inARoom} in a room`));
+  rows.push(foot(v.onShift === null ? "on shift — not announced by Workforce yet" : `${whole(host, v.onShift)} on shift`, `${whole(host, v.inARoom)} in a room`));
   return card("Attendants Now", "who is where", rows);
 }
 

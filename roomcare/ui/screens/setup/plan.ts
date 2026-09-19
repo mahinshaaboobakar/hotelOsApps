@@ -11,6 +11,7 @@ import { failed } from "../../chrome/failure";
 import { el } from "../../chrome/element";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { inlineNumber, refuse, saveLine } from "./controls";
 import type { SetupData } from "./index";
 
@@ -37,12 +38,12 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
     every.append(months, document.createTextNode(" months"));
     const length = el("td", "dim");
     length.append(document.createTextNode("—"), el("span", "tag port", "JOBS-Q2"));
-    tr.append(el("td", undefined, row.roomType), every, length, el("td", "num", String(row.rooms)),
-      el("td", undefined, row.everyMonths === null ? "—" : String(row.dueThisQuarter)));
+    tr.append(el("td", undefined, row.roomType), every, length, el("td", "num", whole(host, row.rooms)),
+      el("td", undefined, row.everyMonths === null ? "—" : whole(host, row.dueThisQuarter)));
     table.append(tr);
     return { row, months };
   });
-  const count = el("div", "count", `${got.value.rows.length} of ${got.value.rows.length} room types · the plan sets "due"; the window is picked per room on the Deep clean tab, in low occupancy`);
+  const count = el("div", "count", `${whole(host, got.value.rows.length)} of ${whole(host, got.value.rows.length)} room types · the plan sets "due"; the window is picked per room on the Deep clean tab, in low occupancy`);
 
   const kv = el("div", "kv");
   const work = el("div");

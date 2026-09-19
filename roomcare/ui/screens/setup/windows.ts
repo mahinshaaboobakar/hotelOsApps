@@ -9,6 +9,7 @@ import { card } from "../../chrome/card";
 import { el } from "../../chrome/element";
 import { act } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { radio, refuse, saveLine, toggle } from "./controls";
 import type { SetupData } from "./index";
 
@@ -36,7 +37,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
     return { w, on, from, to, outside };
   });
   const count = el("div", "count");
-  count.append(el("span", undefined, `${data.windows.length} of ${data.windows.length} — the two windows a hotel has; a window may cross midnight (a night shift is 22:00 → 06:00, not two ranges)`));
+  count.append(el("span", undefined, `${whole(host, data.windows.length)} of ${whole(host, data.windows.length)} — the two windows a hotel has; a window may cross midnight (a night shift is 22:00 → 06:00, not two ranges)`));
   const windowsCard = card("Windows", table, count,
     el("div", "mono aside", "A room is attempted in each window it is due in; outside a window nothing is attempted — and nothing is dropped: it is collected (S5 c2, S0)."));
 

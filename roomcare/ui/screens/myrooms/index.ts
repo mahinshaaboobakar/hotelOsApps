@@ -12,6 +12,7 @@ import { el } from "../../chrome/element";
 import { clock, minutes } from "../../chrome/instant";
 import { READ, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { ordinal, service } from "../../chrome/words";
 import type { Outcome, Paging } from "../../model";
 import { door } from "./door";
@@ -53,8 +54,8 @@ export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId
   const v = got.value;
   const strip = el("div", "strip");
   const count = (text: string, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, text), document.createTextNode(label)); return c; };
-  strip.append(count(String(v.rooms), "rooms"), count(String(v.done), "done"), count(String(v.inProgress), "in progress"),
-    el("span", undefined, `${minutes(v.plannedMinutes)} planned`), el("span", "end", clock(host, v.at)));
+  strip.append(count(whole(host, v.rooms), "rooms"), count(whole(host, v.done), "done"), count(whole(host, v.inProgress), "in progress"),
+    el("span", undefined, `${minutes(host, v.plannedMinutes)} planned`), el("span", "end", clock(host, v.at)));
 
   const table = el("table");
   const head = el("tr");
@@ -68,19 +69,19 @@ export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId
     if (row.soldAt !== null) what.append(document.createTextNode(" · "), el("span", "mono", `arrival ${clock(host, row.soldAt)}`));
     if (row.reduction !== null) what.append(document.createTextNode(" · "), el("i", undefined, row.reduction));
     const pri = el("td");
-    pri.append(el("span", `pill p${Math.min(row.priority, 3)}`, String(row.priority)));
+    pri.append(el("span", `pill p${Math.min(row.priority, 3)}`, whole(host, row.priority)));
     const earliest = el("td");
     earliest.append(row.earliestAt === null ? document.createTextNode("—") : el("b", undefined, clock(host, row.earliestAt)));
-    tr.append(el("td", "num", row.room), what, pri, earliest, linen(row), stateCell(host, row));
+    tr.append(el("td", "num", row.room), what, pri, earliest, linen(host, row), stateCell(host, row));
     table.append(tr);
   }
 
-  body.append(strip, scroller(table), pager(v.paging, v.rows.length, "rooms assigned to you today", () => {}));
+  body.append(strip, scroller(table), pager(host, v.paging, v.rows.length, "rooms assigned to you today", () => {}));
 }
 
-function linen(row: MyRoom): HTMLElement {
+function linen(host: HostApi, row: MyRoom): HTMLElement {
   const cell = el("td");
-  if (row.declinedDay !== null) cell.append(document.createTextNode(`declined day ${row.declinedDay}`));
+  if (row.declinedDay !== null) cell.append(document.createTextNode(`declined day ${whole(host, row.declinedDay)}`));
   else if (row.linen === "STRIP") cell.append(document.createTextNode("strip"));
   else if (row.linen === "DUE" || row.linen === "MUST") cell.append(el("span", "pill warn", row.linen.toLowerCase()));
   else cell.append(document.createTextNode("—"));

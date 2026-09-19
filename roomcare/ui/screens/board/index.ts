@@ -11,6 +11,7 @@ import { chip } from "../../chrome/bar";
 import { el, option } from "../../chrome/element";
 import { clock, when } from "../../chrome/instant";
 import { READ, load } from "../../chrome/load";
+import { whole } from "../../chrome/number";
 import type { Nav } from "../../chrome/nav";
 import { remember, remembered } from "../../chrome/remember";
 import type { Board, BoardRoom, Strip } from "../../model";
@@ -74,7 +75,7 @@ export async function board(host: HostApi, body: HTMLElement, nav: Nav): Promise
         redraw();
       }));
     }
-    const house = view === "MAP" ? map(data, lit(), nav) : wall(host, data, lit(), collapsed, redraw, nav);
+    const house = view === "MAP" ? map(host, data, lit(), nav) : wall(host, data, lit(), collapsed, redraw, nav);
     body.replaceChildren(strip(host, data.strip), chips, house);
   }
 
@@ -86,7 +87,7 @@ export function strip(host: HostApi, s: Strip): HTMLElement {
   const line = el("div", "strip");
   const count = (value: number, label: string): HTMLElement => {
     const cell = el("span");
-    cell.append(el("b", undefined, String(value)), document.createTextNode(label));
+    cell.append(el("b", undefined, whole(host, value)), document.createTextNode(label));
     return cell;
   };
   line.append(

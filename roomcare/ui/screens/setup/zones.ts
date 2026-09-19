@@ -17,6 +17,7 @@ import { control, el, option } from "../../chrome/element";
 import { day } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import { inlineSelect, refuse, saveLine, toggle } from "./controls";
 import type { SetupData } from "./index";
@@ -68,11 +69,11 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
     const tr = el("tr");
     const edit = el("td");
     edit.append(control("btn sm", "Edit…", () => move(host, nav, v, zone.zoneId)));
-    tr.append(el("td", undefined, zone.name), el("td", "num", zone.rooms === 0 ? "no rooms yet" : `${zone.firstRoom} – ${zone.lastRoom} · ${zone.rooms} rooms`),
+    tr.append(el("td", undefined, zone.name), el("td", "num", zone.rooms === 0 ? "no rooms yet" : `${zone.firstRoom} – ${zone.lastRoom} · ${whole(host, zone.rooms)} rooms`),
       el("td", undefined, zone.since === null ? "—" : `since ${day(host, zone.since)}`), edit);
     table.append(tr);
   }
-  const count = el("div", "count", `${v.zones.length} of ${v.zones.length} zones · ${v.rooms} rooms${v.unzoned > 0 ? ` · ${v.unzoned} in no zone yet — a room left out is grouped as "no zone yet"` : ", every room in exactly one zone; a room left out is a refusal, not a gap"}`);
+  const count = el("div", "count", `${whole(host, v.zones.length)} of ${whole(host, v.zones.length)} zones · ${whole(host, v.rooms)} rooms${v.unzoned > 0 ? ` · ${whole(host, v.unzoned)} in no zone yet — a room left out is grouped as "no zone yet"` : ", every room in exactly one zone; a room left out is a refusal, not a gap"}`);
   const moveRow = el("div", "row");
   moveRow.style.marginTop = "8px";
   moveRow.append(control("btn sm", "Move rooms between zones…", () => move(host, nav, v, v.zones[0]?.zoneId ?? "")));

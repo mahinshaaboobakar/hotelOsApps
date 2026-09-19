@@ -12,6 +12,7 @@ import { control, el } from "../../chrome/element";
 import { clock, nearDay, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, dialog } from "../../chrome/overlay";
 import { ordinal, reason } from "../../chrome/words";
 import type { Paging } from "../../model";
@@ -51,7 +52,7 @@ export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, pa
 
   const lane = got.value;
   const strip = el("div", "strip");
-  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, String(n)), document.createTextNode(label)); return c; };
+  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, whole(host, n)), document.createTextNode(label)); return c; };
   strip.append(count(lane.needDecision, "need a decision"), count(lane.decidedToday, "decided today"), el("span", "end", when(host, lane.at)));
 
   const table = el("table", "list");
@@ -68,7 +69,7 @@ export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, pa
     table.append(tr);
   }
 
-  body.append(strip, scroller(table), pager(lane.paging, lane.rows.length, "rooms in the lane", goPage));
+  body.append(strip, scroller(table), pager(host, lane.paging, lane.rows.length, "rooms in the lane", goPage));
 }
 
 function why(row: LaneRow): HTMLElement {

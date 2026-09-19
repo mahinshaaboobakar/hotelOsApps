@@ -13,6 +13,7 @@ import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { remember, remembered } from "../../chrome/remember";
 import type { RoomStates, StateRow } from "../../model";
 import { compact } from "./compact";
@@ -47,12 +48,12 @@ export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promis
     const answer = done.value as { saved: number; conflicts: Conflict[] };
     conflicts = answer.conflicts;
     if (conflicts.length === 0) nav.show();
-    else { said = `${answer.saved} saved · ${conflicts.length} changed by something else since this screen was drawn — look again before saving those`; redraw(); }
+    else { said = `${whole(host, answer.saved)} saved · ${whole(host, conflicts.length)} changed by something else since this screen was drawn — look again before saving those`; redraw(); }
   };
 
   function redraw(): void {
     const top = el("div", "strip");
-    const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, String(n)), document.createTextNode(label)); return c; };
+    const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, whole(host, n)), document.createTextNode(label)); return c; };
     top.append(
       chip("Sheet", view === "SHEET", () => pick("SHEET")),
       chip("Tap grid", view === "TAP_GRID", () => pick("TAP_GRID")),
@@ -60,7 +61,7 @@ export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promis
       count(data.rooms, "rooms"), count(data.dirty, "dirty"), count(data.occupied, "occupied"), count(data.soldTonight, "sold tonight"),
       el("b", undefined, data.silentSince === null ? "" : `PMS silent since ${clock(host, data.silentSince)}`),
     );
-    const saveButton = edits.size === 0 ? el("span", "btn off", "Save — nothing changed") : control("btn pri", `Save ${edits.size} changes`, () => void save());
+    const saveButton = edits.size === 0 ? el("span", "btn off", "Save — nothing changed") : control("btn pri", `Save ${whole(host, edits.size)} changes`, () => void save());
     const discard = control("btn", "Discard", () => { edits.discard(); conflicts = []; said = ""; redraw(); });
     const end = el("span", "end row");
     end.append(saveButton, discard);

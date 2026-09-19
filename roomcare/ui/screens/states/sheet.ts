@@ -10,6 +10,7 @@ import { chip } from "../../chrome/bar";
 import { control, el, option } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { source } from "../../chrome/words";
 import type { RoomStates, StateRow } from "../../model";
 import type { Edits } from "./edits";
@@ -25,7 +26,7 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
   const shows: readonly (readonly [string, (r: StateRow) => boolean])[] = [
     ["All", () => true], ["Dirty", (r) => edits.value(r, "condition") === "DIRTY"], ["Occupied", (r) => edits.value(r, "occupancy") === "OCCUPIED"],
     ["Vacant", (r) => edits.value(r, "occupancy") === "VACANT"], ["Sold tonight", (r) => r.soldAt !== null],
-    [`Changed · ${edits.size}`, (r) => edits.has(r.roomId)], [`Conflicts · ${conflicts.size}`, (r) => conflicts.has(r.roomId)],
+    [`Changed · ${whole(host, edits.size)}`, (r) => edits.has(r.roomId)], [`Conflicts · ${whole(host, conflicts.size)}`, (r) => conflicts.has(r.roomId)],
   ];
   const filters = el("div", "chips");
   filters.append(el("span", "lbl", "group by"), chip("Zone", true, () => {}), el("span", "lbl", "show"));
@@ -52,7 +53,7 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
   for (const zone of data.zones) {
     const group = el("tr", "g");
     const changed = zone.rooms.filter((r) => edits.has(r.roomId)).length;
-    const cell = el("td", undefined, `▾ ${zone.name} · ${zone.rooms.length} rooms${changed > 0 ? ` · ${changed} changed` : ""}`);
+    const cell = el("td", undefined, `▾ ${zone.name} · ${whole(host, zone.rooms.length)} rooms${changed > 0 ? ` · ${whole(host, changed)} changed` : ""}`);
     cell.setAttribute("colspan", "8");
     group.append(cell);
     tbody.append(group);
@@ -60,7 +61,7 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
   }
   table.append(thead, tbody);
   house.append(table);
-  return [filters, house, dock(edits, redraw, data.rooms)];
+  return [filters, house, dock(host, edits, redraw, data.rooms)];
 }
 
 function line(host: HostApi, row: StateRow, edits: Edits, conflicts: ReadonlySet<string>, redraw: () => void, nav: Nav): HTMLElement {
@@ -105,7 +106,7 @@ function line(host: HostApi, row: StateRow, edits: Edits, conflicts: ReadonlySet
   return tr;
 }
 
-function dock(edits: Edits, redraw: () => void, total: number): HTMLElement {
+function dock(host: HostApi, edits: Edits, redraw: () => void, total: number): HTMLElement {
   const bar = el("div", "dock");
   const make = (label: string, options: readonly (readonly [string, string])[]): HTMLSelectElement => {
     const select = el("select", "cell") as HTMLSelectElement;
@@ -117,7 +118,7 @@ function dock(edits: Edits, redraw: () => void, total: number): HTMLElement {
   const stay = make("stay", STAYS);
   const sold = el("input", "cell") as HTMLInputElement;
   sold.placeholder = "sold at";
-  bar.append(el("b", undefined, `${selected.size} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay,
+  bar.append(el("b", undefined, `${whole(host, selected.size)} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay,
     control("btn sm", "Apply to selected", () => {
       for (const id of selected) {
         if (condition.value !== "") edits.set(id, "condition", condition.value);
@@ -127,6 +128,6 @@ function dock(edits: Edits, redraw: () => void, total: number): HTMLElement {
       }
       redraw();
     }),
-    el("span", "grow mono", `${total} of ${total} — no pages`));
+    el("span", "grow mono", `${whole(host, total)} of ${whole(host, total)} — no pages`));
   return bar;
 }

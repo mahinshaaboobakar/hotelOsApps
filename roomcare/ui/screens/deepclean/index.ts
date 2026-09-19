@@ -15,6 +15,7 @@ import { control, el } from "../../chrome/element";
 import { day, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, dialog, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
@@ -54,9 +55,9 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
 
   const v = got.value;
   const strip = el("div", "strip");
-  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, String(n)), document.createTextNode(label)); return c; };
+  const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, whole(host, n)), document.createTextNode(label)); return c; };
   strip.append(count(v.dueThisMonth, "due this month"), count(v.planned, "planned"), count(v.inProgress, "in progress"),
-    el("span", undefined, v.plan.length === 0 ? "no plan set — Setup › Deep clean plan" : `plan: ${v.plan.map((p) => `${p.roomType} every ${p.everyMonths} months`).join(" · ")}`));
+    el("span", undefined, v.plan.length === 0 ? "no plan set — Setup › Deep clean plan" : `plan: ${v.plan.map((p) => `${p.roomType} every ${whole(host, p.everyMonths)} months`).join(" · ")}`));
 
   const table = el("table", "list");
   const head = el("tr");
@@ -80,7 +81,7 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
     table.append(tr);
   }
 
-  body.append(strip, scroller(table), pager(v.paging, v.rows.length, "deep cleans due or under way", goPage));
+  body.append(strip, scroller(table), pager(host, v.paging, v.rows.length, "deep cleans due or under way", goPage));
   const underWay = v.rows.find((r) => r.jobId !== null);
   if (underWay !== undefined) body.append(progress(host, nav, underWay));
 }

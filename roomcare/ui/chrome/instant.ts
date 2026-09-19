@@ -18,6 +18,8 @@
 
 import { formatDay, formatInstant, type HostApi } from "@hotelos/sdk";
 
+import { whole } from "./number";
+
 /** An instant as a date and a time — the SDK's `date-time`. Absent is `—`. */
 export function when(host: HostApi, iso: string | null | undefined): string {
   return iso === null || iso === undefined ? "—" : formatInstant(iso, host.property);
@@ -49,9 +51,14 @@ export function nearDay(host: HostApi, isoDate: string | null | undefined): stri
   return isoDate === null || isoDate === undefined ? "—" : formatDay(isoDate, host.property, "day-month");
 }
 
-/** Minutes as a person reads a shift — hours and minutes, or minutes alone under an hour. Room Care's words, not a date. */
-export function minutes(total: number): string {
+/**
+ * Minutes as a person reads a shift — hours and minutes, or minutes alone under
+ * an hour. Room Care's words, not a date; the digits are the property's
+ * (`whole`, page 64 §12), and the minutes past an hour keep two places by a
+ * leading zero written in the same digits.
+ */
+export function minutes(host: HostApi, total: number): string {
   const h = Math.floor(total / 60);
   const m = total % 60;
-  return h === 0 ? `${m} min` : `${h} h ${String(m).padStart(2, "0")}`;
+  return h === 0 ? `${whole(host, m)} min` : `${whole(host, h)} h ${m < 10 ? whole(host, 0) : ""}${whole(host, m)}`;
 }

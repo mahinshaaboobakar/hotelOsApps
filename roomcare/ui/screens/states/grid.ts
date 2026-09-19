@@ -7,6 +7,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
+import { whole } from "../../chrome/number";
 import { conditionClass } from "../../chrome/words";
 import type { RoomStates } from "../../model";
 import type { Edit, Edits } from "./edits";
@@ -52,7 +53,7 @@ export function grid(host: HostApi, data: RoomStates, edits: Edits, conflicts: R
   const house = el("div", "house");
   for (const zone of data.zones) {
     const header = el("div", "grp mono");
-    header.append(el("b", undefined, `${zone.name} · ${zone.rooms.length}`), control("btn sm", `Select all ${zone.rooms.length}`, () => {
+    header.append(el("b", undefined, `${zone.name} · ${whole(host, zone.rooms.length)}`), control("btn sm", `Select all ${whole(host, zone.rooms.length)}`, () => {
       for (const row of zone.rooms) edits.set(row.roomId, paint.fact, paint.value);
       redraw();
     }));

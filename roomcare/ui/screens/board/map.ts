@@ -4,13 +4,16 @@
  * exceptions: ★ sold tonight · ⏸ DND · ! disagreement · ⚑ supervision.
  */
 
+import type { HostApi } from "@hotelos/sdk";
+
 import { el } from "../../chrome/element";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { conditionClass, service } from "../../chrome/words";
 import type { Board, BoardRoom } from "../../model";
 import type { Lit } from "./index";
 
-export function map(data: Board, lit: Lit, nav: Nav): HTMLElement {
+export function map(host: HostApi, data: Board, lit: Lit, nav: Nav): HTMLElement {
   const house = el("div", "house");
   house.append(legend());
   for (const zone of data.zones) {
@@ -18,7 +21,7 @@ export function map(data: Board, lit: Lit, nav: Nav): HTMLElement {
     header.append(el("b", undefined, zone.name));
     const c = zone.counts;
     for (const [value, label] of [[c.rooms, "rooms"], [c.dirty, "dirty"], [c.inProgress, "in progress"], [c.ready, "ready"], [c.dnd, "DND"], [c.blocked, "blocked"], [c.supervision, "supervision"]] as const) {
-      if (value > 0 || label === "rooms") header.append(el("span", undefined, `${value} ${label}`));
+      if (value > 0 || label === "rooms") header.append(el("span", undefined, `${whole(host, value)} ${label}`));
     }
     const grid = el("div", "tilegrid");
     for (const room of zone.rooms) grid.append(tile(room, lit(room), nav));

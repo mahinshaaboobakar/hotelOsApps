@@ -10,6 +10,7 @@ import { card } from "../../chrome/card";
 import { control, el } from "../../chrome/element";
 import { act } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { inlineNumber, inlineSelect, radio, refuse, reorderSheet, saveLine, sentence } from "./controls";
 import type { SetupData } from "./index";
 
@@ -48,11 +49,11 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
 
   let ladder = [...p.priorityLadder];
   const rungs = el("div", "kv");
-  const drawLadder = (): void => { rungs.replaceChildren(...ladder.flatMap((band, i) => [el("div", "k", String(i + 1)), el("div", undefined, BAND[band] ?? band)])); };
+  const drawLadder = (): void => { rungs.replaceChildren(...ladder.flatMap((band, i) => [el("div", "k", whole(host, i + 1)), el("div", undefined, BAND[band] ?? band)])); };
   drawLadder();
   const reorder = el("div", "row");
   reorder.style.marginTop = "8px";
-  reorder.append(control("btn sm", "Reorder…", () => reorderSheet(nav, "The priority ladder", ladder, (band) => BAND[band] ?? band,
+  reorder.append(control("btn sm", "Reorder…", () => reorderSheet(host, nav, "The priority ladder", ladder, (band) => BAND[band] ?? band,
     "Sooner first. Each of the four bands stays on the ladder exactly once; the tab's Save keeps the order as a new version.",
     (order) => { ladder = order; edit.priorityLadder = order; drawLadder(); return null; })));
   const priority = card("Priority ladder", rungs, reorder, sub("Unsold departure"),

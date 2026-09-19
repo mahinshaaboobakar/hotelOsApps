@@ -11,6 +11,7 @@ import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import { lower, phase, service } from "../../chrome/words";
 import { stateText, type MyRoom } from "./index";
@@ -30,7 +31,7 @@ interface Door {
 export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: string, back: () => void): Promise<void> {
   const got = await load<Door>(host, READ, "door", { taskId });
   if (!got.ok) {
-    body.append(control("btn sm", "‹ My rooms", back), failed(host, got.failure, "this room", nav.show));
+    body.append(control("btn", "‹ My rooms", back), failed(host, got.failure, "this room", nav.show));
     return;
   }
 
@@ -49,12 +50,12 @@ export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: s
   heading.style.cssText = "margin:0;font-size:18px";
   const facts = el("span", "mono", [
     v.startedAt === null ? "not started" : `started ${clock(host, v.startedAt)}`,
-    `${v.minutesExpected + v.extraMinutes} min expected`,
+    `${whole(host, v.minutesExpected + v.extraMinutes)} min expected`,
     r.soldAt === null ? null : `arrival ${clock(host, r.soldAt)}`,
     r.reduction,
   ].filter((x) => x !== null).join(" · "));
   const running = r.state.kind === "IN_PROGRESS";
-  title.append(heading, el("span", `pill p${Math.min(r.priority, 3)}`, String(r.priority)), el("span", running ? "pill run" : "pill", running ? "IN PROGRESS" : stateText(host, r)), facts);
+  title.append(heading, el("span", `pill p${Math.min(r.priority, 3)}`, whole(host, r.priority)), el("span", running ? "pill run" : "pill", running ? "IN PROGRESS" : stateText(host, r)), facts);
   const phases = el("div", "mono");
   phases.style.margin = "6px 0 0";
   phases.append(document.createTextNode("phases: "));

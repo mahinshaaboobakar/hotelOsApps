@@ -11,6 +11,7 @@ import { control, el } from "../../chrome/element";
 import { drawing } from "../../chrome/failure";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { actions, sheet } from "../../chrome/overlay";
 import { phase, service } from "../../chrome/words";
 import { reorderSheet } from "./controls";
@@ -41,21 +42,21 @@ const MEANS: Record<string, string> = {
 };
 
 /** The chosen service's phases; reordering changes the row, and the tab's Save keeps it. */
-export function phasesCard(nav: Nav, row: ServiceRow, reordered: () => void): HTMLElement {
+export function phasesCard(host: HostApi, nav: Nav, row: ServiceRow, reordered: () => void): HTMLElement {
   const kv = el("div", "kv");
   row.phases.forEach((p, i) => {
     const means = el("div", undefined, MEANS[p] ?? "");
     if (p === "MAKE_UP") means.append(el("span", "tag absent", "Inventory"));
-    kv.append(el("div", "k", `${i + 1} · ${capital(phase(p, row.service))}`), means);
+    kv.append(el("div", "k", `${whole(host, i + 1)} · ${capital(phase(p, row.service))}`), means);
   });
   if (row.service === "DEPARTURE_CLEAN") {
     const inspect = el("div");
     inspect.append(document.createTextNode("only if the rule says — requested from the inspection app"), el("span", "tag port", "RC-Q1(6)"));
-    kv.append(el("div", "k", `${row.phases.length + 1} · Inspect`), inspect);
+    kv.append(el("div", "k", `${whole(host, row.phases.length + 1)} · Inspect`), inspect);
   }
   const buttons = el("div", "row");
   buttons.style.marginTop = "8px";
-  buttons.append(control("btn sm", "Reorder…", () => reorder(nav, row, reordered)), el("span", "btn sm off", "Add a phase"));
+  buttons.append(control("btn sm", "Reorder…", () => reorder(host, nav, row, reordered)), el("span", "btn sm off", "Add a phase"));
   return card(`Phases — ${service(row.service)}`, kv, buttons);
 }
 
@@ -69,8 +70,8 @@ export function copyCard(host: HostApi, nav: Nav, v: Services): HTMLElement {
     el("div", "mono", others.length === 0 ? "this property has one room type" : `${others.map((t) => t.name).join(" · ")} — a starting point, edited per type after`), line);
 }
 
-function reorder(nav: Nav, row: ServiceRow, reordered: () => void): void {
-  reorderSheet(nav, `${service(row.service)} — the order of its phases`, row.phases, (p) => phase(p, row.service),
+function reorder(host: HostApi, nav: Nav, row: ServiceRow, reordered: () => void): void {
+  reorderSheet(host, nav, `${service(row.service)} — the order of its phases`, row.phases, (p) => phase(p, row.service),
     "Done closes the work, so it stays last. The tab's Save keeps the new order as a new version.", (order) => {
       if (order.includes("DONE") && order[order.length - 1] !== "DONE") return "done closes the work — it stays the last phase";
       row.phases = order;
@@ -85,7 +86,7 @@ function copy(host: HostApi, nav: Nav, v: Services): void {
     const box = el("input") as HTMLInputElement;
     box.type = "checkbox";
     const label = el("label", "radio");
-    label.append(box, document.createTextNode(`${type.name} · ${type.rooms} rooms`));
+    label.append(box, document.createTextNode(`${type.name} · ${whole(host, type.rooms)} rooms`));
     overlay.body.append(label);
     return { type, box };
   });

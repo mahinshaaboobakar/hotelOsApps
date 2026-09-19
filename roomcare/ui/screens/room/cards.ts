@@ -8,6 +8,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { card } from "../../chrome/card";
 import { el } from "../../chrome/element";
 import { clock, day, when } from "../../chrome/instant";
+import { whole } from "../../chrome/number";
 import { lower, service, source } from "../../chrome/words";
 import type { RoomPage } from "./index";
 
@@ -17,7 +18,7 @@ export function cards(host: HostApi, page: RoomPage, disagreement: HTMLElement |
   const right = el("div");
   if (disagreement !== null) left.append(disagreement);
   left.append(timeline(host, page));
-  right.append(decision(page), inspection(host, page), jobs(host, page));
+  right.append(decision(host, page), inspection(host, page), jobs(host, page));
   for (const column of [left, right]) {
     column.querySelectorAll<HTMLElement>(".card").forEach((c, i) => { if (i > 0) c.style.marginTop = "14px"; });
   }
@@ -67,23 +68,23 @@ export function history(host: HostApi, page: RoomPage): HTMLElement {
 export function record(host: HostApi, page: RoomPage): HTMLElement {
   const kv = el("div", "kv");
   kv.append(el("div", "k", "Condition"), el("div", undefined, `${page.line.condition} · ${page.line.setBy ?? source(page.line.source)} · ${when(host, page.line.setAt)}`),
-    el("div", "k", "Days without service"), el("div", undefined, String(page.facts.daysWithoutService)),
+    el("div", "k", "Days without service"), el("div", undefined, whole(host, page.facts.daysWithoutService)),
     el("div", "k", "Supervisor's since"), el("div", undefined, page.facts.supervisedSince === null ? "—" : day(host, page.facts.supervisedSince)));
   const heard = page.today.filter((e) => e.kind === "OBSERVED").map((entry) => el("div", "mono", `${when(host, entry.at)} · ${entry.what} · ${lower(entry.status ?? "")}`));
   return card("The record — who set the condition, and every fact heard today", kv, ...heard);
 }
 
-function decision(page: RoomPage): HTMLElement {
+function decision(host: HostApi, page: RoomPage): HTMLElement {
   const title = "The decision Room Care made — recorded, not re-derived";
   const d = page.decision;
   if (d === null) return card(title, el("div", "dim", "no service was decided for this room today"));
   const kv = el("div", "kv");
   const inputs = [d.condition, d.occupancy, d.stayStatuses.length > 0 ? `stays [${d.stayStatuses.map(lower).join(", ")}]` : null,
-    d.soldAt !== null ? "sold tonight" : "not sold tonight", d.window !== null ? `${lower(d.window)} window` : null, `standard v${d.ruleVersion}`]
+    d.soldAt !== null ? "sold tonight" : "not sold tonight", d.window !== null ? `${lower(d.window)} window` : null, `standard v${whole(host, d.ruleVersion)}`]
     .filter((x) => x !== null).map((x) => lower(x as string)).join(" · ");
   kv.append(
     el("div", "k", "Inputs"), el("div", undefined, inputs),
-    el("div", "k", "Answer"), el("div", undefined, `${lower(d.service)} · ${d.minutes} min · priority ${d.priority} · inspection: ${lower(d.inspectionRule)}`),
+    el("div", "k", "Answer"), el("div", undefined, `${lower(d.service)} · ${whole(host, d.minutes)} min · priority ${whole(host, d.priority)} · inspection: ${lower(d.inspectionRule)}`),
     el("div", "k", "Decided by"), el("div", undefined, [lower(d.decidedBy), d.runBy].filter((x) => x !== null).join(" · ")),
   );
   return card(title, kv);

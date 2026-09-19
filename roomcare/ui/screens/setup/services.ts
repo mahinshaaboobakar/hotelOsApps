@@ -11,6 +11,7 @@ import { chip } from "../../chrome/bar";
 import { el, option } from "../../chrome/element";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import { phase, service } from "../../chrome/words";
 import { inlineNumber, refuse, saveLine } from "./controls";
 import type { SetupData } from "./index";
@@ -49,7 +50,7 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
   const drawPhases = (): void => {
     const row = v.services.find((s) => s.service === chosenService) ?? v.services[0];
     if (row === undefined) return;
-    cols.replaceChildren(phasesCard(nav, row, () => { phaseCells.get(row.service)!.textContent = phaseLine(row); drawPhases(); }), copyCard(host, nav, v));
+    cols.replaceChildren(phasesCard(host, nav, row, () => { phaseCells.get(row.service)!.textContent = phaseLine(row); drawPhases(); }), copyCard(host, nav, v));
   };
 
   const inputs = v.services.map((s) => {
@@ -83,7 +84,7 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
   drawPhases();
 
   const count = el("div", "count");
-  count.append(el("span", undefined, `${v.services.length} of ${v.services.length} services for ${typeName} — the four a hotel has; deep clean is not a service, it is a project (Deep clean plan)`));
+  count.append(el("span", undefined, `${whole(host, v.services.length)} of ${whole(host, v.services.length)} services for ${typeName} — the four a hotel has; deep clean is not a service, it is a project (Deep clean plan)`));
 
   const { line, said } = saveLine(host, data, () => void (async () => {
     for (const i of inputs) {

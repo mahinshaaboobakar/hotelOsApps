@@ -3,12 +3,13 @@
  * chips, and the pager (page 64 §3, §6).
  */
 
-import { PAGER_LABELS, pagedView, type Paging } from "@hotelos/sdk";
+import { PAGER_LABELS, pagedView, type HostApi, type Paging } from "@hotelos/sdk";
 
 import type { Operator } from "../model";
 import { drawing } from "./failure";
 import type { Read } from "./load";
 import { control, el } from "./element";
+import { whole } from "./number";
 
 /**
  * The top bar: the mark, the app's name, the sections, and who is here
@@ -60,16 +61,17 @@ export function scroller(table: HTMLElement): HTMLElement {
 /**
  * The numbered pager on `common.v1` paged-with-total. It draws on a single
  * page too, states the rows that are there, and sits at the list's floor
- * (§6, CORE-Q13, CORE-Q28) — the SDK's arithmetic, never a second copy.
+ * (§6, CORE-Q13, CORE-Q28) — the SDK's arithmetic, never a second copy. Its
+ * numbers — range, total, page size, page labels — are the property's (§12).
  */
-export function pager(paging: Paging, shown: number, noun: string, go: (page: number) => void): HTMLElement {
+export function pager(host: HostApi, paging: Paging, shown: number, noun: string, go: (page: number) => void): HTMLElement {
   const view = pagedView(paging, shown);
   const line = el("div", "pager");
   const said = view.empty
     ? `no ${noun}`
     : view.barren
-      ? `no rows on this page · ${paging.total} in the list`
-      : `showing ${view.from}–${view.to} of ${paging.total} · ${paging.pageSize} per page`;
+      ? `no rows on this page · ${whole(host, paging.total)} in the list`
+      : `showing ${whole(host, view.from)}–${whole(host, view.to)} of ${whole(host, paging.total)} · ${whole(host, paging.pageSize)} per page`;
   const buttons = el("span");
   const arrow = (text: string, label: string, to: number, dead: boolean): HTMLElement => {
     const button = control("btn pg", text, () => go(to));
@@ -83,7 +85,7 @@ export function pager(paging: Paging, shown: number, noun: string, go: (page: nu
       buttons.append(el("span", "dim", " … "));
       continue;
     }
-    const button = control(entry === paging.page ? "btn pg on" : "btn pg", String(entry + 1), () => go(entry));
+    const button = control(entry === paging.page ? "btn pg on" : "btn pg", whole(host, entry + 1), () => go(entry));
     if (view.empty) button.setAttribute("disabled", "true");
     buttons.append(button);
   }

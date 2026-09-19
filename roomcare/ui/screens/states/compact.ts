@@ -8,6 +8,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import type { Nav } from "../../chrome/nav";
+import { whole } from "../../chrome/number";
 import type { RoomStates, StateRow } from "../../model";
 import type { Edits } from "./edits";
 import { STAYS } from "./sheet";
@@ -19,7 +20,7 @@ export function compact(host: HostApi, data: RoomStates, edits: Edits, conflicts
     const table = el("table", "wall compact states");
     const changed = zone.rooms.filter((r) => edits.has(r.roomId)).length;
     const group = el("tr", "g");
-    const cell = el("td", undefined, `▾ ${zone.name} · ${zone.rooms.length}${changed > 0 ? ` · ${changed} changed` : ""}`);
+    const cell = el("td", undefined, `▾ ${zone.name} · ${whole(host, zone.rooms.length)}${changed > 0 ? ` · ${whole(host, changed)} changed` : ""}`);
     cell.setAttribute("colspan", "5");
     group.append(cell);
     const head = el("tr");
@@ -29,7 +30,7 @@ export function compact(host: HostApi, data: RoomStates, edits: Edits, conflicts
     pairs.append(table);
   }
   house.prepend(el("div", "legend mono", "segmented controls, no dropdowns — one tap sets a value; the stay and sold time are set on the sheet"));
-  house.append(pairs, el("div", "legend mono", `${data.rooms} of ${data.rooms} — no pages · two zones per row · source and time on hover and on the room's page`));
+  house.append(pairs, el("div", "legend mono", `${whole(host, data.rooms)} of ${whole(host, data.rooms)} — no pages · two zones per row · source and time on hover and on the room's page`));
   return house;
 }
 
