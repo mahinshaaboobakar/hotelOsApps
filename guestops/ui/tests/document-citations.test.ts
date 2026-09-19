@@ -1,47 +1,32 @@
 /**
- * No surface cites a document to the person reading it.
+ * No surface shows a person a developer's citation.
  *
  * The owner's ruling of 2026-09-19: a mock carries the screen and notes for the
- * developer, and the notes are never built as screen. A design-section
- * reference, an ADR or a register id is the plainest kind of note — it finds a
- * ruling for an engineer and means nothing at a front desk. Extended from GG's
- * Workforce check (`register-ids.test.ts`, `b001bfac`) to the four shapes the
- * ruling names.
+ * developer, and the notes are never built as screen. The shapes and the reader
+ * are the shared list every application imports — `scripts/developer-content.ts`
+ * (GG, `0a4e4e1a`), which this check's own patterns were merged into (the wider
+ * ADR spelling and `aria-description`); GuestOps kept a private copy until it
+ * landed, then switched, as the architect ruled.
  *
- * **Rendered, not read from source**: a comment citing a ruling is a record
- * and is right; only what reaches a person is a claim to them. Read includes
- * the reasons carried as tooltips and accessible descriptions.
- *
- * This walks the harness's fixtures as well as what the service sends: a
- * fixture is what every capture shows, so a citation there is on the owner's
- * screen at review whether or not a property ever receives it.
+ * **Rendered, not read from source**: a comment citing a ruling is a record and
+ * is right; only what reaches a person is a claim to them. The walk covers the
+ * harness's fixtures as well as what the service sends — a fixture is what every
+ * capture shows the owner.
  *
  * Tests live here rather than beside the source: ADR 0025.
  */
 
 import { describe, expect, it } from "vitest";
 
-import { mountWidget, readable, SCREENS, surfaceHost, WIDGETS } from "./surfaces";
+import { developerContent, readableText } from "../../../scripts/developer-content";
+import { mountWidget, SCREENS, surfaceHost, WIDGETS } from "./surfaces";
 
-/** The shapes of a document citation, each named for what it cites. */
-const CITATIONS: readonly (readonly [string, RegExp])[] = [
-  ["a design section", /\bdesign\s*§\s*[\d.]*|§\s*\d[\d.]*/giu],
-  ["an ADR", /\bADR[\s-]*\d+/gu],
-  ["a register id", /\b[A-Z]+-Q\d+[a-z]?\b/gu],
-];
-
-function cited(text: string): string[] {
-  return CITATIONS.flatMap(([what, shape]) =>
-    [...text.matchAll(shape)].map((found) => `${what}: "${found[0]}"`));
-}
-
-describe("document citations on a surface", () => {
-  it("are found in the shapes the ruling names — the positive control", () => {
-    expect(cited("Jobs' board (design §6)")).toEqual(['a design section: "design §6"']);
-    expect(cited("per §4.2")).toEqual(['a design section: "§4.2"']);
-    expect(cited("as ADR 0106 requires")).toEqual(['an ADR: "ADR 0106"']);
-    expect(cited("accepted with GUEST-Q6")).toEqual(['a register id: "GUEST-Q6"']);
-    expect(cited("Check in · 48 h of arrival · ₹ 8 400.00 · BK-4471")).toEqual([]);
+describe("developer citations on a surface", () => {
+  it("are found — the positive control, against the shared list", () => {
+    expect(developerContent("Jobs' board (design §6)")).toContain("a section sign: §");
+    expect(developerContent("as ADR 0106 requires")).toEqual(["an ADR: ADR 0106"]);
+    expect(developerContent("accepted with GUEST-Q6")).toEqual(["a decision-register id: GUEST-Q6"]);
+    expect(developerContent("Check in · 48 h of arrival · ₹ 8 400.00 · BK-4471")).toEqual([]);
   });
 
   for (const [name, draw] of SCREENS) {
@@ -50,7 +35,7 @@ describe("document citations on a surface", () => {
       await draw(surfaceHost(), main);
 
       expect(main.querySelector(".fail"), `${name} could not read its fixture`).toBeNull();
-      expect(cited(readable(main))).toEqual([]);
+      expect(developerContent(readableText(main))).toEqual([]);
     });
   }
 
@@ -59,7 +44,7 @@ describe("document citations on a surface", () => {
       const body = await mountWidget(name);
 
       expect(body.querySelector(".wx"), `${name} could not read its fixture`).toBeNull();
-      expect(cited(readable(body))).toEqual([]);
+      expect(developerContent(readableText(body))).toEqual([]);
     });
   }
 });

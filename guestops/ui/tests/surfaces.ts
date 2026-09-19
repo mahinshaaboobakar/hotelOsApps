@@ -110,19 +110,3 @@ export async function mountWidget(name: string): Promise<HTMLElement> {
   await new Promise((resolve) => setTimeout(resolve, 30));
   return document.body;
 }
-
-/**
- * Everything on a surface a person can read: its text, and the reasons carried
- * as tooltips and accessible descriptions — those are sentences for staff too.
- */
-export function readable(root: HTMLElement): string {
-  const reasons = [...root.querySelectorAll("[title], [aria-description]")]
-    .flatMap((node) => [node.getAttribute("title"), node.getAttribute("aria-description")])
-    .filter((text): text is string => text !== null);
-
-  // A stylesheet's text is inside the element and no person reads it.
-  const shown = root.cloneNode(true) as HTMLElement;
-  for (const node of shown.querySelectorAll("style, script")) node.remove();
-
-  return [shown.textContent ?? "", ...reasons].join("\n");
-}
