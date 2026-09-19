@@ -97,7 +97,11 @@ button{font-family:inherit;line-height:inherit}
    the reset lives on the class." Jobs' rule and Jobs' reading: the row keeps its
    click for a pointer, and its key text is the button a keyboard reaches — so no
    control is nested inside another, which a whole-row button would do to a row
-   carrying its own link. */
+   carrying its own link. APPS-Q50 (2026-09-19) rules this shape: a real button
+   in the main cell. The focus ring is what makes it reachable in practice — the
+   reset above removes the browser's own, and a button a keyboard reaches but
+   nobody can see it reach is the C8 failure one step later. */
+.opener:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:2px;border-radius:4px}
 .opener{background:none;border:0;padding:0;margin:0;font:inherit;line-height:inherit;
   color:inherit;text-align:left;cursor:pointer}
 .btn.danger{border-color:var(--go-bad-edge);color:var(--color-bad,#f87171)}
