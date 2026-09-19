@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Domain;
@@ -40,18 +41,7 @@ public class DayStart(
         return due.Count;
     }
 
-    /// <summary>Today in the property's zone; UTC when Master Data has no zone for it.</summary>
-    private async Task<DateOnly> TodayAsync(Guid propertyId, CancellationToken cancellationToken)
-    {
-        var zone = await directory.FindTimezoneAsync(propertyId, cancellationToken);
-        var now = records.Now;
-        if (zone is not null && (TimeZoneInfo.TryFindSystemTimeZoneById(zone, out var info)
-            || (TimeZoneInfo.TryConvertIanaIdToWindowsId(zone, out var windows)
-                && TimeZoneInfo.TryFindSystemTimeZoneById(windows, out info))))
-        {
-            return DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(now, info).DateTime);
-        }
-
-        return DateOnly.FromDateTime(now.UtcDateTime);
-    }
+    /// <summary>Today in the property's zone — refused by name when it has none, never UTC (the reference's rule).</summary>
+    private async Task<DateOnly> TodayAsync(Guid propertyId, CancellationToken cancellationToken) =>
+        (await PropertyCalendar.ForAsync(directory, propertyId, cancellationToken)).DayOf(records.Now);
 }

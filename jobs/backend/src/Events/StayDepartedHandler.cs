@@ -31,7 +31,10 @@ public sealed class StayDepartedHandler(JobsDbContext db, TimeProvider clock) : 
             db.Notes.Add(new JobNote
             {
                 Id = Guid.CreateVersion7(), JobId = job.Id, PropertyId = job.PropertyId,
-                AuthorKind = RaisedKind.Application, Text = $"Guest departed {envelope.OccurredAt:yyyy-MM-dd HH:mm} UTC; the room may be empty.",
+                // No time in the words: a UTC time composed here is one every reader
+                // at the property must convert (ADR 0174). The note's own At is drawn
+                // in the property's form, and says when.
+                AuthorKind = RaisedKind.Application, Text = "Guest departed; the room may be empty.",
                 Internal = true, At = now,
             });
         }

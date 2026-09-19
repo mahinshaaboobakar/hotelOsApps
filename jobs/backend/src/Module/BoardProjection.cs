@@ -1,3 +1,5 @@
+using HotelOS.Jobs.Application.Abstractions;
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Queries;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Infrastructure;
@@ -17,7 +19,7 @@ namespace HotelOS.Jobs.Module;
 /// strip in particular is not a cache: a number a person acts on that was true
 /// a minute ago is the class of defect the sweep exists to avoid.
 /// </remarks>
-public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming naming, TimeProvider clock)
+public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming naming, TimeProvider clock, IPropertyDirectory directory)
 {
     /// <summary>A page of the board, or of Scheduled.</summary>
     public async Task<BoardPageView> PageAsync(
@@ -58,7 +60,8 @@ public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming
         RequestScope scope, string? department, CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow();
-        var since = now.AddHours(-24);
+        // "Closed today" from the property's midnight, not the last 24 hours.
+        var since = (await PropertyCalendar.ForAsync(directory, scope.PropertyId, cancellationToken)).TodayStartedAt(now);
         var jobs = db.Jobs.Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null);
         if (department is { } code) jobs = jobs.Where(j => j.DepartmentCode == code);
 

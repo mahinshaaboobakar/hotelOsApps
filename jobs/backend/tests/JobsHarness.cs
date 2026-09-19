@@ -49,7 +49,7 @@ public sealed class JobsHarness
         Catalogue = new CatalogueService(Db, Authorizer, Clock);
         PropertyCatalogue = new PropertyCatalogueService(Db, Authorizer, Clock);
         Policies = new ConcernPolicyService(Db, Authorizer, Clock);
-        Presence = new PresenceService(Db, Authorizer, Clock);
+        Presence = new PresenceService(Db, Authorizer, Clock, Directory);
         Grants = new JobsManagerGrants(Db, Events, Clock);
         Sweep = new ConcernSweep(Db, Directory, new Nudger(Db, Directory), Announcer, Clock);
         AutoClose = new AutoClose(Db, Announcer, Records);

@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Policies;
@@ -48,7 +49,12 @@ public class JobService(
         }
 
         var now = records.Now;
-        var job = Build(scope, command, item, resolved, now);
+        // A scheduled job's promise starts at its day's midnight at the property,
+        // not UTC's (ADR 0174): at +05:30 that was 05:30 in the morning.
+        var starts = command.ScheduledFor is { } day
+            ? (await PropertyCalendar.ForAsync(directory, scope.PropertyId, cancellationToken)).StartOf(day)
+            : now;
+        var job = Build(scope, command, item, resolved, now, starts);
         job.JobNumber = await numbering.NextAsync(scope.PropertyId, resolved.DepartmentCode, cancellationToken);
         await PlaceStepAsync(job, cancellationToken);
         db.Jobs.Add(job);
@@ -65,7 +71,7 @@ public class JobService(
     }
 
     /// <summary>The lean job's columns from the command, the item and the chain's answer.</summary>
-    private static Job Build(RequestScope scope, RaiseJobCommand command, Item item, ResolvedPolicy resolved, DateTimeOffset now)
+    private static Job Build(RequestScope scope, RaiseJobCommand command, Item item, ResolvedPolicy resolved, DateTimeOffset now, DateTimeOffset starts)
     {
         var (priority, decidedBy) = Prioritise(command, resolved);
         var job = new Job
@@ -97,7 +103,7 @@ public class JobService(
             UpdatedAt = now,
             Version = 1,
         };
-        job.DueAt = DueAt(job, resolved, now);
+        job.DueAt = DueAt(job, resolved, starts);
         return job;
     }
 
@@ -160,14 +166,10 @@ public class JobService(
     }
 
     /// <summary>Due from the promise; a scheduled job's clock starts on its day (S2 D3).</summary>
-    private static DateTimeOffset? DueAt(Job job, ResolvedPolicy resolved, DateTimeOffset now)
+    private static DateTimeOffset? DueAt(Job job, ResolvedPolicy resolved, DateTimeOffset starts)
     {
         if (resolved.DueWithinMinutes is not { } minutes || job.Priority == Priority.NotTriaged) return null;
-
-        var start = job.ScheduledFor is { } day
-            ? new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero)
-            : now;
-        return start.AddMinutes(minutes);
+        return starts.AddMinutes(minutes);
     }
 
     /// <summary>A child step takes the next number under its parent (S1 D2, one level only).</summary>

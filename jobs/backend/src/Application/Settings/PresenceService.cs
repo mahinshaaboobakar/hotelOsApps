@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Domain.Policy;
 using HotelOS.Jobs.Infrastructure;
@@ -12,7 +13,7 @@ namespace HotelOS.Jobs.Application.Settings;
 /// The shift fan-out lands here too: <see cref="ShiftStartedAsync"/> and
 /// <see cref="ShiftEndedAsync"/> are the consumers' one call each.
 /// </summary>
-public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, TimeProvider clock)
+public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, TimeProvider clock, IPropertyDirectory directory)
 {
     public async Task<DepartmentPresence> SaveAsync(RequestScope scope, PresenceCommand command, CancellationToken cancellationToken)
     {
@@ -73,7 +74,11 @@ public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, Tim
             .Where(h => h.PropertyId == propertyId && (h.DepartmentCode == departmentCode || h.DepartmentCode == null))
             .ToListAsync(cancellationToken);
         var window = hours.FirstOrDefault(h => h.DepartmentCode == departmentCode) ?? hours.FirstOrDefault(h => h.DepartmentCode == null);
-        return window?.Contains(TimeOnly.FromDateTime(at.UtcDateTime)) ?? false;
+        if (window is null) return false;
+
+        // Service hours are the property's wall clock — 07:00 is 07:00 there, not in UTC.
+        var calendar = await PropertyCalendar.ForAsync(directory, propertyId, cancellationToken);
+        return window.Contains(calendar.TimeOf(at));
     }
 
     private async Task<DepartmentPresence> FindOrAddAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken)

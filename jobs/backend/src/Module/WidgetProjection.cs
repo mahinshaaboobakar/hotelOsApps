@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Infrastructure;
@@ -42,7 +43,9 @@ public sealed class WidgetProjection(JobsDbContext db, TimeProvider clock, IProp
         RequestScope scope, CancellationToken cancellationToken)
     {
         var now = clock.GetUtcNow();
-        var since = now.AddHours(-24);
+        // "done" is today's, and today began at the property's midnight — it was
+        // the last 24 hours, which counted yesterday evening's work as today's.
+        var since = await DayStartedAsync(scope, cancellationToken);
         var jobs = db.Jobs.Where(j => j.PropertyId == scope.PropertyId && j.DeletedAt == null);
 
         var raised = await jobs.CountAsync(j => j.JobStatus == JobStatus.Raised, cancellationToken);
@@ -285,29 +288,13 @@ public sealed class WidgetProjection(JobsDbContext db, TimeProvider clock, IProp
             Math.Max(0, grouped.Count - Rows));
     }
 
-    /// <summary>The property's own midnight — the start of the day being counted.</summary>
-    private async Task<DateTimeOffset> DayStartedAsync(RequestScope scope, CancellationToken cancellationToken)
-    {
-        var now = clock.GetUtcNow();
-        var zone = await directory.FindTimezoneAsync(scope.PropertyId, cancellationToken);
-
-        // An absent timezone is not a reason to answer nothing — the property is
-        // still having a day. UTC is the stated fallback rather than a hidden
-        // one, and it is the same fallback the board's own strip uses.
-        if (zone is null || !TimeZoneInfo.TryFindSystemTimeZoneById(zone, out var found))
-        {
-            return new DateTimeOffset(now.UtcDateTime.Date, TimeSpan.Zero);
-        }
-
-        var local = TimeZoneInfo.ConvertTime(now, found);
-
-        // **Back to UTC before it is a query parameter.** Npgsql refuses a
-        // `DateTimeOffset` with a non-zero offset for `timestamp with time
-        // zone`, so returning the property's own midnight *as* +05:30 threw for
-        // every property that is not on UTC — which is every real one. The
-        // instant is the same; only its spelling changes.
-        return new DateTimeOffset(local.Date, local.Offset).ToUniversalTime();
-    }
+    /// <summary>The property's own midnight — the start of the day being counted (calendar day, pending WF-Q21).</summary>
+    /// <remarks>
+    /// It fell back to UTC midnight when the zone was unknown; the reference refuses
+    /// by name instead, because a day in a zone nobody chose is a claim nobody made.
+    /// </remarks>
+    private async Task<DateTimeOffset> DayStartedAsync(RequestScope scope, CancellationToken cancellationToken) =>
+        (await PropertyCalendar.ForAsync(directory, scope.PropertyId, cancellationToken)).TodayStartedAt(clock.GetUtcNow());
 
     /// <summary>What the job was allowed — from raising to its due time.</summary>
     private static string Allowance(DateTimeOffset createdAt, DateTimeOffset? dueAt) =>

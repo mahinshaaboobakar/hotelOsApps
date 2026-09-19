@@ -65,7 +65,16 @@ public sealed class DirectoryDouble : IPropertyDirectory
     public Task<string?> FindLocationNameAsync(Guid propertyId, Guid locationId, CancellationToken cancellationToken) =>
         Task.FromResult(Places.GetValueOrDefault(locationId));
 
-    public Task<IReadOnlyList<OnShiftPerson>> OnShiftAsync(Guid propertyId, string departmentCode, DateOnly on, CancellationToken cancellationToken) =>
+    /// <summary>Every day the roster was asked about, in order — so a test can see which day "today" was taken to be.</summary>
+    public List<DateOnly> OnShiftDays { get; } = [];
+
+    public Task<IReadOnlyList<OnShiftPerson>> OnShiftAsync(Guid propertyId, string departmentCode, DateOnly on, CancellationToken cancellationToken)
+    {
+        OnShiftDays.Add(on);
+        return OnShiftFor(on);
+    }
+
+    private Task<IReadOnlyList<OnShiftPerson>> OnShiftFor(DateOnly on) =>
         Task.FromResult<IReadOnlyList<OnShiftPerson>>(OnShift.ToList());
 
     public Task<IReadOnlyList<Guid>> ResolveRoleAsync(Guid propertyId, string departmentCode, string role, CancellationToken cancellationToken)

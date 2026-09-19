@@ -126,7 +126,10 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
 
         Assert.Equal(JobStatus.Scheduled, job.JobStatus);
         Assert.Null(await h.Records.CurrentAssignmentAsync(job.Id, default));
-        Assert.Equal(new DateTimeOffset(2026, 9, 3, 0, 40, 0, TimeSpan.Zero), job.DueAt);
+        // The promise starts at the day's midnight at the property (Asia/Qatar, +03:00):
+        // 2 Sep 21:00 UTC, plus 40. This line held 3 Sep 00:40 UTC — midnight in UTC,
+        // 03:40 at the property — which is the defect ADR 0174 rules out (2026-09-19).
+        Assert.Equal(new DateTimeOffset(2026, 9, 2, 21, 40, 0, TimeSpan.Zero), job.DueAt);
 
         h.Clock.Set(new DateTimeOffset(2026, 9, 2, 21, 30, 0, TimeSpan.Zero)); // 3 Sep 00:30 in Asia/Qatar (UTC+3), still 2 Sep in UTC
         Assert.Equal(1, await h.DayStart.RunAsync(h.Sweeping, default));

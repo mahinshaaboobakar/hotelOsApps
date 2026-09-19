@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Application.Policies;
@@ -132,7 +133,8 @@ public class AssignmentService(
     /// <summary>AUTO: on shift on the execution date, fewest open jobs; nobody means null.</summary>
     private async Task<Guid?> PickAsync(Job job, CancellationToken cancellationToken)
     {
-        var day = job.ScheduledFor ?? DateOnly.FromDateTime(records.Now.UtcDateTime);
+        var day = job.ScheduledFor
+            ?? (await PropertyCalendar.ForAsync(directory, job.PropertyId, cancellationToken)).DayOf(records.Now);
         var people = await directory.OnShiftAsync(job.PropertyId, job.DepartmentCode, day, cancellationToken);
         return people.OrderBy(p => p.OpenJobs).ThenBy(p => p.Name).FirstOrDefault()?.UserId;
     }
