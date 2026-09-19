@@ -17,8 +17,9 @@
  * `WF-Q7` put it.
  */
 
-import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
-  from "@hotelos/sdk";
+import {
+  formatDay, formatInstant, formatNumber, type HostApi, load, type PropertyEnvironment,
+} from "@hotelos/sdk";
 
 import { el, fill, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -170,7 +171,8 @@ function header(
   title.append(
     el("div", "hsub", board.teams.length === 0
       ? board.property
-      : `${board.property} · ${board.teams.length} teams in ${departments} departments`),
+      : `${board.property} · ${formatNumber(board.teams.length, property, "whole")} teams`
+        + ` in ${formatNumber(departments, property, "whole")} departments`),
   );
 
   const grow = el("div", "grow");
@@ -303,7 +305,8 @@ function row(
   name.append(el("b", undefined, team.name));
   if (team.note !== null && grid === "tgrid") name.append(el("s", undefined, team.note));
 
-  line.append(name, fill(el("div"), dep(team)), el("div", undefined, String(team.members)));
+  line.append(name, fill(el("div"), dep(team)),
+    el("div", undefined, formatNumber(team.members, property, "whole")));
 
   if (grid === "tgrid") {
     // The formation date carries its year: a team formed in January is

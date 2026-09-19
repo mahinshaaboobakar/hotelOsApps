@@ -58,7 +58,7 @@ function header(month: Month, host: HostApi): HTMLElement {
       month.department,
       `${formatDay(month.from, host.property, "day-month")}`
       + ` – ${formatDay(month.to, host.property, "day-month")}`,
-      `${month.rows.length} people`,
+      `${formatNumber(month.rows.length, host.property, "whole")} people`,
     ].filter((one) => one !== null).join(" · ")),
   );
 
@@ -93,13 +93,16 @@ function table(rows: readonly MonthRow[], host: HostApi): HTMLElement {
 
     for (const figure of [row.posted, row.present, row.late, row.casual,
       row.sick, row.earned, row.comp]) {
-      item.append(el("div", figure === 0 ? "quiet" : undefined, String(figure)));
+      // The default precision rather than whole: leave taken can be a half day.
+      item.append(el("div", figure === 0 ? "quiet" : undefined,
+        formatNumber(figure, host.property)));
     }
 
     // Absent, never zero — WF-Q18. A dash says the number was not computed; a
     // zero would say the staff worked no holidays, and payroll cannot tell the
     // difference between those two from a figure alone.
-    item.append(el("div", "quiet", row.holidays === null ? "—" : String(row.holidays)));
+    item.append(el("div", "quiet",
+      row.holidays === null ? "—" : formatNumber(row.holidays, host.property)));
 
     // `=== 0` on a number, where this compared against the string "0" that the
     // service emitted instead of "0.0" precisely so this line would match. A

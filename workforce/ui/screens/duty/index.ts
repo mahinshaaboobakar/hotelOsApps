@@ -13,8 +13,9 @@
  * backend refused for the same reason.
  */
 
-import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
-  from "@hotelos/sdk";
+import {
+  formatDay, formatInstant, formatNumber, type HostApi, load, type PropertyEnvironment,
+} from "@hotelos/sdk";
 
 import { control, el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -90,7 +91,8 @@ function header(
   // department and posting — WF-Q1, MOD is a duty, not a role.
   title.append(
     el("div", "hsub",
-      `Manager on Duty · property-wide · ${register.duties.filter((d) => d.who !== null).length} duties this week`),
+      `Manager on Duty · property-wide · ${formatNumber(
+        register.duties.filter((d) => d.who !== null).length, property, "whole")} duties this week`),
   );
 
   const grow = el("div", "grow");

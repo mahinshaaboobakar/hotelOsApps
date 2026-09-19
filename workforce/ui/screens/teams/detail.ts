@@ -9,7 +9,7 @@
  * date moved rather than by a second surface.
  */
 
-import { formatDay, formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, formatInstant, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el, fill, unavailable } from "../../chrome/element";
 import type { Member, TeamDetail } from "../../roster/team";
@@ -65,7 +65,7 @@ function count(open: TeamDetail, property: PropertyEnvironment): HTMLElement {
   return fill(row,
     el("em", undefined,
       `Members on ${formatDay(open.onDate, property, "day-month-year")}`),
-    el("b", undefined, String(open.members.length)));
+    el("b", undefined, formatNumber(open.members.length, property, "whole")));
 }
 
 /** The people, each with the day they joined. */

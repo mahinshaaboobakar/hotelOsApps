@@ -14,7 +14,7 @@
  * to it — the way back is the way in.
  */
 
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatNumber, type HostApi, load, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
 import { control, el } from "../../chrome/element";
@@ -64,12 +64,14 @@ export async function shifts(
   const body = el("div", "body");
   body.append(table(catalogue, host), note());
 
-  main.replaceChildren(header(catalogue, open), body);
+  main.replaceChildren(header(catalogue, open, host.property), body);
 
   if (dialog) main.append(newShift(close));
 }
 
-function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLElement {
+function header(
+  catalogue: readonly CatalogueRow[], open: () => void, property: PropertyEnvironment,
+): HTMLElement {
   const head = el("div", "title");
   const title = el("div");
 
@@ -77,7 +79,8 @@ function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLEleme
     el("div", "ht", "Shifts"),
     // No property name: it was a literal — "Kochi Beach Resort" — on every
     // property's catalogue (the app surface audit, 2026-09-19).
-    el("div", "hsub", `${catalogue.length} shifts · shared by every department`),
+    el("div", "hsub",
+      `${formatNumber(catalogue.length, property, "whole")} shifts · shared by every department`),
   );
 
   const add = control("btn pri", "＋ New shift", open);

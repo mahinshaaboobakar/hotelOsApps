@@ -9,7 +9,7 @@
  * about the day.
  */
 
-import { formatClock, type HostApi, load, type PropertyEnvironment }
+import { formatClock, formatNumber, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { el, unavailable } from "../../chrome/element";
@@ -33,7 +33,7 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
   const day = got.value;
   const body = el("div", "body");
 
-  body.append(marks(day), table(day.rows, host));
+  body.append(marks(day, host.property), table(day.rows, host));
   main.replaceChildren(header(day), body);
 }
 
@@ -57,8 +57,9 @@ function header(day: Day): HTMLElement {
 }
 
 /** The four marks, each counted from the rows themselves. */
-function marks(day: Day): HTMLElement {
+function marks(day: Day, property: PropertyEnvironment): HTMLElement {
   const row = el("div", "marks");
+  const n = (value: number): string => formatNumber(value, property, "whole");
 
   const posted = day.rows.filter((r) => r.rostered);
   const present = posted.filter((r) => r.in !== null).length;
@@ -67,10 +68,10 @@ function marks(day: Day): HTMLElement {
   const unplanned = day.rows.filter((r) => !r.rostered && r.in !== null).length;
 
   row.append(
-    mark(`${present} of ${posted.length}`, "present against posted", "ok"),
-    mark(String(late), "late", "warn"),
-    mark(String(absent), "absent", "bad"),
-    mark(String(unplanned), "present, not rostered", "warn"),
+    mark(`${n(present)} of ${n(posted.length)}`, "present against posted", "ok"),
+    mark(n(late), "late", "warn"),
+    mark(n(absent), "absent", "bad"),
+    mark(n(unplanned), "present, not rostered", "warn"),
   );
 
   return row;

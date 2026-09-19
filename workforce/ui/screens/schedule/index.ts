@@ -9,8 +9,8 @@
  * rather than *"Request leave for them"*.
  */
 
-import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment,
-  type Read }
+import { formatDay, formatInstant, formatNumber, type HostApi, load,
+  type PropertyEnvironment, type Read }
   from "@hotelos/sdk";
 
 import { el, unavailable } from "../../chrome/element";
@@ -139,13 +139,14 @@ function figures(month: Schedule, property: PropertyEnvironment): HTMLElement {
     (day) => day.tone !== null && day.tone !== "leave" && day.mark !== "OFF").length;
   const leaveDays = month.days.filter((day) => day.tone === "leave").length;
 
+  const n = (value: number): string => formatNumber(value, property, "whole");
   strip.append(
-    fig(String(shifts), "shifts"),
-    fig(String(leaveDays), "days leave"),
+    fig(n(shifts), "shifts"),
+    fig(n(leaveDays), "days leave"),
     // The count is the service's; the sentence beside it is composed here, in
     // the property's clock. A service that wrote "1 MOD duty · Fri 28,
     // 20:00–08:00" would have chosen the reader's locale and hour cycle.
-    fig(String(month.duty), duties(month, property)),
+    fig(n(month.duty), duties(month, property)),
   );
 
   const balance = el("div", "mpush");
@@ -182,7 +183,8 @@ function calendar(month: Schedule, property: PropertyEnvironment): HTMLElement {
 function cell(day: ScheduleDay, property: PropertyEnvironment): HTMLElement {
   const box = el("div", day.tone === null ? "cday out" : day.today === true ? "cday today" : "cday");
 
-  box.append(el("s", undefined, day.date === null ? "" : String(day.date)));
+  box.append(el("s", undefined,
+    day.date === null ? "" : formatNumber(day.date, property, "whole")));
 
   if (day.mark !== null && day.tone !== null) {
     box.append(el("b", `cm ${day.tone}`, day.mark));

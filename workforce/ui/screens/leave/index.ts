@@ -5,7 +5,7 @@
  * swap. What it owns is the tab state and the counts.
  */
 
-import { type HostApi, load } from "@hotelos/sdk";
+import { formatNumber, type HostApi, load, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
@@ -58,7 +58,8 @@ export async function leave(
     body.append(balances(board.balances, host.property), requests(board.requests, host.property));
   }
 
-  main.replaceChildren(header(board, open), tabs(board, tab, go), body);
+  main.replaceChildren(header(board, open, host.property),
+    tabs(board, tab, go, host.property), body);
 
   // The form chooses nothing on the person's behalf. This passed two people as
   // literals and the overdrawn balance, *"because that is the one the frame
@@ -70,9 +71,12 @@ export async function leave(
 }
 
 /** The header, with counts derived from the board. */
-function header(board: LeaveBoard, open: () => void): HTMLElement {
+function header(
+  board: LeaveBoard, open: () => void, property: PropertyEnvironment,
+): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
+  const n = (value: number): string => formatNumber(value, property, "whole");
 
   const pending = board.requests.filter((row) => row.state === "Requested").length;
 
@@ -80,8 +84,8 @@ function header(board: LeaveBoard, open: () => void): HTMLElement {
 
   title.append(
     el("div", "hsub",
-      `${board.waiting.length} waiting · ${board.waiting.length - swaps} leave · ${swaps} swap`
-      + ` · ${pending} of mine pending`),
+      `${n(board.waiting.length)} waiting · ${n(board.waiting.length - swaps)} leave`
+      + ` · ${n(swaps)} swap · ${n(pending)} of mine pending`),
   );
 
   const grow = el("div", "grow");
@@ -92,7 +96,9 @@ function header(board: LeaveBoard, open: () => void): HTMLElement {
 }
 
 /** The two tabs, the second carrying what is waiting. */
-function tabs(board: LeaveBoard, current: string, go: (tab: string) => void): HTMLElement {
+function tabs(
+  board: LeaveBoard, current: string, go: (tab: string) => void, property: PropertyEnvironment,
+): HTMLElement {
   const row = el("div", "tabs");
 
   for (const label of ["Requests", "Approvals"]) {
@@ -103,7 +109,7 @@ function tabs(board: LeaveBoard, current: string, go: (tab: string) => void): HT
       // The chrome styles `.tab .cnt` as a pill. A bare `s` here rendered
       // "Approvals3" — the number welded to the word, which is what an
       // element with no rule looks like.
-      tab.append(el("span", "cnt", String(board.waiting.length)));
+      tab.append(el("span", "cnt", formatNumber(board.waiting.length, property, "whole")));
     }
 
     tab.addEventListener("click", () => go(label));

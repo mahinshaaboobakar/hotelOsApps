@@ -8,8 +8,9 @@
  * row, never as a column that could stand alone.
  */
 
-import { formatDay, type HostApi, load, type PropertyEnvironment, type ReadFailure }
-  from "@hotelos/sdk";
+import {
+  formatDay, formatNumber, type HostApi, load, type PropertyEnvironment, type ReadFailure,
+} from "@hotelos/sdk";
 
 import { el, unavailable } from "../../chrome/element";
 import { overlay } from "../../chrome/overlay";
@@ -79,10 +80,10 @@ export async function people(
   // same outcome from the list growing and the strip sticking, and it is the
   // one every application now draws: `.rows:has(~ .pager)` needs the two to be
   // siblings, which is what putting it here is for.
-  const pages = pager(board.paging, board.postings.length, onPage);
+  const pages = pager(board.paging, board.postings.length, host.property, onPage);
   if (pages !== null) body.append(pages);
 
-  main.replaceChildren(header(board, ending), body);
+  main.replaceChildren(header(board, ending, host.property), body);
 
   // Ending a posting closes team memberships with it, and until this dialog
   // existed nothing said so — the round's finding, drawn.
@@ -112,9 +113,12 @@ export async function people(
  * @param ending whose posting is being ended, when one is — the subtitle names
  *   them, because a dialog over a dimmed table needs the page to say who it is
  *   about
+ * @param property whose locale the counts are written in
  * @returns the header
  */
-function header(board: People, ending: string | null): HTMLElement {
+function header(
+  board: People, ending: string | null, property: PropertyEnvironment,
+): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -123,7 +127,7 @@ function header(board: People, ending: string | null): HTMLElement {
     (p) => p.tone === "warn" || p.tone === "bad").length;
 
   title.append(
-    el("div", "hsub", subtitle(board, ending, here, expiring)),
+    el("div", "hsub", subtitle(board, ending, here, expiring, property)),
   );
 
   const picker = el("div", "sel");
@@ -138,7 +142,10 @@ function header(board: People, ending: string | null): HTMLElement {
 /** What the header says under the title. */
 function subtitle(
   board: People, ending: string | null, here: number, expiring: number,
+  property: PropertyEnvironment,
 ): string {
+  const n = (value: number): string => formatNumber(value, property, "whole");
+
   if (ending !== null) {
     // Found by id, because that is what the click carried. It was found by
     // name, so a subtitle could name the wrong person's departments the day a
@@ -154,8 +161,8 @@ function subtitle(
   // property the moment somebody turns to page two.
   return board.postings.length === 0
     ? "Nobody is posted yet"
-    : `${board.paging.total} posted · ${here} in Front Office on this page · `
-      + `${expiring} certifications expiring`;
+    : `${n(board.paging.total)} posted · ${n(here)} in Front Office on this page · `
+      + `${n(expiring)} certifications expiring`;
 }
 
 function table(
@@ -249,7 +256,9 @@ function row(
   const since = `Since ${formatDay(posting.since, property, "day-month-year")}`;
 
   who.append(name, el("s", undefined,
-    posting.postings > 1 ? `${since} · ${posting.postings} postings` : since));
+    posting.postings > 1
+      ? `${since} · ${formatNumber(posting.postings, property, "whole")} postings`
+      : since));
 
   const departments = el("div", "deps");
   for (const code of posting.departments) {

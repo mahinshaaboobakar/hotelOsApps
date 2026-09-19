@@ -17,7 +17,8 @@
  * The rows return the day a demand model does, and this file is where they go.
  */
 
-import { formatDay, type HostApi, load, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, formatNumber, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
 import type { SummaryRow } from "../../roster/widget";
@@ -41,7 +42,8 @@ export async function comingUp(host: HostApi): Promise<HTMLElement> {
   const ahead = got.value;
 
   return card("Coming Up", [
-    section("Next 7 days"),
+    // A number in the copy is still a number a person reads (U1).
+    section(`Next ${formatNumber(7, host.property, "whole")} days`),
     figures(ahead.figures),
     section("Two or more away, same department"),
     rows(dated(ahead.overlaps, host.property), host),

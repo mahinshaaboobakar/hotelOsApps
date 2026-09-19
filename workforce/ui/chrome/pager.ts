@@ -37,7 +37,8 @@
  * other two against no caller would be inventing ahead of need.
  */
 
-import { PAGER_LABELS, pagedView, type Paging } from "@hotelos/sdk";
+import { formatNumber, PAGER_LABELS, pagedView, type Paging, type PropertyEnvironment }
+  from "@hotelos/sdk";
 
 import { el } from "./element";
 
@@ -46,12 +47,15 @@ import { el } from "./element";
  *
  * @param paging the server's own numbers — page, the size applied, the total
  * @param shown how many rows the screen actually received
+ * @param property whose locale the numbers are written in — U1, ADR 0174
  * @param go called with a 0-based page
  * @returns the row, or null when the list is empty
  */
 export function pager(
-  paging: Paging, shown: number, go: (page: number) => void,
+  paging: Paging, shown: number, property: PropertyEnvironment, go: (page: number) => void,
 ): HTMLElement | null {
+  const n = (value: number): string => formatNumber(value, property, "whole");
+
   // **The range counts the rows that ARE there** — §6, and the reason the SDK
   // takes `shown`: `(page + 1) * pageSize` agrees on every full page and lies
   // exactly where it matters. A short page — the last one, a server that
@@ -80,8 +84,8 @@ export function pager(
   // A page of a non-empty list that holds nothing says so, rather than
   // describing rows that are not there.
   row.append(el("div", "showing", view.barren
-    ? `No rows on this page · ${paging.total} in the list`
-    : `Showing ${view.from}–${view.to} of ${paging.total}`));
+    ? `No rows on this page · ${n(paging.total)} in the list`
+    : `Showing ${n(view.from)}–${n(view.to)} of ${n(paging.total)}`));
 
   const nav = el("div", "pnav");
   nav.append(step("‹", PAGER_LABELS.previousPage, view.hasPrevious,
@@ -92,7 +96,7 @@ export function pager(
     // something whose destination the pager declined to name.
     nav.append(entry === null
       ? el("span", "elide", "…")
-      : number(entry, entry === paging.page, go));
+      : number(entry, entry === paging.page, n, go));
   }
 
   nav.append(step("›", PAGER_LABELS.nextPage, view.hasNext,
@@ -103,8 +107,10 @@ export function pager(
 }
 
 /** One page number. Drawn 1-based, carried 0-based. */
-function number(page: number, current: boolean, go: (page: number) => void): HTMLElement {
-  const button = el("button", current ? "pg on" : "pg", String(page + 1));
+function number(
+  page: number, current: boolean, n: (value: number) => string, go: (page: number) => void,
+): HTMLElement {
+  const button = el("button", current ? "pg on" : "pg", n(page + 1));
 
   button.setAttribute("type", "button");
   if (current) button.setAttribute("aria-current", "page");

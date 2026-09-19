@@ -99,9 +99,11 @@ function header(week: Week, host: HostApi, print: () => void): HTMLElement {
   const gaps = week.people.reduce(
     (total, person) => total + person.week.filter((cell) => cell.gap).length, 0);
 
+  const n = (value: number): string => formatNumber(value, host.property, "whole");
   title.append(
     el("div", "hsub",
-      `${week.people.length} people · ${shifts} shifts · ${away} on leave · ${gaps} slot uncovered`),
+      `${n(week.people.length)} people · ${n(shifts)} shifts · ${n(away)} on leave · `
+      + `${n(gaps)} slot uncovered`),
   );
 
   const picker = el("div", "sel");

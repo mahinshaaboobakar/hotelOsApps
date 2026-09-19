@@ -16,7 +16,7 @@
  * March* is still a question.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatNumber, type HostApi } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
@@ -40,6 +40,7 @@ export function standDown(
   done: () => void,
 ): HTMLElement {
   const members = open.members.length;
+  const many = formatNumber(members, host.property, "whole");
 
   // The toggle's position, held here because the write carries it. It starts
   // where the switch starts, and the switch starts where the SERVICE's own
@@ -50,7 +51,7 @@ export function standDown(
   const head = el("div");
   head.append(
     el("div", "ht", `Stand down ${open.team.name}?`),
-    el("div", "hsub", `${open.team.departmentName} · ${members} members`));
+    el("div", "hsub", `${open.team.departmentName} · ${many} members`));
 
   const refusal = el("div", "note warn");
 
@@ -92,7 +93,7 @@ export function standDown(
   // A dialog: the person is confirming a stand-down (§9).
   return overlay("dialog", {
     head: [head],
-    body: [what(), keep(members, (on) => { keepMembers = on; }), refusal],
+    body: [what(), keep(many, (on) => { keepMembers = on; }), refusal],
     foot: [acts.row],
   }, close);
 }
@@ -117,11 +118,12 @@ function what(): HTMLElement {
  * A real button rather than a styled div: a switch that cannot be reached from
  * a keyboard is a decision only a mouse can make.
  *
- * @param members how many people the decision is about
+ * @param members how many people the decision is about, already in the
+ *   property's digits
  * @param set called with the new position
  * @returns the row
  */
-function keep(members: number, set: (on: boolean) => void): HTMLElement {
+function keep(members: string, set: (on: boolean) => void): HTMLElement {
   const row = el("div", "tog");
   const label = el("div");
 

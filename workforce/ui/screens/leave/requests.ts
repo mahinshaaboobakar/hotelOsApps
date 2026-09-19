@@ -32,9 +32,10 @@ export function balances(
     const card = el("div", balance.days < 0 ? "bal negative" : "bal");
 
     card.append(
+      // Days can be halves, so the default precision rather than whole.
       el("b", undefined, balance.of === null
-        ? String(balance.days)
-        : `${balance.days} of ${balance.of}`),
+        ? formatNumber(balance.days, property)
+        : `${formatNumber(balance.days, property)} of ${formatNumber(balance.of, property)}`),
       el("div", undefined, balance.type),
     );
 
@@ -81,7 +82,7 @@ export function requests(rows: readonly LeaveRow[],
     item.append(
       what,
       el("div", undefined, days(row.dates, property)),
-      el("div", undefined, String(row.days)),
+      el("div", undefined, formatNumber(row.days, property)),
       el("div", `pill ${tone(row.state)}`, row.state),
     );
 

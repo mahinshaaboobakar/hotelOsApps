@@ -12,7 +12,7 @@
  * widget, not by the shell*.
  */
 
-import { formatInstant, type HostApi, load, type PropertyEnvironment }
+import { formatInstant, formatNumber, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -40,8 +40,9 @@ export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
 
   return card("Shift Board", [
     figures([
-      { value: String(board.onNow), label: "on now", tone: "ink" },
-      { value: String(board.departments), label: "departments", tone: "muted" },
+      { value: formatNumber(board.onNow, host.property, "whole"), label: "on now", tone: "ink" },
+      { value: formatNumber(board.departments, host.property, "whole"), label: "departments",
+        tone: "muted" },
     ]),
     section("On now"),
     // Composed here, on `coming-up`'s precedent: a panel that knows its rows
@@ -73,8 +74,8 @@ function changeover(
   const switching = el("div", "wswitch");
 
   switching.append(
-    el("span", "ok", `${String(change.on)} on`),
-    el("span", "muted", `${String(change.off)} off`),
+    el("span", "ok", `${formatNumber(change.on, property, "whole")} on`),
+    el("span", "muted", `${formatNumber(change.off, property, "whole")} off`),
   );
 
   // **The property's clock, not the server's.** `at` arrives as an
