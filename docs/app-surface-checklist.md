@@ -4,7 +4,8 @@
 
 | Source | Revision |
 |---|---|
-| `HosPilotOS/docs/working/64-the-app-surface-standard.md` §1–§6, §8–§13, change log (30 rows) | `2da088bd` |
+| `HosPilotOS/docs/working/64-the-app-surface-standard.md` §1–§6, §8–§13, change log (30 rows at derivation) | `2da088bd` — its four stale spots corrected at `20b480cf`, which changes no line below |
+| `64f` a list with no rows — **with the owner** | `20b480cf` |
 | `64a` note scale, quiet token — RULED 2026-09-16 | `2da088bd` |
 | `64b` when a screen cannot read — RULED 2026-09-17 | `5c48963b` |
 | `64e` five ways a read is refused or unanswered — APPROVED 2026-09-19 | `c07fb269` |
@@ -126,7 +127,7 @@ never `T` alone.
 | G8 | *"Scoped to a body that has a pager"* — a rule about lists applied without one *"removes content"* | `M` on every screen **without** a pager, nothing is clipped past the body | `ALL` |
 | G9 | the pager is the table's next sibling — *"what `~` depends on and what a wrapper would silently break"* | `T` DOM sibling | `1P` `MP` `E0` |
 | G10 | the strip's colour *"from `--color-surface` and never from a literal"* | `S` | `SRC` |
-| G11 | **The empty list (`E0`) is not ruled.** §6 rules a single page (G3) and an empty page (G5); `pagedView` returns `empty: true` and says *"A caller draws its own empty state instead"* (`pager.ts:94`). Whether `E0` draws a pager, a count (`0 in the list`), or neither is **OPEN** | `C` record what `E0` draws and where; G6, G7 still apply to its placement | `E0` |
+| G11 | **The empty list (`E0`) is not ruled.** §6 rules a single page (G3) and an empty page (G5); `pagedView` returns `empty: true` and says *"A caller draws its own empty state instead"* (`pager.ts:94`). Whether `E0` draws a pager, a count (`0 in the list`), or neither is **OPEN — drawn for the owner in `64f`** | `C` record what `E0` draws and where; G6, G7 still apply to its placement | `E0` |
 
 ## §9 · Overlays
 
@@ -263,6 +264,10 @@ X13, X14, X15 carry 64d's eight items as OPEN.
 (fill, *needs…* size) · X8 (the moment) · X13 · X14 · X15.
 
 ## What deriving this found about the standard itself
+
+**All four corrected in page 64 at `20b480cf`, keeping what each said** — and
+`64f` now draws the empty list for the owner. Kept below as found, because this
+file was published saying them.
 
 For the architect, not for the apps — none of these changes an audit result:
 
