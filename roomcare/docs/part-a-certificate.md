@@ -1,12 +1,56 @@
 # Room Care Part A — frame beside capture
 
+> **Part A is drawing fidelity only, and is never sign-off** (owner ruling, 2026-09-19). It puts an approved frame
+> beside a harness rendering of **recorded fixtures**, not the owner's installed build on the property's real data. It
+> says nothing about whether a button works, whether an action is authorized, or how a screen looks with this
+> property's data. Those are the frame-versus-live comparison, the capability ledger and Part B, which are the
+> evidence. **At this run, Room Care is not installed on the owner's platform** (`platform.packages` holds guestops,
+> jobs, openai and workforce), so no live comparison exists yet.
+
+## Run from `07eb133` — the dead controls removed, chip spacing as approved
+
+Run 2026-09-19 by KK against the frames as re-locked at `fff2d96b`, **built by the run from `07eb133`, clean**
+(`module.js` `36f0e205…`). This is the next cut's source, not 0.1.3.
+
+```text
+drawn 1,657 · built 1,563 · paired 559 (33.7%) · identical 414 · differing 145
+every one of the 145 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+| Class | n | Moves |
+|---|---|---|
+| sticky-header-ground | 23 | neither |
+| font-shorthand-line-height | 44 | drawing |
+| flex-blockified | 20 | neither |
+| button-type-size | 21 | drawing |
+| selected-row-example | 2 | neither |
+| named, one each | 35 | 27 drawing · 5 neither · 3 adjudicate |
+
+**What changed since `28bfdd0a`, and why the counts moved:**
+
+- **The 12 chips moved from build (proposed) to built.** `.btn.chip` has margin 0 6px 6px 0 and `.chips` no gap, the
+  value the owner approved in `19f203c5`, accepted by the architect without an owner page. What remains on those
+  nodes is a display blockified in a flex row, which the `flex-blockified` rule now catches (12 → 20). One entry,
+  `4|Guest departed`, keeps a named reason: the frame draws that chip as the chosen one and the recorded room's
+  stay is another.
+- **Paired fell by 10 (569 → 559)** because five texts changed in the build and the frames have not followed yet.
+  Each was a control that looked live and did nothing, or a drawn-off control with no reason on screen:
+  `Zone` (board and sheet) → the label `grouped by zone` · `Discard` drawn off with nothing to discard ·
+  `Apply to selected — select rows first` · `Add a phase — the five are the owner's` ·
+  `Reassign… — this room's service has ended`. **The drawing moves on these**, and they show here as unpaired
+  rather than differing.
+- **The 3 adjudicate are unchanged and are not the chips**: `1b|off the day` and `1b|out of order` (a blocked row
+  dimmed two ways) and `6|Suite` (a row drawn selected). Each is a design choice for the next owner page.
+
+## Superseded by `07eb133` — the run from `28bfdd0a`
+
 Run 2026-09-19 by KK against the frames **as re-locked at `fff2d96b`**: 01c, approved by the owner, drew every
 control in a frame as the build's `<button>` (0 differing pixels over each whole page). **Built by the run, from
 `28bfdd0a`, clean.** This measures **the next cut's source, not 0.1.3.** Since 0.1.3 the build has gained the
 display-name fix (`df8d44f`) and the model-unavailable sentence (`28bfdd0a`), so `module.js` is `a4666e0c…`, where
 0.1.3's was `2a87ed40…`. Part B on 0.1.3 remains that version's own evidence.
 
-## Result
+### Result
 
 ```text
 drawn 1,657 · built 1,566 · paired 569 (34.3% of drawn; 427 · 25.8% before 01c) · identical 415 · differing 154
@@ -22,7 +66,7 @@ every one of the 154 is named; classify.mjs exits 0; 0 frames unreached
 | selected-row-example | 2 | neither |
 | named, one each | 49 | 30 drawing · 12 **build (proposed)** · 4 neither · 3 adjudicate |
 
-## What 01c's re-lock changed
+### What 01c's re-lock changed
 
 - **142 more nodes pair.** Tabs, actions and pager buttons are buttons on both sides now. Most of the new
   differences fall under two existing classes: `.btn` at 14px in the frame where §2 fixes 13
@@ -39,7 +83,7 @@ every one of the 154 is named; classify.mjs exits 0; 0 frames unreached
   row. That's the build short of an approved drawing, not a new design choice, so it isn't on an owner page. It is
   **proposed and not yet built**: it goes into the cut after Part B, if you agree.
 
-## What this does not prove
+### What this does not prove
 
 569 of 1,657 drawn nodes pair (34.3%), from 16.5% (7e) to 68.3% (7c). What remains unpaired is mostly data: the
 frames draw Marina Bay, and the harness renders the recorded Coral Cove morning, so rooms, names and times don't
