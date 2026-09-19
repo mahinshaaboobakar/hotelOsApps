@@ -49,26 +49,39 @@ function shiftForm(): HTMLElement {
   return form as HTMLElement;
 }
 
-function inert(form: HTMLElement, name: string): void {
+/**
+ * A form as it opens: nothing entered, nothing invented, nothing sent.
+ *
+ * **Rewritten under ADR 0034 when the Leave form was built (2026-09-19).** It
+ * asserted *"every value box is the placeholder"* and *"the primary is off over
+ * nothing"* — true of a form that could accept nothing, and a contract that ends
+ * the day the form accepts input. What it proved and still holds is kept: no
+ * value nobody entered, nothing pre-chosen, and a confirm that waits — off,
+ * disabled, its reason beside it — until something is.
+ */
+function opensEmpty(form: HTMLElement, name: string): void {
   const text = form.textContent ?? "";
   for (const value of INVENTED) {
     expect(text, `${name} shows "${value}", which nobody entered`).not.toContain(value);
   }
 
-  // Every value box is the placeholder: nobody has supplied a value (§10).
-  for (const box of Array.from(form.querySelectorAll(".inp"))) {
+  // A drawn value box is the placeholder, and a real control holds nothing.
+  for (const box of Array.from(form.querySelectorAll("div.inp"))) {
     expect(box.classList.contains("ph"), `${name}: a value box shows a value`).toBe(true);
+  }
+  for (const field of Array.from(form.querySelectorAll<HTMLInputElement>("input, select"))) {
+    expect(field.value, `${name}: ${field.name || field.type} opens holding a value`).toBe("");
   }
 
   // Nothing is pre-chosen.
   expect(form.querySelector(".choice.on, .sw.on"), `${name}: a choice is pre-selected`).toBeNull();
 
-  // The primary is a real control, off and disabled, with its reason beside it.
-  const primary = form.querySelector(".acts .btn.pri");
-  expect(primary?.tagName, `${name}: the primary is not a button`).toBe("BUTTON");
-  expect(primary?.classList.contains("off"), `${name}: the primary is live over nothing`).toBe(true);
-  expect(primary?.hasAttribute("disabled")).toBe(true);
-  expect(form.querySelector(".acts .why")?.textContent ?? "", `${name}: no reason beside it`).not.toBe("");
+  // The confirm is a real control, waiting — off and disabled — with its reason.
+  const confirm = form.querySelector(".acts button:last-of-type");
+  expect(confirm?.classList.contains("off"), `${name}: the confirm is live over nothing`).toBe(true);
+  expect(confirm?.hasAttribute("disabled")).toBe(true);
+  const reason = form.querySelector(".acts .note, .acts .why")?.textContent ?? "";
+  expect(reason, `${name}: no reason beside it`).not.toBe("");
 
   // Every control is a button (C8).
   for (const control of Array.from(form.querySelectorAll(".btn"))) {
@@ -76,12 +89,12 @@ function inert(form: HTMLElement, name: string): void {
   }
 }
 
-describe("a form that accepts nothing", () => {
-  it("leave shows no invented request, and offers nothing to save", async () => {
-    inert(await leaveForm(), "leave");
+describe("a form as it opens", () => {
+  it("leave shows no invented request, and waits for one", async () => {
+    opensEmpty(await leaveForm(), "leave");
   });
 
-  it("shift shows no invented shift, and offers nothing to save", () => {
-    inert(shiftForm(), "shift");
+  it("shift shows no invented shift, and waits for one", () => {
+    opensEmpty(shiftForm(), "shift");
   });
 });

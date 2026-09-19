@@ -1,119 +1,186 @@
 /**
  * Request leave — the form, and the warning that does not stop it.
  *
- * # `WF-Q5` rendered at the point of entry
+ * # It raises what is entered, for the person signed in
  *
- * The balance is shown **while the request is being made**, negative sign and
- * all, and the request can still be raised. *"Warn, never block"* is not a
- * property of the approval screen alone: a form that refused here would have
- * moved the block one step earlier and called it validation.
+ * `leave.request · raise` takes a type, a first and a last day and an optional
+ * note, and **derives whose leave it is from the caller** — ADR 0172. So there
+ * is no "For" field: a request naming somebody else is inexpressible on the
+ * wire, and a control offering it would promise what the service refuses by
+ * construction. The form says so in a sentence rather than drawing a choice.
  *
- * # Provenance is on the form, not inferred from it
+ * The owner met this form dead on 0.3.3: every box a drawing and the primary
+ * live over nothing. On 2026-09-19 it was first drawn honestly off; it is built
+ * now, because everything it needs is served.
  *
- * `WF-Q9`(b). Most of the workforce has no login, so a supervisor raises most
- * of these — and the form says whose request it is and who is raising it, in a
- * sentence rather than a field somebody has to interpret.
+ * # `WF-Q5` at the point of entry
  *
- * # Both of those need a CHOICE, and this form cannot take one yet
- *
- * **It drew a finished request nobody made** (the app surface audit,
- * 2026-09-19, C11 · F1 · C8): two people named as literals in the screen —
- * *"for"* one, *"raised by"* another — the overdrawn balance, chosen *"because
- * that is the one the frame raises the warning against"*, two dates, a note,
- * and *"3 days. 2 of your team are already away on the 15th."* — a fact
- * computed about dates nobody entered. Under it, a live *Raise request*.
- *
- * Every value box is now §10's placeholder, and the two rules above return the
- * day a person and a type can be chosen here: the balance beside the chosen
- * type, and the provenance sentence naming the two people it is true of. **Until
- * then the form states the rules, not a record that does not exist.**
+ * The chosen type's balance is shown **while the request is being made**,
+ * minus sign and all, and the request can still be raised. *Warn, never block*
+ * is not a property of the approval screen alone: a form that refused here
+ * would have moved the block one step earlier and called it validation.
  */
 
-import { control, el } from "../../chrome/element";
+import { formatNumber, type HostApi } from "@hotelos/sdk";
+
+import { foot } from "../../chrome/confirm";
+import { el } from "../../chrome/element";
 import { overlay } from "../../chrome/overlay";
+import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
+import type { Balance } from "../../roster/leave";
 
-/**
- * What an empty value box shows. §10 draws `.inp.ph` *"when nobody has
- * supplied a value"*; the dash is §11's mark for absent.
- */
-const NOTHING = "—";
+/** What the sheet holds, and what the write carries. */
+interface Draft {
+  type: string | null;
+  from: string;
+  to: string;
+  note: string;
+}
 
 /**
  * Build the form — a sheet, because a person composes a request here (§9).
  *
+ * @param host the bridge
+ * @param types every leave type, with the reader's balance in each
  * @param close called when it is dismissed
+ * @param done called after the request is raised, so the board is re-read
  * @returns the overlay
  */
-export function requestForm(close: () => void): HTMLElement {
+export function requestForm(
+  host: HostApi, types: readonly Balance[], close: () => void, done: () => void,
+): HTMLElement {
+  const draft: Draft = { type: null, from: "", to: "", note: "" };
+
+  const balance = el("div", "fld");
+  const refusal = el("div", "note warn");
+  const acts = foot("Raise request", "Raising…", close);
+
+  function redraw(): void {
+    balance.replaceChildren();
+    const chosen = types.find((one) => one.id === draft.type);
+    if (chosen !== undefined) balance.append(held(chosen, host));
+
+    // §2: off, with the field it waits on — never live and refusing. Dates
+    // compare as the control writes them, YYYY-MM-DD, which sorts as it reads.
+    acts.waitingFor(draft.type === null
+      ? "Choose a type of leave"
+      : draft.from === "" || draft.to === ""
+        ? "Choose the first and last day"
+        : draft.to < draft.from
+          ? "The last day is before the first"
+          : null);
+  }
+
+  acts.onConfirm(() => {
+    void (async () => {
+      refusal.replaceChildren();
+      acts.working(true);
+
+      try {
+        await write(host, "leave.request", "raise", {
+          typeId: draft.type,
+          from: draft.from,
+          to: draft.to,
+          ...(draft.note.trim() === "" ? {} : { note: draft.note.trim() }),
+        });
+        done();
+      } catch (error) {
+        // §9: a refusal keeps the sheet open, carrying the reason.
+        refusal.append(el("span", undefined,
+          error instanceof WriteRefused ? error.message : UNKNOWN_OUTCOME));
+        acts.working(false);
+
+        if (!(error instanceof WriteRefused)) throw error;
+      }
+    })();
+  });
+
+  redraw();
+
   return overlay("sheet", {
-    head: [el("div", "ht", "Request leave")],
-    body: [forWhom(), type(), dates(), note()],
-    foot: [actions(close)],
+    head: [
+      el("div", "ht", "Request leave"),
+      el("div", "hsub", "For you — a request is raised by the person it is for."),
+    ],
+    body: [
+      type(types, (id) => { draft.type = id; redraw(); }),
+      balance,
+      dates((which, value) => { draft[which] = value; redraw(); }),
+      note((value) => { draft.note = value; }),
+      refusal,
+    ],
+    foot: [acts.row],
   }, close);
 }
 
-/** Who it is for — and the rule the record keeps, stated rather than filled in. */
-function forWhom(): HTMLElement {
+/** The type — a real choice, and nothing chosen until the person chooses. */
+function type(types: readonly Balance[], chosen: (id: string | null) => void): HTMLElement {
   const row = el("div", "fld");
+  const picker = document.createElement("select");
+  picker.className = "inp ph";
+  picker.name = "type";
 
-  row.append(
-    el("div", "fld-label", "For"),
-    el("div", "inp ph", NOTHING),
-    el("div", "note",
-      "Raised for somebody else, it is recorded as raised on their behalf — "
-      + "the record never claims they did it themselves."),
-  );
+  const none = document.createElement("option");
+  none.value = "";
+  none.textContent = "Choose a type";
+  picker.append(none);
 
+  for (const one of types) {
+    const option = document.createElement("option");
+    option.value = one.id;
+    option.textContent = one.type;
+    picker.append(option);
+  }
+
+  picker.addEventListener("change", () => {
+    picker.classList.toggle("ph", picker.value === "");
+    chosen(picker.value === "" ? null : picker.value);
+  });
+
+  row.append(el("div", "fld-label", "Type"), picker);
   return row;
 }
 
-/**
- * The type. Its balance is shown beside it once one is chosen — `WF-Q5`, warn
- * and never block — and not before: a balance beside no type is a figure about
- * nothing.
- */
-function type(): HTMLElement {
-  const row = el("div", "fld");
-  row.append(el("div", "fld-label", "Type"), el("div", "inp ph", NOTHING));
-  return row;
+/** The chosen type's balance — a warning, never a gate (WF-Q5). */
+function held(chosen: Balance, host: HostApi): HTMLElement {
+  // The default precision, because a balance can be a half day.
+  const days = formatNumber(chosen.days, host.property);
+  const text = chosen.of === null
+    ? `${days} left`
+    : `${days} of ${formatNumber(chosen.of, host.property)} left`;
+
+  return el("div", chosen.days < 0 ? "note warn balance" : "note balance", text);
 }
 
-/** The two dates. What they add up to, and who else is away, follow the dates. */
-function dates(): HTMLElement {
+/** The first and last day — the service counts the days between them. */
+function dates(set: (which: "from" | "to", value: string) => void): HTMLElement {
   const row = el("div", "fld");
   const pair = el("div", "spans");
 
-  pair.append(el("div", "inp ph", NOTHING), el("div", "inp ph", NOTHING));
+  for (const which of ["from", "to"] as const) {
+    const input = document.createElement("input");
+    input.className = "inp";
+    input.type = "date";
+    input.name = which;
+    input.setAttribute("aria-label", which === "from" ? "First day" : "Last day");
+    input.addEventListener("input", () => { set(which, input.value); });
+    pair.append(input);
+  }
+
   row.append(el("div", "fld-label", "Dates"), pair);
-
   return row;
 }
 
-function note(): HTMLElement {
+/** A note the approver reads — optional. */
+function note(set: (value: string) => void): HTMLElement {
   const row = el("div", "fld");
-  row.append(el("div", "fld-label", "Note"), el("div", "inp ph", NOTHING));
-  return row;
-}
+  const input = document.createElement("input");
+  input.className = "inp";
+  input.type = "text";
+  input.name = "note";
+  input.setAttribute("maxlength", "500");
+  input.addEventListener("input", () => { set(input.value); });
 
-function actions(close: () => void): HTMLElement {
-  const row = el("div", "acts");
-  const cancel = control("btn", "Cancel", close);
-
-  // **Off, and says why** — §2: *"A primary action with nothing to send is
-  // drawn `off`, with the reason beside it — never live-and-refusing."*
-  // `leave.request · raise` is served and needs no staff id at all — ADR 0172
-  // derives the requester from the scope, so *whose leave* is not a field and
-  // cannot be one. What this sheet has no way to supply is the person's own
-  // answers: every value box above is a rendered `div`, not a control, so there
-  // is nothing to read a date or a note out of. Building those is a surface,
-  // not a wiring. It was a live `div.btn.pri` over nothing until 2026-09-19.
-  const raise = control("btn pri off", "Raise request");
-  raise.setAttribute("disabled", "true");
-
-  row.append(
-    cancel,
-    raise,
-    el("span", "why", "Dates and a note cannot be entered here yet, so there is nothing to send."),
-  );
+  row.append(el("div", "fld-label", "Note"), input);
   return row;
 }

@@ -68,7 +68,10 @@ export async function leave(
   // demonstrate nothing"* — the drawing's demonstration, shipped as a request
   // (the app surface audit, 2026-09-19). And it opened only when the board had
   // a balance, so on a property with none the button silently did nothing.
-  if (dialog) main.append(requestForm(close));
+  //
+  // It raises now: the types come from the read, whose leave is the caller's
+  // (ADR 0172), and closing re-draws this screen, which re-reads the board.
+  if (dialog) main.append(requestForm(host, board.balances, close, close));
 }
 
 /** The header, with counts derived from the board. */

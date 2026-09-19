@@ -2,6 +2,7 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { recordedRegister } from "../roster/duty";
+import { recordedLeave } from "../roster/leave";
 import { recordedPeople } from "../roster/people";
 import { recordedWeek } from "../roster/recorded";
 import { recordedPostingEnding, recordedTeams } from "../roster/teams";
@@ -37,7 +38,7 @@ if (detail === null) throw new Error("the recorded teams carry an open team");
 
 const COMPOSING: [string, () => HTMLElement][] = [
   ["assign duty", () => assignDuty(host, nothing, recordedRegister.candidates, recordedRegister.days[0], host.property, nothing)],
-  ["request leave", () => requestForm(nothing)],
+  ["request leave", () => requestForm(host, recordedLeave.balances, nothing, nothing)],
   ["new shift", () => newShift(nothing)],
   ["form a team", () => formTeam(host, recordedTeams.departments, recordedTeams.teams, nothing, nothing)],
   ["add a member", () => addMember(host, recordedTeams.onDate, nothing, detail, nothing)],
