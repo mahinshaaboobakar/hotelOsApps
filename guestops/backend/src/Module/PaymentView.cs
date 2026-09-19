@@ -48,7 +48,9 @@ public sealed class PaymentView(GuestOpsDbContext db)
         return new
         {
             terms = Rows(terms, stay.Arrival, stay.Departure),
-            note = Note,
+            // Null: it explained how the deadlines are computed and stored — a
+            // developer's note, removed under the owner's ruling of 2026-09-19.
+            note = (string?)null,
             folio = Folio,
             folioNote = FolioNote,
         };
@@ -124,7 +126,9 @@ public sealed class PaymentView(GuestOpsDbContext db)
                 label = "Deposit policy",
                 value = "due ",
                 strong = depositDays == 1 ? "1 day after booking" : $"{depositDays} days after booking",
-                tags = new[] { Lock("COMPUTED FROM OFFSET") },
+                // Carried a "COMPUTED FROM OFFSET" tag — how the value is
+                // derived, for the developer.
+                tags = Array.Empty<object>(),
             });
         }
 
@@ -232,28 +236,18 @@ public sealed class PaymentView(GuestOpsDbContext db)
     private static object PillWarn(string text)
         => new { kind = "pill", tone = "warn", text };
 
-    private const string Note =
-        "The deadlines are computed, never stored. The record holds “48 hours "
-        + "before arrival”; move the arrival and the deadline moves with it. A "
-        + "stored deadline silently stops matching its reservation, and that is a "
-        + "chargeable error.";
-
     /// <summary>Five lines, each naming what it would take.</summary>
     private static readonly object[] Folio =
     [
-        new { label = "Deposit received", because = "NEEDS FINANCE OR A CONNECTOR CAPABILITY" },
+        new { label = "Deposit received", because = "NOT AVAILABLE" },
         new { label = "Room & tax posted", because = "NOT AVAILABLE" },
         new { label = "Extras", because = "NOT AVAILABLE" },
         new { label = "Balance due", because = "NOT AVAILABLE" },
-        new { label = "Settle · invoice", because = "FINANCE, A LATER ROUND" },
+        new { label = "Settle · invoice", because = "NOT AVAILABLE" },
     ];
 
+    // It explained two different gaps, the connector contract and a register
+    // ruling — for the developer. What the desk needs is the one sentence.
     private const string FolioNote =
-        "Two different gaps, and they need two different answers. In a "
-        + "PMS-connected property the folio lives in Opera and the desk settles "
-        + "there — showing it here needs the connector to carry a balance, a "
-        + "capability v1's inbound contract does not include. In a standalone "
-        + "property there is no Opera, so settlement happens nowhere in v1 — a "
-        + "consequence accepted knowingly with GUEST-Q6, and the reason the first "
-        + "deployments are PMS-connected.";
+        "GuestOps cannot show the folio or take a payment yet.";
 }

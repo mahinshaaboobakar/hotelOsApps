@@ -73,10 +73,10 @@ public sealed class ActivityView(GuestOpsDbContext db)
                 who = Who(one.ActorType, one.Source),
                 what = What(one.EventType),
 
-                // The event's own name, so a row a person does not recognise
-                // can still be matched against a log. It is never a sentence
-                // this projection made up about what the event meant.
-                detail = one.EventType,
+                // The event's own name (`stay.arrived`) stood here — a
+                // developer's identifier, removed under the owner's ruling of
+                // 2026-09-19. Null until there is a line a person would read.
+                detail = (string?)null,
                 disagrees = one.EventType.EndsWith(".disagreed", StringComparison.Ordinal),
             }).ToArray(),
         };

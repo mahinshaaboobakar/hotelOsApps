@@ -28,21 +28,21 @@ export const recordedActivity: Activity = {
       at: "2026-08-28T09:14:00+05:30",
       who: { mark: "pms", text: "Opera" },
       what: "Booked — 4 nights, Deluxe King, ₹ 8 400.00 per night",
-      detail: "reservation 84119377 · business day 28 Aug · arrived via the Integration Hub",
+      detail: "reservation 84119377 · business day 28 Aug",
       disagrees: false,
     },
     {
       at: "2026-08-29T17:02:00+05:30",
       who: { mark: "pms", text: "Opera" },
       what: "Amended — departure moved from 2 Sep to 4 Sep",
-      detail: "the fetched state decided this, not the source's event type",
+      detail: null,
       disagrees: false,
     },
     {
       at: "2026-08-30T21:40:00+05:30",
       who: { mark: "other", text: "Room Care" },
       what: "Room 214 inspected and released",
-      detail: "read through the Context Service · GuestOps stores none of this",
+      detail: null,
       disagrees: false,
     },
     {
@@ -56,7 +56,7 @@ export const recordedActivity: Activity = {
       at: "2026-08-31T14:10:00+05:30",
       who: { mark: "override", text: "Anitha M." },
       what: "Checked in",
-      detail: "override · arrival time observed, not derived",
+      detail: "override",
       disagrees: false,
     },
     {
@@ -77,7 +77,7 @@ export const recordedActivity: Activity = {
       at: "2026-08-31T15:06:00+05:30",
       who: { mark: "other", text: "Jobs" },
       what: "JOB-8821 assigned to Engineering — in progress",
-      detail: "read through the Context Service",
+      detail: null,
       disagrees: false,
     },
     {
@@ -91,7 +91,7 @@ export const recordedActivity: Activity = {
       at: "2026-09-01T10:20:00+05:30",
       who: { mark: "other", text: "Room Care" },
       what: "Stayover service completed by Suma T.",
-      detail: "read through the Context Service",
+      detail: null,
       disagrees: false,
     },
   ],
@@ -244,7 +244,7 @@ export const recordedPayment: Payment = {
     {
       label: "Deposit policy", value: "30% · due ", strong: "7 days after booking",
       tail: " → 4 Sep",
-      tags: [{ kind: "lock", tone: "neutral", text: "COMPUTED FROM OFFSET" }],
+      tags: [],
     },
     {
       label: "Cancellation", value: "1 night if within ", strong: "48 h of arrival",
@@ -260,26 +260,17 @@ export const recordedPayment: Payment = {
     },
   ],
 
-  note: "The deadlines are computed, never stored. The record holds “48 hours "
-    + "before arrival”; move the arrival and the deadline moves with it. A stored "
-    + "deadline silently stops matching its reservation, and that is a chargeable "
-    + "error.",
+  note: null,
 
   folio: [
-    { label: "Deposit received", because: "NEEDS FINANCE OR A CONNECTOR CAPABILITY" },
+    { label: "Deposit received", because: "NOT AVAILABLE" },
     { label: "Room & tax posted", because: "NOT AVAILABLE" },
     { label: "Extras", because: "NOT AVAILABLE" },
     { label: "Balance due", because: "NOT AVAILABLE" },
-    { label: "Settle · invoice", because: "FINANCE, A LATER ROUND" },
+    { label: "Settle · invoice", because: "NOT AVAILABLE" },
   ],
 
-  folioNote: "Two different gaps, and they need two different answers. In a "
-    + "PMS-connected property the folio lives in Opera and the desk settles there "
-    + "— showing it here needs the connector to carry a balance, a capability v1's "
-    + "inbound contract does not include. In a standalone property there is no "
-    + "Opera, so settlement happens nowhere in v1 — a consequence accepted "
-    + "knowingly with GUEST-Q6, and the reason the first deployments are "
-    + "PMS-connected.",
+  folioNote: "GuestOps cannot show the folio or take a payment yet.",
 };
 
 /**

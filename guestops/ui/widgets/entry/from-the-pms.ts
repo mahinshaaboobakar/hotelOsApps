@@ -32,7 +32,7 @@ import { failureDrawing, load } from "@hotelos/sdk";
 import { APP } from "../../app";
 import { instant } from "../../chrome/when";
 import { serve } from "../mount";
-import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
+import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One fact the Hub could not place, and why. */
 interface Held {
@@ -91,7 +91,7 @@ connectToHost((host: HostApi) => {
       if (tile !== null) counts.append(tile);
     }
 
-    body.append(counts, label("Held facts — nothing else is recorded"));
+    body.append(counts, label("Held facts"));
 
     for (const fact of feed.facts.slice(0, 3)) {
       body.append(row(
@@ -112,7 +112,8 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note("Amended and cancelled are not drawn — see the report."));
+    // A footnote on what the card leaves out and why stood here — a note for
+    // the developer, removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
     into.replaceChildren(stylesheet(), frame);
   }

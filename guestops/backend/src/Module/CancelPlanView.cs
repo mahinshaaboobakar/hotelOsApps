@@ -101,15 +101,17 @@ public sealed class CancelPlanView(
     }
 
     /// <summary>The sentence naming what the button does.</summary>
+    /// <remarks>
+    /// It went on to explain that a booking is a group and every operation
+    /// happens to a stay — the model, for the developer — and promised the
+    /// stays "can be reinstated afterwards", which nothing in GuestOps can do.
+    /// Both removed on 2026-09-19 (the owner's ruling on developer notes, and a
+    /// sentence may not promise an outcome the code does not deliver).
+    /// </remarks>
     private static string Consequence(int count)
         => count == 1
-            ? "This cancels one stay. A booking is a group and every operation "
-                + "happens to a stay — so this records one cancellation, and it "
-                + "can be reinstated afterwards."
-            : $"This cancels {Spell(count)} stays, one at a time. A booking is a "
-                + "group and every operation happens to a stay — so this records "
-                + $"{Spell(count)} cancellations, and any of them can be "
-                + "reinstated separately afterwards.";
+            ? "This cancels one stay."
+            : $"This cancels {Spell(count)} stays, one at a time.";
 
     /// <summary>One stay's penalty, as the dialog states it.</summary>
     /// <remarks>

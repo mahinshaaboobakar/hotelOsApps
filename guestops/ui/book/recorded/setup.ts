@@ -40,7 +40,7 @@ export const recordedSetup: Setup = {
 
   lead: {
     title: "Stop-sell",
-    aside: "the seller's control — not an inventory fact",
+    aside: null,
 
     rows: [
       {
@@ -60,13 +60,6 @@ export const recordedSetup: Setup = {
 
     // The drawing's order: the sentence, then the control it justifies.
     blocks: [
-      {
-        kind: "hint",
-        text: "This says “we choose not to sell”, never “this room cannot be "
-          + "used.” A room that is genuinely unusable is out of order — "
-          + "EngineeringOps's to declare and ours only to hear. Two sentences, "
-          + "two owners, and availability subtracts both.",
-      },
       { kind: "actions", labels: ["＋ Close a room type for dates"] },
     ],
   },
@@ -84,7 +77,7 @@ export const recordedSetup: Setup = {
         },
         {
           label: "Authority",
-          value: "Kerala Police — the property names its own",
+          value: "Kerala Police",
           tags: [],
         },
         {
@@ -92,12 +85,12 @@ export const recordedSetup: Setup = {
           value: "",
           strong: "24 hours",
           tail: " after arrival",
-          tags: [{ kind: "lock", tone: "neutral", text: "AN OFFSET, NOT A DATE" }],
+          tags: [],
         },
         {
           label: "Who may file",
           value: "Front Office Manager · Duty Manager",
-          tags: [{ kind: "lock", tone: "neutral", text: "reporting.file" }],
+          tags: [],
         },
         {
           label: "How it is sent",
@@ -107,16 +100,7 @@ export const recordedSetup: Setup = {
         },
       ],
 
-      blocks: [
-        {
-          kind: "note",
-          text: "HotelOS does not submit anything. This screen sets the policy, "
-            + "raises the flag and records what was filed — the authority, the "
-            + "reference, who filed it and when. Sending it automatically is an "
-            + "integration, and every integration on this platform is a "
-            + "connector; that one does not exist and is not pretended here.",
-        },
-      ],
+      blocks: [],
     },
     {
       title: "Due to file",
@@ -180,13 +164,13 @@ export const recordedSetup: Setup = {
       {
         label: "Accepted IDs",
         value: "the property's own list",
-        tags: [{ kind: "lock", tone: "neutral", text: "SEEDED FOR ITS COUNTRY" }],
+        tags: [],
       },
       { label: "Signature", value: "Required · pad or scan", tags: [] },
       {
         label: "Print at check-in",
         value: "Yes",
-        tags: [{ kind: "lock", tone: "neutral", text: "PLATFORM PRINT SURFACE" }],
+        tags: [],
       },
     ],
 
@@ -205,9 +189,7 @@ export const recordedSetup: Setup = {
       },
     ],
 
-    hint: "Two required sets, and the property decides both — which is what "
-      + "lets one product serve a hotel in Kochi and a hotel in Dubai without a "
-      + "country written into it. Everything not required stays on the card as "
-      + "optional; it is never removed from the record.",
+    hint: "Everything not required stays on the card as optional; it is never "
+      + "removed from the record.",
   },
 };

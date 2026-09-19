@@ -26,7 +26,10 @@ const COLUMNS = ["When", "Who", "What"] as const;
  * @returns the tab's contents
  */
 export function activityTab(activity: Activity, property: PropertyEnvironment): readonly HTMLElement[] {
-  return [sources(activity), list(activity.entries, property), provenance()];
+  // A note under the list explained where each kind of row comes from — which
+  // service reads another application's records, and what happens when one is
+  // uninstalled. Removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
+  return [sources(activity), list(activity.entries, property)];
 }
 
 /** The four source filters, and the note about ordering. */
@@ -87,40 +90,9 @@ function line(entry: ActivityEntry, property: PropertyEnvironment): HTMLElement 
   const what = el("div", "w");
   what.append(
     document.createTextNode(entry.what),
-    el("span", undefined, entry.detail),
+    ...(entry.detail === null ? [] : [el("span", undefined, entry.detail)]),
   );
 
   element.append(when, who, what);
   return element;
-}
-
-/**
- * The three kinds of source, named under the list.
- *
- * On the screen rather than in a document because it is what makes the list
- * safe to read: another application's rows are **read through the Context
- * Service and stored nowhere here**, so if that application is uninstalled
- * tomorrow its rows stop appearing and nothing in this stay's history is
- * orphaned.
- */
-function provenance(): HTMLElement {
-  const note = el("div", "note");
-
-  note.append(
-    el("b", undefined, "Three sources, one list, and the difference is never hidden."),
-    document.createTextNode(" "),
-    mark({ mark: "pms", text: "Opera" }),
-    document.createTextNode(" is a fact the PMS wrote. "),
-    mark({ mark: "override", text: "a person" }),
-    document.createTextNode(" is one of ours, named. "),
-    mark({ mark: "other", text: "another app" }),
-    document.createTextNode(
-      " is Room Care's or Jobs' own record, read through the Context Service and "
-        + "stored nowhere here — if that application is uninstalled tomorrow, its "
-        + "rows simply stop appearing, and nothing in this stay's history is "
-        + "orphaned.",
-    ),
-  );
-
-  return note;
 }

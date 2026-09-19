@@ -3,8 +3,7 @@
  */
 
 import type { Request, Requests } from "../../book";
-import { el, fill, unavailable } from "../../chrome/element";
-import { mark } from "../../chrome/marks";
+import { el, unavailable } from "../../chrome/element";
 import { card } from "../../chrome/panel";
 
 /**
@@ -36,24 +35,13 @@ export function requestsTab(requests: Requests): readonly HTMLElement[] {
 function ours(requests: Requests): HTMLElement {
   const { root, body } = card(
     "Guest requests",
-    // The attribution is only worth making where there is another panel to
-    // distinguish it from. Alone on the tab it would be a label on the only
-    // thing there.
-    requests.jobsInstalled === false ? undefined : "GuestOps owns these",
+    // It carried "GuestOps owns these" beside Jobs' panel — which application
+    // owns a record is the developer's distinction, not the desk's. Removed
+    // under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
   );
 
   for (const request of requests.ours) {
     body.append(row(request));
-  }
-
-  if (requests.jobsInstalled !== false) {
-    body.append(el(
-      "div",
-      "hint",
-      "A request is a fact about the guest's stay and lives here whether or not "
-        + "any work follows from it. Not every request is a job — a late "
-        + "checkout is answered at the desk.",
-    ));
   }
 
   const why = "Logging a request from GuestOps is not available yet.";
@@ -68,27 +56,15 @@ function neighbour(requests: Requests): HTMLElement {
   }
 
   const { root, body } = card("Jobs from this stay");
-  const heading = root.querySelector(".ch");
 
-  // The attribution goes in the card's header because it is a claim about the
-  // whole panel: none of it is ours, and none of it is stored here.
-  heading?.append(fill(el("div", "grow"), mark({ mark: "other", text: "Jobs · via Context" })));
+  // "Jobs · via Context" in the header and a note on how the job was created,
+  // resolved and stored were here — the data's route, for the developer.
+  // Removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
   for (const job of requests.jobs) {
     body.append(row(job));
   }
 
-  const note = el("div", "note");
-  note.append(
-    el("b", undefined, "This panel is Jobs' data, not ours."),
-    document.createTextNode(
-      " GuestOps published the request; Jobs created the job and carries the "
-        + "stay reference on it. What you see is resolved live — no job state is "
-        + "stored in GuestOps, and no call is made into Jobs.",
-    ),
-  );
-
-  body.append(note);
   return root;
 }
 

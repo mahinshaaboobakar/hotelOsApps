@@ -36,21 +36,26 @@ function terms(payment: Payment): HTMLElement {
   const { root, body } = card("The terms");
   const heading = root.querySelector(".ch");
 
-  heading?.append(fill(el("div", "grow"), el("span", "pill ok", "in v1")));
+  // It carried an "in v1" pill — a release label for the developer, removed
+  // under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
+  void heading;
 
   for (const term of payment.terms) {
     body.append(row(term));
   }
 
-  const note = el("div", "note");
-  const [lead, ...rest] = payment.note.split(". ");
+  if (payment.note !== null) {
+    const note = el("div", "note");
+    const [lead, ...rest] = payment.note.split(". ");
 
-  note.append(
-    el("b", undefined, `${lead ?? ""}.`),
-    document.createTextNode(` ${rest.join(". ")}`),
-  );
+    note.append(
+      el("b", undefined, `${lead ?? ""}.`),
+      document.createTextNode(` ${rest.join(". ")}`),
+    );
 
-  body.append(note);
+    body.append(note);
+  }
+
   return root;
 }
 
@@ -90,7 +95,7 @@ function folio(payment: Payment): HTMLElement {
 
   heading.append(
     document.createTextNode("The folio"),
-    fill(el("div", "grow"), el("span", "pill bad", "not ruled · nothing built")),
+    fill(el("div", "grow"), el("span", "pill bad", "not available")),
   );
 
   const body = el("div", "cb");

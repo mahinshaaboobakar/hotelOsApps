@@ -24,11 +24,12 @@ context.log  11:14:55Z  GetOperatingDay  AuthenticationFailedException
 
 Context lets a caller with no access token through **only if it is a platform
 service** (`CompositeCallerAuthenticator.cs:53-64` in the SDK). GuestOps is an
-**installed application**, and `AUTHZ-Q18` rules that an application never
-carries a person's session. **So on the platform as built, no installed
-application can call Context.** GuestOps is the first to try. That is a gap
-between two rulings, not something GuestOps can fix alone, and it goes to the
-planner as a question.
+**installed application**, so no installed application can call Context as the
+SDK is built. GuestOps is the first to try. **Not a gap between rulings** — this
+ledger first said it was: `AUTHZ-Q18` already rules that packages are services
+and that .NET services accept an application certificate. The shared SDK
+authenticator does not yet, so it is an SDK defect, owned by BB (architect,
+2026-09-19). Nothing in GuestOps changes for it.
 
 What depends on that call (code):
 
@@ -131,3 +132,55 @@ Everything / Ours (2) · Raise a job (1) · Log a request (1) · Ask for service
 · Open in Opera (1). They come first: each is drawn off with its reason until its backend door exists.
 **The one write that is wired** (cancel a booking) has never been pressed on the
 platform.
+
+## Since this ledger was written (2026-09-19, same day)
+
+- **The 16 are drawn off with their reasons** (`991b032`), and a control that
+  does nothing can no longer be written: `control()` requires its action, and
+  a control GuestOps cannot perform is `unavailable(label, reason)`. "Full
+  activity →" now opens the Activity tab.
+- **Today at the Desk reads what it draws** (`d9addf4`) — its own read, `desk`.
+- **New booking as the owner decided** (`9a8f6ef`): every room type, no pager,
+  no developer panels. It still refuses on a property until the booking flow the
+  owner asked for is drawn, approved and built — it cannot take a person's own
+  dates yet.
+
+## Developer notes built as screen — swept 2026-09-19
+
+The owner's ruling: a mock's notes for the developer are never built as
+screen. Swept by rendering every screen and widget (`tests/surfaces.ts`) and
+reading all of it. **Guarded**: `tests/document-citations.test.ts` fails on a
+design-section reference, an ADR or a register id anywhere a person reads —
+shown failing on `GUEST-Q6` in the Payment tab before the cleanup.
+
+**Removed — they reached a property** (UI code or what the service sends):
+
+| Where | What it said |
+|---|---|
+| Stay · Activity, `activity-tab.ts` | "Three sources, one list… read through the Context Service and stored nowhere here…" |
+| Stay · Activity, `ActivityView.cs` | each row's detail was the event's own name (`stay.arrived`) |
+| Stay · Requests, `requests-tab.ts` | "GuestOps owns these" · "Jobs · via Context" · "This panel is Jobs' data, not ours…" · "A request is a fact about the guest's stay…" |
+| Stay · Servicing, `servicing-tab.ts` | "All of this is Room Care's… Context Service…" · "Why a day can be blank" card · "What the desk can do here" card. The not-readable state keeps its reason, now in plain words |
+| Stay · Payment, `payment-tab.ts` + `PaymentView.cs` | "in v1" · "not ruled · nothing built" · "COMPUTED FROM OFFSET" · "NEEDS FINANCE OR A CONNECTOR CAPABILITY" · "FINANCE, A LATER ROUND" · the deadline note · the folio note citing **GUEST-Q6** |
+| Booking · cancel, `CancelPlanView.cs` + `cancel.ts` | "A booking is a group and every operation happens to a stay" · "can be reinstated afterwards" (nothing in GuestOps can) · "Charging is Finance's, a later round" |
+| New booking | the sources card and the explanation note (the owner's G7 decision) |
+| Widgets | Today "Arrivals without a room show the gap rather than a guess." · Occupancy "By floor is not drawn…" · From the PMS "Amended and cancelled are not drawn — see the report." and "— nothing else is recorded" · Business Mix "In the source's own words, never normalised." |
+
+**Removed from the harness's fixtures** (never on a property, but on every
+capture the owner reviews): the Activity rows' routes ("arrived via the
+Integration Hub", "read through the Context Service"), the stay's event-stream
+note, Setup's "reporting.file", "PLATFORM PRINT SURFACE", "SEEDED FOR ITS
+COUNTRY", "AN OFFSET, NOT A DATE", "the seller's control — not an inventory
+fact", the stop-sell and filing notes, and "…without a country written into it".
+
+**Queued for the owner — unclear which kind it is:**
+
+| Where | What it says | The question |
+|---|---|---|
+| Today and New booking sub-line (`TodayView`, `AvailabilityView`) | "PMS-connected — Opera writes the lifecycle" / "Standalone — this property is the book" | Screen or note? And it names Opera whatever the property's PMS is |
+| Bookings rows (`BookingsView.cs:167`) | an "Opera" chip on every PMS row | The same: hardcoded, wrong on a property whose PMS is not Opera |
+| New booking, out of order (`AvailabilityView`) | "EngineeringOps" chip | An application's name on a staff screen, hardcoded |
+| From the PMS widget rows | "OHIP" — the integration's id | A system name, or what the desk calls its feed? |
+| Stay · Overview tags (fixture) | "OBSERVED" · "DERIVED FROM PROPERTY CLOCK" · "FROM OPERA" · "GUEST · CARRIES TO NEXT STAY" | Provenance for staff, or for the developer? |
+| Setup (fixture) | "OR EVERY GUEST" · "DECIDES WHO IS 'FROM OUTSIDE'" · "BY A PERSON, ON THE AUTHORITY'S PORTAL" · "Overdue is shown, never enforced… the platform says what is owed and stops nothing." | Help text for the manager, or notes? |
+| Attention | "The names only ordered the list — they can never join two stays." | Explanation for staff, or a note? |

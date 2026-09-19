@@ -81,8 +81,9 @@ export function cancel(
       el(
         "div",
         "hint",
-        "The penalty is calculated and recorded, not charged. Charging is "
-          + "Finance's, a later round.",
+        // It went on to say charging was "Finance's, a later round" — a
+        // roadmap note, removed under the owner's ruling of 2026-09-19.
+        "The penalty is recorded, not charged.",
       ),
     ],
 

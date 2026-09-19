@@ -33,8 +33,13 @@ export interface ActivityEntry {
 
   what: string;
 
-  /** The line under it: the basis, the reference, where it was read from. */
-  detail: string;
+  /**
+   * The line under it, or null. The service sent the event's own name here
+   * (`stay.arrived`) — a developer's identifier on a staff screen, removed
+   * under the owner's ruling of 2026-09-19; it sends null until it has
+   * something a person would read.
+   */
+  detail: string | null;
 
   /**
    * True for the row that records a disagreement.
@@ -175,7 +180,7 @@ export interface Payment {
   terms: readonly TermRow[];
 
   /** The sentence under the terms — why the deadlines are computed. */
-  note: string;
+  note: string | null;
 
   /** Each folio line, and the reason there is nothing behind it. */
   folio: readonly { label: string; because: string }[];

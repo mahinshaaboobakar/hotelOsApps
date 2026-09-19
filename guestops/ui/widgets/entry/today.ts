@@ -19,7 +19,7 @@ import { failureDrawing, load } from "@hotelos/sdk";
 import { APP } from "../../app";
 import { instant } from "../../chrome/when";
 import { serve } from "../mount";
-import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
+import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One arrival, as the desk reads it. */
 interface Arrival {
@@ -102,7 +102,8 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note("Arrivals without a room show the gap rather than a guess."));
+    // A footnote on what the card leaves out and why stood here — a note for
+    // the developer, removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
     into.replaceChildren(stylesheet(), frame);
   }

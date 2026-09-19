@@ -101,10 +101,11 @@ export const recordedStay: StayPage = {
     },
     {
       time: "now", tone: "none", what: "Awaiting a decision",
-      detail: "Room Care, Context and the board all read 214",
+      detail: "your entry stands until someone decides",
     },
   ],
-  consequence:
-    "Taking Opera's 208 publishes the same room-changed fact a move does, so Room Care re-plans "
-    + "from the event stream as always — both rooms' axes flip, and no consumer needs a special case.",
+  // It explained which fact would be published and how Room Care re-plans from
+  // the event stream — a developer's note (the owner's ruling, 2026-09-19).
+  // StayDetailView sends a sentence about the stay; this is one.
+  consequence: "Checking out will release the room for cleaning.",
 };

@@ -19,7 +19,7 @@ import { failureDrawing, load } from "@hotelos/sdk";
 
 import { APP } from "../../app";
 import { serve } from "../mount";
-import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
+import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** One room type, and how much of it is sold. */
 interface TypeRow {
@@ -107,7 +107,8 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note("By floor is not drawn — GuestOps counts rooms by type only."));
+    // A footnote on what the card leaves out and why stood here — a note for
+    // the developer, removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
     into.replaceChildren(stylesheet(), frame);
   }

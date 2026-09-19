@@ -23,7 +23,7 @@ import { failureDrawing, load } from "@hotelos/sdk";
 
 import { APP } from "../../app";
 import { serve } from "../mount";
-import { card, el, label, note, opener, row, stylesheet, unanswered } from "../card";
+import { card, el, label, opener, row, stylesheet, unanswered } from "../card";
 
 /** One line of the mix: a code the source sent, and how many arrived on it. */
 interface Line {
@@ -95,7 +95,8 @@ connectToHost((host: HostApi) => {
       ));
     }
 
-    body.append(note("In the source's own words, never normalised."));
+    // A footnote on what the card leaves out and why stood here — a note for
+    // the developer, removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
     into.replaceChildren(stylesheet(), frame);
   }

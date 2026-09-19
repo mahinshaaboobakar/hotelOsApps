@@ -35,7 +35,7 @@ export function servicingTab(servicing: Servicing): readonly HTMLElement[] {
   }
 
   if (servicing.nights === null) {
-    return [attribution(), unread()];
+    return [unread()];
   }
 
   const strip = el("div", "nights");
@@ -44,24 +44,11 @@ export function servicingTab(servicing: Servicing): readonly HTMLElement[] {
     strip.append(cell(night));
   }
 
-  return [attribution(), strip, explanations()];
-}
-
-/** Whose record this is, said before any of it is read. */
-function attribution(): HTMLElement {
-  const banner = el("div", "ban info");
-  const text = el("div");
-
-  text.append(
-    el("b", undefined, "All of this is Room Care's."),
-    document.createTextNode(
-      " GuestOps shows it because the desk is asked about it — it is read "
-        + "through the Context Service and stored nowhere here.",
-    ),
-  );
-
-  banner.append(text);
-  return banner;
+  // A banner naming whose record this is and the route it is read by, and two
+  // cards on why a day can be blank and what the desk may do, stood around the
+  // strip — developer notes from the frame, removed under
+  // the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
+  return [strip];
 }
 
 /** One night. */
@@ -94,73 +81,6 @@ function cell(night: Night): HTMLElement {
   return element;
 }
 
-/** The two cards: why a day can be blank, and what the desk may do. */
-function explanations(): HTMLElement {
-  const cols = el("div", "cols");
-  const why = card("Why a day can be blank");
-
-  const policy = el("div", "note");
-  policy.append(
-    el("b", undefined, "Cleaning is policy, not a consequence."),
-    document.createTextNode(
-      " Not every hotel services every room every day; a declined day is a real "
-        + "outcome, and a room nobody arrives into tonight may be cleaned "
-        + "tomorrow. Room Care decides all of it — this tab reports, and asserts "
-        + "nothing.",
-    ),
-  );
-
-  fill(
-    why.body,
-    policy,
-    el(
-      "div",
-      "hint",
-      "A one-night stay shows two rows and is rarely opened. This tab earns its "
-        + "place on the long stays, which is where the desk gets asked “has "
-        + "anyone been in my room?”",
-    ),
-  );
-
-  const can = card("What the desk can do here");
-
-  fill(
-    can.body,
-    row("Ask for service", "records the guest's request and hands it on", null),
-    row("Decline recorded", "by Room Care, not by GuestOps", null),
-    row("Not available", null, "ASSIGNING AN ATTENDANT"),
-    row("Never", null, "BLOCKING A CHECK-IN ON A DIRTY ROOM"),
-    el(
-      "div",
-      "hint",
-      "Asking is a request, exactly like a job's. Who cleans, in what order, and "
-        + "to what standard is Room Care's — and if Room Care is not installed "
-        + "this tab does not exist. What does not change either way is the "
-        + "check-in: readiness is shown here, never enforced at the desk.",
-    ),
-  );
-
-  cols.append(why.root, can.root);
-  return cols;
-}
-
-/** One capability line, present or refused. */
-function row(label: string, value: string | null, refused: string | null): HTMLElement {
-  const element = el("div", "fr");
-  const cell_ = el("div", "v");
-
-  if (value !== null) {
-    cell_.append(document.createTextNode(value));
-  }
-
-  if (refused !== null) {
-    cell_.append(el("span", "lock no", refused));
-  }
-
-  element.append(el("div", "k", label), cell_);
-  return element;
-}
-
 /**
  * Room Care is here and its record is not reachable from this build.
  *
@@ -174,11 +94,11 @@ function unread(): HTMLElement {
   body.append(el(
     "div",
     "hint",
-    "Room Care answers for this property, and GuestOps cannot read its record "
-      + "yet: the servicing history is resolved through the Context Service, "
-      + "which an installed application cannot call until it is enrolled with a "
-      + "service certificate. This is a gap in the platform, not an empty room "
-      + "— nothing here says whether anybody has been in it.",
+    // The reason stays — it is this screen's failure sentence — in plain words.
+    // It named the service it is read through and the certificate that service
+    // wants until 2026-09-19.
+    "GuestOps cannot show Room Care's record for this stay yet. This does not "
+      + "mean nobody has been in the room.",
   ));
 
   return root;
