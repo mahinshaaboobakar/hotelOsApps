@@ -56,7 +56,7 @@ export function phasesCard(host: HostApi, nav: Nav, row: ServiceRow, reordered: 
   }
   const buttons = el("div", "row");
   buttons.style.marginTop = "8px";
-  buttons.append(control("btn sm", "Reorder…", () => reorder(host, nav, row, reordered)), el("span", "btn sm off", "Add a phase"));
+  buttons.append(control("btn sm", "Reorder…", () => reorder(host, nav, row, reordered)), el("span", "btn sm off", "Add a phase — the five are the owner's"));
   return card(`Phases — ${service(row.service)}`, kv, buttons);
 }
 

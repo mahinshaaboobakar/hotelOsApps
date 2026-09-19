@@ -52,8 +52,9 @@ export async function board(host: HostApi, body: HTMLElement, nav: Nav): Promise
     chips.append(
       chip("Map", view === "MAP", () => { view = "MAP"; remember("board.view", view); redraw(); }),
       chip("Wall", view === "WALL", () => { view = "WALL"; remember("board.view", view); redraw(); }),
-      el("span", "lbl", "group by"),
-      chip("Zone", true, () => {}),
+      // Zone is the only grouping, so it is said rather than offered: a pressed chip with no alternative looks like
+      // one option of several and does nothing when pressed (tests/live.test.ts).
+      el("span", "lbl", "grouped by zone"),
     );
     chips.append(el("span", "grow"));
     for (const [label] of FILTERS) chips.append(chip(label, filter === label, () => { filter = filter === label ? null : label; redraw(); }));

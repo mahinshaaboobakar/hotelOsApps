@@ -43,7 +43,7 @@ input,select,textarea{font:inherit;line-height:inherit}
        border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:8px}
 .strip b{color:var(--color-ink,#e8ebf4);font-size:14px;margin-right:4px}
 .strip .end{margin-left:auto}
-.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px;flex:none}
+.chips{display:flex;flex-wrap:wrap;align-items:center;margin-bottom:6px;flex:none}
 .chips .lbl{font-size:11px;color:var(--color-ink-muted,#8b93a7);margin:0 4px 0 10px}
 .grow{margin-left:auto}
 .btn{background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:7px 14px;
@@ -54,7 +54,7 @@ input,select,textarea{font:inherit;line-height:inherit}
 .btn.danger{color:var(--color-bad,#f87171);border-color:color-mix(in srgb, var(--color-bad,#f87171) 45%, transparent)}
 .btn.danger.confirm{border-color:transparent;background:var(--color-bad,#f87171);color:var(--color-ink-on-accent,#0b0d14);font-weight:600}
 .btn.sm{padding:2px 8px;font-size:11px}
-.btn.chip{padding:5px 10px;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
+.btn.chip{padding:5px 10px;font-size:12px;margin:0 6px 6px 0;color:var(--color-ink-muted,#8b93a7)}
 select.btn.chip{background:var(--color-surface,#0b0d14)}
 .btn.chip.on{border-color:var(--color-brand,#818cf8);color:var(--color-ink,#e8ebf4)}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}

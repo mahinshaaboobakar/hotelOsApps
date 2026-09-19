@@ -82,7 +82,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       case "Supervision": return supervision(host, body, nav, place.page, (p) => { place.page = p; show(); });
       case "Deep clean": return deepClean(host, body, nav, place.page, (p) => { place.page = p; show(); });
       case "Setup": return setup(host, body, nav, place.setupTab, (t) => { place.setupTab = t; show(); });
-      case "My rooms": return myRooms(host, body, nav, place.taskId, (t) => { place.taskId = t; show(); });
+      case "My rooms": return myRooms(host, body, nav, place.taskId, (t) => { place.taskId = t; show(); }, place.page, (p) => { place.page = p; show(); });
       default: return board(host, body, nav);
     }
   }

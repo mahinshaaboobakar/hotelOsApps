@@ -62,7 +62,11 @@ export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promis
       el("b", undefined, data.silentSince === null ? "" : `PMS silent since ${clock(host, data.silentSince)}`),
     );
     const saveButton = edits.size === 0 ? el("span", "btn off", "Save — nothing changed") : control("btn pri", `Save ${whole(host, edits.size)} changes`, () => void save());
-    const discard = control("btn", "Discard", () => { edits.discard(); conflicts = []; said = ""; redraw(); });
+    // Nothing to discard is drawn off beside "Save — nothing changed", which says why, rather than a live
+    // Discard that does nothing when pressed (tests/live.test.ts).
+    const discard = edits.size === 0 && conflicts.length === 0 && said === ""
+      ? el("span", "btn off", "Discard")
+      : control("btn", "Discard", () => { edits.discard(); conflicts = []; said = ""; redraw(); });
     const end = el("span", "end row");
     end.append(saveButton, discard);
     top.append(end);

@@ -29,7 +29,8 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
     [`Changed · ${whole(host, edits.size)}`, (r) => edits.has(r.roomId)], [`Conflicts · ${whole(host, conflicts.size)}`, (r) => conflicts.has(r.roomId)],
   ];
   const filters = el("div", "chips");
-  filters.append(el("span", "lbl", "group by"), chip("Zone", true, () => {}), el("span", "lbl", "show"));
+  // Zone is the only grouping: said, not offered as a chip that does nothing when pressed (tests/live.test.ts).
+  filters.append(el("span", "lbl", "grouped by zone"), el("span", "lbl", "show"));
   for (const [label] of shows) filters.append(chip(label, show.split(" ·")[0] === label.split(" ·")[0], () => { show = label; redraw(); }));
   const keep = shows.find(([label]) => label.split(" ·")[0] === show.split(" ·")[0])?.[1] ?? (() => true);
 
@@ -122,7 +123,7 @@ function dock(host: HostApi, edits: Edits, redraw: () => void, total: number): H
   // "A small"), against page 64 §2's "inside a row or a card". A labelled deviation, not a defect; APPS-Q43's
   // card half is a separate question and still open.
   bar.append(el("b", undefined, `${whole(host, selected.size)} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay,
-    control("btn sm", "Apply to selected", () => {
+    selected.size === 0 ? el("span", "btn sm off", "Apply to selected — select rows first") : control("btn sm", "Apply to selected", () => {
       for (const id of selected) {
         if (condition.value !== "") edits.set(id, "condition", condition.value);
         if (occupancy.value !== "") edits.set(id, "occupancy", occupancy.value);

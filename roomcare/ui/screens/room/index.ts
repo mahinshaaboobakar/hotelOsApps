@@ -68,7 +68,7 @@ export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: s
   actions.append(el("span", "btn off", "Raise a job for this room… — Jobs decides who may"));
   if (holds(host, "roomcare.amend") && line.taskId !== null) actions.append(control("btn", "Record an exception…", () => recordException(host, nav, line)));
   const ended = ["DONE", "INSPECTION_REQUESTED", "READY", "PARTIAL", "ENDED"].includes(line.outcome.kind);
-  if (holds(host, "roomcare.assign") && line.taskId !== null) actions.append(ended ? el("span", "btn off", "Reassign…") : control("btn", "Reassign…", () => void reassign(host, nav, line)));
+  if (holds(host, "roomcare.assign") && line.taskId !== null) actions.append(ended ? el("span", "btn off", "Reassign… — this room's service has ended") : control("btn", "Reassign…", () => void reassign(host, nav, line)));
 
   body.append(title, facts, actions, subnav(["Today", "History · 14 days", "Record"], tab, (t) => { tab = t; nav.show(); }));
   if (tab === "History · 14 days") body.append(history(host, page));

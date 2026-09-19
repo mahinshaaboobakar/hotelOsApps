@@ -43,9 +43,11 @@ interface MyRooms {
   paging: Paging;
 }
 
-export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId: string | null, open: (taskId: string | null) => void): Promise<void> {
+export async function myRooms(
+  host: HostApi, body: HTMLElement, nav: Nav, taskId: string | null, open: (taskId: string | null) => void, page: number, goPage: (page: number) => void,
+): Promise<void> {
   if (taskId !== null) return door(host, body, nav, taskId, () => open(null));
-  const got = await load<MyRooms>(host, READ, "myRooms", { page: 0 });
+  const got = await load<MyRooms>(host, READ, "myRooms", { page });
   if (!got.ok) {
     body.append(failed(host, got.failure, "your rooms", nav.show));
     return;
@@ -76,7 +78,7 @@ export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId
     table.append(tr);
   }
 
-  body.append(strip, scroller(table), pager(host, v.paging, v.rows.length, "rooms assigned to you today", () => {}));
+  body.append(strip, scroller(table), pager(host, v.paging, v.rows.length, "rooms assigned to you today", goPage));
 }
 
 function linen(host: HostApi, row: MyRoom): HTMLElement {
