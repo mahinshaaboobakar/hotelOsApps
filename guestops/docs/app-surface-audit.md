@@ -10,7 +10,12 @@ of the six causes.
 Against GG's checklist `docs/app-surface-checklist.md` (HotelOsApps `3d521ce`).
 Verdicts: PASS · FAIL · OPEN (the checklist's nine unsettled lines — recorded,
 never failed) · N/A (with why) · NOT REACHED (a state no drive reaches — never a
-pass) · UNDECIDED (a role this audit could not establish — asked).
+pass) · DEVIATION (APPS-Q27: the frame as the owner approved it differs from the
+written standard for this surface; labelled at the site, never an amendment).
+
+**Two deviations, L3 and D2** — APPS-Q27: *"repeated or intentional deviations
+trigger a standards-amendment question rather than a third, fourth and fifth
+exception."* The count is the architect's signal to watch.
 
 | Line | Check | Verdict | Cells / evidence |
 |---|---|---|---|
@@ -41,12 +46,12 @@ pass) · UNDECIDED (a role this audit could not establish — asked).
 | N8 | M | PASS | PASS 14 — attention, booking, bookings, cancel, newbooking, registration, setup, stay, stay-activity, stay-payment, stay-requests, stay-servicing, today, walkin |
 | L1 | M | PASS | N/A 1 · PASS 8 — attention, booking, bookings, newbooking, today |
 | L2 | M | PASS | PASS 12 — booking, bookings, newbooking, today |
-| L3 | M | FAIL | FAIL 8 — booking, bookings, newbooking, today |
+| L3 | M | DEVIATION | DEVIATING 8 — booking, bookings, newbooking, today. the 6px cells are an APPS-Q27 approved deviation: the frame as the owner approved it (83e5157; Part A approved 2026-09-05, cb363a8c) draws .tr>div{padding:6px 10px}. Labelled at chrome/styles/table.ts |
 | L4 | M | NOT REACHED |  — . no drive reaches a selected row; the rule in source is tint only (.tr.sel brand 8%) |
 | L5 | M | PASS | PASS 8 — booking, bookings, newbooking, today |
 | L6 | S | PASS | the 6px cell padding names its reason at chrome/styles/table.ts (the approved frame) |
 | D1 | M | PASS | see G6 |
-| D2 | M | UNDECIDED | th .08em PASS; field label .07em PASS; SECTION label: which GuestOps element is 'a group's name' is not established — .ch (card header) computes .08em and the approved gold frame draws it so. Asked, not failed |
+| D2 | M | DEVIATION | th .08em PASS; field label .07em PASS; the section label — .ch, a card's name, 'a group's name' — is .08em as an APPS-Q27 approved deviation: the approved frame (83e5157) draws it so. Labelled at chrome/styles/panel.ts |
 | D3 | M | PASS | PASS 25 — attention, bookings, cancel, newbooking, setup, stay, stay-activity, stay-payment, stay-requests, stay-servicing, today |
 | D4 | M | PASS / OPEN | PASS 1 · OPEN 7 — stay-activity, attention, bookings, cancel, newbooking, setup, stay-requests, stay-servicing |
 | D5 | M | OPEN | 64c: .note b built at weight 700 — recorded |
@@ -56,7 +61,7 @@ pass) · UNDECIDED (a role this audit could not establish — asked).
 | G4 | M | PASS | PASS 10 — attention, booking, bookings, newbooking, today |
 | G5 | M | PASS | PASS 5 — attention, booking, bookings, newbooking, today |
 | G6 | M | PASS | PASS 15 — attention, booking, bookings, newbooking, today |
-| G7 | M | FAIL | PASS 18 · FAIL 2 — attention, booking, bookings, newbooking, today |
+| G7 | M | FAIL | PASS 18 · FAIL 2 — attention, booking, bookings, newbooking, today. New booking only — frame 14 as approved puts a note and a card under the pager, leaving the list 152px. With the owner as a drawing: docs/mockups/04-new-booking-list-floor.html |
 | G8 | M | PASS | PASS 6 — setup, stay, stay-activity, stay-payment, stay-requests, stay-servicing |
 | G9 | M | PASS | PASS 15 — attention, booking, bookings, newbooking, today |
 | G10 | S | PASS | .pager background var(--color-surface) |
@@ -102,17 +107,6 @@ pass) · UNDECIDED (a role this audit could not establish — asked).
 | H6 | S | FAIL | all three mockups declare their own :root palette (01-guestops-gold.html line 11) |
 
 ## Every failing cell
-
-### L3
-
-- **booking--1P** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **booking--MP** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **bookings--1P** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **bookings--MP** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **newbooking--1P** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **newbooking--MP** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **today--1P** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
-- **today--MP** — td padding 6px 10px (rule: 10px; a shrink needs its reason — L6)
 
 ### G7
 

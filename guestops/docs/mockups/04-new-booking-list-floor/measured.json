@@ -1,0 +1,102 @@
+{
+ "locked": {
+  "rows": 12,
+  "visible": 2,
+  "list": 152,
+  "listScrolls": true,
+  "bodyScrolls": false,
+  "pagerBottom": 441,
+  "pagerOnScreen": true,
+  "listWidth": 1220,
+  "panels": [
+   {
+    "s": ".note",
+    "top": 433,
+    "bottom": 495,
+    "onScreen": true
+   },
+   {
+    "s": ".cols",
+    "top": 509,
+    "bottom": 738,
+    "onScreen": true
+   }
+  ],
+  "range": "showing 1–12 of 28"
+ },
+ "beside": {
+  "rows": 12,
+  "visible": 10,
+  "list": 471,
+  "listScrolls": true,
+  "bodyScrolls": false,
+  "pagerBottom": 760,
+  "pagerOnScreen": true,
+  "listWidth": 822,
+  "panels": [
+   {
+    "s": ".note",
+    "top": 218,
+    "bottom": 379,
+    "onScreen": true
+   },
+   {
+    "s": ".cols",
+    "top": 393,
+    "bottom": 738,
+    "onScreen": true
+   }
+  ],
+  "range": "showing 1–12 of 28"
+ },
+ "above": {
+  "rows": 12,
+  "visible": 2,
+  "list": 152,
+  "listScrolls": true,
+  "bodyScrolls": false,
+  "pagerBottom": 760,
+  "pagerOnScreen": true,
+  "listWidth": 1220,
+  "panels": [
+   {
+    "s": ".note",
+    "top": 218,
+    "bottom": 280,
+    "onScreen": true
+   },
+   {
+    "s": ".cols",
+    "top": 294,
+    "bottom": 523,
+    "onScreen": true
+   }
+  ],
+  "range": "showing 1–12 of 28"
+ },
+ "minheight": {
+  "rows": 12,
+  "visible": 7,
+  "list": 331,
+  "listScrolls": true,
+  "bodyScrolls": true,
+  "pagerBottom": 620,
+  "pagerOnScreen": true,
+  "listWidth": 1220,
+  "panels": [
+   {
+    "s": ".note",
+    "top": 612,
+    "bottom": 673,
+    "onScreen": true
+   },
+   {
+    "s": ".cols",
+    "top": 687,
+    "bottom": 917,
+    "onScreen": false
+   }
+  ],
+  "range": "showing 1–12 of 28"
+ }
+}

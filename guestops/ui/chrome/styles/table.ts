@@ -14,12 +14,14 @@ export const TABLE = `
   border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 /* The last row keeps its rule: with no card around the list, that final line
    is what closes it. */
-/* 6px, not §4's 10px — the reason, as L6 asks ("vertical padding may shrink,
-   and only for a reason you can name"): the approved gold frame 01 draws
-   .tr>div{padding:6px 10px}, and §5's density argument is the one it makes —
-   a list screen earns its page by fitting a working shift's worth of rows.
-   Whether the owner-approved drawing or §4 governs here is the same question as
-   64d's button, and it is recorded there rather than decided by this rule. */
+/* 6px, not §4's 10px — an APPS-Q27 APPROVED DEVIATION, labelled where it
+   diverges. The frame as the owner approved it (01-guestops-gold.html at
+   83e5157, Part A approved 2026-09-05 on the full gallery, cb363a8c) draws
+   .tr>div{padding:6px 10px}; APPS-Q27: "an owner-locked artifact can establish
+   an approved surface-specific DEVIATION from a written standard, but it does
+   not AMEND the standard itself." §4 still governs every other surface. The
+   reason L6 asks for is the one the frame makes, §5's: a list screen earns its
+   page by fitting a working shift's worth of rows. */
 .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
 .tr.hd>div{align-items:center;padding:8px 10px;font-size:11px;font-weight:500;
   text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint,#5a6172)}

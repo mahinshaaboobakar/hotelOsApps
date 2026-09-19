@@ -35,7 +35,9 @@ const STATED = {
   N7: ["PASS", "C", "Today's sub-line right of the strip; actions right of the view switcher"],
   L6: ["PASS", "S", "the 6px cell padding names its reason at chrome/styles/table.ts (the approved frame)"],
   D1: ["PASS", "M", "see G6"],
-  D2: ["UNDECIDED", "M", "th .08em PASS; field label .07em PASS; SECTION label: which GuestOps element is 'a group's name' is not established — .ch (card header) computes .08em and the approved gold frame draws it so. Asked, not failed"],
+  L3: ["DEVIATION", "M", "the 6px cells are an APPS-Q27 approved deviation: the frame as the owner approved it (83e5157; Part A approved 2026-09-05, cb363a8c) draws .tr>div{padding:6px 10px}. Labelled at chrome/styles/table.ts"],
+  D2: ["DEVIATION", "M", "th .08em PASS; field label .07em PASS; the section label — .ch, a card's name, 'a group's name' — is .08em as an APPS-Q27 approved deviation: the approved frame (83e5157) draws it so. Labelled at chrome/styles/panel.ts"],
+  G7: ["FAIL", "M", "New booking only — frame 14 as approved puts a note and a card under the pager, leaving the list 152px. With the owner as a drawing: docs/mockups/04-new-booking-list-floor.html"],
   D5: ["OPEN", "M", "64c: .note b built at weight 700 — recorded"],
   G1: ["PASS", "S", "all five paged reads send page/pageSize (Booking did not until this round) and the backend pages through Paging.Of"],
   G2: ["PASS", "S+T", "chrome/pager.ts renders pagedView + PAGER_LABELS; tests/pager.test.ts (the arrows' names, the SDK window)"],
@@ -100,7 +102,12 @@ of the six causes.
 Against GG's checklist \`docs/app-surface-checklist.md\` (HotelOsApps \`3d521ce\`).
 Verdicts: PASS · FAIL · OPEN (the checklist's nine unsettled lines — recorded,
 never failed) · N/A (with why) · NOT REACHED (a state no drive reaches — never a
-pass) · UNDECIDED (a role this audit could not establish — asked).
+pass) · DEVIATION (APPS-Q27: the frame as the owner approved it differs from the
+written standard for this surface; labelled at the site, never an amendment).
+
+**Two deviations, L3 and D2** — APPS-Q27: *"repeated or intentional deviations
+trigger a standards-amendment question rather than a third, fourth and fifth
+exception."* The count is the architect's signal to watch.
 
 | Line | Check | Verdict | Cells / evidence |
 |---|---|---|---|
@@ -112,8 +119,12 @@ for (const line of ORDER) {
     const c = cellsLine(measured[line]);
     const stated = STATED[line];
     const verdict = stated && stated[0] !== "PASS" ? stated[0] : c.verdict;
-    out += `| ${line} | M | ${verdict} | ${c.summary} — ${c.surfaces}${stated ? `. ${stated[2]}` : ""} |\n`;
-    if (c.fails.length) fails.push([line, c.fails]);
+    // A deviation's differing cells are not failures, and the count must not say so.
+    const summary = verdict === "DEVIATION" ? c.summary.replace(/FAIL/, "DEVIATING") : c.summary;
+    out += `| ${line} | M | ${verdict} | ${summary} — ${c.surfaces}${stated ? `. ${stated[2]}` : ""} |\n`;
+    // A deviation's cells differ from the standard by an approved artifact —
+    // they are listed where they are labelled, not as failures.
+    if (c.fails.length && verdict === "FAIL") fails.push([line, c.fails]);
   } else if (STATED[line]) {
     const [verdict, check, why] = STATED[line];
     out += `| ${line} | ${check} | ${verdict} | ${why} |\n`;

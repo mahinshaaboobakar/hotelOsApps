@@ -7,6 +7,11 @@ export const PANEL = `
 .cols{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
 .card{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));overflow:hidden;
   border-radius:var(--radius-panel,1rem);background:var(--color-surface-raised,#11141f)}
+/* A card's name is "a group's name" — page 64 §5's section label, .04em. It is
+   .08em here as an APPS-Q27 APPROVED DEVIATION, labelled where it diverges: the
+   frame as the owner approved it (01-guestops-gold.html at 83e5157, Part A
+   approved 2026-09-05, cb363a8c) draws .ch at .08em. A surface-specific
+   deviation, never an amendment — §5 governs every other surface. */
 .ch{padding:11px 15px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
   display:flex;align-items:center;gap:8px;color:var(--color-ink-faint,#5a6172);
   border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}

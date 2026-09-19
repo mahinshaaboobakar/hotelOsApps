@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<title>New Booking List Floor</title>
+<!-- The published tokens at the shell's own values — the harness's file, which
+     tests/tokens.test.ts holds equal to TOKEN_NAMES. No palette of this page's
+     own: page 64 §8. -->
+<link rel="stylesheet" href="../../ui/preview/tokens.css">
+<style>
+  body{margin:0;background:var(--color-surface);color:var(--color-ink);
+    font:14px/1.6 var(--font-sans,system-ui,sans-serif)}
+  main{max-width:1320px;margin:0 auto;padding:34px 22px 60px;display:flex;flex-direction:column;gap:30px}
+  h1{margin:0;font-size:22px;font-weight:600;text-wrap:balance}
+  h2{margin:0;font-size:16px;font-weight:600}
+  p{margin:0;max-width:78ch;color:var(--color-ink-muted)}
+  p b{color:var(--color-ink)}
+  .lede{display:flex;flex-direction:column;gap:10px}
+  .opt{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:22px;align-items:start}
+  .opt img{width:100%;height:auto;display:block;border-radius:var(--radius-panel,1rem);
+    border:1px solid var(--color-line-strong)}
+  .opt.locked img{box-shadow:0 0 0 2px var(--color-brand)}
+  .side{display:flex;flex-direction:column;gap:12px}
+  .tag{align-self:flex-start;font-size:11px;text-transform:uppercase;letter-spacing:.08em;
+    padding:2px 9px;border-radius:999px;border:1px solid var(--color-line-strong);color:var(--color-ink-muted)}
+  .tag.on{color:var(--color-brand);border-color:var(--color-brand)}
+  dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+  dt{color:var(--color-ink-faint)}
+  dd{margin:0;font-variant-numeric:tabular-nums}
+  .cost{font-size:13px;color:var(--color-ink-muted);display:flex;flex-direction:column;gap:6px}
+  .cost b{color:var(--color-warn)}
+  .gain b{color:var(--color-ok)}
+  .foot{font-size:12.5px;color:var(--color-ink-faint);max-width:90ch}
+  @media (max-width:900px){.opt{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+
+<div class="lede">
+  <h1>New booking — where the list's space goes</h1>
+  <p><b>The page-64 audit's G7 on one screen.</b> Every list screen now follows
+  CORE-Q28: only the list scrolls, and the pager sits at the bottom of the window.
+  New booking is the exception, because frame 14 — as you approved it on
+  5 September — puts a note and a card <b>under</b> the pager. They take their
+  height first, so the list gets whatever is left: <b>152 px, two rooms visible</b>
+  at a 1220 × 760 window.</p>
+  <p>Each picture below is the real build, not a redrawing: the running screen
+  with the option's layout applied, then measured. All four show the same page —
+  12 room types on page 1 of 28 — so the numbers compare. <b>Pick one, or keep
+  frame 14 as it is.</b> Keeping it is a legitimate answer: it would be recorded
+  as an approved deviation for this one screen.</p>
+</div>
+
+<section class="opt locked">
+  <img src="04-new-booking-list-floor/locked.png" alt="New booking as built: two room rows visible above the pager, the note and the sources card beneath">
+  <div class="side">
+    <span class="tag on">Frame 14 — as approved</span>
+    <h2>Keep it</h2>
+    <dl><dt>List</dt><dd>152 px · 2 of 12 rows visible</dd>
+      <dt>Panels</dt><dd>both on screen, below the pager</dd>
+      <dt>Scrolls</dt><dd>the list only</dd></dl>
+    <div class="cost"><span><b>Cost:</b> the list is a slot. On a hotel with
+    more than a handful of room types the operator scrolls a 152 px window to
+    compare them, and the explanation of the numbers permanently outranks the
+    numbers.</span></div>
+  </div>
+</section>
+
+<section class="opt">
+  <img src="04-new-booking-list-floor/beside.png" alt="The note and the sources card in a right-hand column; the list fills the left from the filters to the pager">
+  <div class="side">
+    <span class="tag">Option A</span>
+    <h2>Panels beside the list</h2>
+    <dl><dt>List</dt><dd>471 px · 10 of 12 rows visible</dd>
+      <dt>Panels</dt><dd>both on screen, a 380 px column</dd>
+      <dt>Scrolls</dt><dd>the list only — CORE-Q28 holds</dd></dl>
+    <div class="cost"><span class="gain"><b>Gain:</b> three times the list,
+    and the explanation stays in view while reading it.</span>
+    <span><b>Cost:</b> the list loses a third of its width (1220 → 822 px). At
+    that width the six columns collide — the out-of-order and stop-sell chips
+    run into the next column, visible above. Shipping this means redrawing the
+    row: shorter chips or fewer columns. It also needs a rule for a narrow
+    window, where the column has to drop below.</span></div>
+  </div>
+</section>
+
+<section class="opt">
+  <img src="04-new-booking-list-floor/above.png" alt="The note and the sources card moved above the list; the list is still two rows tall">
+  <div class="side">
+    <span class="tag">Option B</span>
+    <h2>Panels above the list</h2>
+    <dl><dt>List</dt><dd>152 px · 2 of 12 rows visible</dd>
+      <dt>Panels</dt><dd>both on screen, above the list</dd>
+      <dt>Scrolls</dt><dd>the list only</dd></dl>
+    <div class="cost"><span><b>Cost:</b> it gains nothing. The panels take the
+    same height wherever they sit, so the list is exactly as small — measured,
+    not assumed. It does put the pager at the window's foot like every other
+    list, which is all it changes. <b>Not recommended.</b></span></div>
+  </div>
+</section>
+
+<section class="opt">
+  <img src="04-new-booking-list-floor/minheight.png" alt="The list given a seven-row floor; the page scrolls, and the sources card is pushed below the window">
+  <div class="side">
+    <span class="tag">Option C</span>
+    <h2>The list given a minimum height</h2>
+    <dl><dt>List</dt><dd>331 px floor · 7 of 12 rows visible</dd>
+      <dt>Panels</dt><dd>note on screen, card below the window</dd>
+      <dt>Scrolls</dt><dd>the list <b>and</b> the page</dd></dl>
+    <div class="cost"><span class="gain"><b>Gain:</b> frame 14's order and
+    full width are kept; seven rows is the pager's own whole-row unit.</span>
+    <span><b>Cost:</b> two scrolls on one screen — the page, and the list
+    inside it — which is exactly what CORE-Q28 ruled out for every list. This
+    screen would need its own exception to that ruling, not only to frame 14,
+    and that exception is the planner's to make.</span></div>
+  </div>
+</section>
+
+<p class="foot">Measured 2026-09-19 in the GuestOps capture harness (not a
+Kernel), New booking, list state MP, 1220 × 760, one device pixel per CSS pixel.
+Option C's floor is the header plus seven rows as the build draws them (331 px),
+read from the page before the floor was applied. The script and its
+measurements sit beside the pictures: <code>capture.mjs</code>,
+<code>measured.json</code>. The dates in the pictures are the fixture's recorded
+strings, which the service formats today — the audit's I1, being fixed next, so
+their locale is not stated here because nothing chose one.</p>
+</main></body></html>
