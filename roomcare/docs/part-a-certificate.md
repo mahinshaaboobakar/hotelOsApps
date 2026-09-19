@@ -1,11 +1,62 @@
 # Room Care Part A — frame beside capture
 
+Run 2026-09-19 by KK against the frames **as re-locked at `fff2d96b`**: 01c, approved by the owner, drew every
+control in a frame as the build's `<button>` (0 differing pixels over each whole page). **Built by the run, from
+`28bfdd0a`, clean.** This measures **the next cut's source, not 0.1.3.** Since 0.1.3 the build has gained the
+display-name fix (`df8d44f`) and the model-unavailable sentence (`28bfdd0a`), so `module.js` is `a4666e0c…`, where
+0.1.3's was `2a87ed40…`. Part B on 0.1.3 remains that version's own evidence.
+
+## Result
+
+```text
+drawn 1,657 · built 1,566 · paired 569 (34.3% of drawn; 427 · 25.8% before 01c) · identical 415 · differing 154
+every one of the 154 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+| Class | n | Moves |
+|---|---|---|
+| sticky-header-ground | 23 | neither |
+| font-shorthand-line-height | 47 | drawing |
+| flex-blockified | 12 | neither |
+| button-type-size | 21 | drawing |
+| selected-row-example | 2 | neither |
+| named, one each | 49 | 30 drawing · 12 **build (proposed)** · 4 neither · 3 adjudicate |
+
+## What 01c's re-lock changed
+
+- **142 more nodes pair.** Tabs, actions and pager buttons are buttons on both sides now. Most of the new
+  differences fall under two existing classes: `.btn` at 14px in the frame where §2 fixes 13
+  (`button-type-size`, 8 → 21), and a button blockified in a flex row (`flex-blockified`, 2 → 12). **Six are
+  named one by one:**
+  - frame 4's *Record*, a key collision: a sheet's primary action paired with a tab that shares the word;
+  - *Discard* on 4c, 4d and 4e, at the toolbar's 12px where §2 fixes 13 (the drawing moves);
+  - 7e's pager arrows: the border is §2's `line-strong` (the drawing moves), and the colour is the recorded single
+    page disabling them (neither).
+- **The 12 chips that were "adjudicate" now have a proposed side: the build moves.** `preview/audit/chipgap.mjs`
+  measured the space below each chip row, drawn against built: the board and wall 12px against 10, the view
+  switcher 27 against 24, Setup's chips 18 against 10–12. The owner approved the second set's `.chip` margin of
+  `0 6px 6px 0` (`19f203c5`). The build reproduces the horizontal 6px with a flex gap and drops the 6px below the
+  row. That's the build short of an approved drawing, not a new design choice, so it isn't on an owner page. It is
+  **proposed and not yet built**: it goes into the cut after Part B, if you agree.
+
+## What this does not prove
+
+569 of 1,657 drawn nodes pair (34.3%), from 16.5% (7e) to 68.3% (7c). What remains unpaired is mostly data: the
+frames draw Marina Bay, and the harness renders the recorded Coral Cove morning, so rooms, names and times don't
+pair by text.
+
+---
+
+## Superseded by the re-lock at `fff2d96b` (01c) — kept, not deleted
+
+*This measured the frames re-locked at `65762c95`. Its figures are right for what it measured.*
+
 Run 2026-09-19 by KK against the frames **as re-locked at `65762c95`** (01b, the owner: *"A small, B keep, C
 approved"*), with 02's "match" completed at `a81783e`. **Built by the run, from `b43b949`, clean.** The provenance
 stamp names seven artifacts by digest. `module.js` (`2a87ed40…`) and the five widget bundles are the bytes in
 **`roomcare-0.1.3.hopkg`** (`c3485aa2…`), which is staged, and Part B certifies it.
 
-## Result
+### Result
 
 ```text
 drawn 1,657 · built 1,566 · paired 427 (25.8% of drawn, was 377 · 22.8%) · identical 302 · differing 125
@@ -21,7 +72,7 @@ every one of the 125 is named; classify.mjs exits 0; 0 frames unreached
 | selected-row-example | 2 | neither |
 | named, one each | 43 | 25 drawing · 15 adjudicate · 3 neither |
 
-## What the re-lock changed
+### What the re-lock changed
 
 - **50 more nodes pair.** The frames now draw tiles and chips as the build's `<button>`. H4's retagging rendered
   identically (0 differing pixels over each whole page), so the new pairs are a measurement that is newly possible,
@@ -39,7 +90,7 @@ every one of the 125 is named; classify.mjs exits 0; 0 frames unreached
 - **The re-lock's own records now agree with the build**: `.sect` at `.04em`, the legend and the timeline's detail
   line at 12px / 19.8px. They left no difference to name.
 
-## What this does not prove
+### What this does not prove
 
 The paired share is still the finding: 427 of 1,657 drawn nodes, from 9.1% (7e) to 57.1% (7c). Two causes remain.
 The frames draw tabs, actions and pager buttons as `div`/`span`: 239 controls, which is H4's open remainder, drawn

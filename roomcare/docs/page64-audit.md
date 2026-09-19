@@ -139,7 +139,7 @@ build's measurements are the certificate run's (`020f1eff`), and nothing in the 
 | H1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
 | H2 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
 | H3 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
-| H4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **F** |
+| H4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
 | H5 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
 | H6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
 
@@ -161,16 +161,16 @@ build's measurements are the certificate run's (`020f1eff`), and nothing in the 
 | O4 | nothing held it | `982c801` `tests/overlay.test.ts` | the test fails with the scrim check removed |
 | U1 | 21 numbers through `String()`, none through `formatNumber` | `6655c01` `whole(host, n)` everywhere | `tests/number.test.ts` failed first ("expected [ '1234', '5678' ] to deeply equal [ '1.234', '5.678' ]") |
 
-## What still fails — 8 cells
+## What still fails — 7 cells, all C8
 
 1. **C8, table rows (7 cells).** §2 against §4: a `<tr>` cannot be a `<button>`, and Jobs' baseline opens its rows
-   the same way. The planner has it as **APPS-Q50**, and the rows stay as they are.
-2. **H4, the frames (1 cell), narrowed and not closed.** The owner approved retagging the tiles and chips, and the
-   re-locked frames (`65762c95`) draw them as `<button>`: 0 differing pixels, each whole page as locked against it
-   retagged, 1400 × 16,600 in Edge. **Still drawn as div or span: 116 tabs, 111 actions (`span.btn`) and 12 pager
-   buttons.** The same retagging does not render the same for them. Measured: 4,284,723 pixels differ on 01 and
-   808,917 on 02 (a `div` and an unset `button` do not share a display type). So they need a drawn revision for
-   the owner, not a mechanical one.
+   the same way. It is with the planner as **APPS-Q50**, and the rows stay as they are.
+
+**H4 is closed** by 01c. The owner approved it, and the frames were re-locked at `fff2d96b`: every control in a
+frame is the build's `<button>`, and the pager rule is tied to its class. Measured: 0 differing pixels over each
+whole page. *History: H4 was narrowed at `65762c95` (tiles and chips), and I first reported the remainder as a
+4,284,723-pixel visible change. That was wrong in kind: it was two span-bound pagers and the displacement below
+them, as 01c's correction says.*
 
 **Settled by the owner on 01b** (2026-09-19, *"A small, B keep, C approved"*):
 - **C4**: the toolbar's small buttons stay small. Recorded as a deviation at `screens/states/sheet.ts` and
