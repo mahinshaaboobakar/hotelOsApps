@@ -53,7 +53,18 @@ async function reached(h: HostApi, steps: readonly string[]): Promise<HTMLElemen
   return root;
 }
 
-const read = (root: Element): string[] => developerContent(readableText(root));
+/**
+ * A system's name, which the shared list cannot yet hold (GG is adding it once no
+ * application trips it). Jobs' own: "Master Data" and "Kernel". "Workforce" is
+ * not one of them here — it is an application staff use, and "Follow Workforce
+ * shifts" stays by the owner's ruling (2026-09-19).
+ */
+const SYSTEMS: readonly RegExp[] = [/\bMaster Data\b/g, /\bKernel\b/g];
+
+const read = (root: Element): string[] => {
+  const text = readableText(root);
+  return [...developerContent(text), ...SYSTEMS.flatMap((p) => [...text.matchAll(p)].map((m) => `a system's name: ${m[0]}`))];
+};
 
 describe("developer content", () => {
   for (const screen of SCREENS) {

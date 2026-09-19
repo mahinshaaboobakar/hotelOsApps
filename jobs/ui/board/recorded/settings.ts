@@ -76,5 +76,5 @@ export const recordedSettings: Settings = {
   jobsManagers: [
     { userId: "01a05c39-294b-7c6d-9ca2-6bbbf495106c", grantedAt: "2026-09-01T09:12:00.000Z", grantedBy: "01a05c38-4ec1-796c-8e30-6b011919be5c" },
   ],
-  numbering: "MRN-ENG-… · next 145 · property code from Master Data",
+  numbering: "MRN-ENG-… · next 145 · property code",
 };

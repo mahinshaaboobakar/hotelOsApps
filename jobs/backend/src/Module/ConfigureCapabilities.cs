@@ -125,8 +125,8 @@ public static class ConfigureCapabilities
         var organization = await services.GetRequiredService<IPropertyDirectory>()
             .FindOrganizationAsync(request.Scope.PropertyId, cancellationToken)
             ?? throw new InvalidRequestException(
-                "Master Data does not say which organisation this property belongs to, and the "
-                + "catalogue is the organisation's");
+                // Said to a person on the screen: no system's name (owner, 2026-09-19).
+                "this property isn't linked to an organisation yet, so its catalogue can't be changed");
         var scope = request.Scope with { OrganizationId = organization };
         var catalogue = services.GetRequiredService<CatalogueService>();
 

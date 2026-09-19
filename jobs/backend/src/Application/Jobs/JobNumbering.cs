@@ -25,7 +25,7 @@ public class JobNumbering(JobsDbContext db, IPropertyDirectory directory)
         {
             var code = await directory.FindPropertyCodeAsync(propertyId, cancellationToken)
                 ?? throw new InvalidRequestException(
-                    "the property has no code in Master Data; a job number needs one");
+                    "this property has no code yet, so a job number can't be made");
 
             sequence = new PropertyJobSequence
             {
