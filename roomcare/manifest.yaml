@@ -33,7 +33,12 @@
 #     (APPS-Q50), so a keyboard reaches it: the Wall, Prepare's changes,
 #     Supervision, My rooms and Services.
 #   * **A selection on the Room states sheet is forgotten** when the person
-#     leaves, so a bulk change cannot act on rows nobody is looking at.
+#     leaves, and when the filter changes, so Apply never changes a row the
+#     person can't see. (The filter half is interim; the owner chooses between
+#     it and Apply acting only on the rows shown.)
+#   * **"Vacant for N days" counts the property's days.** It counted UTC days:
+#     a day too many at a positive offset for part of every day, and a day
+#     too few at a negative one. The count decides when a room is refreshed.
 #   * **No developer note on any screen**: no register ids, design sections,
 #     event names, relation ids or system names.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.
