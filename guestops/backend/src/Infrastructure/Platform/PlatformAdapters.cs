@@ -20,6 +20,36 @@ namespace HotelOS.GuestOps.Infrastructure.Platform;
 /// </remarks>
 public static class PlatformAdapters
 {
+    /// <summary>
+    /// The Context Service's registered name — what the Kernel's directory
+    /// answers to, and what the peer's certificate must present.
+    /// </summary>
+    /// <remarks>
+    /// The Kernel's <c>CONTEXT_PRINCIPAL</c> (<c>kernel-core/src/pki/mod.rs</c>).
+    /// Written here because the SDK's <c>PlatformEndpoint</c> names only the
+    /// Kernel, Identity and Master Data.
+    /// </remarks>
+    private const string ContextName = "context";
+
+    /// <summary>
+    /// The directory for a process no Kernel started: it refuses, by name.
+    /// </summary>
+    /// <remarks>
+    /// A checkout run has no Kernel and so nothing to discover with. It gets
+    /// this rather than a configured address, because an address that works
+    /// from a checkout is an address an installed build can fall back to —
+    /// which is exactly how the Context literal outlived its expiry.
+    /// </remarks>
+    private sealed class NoKernel : IPlatformDirectory
+    {
+        public ValueTask<PlatformEndpoint> LocateAsync(
+            string serviceName, CancellationToken cancellationToken)
+            => throw new InvalidOperationException(
+                $"GuestOps was not started by a Kernel, so there is nothing to ask where "
+                + $"{serviceName} answers. An installed application discovers its peers; "
+                + "it configures none.");
+    }
+
     /// <param name="services">The container this registers into.</param>
     /// <param name="configuration">The application's configuration.</param>
     /// <param name="platform">
@@ -32,22 +62,23 @@ public static class PlatformAdapters
         IConfiguration configuration,
         PlatformEnvironment? platform)
     {
-        // The Context Service, by address — the **sanctioned interim** of
-        // `AUTHZ-Q21`, which ruled the final state is `Kernel.DiscoverService`
-        // like every other service.
+        // **The Context Service, DISCOVERED through the Kernel** — `AUTHZ-Q21`'s
+        // final state, reached 2026-09-19 on the owner's first run of 0.3.1.
         //
-        // Not discovered here because an installed application has no identity
-        // to discover with, and inventing a discovery path is what that round
-        // exists to answer. **This line is removed in the same change that
-        // wires the app's Kernel channel** — it is an interim with an expiry
-        // rather than a configuration option.
-        // **20054, the DEVELOPMENT port.** This said 15053, which is a number
-        // this platform defines nowhere — not `INSTALLED_PORTS`, not
-        // `dev_settings`, nothing — so the Context Service has never been
-        // reachable from this application in development, and every call
-        // through `IBusinessDay` has been failing to a fallback since it was
-        // written. ADR 0104: development never shares a port with the installed
-        // product, and it does not invent a third number either.
+        // **What this said until then, and why it went.** It dialled
+        // `configuration["Context:Endpoint"] ?? "https://127.0.0.1:20054"` —
+        // *"the sanctioned interim of AUTHZ-Q21 … Not discovered here because an
+        // installed application has no identity to discover with … This line is
+        // removed in the same change that wires the app's Kernel channel."*
+        // That channel was wired (`SHELL-Q40` §3·3, `ed38380`) and the line was
+        // not removed: the interim outlived its own expiry. So when development
+        // Context moved to 25154, every Context call from the owner's GuestOps
+        // was refused at 20054 and drawn as a service fault — while the same
+        // log showed `DiscoverService` answering for the Kernel and Identity.
+        //
+        // The port is asked for at connect time (`PlatformTransport.Handler`'s
+        // directory overload), so it is never written anywhere in this
+        // application and a Context that moves is simply found where it is.
         // **It presents this application's certificate** — and did not, until
         // 2026-09-05. This client was registered with an address and nothing
         // else: no `ConfigurePrimaryHttpMessageHandler`, so no client
@@ -61,9 +92,6 @@ public static class PlatformAdapters
         // install issues one, `ApplicationDoors` already resolves it to serve
         // this application's own listener, and the same directory is what this
         // presents. A comment asserting an outcome, believed for a round.
-        var endpoint = PlatformEndpoint.For(
-            "context",
-            new Uri(configuration["Context:Endpoint"] ?? "https://127.0.0.1:20054"));
 
         // Built from the directory rather than resolved from the container:
         // `ServiceCertificate.Source` is registered only by
@@ -79,11 +107,16 @@ public static class PlatformAdapters
         var certificates = new ServiceCertificate.Source(
             platform?.CertificateDirectory ?? string.Empty);
 
+        // The NAME only — the request URI carries it for `Host:` and TLS, and the
+        // port belongs to the socket, which the handler dials where the Kernel
+        // says (`PlatformEndpoint.Uri`'s own remark).
         services
             .AddGrpcClient<ContextService.ContextServiceClient>(
-                client => client.Address = endpoint.Uri)
-            .ConfigurePrimaryHttpMessageHandler(
-                () => PlatformTransport.Handler(endpoint, certificates));
+                client => client.Address = new Uri($"https://{ContextName}"))
+            .ConfigurePrimaryHttpMessageHandler(provider => PlatformTransport.Handler(
+                ContextName,
+                provider.GetService<IPlatformDirectory>() ?? new NoKernel(),
+                certificates));
 
         services.AddScoped<IBusinessDay, ContextBusinessDay>();
         services.AddScoped<INeighbours, ContextNeighbours>();

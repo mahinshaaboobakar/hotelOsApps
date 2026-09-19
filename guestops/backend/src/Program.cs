@@ -101,20 +101,36 @@ builder.Services.AddDbContext<GuestOpsDbContext>(options => options
 // package inherit its user's full authority.
 var platform = PlatformEnvironment.Read();
 
-// **The bus, and it is the one the Kernel told us about.**
+// **Under a Kernel, the database is the Kernel's word as well** — the same
+// class as the Context and bus literals, found in the same sweep (2026-09-19).
+// The shipped `appsettings.json` carries a development connection string, to
+// `localhost:25432`, so `migrate` runs from a checkout. The Kernel hands an
+// installed process `ConnectionStrings__HotelOS` (`packages/process.rs`,
+// `CONNECTION_NAME`), and environment beats JSON — so the development string is
+// inert exactly as long as the Kernel sets the variable. Were it ever absent, an
+// installed GuestOps would dial the development cluster and say nothing. So a
+// process the Kernel started, without the Kernel's connection string, refuses.
+if (platform is not null
+    && string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable($"ConnectionStrings__{PlatformConnection}")))
+{
+    throw new InvalidOperationException(
+        $"started by a Kernel, but the Kernel gave no ConnectionStrings__{PlatformConnection}. "
+        + "GuestOps will not fall back to the development connection in appsettings.json: "
+        + "an installed application is told its database; it configures none.");
+}
+
+// **The bus is the one the Kernel told us about, and nothing else** — see the
+// consumer below, which takes `platform.NatsUrl` directly.
 //
-// Both consumers below read `Events:NatsUrl` from configuration and fell back
-// to a literal — one to 24222 and the other to 4222, which are the development
-// and the *installed* product's ports (ADR 0104). A package started by a Kernel
-// is handed `HOTELOS_NATS_URL` and was ignoring it: the two fallbacks meant a
-// process could subscribe to a bus nobody was publishing on, or worse, to a
-// real property's while a suite ran.
-//
-// Configuration still wins where it is set, because a developer running this
-// from a checkout has no Kernel to be told by.
-var natsUrl = builder.Configuration["Events:NatsUrl"]
-    ?? platform?.NatsUrl
-    ?? "nats://127.0.0.1:24222";
+// This read `builder.Configuration["Events:NatsUrl"] ?? platform?.NatsUrl ??
+// "nats://127.0.0.1:24222"`, saying *"Configuration still wins where it is
+// set, because a developer running this from a checkout has no Kernel to be
+// told by."* **Both halves were wrong, measured 2026-09-19:** configuration
+// winning meant a key could override the Kernel under a Kernel; and the
+// checkout case it defended never reached the bus — the consumer registers only
+// when a Kernel admitted this process, so the literal had no caller at all.
+// Removed with the Context literal, as one class: a peer address this
+// application writes down is one it can fall back to.
 
 // **One call, and its only argument is what the Kernel said** — `SHELL-Q40`
 // §3·3, `ed38380`.
@@ -170,10 +186,10 @@ builder.Services.AddGuestOpsApplication();
 // no admitted subject list — so a consumer registered there could never resolve
 // its admission, and registering one was a latent failure the required argument
 // surfaced.
-if (admission is not null)
+if (platform is not null && admission is not null)
 {
     builder.Services.AddApplicationEventConsumer(
-        natsUrl: natsUrl,
+        natsUrl: platform.NatsUrl,
         admission: admission,
         declare: events => events
             .Consume<Wire.RoomStayFact, ReservationFactHandler>("reservation.fact")
