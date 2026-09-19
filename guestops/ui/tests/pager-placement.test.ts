@@ -27,19 +27,21 @@ const CSS = (stylesheet().textContent ?? "").replace(/\s+/g, " ");
 
 describe("the pager's placement", () => {
   /**
-   * **Grow only.** `1 0 auto`, and no `min-height:0`.
+   * **Only the list scrolls — CORE-Q28**: the list grows into the free space,
+   * may shrink, and CLIPS, and the body holding it does not scroll.
    *
-   * The shrink half was in the first draft and GG's port measured what it does
-   * in a body that is itself a constrained scroll container: the list shrinks
-   * *below its content*, `.tbl` does not clip, and the rows render through
-   * whatever follows — 304px of list against 1353px of content, 1048px drawn
-   * under the note and the pager. `min-height:0` is what permits that shrink,
-   * so it goes with it.
+   * This asserted the opposite until 2026-09-19 — *"Grow only. `1 0 auto`, and
+   * no `min-height:0`"* — because shrink WITHOUT clip rendered rows through
+   * whatever followed (GG measured 304px of list against 1353px). That was
+   * right about an element that does not clip. CORE-Q28 (2026-09-09) adds the
+   * clip, and page 64 §6 is explicit that `min-height:0` comes back with it; the
+   * test encoded the superseded contract (ADR 0034), and GuestOps never took
+   * the ruling until the page-64 audit measured the document scrolling.
    */
-  it("makes a list with a pager grow, and never shrink below its rows", () => {
-    expect(CSS).toContain(".tbl:has(~ .pager){flex:1 0 auto}");
-    expect(CSS).not.toMatch(/\.tbl:has\(~ \.pager\)\{[^}]*min-height:0/);
-    expect(CSS).not.toMatch(/\.tbl:has\(~ \.pager\)\{[^}]*flex:1 1/);
+  it("makes the list with a pager the scroll container, and the body not", () => {
+    expect(CSS).toMatch(/\.body:has\(> \.pager\)\{[^}]*overflow:hidden/);
+    expect(CSS).toMatch(
+      /\.body:has\(> \.pager\) > :has\(\+ \.pager\)\{[^}]*flex:1 1 auto;min-height:0;overflow-y:auto/);
   });
 
   /**
@@ -55,20 +57,17 @@ describe("the pager's placement", () => {
   });
 
   /**
-   * **The offset is the body's bottom padding, negated.**
+   * **No sticky — "nothing scrolls past it now"** (page 64 §6, CORE-Q28).
    *
-   * Sticky resolves against the scrollport's *padding* box, so `bottom:0` in a
-   * body padded 22px parks the strip 22px short and rows scroll through the
-   * gap — GG measured 598 against a scrollport bottom of 620. The negative
-   * bottom *margin* does not fix it: that moves the flow position, not the
-   * offset sticky resolves, so the strip was flush at rest and high while
-   * stuck, which is the jump the margin exists to prevent arriving from the
-   * other side.
+   * This asserted `position:sticky; bottom:-22px` until 2026-09-19, because
+   * sticky resolves against the scrollport's padding box (GG measured 598
+   * against 620). True of the mechanism CORE-Q28 replaced: with the list as the
+   * scroll container the pager is a plain flex item at the floor, and a sticky
+   * strip here is the checklist's G6 failure by name.
    */
-  it("sticks the pager flush with the bottom, past the body's own padding", () => {
-    expect(CSS).toMatch(/\.pager\{[^}]*position:sticky/);
-    expect(CSS).toMatch(/\.pager\{[^}]*bottom:-22px/);
-    expect(CSS).not.toMatch(/\.pager\{[^}]*bottom:0/);
+  it("keeps the pager a plain floor, never sticky", () => {
+    expect(CSS).toMatch(/\.pager\{flex:0 0 auto/);
+    expect(CSS).not.toMatch(/\.pager\{[^}]*position:sticky/);
   });
 
   /**

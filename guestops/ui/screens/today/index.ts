@@ -105,8 +105,8 @@ export async function today(
 
     strip(day.stats, showing?.label ?? "", day),
     views,
-    table(showing?.rows ?? [], open),
-    pager(Number(showing?.count ?? 0), page, PAGE, showing?.rows.length ?? 0, turn),
+    table(showing?.rows ?? [], Number(showing?.count ?? 0), open),
+    pager(Number(showing?.count ?? 0), page, PAGE, showing?.rows.length ?? 0, turn, host.property),
   );
 
   // No page heading. It said "Today", which the bar already says — the same

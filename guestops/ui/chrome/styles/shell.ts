@@ -35,7 +35,12 @@ export const SHELL = `
 .head .tab .n{margin-left:0;font-size:11px;color:var(--color-ink-faint,#5a6172)}
 .head .tab .n.att{color:var(--color-warn,#fbbf24)}
 .who{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:12px;white-space:nowrap}
-.main{flex:1;min-width:0;display:flex;flex-direction:column}
+/* min-height:0, so the main can be SMALLER than its content and the body is
+   what scrolls. Without it a flex item's minimum is its content, the main grew
+   past the 100vh window, and the DOCUMENT scrolled — taking the bar with it.
+   The page-64 audit measured Setup and a stay's Activity doing exactly that
+   (G8, 2026-09-19). */
+.main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 /* The page's own title row, for a screen naming a RECORD. A screen does not
    print its section name — the bar already says it (§3). */
 .title{display:flex;align-items:center;gap:12px;padding:22px 26px 14px}
@@ -47,7 +52,8 @@ export const SHELL = `
 /* Padded on all four sides. It was 0 on top because the page title supplied
    it; with the title gone from section screens, the strip would otherwise sit
    flush against the bar's rule (§3). */
-.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.body{padding:22px 26px;overflow:auto;display:flex;flex-direction:column;gap:14px;
+  flex:1 1 auto;min-height:0}
 /* A flex child shrinks by default, so once the column overflows every card
    is compressed and its own overflow:hidden clips the controls off the
    bottom — the buttons vanish and the card still looks deliberate. */
@@ -83,6 +89,17 @@ button{font-family:inherit;line-height:inherit}
 .btn.pri{border-color:transparent;font-weight:600;
   color:var(--color-ink-on-accent,#0b0d14);background:var(--go-accent)}
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed}
+/* A primary that has nothing to send loses its fill — Jobs' rule, whose control
+   geometry §2 adopts. Without it .off on a primary kept the gradient and read
+   as live: C11 asks for off, not for a dashed edge on a filled button. */
+.btn.pri.off{background:none;border-color:var(--color-line-strong,rgb(255 255 255 / 0.14));cursor:default}
+/* A row's opener — §2, C8: "a row that opens something is a real button, and
+   the reset lives on the class." Jobs' rule and Jobs' reading: the row keeps its
+   click for a pointer, and its key text is the button a keyboard reaches — so no
+   control is nested inside another, which a whole-row button would do to a row
+   carrying its own link. */
+.opener{background:none;border:0;padding:0;margin:0;font:inherit;line-height:inherit;
+  color:inherit;text-align:left;cursor:pointer}
 .btn.danger{border-color:var(--go-bad-edge);color:var(--color-bad,#f87171)}
 /* The confirm step of a destructive flow is FILLED — docs/working/64 §2,
    amended 2026-09-04. An outline danger button sitting where a person has

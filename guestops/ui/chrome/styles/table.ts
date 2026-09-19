@@ -14,6 +14,12 @@ export const TABLE = `
   border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 /* The last row keeps its rule: with no card around the list, that final line
    is what closes it. */
+/* 6px, not §4's 10px — the reason, as L6 asks ("vertical padding may shrink,
+   and only for a reason you can name"): the approved gold frame 01 draws
+   .tr>div{padding:6px 10px}, and §5's density argument is the one it makes —
+   a list screen earns its page by fitting a working shift's worth of rows.
+   Whether the owner-approved drawing or §4 governs here is the same question as
+   64d's button, and it is recorded there rather than decided by this rule. */
 .tr>div{padding:6px 10px;display:flex;align-items:flex-start;gap:7px;min-width:0}
 .tr.hd>div{align-items:center;padding:8px 10px;font-size:11px;font-weight:500;
   text-transform:uppercase;letter-spacing:.08em;color:var(--color-ink-faint,#5a6172)}
@@ -112,9 +118,25 @@ export const TABLE = `
  * rather than derived because there is no variable to derive it from; the
  * standard states the rule so the third application does not rediscover it.
  */
-.tbl:has(~ .pager){flex:1 0 auto}
+/* ONLY THE LIST SCROLLS — CORE-Q28, ruled 2026-09-09, applied here 2026-09-19.
+   Everything above describes the sticky mechanism CORE-Q28 REPLACED, and is
+   kept as the record of how it got here; GuestOps never took the ruling. The
+   page-64 audit measured what that cost: the document scrolled, the list's
+   overflow was visible, the pager was position:sticky, and on a short list
+   the pager sat under the rows — 454px down a 760px window — with the list box
+   exactly the height of its rows (G6, G7).
+
+   The snippet from page 64 §6, with the list found by position rather than by
+   class: the element immediately before the pager IS the list, whether a table
+   or Attention's stack of cards. min-height:0 is back, and the reversal is the
+   point — shrink WITHOUT clip was the defect GG measured; shrink WITH clip
+   (overflow-y:auto) is the mechanism. Scoped to a body that has a pager (G8):
+   applied to every body it would clip a settings screen. */
+.body:has(> .pager){flex:1 1 auto;min-height:0;overflow:hidden}
+.body:has(> .pager) > :has(+ .pager){flex:1 1 auto;min-height:0;overflow-y:auto;
+  margin:0 -26px;padding:0 26px}
 .psize{color:var(--color-ink-faint,#5a6172)}
-.pager{position:sticky;bottom:-22px;z-index:2;
+.pager{flex:0 0 auto;
   display:flex;justify-content:space-between;align-items:center;gap:9px;
   margin:0 -26px -22px;padding:10px 30px 22px;
   font-size:12px;color:var(--color-ink-faint,#5a6172);

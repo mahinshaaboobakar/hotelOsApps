@@ -16,19 +16,34 @@
  * the right, the current one carrying the brand border, eliding past five.
  */
 
-import { control, el } from "./element";
+import {
+  formatNumber, PAGER_LABELS, pagedView, type PropertyEnvironment,
+} from "@hotelos/sdk";
 
-/** How many numbered buttons before the row elides. */
-const SHOWN = 5;
+import { control, el } from "./element";
 
 /**
  * Draw the pager for a list.
+ *
+ * # The arithmetic and the arrows' names are the SDK's — §6, G2
+ *
+ * *"ONE pager component — the words are `PAGER_LABELS`, the arithmetic
+ * `pagedView`."* This computed its own range, its own page window (eliding past
+ * five) and its own labels until the page-64 audit, 2026-09-19 — a second copy
+ * of what four applications must agree on. The window now elides where the SDK
+ * does (`WHOLE_ROW`), which moves the row on a long list; the standard governs.
+ *
+ * # Every number goes through `formatNumber` — §12, U1
+ *
+ * In the property's locale, and ungrouped where none is established — the
+ * SDK's rule, not a separator chosen here.
  *
  * @param total how many rows the whole list holds
  * @param page the current page, 0-based
  * @param size how many rows a page holds
  * @param shown how many rows are actually on screen
  * @param go what to do when a page is chosen
+ * @param property the property's locale, for the numbers
  * @returns the pager — always, because the count is information
  */
 export function pager(
@@ -37,8 +52,10 @@ export function pager(
   size: number,
   shown: number,
   go: (page: number) => void,
+  property: PropertyEnvironment,
 ): HTMLElement | null {
-  const pages = Math.max(1, Math.ceil(total / size));
+  const view = pagedView({ page, pageSize: size, total }, shown);
+  const n = (value: number): string => formatNumber(value, property, "whole");
 
   // **The range is drawn even on a single page**, and the nav with it.
   //
@@ -51,22 +68,20 @@ export function pager(
   // whole list, which is exactly what a person checking the morning's arrivals
   // needs to know and cannot infer from a list that simply stops.
   const element = el("div", "pager");
-  const first = page * size + 1;
 
-  // Two clamps, and they catch different mistakes. `shown` counts the rows
-  // that are actually here, which is what a short page needs — a range wider
-  // than the screen is a number nobody can check by counting, and it would read
-  // the same if the list had failed to load half of itself. `total` catches a
-  // caller that reports a full page on the last page, which is the easy thing
-  // to pass and the easy thing to get wrong.
-  const last = Math.min(total, first + shown - 1);
-
+  // `from`/`to` are `pagedView`'s: counted from the rows that arrived, clamped
+  // by the total — both clamps this file used to keep for itself.
+  //
+  // **The empty list (E0) is drawn as built, deliberately.** `pagedView` says
+  // *"a caller draws its own empty state"*, and what E0 draws is OPEN (G11,
+  // going to the owner as 64f). Until that is ruled, E0 keeps the sentence and
+  // the lone page it had — changing it here would decide 64f by refactor.
   element.append(el(
     "span",
     undefined,
-    shown === 0
-      ? `no rows on this page · ${total} in the list`
-      : `showing ${first}–${last} of ${total}`,
+    view.empty || view.barren
+      ? `no rows on this page · ${n(total)} in the list`
+      : `showing ${n(view.from)}–${n(view.to)} of ${n(total)}`,
   ));
 
   // **The rows-per-page statement, drawn here so no screen can omit it** —
@@ -79,28 +94,31 @@ export function pager(
   // It states the size and not a guess at what a taller window would hold —
   // this module does not resize its page, so a sentence about a maximised
   // window would be a claim about behaviour it does not have.
-  element.append(el("span", "psize", `${size} per page`));
+  element.append(el("span", "psize", `${n(size)} per page`));
 
   const nav = el("span", "pnav");
-  nav.append(step("‹", page - 1, page > 0, go));
+  nav.append(step("‹", PAGER_LABELS.previousPage, page - 1, view.hasPrevious, go));
 
-  for (const number of numbers(page, pages)) {
+  // E0 keeps its lone page 1, as built (above); every other state draws the
+  // SDK's entries.
+  for (const number of view.empty ? [0] : view.entries) {
     nav.append(
       number === null
         ? el("span", "gap", "…")
-        : step(String(number + 1), number, true, go, number === page),
+        : step(n(number + 1), null, number, true, go, number === page),
     );
   }
 
-  nav.append(step("›", page + 1, page < pages - 1, go));
+  nav.append(step("›", PAGER_LABELS.nextPage, page + 1, view.hasNext, go));
   element.append(nav);
 
   return element;
 }
 
-/** One page button, or an arrow.  */
+/** One page button, or an arrow — an arrow named by `PAGER_LABELS`.  */
 function step(
   label: string,
+  name: string | null,
   target: number,
   enabled: boolean,
   go: (page: number) => void,
@@ -112,6 +130,10 @@ function step(
     }
   });
 
+  // A glyph is not a name; the SDK names it so two realms cannot differ.
+  if (name !== null) button.setAttribute("aria-label", name);
+  if (current) button.setAttribute("aria-current", "page");
+
   // `disabled` rather than a class: an arrow at the end of the list must not
   // take focus or fire, and styling alone would leave it clickable to a
   // keyboard.
@@ -122,29 +144,3 @@ function step(
   return button;
 }
 
-/**
- * Which page numbers to draw, with `null` where the row elides.
- *
- * Jobs' four pages are drawn whole and its canonical rendering says nothing
- * about a hundred, because a board never has a hundred. A property's stay list
- * will, and a row of two hundred buttons is not the same design at a larger
- * size — it is a different one. The window keeps the first, the last, and
- * `SHOWN` around the current page.
- */
-function numbers(page: number, pages: number): readonly (number | null)[] {
-  if (pages <= SHOWN + 2) {
-    return [...Array(pages).keys()];
-  }
-
-  const half = Math.floor(SHOWN / 2);
-  const from = Math.min(Math.max(page - half, 1), pages - SHOWN - 1);
-  const window = [...Array(SHOWN).keys()].map((offset) => from + offset);
-
-  return [
-    0,
-    ...(from > 1 ? [null] : []),
-    ...window,
-    ...(from + SHOWN < pages - 1 ? [null] : []),
-    pages - 1,
-  ];
-}

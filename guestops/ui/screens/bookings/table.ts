@@ -3,7 +3,7 @@
  */
 
 import type { BookingRow } from "../../book";
-import { el, fill } from "../../chrome/element";
+import { el, fill, opener } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Rooms", "Dates", "Status", ""] as const;
@@ -17,12 +17,14 @@ const COLUMNS = ["Guest", "Booking", "Rooms", "Dates", "Status", ""] as const;
  * not sent are not rows, not placeholders, and not counted.
  *
  * @param rows the page
+ * @param total how many the SEARCH matched, which is not how many this page holds
  * @param open what to do when a booking is chosen
  * @param selected the booking a dialog is currently about, if any
  * @returns the table
  */
 export function table(
   rows: readonly BookingRow[],
+  total: number,
   open: (row: BookingRow) => void,
   selected?: string,
 ): HTMLElement {
@@ -35,7 +37,10 @@ export function table(
 
   element.append(head);
 
-  if (rows.length === 0) {
+  // Only when the SEARCH matched nothing — see today/table.ts. An empty page of
+  // fifty matches said "No booking matches this search." under a pager saying
+  // "no rows on this page · 50 in the list" (page-64 audit, G5).
+  if (total === 0) {
     const empty = el("div", "tr list");
     empty.append(el("div", "hint", "No booking matches this search."));
     element.append(empty);
@@ -57,7 +62,8 @@ function line(
   const element = el("div", `tr list act${row.id === selected ? " sel" : ""}`);
 
   const name = el("div", "nm");
-  name.append(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest));
+  name.append(opener(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest),
+    () => open(row)));
 
   // GUEST-Q12: the contact is absent, so the second line is absent with it
   // rather than held open by an empty span.

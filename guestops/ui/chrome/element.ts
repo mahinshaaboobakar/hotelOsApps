@@ -60,3 +60,28 @@ export function fill(parent: HTMLElement, ...children: readonly (Node | null)[])
 
   return parent;
 }
+
+/**
+ * A row's opener — §2, C8: the row's key text as a real button a keyboard
+ * reaches.
+ *
+ * The page-64 audit found every row that opens something drawn as a `div` with
+ * a click listener, unreachable without a pointer (2026-09-19). A whole-row
+ * `<button>` would nest a row's own link inside it, so this follows Jobs' board:
+ * the row keeps its click for a pointer, and its key text is the button. The
+ * button stops its own click there, so one press opens once.
+ *
+ * @param label what the opener shows — the row's name, drawn as it was
+ * @param open what opening the row does
+ * @returns the button
+ */
+export function opener(label: HTMLElement, open: () => void): HTMLElement {
+  const button = el("button", "opener");
+  button.setAttribute("type", "button");
+  button.append(label);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    open();
+  });
+  return button;
+}

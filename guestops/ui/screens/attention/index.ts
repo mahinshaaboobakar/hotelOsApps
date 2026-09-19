@@ -74,19 +74,28 @@ export async function attention(
     ),
   );
 
+  // **The cards are ONE list element, the pager's sibling** — CORE-Q28: only the
+  // list scrolls, so there has to be one list to scroll. They were loose
+  // children of the body, and a loose stack is a body that scrolls: the page-64
+  // audit measured the document scrolling and the pager 184px below the window.
+  const stack = el("div", "stack");
+
   if (loaded.value.total === 0) {
     const clear = card("Nothing waiting");
     clear.body.append(el("div", "hint", "Nothing needs a person."));
-    body.append(clear.root);
+    stack.append(clear.root);
   }
 
   for (const item of loaded.value.cards) {
-    body.append(one(item));
+    stack.append(one(item));
   }
+
+  body.append(stack);
 
   // A pager over cards, not rows — `64` §8 asks every list screen for one, and
   // a stack of cards a person scans is a list by the only test that matters.
-  const turning = pager(loaded.value.total, page, PAGE, loaded.value.cards.length, turn);
+  const turning = pager(
+    loaded.value.total, page, PAGE, loaded.value.cards.length, turn, host.property);
   if (turning !== null) body.append(turning);
 
   into.replaceChildren(body);

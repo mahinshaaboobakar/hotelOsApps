@@ -101,7 +101,7 @@ export async function newBooking(
     body,
     query,
     availability(answer.types),
-    pager(answer.total, page, PAGE, answer.types.length, turn),
+    pager(answer.total, page, PAGE, answer.types.length, turn, host.property),
     explain(),
     cards,
   );

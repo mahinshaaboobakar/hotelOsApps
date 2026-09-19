@@ -21,7 +21,7 @@
  */
 
 import type { DayRow } from "../../book/model";
-import { control, el, fill } from "../../chrome/element";
+import { control, el, fill, opener } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const;
@@ -29,11 +29,16 @@ const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const
 /**
  * Draw the table.
  *
- * @param rows the day's rows
+ * @param rows the day's rows — this page of them
+ * @param total how many the LIST holds, which is not how many this page does
  * @param open what to do when a row is chosen
  * @returns the table
  */
-export function table(rows: readonly DayRow[], open: (row: DayRow) => void): HTMLElement {
+export function table(
+  rows: readonly DayRow[],
+  total: number,
+  open: (row: DayRow) => void,
+): HTMLElement {
   const element = el("div", "tbl");
   const head = el("div", "tr hd");
 
@@ -43,7 +48,13 @@ export function table(rows: readonly DayRow[], open: (row: DayRow) => void): HTM
 
   element.append(head);
 
-  if (rows.length === 0) {
+  // **Only an empty LIST says it is empty.** This tested `rows.length`, so an
+  // empty page of a fifty-row list — after a delete while somebody paged —
+  // said "Nothing in this list today." over a pager saying "no rows on this
+  // page · 50 in the list": two statements on one screen, one of them false.
+  // The page-64 audit measured it (G5). An empty page draws no sentence here;
+  // the pager states it. The empty list's own words stay as built until 64f.
+  if (total === 0) {
     const empty = el("div", "tr");
     empty.append(el("div", "hint", "Nothing in this list today."));
     element.append(empty);
@@ -61,7 +72,8 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
   const element = el("div", "tr act");
 
   const name = el("div", "nm");
-  name.append(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest));
+  name.append(opener(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest),
+    () => open(row)));
 
   // The second line, only where there is one to draw. A contact is ruled
   // absent (GUEST-Q12) and a party count is not, so this renders whichever

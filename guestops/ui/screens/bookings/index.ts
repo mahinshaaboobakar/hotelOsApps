@@ -74,8 +74,8 @@ export async function bookings(
   fill(
     body,
     filters(list, walkIn, book),
-    table(list.rows, open, selected),
-    pager(list.total, page, PAGE, list.rows.length, turn),
+    table(list.rows, list.total, open, selected),
+    pager(list.total, page, PAGE, list.rows.length, turn, host.property),
   );
 
   into.replaceChildren(body);

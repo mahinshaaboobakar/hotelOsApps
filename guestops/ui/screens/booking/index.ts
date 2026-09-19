@@ -56,8 +56,13 @@ export async function booking(
   close: () => void,
   done: () => void,
 ): Promise<void> {
+  // **The page travels with the booking** — it did not until 2026-09-19. The
+  // screen paged by 12 and asked for `{ bookingId }` alone, so the backend,
+  // told no size, answered `Paging.Of`'s 500: every stay, under a pager
+  // claiming three pages of twelve. The audit measured "showing 1–28 of 28"
+  // with three page buttons, and "showing 25–24 of 24" on a shrunken list.
   const loaded = await load<BookingDetail>(
-    host, "reservation.read", "booking", { bookingId: id });
+    host, "reservation.read", "booking", { bookingId: id, page, pageSize: PAGE });
   // **A read that did not answer renders the failure, not a stand-in** —
   // APPS-Q42. Nothing below this line runs on data nobody's platform produced.
   if (!loaded.ok) {
@@ -102,7 +107,7 @@ export async function booking(
     record.incomplete === null ? null : says(record.incomplete),
 
     table(record.stays),
-    pager(record.total, page, PAGE, record.stays.length, turn),
+    pager(record.total, page, PAGE, record.stays.length, turn, host.property),
 
     // The same fact under the table, answering the other question: not *what
     // am I looking at* but *why are the missing two not here*. Frame 9 says it

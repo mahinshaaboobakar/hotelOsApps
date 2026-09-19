@@ -22,7 +22,11 @@ import { pager } from "../chrome/pager";
  */
 function draw(total: number, page: number, size = 25, shown = size) {
   const chosen: number[] = [];
-  const element = pager(total, page, size, shown, (to: number) => chosen.push(to));
+
+  // A property with no locale — `formatNumber` then groups nothing (§12, U2),
+  // so every figure below reads exactly as the digits the test states.
+  const element = pager(total, page, size, shown, (to: number) => chosen.push(to),
+    { locale: null, timezone: null });
 
   return { element, chosen };
 }
@@ -104,15 +108,19 @@ describe("the pager", () => {
   /**
    * 0-based in the model, 1-based on screen, converted in exactly one place.
    */
+  // Page 2 rather than page 4 — ADR 0034: this asserted GuestOps' private
+  // five-page window, and G2 replaced it with the SDK's `pagedView`, which on
+  // page 1 of 8 draws 1 · 2 · … · 8. The contract under test is unchanged:
+  // a label one-based, a target zero-based.
   it("labels pages from one and reports them from zero", () => {
     const { element, chosen } = draw(200, 0);
-    const four = [...(element?.querySelectorAll(".pg") ?? [])].find(
-      (node) => node.textContent === "4",
+    const two = [...(element?.querySelectorAll(".pg") ?? [])].find(
+      (node) => node.textContent === "2",
     );
 
-    (four as HTMLElement).click();
+    (two as HTMLElement).click();
 
-    expect(chosen).toEqual([3]);
+    expect(chosen).toEqual([1]);
   });
 
   /** Both ends refuse to move past themselves. */
@@ -135,12 +143,25 @@ describe("the pager", () => {
    * a property's stay list will. The window keeps the first, the last and five
    * around the current page, and the elision is drawn rather than implied.
    */
+  // The SDK's elision (`pagedView`, WHOLE_ROW): first, last, and the current
+  // page with one neighbour either side. This expected GuestOps' own window of
+  // five — the superseded contract (ADR 0034), replaced by G2.
   it("elides rather than drawing two hundred buttons", () => {
     const { element } = draw(5_000, 100);
 
     expect(labels(element!)).toEqual(
-      ["‹", "1", "…", "99", "100", "101", "102", "103", "…", "200", "›"],
+      ["‹", "1", "…", "100", "101", "102", "…", "200", "›"],
     );
+  });
+
+  // G2's other half: the arrows are named by PAGER_LABELS, not left as glyphs.
+  it("names its arrows with the SDK's words", () => {
+    const { element } = draw(200, 3);
+    const arrows = [...(element?.querySelectorAll(".pg") ?? [])]
+      .filter((node) => node.textContent === "‹" || node.textContent === "›")
+      .map((node) => node.getAttribute("aria-label"));
+
+    expect(arrows).toEqual(["Previous page", "Next page"]);
   });
 
   /** A short list is drawn whole, exactly as Jobs draws four pages. */

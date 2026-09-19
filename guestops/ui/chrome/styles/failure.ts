@@ -56,7 +56,7 @@ export const FAILURE = `
 
 /* The four facts. A grid, never a dotted line: the same content set as a log
    entry is what made this surface unreadable in the first place. */
-.fp{border-top:1px solid var(--color-line,rgb(255 255 255/.07));padding-top:13px;margin:0;
+.fp{border-top:1px solid var(--color-line,rgb(255 255 255 / 0.07));padding-top:13px;margin:0;
   display:grid;grid-template-columns:auto 1fr;gap:3px 16px;font-size:12px}
 .fp dt{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--color-ink-faint,#5a6172)}

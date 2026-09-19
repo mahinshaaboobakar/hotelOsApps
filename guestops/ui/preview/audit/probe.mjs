@@ -48,6 +48,7 @@ export const PROBE = String.raw`(doc) => {
   const controls = all("button").filter((b) => b.offsetParent !== null).map((b) => ({
     cls: b.className, text: (b.textContent ?? "").trim().slice(0, 24),
     lh: cs(b).lineHeight, parentLh: cs(b.parentElement).lineHeight,
+    fs: cs(b).fontSize, parentFs: cs(b.parentElement).fontSize,
     family: cs(b).fontFamily === cs(b.parentElement).fontFamily,
   }));
 
@@ -72,10 +73,20 @@ export const PROBE = String.raw`(doc) => {
     } : null,
     pager: pager ? {
       box: box(pager), text: pager.textContent.replace(/\s+/g, " ").trim(),
+      // The range is its own span. Reading it out of the whole strip ran it
+      // into "10 per page" and read "of 4" as "of 410" — the instrument's
+      // fault, found by checking a verdict before believing it.
+      range: (pager.firstElementChild?.textContent ?? "").replace(/\s+/g, " ").trim(),
       position: cs(pager).position, prev: list ? list.tagName + "." + list.className : null,
+      followedBy: pager.nextElementSibling ? pager.nextElementSibling.className : null,
       nextOfList: list?.nextElementSibling === pager,
       arrows: Array.from(pager.querySelectorAll(".pg")).map((b) => ({ t: b.textContent, disabled: b.hasAttribute("disabled"), label: b.getAttribute("aria-label") })),
     } : null,
+    // A stack of cards (Attention) is a list whose rows are the body's cards,
+    // not the rows inside the last one.
+    // Attention's cards moved into one .stack (CORE-Q28: one list to scroll);
+    // counted in either place so the probe reads before and after alike.
+    stackCards: body ? body.querySelectorAll(":scope > .card, :scope > .stack > .card").length : 0,
     list: list ? {
       box: box(list), cls: list.className, rows: rows.length, rowsHeight,
       headerHeight: header ? header.getBoundingClientRect().height : 0,
@@ -89,10 +100,27 @@ export const PROBE = String.raw`(doc) => {
     tdRow: pick(doc.querySelector(".tr:not(.hd)"), ["border-bottom-width", "align-items"]),
     lastRow: rows.length ? pick(rows.at(-1), ["border-bottom-width", "border-bottom-style"]) : null,
     btn: pick(doc.querySelector(".btn:not(.pri):not(.danger):not(.sm):not(.off)"), ["border-top-width", "border-top-color", "border-top-left-radius", "padding-top", "padding-left", "font-size", "color", "background-color"]),
-    btnPri: pick(doc.querySelector(".btn.pri:not(.sm)"), ["border-top-color", "color", "background-image"]),
+    // A LIVE primary — .btn.pri.off is C11's shape, not C2's, and measuring it
+    // as C2 failed Setup's deliberately unavailable Save for having no fill.
+    btnPri: pick(doc.querySelector(".btn.pri:not(.sm):not(.off)"), ["border-top-color", "color", "background-image"]),
+    btnPriOff: pick(doc.querySelector(".btn.pri.off"), ["background-image", "border-top-style", "color", "cursor"]),
     btnDanger: pick(doc.querySelector(".btn.danger:not(.confirm)"), ["color", "border-top-color"]),
     controls,
     rowButtons: all(".tr.act, .row.act").map((r) => r.tagName),
+    // C8 as Jobs' board reads it: the row keeps its click, and its key text is
+    // a real button. Measured on that button: no UA border, left-aligned, the
+    // row's family.
+    rowOpeners: all(".tr.act, .row.act").map((r) => {
+      const b = r.querySelector("button.opener");
+      return b ? { border: cs(b).borderTopWidth, align: cs(b).textAlign, family: cs(b).fontFamily === cs(r).fontFamily } : null;
+    }),
+    // D4's ruled role, and only it (64a: the Activity date column — faint text
+    // elsewhere is unclassified and OPEN, not swept off one ruling). 64a names
+    // it by the DRAWING's class, .act .tm b; the build draws the role as
+    // .ev .tm b (chrome/styles/table.ts). The first probe used the drawing's
+    // and found nothing — a selector that finds nothing can neither pass nor fail.
+    activityDate: pick(doc.querySelector(".ev .tm b"), ["color"]),
+    barrenSays: (() => { const t = list?.querySelector(".tr:not(.hd) .hint, .tr:not(.hd) .empty, .empty"); return t ? t.textContent.trim() : null; })(),
     notes: all(".note, .hint, .fn").filter((n) => n.offsetParent !== null).slice(0, 12).map((n) => ({ cls: n.className, ...pick(n, ["font-size", "line-height", "color"]) })),
     failure: fail ? {
       stage: box(stage), state: box(fail),

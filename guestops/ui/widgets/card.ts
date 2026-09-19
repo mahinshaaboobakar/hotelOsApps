@@ -163,10 +163,10 @@ export function stylesheet(): HTMLStyleElement {
 
   style.textContent = `
     .w{display:flex;flex-direction:column;height:100vh;overflow:hidden;
-      font-family:var(--font-sans,system-ui,sans-serif);font-size:12.5px;
+      font-family:var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);font-size:12.5px;
       color:var(--color-ink,#e8ebf4);background:var(--color-surface-raised,#11141f)}
     .wh{display:flex;align-items:center;gap:8px;padding:12px 14px 10px;
-      border-bottom:1px solid var(--color-line,rgba(255,255,255,.07))}
+      border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
     .wt{font-size:12.5px;font-weight:600;letter-spacing:.01em}
     .wa{font-size:10.5px;color:var(--color-ink-faint,#5a6172)}
     .grow{flex:1}
@@ -187,7 +187,7 @@ export function stylesheet(): HTMLStyleElement {
       color:var(--color-ink-faint,#5a6172)}
     .wr{display:flex;align-items:center;gap:8px;width:100%;text-align:left;
       padding:7px 0;background:none;border:0;border-bottom:1px solid
-      var(--color-line,rgba(255,255,255,.07));font:inherit;color:inherit;cursor:pointer}
+      var(--color-line,rgb(255 255 255 / 0.07));font:inherit;color:inherit;cursor:pointer}
     .wr:last-of-type{border-bottom:0}
     .wr:hover{background:color-mix(in srgb, var(--color-brand,#818cf8) 7%, transparent)}
     .rs{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

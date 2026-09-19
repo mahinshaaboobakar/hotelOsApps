@@ -90,7 +90,22 @@ function sections(
     bar.append(control(one.label === showing ? "tab on" : "tab", one.label, () => go(one.label)));
   }
 
-  bar.append(el("div", "grow"), control("btn", "Discard"), control("btn pri", "Save"));
+  // **Off, with the reason beside them** — §2, C11: "a primary action with
+  // nothing to send is drawn off, with the reason beside it — never
+  // live-and-refusing." These were live buttons with no handler: nothing on this
+  // screen is an input (every field is a drawn `.inp`, §10), and saving settings
+  // is reachable only through the gRPC door, so pressing Save did nothing and
+  // said nothing. Found by the page-64 audit, 2026-09-19.
+  const save = control("btn pri off", "Save");
+  const discard = control("btn off", "Discard");
+  for (const unavailable of [save, discard]) unavailable.setAttribute("disabled", "");
+
+  bar.append(
+    el("div", "grow"),
+    el("span", "hint", "Settings are shown here and cannot be changed from this screen yet."),
+    discard,
+    save,
+  );
   return bar;
 }
 

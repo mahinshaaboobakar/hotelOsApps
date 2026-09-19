@@ -24,9 +24,11 @@
  *
  * # E1 is reached the way a property reaches it
  *
- * The dataset loses its last page's rows after the first answer — a delete
- * while somebody paged — and the drive goes to the last page. The request that
- * follows asks for a page the list no longer has.
+ * The dataset loses its last page's rows at the moment the drive presses the
+ * last page — a delete while somebody paged (`frame.ts`, `deleted`). The request
+ * that follows asks for a page the list no longer has. *This said "after the
+ * first answer" until a screen that reads twice at start-up shrank before its
+ * pager was drawn.*
  */
 
 /** The states, by the checklist's codes. */
@@ -70,7 +72,7 @@ export function page<T>(all: readonly T[], params: unknown): { rows: T[]; total:
 /**
  * How many rows each state's list holds, from the screen's own page size.
  *
- * `after` is the size once the first answer has gone — only E1 shrinks, and it
+ * `after` is the size once the drive has "deleted" — only E1 shrinks, and it
  * shrinks by exactly its last page, so the last page a person can reach before
  * the delete is the first page past the rows after it.
  */

@@ -174,8 +174,17 @@ function sized(fallback: number): (params: unknown) => number {
   };
 }
 
-/** How many answers each paged method has given — E1 shrinks after the first. */
-const answered = new Map<string, number>();
+/**
+ * Whether the drive has "deleted" the last page's rows — E1's event.
+ *
+ * **Set by the drive, never counted from answers.** The first cut shrank the
+ * list after its first answer, assuming one read per screen; Today reads
+ * `today` twice at start-up, so the list shrank BEFORE the pager was drawn, the
+ * pager showed two pages, and the drive pressed page 2 — a real page, not a page
+ * past the rows. The rule now says what happens: the list shrinks at the moment
+ * the drive presses the last page, as it would after a delete.
+ */
+let deleted = false;
 
 /**
  * The paged read each screen is audited on — and ONLY that one is re-paged.
@@ -197,11 +206,8 @@ function shaped(method: string, answer: unknown, params: unknown): unknown {
   const paged = PAGED[method];
   if (list === null || paged === undefined || AUDITED[screen] !== method) return answer;
 
-  const count = answered.get(method) ?? 0;
-  answered.set(method, count + 1);
-
   const sizes = rowsFor(list, paged.size(params));
-  const n = count === 0 ? sizes.before : sizes.after;
+  const n = deleted ? sizes.after : sizes.before;
 
   // Today's paged list is its first — Arrivals, the tab it opens on.
   if (method === "today") {
@@ -291,6 +297,7 @@ async function drive(): Promise<void> {
       if (last === undefined || numbered.length < 2) {
         throw new Error(`no second page to reach for list=${list} — the drive could not reach it`);
       }
+      deleted = list === "E1";
       last.click();
       await settled();
     }
