@@ -83,20 +83,31 @@ public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming
             now.ToString("o"));
     }
 
-    /// <summary>The scheduled list — a date, and nothing about cycles (frame 6).</summary>
-    public async Task<IReadOnlyList<ScheduledRowView>> ScheduledAsync(
-        RequestScope scope, CancellationToken cancellationToken)
+    /// <summary>
+    /// A page of the scheduled list — a date, and nothing about cycles (frame 6).
+    /// </summary>
+    /// <remarks>
+    /// <b>Paged, and it says how many there are in all</b> — standard §6 /
+    /// CORE-Q13 (checklist G1). This took one page at <c>MaxPageSize</c>, dropped
+    /// the total and returned the rows, so a property with more scheduled jobs
+    /// than one page lost the rest silently while the screen's pager called the
+    /// list whole. It also loaded EVERY scheduled job a second time, unpaged, to
+    /// find the dates; the dates are now read for the page's own jobs only.
+    /// </remarks>
+    public async Task<ScheduledPageView> ScheduledAsync(
+        RequestScope scope, int page, int pageSize, CancellationToken cancellationToken)
     {
-        var page = await PageAsync(
+        var rows = await PageAsync(
             scope,
-            new JobFilter(null, [], ScheduledOnly: true, null, JobQueries.MaxPageSize, 0),
+            new JobFilter(null, [], ScheduledOnly: true, null, pageSize, page),
             cancellationToken);
 
+        var ids = rows.Rows.Select(r => Guid.Parse(r.Id)).ToList();
         var jobs = await db.Jobs
-            .Where(j => j.PropertyId == scope.PropertyId && j.JobStatus == JobStatus.Scheduled && j.DeletedAt == null)
+            .Where(j => ids.Contains(j.Id))
             .ToDictionaryAsync(j => j.Id.ToString(), j => j.ScheduledFor, cancellationToken);
 
-        return page.Rows.Select(row => new ScheduledRowView(
+        return new ScheduledPageView(rows.Rows.Select(row => new ScheduledRowView(
             jobs.GetValueOrDefault(row.Id)?.ToString("yyyy-MM-dd") ?? string.Empty,
             row.Number,
             row.Where,
@@ -104,7 +115,7 @@ public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming
             row.Tags,
             row.RaisedBy,
             row.AssignedTo,
-            row.DueAt)).ToList();
+            row.DueAt)).ToList(), rows.Paging);
     }
 
     /// <summary>The latest concern verdict for each of these jobs.</summary>

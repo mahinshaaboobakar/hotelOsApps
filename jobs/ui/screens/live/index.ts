@@ -4,7 +4,7 @@
  * table. Cards page as they scroll; the first six people come with the screen.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
 import { when } from "../../chrome/instant";
@@ -25,14 +25,15 @@ export async function live(host: HostApi, main: HTMLElement): Promise<void> {
   }
   const body = el("div", "body");
   const cards = el("div", "cols3");
-  for (const d of got.value.departments) cards.append(department(d));
+  for (const d of got.value.departments) cards.append(department(d, host.property));
   const heading = el("div", "sect", `Concern · property · last 60-second sweep ${when(host, got.value.sweptAt)}`);
   heading.style.marginTop = "22px";
   body.append(cards, heading, table(host, got.value));
   main.replaceChildren(body);
 }
 
-function department(d: LiveDepartment): HTMLElement {
+function department(d: LiveDepartment, property: PropertyEnvironment): HTMLElement {
+  const n = (value: number): string => formatNumber(value, property);
   const box = el("div", "card");
   const title = el("h3");
   const presence = d.presence === "off" ? el("span", "pill", "no presence") : el("span", "pill ok", "present");
@@ -55,11 +56,11 @@ function department(d: LiveDepartment): HTMLElement {
   // list says what it is showing, and a caption that describes a behaviour the
   // screen does not have is worse than no caption).
   if (d.people.length < d.peopleTotal) {
-    box.append(el("div", "more", `${String(d.people.length)} working of ${String(d.peopleTotal)} on shift`));
+    box.append(el("div", "more", `${n(d.people.length)} working of ${n(d.peopleTotal)} on shift`));
   }
   const bar = fill(el("div", "bar"), el("i", d.breached > 0 ? "bad" : ""));
   (bar.firstElementChild as HTMLElement).style.width = `${String(Math.min(100, Math.round((d.open / 20) * 100)))}%`;
-  box.append(bar, el("div", "mono", `${String(d.open)} open · ${String(d.breached)} breached`));
+  box.append(bar, el("div", "mono", `${n(d.open)} open · ${n(d.breached)} breached`));
   return box;
 }
 
@@ -80,5 +81,5 @@ function table(host: HostApi, l: Live): HTMLElement {
   // borrowing that class now the pager sticks to the list's floor: a caveat
   // that held station at the bottom of the screen would be a control that is
   // not one.
-  return fill(el("div"), t, el("div", "mono", `${String(l.concern.length)} in concern · ON TRACK rows are not listed here`));
+  return fill(el("div"), t, el("div", "mono", `${formatNumber(l.concern.length, host.property)} in concern · ON TRACK rows are not listed here`));
 }

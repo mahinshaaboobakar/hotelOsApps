@@ -3,7 +3,7 @@
  * (frame 6) — Marina Bay, 2 September 2026, the sweep at 14:24:00.
  */
 
-import type { Live, ScheduledRow } from "../model";
+import type { Live, ScheduledPage, ScheduledRow } from "../model";
 import { at } from "./board";
 
 export const recordedLive: Live = {
@@ -53,3 +53,9 @@ export const recordedScheduled: readonly ScheduledRow[] = [
   { scheduledFor: "2026-09-15", number: "MRN-ENG-118", where: "Plant room B", what: "Generator › Load test", tags: [], raisedBy: "APPLICATION · Engineering", assignedTo: "Deepak Rao", dueAt: at("17:00", "2026-09-15") },
   { scheduledFor: "2026-09-19", number: "MRN-HK-402", where: "Suite 2001", what: "Housekeeping › Deep clean", tags: [], raisedBy: "Sana Rahman (FO)", assignedTo: "Team · Floor 20", dueAt: at("15:00", "2026-09-19") },
 ];
+
+/** The recorded scheduled rows as the paged read returns them — one page, whole. */
+export const recordedScheduledPage: ScheduledPage = {
+  rows: recordedScheduled,
+  paging: { page: 0, pageSize: 12, total: recordedScheduled.length },
+};

@@ -41,7 +41,8 @@ public static class ReadCapability
                 .PageAsync(scope, Filter(request), cancellationToken),
 
             "scheduled" => await services.GetRequiredService<BoardProjection>()
-                .ScheduledAsync(scope, cancellationToken),
+                .ScheduledAsync(
+                    scope, body.Number("page"), body.Number("pageSize", JobQueries.DefaultPageSize), cancellationToken),
 
             "job" => await services.GetRequiredService<JobProjection>()
                 .DetailAsync(scope, body.Id("id"), cancellationToken),

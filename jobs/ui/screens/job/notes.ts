@@ -1,3 +1,5 @@
+import { formatNumber } from "@hotelos/sdk";
+
 /**
  * The Notes & photos tab — frame 2d: the notes as a timeline with the guest's
  * raising text first, the add field, the photo panel.
@@ -53,7 +55,7 @@ export function notes(host: HostApi, d: JobDetail, onChanged: () => void): HTMLE
 
   const photos = d.notes.filter((n) => n.photo !== null);
   const right = el("div", "card");
-  right.append(el("h3", undefined, `Photos · ${String(photos.length)}`));
+  right.append(el("h3", undefined, `Photos · ${formatNumber(photos.length, host.property)}`));
   for (const p of photos) {
     const frame = el("div", "field ph", p.photo ?? "");
     frame.style.height = "120px";

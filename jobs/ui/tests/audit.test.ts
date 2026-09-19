@@ -5,7 +5,7 @@ import { activate } from "../application";
 import { recordedBoard, recordedToday } from "../board/recorded/board";
 import { recordedCatalogue } from "../board/recorded/catalogue";
 import { recordedJob, recordedRatedJob } from "../board/recorded/job";
-import { recordedLive, recordedScheduled } from "../board/recorded/live";
+import { recordedLive, recordedScheduledPage } from "../board/recorded/live";
 import { recordedSettings } from "../board/recorded/settings";
 
 /**
@@ -40,7 +40,7 @@ function host(answers: Record<string, unknown> = live(), granted: readonly strin
 function live(): Record<string, unknown> {
   return {
     today: recordedToday, board: recordedBoard, job: recordedJob, live: recordedLive,
-    scheduled: recordedScheduled, catalogue: recordedCatalogue, settings: recordedSettings,
+    scheduled: recordedScheduledPage, catalogue: recordedCatalogue, settings: recordedSettings,
   };
 }
 

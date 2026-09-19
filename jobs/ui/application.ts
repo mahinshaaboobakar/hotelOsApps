@@ -53,6 +53,7 @@ interface Place {
   mode: string;
   boardFilter: string;
   boardPage: number;
+  scheduledPage: number;
   settingsTab: string;
   settingsView: string;
 }
@@ -71,7 +72,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
 
   const place: Place = {
     tab: "Board", jobId: null, lastOpened: null, jobTab: "Overview", mode: "board",
-    boardFilter: "My departments", boardPage: 0,
+    boardFilter: "My departments", boardPage: 0, scheduledPage: 0,
     settingsTab: "Concern policy", settingsView: "engineering",
   };
 
@@ -91,7 +92,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   async function draw(main: HTMLElement): Promise<void> {
     switch (place.tab) {
       case "Live": return live(host, main);
-      case "Scheduled": return scheduled(host, main);
+      case "Scheduled": return scheduled(host, main, { page: place.scheduledPage, onPage: (n) => { place.scheduledPage = n; show(); } });
       case "Catalogue": return catalogue(host, main, show);
       case "Settings":
         return settings(host, main, {
@@ -143,11 +144,6 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       root = element;
       show();
       void load<Operator>(host, JOB_READ, "me").then((got) => {
-        // **Only what the platform established.** The chrome has nowhere to put
-        // a failure — a head is not a surface — so a name that is not the
-        // property's own is not drawn at all. That was true when this read
-        // could fall back; it is now true because there is nothing to fall back
-        // to.
         // **Only what the platform established.** The chrome has nowhere to put
         // a failure — a head is not a surface — so a name that is not the
         // property's own is not drawn at all. That was true when this read

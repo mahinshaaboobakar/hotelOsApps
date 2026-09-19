@@ -4,14 +4,14 @@
  * the pager. Every row opens the job.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { today as dayLine, when } from "../../chrome/instant";
 import { concern, priority, status, tag } from "../../chrome/marks";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
 import { failure, failureState } from "../../chrome/failure";
-import { counted, pager } from "../../chrome/tabs";
+import { pager } from "../../chrome/tabs";
 import { may, type BoardPage, type JobRow, type Today } from "../../board";
 
 /** What the board is told and tells back. */
@@ -94,7 +94,7 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
     // The list is a wrapper round the table: `.tbl` is what grows and scrolls
     // (standard §6, CORE-Q28), because a table cannot be a scroll container.
     fill(el("div", "tbl"), table(host, page.value.rows, place), unexplained(place, page.value)),
-    pages(page.value, place),
+    pages(page.value, place, host.property),
   );
 
   main.replaceChildren(body);
@@ -128,12 +128,14 @@ function unexplained(place: BoardPlace, page: BoardPage): HTMLElement | null {
 
 function strip(host: HostApi, today: Today): HTMLElement {
   const line = el("div", "strip");
-  const figure = (n: string, label: string): HTMLElement => fill(el("span"), el("b", undefined, n), label);
+  // Every figure through formatNumber, in the property's locale — §12 (U1).
+  const n = (value: number): string => formatNumber(value, host.property);
+  const figure = (value: string, label: string): HTMLElement => fill(el("span"), el("b", undefined, value), label);
   line.append(
-    figure(String(today.open), "open"), figure(String(today.breached), "breached"), figure(String(today.stuck), "stuck"),
-    figure(String(today.running), "running"), figure(String(today.closedToday), "closed today"),
-    figure(`${String(today.avgResolveMinutes)} min`, "avg to resolve"),
-    // Department, day and time — the drawing's "ENG · Tue 2 Sep · 14:24".
+    figure(n(today.open), "open"), figure(n(today.breached), "breached"), figure(n(today.stuck), "stuck"),
+    figure(n(today.running), "running"), figure(n(today.closedToday), "closed today"),
+    figure(`${n(today.avgResolveMinutes)} min`, "avg to resolve"),
+    // Department, day and time — the drawing's "ENG · Tue 2 Sep · 14:24" (en-GB, Asia/Qatar).
     el("span", "end", `${today.department} · ${dayLine(host, today.at)}`),
   );
   return line;
@@ -159,11 +161,19 @@ function table(host: HostApi, rows: readonly JobRow[], place: BoardPlace): HTMLE
 
 function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
   const tr = el("tr", row.id === place.opened ? "pick sel" : "pick");
-  tr.addEventListener("click", () => place.onOpen(row.id));
+  // The opener button handles its own click; without this the click would
+  // bubble here and open the job twice.
+  tr.addEventListener("click", (event) => {
+    if ((event.target as Element | null)?.closest(".opener")) return;
+    place.onOpen(row.id);
+  });
   const what = el("td", undefined, row.what);
   for (const t of row.tags) what.append(tag(t));
   tr.append(
-    el("td", "num", row.number), el("td", undefined, row.where), what,
+    // The number is the row's opener, and a real button — standard §2 (checklist
+    // C8): the row opened on a click no keyboard could reach. The row keeps its
+    // click for a pointer; the button is what Tab lands on.
+    fill(el("td", "num"), control("opener", row.number, () => place.onOpen(row.id))), el("td", undefined, row.where), what,
     fill(el("td"), priority(row.priority)), fill(el("td"), status(row.status)),
     el("td", undefined, row.raisedBy), el("td", undefined, row.assignedTo),
     fill(el("td"), row.concern === "ON_TRACK" && row.concernDetail !== null
@@ -174,16 +184,10 @@ function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
   return tr;
 }
 
-function pages(page: BoardPage, place: BoardPlace): HTMLElement {
-  const { page: at, pageSize, total } = page.paging;
-  const count = Math.max(1, Math.ceil(total / pageSize));
-
-  // **A page with no rows says which of the two it is** — standard §6, in the
-  // one wording every Jobs list uses (`counted`). The page size is the Board's
-  // own addition, and only where rows are shown: it explains a count, and an
-  // empty list has none to explain.
-  const shown = counted(at * pageSize + 1, page.rows.length, total);
-  const sized = page.rows.length === 0 ? shown : `${shown} · ${String(pageSize)} per page at this height`;
-
-  return pager(sized, at, count, place.onPage);
+function pages(page: BoardPage, place: BoardPlace, property: HostApi["property"]): HTMLElement {
+  // The SDK's pager (`chrome/tabs.ts`, checklist G2): the range from the rows
+  // that arrived, an empty page kept apart from an empty list. The page size is
+  // the Board's own addition, drawn only after a range — it explains a count,
+  // and an empty state has none to explain.
+  return pager(page.paging, page.rows.length, place.onPage, property, `${formatNumber(page.paging.pageSize, property)} per page at this height`);
 }

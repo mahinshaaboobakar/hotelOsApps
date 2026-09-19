@@ -1,3 +1,5 @@
+import { formatNumber } from "@hotelos/sdk";
+
 /**
  * The Rating tab — frame 2f: the guest's stars and line once a guest-raised
  * job is closed; before that, "not yet — asked after close" (S10 D2).
@@ -32,7 +34,7 @@ export function rating(host: HostApi, d: JobDetail): HTMLElement {
     el("div", "k", "Asked"), el("div", undefined, `${when(host, r.askedAt)} · on auto-close · in the guest app`),
     el("div", "k", "Window"), el("div", undefined, `until ${r.windowUntil}`),
     el("div", "k", "Resolved by"), el("div", undefined, r.resolvedBy),
-    el("div", "k", "Raised → resolved"), el("div", undefined, `${String(r.minutesRaisedToResolved)} min`),
+    el("div", "k", "Raised → resolved"), el("div", undefined, `${formatNumber(r.minutesRaisedToResolved, host.property)} min`),
   );
   right.append(kv);
   return fill(el("div", "cols"), left, right);

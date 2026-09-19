@@ -4,7 +4,7 @@
  * the action row); seven tabs beneath it hold one kind of thing each.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { elapsed, when } from "../../chrome/instant";
@@ -89,7 +89,7 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
     header(host, detail, place, doing, ask),
     asked,
     said.line,
-    subnav(tabs(detail), place.tab, place.onTab),
+    subnav(tabs(detail, host.property), place.tab, place.onTab),
     tab(host, detail, place),
   );
   main.replaceChildren(body);
@@ -113,13 +113,14 @@ type Asking = (
   destructive?: boolean,
 ) => void;
 
-function tabs(d: JobDetail): readonly Tab[] {
+function tabs(d: JobDetail, property: PropertyEnvironment): readonly Tab[] {
+  const n = (value: number): string => formatNumber(value, property);
   const list: Tab[] = [
     { label: "Overview" },
-    { label: "Work", count: String(d.sessions.length) },
-    { label: "History", count: String(d.history.length) },
-    { label: "Notes & photos", count: String(d.notes.length) },
-    { label: "Links & steps", count: String(d.links.length + d.steps.length) },
+    { label: "Work", count: n(d.sessions.length) },
+    { label: "History", count: n(d.history.length) },
+    { label: "Notes & photos", count: n(d.notes.length) },
+    { label: "Links & steps", count: n(d.links.length + d.steps.length) },
   ];
   if (d.row.raisedBy.startsWith("Guest")) list.push({ label: "Rating" });
   list.push({ label: "Record" });
@@ -131,7 +132,7 @@ function tab(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
     case "Work": return work(host, d, may(host, JOB_COMPLETE), place.onResolve);
     case "History": return history(host, d);
     case "Notes & photos": return notes(host, d, place.onChanged);
-    case "Links & steps": return links(d, may(host, JOB_AMEND));
+    case "Links & steps": return links(d, may(host, JOB_AMEND), host.property);
     case "Rating": return rating(host, d);
     case "Record": return record(d);
     default: return overview(d);

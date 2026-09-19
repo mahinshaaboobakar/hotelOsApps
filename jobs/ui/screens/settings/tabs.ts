@@ -3,6 +3,8 @@
  * who is told, holds & reminders, closing & rating, access (read-only).
  */
 
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
 import { control, el, fill } from "../../chrome/element";
 import { choose, confirming, text, toggle as switchOf, values } from "../../chrome/form";
 import type { Detail, Settings } from "../../board";
@@ -119,7 +121,13 @@ export function whoIsTold(s: Settings, configure: boolean): HTMLElement {
 }
 
 /** Frame 4 — waiting with a date, and being warned before it. */
-export function holds(s: Settings, configure: boolean, save: Saving, discard: () => void): HTMLElement {
+export function holds(
+  s: Settings,
+  configure: boolean,
+  save: Saving,
+  discard: () => void,
+  property: PropertyEnvironment,
+): HTMLElement {
   const grid = el("div", "cols");
   grid.append(
     fill(el("div", "card"), el("h3", undefined, "Putting a job on hold"), kv(s.holds)),
@@ -131,7 +139,7 @@ export function holds(s: Settings, configure: boolean, save: Saving, discard: ()
       // looking like the whole set — a truncated list that does not admit it is
       // the defect the conformance pass looks for.
       el("div", "mono", s.holdWarnings.length < 10
-        ? `${String(s.holdWarnings.length)} hold(s) with a date`
+        ? `${formatNumber(s.holdWarnings.length, property)} hold(s) with a date`
         : "the ten nearest holds with a date"),
     ),
   );

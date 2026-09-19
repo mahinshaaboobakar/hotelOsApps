@@ -13,7 +13,7 @@
  * who took it for a job count would think the day was busier than it was.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -34,8 +34,8 @@ export async function raisedToday(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.raised), label: "raised today", tone: "run" },
-      { value: String(now.closed), label: "closed today", tone: "ok" },
+      { value: formatNumber(now.raised, host.property), label: "raised today", tone: "run" },
+      { value: formatNumber(now.closed, host.property), label: "closed today", tone: "ok" },
     ]),
   ];
 

@@ -196,6 +196,15 @@ export interface Live {
   sweptAt: string;
 }
 
+/**
+ * A page of Scheduled — rows and paging, as the board's page has them (§6,
+ * CORE-Q13; checklist G1). It was a bare list of one capped page.
+ */
+export interface ScheduledPage {
+  rows: readonly ScheduledRow[];
+  paging: Paging;
+}
+
 /** A scheduled row — frame 6. */
 export interface ScheduledRow {
   scheduledFor: string;

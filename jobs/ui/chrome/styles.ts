@@ -20,20 +20,27 @@ const CHROME = `
 ::-webkit-scrollbar-thumb{background:color-mix(in srgb, var(--color-ink-faint) 60%, transparent);border-radius:3px}
 .jb{height:100vh;display:flex;flex-direction:column;min-width:0;
     background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);
-    font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);font-variant-numeric:tabular-nums}
+    font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);font-variant-numeric:tabular-nums;
+    /* Standard §2 (C2): the primary fill is "135deg ... written once, as --accent,
+       and derived — never a literal". It was written out twice, on the mark and
+       on .btn.pri; an app-local name derived from published tokens, which P1
+       allows. */
+    --accent:linear-gradient(135deg, var(--color-brand,#818cf8),
+             color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
 .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;
       border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
 .mark{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;
-      color:var(--color-ink-on-accent,#0b0d14);
-      background:linear-gradient(135deg, var(--color-brand,#818cf8),
-                 color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
+      color:var(--color-ink-on-accent,#0b0d14);background:var(--accent)}
 .tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--color-ink-muted,#8b93a7);
      padding:19px 2px;font:inherit;line-height:inherit;font-size:13px;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
-.search{margin-left:auto;color:var(--color-ink-faint,#5a6172);border:1px solid var(--color-line,rgb(255 255 255 / 0.07));
-        border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
-.who{color:var(--color-ink-faint,#5a6172);font-size:12px}
+.who{color:var(--color-ink-muted,#8b93a7);font-size:12px}
+/* A row's opener — standard §2's reset on the class (checklist C8): a real
+   button that draws as the text it replaces, so the number reads as before and
+   a keyboard reaches it. */
+.opener{background:none;border:0;padding:0;margin:0;font:inherit;line-height:inherit;
+        color:inherit;text-align:left;cursor:pointer}
 .body{padding:22px;overflow:auto;min-height:0}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .subnav .tab{padding:8px 12px;font-size:12px;margin-bottom:-1px}
@@ -53,10 +60,12 @@ const CHROME = `
 .grow{margin-left:auto}
 .btn{background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:7px 14px;
      font:inherit;line-height:inherit;font-size:13px;color:var(--color-ink,#e8ebf4);cursor:pointer;text-align:start}
-.btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);text-align:start;
-         background:linear-gradient(135deg, var(--color-brand,#818cf8),
-                    color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
+.btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);text-align:start;background:var(--accent)}
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed}
+/* An unavailable PRIMARY — standard §2, C11: a primary with nothing to send is
+   drawn off, with the reason beside it. .btn.off alone left the brand gradient
+   under a primary, so an off primary still looked like the one thing to press. */
+.btn.pri.off{background:none;border-color:var(--color-line-strong,rgb(255 255 255 / 0.14));cursor:default}
 /* **Destructive: outline inline, filled at the confirm** — standard §2, amended
    2026-09-04 on GG's finding. Conforming to the ordinary outline made the most
    consequential control on the screen the quietest; filling every one of them
@@ -76,7 +85,6 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--color-ink-faint,#5a6172);font-weight:500;font-size:11px;letter-spacing:.08em;
    text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 td{padding:10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));vertical-align:top}
-tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 tr.pick{cursor:pointer}
 /* The row you came back from, tinted as frame 1 tints it — a person returning
    to the board should not have to find their place again. Mixed from the
@@ -84,8 +92,11 @@ tr.pick{cursor:pointer}
    one. Measured finding, 2026-09-05. */
 tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7);white-space:nowrap}
-.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
-.dim{color:var(--color-ink-faint,#5a6172)}
+/* D3 — text that explains is 12px on 19.8px (64a, APPS-Q35). .mono and .hint
+   carry Jobs' explanatory sentences; their line-height inherited 18px. */
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;line-height:19.8px;color:var(--color-ink-muted,#8b93a7)}
+/* D4 — quiet text a person still reads is --color-ink-muted (64a); this was faint. */
+.dim{color:var(--color-ink-muted,#8b93a7)}
 table+.mono,.kv+.mono{margin-top:8px}
 /* Four classes the build emitted that no rule defined and no frame ever drew —
    found 2026-09-17 by tests/styled.test.ts, written after FF's GuestOps finding.
@@ -100,7 +111,7 @@ table+.mono,.kv+.mono{margin-top:8px}
    as tall as its content — 250px of a 900px window on an empty Board — so no
    rule below could put the pager anywhere but straight under the headings. */
 .main > .body{flex:1 1 auto}
-.hint{margin-top:4px}
+.hint{margin-top:4px;font-size:12px;line-height:19.8px}
 .title{font-weight:600;color:var(--color-ink,#e8ebf4)}
 /* The pager is the list's floor, and ONLY THE LIST SCROLLS — the standard's
    §6 as it stands: the owner's rulings of 2026-09-05 (the list takes the free
@@ -137,6 +148,7 @@ table+.mono,.kv+.mono{margin-top:8px}
      font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .btn.pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}
 .btn.pg[disabled]{color:var(--color-ink-faint,#5a6172);cursor:default;opacity:.5}
+.pg-gap{margin-left:4px;font-size:12px;color:var(--color-ink-faint,#5a6172)}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .card{border:1px solid var(--color-line,rgb(255 255 255 / 0.07));border-radius:var(--radius-panel,1rem);padding:16px;
@@ -201,9 +213,9 @@ label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07
    a class with no rule there, a rule with no class here — and both are
    invisible to a fidelity sweep, which compares two renderings and cannot see a
    selector that matches nothing. */
-.note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;color:var(--color-ink-muted,#8b93a7);font-size:13px;
+.note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;color:var(--color-ink-muted,#8b93a7);font-size:12px;line-height:19.8px;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
 .note b{color:var(--color-ink,#e8ebf4)}
 .stars{font-size:26px;letter-spacing:4px;color:var(--color-warn,#fbbf24)}
-.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin:18px 0 8px}
+.sect{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin:18px 0 8px}
 `;

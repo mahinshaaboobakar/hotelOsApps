@@ -7,7 +7,7 @@
  * clock keeps running while the person is away from it.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -28,8 +28,8 @@ export async function blocked(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.onHold), label: "on hold", tone: "warn" },
-      { value: String(now.pausedCount), label: "paused", tone: "run" },
+      { value: formatNumber(now.onHold, host.property), label: "on hold", tone: "warn" },
+      { value: formatNumber(now.pausedCount, host.property), label: "paused", tone: "run" },
     ]),
   ];
 

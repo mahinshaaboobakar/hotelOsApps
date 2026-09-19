@@ -3,6 +3,8 @@
  * search and the operator — and the sub-navigation a screen may carry.
  */
 
+import { PAGER_LABELS, formatNumber, pagedView, type Paging, type PropertyEnvironment } from "@hotelos/sdk";
+
 import { control, el, fill } from "./element";
 import type { Operator } from "../board/model";
 
@@ -28,7 +30,13 @@ export function head(
   for (const tab of tabs) {
     bar.append(control(tab.label === current ? "tab on" : "tab", tab.label, () => go(tab.label)));
   }
-  bar.append(el("div", "search", "Search job number, room, summary…"));
+  // **No search box** — standard §3: "No search box in the bar unless the app
+  // has one" (checklist N4). This drew "Search job number, room, summary…" as a
+  // <div> with nothing behind it: Jobs has no search, so the box promised one
+  // to every person who looked at the bar. The locked frame draws it; a control
+  // that does nothing is not an appearance a frame can approve, and it returns
+  // with a search that answers. The spacer keeps the operator at the right.
+  bar.append(el("span", "grow"));
   // Nothing, rather than a name nobody established.
   if (operator !== null) bar.append(el("div", "who", `${operator.name} · ${operator.where}`));
   return bar;
@@ -46,46 +54,64 @@ export function subnav(tabs: readonly Tab[], current: string, go: (label: string
 }
 
 /**
- * What a pager says about the rows in front of the reader — standard §6.
+ * A pager line — "1–12 of 47" and the page buttons — drawn from the SDK's ONE
+ * pager (standard §6, `CORE-Q13`; checklist G2).
  *
- * **One sentence for every list in Jobs**, because three lists wrote their own:
- * the Board said *"no jobs in this list"* when empty, while Scheduled computed
- * `1–0 of 0` — arithmetic nobody reads as "this list is empty", which §6
- * names. The range counts the rows that ARRIVED (§6: `first + rows.length - 1`,
- * clamped by `total`), never the page size asked for.
+ * **The arithmetic and the arrow names are `@hotelos/sdk`'s**: `pagedView`
+ * computes the range from the rows that ARRIVED (clamped by `total`), the page
+ * count, the page numbers with their elision, and keeps an empty list apart
+ * from an empty page; `PAGER_LABELS` names the arrows. Jobs hand-wrote all of
+ * it until 2026-09-19 — including a `counted()` written that same morning to
+ * unify three lists' wording, which made it a third copy of what the SDK
+ * already owned. The sentences are the caller's, as the SDK says.
  *
- * @param first the 1-based position of the first row on this page
- * @param rows how many rows this page actually holds
- * @param total how many the list holds in all
+ * An arrow with nowhere to go is disabled rather than absent: a pager that
+ * changes shape between one page and two is two controls, and the count is the
+ * information a one-page list carries (§6).
+ *
+ * **The empty list (`E0`) is not ruled** — checklist G11, going to the owner as
+ * 64f. `pagedView` says *"a caller draws its own empty state"*; Jobs draws the
+ * pager with *no jobs in this list* and both arrows disabled, recorded as what
+ * is built, not as settled.
+ *
+ * @param paging page (0-based), the page size applied, and the list's total
+ * @param shown how many rows this page actually holds
+ * @param property the locale every number is written in — standard §12 (U1)
+ * @param suffix what a caller adds after the range, never after an empty state
  */
-export function counted(first: number, rows: number, total: number): string {
-  if (rows === 0) {
-    return total === 0 ? "no jobs in this list" : `no rows on this page · ${String(total)} in the list`;
-  }
-  return `${String(first)}–${String(Math.min(total, first + rows - 1))} of ${String(total)}`;
-}
-
-/** A pager line — "1–12 of 47" and the page buttons. */
-export function pager(shown: string, page: number, pages: number, go: (page: number) => void): HTMLElement {
+export function pager(
+  paging: Paging,
+  shown: number,
+  go: (page: number) => void,
+  property: PropertyEnvironment,
+  suffix?: string,
+): HTMLElement {
+  const view = pagedView(paging, shown);
+  const n = (value: number): string => formatNumber(value, property);
   const line = el("div", "pager");
   const buttons = el("span");
 
-  // An arrow with nowhere to go is disabled rather than absent: a pager that
-  // changes shape between one page and two is two controls, and the count is
-  // the information a one-page list carries — it says the list in front of you
-  // is the whole list, which a list that simply stops cannot (standard §6).
-  const arrow = (text: string, to: number, dead: boolean): HTMLElement => {
-    const button = control("btn pg", text, () => go(to));
-    if (dead) button.setAttribute("disabled", "true");
+  const sentence = view.empty
+    ? "no jobs in this list"
+    : view.barren
+      ? `no rows on this page · ${n(paging.total)} in the list`
+      : `${n(view.from)}–${n(view.to)} of ${n(paging.total)}${suffix === undefined ? "" : ` · ${suffix}`}`;
+
+  const arrow = (glyph: string, name: string, to: number, live: boolean): HTMLElement => {
+    const button = control("btn pg", glyph, () => go(to));
+    button.setAttribute("aria-label", name);
+    if (!live) button.setAttribute("disabled", "true");
     return button;
   };
 
-  buttons.append(arrow("‹", Math.max(0, page - 1), page === 0));
-  for (let i = 0; i < pages; i += 1) {
-    buttons.append(control(i === page ? "btn pg on" : "btn pg", String(i + 1), () => go(i)));
+  buttons.append(arrow("‹", PAGER_LABELS.previousPage, paging.page - 1, view.hasPrevious));
+  for (const entry of view.entries) {
+    buttons.append(entry === null
+      ? el("span", "pg-gap", "…")
+      : control(entry === paging.page ? "btn pg on" : "btn pg", n(entry + 1), () => go(entry)));
   }
+  buttons.append(arrow("›", PAGER_LABELS.nextPage, paging.page + 1, view.hasNext));
 
-  buttons.append(arrow("›", Math.min(pages - 1, page + 1), page >= pages - 1));
-  line.append(el("span", undefined, shown), buttons);
+  line.append(el("span", undefined, sentence), buttons);
   return line;
 }

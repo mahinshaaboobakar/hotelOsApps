@@ -11,11 +11,20 @@ import { day, when } from "../../chrome/instant";
 import { tag } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
 import { failure } from "../../chrome/failure";
-import { counted, pager } from "../../chrome/tabs";
-import { type ScheduledRow } from "../../board";
+import { pager } from "../../chrome/tabs";
+import { type ScheduledPage } from "../../board";
 
-export async function scheduled(host: HostApi, main: HTMLElement): Promise<void> {
-  const got = await load<readonly ScheduledRow[]>(host, JOB_READ, "scheduled");
+/** Which page is shown, and how to show another — the board's shape. */
+export interface ScheduledPlace {
+  page: number;
+  onPage: (page: number) => void;
+}
+
+export async function scheduled(host: HostApi, main: HTMLElement, place: ScheduledPlace): Promise<void> {
+  // Paged like the board — standard §6 / CORE-Q13 (checklist G1). This read the
+  // whole list as one capped page with no total, under a pager that called it
+  // whole; a property with more scheduled jobs than one page lost the rest.
+  const got = await load<ScheduledPage>(host, JOB_READ, "scheduled", { page: place.page, pageSize: 12 });
 
   // A screen shows this property's own data or says why it cannot — the
   // seam carries a value or a reason and never both, so there is nothing
@@ -28,7 +37,7 @@ export async function scheduled(host: HostApi, main: HTMLElement): Promise<void>
   const head = el("tr");
   for (const h of ["Scheduled for", "Job", "Where", "What", "Raised by", "Assigned to", "Due"]) head.append(el("th", undefined, h));
   t.append(head);
-  for (const r of got.value) {
+  for (const r of got.value.rows) {
     const what = el("td", undefined, r.what);
     for (const x of r.tags) what.append(tag(x));
     const tr = el("tr");
@@ -51,8 +60,9 @@ export async function scheduled(host: HostApi, main: HTMLElement): Promise<void>
     // front of them is the whole list, and the arrows are drawn disabled rather
     // than omitted — a pager that changes shape between one page and two is two
     // controls (standard §6).
-    // `counted`, not a hand-built range: this read `1–0 of 0` on an empty list.
-    pager(counted(1, got.value.length, got.value.length), 0, 1, () => {}),
+    // The service's paging, drawn by the SDK's pager: the true total, and the
+    // other pages reachable.
+    pager(got.value.paging, got.value.rows.length, place.onPage, host.property),
   );
   main.replaceChildren(body);
 }

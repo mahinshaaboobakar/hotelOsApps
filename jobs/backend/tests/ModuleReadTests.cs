@@ -149,10 +149,38 @@ public class ModuleReadTests(JobsFixture fixture)
 
         var answer = await module.CallAsync(Permissions.Read, "scheduled");
 
+        // **Rewritten 2026-09-19** (ADR 0034): this read a bare array. Scheduled is
+        // now paged like the board — `rows` and `paging` — because the array was
+        // ONE page at the maximum size with the total dropped, while the screen
+        // drew "1–n of n" as though it were the whole list (checklist G1).
         Assert.Equal(200, answer.Status);
-        var row = Assert.Single(answer.At().EnumerateArray().ToList());
+        var row = Assert.Single(answer.At("rows").EnumerateArray().ToList());
         Assert.Equal("2026-09-30", row.GetProperty("scheduledFor").GetString());
         Assert.False(row.TryGetProperty("cycle", out _));
+    }
+
+    [Fact]
+    public async Task Scheduled_is_paged_and_says_how_many_there_are_in_all()
+    {
+        // Standard §6 / CORE-Q13 (checklist G1): a bounded operational list is
+        // paged — page / page_size → total — and no application defines a third
+        // pattern. Scheduled returned a bare first page with the total dropped, so
+        // a property with more scheduled jobs than one page silently lost the
+        // rest while the pager said the list in front of the reader was whole.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        var h = module.Data;
+        await h.SeedCatalogueAsync();
+        foreach (var day in new[] { 28, 29, 30 })
+        {
+            await h.RaiseNotCoolingAsync(h.Scope(), scheduledFor: new DateOnly(2026, 9, day));
+        }
+
+        var answer = await module.CallAsync(Permissions.Read, "scheduled", new { page = 0, pageSize = 2 });
+
+        Assert.Equal(200, answer.Status);
+        Assert.Equal(2, answer.At("rows").GetArrayLength());
+        Assert.Equal(3, answer.At("paging").GetProperty("total").GetInt32());
+        Assert.Equal(2, answer.At("paging").GetProperty("pageSize").GetInt32());
     }
 
     [Fact]

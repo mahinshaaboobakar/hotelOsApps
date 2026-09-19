@@ -13,7 +13,7 @@
  * exists to surface.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -34,10 +34,10 @@ export async function byPriority(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.p1), label: "P1", tone: "bad" },
-      { value: String(now.p2), label: "P2", tone: "warn" },
-      { value: String(now.p3), label: "P3", tone: "run" },
-      { value: String(now.notTriaged), label: "not triaged", tone: "hold" },
+      { value: formatNumber(now.p1, host.property), label: "P1", tone: "bad" },
+      { value: formatNumber(now.p2, host.property), label: "P2", tone: "warn" },
+      { value: formatNumber(now.p3, host.property), label: "P3", tone: "run" },
+      { value: formatNumber(now.notTriaged, host.property), label: "not triaged", tone: "hold" },
     ]),
   ];
 

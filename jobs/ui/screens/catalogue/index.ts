@@ -4,7 +4,7 @@
  * resolution). Jobs' own, read by the other apps through Context.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { choose, lines, saying, text, values } from "../../chrome/form";
@@ -39,10 +39,10 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
   grid.style.gridTemplateColumns = "260px 1fr";
   const item = got.value.items[0];
   grid.append(
-    categories(got.value, curate, doing, said.say),
+    categories(got.value, curate, doing, said.say, host.property),
     fill(
       el("div", "stack"),
-      item === undefined ? null : detail(item, curate, doing, said.say),
+      item === undefined ? null : detail(item, curate, doing, said.say, host.property),
       curate ? newItem(got.value, doing, said.say) : null,
     ),
   );
@@ -55,6 +55,7 @@ function categories(
   curate: boolean,
   doing: (method: string, params: unknown) => void,
   say: (message: string) => void,
+  property: PropertyEnvironment,
 ): HTMLElement {
   const box = el("div", "card");
   const title = el("h3", undefined, "Categories");
@@ -78,7 +79,7 @@ function categories(
   box.append(title, form);
   for (const cat of c.categories) {
     const row = el("div", "wrow");
-    row.append(el("span", cat.activeHere ? undefined : "dim", cat.name), el("span", "mono", cat.activeHere ? `${cat.department} · ${String(cat.items)} items` : "not active here"));
+    row.append(el("span", cat.activeHere ? undefined : "dim", cat.name), el("span", "mono", cat.activeHere ? `${cat.department} · ${formatNumber(cat.items, property)} items` : "not active here"));
     box.append(row);
   }
   box.append(el("div", "mono", "A category is a name and a department code from the ADR 0119 canon. Nothing else."));
@@ -90,6 +91,7 @@ function detail(
   curate: boolean,
   doing: (method: string, params: unknown) => void,
   say: (message: string) => void,
+  property: PropertyEnvironment,
 ): HTMLElement {
   const box = el("div", "card");
   const title = el("h3", undefined, `Air conditioning › ${item.name}`);
@@ -99,7 +101,7 @@ function detail(
   kv.append(
     el("div", "k", "Department"), el("div", undefined, item.department),
     el("div", "k", "Default priority"), el("div", undefined, item.defaultPriority),
-    el("div", "k", "Due within"), el("div", undefined, item.dueWithinMinutes === null ? "the category's, else the department's" : `${String(item.dueWithinMinutes)} min`),
+    el("div", "k", "Due within"), el("div", undefined, item.dueWithinMinutes === null ? "the category's, else the department's" : `${formatNumber(item.dueWithinMinutes, property)} min`),
     el("div", "k", "Restricted by default"), el("div", undefined, item.restricted ? "Yes" : "No"),
     el("div", "k", "Aliases"), el("div", undefined, item.aliases.map((a) => `"${a}"`).join(" · ")),
     el("div", "k", "Active at"), el("div", undefined, item.activeAt.map((p) => `${p.property} ${p.on ? "✓" : "— off"}`).join(" · ")),

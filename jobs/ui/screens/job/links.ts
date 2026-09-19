@@ -1,3 +1,5 @@
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
 /**
  * The Links & steps tab — frame 2e: the job's steps in sequence, then its
  * group links. Two relations, drawn apart because they mean different things
@@ -8,9 +10,9 @@ import { control, el, fill } from "../../chrome/element";
 import { status } from "../../chrome/marks";
 import type { JobDetail } from "../../board";
 
-export function links(d: JobDetail, mayAmend: boolean): HTMLElement {
+export function links(d: JobDetail, mayAmend: boolean, property: PropertyEnvironment): HTMLElement {
   const root = el("div");
-  root.append(el("div", "sect", "Steps of this job · sequence"), steps(d), el("div", "mono", "Cancelling this job cancels its steps. Closing it never closes them (S1 D2)."));
+  root.append(el("div", "sect", "Steps of this job · sequence"), steps(d, property), el("div", "mono", "Cancelling this job cancels its steps. Closing it never closes them (S1 D2)."));
   root.append(el("div", "sect", "Linked jobs · same room, related"), linked(d, mayAmend));
   if (mayAmend) {
     const row = el("div", "row");
@@ -20,7 +22,7 @@ export function links(d: JobDetail, mayAmend: boolean): HTMLElement {
   return root;
 }
 
-function steps(d: JobDetail): HTMLElement {
+function steps(d: JobDetail, property: PropertyEnvironment): HTMLElement {
   const t = el("table");
   const head = el("tr");
   for (const h of ["Step", "Job", "What", "Status", "Clock", "Assigned to"]) head.append(el("th", undefined, h));
@@ -28,7 +30,7 @@ function steps(d: JobDetail): HTMLElement {
   for (const s of d.steps) {
     const tr = el("tr");
     tr.append(
-      el("td", undefined, String(s.no)), el("td", "num", s.number), el("td", undefined, s.what),
+      el("td", undefined, formatNumber(s.no, property)), el("td", "num", s.number), el("td", undefined, s.what),
       el("td", undefined, s.status), el("td", "dim", s.clock), el("td", undefined, s.assignedTo),
     );
     t.append(tr);

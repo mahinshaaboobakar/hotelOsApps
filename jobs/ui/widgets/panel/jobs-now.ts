@@ -4,7 +4,7 @@
  * does, and shows the viewer what their access shows them.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -26,17 +26,17 @@ export async function jobsNow(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.open), label: "open", tone: "" },
-      { value: String(now.running), label: "running", tone: "run" },
+      { value: formatNumber(now.open, host.property), label: "open", tone: "" },
+      { value: formatNumber(now.running, host.property), label: "running", tone: "run" },
       quiet
         ? { value: "ON TRACK", label: "concern", tone: "ok" }
-        : { value: `${String(now.breached)} · ${String(now.stuck)}`, label: "breached · stuck", tone: "bad" },
+        : { value: `${formatNumber(now.breached, host.property)} · ${formatNumber(now.stuck, host.property)}`, label: "breached · stuck", tone: "bad" },
     ]),
   ];
 
   if (quiet) body.push(el("div", "wquiet", "Nothing at risk. The sweep last ran a minute ago."));
   for (const worst of now.worst) body.push(openRow(host, worst.number, worst.line, worst.tone, `jobs:${worst.number}`));
-  if (now.unreadNudges > 0) body.push(openRow(host, "Nudges", `${String(now.unreadNudges)} unread`, "warn", "jobs:nudges"));
+  if (now.unreadNudges > 0) body.push(openRow(host, "Nudges", `${formatNumber(now.unreadNudges, host.property)} unread`, "warn", "jobs:nudges"));
 
   return card("Jobs now", now.scope, body);
 }

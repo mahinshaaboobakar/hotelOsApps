@@ -10,7 +10,7 @@
  * standard alone.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { load, type HostApi, formatNumber } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { lines, saying, values } from "../../chrome/form";
@@ -77,7 +77,7 @@ export async function resolve(
 
   body.append(
     el("div", "sect", `Resolve ${job.row.number} · ${job.row.what}`),
-    el("div", "mono", `work ${elapsed(job.totalWorkedSeconds)} across ${String(job.sessions.length)} sessions · stopping the clock now`),
+    el("div", "mono", `work ${elapsed(job.totalWorkedSeconds)} across ${formatNumber(job.sessions.length, host.property)} sessions · stopping the clock now`),
     el("label", "lbl", "What fixed it"),
     chips,
     words,

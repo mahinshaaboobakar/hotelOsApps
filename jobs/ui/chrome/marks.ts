@@ -28,7 +28,10 @@ export const MARKS_CSS = PILL_CSS;
 /** A job status as a pill — S2's nine, each with its tone. */
 export function status(value: string): HTMLElement {
   const tone: Record<string, string> = {
-    IN_PROGRESS: "run", ACCEPTED: "warn", RESOLVED: "ok", ON_HOLD: "hold", CANCELLED: "hold",
+    IN_PROGRESS: "run", ACCEPTED: "warn", RESOLVED: "ok", ON_HOLD: "hold",
+    // P5 — cancelled is OVER, which is `bad` (§1: "bad is over (cancelled,
+    // no-show)"); it took `hold`, the tone of a job that will resume.
+    CANCELLED: "bad",
   };
   return el("span", `pill ${tone[value] ?? ""}`.trim(), value.replace("_", " "));
 }

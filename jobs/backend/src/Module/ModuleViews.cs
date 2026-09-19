@@ -42,6 +42,13 @@ public static class ModuleViews
     /// <summary>A page of the board.</summary>
     public sealed record BoardPageView(IReadOnlyList<JobRowView> Rows, Paging Paging);
 
+    /// <summary>
+    /// A page of Scheduled — rows and paging, as the board has them. Standard §6 /
+    /// CORE-Q13 (checklist G1): this was a bare list, ONE page at the maximum size
+    /// with the total dropped, under a pager that called it the whole list.
+    /// </summary>
+    public sealed record ScheduledPageView(IReadOnlyList<ScheduledRowView> Rows, Paging Paging);
+
     /// <summary>Today's strip above the board.</summary>
     public sealed record TodayView(
         int Open,

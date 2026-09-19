@@ -13,6 +13,7 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
+import type { BoardPage } from "../board";
 import { recordedBoard, recordedToday } from "../board/recorded/board";
 import { recordedCatalogue } from "../board/recorded/catalogue";
 import { recordedJob, recordedRatedJob } from "../board/recorded/job";
@@ -26,8 +27,15 @@ import { stylesheet } from "../widgets/sheet";
 
 const params = new URLSearchParams(location.search);
 
-/** Marina Bay: 24-hour, day-month, Asia/Qatar — the frames' own form. */
-const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
+/**
+ * Marina Bay: 24-hour, day-month, Asia/Qatar — the frames' own form.
+ *
+ * `?locale=none` is the checklist's `NL` state: a property whose locale and zone
+ * are not established, which §11 draws as ISO, 24-hour, marked UTC.
+ */
+const PROPERTY = params.get("locale") === "none"
+  ? { timezone: null, locale: null }
+  : { timezone: "Asia/Qatar", locale: "en-GB" };
 
 const GRANTS = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel", "job.amend", "job.configure", "job.curate"];
 
@@ -68,6 +76,25 @@ function list<T>(rows: readonly T[], single: number): readonly T[] {
 }
 
 /**
+ * The Board in each of the checklist's five list states.
+ *
+ * The recorded page is 12 rows of a 47-row list, so the other states are built
+ * from it and say so: `last` is page 4 of 4 (11 rows — §6's short last page),
+ * `barren` a page past the rows (0 rows, 47 in the list — an empty page of a
+ * non-empty list). Absent is the full first page.
+ */
+function boardFor(state: string | null): BoardPage {
+  const recorded = recordedBoard;
+  switch (state) {
+    case "empty": return { rows: [], paging: { ...recorded.paging, total: 0 } };
+    case "single": return { rows: recorded.rows.slice(0, 5), paging: { ...recorded.paging, total: 5 } };
+    case "last": return { rows: recorded.rows.slice(0, 11), paging: { ...recorded.paging, page: 3 } };
+    case "barren": return { rows: [], paging: { ...recorded.paging, page: 4 } };
+    default: return recorded;
+  }
+}
+
+/**
  * `&only=<method>` — refuse that one call and answer the rest.
  *
  * For the placement 64b does not draw: the Board's figures strip (`today`)
@@ -88,10 +115,7 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
       const answers: Record<string, unknown> = {
         me: recordedMe,
         today: recordedToday,
-        board: DATA === null ? recordedBoard : {
-          rows: list(recordedBoard.rows, 5),
-          paging: { ...recordedBoard.paging, total: list(recordedBoard.rows, 5).length },
-        },
+        board: boardFor(DATA),
         job: params.get("job") === "rated"
           ? recordedRatedJob
           : params.get("granted") === "none"
@@ -100,7 +124,7 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
             ? { ...recordedJob, row: { ...recordedJob.row, viewerIsAssignee: false } }
             : recordedJob,
         live: DATA === null ? recordedLive : { ...recordedLive, departments: list(recordedLive.departments, 1) },
-        scheduled: list(recordedScheduled, 2),
+        scheduled: { rows: list(recordedScheduled, 2), paging: { page: 0, pageSize: 12, total: list(recordedScheduled, 2).length } },
         catalogue: DATA === null ? recordedCatalogue : { ...recordedCatalogue, categories: list(recordedCatalogue.categories, 2) },
         settings: recordedSettings,
         jobsNow: widget === "quiet" ? recordedQuiet : widget === "mine" ? recordedMine : recordedEscalated,
@@ -261,7 +285,7 @@ async function drive(): Promise<void> {
   // the screen's back.
   // A failing board has no row to open — the drive is skipped rather than
   // recorded as a miss, because the miss would be the audit's own doing.
-  if ((screen === null || screen === "Board") && (FAIL === null || ONLY !== null) && DATA !== "empty") {
+  if ((screen === null || screen === "Board") && (FAIL === null || ONLY !== null) && DATA !== "empty" && DATA !== "barren") {
     if (params.get("open") === null) {
       click(".num", "MRN-ENG-142");
       await settle();

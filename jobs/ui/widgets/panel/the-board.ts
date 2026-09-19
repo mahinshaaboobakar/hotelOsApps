@@ -5,7 +5,7 @@
  * exactly as drawn.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -26,10 +26,10 @@ export async function theBoard(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.raised), label: "new", tone: "" },
-      { value: String(now.running), label: "in progress", tone: "run" },
-      { value: String(now.onHold), label: "on hold", tone: "warn" },
-      { value: String(now.doneToday), label: "done", tone: "ok" },
+      { value: formatNumber(now.raised, host.property), label: "new", tone: "" },
+      { value: formatNumber(now.running, host.property), label: "in progress", tone: "run" },
+      { value: formatNumber(now.onHold, host.property), label: "on hold", tone: "warn" },
+      { value: formatNumber(now.doneToday, host.property), label: "done", tone: "ok" },
     ]),
     el("div", "wquiet", "Longest in NEW — nobody has taken these"),
   ];

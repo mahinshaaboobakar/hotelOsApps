@@ -11,11 +11,10 @@
  * standard alone.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { choose, day, lines, saying, text, toggle, values } from "../../chrome/form";
-import { when } from "../../chrome/instant";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
 import { failure } from "../../chrome/failure";
 import { act, type Catalogue, type CatalogueItem } from "../../board";
@@ -35,7 +34,7 @@ export async function raise(host: HostApi, main: HTMLElement, onDone: () => void
   const form = el("div", "cols");
   const said = saying();
 
-  form.append(left(catalogue), right(host, catalogue));
+  form.append(left(catalogue, host.property), right(host, catalogue));
 
   const actions = el("div", "row");
   actions.append(
@@ -95,14 +94,14 @@ async function raiseIt(
   return true;
 }
 
-function left(catalogue: Catalogue): HTMLElement {
+function left(catalogue: Catalogue, property: PropertyEnvironment): HTMLElement {
   return fill(
     el("div"),
     // Typed rather than picked: the picker is Master Data's location tree, and
     // no client reaches it from a module yet. Named as what it is rather than
     // drawn as a chooser that cannot choose.
     text("Where · location id", "locationId", "the location this is about"),
-    choose("What", "itemId", catalogue.items.map((item) => ({ value: item.id, label: label(item) }))),
+    choose("What", "itemId", catalogue.items.map((item) => ({ value: item.id, label: label(item, property) }))),
     text("Summary", "summary", "One line: what is wrong"),
     lines("Details · optional", "details", "Anything the technician should know first"),
   );
@@ -128,9 +127,13 @@ function left(catalogue: Catalogue): HTMLElement {
 function follows(host: HostApi, item: CatalogueItem | undefined): HTMLElement {
   if (item === undefined) return el("div", "hint mono", "Choose an item and its department, priority and time appear here.");
 
-  const due = item.dueWithinMinutes === null
-    ? null
-    : new Date(Date.now() + item.dueWithinMinutes * 60_000).toISOString();
+  // **The allowance, not a clock time** — standard §11 (checklist I3, I5):
+  // machine time is for machine facts, and an elapsed or projected figure comes
+  // from the service. This drew `now + allowance` from THIS machine's clock as a
+  // due time, for a job that does not exist yet — a clock the desk does not
+  // own, predicting a stored value the service's policy chain decides. The frame
+  // annotates the allowance itself, "within 60 min", and so does this.
+  const minutes = item.dueWithinMinutes;
 
   return fill(
     el("div"),
@@ -138,10 +141,10 @@ function follows(host: HostApi, item: CatalogueItem | undefined): HTMLElement {
     shown("Priority", item.defaultPriority, "the item's default · you may override"),
     shown(
       "Due",
-      due === null ? "no allowance on this item" : when(host, due),
-      due === null
+      minutes === null ? "no allowance on this item" : `within ${formatNumber(minutes, host.property)} min`,
+      minutes === null
         ? "the item sets no time; the service's policy chain decides"
-        : `the item allows ${String(item.dueWithinMinutes)} min · the service's policy chain decides the stored due`,
+        : "the item's allowance · the service's policy chain decides the stored due",
     ),
   );
 }
@@ -178,7 +181,7 @@ function right(host: HostApi, catalogue: Catalogue): HTMLElement {
   );
 }
 
-function label(item: CatalogueItem): string {
-  const clock = item.dueWithinMinutes === null ? "no clock" : `${String(item.dueWithinMinutes)} min`;
+function label(item: CatalogueItem, property: PropertyEnvironment): string {
+  const clock = item.dueWithinMinutes === null ? "no clock" : `${formatNumber(item.dueWithinMinutes, property)} min`;
   return `${item.department} › ${item.name} · ${item.defaultPriority} · ${clock}`;
 }

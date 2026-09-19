@@ -14,7 +14,7 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { recordedBoard, recordedToday } from "../board/recorded/board";
 import { recordedCatalogue } from "../board/recorded/catalogue";
 import { recordedJob } from "../board/recorded/job";
-import { recordedLive, recordedScheduled } from "../board/recorded/live";
+import { recordedLive, recordedScheduledPage } from "../board/recorded/live";
 import { recordedSettings } from "../board/recorded/settings";
 
 const ALL = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel", "job.amend", "job.configure", "job.curate"];
@@ -22,7 +22,7 @@ const ALL = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel
 export function host(): HostApi {
   const answers: Record<string, unknown> = {
     today: recordedToday, board: recordedBoard, job: recordedJob, live: recordedLive,
-    scheduled: recordedScheduled, catalogue: recordedCatalogue, settings: recordedSettings,
+    scheduled: recordedScheduledPage, catalogue: recordedCatalogue, settings: recordedSettings,
   };
 
   return {

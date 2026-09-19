@@ -4,8 +4,10 @@
  * flow that creates one, ending in the ladder builder.
  */
 
-import { control, el, fill } from "../../chrome/element";
-import { counted, pager } from "../../chrome/tabs";
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
+import { control, el, fill, unavailable } from "../../chrome/element";
+import { pager } from "../../chrome/tabs";
 import { priority } from "../../chrome/marks";
 import type { PolicyRow, Settings } from "../../board";
 
@@ -45,18 +47,25 @@ export function concernPolicy(s: Settings, configure: boolean, onView: (view: st
   (nt.lastElementChild as HTMLElement).setAttribute("colspan", "6");
   t.append(nt);
   box.append(t, el("div", "mono", "Outside presence: P1 keeps running · P2 and P3 pause until the department is present."));
-  if (configure) box.append(fill(el("div", "row"), control("btn pri", "Save"), control("btn", "Discard")));
+  // Nothing sends this clock yet — drawn off with the reason (§2, C11). It was a
+  // live Save and Discard with no action behind either.
+  if (configure) box.append(fill(el("div", "row"), unavailable("Save", "Editing a policy's clock is not built yet — a new policy is the way to change one.")));
   return fill(grid, rail(s), box);
 }
 
 /** Frame 7 — every policy this property has, nested by scope. */
-export function policies(s: Settings, configure: boolean, onView: (view: string) => void): HTMLElement {
+export function policies(
+  s: Settings,
+  configure: boolean,
+  onView: (view: string) => void,
+  property: PropertyEnvironment,
+): HTMLElement {
   // `.list`: this list sits inside Settings' tab, one level below the body, so
   // it is its own growing column — without it the pager sat under the last row.
   const root = el("div", "list");
   const top = el("div", "row");
   if (configure) top.append(control("btn pri", "＋ New policy", () => onView("1")));
-  top.append(el("span", "mono", `${String(s.policies.length)} policies · a job uses the most specific one that matches it`), fill(el("span", "grow"), control("btn sm", "Engineering's clock", () => onView("engineering"))));
+  top.append(el("span", "mono", `${formatNumber(s.policies.length, property)} policies · a job uses the most specific one that matches it`), fill(el("span", "grow"), control("btn sm", "Engineering's clock", () => onView("engineering"))));
   const t = el("table");
   const head = el("tr");
   for (const h of ["Scope", "Policy name", "Due · P1 / P2 / P3", "At risk", "Ladder (P1)", "Used by", ""]) head.append(el("th", undefined, h));
@@ -65,7 +74,7 @@ export function policies(s: Settings, configure: boolean, onView: (view: string)
   // `.tbl` round the table and the shared wording, as every Jobs list has them
   // since 2026-09-19 (standard §6, CORE-Q28) — this read `1–0 of 0` when empty.
   return fill(root, top, fill(el("div", "tbl"), t), pager(
-    counted(1, s.policies.length, s.policies.length), 0, 1, () => {}));
+    { page: 0, pageSize: Math.max(1, s.policies.length), total: s.policies.length }, s.policies.length, () => {}, property));
 }
 
 function policyLine(p: PolicyRow, configure: boolean): HTMLElement {
@@ -89,7 +98,9 @@ export function policyFlow(s: Settings, step: "1" | "2" | "3", onView: (view: st
   root.append(steps);
   if (step === "1") root.append(scopeStep(), fill(el("div", "row"), control("btn pri", "Next · the clock", () => onView("2")), control("btn", "Cancel", () => onView("list"))));
   else if (step === "2") root.append(clockStep(s), fill(el("div", "row"), control("btn pri", "Next · the ladder", () => onView("3")), control("btn", "Back", () => onView("1"))));
-  else root.append(ladderStep(), fill(el("div", "row"), control("btn pri", "Save policy", () => onView("list")), control("btn", "Back", () => onView("2"))));
+  // "Save policy" returned to the list and saved nothing — a primary that
+  // promised a write. Drawn off with its reason until a write path exists (§2, C11).
+  else root.append(ladderStep(), fill(el("div", "row"), unavailable("Save policy", "Saving a new policy is not built yet."), control("btn", "Back", () => onView("2"))));
   return root;
 }
 
@@ -155,6 +166,6 @@ function ladderStep(): HTMLElement {
   }
   const dlg = el("div", "dlg");
   dlg.append(el("h3", undefined, "Add a step to P1"), el("label", "lbl", "Role"), el("div", "field", "Department manager ▾"), el("label", "lbl", "Becomes accountable"), el("div", "field", "when breached ▾ + 15 min"),
-    fill(el("div", "row"), control("btn pri", "Add"), control("btn", "Cancel")));
+    fill(el("div", "row"), unavailable("Add", "Adding a step is not built yet.")));
   return fill(el("div"), grid, dlg, el("div", "mono", "Stuck goes straight to the supervisor for every priority. If a step's role has nobody today, the sweep moves one step up and records why."));
 }

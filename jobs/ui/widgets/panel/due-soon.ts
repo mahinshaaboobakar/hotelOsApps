@@ -14,7 +14,7 @@
  * This follows the corrected drawing: late first, furthest past due at the top.
  */
 
-import { load, type HostApi } from "@hotelos/sdk";
+import { formatNumber, load, type HostApi } from "@hotelos/sdk";
 
 import { el } from "../../chrome/element";
 import { failedCard } from "../failed";
@@ -35,8 +35,8 @@ export async function dueSoon(host: HostApi): Promise<HTMLElement> {
 
   const body: (Node | null)[] = [
     figures([
-      { value: String(now.overdue), label: "overdue", tone: "bad" },
-      { value: String(now.dueWithinTwoHours), label: "due within 2h", tone: "warn" },
+      { value: formatNumber(now.overdue, host.property), label: "overdue", tone: "bad" },
+      { value: formatNumber(now.dueWithinTwoHours, host.property), label: "due within 2h", tone: "warn" },
     ]),
   ];
 

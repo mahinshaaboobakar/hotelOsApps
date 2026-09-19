@@ -1,3 +1,5 @@
+import { formatNumber } from "@hotelos/sdk";
+
 /**
  * The Work tab — frame 2b: the clock now, and the sessions table. PAUSED lives
  * here and is never a job status (S2 D2).
@@ -48,7 +50,7 @@ function sessions(host: HostApi, list: readonly Session[]): HTMLElement {
   for (const s of list) {
     const tr = el("tr");
     tr.append(
-      el("td", undefined, String(s.no)), el("td", undefined, s.who), el("td", undefined, when(host, s.startedAt)),
+      el("td", undefined, formatNumber(s.no, host.property)), el("td", undefined, s.who), el("td", undefined, when(host, s.startedAt)),
       el("td", undefined, s.pausedAt === null ? "—" : `${when(host, s.pausedAt)} · ${s.pauseReason ?? ""}`),
       el("td", undefined, s.resumedAt === null ? "—" : when(host, s.resumedAt)),
       fill(el("td"), s.stoppedAt === null ? el("span", "pill run", "running") : document.createTextNode(when(host, s.stoppedAt))),

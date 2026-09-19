@@ -52,10 +52,27 @@ describe("the module's token references", () => {
     expect(injected.size).toBe(TOKEN_NAMES.length);
   });
 
-  it("names only tokens the shell publishes", () => {
+  it("names only tokens the shell publishes — or its own, derived from them", () => {
+    // Standard §1 (checklist P1): "every var(--x) is in TOKEN_NAMES or is an
+    // app-local name DERIVED from published ones". Narrowed 2026-09-19 for
+    // --accent, which §2 (C2) itself asks for: the primary fill "written once,
+    // as --accent, and derived". An own name passes only when this module
+    // DECLARES it and every var() in that declaration is a published token.
     const published = new Set<string>([...TOKEN_NAMES, "font-sans"]);
-    const unknown = [...referenced()].filter((name) => !published.has(name));
+    const own = new Map<string, string>();
+    for (const file of sheets(".")) {
+      for (const match of readFileSync(join(root, file), "utf8").matchAll(/--([a-z0-9-]+)\s*:([^;}]+)/g)) {
+        if (match[1] !== undefined && !published.has(match[1])) own.set(match[1], match[2] ?? "");
+      }
+    }
+
+    const unknown = [...referenced()].filter((name) => !published.has(name) && !own.has(name));
     expect(unknown).toEqual([]);
+
+    for (const [name, value] of own) {
+      const uses = [...value.matchAll(/var\(--([a-z0-9-]+)/g)].map((m) => m[1] ?? "");
+      expect(uses.filter((used) => !published.has(used)), `--${name} derives only from published tokens`).toEqual([]);
+    }
   });
 
   it("falls back to the platform's values, never the drawing's", () => {

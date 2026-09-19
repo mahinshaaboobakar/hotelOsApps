@@ -51,7 +51,10 @@ describe("§2's control vocabulary, walked", () => {
     // check is the general one, because the next second base class will have a
     // name nobody listed. Every element that acts is a `.btn` or is one of the
     // three the chrome names for a reason.
-    const allowed = new Set(["btn", "tab", "pg", "chip", "num", "pick", "pri", "sm", "on", "off", "danger", "confirm"]);
+    // `opener` joined 2026-09-19: the Board row's opener is §2's C8 case — "a row
+    // that opens something is a real <button>, and the reset lives on the class"
+    // — a button drawn as the text it replaces, not a second button geometry.
+    const allowed = new Set(["btn", "tab", "pg", "chip", "num", "pick", "pri", "sm", "on", "off", "danger", "confirm", "opener"]);
     const strangers: string[] = [];
 
     for (const screen of SCREENS) {
