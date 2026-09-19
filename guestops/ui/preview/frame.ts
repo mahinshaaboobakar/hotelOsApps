@@ -167,7 +167,6 @@ const PAGED: Record<string, { key: string; size: (params: unknown) => number }> 
   bookings: { key: "rows", size: sized(25) },
   attention: { key: "cards", size: sized(10) },
   booking: { key: "stays", size: () => 12 },
-  availability: { key: "types", size: sized(12) },
 };
 
 function sized(fallback: number): (params: unknown) => number {

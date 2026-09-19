@@ -321,8 +321,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "NewBooking") {
-      void newBooking(host, main, where.page, (page) => show({ page }), () =>
-        show({ overlay: "walkin" }))
+      void newBooking(host, main, () => show({ overlay: "walkin" }))
         .then(overlay);
       return;
     }

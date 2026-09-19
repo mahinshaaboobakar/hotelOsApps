@@ -47,13 +47,22 @@ describe("the pager's placement", () => {
   /**
    * **Scoped, and this is the half that matters.**
    *
-   * Frame 14's availability table is followed by a note and two cards. A table
-   * that grew there would push them off the screen, so the rule is *a list with
-   * a pager*, never *a table* — and an unscoped `.tbl{flex:1}` is the obvious
-   * thing for the next person to write.
+   * Frame 14's availability table was followed by a note and two cards (removed
+   * by the owner's ruling on New booking, 2026-09-19); a booking's stays and the
+   * activity list still sit among other content. So the rule is *a list with a
+   * pager* or *a body declared unpaged*, never *a table* — and an unscoped
+   * `.tbl{flex:1}` is the obvious thing for the next person to write.
    */
   it("does not make every table take the free space", () => {
-    expect(CSS).not.toMatch(/[^:]\.tbl\{[^}]*flex:1/);
+    // `.tbl` as a whole selector — at the start of a rule — never as the last
+    // step of a scoped one (`.body.unpaged > .tbl` is scoped, and allowed).
+    const unscoped = /(?:^|[}\n])\s*\.tbl\{[^}]*flex:1/;
+    expect(CSS).not.toMatch(unscoped);
+
+    // Proven both ways, so a regex that matches nothing cannot pass for one
+    // that matches the right thing.
+    expect("}\n.tbl{flex:1 1 auto}").toMatch(unscoped);
+    expect("}\n.body.unpaged > .tbl{flex:1 1 auto}").not.toMatch(unscoped);
   });
 
   /**

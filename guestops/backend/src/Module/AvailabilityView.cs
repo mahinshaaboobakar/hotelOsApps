@@ -33,7 +33,6 @@ public sealed class AvailabilityView(
         RequestScope scope,
         DateOnly from,
         DateOnly to,
-        Paging.Window page,
         CancellationToken cancellationToken)
     {
         var days = await availability.GetAsync(scope, from, to, [], cancellationToken);
@@ -49,8 +48,10 @@ public sealed class AvailabilityView(
         {
             query = new
             {
-                arrive = from.ToString("d MMM"),
-                depart = to.ToString("d MMM"),
+                // ISO days — the screen formats them for the property (page 64
+                // §11). They were "d MMM" until 2026-09-19.
+                arrive = from.ToString("yyyy-MM-dd"),
+                depart = to.ToString("yyyy-MM-dd"),
 
                 // The party is the desk's own input and nothing here holds one
                 // yet. It is stated as the search this answer was computed for,
@@ -62,16 +63,13 @@ public sealed class AvailabilityView(
                 ? "PMS-connected — Opera writes the lifecycle"
                 : "Standalone — this property is the book",
 
-            // **Paged, though a catalogue feels bounded** — `64` §8, and the
-            // ruling behind it: *bounded by a natural key* is a property of
-            // today's data, not of the screen. A property with four hundred room
-            // types is a property this list silently truncates, and the count is
-            // information in its own right — a pager over eleven rows tells the
-            // desk that eleven is all there is.
-            total = byType.Count,
+            // **Every room type, unpaged — the owner's ruling on New booking,
+            // 2026-09-19 (G7).** This paged by `64` §8's reading that a list
+            // bounded by a natural key is still a list; the owner looked at the
+            // screen and decided the room types are shown whole, with only the
+            // list scrolling. No total either: with every row sent, the rows are
+            // the count.
             types = byType
-                .Skip(page.Page * page.PageSize)
-                .Take(page.PageSize)
                 .Select(type => Row(type, names))
                 .ToArray(),
         };

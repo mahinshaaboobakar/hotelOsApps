@@ -43,7 +43,9 @@ const SCREENS = [
   { name: "bookings", screen: "bookings", at: "bookings", paged: true },
   { name: "attention", screen: "attention", at: "attention", paged: true },
   { name: "booking", screen: "booking", at: "booking", paged: true },
-  { name: "newbooking", screen: "newbooking", at: "availability", paged: true },
+  // Unpaged since the owner's G7 ruling (2026-09-19): every room type, only
+  // the list scrolling.
+  { name: "newbooking", screen: "newbooking", at: "availability" },
   { name: "stay", screen: "stay", at: "stay" },
   { name: "stay-requests", screen: "requests", at: "requests", failAs: "stay" },
   { name: "stay-servicing", screen: "servicing", at: "servicing", failAs: "stay" },

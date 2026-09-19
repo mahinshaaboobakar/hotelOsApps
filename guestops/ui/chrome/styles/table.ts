@@ -137,6 +137,13 @@ export const TABLE = `
 .body:has(> .pager){flex:1 1 auto;min-height:0;overflow:hidden}
 .body:has(> .pager) > :has(+ .pager){flex:1 1 auto;min-height:0;overflow-y:auto;
   margin:0 -26px;padding:0 26px}
+.body.unpaged{flex:1 1 auto;min-height:0;overflow:hidden}
+/* A list shown whole, with no pager — New booking's room types (the owner's
+   ruling on that screen, 2026-09-19). Only the list scrolls, as CORE-Q28 has
+   every list do; the body is a flex column, so the table takes what the query
+   row leaves. */
+.body.unpaged > .tbl{flex:1 1 auto;min-height:0;overflow-y:auto;
+  margin:0 -26px;padding:0 26px}
 .psize{color:var(--color-ink-faint,#5a6172)}
 .pager{flex:0 0 auto;
   display:flex;justify-content:space-between;align-items:center;gap:9px;

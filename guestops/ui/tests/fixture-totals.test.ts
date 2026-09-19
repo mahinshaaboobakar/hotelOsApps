@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   recordedAttention,
-  recordedAvailability,
   recordedBooking,
   recordedGroup,
 } from "../book/recorded";
@@ -29,10 +28,6 @@ import {
 describe("a fixture claims only the rows it has", () => {
   it("attention", () => {
     expect(recordedAttention.total).toBe(recordedAttention.cards.length);
-  });
-
-  it("availability", () => {
-    expect(recordedAvailability.total).toBe(recordedAvailability.types.length);
   });
 
   it("a booking", () => {

@@ -72,7 +72,11 @@ const CLASSIFIED: Record<string, "paged" | "bounded"> = {
 
   attention: "paged",
   booking: "paged",
-  newbooking: "paged",
+  // Every room type, no pager — the owner's ruling on New booking, 2026-09-19
+  // (G7), made on the drawn options for this one screen. It was "paged" under
+  // `64` §8's reading; the owner decided otherwise with the screen in front of
+  // them.
+  newbooking: "bounded",
   stay: "bounded",
 };
 

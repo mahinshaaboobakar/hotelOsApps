@@ -40,23 +40,15 @@ export interface TypeAvailability {
 
 /** The dates and party a search was made for — frame 14's three fields. */
 export interface AvailabilityQuery {
-  /** `3 Sep` — what the field shows. */
+  /**
+   * The arrival day, ISO (`2026-09-03`) — the screen draws it in the
+   * property's form. Until 2026-09-19 the service sent it rendered, and the
+   * fixture carried a second, ISO copy (`arriveOn`) the service never sent.
+   */
   arrive: string;
 
-  /** `7 Sep`. */
+  /** The departure day, ISO. */
   depart: string;
-
-  /**
-   * The same two dates in ISO, which is what travels.
-   *
-   * Two representations of one date, deliberately: `3 Sep` is what a
-   * receptionist reads and is ambiguous about the year, and `2026-09-03` is
-   * what a server can parse. Deriving one from the other on either side would
-   * put date parsing in a screen — and a screen that guessed the year would
-   * quote availability for a date twelve months away.
-   */
-  arriveOn: string;
-  departOn: string;
 
   /** `1 room · 2 adults`. */
   party: string;
@@ -64,14 +56,6 @@ export interface AvailabilityQuery {
 
 /** The answer, and what was asked — frame 14. */
 export interface Availability {
-  /**
-   * How many rows the list holds in all — `64` §8's pager, not this page.
-   *
-   * A total taken from the rows in hand is a pager that says the list ends
-   * where the page does.
-   */
-  total: number;
-
   query: AvailabilityQuery;
 
   /** Null in a PMS-connected property, where the mode sentence differs. */

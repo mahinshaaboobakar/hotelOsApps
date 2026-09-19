@@ -238,7 +238,7 @@ public static class ModuleSurface
             ?? throw new InvalidRequestException("availability needs a departure date");
 
         return services.GetRequiredService<AvailabilityView>()
-            .AnswerAsync(request.Scope, from, to, Page(request.Body), cancellationToken);
+            .AnswerAsync(request.Scope, from, to, cancellationToken);
     }
 
     /// <summary>Which stay the bundle is asking about.</summary>

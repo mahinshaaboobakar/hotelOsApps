@@ -15,12 +15,9 @@ import type { Availability, RoomConflict, WalkInDraft } from "../model";
  * is why GUEST-Q7 needed no new inventory owner.
  */
 export const recordedAvailability: Availability = {
-  total: 3,
   query: {
-    arrive: "3 Sep",
-    depart: "7 Sep",
-    arriveOn: "2026-09-03",
-    departOn: "2026-09-07",
+    arrive: "2026-09-03",
+    depart: "2026-09-07",
     party: "1 room · 2 adults",
   },
   mode: "Standalone — this property is the book",

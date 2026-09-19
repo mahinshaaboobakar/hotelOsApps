@@ -35,7 +35,6 @@ public sealed class RenderedDateGuardTests
     private static readonly Dictionary<string, int> NotYetConverted = new()
     {
         ["AttentionView.cs"] = 1,
-        ["AvailabilityView.cs"] = 2,
         ["BookingView.cs"] = 7,
         ["BookingsView.cs"] = 2,
         ["CancelPlanView.cs"] = 6,
