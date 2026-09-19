@@ -17,33 +17,105 @@ import type { Call } from "./host";
  * being shown): pressing what is already chosen changes nothing, correctly.
  * That exemption is why a choice with no alternative is tested on its own
  * below — the walk cannot see it. The places are `tests/places.ts`'s, shared with
- * the developer-content walk.
+ * the developer-content walk, and include a room's page and the door, which are
+ * reached by navigating rather than by a sheet.
+ *
+ * Widened on 2026-09-19 after HH's Jobs guard (be1c6730) passed tabs wired to
+ * `() => {}`. It already asked for an effect, not a handler; what it lacked was
+ * depth and inputs. Now every button inside whatever a press opens is pressed too,
+ * each from a fresh mount; text fields are filled before every press, so a Cancel
+ * has something to clear; and a field's value or where focus is counts as an
+ * effect. "The walk itself" below proves it tells a dead handler from a live one.
+ * First run: the door's End… sheet drew its chosen ending without `aria-pressed`.
  */
+/** The text fields a press could act on: filled before each press, so a Cancel or a Clear has something to clear. */
+function fill(root: HTMLElement): void {
+  for (const field of root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+    "input:not([type=checkbox]):not([type=radio]):not([type=date]):not([type=number]):not([type=time]), textarea")) field.value = "typed for the test";
+}
+
+/** Everything a press could change that a person would notice: the page, a field's value, where focus is, a request. */
+function state(root: HTMLElement, calls: Call[]): string {
+  const values = [...root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>("input, textarea, select")].map((f) => f.value).join("");
+  return [root.innerHTML, values, document.activeElement?.outerHTML ?? "", String(calls.length)].join("");
+}
+
+/** Press a button and say whether anything observable followed — never whether it merely has a handler (HH, be1c6730). */
+async function acts(root: HTMLElement, calls: Call[], button: HTMLButtonElement): Promise<boolean> {
+  fill(root);
+  const before = state(root, calls);
+  let scrolled = false;
+  const scroll = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = () => { scrolled = true; };
+  button.click();
+  await settle();
+  Element.prototype.scrollIntoView = scroll;
+  return scrolled || state(root, calls) !== before;
+}
+
+/** The enabled buttons in whatever a press opened — a sheet, a dialog, a confirmation. */
+function opened(root: HTMLElement): HTMLButtonElement[] {
+  return [...root.querySelectorAll<HTMLButtonElement>(".scrim button")].filter((b) => !b.hasAttribute("disabled"));
+}
+
 describe("every control a person can press", () => {
-  for (const [place, capabilities, section, tab] of PLACES) {
-    it(`does something when pressed — ${place}`, async () => {
-      const count = pressable(await reach(capabilities, section, tab, [])).length;
+  for (const [place, capabilities, section, tab, into] of PLACES) {
+    it(`does something when pressed — ${place}, and in everything a press opens`, async () => {
+      const count = pressable(await reach(capabilities, section, tab, [], into)).length;
       expect(count, "the walk found no controls; it is not measuring this place").toBeGreaterThan(0);
       const dead: string[] = [];
+      let inner = 0;
       for (let i = 0; i < count; i += 1) {
         const calls: Call[] = [];
-        const root = await reach(capabilities, section, tab, calls);
+        const root = await reach(capabilities, section, tab, calls, into);
         const button = pressable(root)[i];
-        if (button === undefined) continue;
-        if (current(button)) continue;
-        const before = root.innerHTML;
-        const made = calls.length;
-        let scrolled = false;
-        const scroll = Element.prototype.scrollIntoView;
-        Element.prototype.scrollIntoView = () => { scrolled = true; };
-        button.click();
-        await settle();
-        Element.prototype.scrollIntoView = scroll;
-        if (calls.length === made && root.innerHTML === before && !scrolled) dead.push(`${i}: "${button.textContent?.trim()}"`);
+        if (button === undefined || current(button)) continue;
+        const label = button.textContent?.trim() ?? "";
+        if (!(await acts(root, calls, button))) dead.push(`${i}: "${label}"`);
+        // Whatever that press opened is walked too, each of its buttons from a fresh mount and a fresh first press.
+        const within = opened(root).length;
+        for (let j = 0; j < within; j += 1) {
+          const again: Call[] = [];
+          const fresh = await reach(capabilities, section, tab, again, into);
+          const first = pressable(fresh)[i];
+          if (first === undefined) continue;
+          first.click();
+          await settle();
+          const target = opened(fresh)[j];
+          if (target === undefined || current(target)) continue;
+          inner += 1;
+          if (!(await acts(fresh, again, target))) dead.push(`${i}: "${label}" → "${target.textContent?.trim()}"`);
+        }
       }
-      expect(dead, `looks live and does nothing on ${place}`).toEqual([]);
-    }, 60_000);
+      expect(dead, `looks live and does nothing on ${place} (${inner} controls pressed inside what opened)`).toEqual([]);
+    }, 180_000);
   }
+});
+
+describe("the walk itself", () => {
+  // A walk that cannot tell a dead button from a live one passes everything. Planted: a button whose handler exists
+  // and does nothing (HH's Jobs tabs, be1c6730), a Cancel that clears a filled field, one that moves focus, and one
+  // that makes a request. Only the first may read as dead.
+  it("tells a handler that does nothing from a press that changes something", async () => {
+    const root = document.createElement("div");
+    document.body.replaceChildren(root);
+    const field = document.createElement("input");
+    root.append(field);
+    const make = (text: string, onClick: () => void): HTMLButtonElement => {
+      const b = document.createElement("button");
+      b.textContent = text;
+      b.addEventListener("click", onClick);
+      root.append(b);
+      return b;
+    };
+    const calls: Call[] = [];
+    const nothing = make("Tab", () => {});
+    const clears = make("Cancel", () => { field.value = ""; });
+    const focuses = make("Next", () => field.focus());
+    const asks = make("Save", () => { calls.push({ capability: "roomcare.configure", method: "savePolicy", params: {} }); });
+    expect([await acts(root, calls, nothing), await acts(root, calls, clears), await acts(root, calls, focuses), await acts(root, calls, asks)])
+      .toEqual([false, true, true, true]);
+  });
 });
 
 describe("a choice with nothing to choose between", () => {

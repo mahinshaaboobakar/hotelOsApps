@@ -32,6 +32,10 @@ export const DEVELOPER_CONTENT: readonly (readonly [string, RegExp])[] = [
   ["a code identifier", /\b[a-z]+(?:_[a-z]+)+\b/g],
   ["a correlation id", /\bcorrelation ids?\b/gi],
   ["a platform system", /\b(?:Master Data|Kernel|OpenFGA|Context Service|Integration Hub)\b/g],
+  // What the wire carries and a person cannot read (owner, 2026-09-19: "never raw ids"; page 64 §11). From Jobs'
+  // local RAW list (HH, be1c6730), which found both on its jobs-manager list; moved here so every app inherits it.
+  ["a raw id", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi],
+  ["an unformatted instant", /\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/g],
 ];
 
 /** Every developer citation in `text`, each as "what it is: the text found". */

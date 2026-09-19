@@ -83,9 +83,11 @@ function end(host: HostApi, nav: Nav, v: Door): void {
   for (const [label, value] of [["Done", "DONE"], ["Partial", "PARTIAL"], ["Declined by guest", "DECLINED"], ["DND board", "DND"]] as const) {
     const button = control(value === found ? "btn chip on" : "btn chip", label, () => {
       found = value;
-      choice.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === button));
+      choice.querySelectorAll("button").forEach((b) => { b.classList.toggle("on", b === button); b.setAttribute("aria-pressed", String(b === button)); });
       partsRow.style.display = found === "PARTIAL" ? "flex" : "none";
     });
+    // The chosen ending is announced, not only coloured, as `chip()` does: a screen reader hears which is chosen.
+    button.setAttribute("aria-pressed", String(value === found));
     choice.append(button);
   }
   for (const part of v.partialParts) {

@@ -15,14 +15,14 @@ import { PLACES, pressable, reach } from "./places";
  * and a confirmation are read too — the walk reaches whatever a person can reach by pressing once.
  */
 describe("developer content", () => {
-  for (const [place, capabilities, section, tab] of PLACES) {
+  for (const [place, capabilities, section, tab, into] of PLACES) {
     it(`none on ${place}, or on anything one press away`, async () => {
       const found = new Set<string>();
-      const first = await reach(capabilities, section, tab, []);
+      const first = await reach(capabilities, section, tab, [], into);
       for (const hit of developerContent(readableText(first))) found.add(`as it opens — ${hit}`);
       const count = pressable(first).length;
       for (let i = 0; i < count; i += 1) {
-        const root = await reach(capabilities, section, tab, []);
+        const root = await reach(capabilities, section, tab, [], into);
         const button = pressable(root)[i];
         if (button === undefined) continue;
         const label = button.textContent?.trim() ?? "";
@@ -42,10 +42,10 @@ describe("developer content", () => {
   });
 
   it("finds each shape it names — a positive control, so a clean walk is not a blind one", () => {
-    const planted = "WF-Q18 · ADR 0044 · design §6 · (S5 c4) · (row 7) · Chapter 21 · roomcare_manager · a correlation id · Master Data";
+    const planted = "WF-Q18 · ADR 0044 · design §6 · (S5 c4) · (row 7) · Chapter 21 · roomcare_manager · a correlation id · Master Data · 0192f100-0000-7000-8000-000000000003 · 2026-09-19T08:30";
     expect(developerContent(planted).map((hit) => hit.split(": ")[0])).toEqual([
       "a decision-register id", "an ADR", "a section sign", "a design-section reference", "a design-row reference",
-      "a chapter reference", "a code identifier", "a correlation id", "a platform system",
+      "a chapter reference", "a code identifier", "a correlation id", "a platform system", "a raw id", "an unformatted instant",
     ]);
   });
 });

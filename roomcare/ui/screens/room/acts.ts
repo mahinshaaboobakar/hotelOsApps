@@ -21,8 +21,10 @@ export function roomState(host: HostApi, nav: Nav, room: BoardRoom): void {
   for (const [label, word] of [["Guest arrived", "ARRIVED"], ["Guest departed", "DEPARTED"], ["Occupied", "IN_HOUSE"], ["Vacant", "NONE"]] as const) {
     const button = control("btn chip", label, () => {
       stay = word;
-      choices.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b === button));
+      choices.querySelectorAll("button").forEach((b) => { b.classList.toggle("on", b === button); b.setAttribute("aria-pressed", String(b === button)); });
     });
+    // Nothing is chosen until the person chooses; the choice is announced, not only coloured, as `chip()` does.
+    button.setAttribute("aria-pressed", "false");
     choices.append(button);
   }
   const arrival = el("input", "field") as HTMLInputElement;

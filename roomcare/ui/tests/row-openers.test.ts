@@ -22,10 +22,10 @@ describe("rows that open something", () => {
   it("each carry exactly one real button, holding the row's key text", async () => {
     let rows = 0;
     const missing: string[] = [];
-    for (const [place, capabilities, section, tab] of PLACES) {
-      const root = await reach(capabilities, section, tab, []);
+    for (const [place, capabilities, section, tab, into] of PLACES) {
+      const root = await reach(capabilities, section, tab, [], into);
       // The Board opens on the Map; its Wall is a list of rows, so it is visited too.
-      if (section === "Board") {
+      if (section === "Board" && into === null) {
         click(root, ".chips button", "Wall");
         await settle();
       }
