@@ -14,6 +14,11 @@ namespace HotelOS.RoomCare.Domain;
 /// §7.3 guarantee holds unchanged: there is no UTC hour anywhere in Room Care,
 /// only a property's own setting.
 /// </para>
+/// <para>
+/// <b>That reason is under review with the planner (WF-Q21, alongside AUTHZ-Q18b), 2026-09-19</b>: GuestOps now calls
+/// <c>GetOperatingDay</c>, and ADR 0210 fixed that call, so "an installed application cannot call Context" may no
+/// longer hold. Nothing changes until the ruling; do not read this copy as settled.
+/// </para>
 /// </remarks>
 public static class OperatingDay
 {
