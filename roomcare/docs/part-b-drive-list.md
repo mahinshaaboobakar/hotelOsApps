@@ -1,13 +1,14 @@
 # Room Care Part B — the drive list
 
-Prepared 2026-09-19 by KK against `HotelOsApps` at `105cb24` and platform
-`HosPilotOS` at `8fa9de0c`, for the run after the owner installs
-**`roomcare-0.1.1.hopkg`** — 16,721,717 bytes, sha256
-`29bb38a08ab2c27ac5ac1fc745be798a05086e25415dcb00e3cc2388060eeea0`, signed by
+Prepared 2026-09-19 by KK against `HotelOsApps` at `1800ce7` and platform
+`HosPilotOS` at `999b022f` (module contract v2, `d45f028d`), for the run after
+the owner installs **`roomcare-0.1.2.hopkg`**: 16,727,377 bytes, sha256
+`7b7b6ec08479c6fca474b64b033413cfb3aac5c96a86b036c9bca371fdc00a6f`, signed by
 `dev-local`, staged in `%LOCALAPPDATA%\HotelOS\packages\registry` on the
-owner's machine. Its UI bundles are the bytes Part A measured at `71ff149`.
-(0.1.0, built before Part A's style moves, was staged, never installed, and
-removed.) **Nothing below has been run yet; every result cell is empty
+owner's machine. Its UI bundles are the bytes Part A measured at `89777a1`.
+Neither 0.1.0 (built before Part A's style moves) nor 0.1.1 (built before
+the second set and contract v2) was ever installed. Each was staged and then
+removed, so no version names two builds. **Nothing below has been run yet; every result cell is empty
 on purpose.** The shape is FF's (`guestops/docs/part-b-drive-list.md`), so the
 two certificates read alike.
 
@@ -57,7 +58,7 @@ works.
 
 ## Preconditions, checked at the start and quoted
 
-1. Software Center lists **Room Care 0.1.1, Running**.
+1. Software Center lists **Room Care 0.1.2, Running**.
 2. The signed-in user is admin on the property: the Board answers rather than
    drawing *Not permitted*. A refusal there ends the run as a precondition
    failure, not twenty failed rows.
@@ -118,7 +119,9 @@ lists proves the pipe and not the logic, and will say so.
 | D3 | `clearDisagreement` · `decide` · `saveStates` | **BLOCKED — ADR 0193 (ruled, unbuilt)** — asked on the room's latest task |
 
 Each is driven once to capture the refusal as evidence, and read back as
-unchanged; none is scored.
+unchanged; none is scored. Under contract v2 the screen names the refusal's
+cause. The row records the cause drawn (*not admitted*, *not granted*, or
+*model cannot answer*) exactly as drawn, without predicting it.
 
 ## E · The attendant's acts — `room.clean`, riding the assignment
 

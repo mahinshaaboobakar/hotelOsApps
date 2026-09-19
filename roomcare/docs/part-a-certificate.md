@@ -1,9 +1,13 @@
 # Room Care Part A — frame beside capture
 
-Run 2026-09-19 by KK. **Built by the run, from `71ff149`, clean** — the
+Run 2026-09-19 by KK. **Built by the run, from `89777a1`, clean** — the
 provenance stamp `ui/.parta/provenance.json` names seven artifacts by digest,
-and the five widget bundles and `module.js` in **`roomcare-0.1.1.hopkg`**
-(sha256 `29bb38a0…0eeea0`) are those bytes, checked from inside the archive.
+and the five widget bundles and `module.js` in **`roomcare-0.1.2.hopkg`**
+(sha256 `7b7b6ec0…fdc00a6f`) are those bytes, checked from inside the archive.
+
+**Re-run after the owner chose the second set** (19f203c5, *"we can go with
+second"*). The build carries it from `86c504f`. The certificate before this
+one, from `71ff149` with 87 named differences, is in this file's history.
 
 ## Method
 
@@ -29,30 +33,56 @@ an unknown frame id                     run.mjs exits 2, naming the ids
 a run with one comparison missing       classify.mjs exits 2 — "20 of 21 frames compared"
 a build style changed (.card h3 → 15px) classify.mjs exits 1 — 2 UNCLASSIFIED on frame 7g
 the style restored                      frame 7g re-swept clean from 71ff149, exit 0
+the second set, old rules (f7ba0df)     classify.mjs exits 1 — 14 UNCLASSIFIED, all on 7b–7g
 ```
 
 ## Result
 
 ```text
-drawn 1,657 · built 1,566 · paired 377 (22.8% of drawn) · identical 290 · differing 87
-every one of the 87 is named; classify.mjs exits 0; 0 frames unreached
+drawn 1,657 · built 1,566 · paired 377 (22.8% of drawn) · identical 297 · differing 80
+every one of the 80 is named; classify.mjs exits 0; 0 frames unreached
 ```
 
 | Class | n | Moves | Why |
 |---|---|---|---|
-| page-redeclares-a-class | 24 | **adjudicate** | the screens page declares eleven classes twice, eight of them differently; the setup page once |
+| setup-page-first-set | 13 | **adjudicate** | the setup page declares `.mono .tag .pill` once, at the first set; the build carries the owner's second |
 | sticky-header-ground | 23 | neither | the wall's header sticks over the scrolling house; same pixels |
-| font-shorthand-line-height | 27 | drawing | the frame's `font:` shorthand resets line-height (64 §2's fourth reset) |
+| font-shorthand-line-height | 31 | drawing | the frame's `font:` shorthand resets line-height (64 §2's fourth reset) |
 | flex-blockified | 2 | neither | a span in a flex row computes block |
 | button-type-size | 2 | drawing | 64 §2 fixes `.btn` at 13px; the frame's `font:inherit` makes it 14 |
-| selected-row-example | 3 | neither | the frame draws a row selected; nothing is on arrival |
-| named, one each | 6 | 2 drawing · 3 adjudicate · 1 neither | in `classify.mjs`, with reasons |
+| selected-row-example | 2 | neither | the frame draws a row selected; nothing is on arrival |
+| named, one each | 7 | 2 drawing · 4 adjudicate · 1 neither | in `classify.mjs`, with reasons |
+
+### What the second set closed, and what remains
+
+- **Closed: all 24 `page-redeclares-a-class`**, the screens frames drawn at
+  the second set against a build at the first. 20 are now identical. 4 differ
+  only in line-height, because the frame's `.mono` is a `font:` shorthand, and
+  are counted under that rule (27 → 31).
+- **Five of those 24 were never about the redeclared classes.** The rule's
+  first clause did not check which other properties differed, so it absorbed
+  them. With `.mono` and `.pill` moved they showed, and the build moved to the
+  drawing (`f7ba0df`): Prepare's time cell is `.num`, not `.mono` (frame 2);
+  the states tables' blocked cell is `.mono`, not `.dim`, and a `td.mono`
+  there keeps 11px against `table.wall td` (4c ×2, 4e); the priority pill's
+  border is its fill colour (3b). *This certificate's earlier count of 24
+  therefore overstated the class question by five.*
+- **Remaining: 13 on the setup page, plus one second cause.** The move opened
+  them. `02-the-roomcare-setup.html` declares these classes once, at the
+  first values, and 01a drew the screens page only, so the owner's choice
+  did not address that page. They are `adjudicate` and not the drawing's to
+  move by assumption. The build has one sheet: either 02 is redrawn at the
+  second set, or Setup keeps the first set under its own scope. 7e's `lobby`
+  cell carries this and the selected-row example, so it is named on its own.
+- **The other named classes are unchanged**, and so is the paired share,
+  because the move changed values, not which nodes pair.
 
 **Moved in the build during the run**, because the drawing was consistent and
 the standard silent: the radio's bold at 700, the states tables' 4px rows, the
-widget scope at 13px, the *group by* label muted, the tag's first-declared
-padding, the card heading's mono aside at 400, the dock's labels at the
-first-declared mono (119 differences became 87).
+widget scope at 13px, the *group by* label muted, the card heading's mono
+aside at 400 (119 differences became 87). Then, after the owner's choice, the
+six classes to the second set (`86c504f`) and the three moves above
+(`f7ba0df`): 87 became 80.
 
 ## What this does not prove — read before quoting the 22.8%
 
@@ -76,16 +106,14 @@ rest and is recorded in chapter 03 §9.
 
 ## For the owner, drawn
 
-1. **The screens page contradicts itself.** Redline 5 added a second,
-   unscoped declaration of eleven classes — `.btn .note .num` identically, and
-   **eight differently**: `.pill .mono .chip .strip .tag .tilegrid .tile
-   .legend`, size and spacing only — which re-renders every earlier frame at
-   the new values; the setup page keeps the first. **The build follows the
-   first for five, the second for `.chip` and `.strip`, and neither for
-   `.legend`.** *Corrected 2026-09-19: this said "nine classes" and "the build
-   follows the first", from a search that looked for the classes already
-   suspected and a claim checked against three of them.* Drawn for the owner in
-   `docs/mockups/01a-the-classes-declared-twice.html`.
+1. **The screens page contradicted itself. Decided: the second set** (owner,
+   2026-09-19, 19f203c5, *"we can go with second"*). The build carries it. **Now
+   open: the setup page.** It draws `.mono .tag .pill` at the first set, and 01a
+   did not show it. Either 02 is redrawn at the second set, or Setup keeps the
+   first in the build under its own scope. That is 13 differences, drawn in
+   `setup-page-first-set`. *History: this item said "nine classes" and "the
+   build follows the first" until 2026-09-19, and 01a
+   (`docs/mockups/01a-the-classes-declared-twice.html`) drew the eleven.*
 2. **Measurable frames.** Redrawing the frames in the build's element types
    and the harness's data would take the pairing share toward the
    whole screen. That changes locked drawings, so it is yours to ask for.
