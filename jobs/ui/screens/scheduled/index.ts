@@ -11,7 +11,7 @@ import { day, when } from "../../chrome/instant";
 import { tag } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
 import { failure } from "../../chrome/failure";
-import { pager } from "../../chrome/tabs";
+import { counted, pager } from "../../chrome/tabs";
 import { type ScheduledRow } from "../../board";
 
 export async function scheduled(host: HostApi, main: HTMLElement): Promise<void> {
@@ -41,7 +41,8 @@ export async function scheduled(host: HostApi, main: HTMLElement): Promise<void>
 
   const body = fill(
     el("div", "body"),
-    t,
+    // `.tbl` grows and scrolls; the table inside it cannot (standard §6, CORE-Q28).
+    fill(el("div", "tbl"), t),
     el("div", "mono", "A scheduled job becomes RAISED at 00:00 on its day and its concern clock starts then. What put it here — a person, or the Engineering app's PPM plan — is only the raiser; Jobs holds the job, not the plan."),
 
     // The pager is the list's floor, so nothing follows it — the note that
@@ -50,7 +51,8 @@ export async function scheduled(host: HostApi, main: HTMLElement): Promise<void>
     // front of them is the whole list, and the arrows are drawn disabled rather
     // than omitted — a pager that changes shape between one page and two is two
     // controls (standard §6).
-    pager(`1–${String(got.value.length)} of ${String(got.value.length)}`, 0, 1, () => {}),
+    // `counted`, not a hand-built range: this read `1–0 of 0` on an empty list.
+    pager(counted(1, got.value.length, got.value.length), 0, 1, () => {}),
   );
   main.replaceChildren(body);
 }

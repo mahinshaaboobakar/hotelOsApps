@@ -45,6 +45,26 @@ export function subnav(tabs: readonly Tab[], current: string, go: (label: string
   return bar;
 }
 
+/**
+ * What a pager says about the rows in front of the reader — standard §6.
+ *
+ * **One sentence for every list in Jobs**, because three lists wrote their own:
+ * the Board said *"no jobs in this list"* when empty, while Scheduled computed
+ * `1–0 of 0` — arithmetic nobody reads as "this list is empty", which §6
+ * names. The range counts the rows that ARRIVED (§6: `first + rows.length - 1`,
+ * clamped by `total`), never the page size asked for.
+ *
+ * @param first the 1-based position of the first row on this page
+ * @param rows how many rows this page actually holds
+ * @param total how many the list holds in all
+ */
+export function counted(first: number, rows: number, total: number): string {
+  if (rows === 0) {
+    return total === 0 ? "no jobs in this list" : `no rows on this page · ${String(total)} in the list`;
+  }
+  return `${String(first)}–${String(Math.min(total, first + rows - 1))} of ${String(total)}`;
+}
+
 /** A pager line — "1–12 of 47" and the page buttons. */
 export function pager(shown: string, page: number, pages: number, go: (page: number) => void): HTMLElement {
   const line = el("div", "pager");

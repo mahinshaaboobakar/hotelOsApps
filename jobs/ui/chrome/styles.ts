@@ -94,25 +94,45 @@ table+.mono,.kv+.mono{margin-top:8px}
 
    .main held its layout in inline styles, which is the same defect from the
    other side: the rule was empty because the element carried its own. */
-.main{display:flex;flex-direction:column;min-height:0}
+.main{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
+/* The body fills the main area, so a list inside it has a floor to reach.
+   .main took the column's free height only from 2026-09-19: until then it was
+   as tall as its content — 250px of a 900px window on an empty Board — so no
+   rule below could put the pager anywhere but straight under the headings. */
+.main > .body{flex:1 1 auto}
 .hint{margin-top:4px}
 .title{font-weight:600;color:var(--color-ink,#e8ebf4)}
-/* The pager is the list's floor — the standard's §6, ported 2026-09-05.
-   Two halves, and neither works alone: the list grows so a short one still
-   puts the pager at the bottom, and the pager sticks so a full page does not
-   hide it behind a scroll. The growth is scoped to a list that HAS a pager,
-   never to every table — a table that grew on the Live tab would push the
-   concern note off the screen.
-   The negative margins cancel .body's own 22px and re-supply it here, so the
-   strip is full-width while stuck instead of inset and then jumping when the
-   list ends. The ground is the published surface, never a literal: a hardcoded
-   colour is a dark-theme decision frozen into a module a light property runs.
-   The cost, stated: an opaque strip covers the last rows while scrolling. */
-.body:has(> .pager){display:flex;flex-direction:column}
-table:has(~ .pager){flex:1 1 auto;min-height:0}
-.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;
-       color:var(--color-ink-faint,#5a6172);position:sticky;bottom:0;
-       background:var(--color-surface,#0b0d14);margin:0 -22px -22px;padding:10px 22px 22px}
+/* The pager is the list's floor, and ONLY THE LIST SCROLLS — the standard's
+   §6 as it stands: the owner's rulings of 2026-09-05 (the list takes the free
+   space; the pager draws even on one page) and CORE-Q28 of 2026-09-09, which
+   "replaces the mechanism below, not its intent". Page 64's snippet, applied:
+
+     .body:has(.pager){overflow:hidden}
+     .tbl:has(~ .pager){flex:1 1 auto;min-height:0;overflow-y:auto; … }
+     .pager{flex:0 0 auto}          no sticky: nothing scrolls past it now
+
+   The list is a WRAPPER (.tbl) round the table, not the table: a table cannot
+   be a scroll container, so overflow on it does nothing and the rows render
+   through. min-height:0 is back and is the point — with overflow-y:auto the box
+   shrinks and its rows scroll INSIDE it; page 64 records that deleting it on
+   the strength of the older paragraph makes the list push the pager off the
+   frame. Scoped to a body that has a pager, as page 64 measured it must be.
+
+   SUPERSEDED, kept so the change can be read: this block said "the pager
+   sticks so a full page does not hide it behind a scroll", with the body as
+   the scroll container, position:sticky;bottom:0 and negative margins. It was
+   written 2026-09-05 and never moved to CORE-Q28 — and on an empty Board it
+   drew the pager straight under the headings with the notice's first line
+   under the sticky strip (owner's screenshot, 2026-09-19 12:07). */
+.body:has(.pager){display:flex;flex-direction:column;overflow:hidden}
+/* A paged list that sits one level in — Settings' Policies, inside its tab —
+   is its own growing column, so the free height reaches the list. Page 64's
+   selector is .body:has(.pager), a descendant; this read > .pager, a direct
+   child, and so never reached Policies, whose pager sat under its last row. */
+.list{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.tbl:has(~ .pager){flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -22px;padding:0 22px}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;flex:0 0 auto;
+       color:var(--color-ink-faint,#5a6172);padding-top:10px}
 .btn.pg{border-radius:6px;padding:2px 8px;margin-left:4px;
      font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .btn.pg.on{color:var(--color-ink,#e8ebf4);border-color:var(--color-brand,#818cf8)}

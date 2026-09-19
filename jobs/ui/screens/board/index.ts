@@ -11,7 +11,7 @@ import { today as dayLine, when } from "../../chrome/instant";
 import { concern, priority, status, tag } from "../../chrome/marks";
 import { JOB_CREATE, JOB_READ } from "../../chrome/permissions";
 import { failure, failureState } from "../../chrome/failure";
-import { pager } from "../../chrome/tabs";
+import { counted, pager } from "../../chrome/tabs";
 import { may, type BoardPage, type JobRow, type Today } from "../../board";
 
 /** What the board is told and tells back. */
@@ -91,22 +91,39 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
       // it is reported as undrawn in chapter 05 rather than treated as settled.
       : failureState(host.property, today.failure, "today's figures", () => void board(host, main, place)),
     filters(place, may(host, JOB_CREATE)),
-    table(host, page.value.rows, place),
+    // The list is a wrapper round the table: `.tbl` is what grows and scrolls
+    // (standard §6, CORE-Q28), because a table cannot be a scroll container.
+    fill(el("div", "tbl"), table(host, page.value.rows, place), unexplained(place, page.value)),
     pages(page.value, place),
   );
 
-  // An empty list is not self-explanatory, and this one has a specific cause:
-  // a person's departments are their Workforce postings, and no client reaches
-  // them. The screen names the missing source rather than looking like a quiet
-  // morning.
-  if (place.filter === "My departments" && page.value.rows.length === 0) {
-    body.append(el(
-      "div",
-      "note",
-      "Your departments are not established here — a person's postings are Workforce's, and Jobs has no client for them yet (design §6). Nothing is filtered out; nothing can be filtered in.",
-    ));
-  }
   main.replaceChildren(body);
+}
+
+/**
+ * Why an empty "My departments" list is empty — in the LIST's place.
+ *
+ * The words are unchanged and were right: a person's departments are their
+ * Workforce postings, and nothing Jobs can reach resolves them (the Context
+ * Service's staff context has no department since ADR 0116 §6, pending
+ * Workforce as its authority). What was broken was where it sat: appended
+ * after the pager, it was squeezed under the table with its first line beneath
+ * the pager's sticky strip (owner's screenshot, 2026-09-19 12:07).
+ *
+ * It now sits where the rows would be — inside the scrolling list, under the
+ * column headings — so it is fully visible and never competes with the pager
+ * for the floor. **No frame draws this state**; the placement is this module's
+ * least-invented reading, recorded as undrawn in the page-64 audit rather than
+ * treated as settled.
+ */
+function unexplained(place: BoardPlace, page: BoardPage): HTMLElement | null {
+  if (place.filter !== "My departments" || page.rows.length > 0) return null;
+
+  return el(
+    "div",
+    "note",
+    "Your departments are not established here — a person's postings are Workforce's, and Jobs has no client for them yet (design §6). Nothing is filtered out; nothing can be filtered in.",
+  );
 }
 
 function strip(host: HostApi, today: Today): HTMLElement {
@@ -159,19 +176,14 @@ function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
 
 function pages(page: BoardPage, place: BoardPlace): HTMLElement {
   const { page: at, pageSize, total } = page.paging;
-  const from = at * pageSize + 1;
-  const to = Math.min(total, from + page.rows.length - 1);
   const count = Math.max(1, Math.ceil(total / pageSize));
 
-  // **A page with no rows says which of the two it is** — standard §6. "1–0 of
-  // 218" is arithmetic nobody reads as "this page is empty and the list is
-  // not", and a person who paged past the end deserves the difference between
-  // that and an empty list.
-  const shown = page.rows.length === 0
-    ? total === 0
-      ? "no jobs in this list"
-      : `no rows on this page · ${String(total)} in the list`
-    : `${String(from)}–${String(to)} of ${String(total)} · ${String(pageSize)} per page at this height`;
+  // **A page with no rows says which of the two it is** — standard §6, in the
+  // one wording every Jobs list uses (`counted`). The page size is the Board's
+  // own addition, and only where rows are shown: it explains a count, and an
+  // empty list has none to explain.
+  const shown = counted(at * pageSize + 1, page.rows.length, total);
+  const sized = page.rows.length === 0 ? shown : `${shown} · ${String(pageSize)} per page at this height`;
 
-  return pager(shown, at, count, place.onPage);
+  return pager(sized, at, count, place.onPage);
 }

@@ -5,7 +5,7 @@
  */
 
 import { control, el, fill } from "../../chrome/element";
-import { pager } from "../../chrome/tabs";
+import { counted, pager } from "../../chrome/tabs";
 import { priority } from "../../chrome/marks";
 import type { PolicyRow, Settings } from "../../board";
 
@@ -51,7 +51,9 @@ export function concernPolicy(s: Settings, configure: boolean, onView: (view: st
 
 /** Frame 7 — every policy this property has, nested by scope. */
 export function policies(s: Settings, configure: boolean, onView: (view: string) => void): HTMLElement {
-  const root = el("div");
+  // `.list`: this list sits inside Settings' tab, one level below the body, so
+  // it is its own growing column — without it the pager sat under the last row.
+  const root = el("div", "list");
   const top = el("div", "row");
   if (configure) top.append(control("btn pri", "＋ New policy", () => onView("1")));
   top.append(el("span", "mono", `${String(s.policies.length)} policies · a job uses the most specific one that matches it`), fill(el("span", "grow"), control("btn sm", "Engineering's clock", () => onView("engineering"))));
@@ -60,8 +62,10 @@ export function policies(s: Settings, configure: boolean, onView: (view: string)
   for (const h of ["Scope", "Policy name", "Due · P1 / P2 / P3", "At risk", "Ladder (P1)", "Used by", ""]) head.append(el("th", undefined, h));
   t.append(head);
   for (const p of s.policies) t.append(policyLine(p, configure));
-  return fill(root, top, t, pager(
-    `1–${String(s.policies.length)} of ${String(s.policies.length)}`, 0, 1, () => {}));
+  // `.tbl` round the table and the shared wording, as every Jobs list has them
+  // since 2026-09-19 (standard §6, CORE-Q28) — this read `1–0 of 0` when empty.
+  return fill(root, top, fill(el("div", "tbl"), t), pager(
+    counted(1, s.policies.length, s.policies.length), 0, 1, () => {}));
 }
 
 function policyLine(p: PolicyRow, configure: boolean): HTMLElement {

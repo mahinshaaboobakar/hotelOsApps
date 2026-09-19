@@ -144,16 +144,24 @@ describe("the pager, as the standard has it", () => {
 
     const pager = root.querySelector(".pager");
     expect(pager?.textContent).toContain("of");
-    expect(pager?.previousElementSibling?.tagName).toBe("TABLE");
+    expect(pager?.previousElementSibling?.classList.contains("tbl")).toBe(true);
   });
 
-  it("is the list's next sibling, which is what the growth rule depends on", async () => {
+  it("follows the list's scrolling wrapper, which is what the growth rule depends on", async () => {
+    // **Rewritten for CORE-Q28** (ADR 0034). This asserted the pager's previous
+    // sibling was a TABLE — the 2026-09-05 mechanism, where the table grew and
+    // the body scrolled. CORE-Q28 (2026-09-09) makes the LIST the scroll
+    // container, and a table cannot be one, so the list is a `.tbl` wrapper
+    // round the table: `.tbl:has(~ .pager)` is the rule, and it needs the
+    // wrapper before the pager and the table inside it.
     const { host } = watching();
     const root = mount(host);
     await settle();
 
     const pager = root.querySelector(".pager");
-    expect(pager?.previousElementSibling?.tagName).toBe("TABLE");
+    const list = pager?.previousElementSibling;
+    expect(list?.classList.contains("tbl")).toBe(true);
+    expect(list?.querySelector(":scope > table")).not.toBeNull();
     expect(pager?.parentElement?.classList.contains("body")).toBe(true);
   });
 

@@ -43,8 +43,29 @@ const GRANTS = ["job.read", "job.create", "job.assign", "job.complete", "job.can
  * none of them for people, so the Answer fact is the seam's own sentence, as the
  * frame draws it.
  */
-const KINDS = ["unavailable", "forbidden", "internal"] as const;
+const KINDS = [
+  "unavailable", "forbidden", "internal",
+  // Contract v2's three (ADR 0192, d45f028d) — the page-64 audit covers every
+  // cause, so the harness must be able to produce every cause.
+  "local_forbidden", "user_forbidden", "model_unavailable",
+] as const;
 const FAIL = KINDS.find((kind) => kind === params.get("fail")) ?? null;
+
+/**
+ * `?data=empty|single` — a list with no rows, or one that fits on one page.
+ *
+ * **The empty case is where the Board's pager failed, and nobody had captured
+ * it** (owner's screenshot, 2026-09-19 12:07): every capture this harness took
+ * drew the recorded example, which is 47 jobs across four pages, so the state a
+ * new property opens on was never photographed. Absent means the recorded
+ * example — the multi-page case. These are harness states, stated as such in
+ * the audit's table; they are not a property's data.
+ */
+const DATA = params.get("data");
+
+function list<T>(rows: readonly T[], single: number): readonly T[] {
+  return DATA === "empty" ? [] : DATA === "single" ? rows.slice(0, single) : rows;
+}
 
 /**
  * `&only=<method>` — refuse that one call and answer the rest.
@@ -67,7 +88,10 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
       const answers: Record<string, unknown> = {
         me: recordedMe,
         today: recordedToday,
-        board: recordedBoard,
+        board: DATA === null ? recordedBoard : {
+          rows: list(recordedBoard.rows, 5),
+          paging: { ...recordedBoard.paging, total: list(recordedBoard.rows, 5).length },
+        },
         job: params.get("job") === "rated"
           ? recordedRatedJob
           : params.get("granted") === "none"
@@ -75,9 +99,9 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
             // no work controls — the state the read-only pane exists to show.
             ? { ...recordedJob, row: { ...recordedJob.row, viewerIsAssignee: false } }
             : recordedJob,
-        live: recordedLive,
-        scheduled: recordedScheduled,
-        catalogue: recordedCatalogue,
+        live: DATA === null ? recordedLive : { ...recordedLive, departments: list(recordedLive.departments, 1) },
+        scheduled: list(recordedScheduled, 2),
+        catalogue: DATA === null ? recordedCatalogue : { ...recordedCatalogue, categories: list(recordedCatalogue.categories, 2) },
         settings: recordedSettings,
         jobsNow: widget === "quiet" ? recordedQuiet : widget === "mine" ? recordedMine : recordedEscalated,
       };
@@ -237,7 +261,7 @@ async function drive(): Promise<void> {
   // the screen's back.
   // A failing board has no row to open — the drive is skipped rather than
   // recorded as a miss, because the miss would be the audit's own doing.
-  if ((screen === null || screen === "Board") && (FAIL === null || ONLY !== null)) {
+  if ((screen === null || screen === "Board") && (FAIL === null || ONLY !== null) && DATA !== "empty") {
     if (params.get("open") === null) {
       click(".num", "MRN-ENG-142");
       await settle();
