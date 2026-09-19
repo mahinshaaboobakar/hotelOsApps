@@ -27,7 +27,7 @@
 
 import type { FailureDrawing, HostApi } from "@hotelos/sdk";
 
-import { stateMark } from "../chrome/glyph";
+import { stateMark, tone } from "../chrome/glyph";
 
 /** What a tap opens: the app's own word for a screen, resolved by the module. */
 export type Destination = string;
@@ -246,9 +246,7 @@ export function unanswered(
   // by no rule, so the reason rendered as the loudest text on the card while
   // the headline sat small and muted above it. Pinned to the top, too, where
   // the frame centres the state in the card.
-  const tone = drawing.cause === "unanswered" ? "wait"
-    : drawing.cause === "faulted" ? "fault" : "no";
-  body.classList.add("wx", tone);
+  body.classList.add("wx", tone(drawing.cause));
 
   // **The facts are NOT here, by the approved divergence**: a card is glanced
   // at, and the frame moves the four facts to the screen the card opens.

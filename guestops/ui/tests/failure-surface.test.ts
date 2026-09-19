@@ -17,7 +17,27 @@ import { failureDrawing, type Cause, type ReadFailure } from "@hotelos/sdk";
 import { cannot, failed } from "../chrome/marks";
 import { unanswered } from "../widgets/card";
 
-const CAUSES: readonly Cause[] = ["unanswered", "forbidden", "faulted"];
+/** Contract v2's six causes (`d45f028d`). */
+const CAUSES: readonly Cause[] = [
+  "unanswered", "forbidden", "unadmitted", "ungranted", "undecidable", "faulted",
+];
+
+/**
+ * The mark's colour per cause, spelled out from the approved drawings — never
+ * imported from `chrome/glyph.ts`, which is the code under test.
+ *
+ * `64b`: unanswered warn, forbidden dim, faulted bad. `64e`: the two new
+ * refusals *"neutral grey, like 64b's refusal"*, and the model state drawn
+ * `c-fault`.
+ */
+const TONE: Record<Cause, string> = {
+  unanswered: "wait",
+  forbidden: "no",
+  unadmitted: "no",
+  ungranted: "no",
+  undecidable: "fault",
+  faulted: "fault",
+};
 
 function drawing(cause: Cause) {
   const failure: ReadFailure = {
@@ -30,6 +50,22 @@ function drawing(cause: Cause) {
 
   return failureDrawing(failure, { app: "GuestOps", the: "today at this property" });
 }
+
+describe("the mark's colour, per cause", () => {
+  it.each(CAUSES)("on a screen — %s", (cause) => {
+    const state = failed(drawing(cause), () => {}).querySelector(".fail");
+
+    expect([...(state?.classList ?? [])].filter((c) => c !== "fail")).toEqual([TONE[cause]]);
+  });
+
+  it.each(CAUSES)("on a card — %s", (cause) => {
+    const card = unanswered("Today", drawing(cause), { retry: () => {}, open: () => {} });
+    const body = card.querySelector(".wb.wx");
+
+    expect([...(body?.classList ?? [])].filter((c) => c !== "wb" && c !== "wx"))
+      .toEqual([TONE[cause]]);
+  });
+});
 
 describe("a screen's failure", () => {
   it.each(CAUSES)("is placed on the stage that centres it — %s", (cause) => {
@@ -47,9 +83,12 @@ describe("a screen's failure", () => {
     expect(cannot("No stay was chosen", "Open a stay.").className).toBe("fs");
   });
 
+  // X7: a retry only where waiting could work; copy for a fault and for the
+  // model state, which 64e draws beside the fault.
   it.each([
     ["unanswered", "Try again"],
     ["faulted", "Copy these details"],
+    ["undecidable", "Copy these details"],
   ] as const)("offers a button only where one can work — %s", (cause, label) => {
     const buttons = failed(drawing(cause), () => {}).querySelectorAll(".fd button");
 
@@ -62,6 +101,26 @@ describe("a screen's failure", () => {
     expect(stage.querySelectorAll(".fd button")).toHaveLength(0);
     expect(stage.querySelector(".fn")?.textContent).toBe(
       "This screen needs reservation.read, and no grant at this property names this user.");
+  });
+
+  // X9: every refusal names what is missing and stops — no button, and no
+  // sentence that sends the reader to a person, a name or a role.
+  it.each(["forbidden", "unadmitted", "ungranted"] as const)(
+    "a refusal offers no button and routes nobody to a person — %s",
+    (cause) => {
+      const stage = failed(drawing(cause), () => {});
+
+      expect(stage.querySelectorAll(".fd button")).toHaveLength(0);
+      expect(stage.textContent ?? "").not.toMatch(/administrator|\bask\b|manager|contact/i);
+    });
+
+  // X11: the model state names the model and never the person.
+  it("the model state says nothing about the person or their account", () => {
+    const state = failed(drawing("undecidable"), () => {}).querySelector(".fail");
+    const words = [".fl", ".fh", ".fb", ".fn"]
+      .map((selector) => state?.querySelector(selector)?.textContent ?? "").join(" ");
+
+    expect(words).not.toMatch(/\byou\b|\byour\b|account/i);
   });
 });
 
@@ -84,6 +143,9 @@ describe("a widget's failure", () => {
   it.each([
     ["unanswered", "Try again →", "retry"],
     ["forbidden", "Open GuestOps →", "open"],
+    ["unadmitted", "Open GuestOps →", "open"],
+    ["ungranted", "Open GuestOps →", "open"],
+    ["undecidable", "Open GuestOps →", "open"],
     ["faulted", "Open GuestOps →", "open"],
   ] as const)("acts by the cause — %s", (cause, label, which) => {
     const called: string[] = [];

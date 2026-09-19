@@ -21,7 +21,7 @@ import { type Fact, type FailureDrawing } from "@hotelos/sdk";
 
 import type { Chip, Tag } from "../book/model";
 import { control, el } from "./element";
-import { stateMark } from "./glyph";
+import { stateMark, tone } from "./glyph";
 
 /**
  * A mark: a coloured dot and a word.
@@ -140,10 +140,9 @@ function staged(state: HTMLElement): HTMLElement {
  * @returns the element to put where the data would have gone
  */
 export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement {
-  // The cause rides on the element so the mark takes the state's colour.
-  const tone = drawing.cause === "unanswered" ? "wait"
-    : drawing.cause === "faulted" ? "fault" : "no";
-  const box = el("div", `fail ${tone}`);
+  // The cause rides on the element so the mark takes the state's colour — from
+  // the one exhaustive map, never a two-way check that lets a new cause default.
+  const box = el("div", `fail ${tone(drawing.cause)}`);
   const doing = el("div", "fd");
 
   // **The affordance is what separates the three states, not the wording.** A

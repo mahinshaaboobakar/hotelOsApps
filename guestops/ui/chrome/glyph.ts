@@ -8,7 +8,44 @@
  * the SDK ships no DOM.
  */
 
-import type { Glyph } from "@hotelos/sdk";
+import type { Cause, Glyph } from "@hotelos/sdk";
+
+/** The three colours a failure's mark can take — the class the stylesheets key on. */
+export type Tone = "wait" | "no" | "fault";
+
+/**
+ * The mark's colour, per cause — `64b` and `64e`, both owner-approved.
+ *
+ * ```text
+ * unanswered                          wait    amber — waiting could work
+ * forbidden · unadmitted · ungranted  no      grey  — 64e: "neutral grey, like
+ *                                                     64b's refusal: none of them
+ *                                                     is a fault or an outage"
+ * faulted · undecidable               fault   red   — 64e draws the model state
+ *                                                     `c-fault`
+ * ```
+ *
+ * **Exhaustive, with no default, and that is the point.** The two call sites
+ * this replaced asked *"is it unanswered? is it faulted?"* and let everything
+ * else fall to grey — so when contract v2 added `undecidable`, the model state
+ * drew as a refusal, grey where 64e draws red, and nothing failed. A seventh
+ * cause now fails to compile here instead of choosing a colour silently.
+ */
+export function tone(cause: Cause): Tone {
+  switch (cause) {
+    case "unanswered":
+      return "wait";
+
+    case "forbidden":
+    case "unadmitted":
+    case "ungranted":
+      return "no";
+
+    case "faulted":
+    case "undecidable":
+      return "fault";
+  }
+}
 
 /**
  * The mark as an SVG element.

@@ -28,7 +28,10 @@ import { failureDrawing, type Cause } from "@hotelos/sdk";
 import { stylesheet, unanswered } from "../widgets/card";
 
 const ENTRY = join(dirname(fileURLToPath(import.meta.url)), "..", "widgets", "entry");
-const CAUSES: readonly Cause[] = ["unanswered", "forbidden", "faulted"];
+/** Contract v2's six causes (`d45f028d`). */
+const CAUSES: readonly Cause[] = [
+  "unanswered", "forbidden", "unadmitted", "ungranted", "undecidable", "faulted",
+];
 
 /** Every `.class` a sheet's selectors name. */
 function styledBy(css: string): Set<string> {
@@ -66,6 +69,10 @@ describe("a widget realm's failure", () => {
       const source = readFileSync(join(ENTRY, file), "utf8");
       expect(source, file).toMatch(/import \{[^}]*\bstylesheet\b[^}]*\} from "\.\.\/card"/);
       expect(source, file).not.toMatch(/chrome\/styles/);
+
+      // `widgets/recorded.ts` is the capture harness's loaded answer. A widget
+      // importing it is the recorded fallback APPS-Q42 removed, coming back.
+      expect(source, file).not.toMatch(/from "\.\.\/recorded"|from "\.\/recorded"/);
     }
   });
 
