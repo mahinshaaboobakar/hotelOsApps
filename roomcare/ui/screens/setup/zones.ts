@@ -18,7 +18,7 @@ import { day } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import { inlineSelect, refuse, saveLine, toggle } from "./controls";
 import type { SetupData } from "./index";
 
@@ -88,7 +88,7 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
     const done = await act(host, "roomcare.configure", "savePolicy", { assignmentStrategy: word, version: data.policy.version });
     if (done.ok) nav.show();
     else refuse(said, done.because);
-  })(), nav.show);
+  })(), nav.show, [cols]);
   body.append(cols, save);
 }
 
@@ -116,4 +116,5 @@ function move(host: HostApi, nav: Nav, v: Zones, zoneId: string): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (boxes.some((b) => b.box.checked && b.room.zoneId !== target.value) ? null : "tick a room that is not already in this zone"));
 }

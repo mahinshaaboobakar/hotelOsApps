@@ -64,6 +64,6 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
       if (!done.ok) return refuse(said, `${i.row.roomType}: ${done.because}`);
     }
     nav.show();
-  })(), nav.show);
+  })(), nav.show, [cols]);
   body.append(cols, line);
 }

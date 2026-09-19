@@ -10,7 +10,7 @@ import { control, el, option } from "../../chrome/element";
 import { failed } from "../../chrome/failure";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import type { BoardRoom } from "../../model";
 
 /** Enter a fact by hand for one room — source manual, a deliberate act (frame 4, redline 4). */
@@ -48,6 +48,7 @@ export function roomState(host: HostApi, nav: Nav, room: BoardRoom): void {
       nav.show();
     })();
   });
+  readyWhen(overlay, () => (stay === null && arrival.value === "" && condition.value === "" ? "choose what happened, an arrival or a condition" : null));
 }
 
 /** Record what was found at the door, on the attendant's behalf (roomcare.amend). */
@@ -92,4 +93,5 @@ export async function reassign(host: HostApi, nav: Nav, room: BoardRoom): Promis
       nav.show();
     })();
   });
+  readyWhen(overlay, () => (person.value === "" || person.value === room.attendantId ? "choose someone else" : null));
 }

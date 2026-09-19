@@ -50,7 +50,12 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
   const drawPhases = (): void => {
     const row = v.services.find((s) => s.service === chosenService) ?? v.services[0];
     if (row === undefined) return;
-    cols.replaceChildren(phasesCard(host, nav, row, () => { phaseCells.get(row.service)!.textContent = phaseLine(row); drawPhases(); }), copyCard(host, nav, v));
+    cols.replaceChildren(phasesCard(host, nav, row, () => {
+      const cell = phaseCells.get(row.service)!;
+      cell.textContent = phaseLine(row);
+      cell.dispatchEvent(new Event("change", { bubbles: true }));
+      drawPhases();
+    }), copyCard(host, nav, v));
   };
 
   const inputs = v.services.map((s) => {
@@ -95,7 +100,7 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
       if (!done.ok) return refuse(said, `${service(i.s.service)}: ${done.because}`);
     }
     nav.show();
-  })(), nav.show);
+  })(), nav.show, [table, cols]);
   body.append(chips, table, count, cols, line);
 }
 

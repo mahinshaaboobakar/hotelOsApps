@@ -16,7 +16,7 @@ import { day, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, dialog, sheet } from "../../chrome/overlay";
+import { actions, dialog, readyWhen, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
 
@@ -122,6 +122,7 @@ function plan(host: HostApi, nav: Nav, row: Row): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (from.value === "" || to.value === "" ? "choose both dates" : null));
 }
 
 async function cancel(host: HostApi, nav: Nav, row: Row): Promise<void> {

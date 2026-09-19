@@ -12,7 +12,7 @@ import { drawing } from "../../chrome/failure";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import { phase, service } from "../../chrome/words";
 import { reorderSheet } from "./controls";
 
@@ -108,6 +108,7 @@ function copy(host: HostApi, nav: Nav, v: Services): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (boxes.some((b) => b.box.checked) ? null : "tick a room type"));
 }
 
 function capital(words: string): string {

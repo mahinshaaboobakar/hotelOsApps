@@ -62,3 +62,27 @@ export function actions(overlay: Overlay, label: string, act: () => void, style 
   overlay.foot.append(control("btn", "Back", () => overlay.close()), go);
   return go;
 }
+
+/**
+ * Hold the overlay's primary — the last control `actions` put in its foot —
+ * until it has something to send: drawn off, with its reason beside it, never
+ * live and refusing (page 64 §2, checklist C11). `ready` answers null when there
+ * is something to send, or the reason there is not; it is asked again whenever
+ * anything inside the overlay's body is typed, changed or pressed.
+ */
+export function readyWhen(overlay: Overlay, ready: () => string | null): void {
+  const go = overlay.foot.lastElementChild as HTMLElement;
+  const label = go.textContent ?? "";
+  const idle = el("span", "btn off");
+  const check = (): void => {
+    const reason = ready();
+    if (reason === null) {
+      if (idle.isConnected) idle.replaceWith(go);
+      return;
+    }
+    idle.textContent = `${label} — ${reason}`;
+    if (go.isConnected) go.replaceWith(idle);
+  };
+  for (const event of ["input", "change", "click"]) overlay.body.addEventListener(event, check);
+  check();
+}

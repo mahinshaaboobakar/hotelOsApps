@@ -11,7 +11,7 @@ import { failed } from "../../chrome/failure";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import { service } from "../../chrome/words";
 import type { Board } from "../../model";
 import type { PrepareView } from "./index";
@@ -51,4 +51,5 @@ export async function moveRooms(host: HostApi, nav: Nav, v: PrepareView, onlyTas
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (choices.every(({ room, select }) => select.value === "" || select.value === room.attendantId) ? "choose someone for a room" : null));
 }

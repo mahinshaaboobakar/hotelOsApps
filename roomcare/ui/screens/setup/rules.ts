@@ -55,7 +55,7 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
   reorder.style.marginTop = "8px";
   reorder.append(control("btn sm", "Reorder…", () => reorderSheet(host, nav, "The priority ladder", ladder, (band) => BAND[band] ?? band,
     "Sooner first. Each of the four bands stays on the ladder exactly once; the tab's Save keeps the order as a new version.",
-    (order) => { ladder = order; edit.priorityLadder = order; drawLadder(); return null; })));
+    (order) => { ladder = order; edit.priorityLadder = order; drawLadder(); rungs.dispatchEvent(new Event("change", { bubbles: true })); return null; })));
   const priority = card("Priority ladder", rungs, reorder, sub("Unsold departure"),
     sentence("row", radio("unsoldDeparture", "TODAY", p.unsoldDeparture === "TODAY", "clean today", "", set("unsoldDeparture")),
       radio("unsoldDeparture", "MAY_WAIT", p.unsoldDeparture === "MAY_WAIT", "may wait", "— the pending lane, one click promotes it (the charter)", set("unsoldDeparture"))));
@@ -79,6 +79,6 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
     const done = await act(host, "roomcare.configure", "savePolicy", { ...edit, version: p.version });
     if (done.ok) nav.show();
     else refuse(said, done.because);
-  })(), nav.show);
+  })(), nav.show, [top, bottom]);
   body.append(top, bottom, line);
 }

@@ -65,7 +65,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
     const done = await act(host, "roomcare.configure", "savePolicy", { triggerMode: trigger, version: data.policy.version });
     if (!done.ok) return refuse(said, done.because);
     nav.show();
-  })(), nav.show);
+  })(), nav.show, [cols]);
   body.append(cols, line);
 }
 

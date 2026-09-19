@@ -13,7 +13,7 @@ import { control, el } from "../../chrome/element";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
 import { inlineNumber, inlineSelect, refuse, saveLine } from "./controls";
@@ -79,7 +79,7 @@ export async function areas(host: HostApi, body: HTMLElement, nav: Nav, data: Se
       if (!done.ok) return refuse(said, `${area.name}: ${done.because}`);
     }
     nav.show();
-  })(), nav.show);
+  })(), nav.show, [table]);
   body.append(strip, chips, scroller(table), pager(host, v.paging, v.rows.length, withoutRoutine ? "public areas without a routine" : "public areas", (p) => { page = p; nav.show(); }), line);
 }
 
@@ -105,4 +105,5 @@ function routine(host: HostApi, nav: Nav, area: Area): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (times.value === area.times.join(", ") && Number(minutes.value) === (area.minutes ?? 20) && on.checked === (area.times.length === 0 || area.enabled) ? "change the routine first" : null));
 }

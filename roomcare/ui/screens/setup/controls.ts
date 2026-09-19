@@ -10,7 +10,7 @@ import { control, el, option } from "../../chrome/element";
 import { when } from "../../chrome/instant";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import type { SetupData } from "./index";
 
 /** A switch — a real checkbox, so a keyboard reaches it, drawn as the frame's toggle. */
@@ -61,11 +61,29 @@ export function sentence(className: string, ...parts: readonly (Node | string)[]
   return line;
 }
 
-/** The line every tab ends with — Save, Discard, and which version is live. */
-export function saveLine(host: HostApi, data: SetupData | null, save: () => void, discard: () => void): { line: HTMLElement; said: HTMLElement } {
+/**
+ * The line every tab ends with — Save, Discard, and which version is live.
+ *
+ * Save is drawn off, saying nothing changed, until a field inside `watched`
+ * fires `input` or `change`: a primary action with nothing to send is drawn off
+ * with its reason, never live (page 64 §2, checklist C11) — a live Save pressed
+ * with nothing edited wrote an unchanged new version. A tab whose state moves
+ * without a field (a reorder sheet) dispatches `change` inside what it watches.
+ */
+export function saveLine(host: HostApi, data: SetupData | null, save: () => void, discard: () => void,
+  watched: readonly HTMLElement[]): { line: HTMLElement; said: HTMLElement } {
   const line = el("div", "save");
   const said = el("span", "said");
-  line.append(control("btn pri", "Save", save), control("btn", "Discard", discard));
+  const idle = el("span", "btn off", "Save — nothing changed");
+  const live = control("btn pri", "Save", save);
+  const wake = (): void => {
+    if (idle.isConnected) idle.replaceWith(live);
+  };
+  for (const root of watched) {
+    root.addEventListener("input", wake);
+    root.addEventListener("change", wake);
+  }
+  line.append(idle, control("btn", "Discard", discard));
   if (data !== null) line.append(versionLine(host, data));
   line.append(said);
   return { line, said };
@@ -102,6 +120,7 @@ export function reorderSheet(host: HostApi, nav: Nav, title: string, items: read
     if (refusal !== null) return overlay.refuse(refusal);
     overlay.close();
   });
+  readyWhen(overlay, () => (order.every((item, i) => item === items[i]) ? "move a line first" : null));
 }
 
 /** Say a refusal on the save line, never swallow it. */

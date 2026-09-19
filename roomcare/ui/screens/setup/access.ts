@@ -15,7 +15,7 @@ import { day } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, dialog, sheet } from "../../chrome/overlay";
+import { actions, dialog, readyWhen, sheet } from "../../chrome/overlay";
 
 interface Grants {
   grants: { userId: string; name: string; grantedAt: string; grantedBy: string | null }[];
@@ -87,6 +87,7 @@ function grant(host: HostApi, nav: Nav): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (person.value.trim() === "" ? "name the person by their login id" : null));
 }
 
 function confirmRevoke(host: HostApi, nav: Nav, userId: string, name: string): void {

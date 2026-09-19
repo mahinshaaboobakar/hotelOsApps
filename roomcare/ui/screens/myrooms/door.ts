@@ -12,7 +12,7 @@ import { clock } from "../../chrome/instant";
 import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { actions, sheet } from "../../chrome/overlay";
+import { actions, readyWhen, sheet } from "../../chrome/overlay";
 import { lower, phase, service } from "../../chrome/words";
 import { stateText, type MyRoom } from "./index";
 
@@ -144,4 +144,5 @@ function issue(host: HostApi, nav: Nav, taskId: string): void {
     overlay.close();
     nav.show();
   })());
+  readyWhen(overlay, () => (note.value.trim() === "" ? "say what is wrong" : null));
 }
