@@ -18,7 +18,7 @@ import { formTeam } from "../screens/teams/form";
 import { addMember } from "../screens/teams/member";
 import { renameTeam } from "../screens/teams/rename";
 import { standDown } from "../screens/teams/stand-down";
-import { developerNotes, readableText } from "../../../packages/developer-notes/src";
+import { developerContent, readableText } from "../../../scripts/developer-content";
 import { readable, SURFACES, surfaceHost } from "./surfaces";
 
 /**
@@ -47,15 +47,27 @@ import { readable, SURFACES, surfaceHost } from "./surfaces";
  * Rendered rather than read from source: a comment citing a ruling is a record
  * and is right, and only what reaches the screen is a claim to staff.
  *
- * **The shapes and the reader are the estate's one copy**,
- * `packages/developer-notes` — the union of this check, GuestOps'
- * `document-citations` and the interim `scripts/developer-content.ts`
- * (architect, 2026-09-19). This file walks Workforce's surfaces and nothing
- * else; the system names and "design page" it used to keep locally are in the
- * package now.
+ * **The shapes and the reader are the estate's single copy**,
+ * `scripts/developer-content.ts` (15e2654), which this check was merged into
+ * (architect, 2026-09-19).
+ *
+ * **One shape stays here until it can move**: the platform systems by name.
+ * The owner's ruling covers them, but in the shared list they would turn Jobs'
+ * and Room Care's suites red on lines that are theirs to clear; the script's
+ * header names those lines. When they are cleared, this list moves there and
+ * `found` becomes one call.
  */
+const SYSTEMS: readonly (readonly [string, RegExp])[] = [
+  ["a platform system", /\b(?:Master Data|Kernel|OpenFGA|Context Service|Integration Hub)\b/g],
+];
+
 function found(root: HTMLElement): string[] {
-  return developerNotes(readableText(readable(root)));
+  const text = readableText(readable(root));
+  return [
+    ...developerContent(text),
+    ...SYSTEMS.flatMap(([what, pattern]) =>
+      [...text.matchAll(pattern)].map((match) => `${what}: ${match[0]}`)),
+  ];
 }
 
 const host = surfaceHost("en-GB");
@@ -128,8 +140,19 @@ describe("developer content", () => {
       + "<p>per ADR 0174 and the design page</p>";
 
     expect(found(planted).map((one) => one.split(":")[0])).toEqual(expect.arrayContaining([
-      "a register id", "an ADR", "a code identifier",
+      "a decision-register id", "an ADR", "a code identifier",
       "a design page", "a platform system",
     ]));
+  });
+
+  // The two catches merged into the shared list from GuestOps' guard, planted
+  // where only they can find them: an ADR spelled with a double space, and a
+  // reason carried only in an accessible description. The list had no test of
+  // its own, so these are the proof the merge reads what it claims to.
+  it("finds a spaced ADR carried only in an accessible description", () => {
+    const planted = document.createElement("div");
+    planted.innerHTML = '<span aria-description="as ADR  0092 requires">x</span>';
+
+    expect(found(planted)).toEqual(['an ADR: ADR  0092']);
   });
 });
