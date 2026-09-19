@@ -122,13 +122,7 @@ function header(
   const head = el("div", "tools");
   const title = el("div");
 
-  const here = board.postings.filter((p) => p.departments.includes("FO")).length;
-  const expiring = board.postings.filter(
-    (p) => p.tone === "warn" || p.tone === "bad").length;
-
-  title.append(
-    el("div", "hsub", subtitle(board, ending, here, expiring, property)),
-  );
+  title.append(el("div", "hsub", subtitle(board, ending, property)));
 
   const picker = el("div", "sel");
   picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
@@ -141,8 +135,7 @@ function header(
 
 /** What the header says under the title. */
 function subtitle(
-  board: People, ending: string | null, here: number, expiring: number,
-  property: PropertyEnvironment,
+  board: People, ending: string | null, property: PropertyEnvironment,
 ): string {
   const n = (value: number): string => formatNumber(value, property, "whole");
 
@@ -156,13 +149,16 @@ function subtitle(
     return `${posting.who} · ${posting.departments.join(" · ")}`.trim();
   }
 
-  // **The property's total, not this page's length.** A subtitle counting the
-  // rows in front of you under a list that pages says something false about the
-  // property the moment somebody turns to page two.
-  return board.postings.length === 0
+  // **Every figure is the property's, counted by the service where the rows
+  // live** (app surface audit, 2026-09-19). Three were taken from this page:
+  // "nobody posted" from its length, so an empty page 3 of forty people said
+  // nobody was; a Front Office count, a department code written into the
+  // screen for every property; and "certifications expiring" from the rows'
+  // tone, which counted people rather than certificates and expired as
+  // expiring.
+  return board.paging.total === 0
     ? "Nobody is posted yet"
-    : `${n(board.paging.total)} posted · ${n(here)} in Front Office on this page · `
-      + `${n(expiring)} certifications expiring`;
+    : `${n(board.paging.total)} posted · ${n(board.expiring)} certifications expiring`;
 }
 
 function table(
@@ -271,7 +267,7 @@ function row(
     zone(posting.zone),
     el("div", undefined, posting.role),
     el("div", "quiet", posting.reportsTo),
-    el("div", `pill ${posting.tone}`, posting.capability),
+    el("div", `pill ${posting.tone}`, standing(posting, property)),
   );
 
   return item;
@@ -314,6 +310,17 @@ function zone(value: string | null): HTMLElement {
   const cell = el("div");
   cell.append(value === null ? el("span", "quiet", "—") : el("span", "pill acc", value));
   return cell;
+}
+
+/**
+ * A row's standing in words — the service sends the band and the count.
+ *
+ * The words are the screen's and the digits the property's (NUM-Q1, ADR
+ * 0174); the service used to send `"2 expiring"` whole.
+ */
+function standing(posting: Posting, property: PropertyEnvironment): string {
+  if (posting.standing === "none") return "none recorded";
+  return `${formatNumber(posting.certificates, property, "whole")} ${posting.standing}`;
 }
 
 /** What this screen owns, and what it does not. */

@@ -66,6 +66,14 @@ public static class PeopleView
         {
             postings = people.Select(group => Row(group, names, held, today)).ToList(),
             paging = new { page = page.Page, pageSize = page.Size, total = page.Total },
+
+            // **Certificates, across the property — counted where the rows
+            // live.** The screen used to derive this from the page it had been
+            // sent, and from row tone: people rather than certificates, one
+            // page rather than the property, and expired counted as expiring.
+            // The register is already the property's whole list, so this is a
+            // count over rows in hand rather than a second query.
+            expiring = register.Count(one => Expiring(one.BandOn(today))),
         };
     }
 
@@ -161,7 +169,7 @@ public static class PeopleView
             .ToList();
 
         var primary = postings[0];
-        var (capability, tone) = Standing(register[held.Key], today);
+        var (standing, certificates, tone) = Standing(register[held.Key], today);
 
         return new
         {
@@ -186,10 +194,18 @@ public static class PeopleView
             zone = (string?)null,
             role = primary.JobRole,
             reportsTo = ReportsTo(primary, names),
-            capability,
+
+            // A band and a count — the screen writes "2 expiring" in the
+            // property's digits (NUM-Q1, ADR 0174). This sent the sentence.
+            standing,
+            certificates,
             tone,
         };
     }
+
+    /// <summary>The three bands the screen calls expiring; expired is not one.</summary>
+    private static bool Expiring(ExpiryBand band)
+        => band is ExpiryBand.Within7Days or ExpiryBand.Within30Days or ExpiryBand.Within60Days;
 
     /// <summary>When the primary posting began — ADR 0175.</summary>
     /// <remarks>
@@ -221,33 +237,32 @@ public static class PeopleView
     /// </summary>
     /// <remarks>
     /// The worst band wins, because a person with four valid certificates and
-    /// one expired one is a person with an expired certificate. "none recorded"
+    /// one expired one is a person with an expired certificate. <c>none</c>
     /// is neutral rather than bad: nothing recorded is not the same fact as
     /// something lapsed, and colouring it red would make an unstarted register
     /// look like a compliance failure.
     /// </remarks>
-    private static (string Reads, string Tone) Standing(
+    private static (string Standing, int Certificates, string Tone) Standing(
         IEnumerable<Capability> held, DateOnly today)
     {
         var dated = held.Where(one => one.Lapses).ToList();
 
         if (dated.Count == 0)
         {
-            return ("none recorded", "neu");
+            return ("none", 0, "neu");
         }
 
         var bands = dated.Select(one => one.BandOn(today)).ToList();
 
         if (bands.Contains(ExpiryBand.Expired))
         {
-            return (bands.Count(one => one == ExpiryBand.Expired) + " expired", "bad");
+            return ("expired", bands.Count(one => one == ExpiryBand.Expired), "bad");
         }
 
-        var expiring = bands.Count(one =>
-            one is ExpiryBand.Within7Days or ExpiryBand.Within30Days or ExpiryBand.Within60Days);
+        var expiring = bands.Count(Expiring);
 
         return expiring > 0
-            ? (expiring + " expiring", "warn")
-            : (dated.Count + " valid", "ok");
+            ? ("expiring", expiring, "warn")
+            : ("valid", dated.Count, "ok");
     }
 }
