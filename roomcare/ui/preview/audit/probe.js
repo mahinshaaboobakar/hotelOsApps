@@ -120,9 +120,18 @@
   const clickable = [...document.querySelectorAll("*")].filter((e) => shown(e) && cs(e).cursor === "pointer"
     && !["BUTTON", "A", "INPUT", "SELECT", "LABEL", "SUMMARY", "TEXTAREA"].includes(e.tagName) && e.closest("button, a, label") === null
     && (e.parentElement === null || cs(e.parentElement).cursor !== "pointer"));
-  if (clickable.length === 0) add("C8", "PASS", "every clickable node is a button");
-  else judge("C8", clickable, (e) => (["TR", "TD"].includes(e.tagName)
-    ? `a table ${e.tagName.toLowerCase()} opens something and is not a <button> — §2 against §4: a table row cannot be a button, and Jobs' baseline list opens rows the same way`
+  // APPS-Q50 (planner, 2026-09-19) rules the shape §2 and §4 meet in: a table row that opens something keeps its
+  // pointer for a mouse, and its main cell holds exactly one real button (`button.opener`) a keyboard reaches. Such
+  // a row passes; a row or cell with the pointer and no such button still fails, as every one did before the ruling.
+  const ruled = (e) => {
+    const row = e.tagName === "TR" ? e : e.tagName === "TD" ? e.closest("tr") : null;
+    return row !== null && row.querySelectorAll("button.opener").length === 1;
+  };
+  const bare = clickable.filter((e) => !ruled(e));
+  if (bare.length === 0) add("C8", "PASS", clickable.length === 0 ? "every clickable node is a button"
+    : `every clickable node is a button, or a table row whose main cell holds its one button (APPS-Q50) — ${clickable.length} rows`);
+  else judge("C8", bare, (e) => (["TR", "TD"].includes(e.tagName)
+    ? `a table ${e.tagName.toLowerCase()} opens something with no button in its main cell — APPS-Q50's shape is missing`
     : `clickable ${e.tagName.toLowerCase()} (cursor:pointer), not a <button>`));
   judge("C8", all("button.btn, button.tile, tr button"), (b) => {
     const s = cs(b); const out = [];
