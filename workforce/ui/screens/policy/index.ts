@@ -66,7 +66,7 @@ export async function policy(
   // Drawn over the screen it belongs to, not on a page of its own: a shift is
   // created from the catalogue it joins, and the list behind it is the context
   // that makes the short code's uniqueness visible.
-  if (dialog) main.append(newShift(close));
+  if (dialog) main.append(newShift(host, close, close));
 }
 
 function header(config: Policy, open: () => void): HTMLElement {

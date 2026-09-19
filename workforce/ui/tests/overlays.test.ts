@@ -39,7 +39,7 @@ if (detail === null) throw new Error("the recorded teams carry an open team");
 const COMPOSING: [string, () => HTMLElement][] = [
   ["assign duty", () => assignDuty(host, nothing, recordedRegister.candidates, recordedRegister.days[0], host.property, nothing)],
   ["request leave", () => requestForm(host, recordedLeave.balances, nothing, nothing)],
-  ["new shift", () => newShift(nothing)],
+  ["new shift", () => newShift(host, nothing, nothing)],
   ["form a team", () => formTeam(host, recordedTeams.departments, recordedTeams.teams, nothing, nothing)],
   ["add a member", () => addMember(host, recordedTeams.onDate, nothing, detail, nothing)],
 ];

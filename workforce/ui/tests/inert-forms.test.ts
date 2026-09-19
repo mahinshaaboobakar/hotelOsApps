@@ -43,8 +43,16 @@ async function leaveForm(): Promise<HTMLElement> {
   return form as HTMLElement;
 }
 
+/** A host the shift form is built with; nothing here presses its confirm. */
+const shiftHost: HostApi = {
+  identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.configure"] },
+  property: { timezone: "Asia/Kolkata", locale: "en-GB" },
+  call: () => Promise.reject(new Error("the form sent something while it opened")),
+  on: () => () => {},
+};
+
 function shiftForm(): HTMLElement {
-  const form = newShift(() => {}).querySelector(".sheet");
+  const form = newShift(shiftHost, () => {}, () => {}).querySelector(".sheet");
   if (form === null) throw new Error("the shift form did not open");
   return form as HTMLElement;
 }

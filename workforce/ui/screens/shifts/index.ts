@@ -66,7 +66,7 @@ export async function shifts(
 
   main.replaceChildren(header(catalogue, open, host.property), body);
 
-  if (dialog) main.append(newShift(close));
+  if (dialog) main.append(newShift(host, close, close));
 }
 
 function header(
