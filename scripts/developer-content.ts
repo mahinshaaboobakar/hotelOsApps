@@ -16,11 +16,10 @@
  * own. Merged in then, so neither loses a catch by switching: "design page" (Workforce), an ADR with any run of
  * spaces or hyphens before its number, and `aria-description` among the attributes read (GuestOps' `8aae94e`).
  *
- * **Not here yet, and why: the platform systems by name** (Master Data, Kernel, OpenFGA, Context Service,
- * Integration Hub). The owner's ruling names them, and Workforce's guard carries them locally. Adding them here
- * would turn two neighbours' suites red on lines that ruling makes defects: Jobs `board/recorded/settings.ts:79`,
- * and Room Care `chrome/bar.ts:34`, `screens/setup/areas.ts:53`, `screens/setup/services.ts:41`
- * (measured 2026-09-19). They move here when those lines are cleared.
+ * **The platform systems by name** (Master Data, Kernel, OpenFGA, Context Service, Integration Hub) joined this
+ * list on 2026-09-19, taken from Workforce's local guard, once Room Care's three lines were cleared (the bar in
+ * `7a2f013f`; Areas and Services with this change). Until then this paragraph said why they were not here yet:
+ * those three lines, and Jobs' `board/recorded/settings.ts:79`.
  */
 export const DEVELOPER_CONTENT: readonly (readonly [string, RegExp])[] = [
   ["a decision-register id", /\b[A-Z]+-Q[0-9]+[a-z]?\b/g],
@@ -32,6 +31,7 @@ export const DEVELOPER_CONTENT: readonly (readonly [string, RegExp])[] = [
   ["a chapter reference", /\bChapter [0-9]+/g],
   ["a code identifier", /\b[a-z]+(?:_[a-z]+)+\b/g],
   ["a correlation id", /\bcorrelation ids?\b/gi],
+  ["a platform system", /\b(?:Master Data|Kernel|OpenFGA|Context Service|Integration Hub)\b/g],
 ];
 
 /** Every developer citation in `text`, each as "what it is: the text found". */

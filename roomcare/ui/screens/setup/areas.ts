@@ -50,7 +50,7 @@ export async function areas(host: HostApi, body: HTMLElement, nav: Nav, data: Se
   const strip = el("div", "strip");
   const count = (n: number, label: string): HTMLElement => { const c = el("span"); c.append(el("b", undefined, whole(host, n)), document.createTextNode(label)); return c; };
   strip.append(count(v.areas, "public areas at this property"), count(v.withRoutine, "with a routine"), count(v.areas - v.withRoutine, "without"),
-    el("span", "end", "from Master Data's location tree · read, never created here"));
+    el("span", "end", "set up with the property's rooms and buildings · never created here"));
   const chips = el("div", "chips");
   chips.append(chip("All", !withoutRoutine, () => { withoutRoutine = false; page = 0; nav.show(); }),
     chip("Without a routine", withoutRoutine, () => { withoutRoutine = true; page = 0; nav.show(); }));

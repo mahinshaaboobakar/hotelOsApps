@@ -38,7 +38,7 @@ export async function services(host: HostApi, body: HTMLElement, nav: Nav, data:
   const typeName = v.roomTypes.find((t) => t.id === v.roomTypeId)?.name ?? "this room type";
   const chips = el("div", "tabline");
   for (const type of v.roomTypes) chips.append(chip(type.name, type.id === v.roomTypeId, () => { chosenType = type.id; nav.show(); }));
-  chips.append(el("span", "mono", "room types are Master Data's; this tab holds Room Care's numbers for each"));
+  chips.append(el("span", "mono", "room types are set up with the property's rooms; this tab holds Room Care's numbers for each"));
 
   const table = el("table");
   const head = el("tr");

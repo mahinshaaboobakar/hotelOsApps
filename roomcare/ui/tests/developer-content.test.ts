@@ -42,10 +42,10 @@ describe("developer content", () => {
   });
 
   it("finds each shape it names — a positive control, so a clean walk is not a blind one", () => {
-    const planted = "WF-Q18 · ADR 0044 · design §6 · (S5 c4) · (row 7) · Chapter 21 · roomcare_manager · a correlation id";
+    const planted = "WF-Q18 · ADR 0044 · design §6 · (S5 c4) · (row 7) · Chapter 21 · roomcare_manager · a correlation id · Master Data";
     expect(developerContent(planted).map((hit) => hit.split(": ")[0])).toEqual([
       "a decision-register id", "an ADR", "a section sign", "a design-section reference", "a design-row reference",
-      "a chapter reference", "a code identifier", "a correlation id",
+      "a chapter reference", "a code identifier", "a correlation id", "a platform system",
     ]);
   });
 });
