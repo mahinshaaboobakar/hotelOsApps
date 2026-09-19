@@ -1,3 +1,4 @@
+using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Domain;
 
 namespace HotelOS.RoomCare.Application.Day;
@@ -67,7 +68,7 @@ public static class DayDecision
 
         if (room.Occupancy == Occupancy.Vacant && room.Condition != Condition.Dirty)
         {
-            var idle = facts.Day.DayNumber - DateOnly.FromDateTime(room.ConditionSetAt.UtcDateTime).DayNumber;
+            var idle = facts.Day.DayNumber - facts.Property.DayOf(room.ConditionSetAt).DayNumber;
             return !soldTonight && idle >= policy.RefreshAfterDays
                 ? Service(Domain.Service.Refresh, PriorityBand.Refresh, $"vacant and unsold for {idle} days")
                 : null;
@@ -116,7 +117,7 @@ public static class DayDecision
 }
 
 /// <summary>What the decision is given about one room.</summary>
-public sealed record DecisionFacts(RoomState? Room, PropertyPolicy Policy, string Window, DateOnly Day, DateTimeOffset DayEndsAt)
+public sealed record DecisionFacts(RoomState? Room, PropertyPolicy Policy, string Window, DateOnly Day, DateTimeOffset DayEndsAt, PropertyDaySettings Property)
 {
     /// <summary>A deep clean holds the room out of the day (S0).</summary>
     public bool Blocked { get; init; }

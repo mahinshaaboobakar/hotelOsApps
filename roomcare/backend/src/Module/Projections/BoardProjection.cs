@@ -74,7 +74,7 @@ public sealed class BoardProjection(RoomCareDbContext db, IHouse house, Property
             day.Name(state?.ConditionSetById),
             (state?.ConditionSetAt ?? day.Now.Instant).ToString("o"),
             state?.Occupancy ?? Occupancy.Unknown,
-            state is { Occupancy: Occupancy.Vacant, Condition: not Condition.Dirty } ? day.Date.DayNumber - DateOnly.FromDateTime(state.ConditionSetAt.UtcDateTime).DayNumber : null,
+            state is { Occupancy: Occupancy.Vacant, Condition: not Condition.Dirty } ? day.Date.DayNumber - day.Now.Settings.DayOf(state.ConditionSetAt).DayNumber : null,
             At(state?.NextSoldAt),
             task?.Id.ToString(),
             task?.Version,

@@ -26,7 +26,15 @@ public interface IHouse
 }
 
 /// <summary>A property's code, zone and business-day boundary.</summary>
-public sealed record PropertyDaySettings(string Code, string Name, string Timezone, TimeOnly Boundary);
+public sealed record PropertyDaySettings(string Code, string Name, string Timezone, TimeOnly Boundary)
+{
+    /// <summary>
+    /// The business day an instant fell on at this property — the same rule as the property's own "today", so a count
+    /// of days between the two is a count of the property's days. Never the instant's UTC date, which is a day early or
+    /// late for part of every day anywhere but UTC (owner instruction, 2026-09-19; Workforce's b5c5ffc).
+    /// </summary>
+    public DateOnly DayOf(DateTimeOffset instant) => Domain.OperatingDay.At(instant, Timezone, Boundary).Date;
+}
 
 /// <summary>A room as a screen and the decision need it — identity only.</summary>
 public sealed record HouseRoom(Guid Id, string Number, Guid RoomTypeId, int SortOrder);

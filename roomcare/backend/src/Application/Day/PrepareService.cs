@@ -98,7 +98,7 @@ public sealed class PrepareService(
         foreach (var room in rooms)
         {
             states.TryGetValue(room.Id, out var state);
-            var decided = DayDecision.Decide(new DecisionFacts(state, policy, target.Window, day, dayEnds)
+            var decided = DayDecision.Decide(new DecisionFacts(state, policy, target.Window, day, dayEnds, now.Settings)
             {
                 Blocked = blocked.Contains(room.Id),
             });

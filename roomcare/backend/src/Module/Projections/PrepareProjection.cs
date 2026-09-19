@@ -81,7 +81,7 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
             ObservationSource.Manual => $"entered by hand · {Words(seen)}",
             _ => $"{seen.Source.ToLowerInvariant()} · {Words(seen)}",
         };
-        var decided = DayDecision.Decide(new DecisionFacts(state, policy, window, day, WindowTimes.DayEnds(day, snapshot.Now)));
+        var decided = DayDecision.Decide(new DecisionFacts(state, policy, window, day, WindowTimes.DayEnds(day, snapshot.Now), snapshot.Now.Settings));
         var next = (decided, task) switch
         {
             (null, null) => "nothing — the room needs no service",
