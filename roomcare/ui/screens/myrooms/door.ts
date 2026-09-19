@@ -9,7 +9,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { failed } from "../../chrome/failure";
 import { control, el } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
-import { act, load } from "../../chrome/load";
+import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
 import { lower, phase, service } from "../../chrome/words";
@@ -28,9 +28,9 @@ interface Door {
 }
 
 export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: string, back: () => void): Promise<void> {
-  const got = await load<Door>(host, "door", { taskId });
+  const got = await load<Door>(host, READ, "door", { taskId });
   if (!got.ok) {
-    body.append(control("btn sm", "‹ My rooms", back), failed(got.failure, "this room", nav.show));
+    body.append(control("btn sm", "‹ My rooms", back), failed(host, got.failure, "this room", nav.show));
     return;
   }
 

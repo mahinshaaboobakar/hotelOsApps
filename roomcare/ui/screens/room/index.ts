@@ -11,7 +11,7 @@ import { card } from "../../chrome/card";
 import { control, el } from "../../chrome/element";
 import { clock, day, nearDay, when } from "../../chrome/instant";
 import { failed } from "../../chrome/failure";
-import { act, holds, load } from "../../chrome/load";
+import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { conditionClass, lower, source } from "../../chrome/words";
 import type { BoardRoom } from "../../model";
@@ -36,9 +36,9 @@ export interface RoomPage {
 let tab = "Today";
 
 export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: string): Promise<void> {
-  const got = await load<RoomPage>(host, "room", { roomId });
+  const got = await load<RoomPage>(host, READ, "room", { roomId });
   if (!got.ok) {
-    body.append(failed(got.failure, "this room", nav.show));
+    body.append(failed(host, got.failure, "this room", nav.show));
     return;
   }
 

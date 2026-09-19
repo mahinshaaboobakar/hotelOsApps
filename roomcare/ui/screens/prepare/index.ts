@@ -11,7 +11,7 @@ import { failed } from "../../chrome/failure";
 import { pager } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock, minutes, when } from "../../chrome/instant";
-import { act, holds, load } from "../../chrome/load";
+import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { lower } from "../../chrome/words";
 import type { Paging } from "../../model";
@@ -42,9 +42,9 @@ export interface PrepareView {
 }
 
 export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: number, goPage: (page: number) => void): Promise<void> {
-  const got = await load<PrepareView>(host, "prepare", { page });
+  const got = await load<PrepareView>(host, READ, "prepare", { page });
   if (!got.ok) {
-    body.append(failed(got.failure, "the day's preparation", nav.show));
+    body.append(failed(host, got.failure, "the day's preparation", nav.show));
     return;
   }
 

@@ -10,7 +10,7 @@ import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { control, el } from "../../chrome/element";
 import { clock, nearDay, when } from "../../chrome/instant";
-import { act, holds, load } from "../../chrome/load";
+import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog } from "../../chrome/overlay";
 import { ordinal, reason } from "../../chrome/words";
@@ -43,9 +43,9 @@ interface Lane {
 }
 
 export async function supervision(host: HostApi, body: HTMLElement, nav: Nav, page: number, goPage: (page: number) => void): Promise<void> {
-  const got = await load<Lane>(host, "supervision", { page });
+  const got = await load<Lane>(host, READ, "supervision", { page });
   if (!got.ok) {
-    body.append(failed(got.failure, "the supervision lane", nav.show));
+    body.append(failed(host, got.failure, "the supervision lane", nav.show));
     return;
   }
 

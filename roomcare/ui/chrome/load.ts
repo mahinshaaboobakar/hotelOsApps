@@ -1,59 +1,41 @@
 /**
- * Reading from Room Care's backend — the one seam, and the only file that
- * touches `host.call` for a read or a write.
+ * Room Care's one seam to its backend — the SDK's read, and this module's write.
  *
- * # A stand-in is not expressible
+ * # The read is the SDK's, and there is no second copy
  *
- * Owner, 2026-09-09 (`APPS-Q26(4)`, `APPS-Q42`): *"Showing a hardcoded list is
- * wrong."* — and marking a fabrication honestly is still rendering one. So a
- * read produces the property's data or the reason there is none, never both
- * and never a stand-in for either. The shape is GuestOps' and Workforce's
- * `Read<T>`, with Workforce's typed failure, so a screen **cannot** reach a
- * value without first answering whether there is one.
+ * `load`, `Read` and `ReadFailure` are `@hotelos/sdk`'s (`read.ts`), shared with
+ * GuestOps, Jobs and Workforce. Room Care kept its own copy of the same union
+ * and the same three causes until 2026-09-18 — correct, and exactly the drift
+ * `read.ts`'s header warns about: the half that differs between copies is what
+ * each one refuses to say. So nothing here re-states a cause, a mapping or a
+ * sentence; screens import the seam from this file, and this file only
+ * re-exports it.
  *
- * **There is no fallback parameter, and its absence is the mechanism.** The
- * recorded fixtures live in `preview/` for the harness and the tests; nothing
- * on the shipped path imports them, and `tests/seam.test.ts` parses the source
- * to keep it so.
+ * **A stand-in is not expressible** (owner, 2026-09-09: *"Showing a hardcoded
+ * list is wrong."*). The failing side of `Read<T>` has no value, and `load` has
+ * no fallback parameter to supply one. The recorded fixtures live in `preview/`
+ * for the harness and the suites; `tests/seam.test.ts` parses the shipped source
+ * so nothing that ships can reach them.
+ *
+ * # The write stays here
+ *
+ * The SDK classifies a read; a write's refusal is a sentence a person acts on,
+ * kept open in its sheet (page 64 §9) — GuestOps keeps its write half for the
+ * same reason.
  */
 
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
-import { causeOf, type ReadFailure } from "./failure";
+export { load } from "@hotelos/sdk";
+export type { Read, ReadFailure } from "@hotelos/sdk";
 
+/** The capability every Room Care read is made under. */
 export const READ = "roomcare.read";
-
-/** What a read produced: the property's data, or the reason there is none. There is no third case. */
-export type Read<T> =
-  | { readonly ok: true; readonly value: T }
-  | { readonly ok: false; readonly failure: ReadFailure };
 
 /** What a write did: its answer, or the service's own sentence for why not. */
 export type Acted<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly because: string };
-
-/**
- * Ask Room Care's backend.
- *
- * @param method the operation within the capability
- * @param params this application's own body — the page, a room's id
- * @param capability the permission the manifest requested; reads are `roomcare.read`
- * @returns the value, or why there is none
- */
-export async function load<T>(host: HostApi, method: string, params?: unknown, capability = READ): Promise<Read<T>> {
-  const at = new Date();
-  // A capability this person was not granted is a decision somebody made, not
-  // an outage — answered without a round trip, naming what is missing.
-  if (!holds(host, capability)) return { ok: false, failure: { cause: "forbidden", capability, method, said: null, at } };
-
-  try {
-    return { ok: true, value: (await host.call(capability, method, params)) as T };
-  } catch (error) {
-    if (!(error instanceof HostCallError)) throw error;
-    return { ok: false, failure: { cause: causeOf(error.kind), capability, method, said: error.isForPeople ? error.message : null, at: new Date() } };
-  }
-}
 
 /** Run a write; answer the service's own sentence when it refuses. */
 export async function act(host: HostApi, capability: string, method: string, params?: unknown): Promise<Acted<unknown>> {

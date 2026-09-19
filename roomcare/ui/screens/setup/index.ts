@@ -8,7 +8,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { failed } from "../../chrome/failure";
 import { subnav } from "../../chrome/bar";
-import { load } from "../../chrome/load";
+import { READ, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { access } from "./access";
 import { areas } from "./areas";
@@ -49,9 +49,9 @@ export interface SetupData {
 
 export async function setup(host: HostApi, body: HTMLElement, nav: Nav, tab: string, go: (tab: string) => void): Promise<void> {
   body.append(subnav(TABS, tab, go));
-  const got = await load<SetupData>(host, "setup");
+  const got = await load<SetupData>(host, READ, "setup");
   if (!got.ok) {
-    body.append(failed(got.failure, "the property's standard", nav.show));
+    body.append(failed(host, got.failure, "the property's standard", nav.show));
     return;
   }
 

@@ -15,7 +15,7 @@ import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { control, el, option } from "../../chrome/element";
 import { day } from "../../chrome/instant";
-import { act, load } from "../../chrome/load";
+import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
 import { inlineSelect, refuse, saveLine, toggle } from "./controls";
@@ -40,9 +40,9 @@ interface Zones {
 }
 
 export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: SetupData): Promise<void> {
-  const got = await load<Zones>(host, "zones");
+  const got = await load<Zones>(host, READ, "zones");
   if (!got.ok) {
-    body.append(failed(got.failure, "the zones", nav.show));
+    body.append(failed(host, got.failure, "the zones", nav.show));
     return;
   }
 

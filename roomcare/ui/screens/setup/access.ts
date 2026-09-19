@@ -12,7 +12,7 @@ import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { control, el } from "../../chrome/element";
 import { day } from "../../chrome/instant";
-import { act, load } from "../../chrome/load";
+import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, dialog, sheet } from "../../chrome/overlay";
 
@@ -35,9 +35,9 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
   );
   read.append(el("div", "sect", "Read this first — every role in Room Care comes from Workforce"), kv);
 
-  const got = await load<Grants>(host, "grants");
+  const got = await load<Grants>(host, READ, "grants");
   if (!got.ok) {
-    body.append(read, failed(got.failure, "the property-wide grants", nav.show));
+    body.append(read, failed(host, got.failure, "the property-wide grants", nav.show));
     return;
   }
 

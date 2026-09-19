@@ -6,7 +6,7 @@
 import { PAGER_LABELS, pagedView, type Paging } from "@hotelos/sdk";
 
 import type { Operator } from "../model";
-import { sentence } from "./failure";
+import { drawing } from "./failure";
 import type { Read } from "./load";
 import { control, el } from "./element";
 
@@ -23,7 +23,7 @@ export function head(sections: readonly string[], current: string, operator: Rea
   for (const section of sections) {
     bar.append(control(section === current ? "tab on" : "tab", section, () => go(section)));
   }
-  if (operator !== null && !operator.ok) bar.append(el("div", "who", sentence(operator.failure, "who is signed in")));
+  if (operator !== null && !operator.ok) bar.append(el("div", "who", `${drawing(operator.failure, "who is signed in").label} · who is signed in`));
   if (operator !== null && operator.ok) {
     const o = operator.value;
     bar.append(el("div", "who", [o.name, o.department, o.property].filter((part) => part !== null && part !== "").join(" · ")));

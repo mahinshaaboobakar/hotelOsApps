@@ -8,8 +8,8 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { card } from "../../chrome/card";
 import { control, el } from "../../chrome/element";
-import { sentence } from "../../chrome/failure";
-import { act, load } from "../../chrome/load";
+import { drawing } from "../../chrome/failure";
+import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { actions, sheet } from "../../chrome/overlay";
 import { phase, service } from "../../chrome/words";
@@ -94,8 +94,8 @@ function copy(host: HostApi, nav: Nav, v: Services): void {
     const chosen = boxes.filter((b) => b.box.checked);
     if (chosen.length === 0) return overlay.refuse("tick at least one room type");
     for (const { type } of chosen) {
-      const target = await load<Services>(host, "services", { roomTypeId: type.id });
-      if (!target.ok) return overlay.refuse(`${type.name}: ${sentence(target.failure, "its numbers")} Nothing was copied to it.`);
+      const target = await load<Services>(host, READ, "services", { roomTypeId: type.id });
+      if (!target.ok) return overlay.refuse(`${type.name}: ${drawing(target.failure, "its numbers").said}. Nothing was copied to it.`);
       for (const s of v.services) {
         const version = target.value.services.find((t) => t.service === s.service)?.version ?? 0;
         const done = await act(host, "roomcare.configure", "saveService", {

@@ -1,22 +1,37 @@
 /**
  * A widget's card — its heading, its figures and its rows, on the published
- * tokens only (page 56; page 64 §1). A row opens the room it names through the
- * shell; a refusal is said on the card, never swallowed.
+ * tokens only (page 56; page 64 §1), and the card it becomes when its read did
+ * not arrive (page 64b's widget frame). A row opens the room it names through the
+ * shell; a refusal to open is said on the card, never swallowed.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import type { FailureDrawing, HostApi, ReadFailure } from "@hotelos/sdk";
 
 import { el, fill } from "../chrome/element";
-import { remedy, sentence, type ReadFailure } from "../chrome/failure";
+import { drawing, mark } from "../chrome/failure";
 import { saying } from "../chrome/load";
 
-/** The shell's own opener — the same route Jobs' widgets take; the shell decides whether it opens. */
+/**
+ * The shell's own opener. The widget names a screen, never an application — the
+ * shell knows which package the widget came from, as it does for Workforce's.
+ */
 const SHELL_OPEN = "shell.open";
 
+/**
+ * Every rule a Room Care widget renders with — this is the only sheet a widget
+ * bundle mounts, so a class a widget emits is styled here or nowhere
+ * (`tests/widget-sheet.test.ts` holds that, per widget and per cause).
+ *
+ * The card fills the widget's frame in every state, so a card that could not
+ * read is the same rectangle as one that did — as Workforce builds it (page 64d,
+ * item 3, is before the owner). The failure rules are 64b's `.card .in`,
+ * `.w-said`, `.w-why` and `.w-open`.
+ */
 const WIDGET_CSS = `
 *{box-sizing:border-box}
 .wcard{font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);color:var(--color-ink,#e8ebf4);
-       background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums}
+       background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums;
+       min-height:100vh;display:flex;flex-direction:column}
 .whead{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin:0 0 12px}
 .whead span{color:var(--color-ink-faint,#5a6172);font-weight:400;font-size:12px}
 .wfig{display:flex;gap:26px;margin-bottom:10px}
@@ -35,10 +50,19 @@ const WIDGET_CSS = `
 .wrow .run{color:var(--color-brand,#818cf8)}
 .wfoot span{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-muted,#8b93a7)}
 .wquiet{color:var(--color-ok,#34d399);font-size:12px}
-.wrefusal{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
-.wrefusal b{display:block;color:var(--color-bad,#f87171);font-weight:600;margin-bottom:4px}
-.wretry{margin-top:12px;background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:5px 12px;
-      font:inherit;font-size:12px;color:var(--color-ink,#e8ebf4);cursor:pointer}
+.wnone{color:var(--color-ink-faint,#5a6172);font-size:12px;padding-top:8px}
+.wrefusal{color:var(--color-bad,#f87171);font-size:12px;padding-top:8px}
+.wfail{flex:1;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.wf-mark{color:var(--color-ink-muted,#8b93a7)}
+.wf-mark svg{width:20px;height:20px;display:block}
+.wf-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
+.wf-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.wf-mark.fail-faulted{color:var(--color-bad,#f87171)}
+.wf-said{font-size:13px;font-weight:600;line-height:1.4}
+.wf-why{font-size:11.5px;line-height:1.5;color:var(--color-ink-muted,#8b93a7)}
+.wf-open{align-self:flex-start;margin-top:2px;padding:0;border:0;background:none;font:inherit;font-size:11.5px;
+         color:var(--color-brand,#818cf8);cursor:pointer}
+.wf-open:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:2px;border-radius:3px}
 `;
 
 export function stylesheet(): HTMLStyleElement {
@@ -71,36 +95,55 @@ export function openRow(host: HostApi, left: string, right: string, tone: string
   const row = el("button", "wrow");
   row.setAttribute("type", "button");
   row.append(el("span", "num", left), el("span", tone, right));
-  row.addEventListener("click", () => void open(host, row, `roomcare:room?id=${roomId}`));
+  row.addEventListener("click", () => void open(host, row, `room?id=${roomId}`));
   return row;
 }
 
+/** What a failure card can reach, from the panel that drew it. */
+export interface Reach {
+  host: HostApi;
+  /** The screen that holds this card's subject — where the four facts are drawn. */
+  opens: string;
+  /** Draw the panel again; wired only where a retry could succeed. */
+  again: () => Promise<HTMLElement>;
+}
+
 /**
- * What a widget draws when its read failed — the card it always has, with the
- * reason where the figures were (a 320×384 canvas does not scroll, so the
- * failure takes the place of the answer rather than sitting above one). Never
- * a figure: a widget is the frame most likely to be glanced at and believed.
- *
- * @param again draw the widget afresh; offered only when asking again could work
+ * A widget that could not read, as 64b's widget frame draws it — its own
+ * surface, not the screen's cut down: the heading it always has, then the mark,
+ * the SDK's short headline and short sentence, and one link onward. **No facts
+ * at this size** — 64b moves them to the screen the card opens, and the owner
+ * approved that divergence by name. Never a figure: a widget is the frame most
+ * likely to be glanced at and believed.
  */
-export function unread(title: string, scope: string, subject: string, failure: ReadFailure, again: () => Promise<HTMLElement>): HTMLElement {
-  const said = el("div", "wrefusal");
-  said.append(el("b", undefined, sentence(failure, subject)), el("div", undefined, remedy(failure)));
-  const root = card(title, scope, [said]);
-  if (failure.cause === "unanswered") {
-    const retry = el("button", "wretry", "Try again");
-    retry.setAttribute("type", "button");
-    retry.addEventListener("click", () => void again().then((fresh) => root.replaceWith(fresh)));
-    root.append(retry);
-  }
+export function unread(title: string, scope: string, subject: string, failure: ReadFailure, reach: Reach): HTMLElement {
+  const drawn = drawing(failure, subject);
+  const body = fill(el("div", "wfail"), mark(drawn, "wf-mark"), el("div", "wf-said", drawn.briefSaid), el("div", "wf-why", drawn.brief));
+  const root = card(title, scope, [body]);
+  body.append(onward(drawn, root, reach));
   return root;
 }
 
-async function open(host: HostApi, row: HTMLElement, destination: string): Promise<void> {
+/** The one thing a glance can do — the SDK's words and choice; this wires them. */
+function onward(drawn: FailureDrawing, root: HTMLElement, reach: Reach): HTMLElement {
+  const link = el("button", "wf-open", drawn.onward.label);
+  link.setAttribute("type", "button");
+  switch (drawn.onward.kind) {
+    case "retry":
+      link.addEventListener("click", () => void reach.again().then((fresh) => root.replaceWith(fresh)));
+      break;
+    case "open":
+      link.addEventListener("click", () => void open(reach.host, link, reach.opens));
+      break;
+  }
+  return link;
+}
+
+async function open(host: HostApi, from: HTMLElement, destination: string): Promise<void> {
   try {
     await host.call(SHELL_OPEN, "at", { destination });
   } catch (error) {
-    const holder = row.closest(".wcard");
+    const holder = from.closest(".wcard");
     if (holder === null) return;
     holder.querySelector(".wrefusal")?.remove();
     holder.append(el("div", "wrefusal", `Not opened — ${saying(error)}`));

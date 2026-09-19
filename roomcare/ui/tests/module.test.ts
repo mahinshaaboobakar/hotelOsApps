@@ -45,24 +45,24 @@ describe("the Room Care module", () => {
     const overrides: Record<string, unknown> = { board: new HostCallError({ kind: "unavailable", message: "down" }) };
     const root = mount(activate, host(SUPERVISOR, overrides));
     await settle();
-    expect(root.querySelector(".note.bad")?.textContent).toContain("Room Care did not answer, so the board could not be read.");
+    expect(root.querySelector(".fail-said")?.textContent).toBe("Room Care did not answer in time");
     expect(root.querySelectorAll(".tile").length).toBe(0);
 
     delete overrides.board;
-    click(root, ".note.bad button", "Try again");
+    click(root, ".fail button", "Try again");
     await settle();
-    expect(root.querySelector(".note.bad")).toBeNull();
+    expect(root.querySelector(".fail")).toBeNull();
     expect(root.querySelectorAll(".tile").length).toBeGreaterThan(0);
   });
 
-  it("offers no Try again when the service refused the question, and shows the service's own words", async () => {
+  it("offers no Try again when the service refused the question — only the details to pass on, with the service's own words", async () => {
     const refused = new HostCallError({ kind: "rejected", message: "this room is not at this property" });
     const root = mount(activate, host(SUPERVISOR, { board: refused }));
     await settle();
-    const note = root.querySelector(".note.bad");
-    expect(note?.textContent).toContain("Room Care could not produce the board.");
-    expect(note?.textContent).toContain("this room is not at this property");
-    expect(note?.querySelector("button")).toBeNull();
+    const state = root.querySelector(".fail");
+    expect(state?.querySelector(".fail-said")?.textContent).toBe("Room Care could not build the board");
+    expect(state?.querySelector(".fail-facts")?.textContent).toContain("this room is not at this property");
+    expect([...(state?.querySelectorAll("button") ?? [])].map((b) => b.textContent)).toEqual(["Copy these details"]);
   });
 
   it("opens a room with its disagreement, and keeps ours with the version it was drawn at", async () => {

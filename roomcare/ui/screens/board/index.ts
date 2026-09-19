@@ -10,7 +10,7 @@ import { failed } from "../../chrome/failure";
 import { chip } from "../../chrome/bar";
 import { el, option } from "../../chrome/element";
 import { clock, when } from "../../chrome/instant";
-import { load } from "../../chrome/load";
+import { READ, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { remember, remembered } from "../../chrome/remember";
 import type { Board, BoardRoom, Strip } from "../../model";
@@ -28,9 +28,9 @@ const FILTERS: readonly (readonly [string, Lit])[] = [
 ];
 
 export async function board(host: HostApi, body: HTMLElement, nav: Nav): Promise<void> {
-  const got = await load<Board>(host, "board");
+  const got = await load<Board>(host, READ, "board");
   if (!got.ok) {
-    body.append(failed(got.failure, "the board", nav.show));
+    body.append(failed(host, got.failure, "the board", nav.show));
     return;
   }
 

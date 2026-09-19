@@ -10,7 +10,7 @@ import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
 import { el } from "../../chrome/element";
 import { clock, minutes } from "../../chrome/instant";
-import { load } from "../../chrome/load";
+import { READ, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { ordinal, service } from "../../chrome/words";
 import type { Outcome, Paging } from "../../model";
@@ -44,9 +44,9 @@ interface MyRooms {
 
 export async function myRooms(host: HostApi, body: HTMLElement, nav: Nav, taskId: string | null, open: (taskId: string | null) => void): Promise<void> {
   if (taskId !== null) return door(host, body, nav, taskId, () => open(null));
-  const got = await load<MyRooms>(host, "myRooms", { page: 0 });
+  const got = await load<MyRooms>(host, READ, "myRooms", { page: 0 });
   if (!got.ok) {
-    body.append(failed(got.failure, "your rooms", nav.show));
+    body.append(failed(host, got.failure, "your rooms", nav.show));
     return;
   }
 

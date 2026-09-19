@@ -9,7 +9,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { failed } from "../../chrome/failure";
 import { chip } from "../../chrome/bar";
 import { el, option } from "../../chrome/element";
-import { act, load } from "../../chrome/load";
+import { READ, act, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { phase, service } from "../../chrome/words";
 import { inlineNumber, refuse, saveLine } from "./controls";
@@ -27,9 +27,9 @@ let chosenType: string | null = null;
 let chosenService = "DEPARTURE_CLEAN";
 
 export async function services(host: HostApi, body: HTMLElement, nav: Nav, data: SetupData): Promise<void> {
-  const got = await load<Services>(host, "services", { roomTypeId: chosenType });
+  const got = await load<Services>(host, READ, "services", { roomTypeId: chosenType });
   if (!got.ok) {
-    body.append(failed(got.failure, "the services", nav.show));
+    body.append(failed(host, got.failure, "the services", nav.show));
     return;
   }
 

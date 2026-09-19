@@ -66,17 +66,18 @@ describe("the read seam", () => {
   });
 
   it("renders no date itself — every one goes through the SDK (page 64 §11)", () => {
-    // The one machine fact is when this screen observed a failed read, and it is labelled as ISO on the failure's wire line.
+    // No exemption. The moment a read failed is stamped by the SDK's `load`; Room Care's own copy stamped it in
+    // `chrome/load.ts`, which this guard exempted by name until that copy was deleted on 2026-09-18.
     const offenders = shipped().flatMap((file) =>
       readFileSync(join(ROOT, file), "utf8").split("\n")
         .map((line, i) => ({ line, at: `${file}:${i + 1}` }))
-        .filter(({ line }) => /\bIntl\.|\bDate\.(now|parse)\(|toLocale(Date|Time)?String\(/.test(line) || (/\bnew Date\(/.test(line) && file !== "chrome/load.ts"))
+        .filter(({ line }) => /\bIntl\.|\bDate\.(now|parse)\(|\bnew Date\(|toLocale(Date|Time)?String\(/.test(line))
         .map(({ at }) => at));
     expect(offenders).toEqual([]);
   });
 
   it("returns a reason and no value when the service does not answer", async () => {
-    const got = await load(host(["roomcare.read"], { board: new HostCallError({ kind: "unavailable", message: "down" }) }), "board");
+    const got = await load(host(["roomcare.read"], { board: new HostCallError({ kind: "unavailable", message: "down" }) }), "roomcare.read", "board");
     expect(got.ok).toBe(false);
     expect("value" in got).toBe(false);
     expect(!got.ok && got.failure.cause).toBe("unanswered");
@@ -84,14 +85,14 @@ describe("the read seam", () => {
 
   it("refuses without a round trip, naming the capability, when this person was not granted it", async () => {
     const calls: { method: string }[] = [];
-    const got = await load(host([], {}, calls as never), "board");
+    const got = await load(host([], {}, calls as never), "roomcare.read", "board");
     expect(calls).toEqual([]);
     expect(!got.ok && [got.failure.cause, got.failure.capability]).toEqual(["forbidden", "roomcare.read"]);
   });
 
   it("does not turn a programming error into a sentence a person would believe", async () => {
     const broken = { ...host(["roomcare.read"]), call: () => Promise.reject(new TypeError("not a host failure")) };
-    await expect(load(broken, "board")).rejects.toThrow(TypeError);
+    await expect(load(broken, "roomcare.read", "board")).rejects.toThrow(TypeError);
   });
 });
 
@@ -104,19 +105,19 @@ describe("a widget that cannot read", () => {
     document.body.replaceChildren(holder);
     holder.append(await roomsReady(flaky));
     expect(holder.querySelector(".wfig")).toBeNull();
-    expect(holder.textContent).toContain("Room Care did not answer, so today's departures could not be read.");
+    expect(holder.textContent).toContain("Room Care did not answer in time");
+    expect(holder.querySelector(".wf-open")?.textContent).toBe("Try again →");
 
     down = false;
-    holder.querySelector<HTMLElement>(".wretry")!.click();
+    holder.querySelector<HTMLElement>(".wf-open")!.click();
     await settle();
     const counts = recorded<{ ready: number }>("widget-rooms-ready");
     expect(holder.querySelector(".wfig b")?.textContent).toBe(String(counts.ready));
   });
 
-  it("offers no Try again on a refusal — asking again cannot change it", async () => {
+  it("offers no Try again on a refusal — asking again cannot change it — and opens Room Care instead", async () => {
     const card = await roomsReady(host([]));
-    expect(card.querySelector(".wretry")).toBeNull();
-    expect(card.textContent).toContain("You do not have access to today's departures.");
-    expect(card.textContent).toContain("roomcare.read");
+    expect(card.querySelector(".wf-open")?.textContent).toBe("Open Room Care →");
+    expect(card.textContent).toContain("You do not have access to today's departures");
   });
 });

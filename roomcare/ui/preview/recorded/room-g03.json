@@ -1,6 +1,6 @@
 {
   "line": {
-    "id": "01a09e9a-e7e7-70aa-aea2-bff58d49ffeb",
+    "id": "01a0aaf4-1e5f-75b7-8ae7-f9a8d5eb30d6",
     "number": "G03",
     "condition": "CLEAN",
     "source": "ATTENDANT",
@@ -9,13 +9,13 @@
     "occupancy": "VACANT",
     "vacantDays": 0,
     "soldAt": "2026-09-05T07:30:00.0000000+00:00",
-    "taskId": "01a09e9a-ea34-7e44-8f91-b2fd21d62d17",
+    "taskId": "01a0aaf4-22aa-718b-b5d3-5369288ce4d0",
     "taskVersion": 9,
     "service": "DEPARTURE_CLEAN",
     "reduction": null,
     "earliestAt": null,
     "priority": 1,
-    "attendantId": "01a09e9a-e7b8-7050-8f0a-4bf535e7a61c",
+    "attendantId": "01a0aaf4-1e0e-7631-b751-23432c3f9235",
     "attendant": "Anita Pillai",
     "outcome": {
       "kind": "DONE",

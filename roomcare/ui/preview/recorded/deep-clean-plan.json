@@ -1,7 +1,7 @@
 {
   "rows": [
     {
-      "roomTypeId": "01a09e9a-deb1-773d-a416-0a2480869a79",
+      "roomTypeId": "01a0aaf4-0a3f-7b16-a79c-f42132ae1a6e",
       "roomType": "Standard",
       "everyMonths": 12,
       "rooms": 16,
@@ -9,7 +9,7 @@
       "version": 1
     },
     {
-      "roomTypeId": "01a09e9a-deb1-787e-bfba-1094ec17bb83",
+      "roomTypeId": "01a0aaf4-0a3f-7486-917b-474cb19f59c1",
       "roomType": "Suite",
       "everyMonths": 4,
       "rooms": 1,

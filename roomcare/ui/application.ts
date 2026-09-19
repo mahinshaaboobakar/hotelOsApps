@@ -13,7 +13,7 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
 import { head } from "./chrome/bar";
 import { el } from "./chrome/element";
-import { holds, load } from "./chrome/load";
+import { READ, holds, load } from "./chrome/load";
 import { stylesheet } from "./chrome/styles";
 import type { Read } from "./chrome/load";
 import type { Operator } from "./model";
@@ -109,7 +109,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
     mount(element) {
       root = element;
       show();
-      void load<Operator>(host, "me").then((got) => {
+      void load<Operator>(host, READ, "me").then((got) => {
         operator = got;
         show();
       });

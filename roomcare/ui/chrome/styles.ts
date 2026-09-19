@@ -11,9 +11,11 @@
  * (No backticks inside the sheet: it is a template literal.)
  */
 
+import { FAILURE_CSS } from "./failure";
+
 export function stylesheet(parts: readonly string[] = []): HTMLStyleElement {
   const style = document.createElement("style");
-  style.textContent = [CHROME, TABLES, HOUSE, OVERLAY, SETUP, ...parts].join("\n");
+  style.textContent = [CHROME, TABLES, HOUSE, OVERLAY, SETUP, FAILURE_CSS, ...parts].join("\n");
   return style;
 }
 
@@ -62,8 +64,6 @@ select.btn.chip{background:var(--color-surface,#0b0d14)}
 .note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;margin:10px 0;color:var(--color-ink-muted,#8b93a7);font-size:13px;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
 .note b{color:var(--color-ink,#e8ebf4)}
-.note.bad{border-color:var(--color-bad,#f87171);background:var(--color-bad-soft,rgb(248 113 113 / 0.12))}
-.note.warn{border-color:var(--color-warn,#fbbf24);background:var(--color-warn-soft,rgb(251 191 36 / 0.12))}
 .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7);white-space:nowrap}
 .mono{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .dim{color:var(--color-ink-faint,#5a6172)}
