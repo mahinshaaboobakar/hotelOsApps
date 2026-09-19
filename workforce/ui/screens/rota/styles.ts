@@ -20,6 +20,8 @@ export const ROTA_CSS = `
 .wkstep:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:-1px}
 
 .rgrid{display:grid;grid-template-columns:230px repeat(7,1fr);gap:6px;min-width:0}
+/* The cells are buttons (ledger D4): a keyboard that reaches one must see it. */
+.rgrid > button:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:1px}
 /* person, not who: the app bar owns .who for the signed-in person, which
    is the name Jobs and GuestOps both draw. This is a grid cell, internal to one
    screen, so it is the one that renames. */

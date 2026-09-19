@@ -45,6 +45,15 @@ export function grid(
 
     person.week.forEach((cell, day) => {
       const node = draw(cell, property);
+
+      // A button, so a keyboard reaches it: these were `div`s with a click
+      // listener, which a mouse could open and nothing else could (ledger D4,
+      // tests/mouse-only). Its name says whose day it is, because the cell's
+      // own text is a code or a "＋" that means nothing read aloud.
+      node.setAttribute("type", "button");
+      const heading = days[day] === undefined ? "" : formatDay(days[day], property, "weekday-day");
+      node.setAttribute("aria-label",
+        [person.name, heading, spoken(cell, property)].filter((one) => one !== "").join(" · "));
       node.addEventListener("click", () => open(person, day));
       table.append(node);
     });
@@ -76,23 +85,40 @@ function who(person: Person): HTMLElement {
   return row;
 }
 
-/** One cell, in whichever of its four states it is in. */
+/**
+ * What a cell says when read aloud. Composed from the cell rather than taken
+ * from its `textContent`, which welds the code to the hours ("M07:00–15:00").
+ */
+function spoken(cell: Cell, property: PropertyEnvironment): string {
+  if (cell.leave !== null) return cell.leave;
+  if (cell.gap) return "gap, needs cover";
+  if (cell.shift === null) return "no shift";
+
+  const when = span(cell.override ?? cell.shift.hours, property);
+  return when === null ? cell.shift.name : `${cell.shift.name}, ${when}`;
+}
+
+/**
+ * One cell, in whichever of its four states it is in — a `<button>` in every
+ * one, because every one opens the picker. The classes carry the drawing; the
+ * chrome's `button` reset carries nothing that shows.
+ */
 function draw(cell: Cell, property: PropertyEnvironment): HTMLElement {
   if (cell.leave !== null) {
-    return el("div", "away", cell.leave);
+    return el("button", "away", cell.leave);
   }
 
   if (cell.gap) {
     // Named, not blank. The header counts it, and a manager should be able to
     // find the one the count refers to without reading every cell.
-    return el("div", "gap", "gap — cover?");
+    return el("button", "gap", "gap — cover?");
   }
 
   if (cell.shift === null) {
-    return el("div", "empty", "＋");
+    return el("button", "empty", "＋");
   }
 
-  const chip = el("div", `chip ${cell.shift.tone}`);
+  const chip = el("button", `chip ${cell.shift.tone}`);
   chip.append(el("b", undefined, cell.shift.code));
 
   // The override replaces the hours *for this day* and is drawn on the chip it
