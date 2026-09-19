@@ -20,7 +20,7 @@ import { notes } from "./notes";
 import { overview } from "./overview";
 import { rating } from "./rating";
 import { record } from "./record";
-import { work } from "./work";
+import { work, type WorkActs } from "./work";
 
 /** What the job view is told and tells back. */
 export interface JobPlace {
@@ -90,7 +90,7 @@ export async function job(host: HostApi, main: HTMLElement, place: JobPlace): Pr
     asked,
     said.line,
     subnav(tabs(detail, host.property), place.tab, place.onTab),
-    tab(host, detail, place),
+    tab(host, detail, place, workActs(detail.row.id, doing, ask)),
   );
   main.replaceChildren(body);
 }
@@ -127,9 +127,17 @@ function tabs(d: JobDetail, property: PropertyEnvironment): readonly Tab[] {
   return list;
 }
 
-function tab(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
+/** Pause and Stop, as the header does them — one definition, used by the header and the Work tab. */
+function workActs(id: string, doing: Doing, ask: Asking): WorkActs {
+  return {
+    pause: () => ask("Why is it pausing?", "waiting for parts", (reason) => void doing(JOB_COMPLETE, "pause", { id, reason })),
+    stop: () => void doing(JOB_COMPLETE, "stop", { id }),
+  };
+}
+
+function tab(host: HostApi, d: JobDetail, place: JobPlace, acts: WorkActs): HTMLElement {
   switch (place.tab) {
-    case "Work": return work(host, d, may(host, JOB_COMPLETE), place.onResolve);
+    case "Work": return work(host, d, may(host, JOB_COMPLETE), place.onResolve, acts);
     case "History": return history(host, d);
     case "Notes & photos": return notes(host, d, place.onChanged);
     case "Links & steps": return links(d, may(host, JOB_AMEND), host.property);
@@ -200,11 +208,8 @@ function actions(
     if (d.runningSeconds === null) {
       row.append(control("btn", "Start work", () => void doing(JOB_COMPLETE, "start", { id })));
     } else {
-      row.append(
-        control("btn", "Pause", () => ask("Why is it pausing?", "waiting for parts", (reason) =>
-          void doing(JOB_COMPLETE, "pause", { id, reason }))),
-        control("btn", "Stop", () => void doing(JOB_COMPLETE, "stop", { id })),
-      );
+      const acts = workActs(id, doing, ask);
+      row.append(control("btn", "Pause", acts.pause), control("btn", "Stop", acts.stop));
     }
   }
 

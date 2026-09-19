@@ -6,7 +6,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { control, el, fill } from "../../chrome/element";
+import { el, fill, off } from "../../chrome/element";
 import { when } from "../../chrome/instant";
 import type { JobDetail } from "../../board";
 import { card } from "./overview";
@@ -24,7 +24,8 @@ export function record(host: HostApi, d: JobDetail): HTMLElement {
     el("div", "card"),
     el("h3", undefined, "Reminders"),
     el("div", "mono", `Mine · ${d.record.find((x) => x.k === "Reminders")?.v ?? "none"}`),
-    control("btn sm", "Remind me…"),
+    // The backend answers `remind`; choosing when needs a form no frame draws.
+    off("btn sm", "Remind me…", "setting a reminder isn't available here yet"),
   );
   return fill(el("div", "cols3"), card("Identity", identity), card("Audit", audit), reminders);
 }

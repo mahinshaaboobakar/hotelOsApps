@@ -6,7 +6,7 @@
 
 import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
-import { control, el, fill } from "../../chrome/element";
+import { control, el, fill, off } from "../../chrome/element";
 import { choose, lines, saying, text, values } from "../../chrome/form";
 import { JOB_CURATE, JOB_READ } from "../../chrome/permissions";
 import { failure } from "../../chrome/failure";
@@ -95,7 +95,8 @@ function detail(
 ): HTMLElement {
   const box = el("div", "card");
   const title = el("h3", undefined, `Air conditioning › ${item.name}`);
-  if (curate) title.append(fill(el("span", "grow"), control("btn sm", "Edit")));
+  // `saveItem` exists; the edit form for an existing item is not drawn yet.
+  if (curate) title.append(fill(el("span", "grow"), off("btn sm", "Edit", "editing an item isn't available here yet")));
   box.append(title);
   const kv = el("div", "kv");
   kv.append(
@@ -108,7 +109,8 @@ function detail(
   );
   box.append(kv, el("div", "sect", "Resolutions"));
   const chips = el("div", "chips");
-  for (const r of item.resolutions) chips.append(control("btn chip", r.name));
+  // A list, not actions: they were buttons that did nothing when pressed.
+  for (const r of item.resolutions) chips.append(el("span", "pill", r.name));
   box.append(chips);
   if (curate) {
     const adding = el("div");

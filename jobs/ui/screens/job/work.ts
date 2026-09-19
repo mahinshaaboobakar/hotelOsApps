@@ -11,14 +11,17 @@ import { control, el, fill } from "../../chrome/element";
 import { elapsed, when } from "../../chrome/instant";
 import type { JobDetail, Session } from "../../board";
 
-export function work(host: HostApi, d: JobDetail, mayResolve: boolean, onResolve: () => void): HTMLElement {
+/** The header's own Pause and Stop: the Work tab offers the same two acts, so it takes the same handlers. */
+export interface WorkActs { pause: () => void; stop: () => void }
+
+export function work(host: HostApi, d: JobDetail, mayResolve: boolean, onResolve: () => void, acts: WorkActs): HTMLElement {
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "1fr 2fr";
-  grid.append(now(d, mayResolve, onResolve), sessions(host, d.sessions));
+  grid.append(now(d, mayResolve, onResolve, acts), sessions(host, d.sessions));
   return grid;
 }
 
-function now(d: JobDetail, mayResolve: boolean, onResolve: () => void): HTMLElement {
+function now(d: JobDetail, mayResolve: boolean, onResolve: () => void, acts: WorkActs): HTMLElement {
   const box = el("div", "card");
   box.append(el("h3", undefined, "Now"));
   const kv = el("div", "kv");
@@ -33,7 +36,7 @@ function now(d: JobDetail, mayResolve: boolean, onResolve: () => void): HTMLElem
   const working = d.runningSeconds !== null && d.row.viewerIsAssignee;
   if (working || mayResolve) {
     const row = el("div", "row");
-    if (working) row.append(control("btn", "Pause"), control("btn", "Stop"));
+    if (working) row.append(control("btn", "Pause", acts.pause), control("btn", "Stop", acts.stop));
     if (mayResolve) row.append(control("btn pri", "Resolve…", onResolve));
     box.append(row);
   }

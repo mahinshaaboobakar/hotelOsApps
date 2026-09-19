@@ -6,7 +6,7 @@
 
 import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
-import { control, el, fill, unavailable } from "../../chrome/element";
+import { control, el, fill, off, unavailable } from "../../chrome/element";
 import { pager } from "../../chrome/tabs";
 import { priority } from "../../chrome/marks";
 import type { PolicyRow, Settings } from "../../board";
@@ -84,7 +84,7 @@ function policyLine(p: PolicyRow, configure: boolean): HTMLElement {
   const scope = fill(el("td"), el("span", `pill ${tone[p.scope]}`.trim(), p.scope), ` ${p.scopeLabel}`);
   scope.style.paddingLeft = `${String(10 + indent[p.scope])}px`;
   tr.append(scope, el("td", undefined, p.name), el("td", undefined, p.due), el("td", undefined, p.atRisk), el("td", undefined, p.ladder), el("td", undefined, p.usedBy),
-    fill(el("td"), configure ? control("btn sm", "Edit") : null));
+    fill(el("td"), configure ? off("btn sm", "Edit", "editing a policy from this list isn't available yet") : null));
   return tr;
 }
 

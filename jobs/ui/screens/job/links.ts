@@ -6,9 +6,11 @@ import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
  * (S1 D2).
  */
 
-import { control, el, fill } from "../../chrome/element";
+import { el, fill, off } from "../../chrome/element";
 import { status } from "../../chrome/marks";
 import type { JobDetail } from "../../board";
+
+const LATER = "linking and adding steps aren't available here yet";
 
 export function links(d: JobDetail, mayAmend: boolean, property: PropertyEnvironment): HTMLElement {
   const root = el("div");
@@ -16,7 +18,10 @@ export function links(d: JobDetail, mayAmend: boolean, property: PropertyEnviron
   root.append(el("div", "sect", "Linked jobs · same room, related"), linked(d, mayAmend));
   if (mayAmend) {
     const row = el("div", "row");
-    row.append(control("btn", "Link a job…"), control("btn", "Add a step…"));
+    // The backend answers `link`, but choosing the job to link needs a picker
+    // no frame draws, and adding a step or unlinking has no operation at all.
+    // Drawn off until each is built (owner, 2026-09-19: nothing live and inert).
+    row.append(off("btn", "Link a job…", LATER), off("btn", "Add a step…", LATER), el("span", "mono", LATER));
     root.append(row);
   }
   return root;
@@ -49,7 +54,7 @@ function linked(d: JobDetail, mayAmend: boolean): HTMLElement {
     tr.append(
       el("td", "num", l.number), el("td", undefined, l.department), el("td", undefined, l.what),
       fill(el("td"), status(l.status)), el("td", undefined, l.assignedTo),
-      fill(el("td"), mayAmend ? control("btn sm", "Unlink") : null),
+      fill(el("td"), mayAmend ? off("btn sm", "Unlink", LATER) : null),
     );
     t.append(tr);
   }

@@ -49,6 +49,19 @@ export function fill(parent: HTMLElement, ...children: readonly (Node | string |
  * and saved nothing. A disabled button with no reason is a puzzle, so the
  * reason is always given.
  */
+/**
+ * A secondary control with nothing behind it yet: drawn `off`, disabled, its
+ * reason carried in its title (and said beside it by the caller where a row has
+ * room). Never live-and-inert — the owner found such buttons on 2026-09-19.
+ */
+export function off(className: string, label: string, reason: string): HTMLButtonElement {
+  const button = el("button", `${className} off`, label) as HTMLButtonElement;
+  button.type = "button";
+  button.disabled = true;
+  button.title = reason;
+  return button;
+}
+
 export function unavailable(label: string, reason: string): HTMLElement {
   const button = control("btn pri off", label);
   button.setAttribute("disabled", "true");
