@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Module;
 using HotelOS.Platform;
@@ -95,4 +96,48 @@ public sealed class LocaleWireTests
         Assert.False(entry.TryGetProperty("date", out _), "'date' is a rendering; the screen formats 'at'");
         Assert.False(entry.TryGetProperty("time", out _), "'time' is a rendering; the screen formats 'at'");
     }
+
+    /// <summary>23:40 UTC on the 31st — the 1st in any zone east of UTC.</summary>
+    private static readonly DateTimeOffset Late = new(2026, 8, 31, 23, 40, 0, TimeSpan.Zero);
+
+    [Fact]
+    public async Task Feed_sends_instants_for_the_last_fact_and_each_held_one()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        harness.Db.FeedMarks.Add(new InboundFeedMark
+        {
+            PropertyId = DeskHarness.Property, IntegrationId = "ohip", LastFactAt = Late,
+        });
+        harness.Db.HeldFacts.Add(new HeldFact
+        {
+            Id = Guid.CreateVersion7(), PropertyId = DeskHarness.Property, IntegrationId = "ohip",
+            Payload = "{}", Reason = default, ReceivedAt = Late,
+        });
+        await harness.Db.SaveChangesAsync();
+
+        var feed = Wire(await new FeedView(harness.Db).AnswerAsync(harness.Scope(), CancellationToken.None));
+
+        Assert.Equal(Late, Instant(feed.GetProperty("lastFactAt")));
+        Assert.Equal(Late, Instant(feed.GetProperty("facts").EnumerateArray().Single().GetProperty("at")));
+    }
+
+    [Fact]
+    public async Task Feed_sends_null_for_a_property_nothing_has_spoken_to()
+    {
+        // Absent is its own answer: the widget draws no row, never "never" and
+        // never a time somebody could read as the feed's last word.
+        await using var harness = await DeskHarness.CreateAsync();
+
+        var feed = Wire(await new FeedView(harness.Db).AnswerAsync(harness.Scope(), CancellationToken.None));
+
+        Assert.Equal(JsonValueKind.Null, feed.GetProperty("lastFactAt").ValueKind);
+    }
+
+    // **Watchlist has no wire test here, and the gap is stated rather than
+    // hidden.** `WatchlistView` reads `masterdata.rooms` and room-type names
+    // directly, and this harness's scratch database provisions the `guestops`
+    // schema only — the view throws 42P01 before it reaches a time (measured
+    // 2026-09-19). Its `due` and `at` are covered by call shape instead:
+    // `RenderedDateGuardTests` refuses any fixed date or time pattern in
+    // `Module/`, which is the defect this file checks by value.
 }

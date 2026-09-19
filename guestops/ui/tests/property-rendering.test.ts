@@ -22,6 +22,7 @@ import { describe, expect, it } from "vitest";
 import type { PropertyEnvironment } from "@hotelos/sdk";
 
 import type { Activity } from "../book";
+import { day, instant } from "../chrome/when";
 import { activityTab } from "../screens/stay/activity-tab";
 
 const KOLKATA: PropertyEnvironment = { locale: "en-IN", timezone: "Asia/Kolkata" };
@@ -58,5 +59,18 @@ describe("the Activity tab", () => {
 
   it("draws the marked ISO form where no locale or zone is established", () => {
     expect(when(UNKNOWN)).toEqual(["2026-08-31 UTC", "23:40 UTC"]);
+  });
+});
+
+describe("an absent instant", () => {
+  it("is drawn as the dash, never as today and never as the word null (I2)", () => {
+    expect(instant(null, KOLKATA, "time")).toBe("—");
+    expect(instant(null, UNKNOWN, "date")).toBe("—");
+    expect(day(null, KOLKATA, "day-month")).toBe("—");
+  });
+
+  it("is the value's rendering when there is one", () => {
+    expect(instant(LATE, UNKNOWN, "time")).toBe("23:40 UTC");
+    expect(day("2026-09-01", UNKNOWN, "day-month")).toBe("2026-09-01");
   });
 });

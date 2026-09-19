@@ -30,6 +30,7 @@ import { connectToHost, type HostApi } from "@hotelos/sdk";
 import { failureDrawing, load } from "@hotelos/sdk";
 
 import { APP } from "../../app";
+import { instant } from "../../chrome/when";
 import { serve } from "../mount";
 import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
 
@@ -37,7 +38,10 @@ import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from
 interface Held {
   reason: string;
   source: string;
+
+  /** When it arrived — an ISO instant; this widget draws its time. */
   at: string;
+
   stay: string;
 }
 
@@ -49,7 +53,9 @@ interface Feed {
    * When this property last heard anything at all — null only when it never has.
    *
    * Absence and an ageing time are different facts and stay different values:
-   * a property nobody has ever sent a fact to has not gone quiet.
+   * a property nobody has ever sent a fact to has not gone quiet. An ISO
+   * instant, drawn in the property's zone and locale — "HH:mm" on the
+   * server's clock until 2026-09-19.
    */
   lastFactAt: string | null;
 
@@ -89,7 +95,7 @@ connectToHost((host: HostApi) => {
 
     for (const fact of feed.facts.slice(0, 3)) {
       body.append(row(
-        [fact.reason, el("span", "rc", fact.source), el("span", "rc t", fact.at)],
+        [fact.reason, el("span", "rc", fact.source), el("span", "rc t", instant(fact.at, host.property, "time"))],
         `attention/${fact.stay}`,
         open,
       ));
@@ -100,7 +106,7 @@ connectToHost((host: HostApi) => {
     // "never", because "never" is a claim about a feed that may not exist yet.
     if (feed.lastFactAt !== null) {
       body.append(row(
-        ["Last fact received", el("span", "rc t", feed.lastFactAt)],
+        ["Last fact received", el("span", "rc t", instant(feed.lastFactAt, host.property, "time"))],
         "attention",
         open,
       ));

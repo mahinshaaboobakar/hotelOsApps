@@ -78,7 +78,10 @@ public sealed class WatchlistView(
                     ? number
                     : null,
                 guest = Named(names, stay.Id),
-                due = stay.DepartureAt.At?.ToString("HH:mm"),
+                // Instants, not renderings — page 64 §11. Both were "HH:mm" on
+                // the server's offset until 2026-09-19; null still means the
+                // time was never recorded, and the widget draws it as a dash.
+                due = stay.DepartureAt.At?.ToString("O"),
                 late = (string?)null,
                 stay = stay.Id.ToString(),
             }).ToArray(),
@@ -87,7 +90,7 @@ public sealed class WatchlistView(
             {
                 guest = Named(names, stay.Id),
                 type = types.TryGetValue(stay.RoomTypeId, out var type) ? type : null,
-                at = stay.ArrivalAt.At?.ToString("HH:mm"),
+                at = stay.ArrivalAt.At?.ToString("O"),
                 stay = stay.Id.ToString(),
             }).ToArray(),
         };

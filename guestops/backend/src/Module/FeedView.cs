@@ -44,13 +44,16 @@ public sealed class FeedView(GuestOpsDbContext db)
                 f => f.PropertyId == scope.PropertyId && f.ResolvedAt == null,
                 cancellationToken),
 
-            lastFactAt = mark?.LastFactAt.ToString("HH:mm"),
+            // Instants, not renderings — page 64 §11. Both were "HH:mm" on
+            // the server's offset until 2026-09-19; the widget draws them in
+            // the property's zone and locale.
+            lastFactAt = mark?.LastFactAt.ToString("O"),
 
             facts = held.Select(fact => new
             {
                 reason = fact.Reason.ToString(),
                 source = fact.IntegrationId,
-                at = fact.ReceivedAt.ToString("HH:mm"),
+                at = fact.ReceivedAt.ToString("O"),
 
                 // The held fact names no stay — that is why it is held. The
                 // widget's `stay` is the tap-through target, and an id invented

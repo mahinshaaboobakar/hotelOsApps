@@ -55,10 +55,10 @@ export const occupancy = {
 export const pms = {
   newToday: 23,
   held: 2,
-  lastFactAt: "09:41",
+  lastFactAt: "2026-09-01T09:41:00+05:30",
   facts: [
-    { reason: "Unmatched stay reference", source: "OHIP", at: "09:12", stay: "h1" },
-    { reason: "Rate code not known here", source: "OHIP", at: "07:48", stay: "h2" },
+    { reason: "Unmatched stay reference", source: "OHIP", at: "2026-09-01T09:12:00+05:30", stay: "h1" },
+    { reason: "Rate code not known here", source: "OHIP", at: "2026-09-01T07:48:00+05:30", stay: "h2" },
   ],
 };
 
@@ -83,11 +83,11 @@ export const watchlist = {
   noRoom: 1,
   notCheckedOut: 5,
   overdue: [
-    { room: "Suite 601", guest: "R. Balakrishnan", due: "due 11:00", late: "+3h", stay: "w1" },
-    { room: "Dlx 305", guest: "Meera Iyer", due: "due 11:00", late: "+3h", stay: "w2" },
-    { room: "Std 118", guest: "K. Varghese", due: "due 12:00", late: "+2h", stay: "w3" },
+    { room: "Suite 601", guest: "R. Balakrishnan", due: "2026-09-01T11:00:00+05:30", late: "+3h", stay: "w1" },
+    { room: "Dlx 305", guest: "Meera Iyer", due: "2026-09-01T11:00:00+05:30", late: "+3h", stay: "w2" },
+    { room: "Std 118", guest: "K. Varghese", due: "2026-09-01T12:00:00+05:30", late: "+2h", stay: "w3" },
   ],
   unassigned: [
-    { guest: "Joseph Thomas", type: "Deluxe", at: "16:10", stay: "w4" },
+    { guest: "Joseph Thomas", type: "Deluxe", at: "2026-09-01T16:10:00+05:30", stay: "w4" },
   ],
 };

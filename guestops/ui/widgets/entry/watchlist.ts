@@ -17,23 +17,35 @@ import { connectToHost, type HostApi } from "@hotelos/sdk";
 import { failureDrawing, load } from "@hotelos/sdk";
 
 import { APP } from "../../app";
+import { instant } from "../../chrome/when";
 import { serve } from "../mount";
 import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../card";
 
 /** A departure that has not happened, and how late it is. */
 interface Overdue {
-  room: string;
+  /** Null where the stay holds no room — the service's own absence. */
+  room: string | null;
   guest: string;
-  due: string;
-  late: string;
+
+  /** When it was due out — an ISO instant, or null when never recorded. */
+  due: string | null;
+
+  /** How late, as the service computes it (I5) — null until it does. */
+  late: string | null;
+
   stay: string;
 }
 
 /** An arrival today with no room yet. */
 interface Unassigned {
   guest: string;
-  type: string;
-  at: string;
+
+  /** Null where the room type's name could not be read. */
+  type: string | null;
+
+  /** When they are expected — an ISO instant, or null when never recorded. */
+  at: string | null;
+
   stay: string;
 }
 
@@ -86,9 +98,12 @@ connectToHost((host: HostApi) => {
       for (const late of list.overdue.slice(0, 3)) {
         body.append(row(
           [
-            `${late.room} · ${late.guest}`,
-            el("span", "rc", late.due),
-            el("span", "rc late", late.late),
+            // The parts the service has, joined — a null room drew the word
+            // "null" here while the type said the field could not be absent.
+            [late.room, late.guest].filter((part) => part !== null).join(" · "),
+            el("span", "rc", late.due === null ? instant(null, host.property, "time")
+              : `due ${instant(late.due, host.property, "time")}`),
+            ...(late.late === null ? [] : [el("span", "rc late", late.late)]),
           ],
           `stay/${late.stay}`,
           open,
@@ -102,8 +117,8 @@ connectToHost((host: HostApi) => {
       for (const waiting of list.unassigned.slice(0, 2)) {
         body.append(row(
           [
-            `${waiting.guest} · ${waiting.type}`,
-            el("span", "rc t", waiting.at),
+            [waiting.guest, waiting.type].filter((part) => part !== null).join(" · "),
+            el("span", "rc t", instant(waiting.at, host.property, "time")),
             el("span", "rc miss", "—"),
           ],
           `stay/${waiting.stay}`,
