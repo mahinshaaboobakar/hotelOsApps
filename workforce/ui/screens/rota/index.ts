@@ -6,6 +6,7 @@
  * warning, and saying when it is not looking at the property's own data.
  */
 
+import { allDepartments } from "../../chrome/department";
 import { control, el, unavailable } from "../../chrome/element";
 import { legend } from "../../chrome/legend";
 import { failureScreen } from "../../chrome/failure";
@@ -140,9 +141,6 @@ function header(week: Week, host: HostApi, print: () => void, nav: RotaNav): HTM
       + `${n(gaps)} slot uncovered`),
   );
 
-  const picker = el("div", "sel");
-  picker.append(el("span", undefined, week.department), el("i", undefined, "▾"));
-
   const grow = el("div", "grow");
 
   // **The week and Copy work; Swap is off, and says what is missing.** All
@@ -178,7 +176,7 @@ function header(week: Week, host: HostApi, print: () => void, nav: RotaNav): HTM
   // was never wired to anything (the app surface audit, 2026-09-19, C8 · C11).
   const assign = unavailable("btn pri", "＋ Assign shift", "Pick a cell in the week to assign a shift.");
 
-  head.append(title, picker, grow, week_, copy, swap, printBtn, assign);
+  head.append(title, allDepartments(), grow, week_, copy, swap, printBtn, assign);
   return head;
 }
 

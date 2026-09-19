@@ -252,6 +252,16 @@ public static class RotaView
             name,
             initials = name is null ? "" : Wording.Initials(name),
             role = primary.JobRole,
+
+            // **The department a cell on this row is assigned under.** `assign`
+            // requires one, and the week-level `departmentCode` is the filter
+            // the screen asked for — "" when it named none, which it never has,
+            // so every assignment on a real property was refused. The row's own
+            // posting is the only honest source. A person posted to two
+            // departments is assigned under the PRIMARY one here — the same
+            // posting `role` is read from; which is right for such a person is
+            // queued for the owner, not decided in this line.
+            departmentCode = primary.DepartmentCode,
             zone = (string?)null,
             head = primary.IsDepartmentHead,
             week = Enumerable.Range(0, 7)

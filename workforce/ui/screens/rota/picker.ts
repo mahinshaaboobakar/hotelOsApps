@@ -68,9 +68,13 @@ export function picker(
   // The DEPARTMENT, not the job role. The rota is a department's, and what makes
   // a zone mean anything is the department beside it — WF-Q7's whole argument,
   // in the one place a manager is about to change the posting's day.
-  const where = person.zone === null
-    ? week.department
-    : `${week.department} · ${person.zone}`;
+  //
+  // The ROW's department — the one this cell is assigned under — as its code,
+  // the form People's rows show it in. It was the week's, which a real
+  // property's read sends as null, and the line read "null · one shift per day".
+  const where = [person.departmentCode, person.zone]
+    .filter((one) => one !== null && one !== "")
+    .join(" · ");
 
   const head = el("div");
   head.append(
@@ -128,9 +132,10 @@ export function picker(
         date: dayOf(week.monday, day),
         shiftId: chosen,
 
-        // The CODE, which is why the read now carries it. `week.department` is
-        // "Front Office" and the command wants `FO`.
-        department: week.departmentCode,
+        // The ROW's code. `week.departmentCode` is the filter the week was
+        // read with — `""` on every real property, since nothing names one —
+        // and the service refused each assignment that sent it.
+        department: person.departmentCode,
       });
       done();
     } catch (error) {

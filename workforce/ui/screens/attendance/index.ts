@@ -12,6 +12,7 @@
 import { formatClock, formatNumber, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
+import { allDepartments } from "../../chrome/department";
 import { el, unavailable } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -43,8 +44,7 @@ function header(day: Day): HTMLElement {
 
   title.append(el("div", "hsub", day.date));
 
-  const picker = el("div", "sel");
-  picker.append(el("span", undefined, day.department), el("i", undefined, "▾"));
+  const picker = allDepartments();
 
   const grow = el("div", "grow");
   // Neither control is wired, and the stepper's label was a literal — *"Fri

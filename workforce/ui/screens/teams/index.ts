@@ -21,6 +21,7 @@ import {
   formatDay, formatInstant, formatNumber, type HostApi, load, type PropertyEnvironment,
 } from "@hotelos/sdk";
 
+import { allDepartments } from "../../chrome/department";
 import { el, fill, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
@@ -201,10 +202,7 @@ function header(
     return head;
   }
 
-  const picker = el("div", "sel");
-  picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
-
-  return fill(head, title, board.teams.length === 0 ? null : picker, grow,
+  return fill(head, title, board.teams.length === 0 ? null : allDepartments(), grow,
     board.teams.length === 0 ? null
       : unavailable("btn", "Show stood down", "Stood-down teams cannot be shown here yet."),
     form);

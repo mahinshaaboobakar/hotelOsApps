@@ -62,7 +62,8 @@ export interface Month {
 
   /** The last. */
   to: string;
-  department: string;
+  /** The department asked for, echoed by the service — null, since this screen names none. */
+  department: string | null;
   rows: readonly MonthRow[];
 }
 
@@ -70,7 +71,7 @@ export const recordedMonth: Month = {
   month: "2026-08-01",
   from: "2026-08-01",
   to: "2026-08-31",
-  department: "Front Office",
+  department: null,
   rows: [
     {
       who: "Priya Thomas", role: "Supervisor", posted: 26, present: 26, late: 1,

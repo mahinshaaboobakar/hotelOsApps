@@ -102,7 +102,7 @@ describe("the rota's week", () => {
     ]);
   });
 
-  it("copies last week into this one after confirming, and names the department", async () => {
+  it("copies last week into this one after confirming, for every department shown", async () => {
     const calls: Call[] = [];
     const root = await mount(calls);
 
@@ -111,6 +111,11 @@ describe("the rota's week", () => {
 
     const dialog = root.querySelector(".dlg");
     expect(dialog?.textContent).toContain("Only empty cells are filled");
+    // The fixture is a real property's read now — no department named — so
+    // the dialog says what `copyWeek` will copy, and passes the week's own
+    // filter on: `""`, which the service reads as no filter. This expected
+    // `"FO"`, the old fixture's, which no installed read ever sent.
+    expect(dialog?.textContent).toContain("Every department");
     expect(calls.some((one) => one.method === "copyWeek")).toBe(false);
 
     dialog?.querySelector<HTMLButtonElement>(".acts button:last-of-type")?.click();
@@ -119,7 +124,7 @@ describe("the rota's week", () => {
     expect(calls.filter((one) => one.method === "copyWeek")).toEqual([{
       capability: "roster.plan",
       method: "copyWeek",
-      params: { from: "2026-08-17", to: "2026-08-24", department: "FO" },
+      params: { from: "2026-08-17", to: "2026-08-24", department: "" },
     }]);
     // Closed and re-read: the grid is what changed.
     expect(root.querySelector(".dlg")).toBeNull();

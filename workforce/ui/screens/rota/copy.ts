@@ -85,8 +85,12 @@ export function copyWeek(
       // formatDay named on each line, not through a local wrapper: the ISO
       // guard (tests/iso-never-rendered) reads for the formatter where a date
       // is drawn, and a wrapper hides it from the one check that looks.
+      // "Every department" where the week named none — which is what
+      // `copyWeek` then copies, since an empty code is no filter. This printed
+      // the echoed filter raw, and a real property's read echoes null.
       el("div", "hsub",
-        `${week.department} · ${formatDay(from, host.property, "day-month")}`
+        `${week.department ?? "Every department"}`
+        + ` · ${formatDay(from, host.property, "day-month")}`
         + ` – ${formatDay(shifted(from, 6), host.property, "day-month")} into `
         + `${formatDay(week.monday, host.property, "day-month")}`
         + ` – ${formatDay(week.sunday, host.property, "day-month")}`),

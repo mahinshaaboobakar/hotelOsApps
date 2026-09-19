@@ -63,8 +63,11 @@ export const recordedWeek: Week = {
   // same week. A fixture whose date disagreed with its own day names would
   // teach every capture a week that does not exist.
   monday: "2026-08-24",
-  department: "Front Office",
-  departmentCode: "FO",
+  // A real property's read: the screen names no department, so the service
+  // echoes none. This carried "Front Office"/"FO", which is why a cell
+  // assignment sending the week's code never failed in the harness.
+  department: null,
+  departmentCode: "",
   sunday: "2026-08-30",
   days: [
     "2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27",
@@ -87,32 +90,32 @@ export const recordedWeek: Week = {
 
   people: [
     {
-      id: "p-priya", name: "Priya Thomas", initials: "PT", role: "Supervisor",
+      id: "p-priya", name: "Priya Thomas", initials: "PT", role: "Supervisor", departmentCode: "FO",
       zone: "Zone 1", head: true,
       week: [on(MORNING), on(MORNING), on(MORNING), on(MORNING), on(MORNING), on(OFF), on(OFF)],
     },
     {
-      id: "p-anjali", name: "Anjali Menon", initials: "AM", role: "Receptionist",
+      id: "p-anjali", name: "Anjali Menon", initials: "AM", role: "Receptionist", departmentCode: "FO",
       zone: "Zone 3", head: false,
       week: [on(MORNING), on(MORNING), on(MORNING), on(AFTERNOON), on(MORNING), on(MORNING), on(OFF)],
     },
     {
-      id: "p-vishnu", name: "Vishnu Das", initials: "VD", role: "Night auditor",
+      id: "p-vishnu", name: "Vishnu Das", initials: "VD", role: "Night auditor", departmentCode: "FO",
       zone: "Zone 1", head: false,
       week: [on(NIGHT), on(NIGHT), on(NIGHT), on(NIGHT), on(NIGHT), on(OFF), on(NIGHT)],
     },
     {
-      id: "p-sneha", name: "Sneha Iyer", initials: "SI", role: "Receptionist",
+      id: "p-sneha", name: "Sneha Iyer", initials: "SI", role: "Receptionist", departmentCode: "FO",
       zone: "Zone 2", head: false,
       week: [on(AFTERNOON), on(AFTERNOON), away("Sick"), away("Sick"), on(AFTERNOON), on(AFTERNOON), on(OFF)],
     },
     {
-      id: "p-joseph", name: "Joseph Kurian", initials: "JK", role: "Bell captain",
+      id: "p-joseph", name: "Joseph Kurian", initials: "JK", role: "Bell captain", departmentCode: "FO",
       zone: "Zone 1", head: false,
       week: [on(OFF), on(MORNING), on(SPLIT), on(AFTERNOON), on(AFTERNOON), on(MORNING), on(MORNING)],
     },
     {
-      id: "p-rani", name: "Rani Rajan", initials: "RR", role: "Guest relations",
+      id: "p-rani", name: "Rani Rajan", initials: "RR", role: "Guest relations", departmentCode: "FO",
       zone: "Zone 2", head: false,
       week: [
         on(AFTERNOON),

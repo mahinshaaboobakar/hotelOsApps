@@ -12,6 +12,7 @@ import {
   formatDay, formatNumber, type HostApi, load, type PropertyEnvironment, type ReadFailure,
 } from "@hotelos/sdk";
 
+import { allDepartments } from "../../chrome/department";
 import { el, unavailable } from "../../chrome/element";
 import { overlay } from "../../chrome/overlay";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -126,11 +127,8 @@ function header(
 
   title.append(el("div", "hsub", subtitle(board, ending, property)));
 
-  const picker = el("div", "sel");
-  picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
-
   const grow = el("div", "grow");
-  head.append(title, picker, grow,
+  head.append(title, allDepartments(), grow,
     unavailable("btn pri", "＋ Post a staff member", "Postings cannot be made here yet."));
   return head;
 }

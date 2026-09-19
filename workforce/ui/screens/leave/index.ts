@@ -106,7 +106,9 @@ function tabs(
   const row = el("div", "tabs");
 
   for (const label of ["Requests", "Approvals"]) {
-    const tab = el("div", label === current ? "tab on" : "tab", label);
+    // A button, so a keyboard reaches it: a `div` with a click listener worked
+    // under a mouse and was not there for anyone else (tests/no-dead-controls).
+    const tab = control(label === current ? "tab on" : "tab", label, () => go(label));
 
     // The count comes from the queue itself — the same list the tab opens.
     if (label === "Approvals") {
@@ -116,7 +118,6 @@ function tabs(
       tab.append(el("span", "cnt", formatNumber(board.waiting.length, property, "whole")));
     }
 
-    tab.addEventListener("click", () => go(label));
     row.append(tab);
   }
 

@@ -80,6 +80,16 @@ export interface Person {
   /** The job role from their posting. */
   role: string;
 
+  /**
+   * The department a cell on this row is assigned under — their primary
+   * posting's code, the same posting {@link Person.role} comes from.
+   *
+   * **Not {@link Week.departmentCode}**, which is the filter the week was read
+   * with and is `""` when none was named. Sending that refused every
+   * assignment on a real property.
+   */
+  departmentCode: string;
+
   /** The zone the posting carries, when it carries one — `WF-Q7`. Optional. */
   zone: string | null;
 
@@ -171,16 +181,22 @@ export interface Week {
    */
   monday: string;
 
-  /** The department this rota is for. */
-  department: string;
+  /**
+   * The department the week was asked for, echoed from the request — null
+   * when none was named, which is every read this screen makes today.
+   *
+   * This said *"the department this rota is for"* and was typed as a name.
+   * The service echoes the request's parameter: a code when one was sent,
+   * null otherwise — so a picker rendering it read "null · one shift per day".
+   */
+  department: string | null;
 
   /**
-   * The same department as a code — `FO`, `HK` — which is what a write names.
+   * The same filter as a code, `""` when none was named.
    *
-   * {@link Week.department} is for reading and this is for sending. They are
-   * two fields because a name is not a key, and the day somebody renames a
-   * department is the day a screen that sent the name would start writing to
-   * nothing.
+   * **A filter, not a key a cell write can use** — `copyWeek` passes it on,
+   * where `""` means every department; `assign` takes the row's own
+   * {@link Person.departmentCode} instead.
    */
   departmentCode: string;
 

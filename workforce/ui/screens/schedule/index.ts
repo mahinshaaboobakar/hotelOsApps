@@ -106,8 +106,12 @@ function header(month: Schedule, property: PropertyEnvironment): HTMLElement {
 
   // No sub-line either: the picker below names the person, and a line above it
   // saying the same name is the duplication §3 removes, one level down.
-  const picker = el("div", "sel");
-  picker.append(
+  //
+  // Disabled, with its reason: this was a `div.sel` with a ▾ that opened
+  // nothing (tests/no-dead-controls). The read takes a `staffId`, and nothing
+  // on this screen lists the people it could be changed to.
+  const picker = unavailable("btn", "", "Another person's schedule cannot be opened here yet.");
+  picker.replaceChildren(
     el("span", "av", month.initials),
     el("span", undefined, month.who),
     el("i", undefined, "▾"),

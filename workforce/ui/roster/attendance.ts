@@ -70,13 +70,14 @@ export interface DayRow {
 /** The day, as the screen draws it. */
 export interface Day {
   date: string;
-  department: string;
+  /** The department asked for, echoed by the service — null, since this screen names none. */
+  department: string | null;
   rows: readonly DayRow[];
 }
 
 export const recordedDay: Day = {
   date: "Friday 28 August · business day",
-  department: "Front Office",
+  department: null,
   rows: [
     {
       who: "Priya Thomas", role: "Supervisor · Zone 1", rostered: true, postedAt: "07:00",

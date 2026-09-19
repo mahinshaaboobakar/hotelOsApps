@@ -11,6 +11,7 @@
 
 import { formatDay, formatNumber, type HostApi, load } from "@hotelos/sdk";
 
+import { allDepartments } from "../../chrome/department";
 import { el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
@@ -62,11 +63,8 @@ function header(month: Month, host: HostApi): HTMLElement {
     ].filter((one) => one !== null).join(" · ")),
   );
 
-  const picker = el("div", "sel");
-  picker.append(el("span", undefined, month.department), el("i", undefined, "▾"));
-
   const grow = el("div", "grow");
-  head.append(title, picker, grow,
+  head.append(title, allDepartments(), grow,
     unavailable("btn", "⎙ Print", "Reports cannot be printed here yet."),
     unavailable("btn", "↓ Export CSV", "Reports cannot be exported here yet."));
   return head;
