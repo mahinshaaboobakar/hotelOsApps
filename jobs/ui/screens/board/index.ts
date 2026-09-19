@@ -93,37 +93,11 @@ export async function board(host: HostApi, main: HTMLElement, place: BoardPlace)
     filters(place, may(host, JOB_CREATE)),
     // The list is a wrapper round the table: `.tbl` is what grows and scrolls
     // (standard §6, CORE-Q28), because a table cannot be a scroll container.
-    fill(el("div", "tbl"), table(host, page.value.rows, place), unexplained(place, page.value)),
+    fill(el("div", "tbl"), table(host, page.value.rows, place)),
     pages(page.value, place, host.property),
   );
 
   main.replaceChildren(body);
-}
-
-/**
- * Why an empty "My departments" list is empty — in the LIST's place.
- *
- * The words are unchanged and were right: a person's departments are their
- * Workforce postings, and nothing Jobs can reach resolves them (the Context
- * Service's staff context has no department since ADR 0116 §6, pending
- * Workforce as its authority). What was broken was where it sat: appended
- * after the pager, it was squeezed under the table with its first line beneath
- * the pager's sticky strip (owner's screenshot, 2026-09-19 12:07).
- *
- * It now sits where the rows would be — inside the scrolling list, under the
- * column headings — so it is fully visible and never competes with the pager
- * for the floor. **No frame draws this state**; the placement is this module's
- * least-invented reading, recorded as undrawn in the page-64 audit rather than
- * treated as settled.
- */
-function unexplained(place: BoardPlace, page: BoardPage): HTMLElement | null {
-  if (place.filter !== "My departments" || page.rows.length > 0) return null;
-
-  return el(
-    "div",
-    "note",
-    "Your departments are not established here — a person's postings are Workforce's, and Jobs has no client for them yet (design §6). Nothing is filtered out; nothing can be filtered in.",
-  );
 }
 
 function strip(host: HostApi, today: Today): HTMLElement {
@@ -141,11 +115,29 @@ function strip(host: HostApi, today: Today): HTMLElement {
   return line;
 }
 
+/**
+ * "My departments" is drawn off, with its reason, because nothing can answer it:
+ * the backend returns no rows for it (`JobQueries.cs`, MineDepartmentsOnly),
+ * since which departments a person belongs to is not known to Jobs until
+ * ADR 0203. It was drawn live and selected, over an empty list and a paragraph
+ * explaining why — developer content on a screen (owner ruling, 2026-09-19).
+ * Off, the screen says it in its own words and opens on All departments.
+ */
+const UNKNOWN_DEPARTMENTS = "your departments aren't known yet";
+
 function filters(place: BoardPlace, mayRaise: boolean): HTMLElement {
   const row = el("div", "chips");
   for (const label of FILTERS) {
+    if (label === "My departments") {
+      const off = el("button", "btn chip off", label) as HTMLButtonElement;
+      off.disabled = true;
+      off.title = UNKNOWN_DEPARTMENTS;
+      row.append(off);
+      continue;
+    }
     row.append(control(label === place.filter ? "btn chip on" : "btn chip", label, () => place.onFilter(label)));
   }
+  row.append(el("span", "mono", `My departments: ${UNKNOWN_DEPARTMENTS}`));
   if (mayRaise) fill(row, el("span", "grow"), control("btn pri", "＋ Raise a job", place.onRaise));
   return row;
 }

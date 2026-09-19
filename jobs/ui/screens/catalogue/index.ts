@@ -82,7 +82,7 @@ function categories(
     row.append(el("span", cat.activeHere ? undefined : "dim", cat.name), el("span", "mono", cat.activeHere ? `${cat.department} · ${formatNumber(cat.items, property)} items` : "not active here"));
     box.append(row);
   }
-  box.append(el("div", "mono", "A category is a name and a department code from the ADR 0119 canon. Nothing else."));
+  box.append(el("div", "mono", "A category is a name and a department. Nothing else."));
   return box;
 }
 

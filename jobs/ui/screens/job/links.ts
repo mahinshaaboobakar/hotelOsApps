@@ -12,7 +12,7 @@ import type { JobDetail } from "../../board";
 
 export function links(d: JobDetail, mayAmend: boolean, property: PropertyEnvironment): HTMLElement {
   const root = el("div");
-  root.append(el("div", "sect", "Steps of this job · sequence"), steps(d, property), el("div", "mono", "Cancelling this job cancels its steps. Closing it never closes them (S1 D2)."));
+  root.append(el("div", "sect", "Steps of this job · sequence"), steps(d, property), el("div", "mono", "Cancelling this job cancels its steps. Closing it never closes them."));
   root.append(el("div", "sect", "Linked jobs · same room, related"), linked(d, mayAmend));
   if (mayAmend) {
     const row = el("div", "row");

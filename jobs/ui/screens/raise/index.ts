@@ -143,8 +143,8 @@ function follows(host: HostApi, item: CatalogueItem | undefined): HTMLElement {
       "Due",
       minutes === null ? "no allowance on this item" : `within ${formatNumber(minutes, host.property)} min`,
       minutes === null
-        ? "the item sets no time; the service's policy chain decides"
-        : "the item's allowance · the service's policy chain decides the stored due",
+        ? "the item sets no time; this property's policy sets the due time"
+        : "the item's allowance · this property's policy sets the due time",
     ),
   );
 }

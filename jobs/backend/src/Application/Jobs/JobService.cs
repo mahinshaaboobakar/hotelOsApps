@@ -180,7 +180,7 @@ public class JobService(
             ?? throw new InvalidRequestException("parent_job_id is not a job at this property");
         if (parent.IsStep)
         {
-            throw new InvalidRequestException("a step cannot have steps — one level only (S1 D2)");
+            throw new InvalidRequestException("a step cannot have steps of its own");
         }
 
         var last = await db.Jobs

@@ -112,7 +112,7 @@ export function whoIsTold(s: Settings, configure: boolean): HTMLElement {
     w.stuck === "—" ? el("span", "dim", "—") : toggle(true, w.stuck === "yes" ? "" : w.stuck), toggle(w.untriaged), w.repeat, w.departments,
   ]);
   return fill(el("div"), table(["Role", "At risk", "Breached", "Stuck", "Not triaged", "Repeat every", "Departments"], rows),
-    el("div", "mono", "In-app only. There is no channel, no quiet hours, no per-person setting — the role decides (S9 D10)."),
+    el("div", "mono", "In the app only. Who is told is decided by role, not by person."),
     configure
       ? el("div", "mono dim", "Editing waits on one read. The tab groups the subscriptions by role to draw them and "
         + "saving replaces the whole set, so an editor needs the rows as they are stored — which this read does not "
@@ -162,7 +162,7 @@ export function holds(
     warnDaysBefore: Number(held.warnDaysBefore ?? 1),
     warnRole: held.warnRole,
     warnAssigneeOnDay: held.warnAssigneeOnDay === true,
-  }), discard), el("div", "mono", "Manual reminders (S9 D3) need no setting: anyone can set one on a job they can see, for themselves, from the job's \"More ▾\"."));
+  }), discard), el("div", "mono", "Reminders you set yourself need no setting: anyone can set one on a job they can see, for themselves, from the job's \"More ▾\"."));
 }
 
 /** Frame 5 — from RESOLVED to CLOSED, and what the guest is asked. */
@@ -231,7 +231,9 @@ export function access(
 
   return fill(
     el("div"),
-    table(["Label", "Who", "Comes from"], s.access.map((a) => [a.label, a.who, a.from])),
+    // No "Comes from" column: which system holds a fact is a note for the
+    // developer, never a screen's (owner ruling, 2026-09-19). The frame drew it.
+    table(["Label", "Who"], s.access.map((a) => [a.label, a.who])),
     // `sect`, not `hd`: the sheet already names this treatment, and `hd` was a
     // second name for it that no rule defined.
     el("div", "sect", "Jobs managers"),
@@ -241,6 +243,6 @@ export function access(
     asked,
     configure ? grant : null,
     saveRow(configure, grant, save, "grantJobsManager", (h) => ({ userId: h.userId }), discard),
-    el("div", "mono", "Postings and headships are Workforce's and are read here, not edited. The jobs-manager grant is this property's to make: Jobs announces it and the Kernel writes the relation — nothing here writes an authorization tuple."),
+    el("div", "mono", "Postings and department heads are set in Workforce and shown here, not edited. The jobs-manager grant is made here."),
   );
 }

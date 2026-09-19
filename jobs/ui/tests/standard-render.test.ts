@@ -69,13 +69,13 @@ describe("app surface checklist — automated lines, Jobs", () => {
     expect(root.querySelector(".head .search"), "a search box over no search").toBeNull();
   });
 
-  it("N5 — the bar reads name · department · property, and says the department is not established", async () => {
+  it("N5 — the bar reads name · department · property, and says the department is not known yet", async () => {
     // Page 64 §3. The name and property as Room Care reads them; the department
-    // is ADR 0203's, so the clause says it is not established — never a stand-in.
+    // is ADR 0203's, so the clause says it is not known yet — never a stand-in.
     const root = await mounted(host({ ...ANSWERS, me: { name: "Priya Nair", department: null, property: "Marina" } }));
     const who = root.querySelector(".head .who");
-    expect(who?.textContent).toBe("Priya Nair · department not established · Marina");
-    expect(who?.querySelector(".unset")?.textContent, "the gap is marked as a gap, not as a value").toBe("department not established");
+    expect(who?.textContent).toBe("Priya Nair · department not known yet · Marina");
+    expect(who?.querySelector(".unset")?.textContent, "the gap is marked as a gap, not as a value").toBe("department not known yet");
   });
 
   it("N5 — a name Master Data does not hold is said, in the name's place, and nothing stands in for it", async () => {
@@ -83,8 +83,8 @@ describe("app surface checklist — automated lines, Jobs", () => {
     // never pass for three. Null and blank are the same unknown.
     for (const name of [null, "", "   "]) {
       const root = await mounted(host({ ...ANSWERS, me: { name, department: null, property: "MRN" } }));
-      expect(root.querySelector(".head .who")?.textContent).toBe("no name in Master Data · department not established · MRN");
-      expect(root.querySelector(".head .who .unset")?.textContent).toBe("no name in Master Data");
+      expect(root.querySelector(".head .who")?.textContent).toBe("no name on record · department not known yet · MRN");
+      expect(root.querySelector(".head .who .unset")?.textContent).toBe("no name on record");
     }
   });
 

@@ -44,7 +44,7 @@ export const recordedSettings: Settings = {
     { role: "Property jobs manager", atRisk: false, breached: "P1 only", stuck: "ladder's last step", untriaged: false, repeat: "30 min", departments: "all" },
   ],
   holds: [
-    { k: "Requires", v: "a reason and a hold_until date" },
+    { k: "Requires", v: "a reason and a date to resume" },
     { k: "Clock", v: "stopped while on hold" },
     { k: "Longest hold", v: "30 days · then STUCK → supervisor" },
   ],

@@ -49,7 +49,7 @@ export function notes(host: HostApi, d: JobDetail, onChanged: () => void): HTMLE
   // promise something that silently does nothing.
   const photo = control("btn", "Attach photo");
   photo.setAttribute("disabled", "true");
-  photo.title = "photos wait for a media client";
+  photo.title = "adding photos isn't available yet";
   row.append(photo);
   left.append(line, writing, row, said.line);
 

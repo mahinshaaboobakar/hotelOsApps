@@ -9,7 +9,7 @@ import type { JobDetail } from "../../board";
 import { card } from "./overview";
 
 export function record(d: JobDetail): HTMLElement {
-  const identity = d.record.filter((x) => ["job_id", "Number", "Property", "Version"].includes(x.k));
+  const identity = d.record.filter((x) => ["Job id", "Number", "Property", "Version"].includes(x.k));
   const audit = d.record.filter((x) => ["Created", "Updated", "Deleted"].includes(x.k));
   const reminders = fill(
     el("div", "card"),

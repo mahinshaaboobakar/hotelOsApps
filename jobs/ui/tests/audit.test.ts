@@ -154,7 +154,7 @@ describe("frame 2e · One job · Links & steps", () => {
 describe("frame 2g · One job · Record", () => {
   it("draws identity, audit and the viewer's own reminders", async () => {
     const root = await jobTab("Record");
-    has(root, "Identity", "job_id", "018f3c…9a1e", "Number", "MRN-ENG-142", "Property", "Marina Bay · mrn", "Version", "9");
+    has(root, "Identity", "Job id", "018f3c…9a1e", "Number", "MRN-ENG-142", "Property", "Marina Bay · mrn", "Version", "9");
     has(root, "Audit", "Created", "guest · stay 7F2A", "Updated", "Arjun Menon", "Deleted");
     has(root, "Reminders", "none", "Remind me…");
   });
@@ -225,18 +225,18 @@ describe("frame 02-3 · Settings · Who is told", () => {
     has(root, "Department supervisor", "15 min", "own department");
     has(root, "Department manager", "P1 only", "> 30 min", "30 min");
     has(root, "Property jobs manager", "ladder's last step", "all");
-    has(root, "In-app only. There is no channel, no quiet hours, no per-person setting — the role decides");
+    has(root, "In the app only. Who is told is decided by role, not by person.");
   });
 });
 
 describe("frame 02-4 · Settings · Holds & reminders", () => {
   it("draws what a hold must carry and who is warned when", async () => {
     const root = await settings("Holds & reminders");
-    has(root, "Putting a job on hold", "Requires", "a reason and a", "hold_until", "date");
+    has(root, "Putting a job on hold", "Requires", "a reason and a date to resume");
     has(root, "Clock", "stopped while on hold", "Longest hold", "30 days · then STUCK → supervisor");
     has(root, "Warn before the date", "1 day before", "department supervisor");
     has(root, "on the day, 08:00", "assignee", "date passed, still on hold", "supervisor · repeat daily");
-    has(root, "Manual reminders (S9 D3) need no setting");
+    has(root, "Reminders you set yourself need no setting");
   });
 });
 
@@ -254,11 +254,12 @@ describe("frame 02-5 · Settings · Closing & rating", () => {
 describe("frame 02-6 · Settings · Access", () => {
   it("draws five labels, who holds them and where each fact comes from", async () => {
     const root = await settings("Access");
-    has(root, "Label", "Who", "Comes from");
-    has(root, "Property jobs manager", "Rohan Desai", "granted by the GM in Identity · 2026-08-28");
-    has(root, "Department manager · ENG", "Kiran Bhat", "Workforce headship");
+    has(root, "Label", "Who");
+    expect(root.textContent, "which system holds a fact is not the screen's").not.toContain("Comes from");
+    has(root, "Property jobs manager", "Rohan Desai");
+    has(root, "Department manager · ENG", "Kiran Bhat");
     has(root, "Department supervisor · ENG", "Priya Nair");
-    has(root, "Department member · ENG", "9 people", "Workforce posting");
+    has(root, "Department member · ENG", "9 people");
     has(root, "Department manager · HK", "Anjali Rao");
     // **The frame said Jobs had no editor, and design §4.2 gave it one.** The
     // jobs-manager grant is this application's action now, so the tab lists who
@@ -266,7 +267,7 @@ describe("frame 02-6 · Settings · Access", () => {
     // and still read-only. The old sentence is asserted absent, not merely
     // replaced — a caption that promised less than the screen does is exactly
     // the drift the Live tab's caption taught us to guard from both sides.
-    has(root, "Jobs managers", "Postings and headships are Workforce's and are read here, not edited");
+    has(root, "Jobs managers", "Postings and department heads are set in Workforce and shown here, not edited");
     expect(root.textContent).not.toContain("Jobs has no editor");
   });
 });

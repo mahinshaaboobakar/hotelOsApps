@@ -73,7 +73,7 @@ export const recordedJob: JobDetail = {
   ],
   rating: null,
   record: [
-    { k: "job_id", v: "018f3c…9a1e" },
+    { k: "Job id", v: "018f3c…9a1e" },
     { k: "Number", v: "MRN-ENG-142" },
     { k: "Property", v: "Marina Bay · mrn" },
     { k: "Version", v: "9" },

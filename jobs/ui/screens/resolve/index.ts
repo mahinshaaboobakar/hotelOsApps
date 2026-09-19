@@ -73,7 +73,7 @@ export async function resolve(
 
   const photo = control("btn", "Add a photo");
   photo.setAttribute("disabled", "true");
-  photo.title = "photos wait for a media client";
+  photo.title = "adding photos isn't available yet";
 
   body.append(
     el("div", "sect", `Resolve ${job.row.number} · ${job.row.what}`),

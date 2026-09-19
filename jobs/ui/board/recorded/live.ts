@@ -35,7 +35,7 @@ export const recordedLive: Live = {
     },
     {
       code: "FO", name: "Front Office", presence: "off",
-      presenceLine: "No shift feed, no service hours — jobs run on the property clock (S7 D8: off).",
+      presenceLine: "not followed here",
       people: [{ name: "Sana Rahman", doing: "free · 2 open", tone: "dim" }],
       peopleTotal: 1, open: 2, breached: 0,
     },

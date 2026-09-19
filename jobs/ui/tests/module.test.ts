@@ -211,8 +211,9 @@ describe("the Jobs module", () => {
     await settle();
     click(root, ".subnav .tab", "Access");
     await settle();
-    expect(root.textContent).toContain("Workforce headship");
-    expect(root.textContent).toContain("nothing here writes an authorization tuple");
+    // Where each fact is held is a developer's note, not the screen's (owner, 2026-09-19).
+    expect(root.textContent).not.toContain("Workforce headship");
+    expect(root.textContent).not.toContain("authorization tuple");
     expect(root.textContent).not.toContain("none of it is in Jobs' database");
   });
 });
