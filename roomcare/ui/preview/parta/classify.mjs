@@ -27,22 +27,6 @@ const BRAND_8 = "color(srgb 0.505882 0.54902 0.972549 / 0.08)";
 
 const RULES = [
   {
-    name: "setup-page-first-set",
-    moves: "adjudicate",
-    why: "The owner chose the screens page's SECOND set of its twice-declared classes (19f203c5, 2026-09-19: "
-       + "'we can go with second'), and the build carries it in its one sheet (86c504f). 02-the-roomcare-setup.html "
-       + "declares .mono .tag .pill once, at the FIRST values, so its seven tab frames now differ by that set's "
-       + "size and spacing: .mono 12 -> 11, .tag padding 2 -> 1, .pill 11/2px -> 10/1px. 01a drew the screens page "
-       + "only, so the choice did not address this page; whether 02 is redrawn at the second set or Setup keeps "
-       + "the first is the owner's. (Until 86c504f these were the other way round, on the screens frames, as "
-       + "page-redeclares-a-class — 24 there, all closed.)",
-    hit: (p, frame) => /^7[a-g]$/u.test(frame) && (
-      (was(p, "font-size", "12px", "11px") && only(p, ["font-size", "line-height", "display"]))
-      || (was(p, "padding-top", "2px", "1px") && only(p, ["padding-top", "padding-bottom", "line-height"]))
-      || (was(p, "font-size", "11px", "10px") && was(p, "padding-top", "2px", "1px")
-        && only(p, ["font-size", "line-height", "letter-spacing", "padding-top", "padding-bottom"]))),
-  },
-  {
     name: "sticky-header-ground",
     moves: "neither",
     why: "The wall's header row sticks while the house scrolls beneath it (page 64 §6, the whole-house view the "
@@ -77,7 +61,7 @@ const RULES = [
     moves: "neither",
     why: "The frame draws one row selected (tr.sel) to show the state; nothing is selected when the screen "
        + "opens.",
-    hit: (p) => was(p, "background-color", BRAND_8, "rgba(0, 0, 0, 0)") && only(p, ["background-color", "line-height"]),
+    hit: (p) => was(p, "background-color", BRAND_8, "rgba(0, 0, 0, 0)") && only(p, ["background-color"]),
   },
 ];
 
@@ -91,9 +75,10 @@ const NAMED = new Map([
     + "label takes .08em."]],
   ["4d|V 13:00", ["neither", "Data, not styling: the drawing's G03 is dirty (dark text on red), the recorded "
     + "Coral Cove morning's is clean, and the corner text follows the fill."]],
-  ["7e|lobby", ["adjudicate", "Two named causes on one node: the frame draws this row selected "
-    + "(selected-row-example), and its .mono is the setup page's first-set 12px where the build carries the "
-    + "owner's second, 11px (setup-page-first-set)."]],
+  ["7e|lobby", ["drawing", "Two named causes on one node, each moving its own side. The frame draws this row "
+    + "selected (selected-row-example: neither moves). Its .mono is a `font:` shorthand that resets line-height "
+    + "to normal (font-shorthand-line-height: the drawing moves). Until 02 was redrawn at the second set "
+    + "(3f1cfbd, the owner's 'match', c69fde42), its size differed too."]],
   ["6|Suite", ["adjudicate", "The frame draws this row selected and its cell at 12px; the build draws the table at "
     + "the drawing's own table size, 13px (its line 46). Not settled by the standard."]],
 ]);
