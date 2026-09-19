@@ -4,9 +4,11 @@ Run 2026-09-19 by KK against GG's checklist (`docs/app-surface-checklist.md`,
 `3d521cef`, 86 lines), every screen and widget, in every state the checklist
 names for it.
 
-**A harness run, and every row says so.** Room Care is installed on no Kernel:
-0.1.2 is staged for the owner's restart tonight, so no state below was reached
-on a real one. The list states (E0, E1, 1P, MP, ML) are **derived from the
+**A harness run, and every row says so.** No state below was reached on a real
+Kernel. *Corrected: this said Room Care was installed on no Kernel. 0.1.2 had
+been installed earlier today, and I did not know it, so the audit's real-Kernel
+states were never attempted. It stays a harness run, and Part B on 0.1.3 is
+the real-Kernel evidence.* The list states (E0, E1, 1P, MP, ML) are **derived from the
 recorded Coral Cove morning**: rows repeated to fill a page, and `total` stated. The
 harness stamps each derived capture. Failed reads are produced through the
 host's own six error kinds, so the SDK's `load` classifies them.
@@ -14,7 +16,7 @@ host's own six error kinds, so the SDK's `load` classifies them.
 | | commit | provenance |
 |---|---|---|
 | **before** | `d98785f4` (the audit's tooling, nothing fixed) | clean · 230 cases · 0 unreached |
-| **after** | ``020f1eff`, all of it committed (the manifest bump `16bdeed` comes after and changes no bundle)` | clean · 249 cases · 0 unreached |
+| **after** | `020f1eff`, all of it committed (the manifest bump `16bdeed` comes after and changes no bundle) | clean · 249 cases · 0 unreached |
 
 ## How each line was checked
 
