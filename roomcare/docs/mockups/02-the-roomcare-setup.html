@@ -72,8 +72,8 @@ label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppe
 .strip{display:flex;gap:22px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px;align-items:center}
 .strip b{color:var(--text);font-size:14px;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
-.pager span.pg.on{color:var(--text);border-color:var(--indigo)}
+.pager .pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
+.pager .pg.on{color:var(--text);border-color:var(--indigo)}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
 .subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
 .subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
@@ -112,7 +112,7 @@ ul.flows b{color:var(--text)}
 <div id="f7a" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -139,7 +139,7 @@ ul.flows b{color:var(--text)}
         </div>
       </div>
     </div>
-    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (the trigger, ruled; the two presses), S5 c2 (two windows).</b> The window's <i>to</i> is when the tick closes it and writes the outcome for every room not reached (§6.1) — nothing here is a cron in UTC (survey F3).</div>
@@ -150,7 +150,7 @@ ul.flows b{color:var(--text)}
 <div id="f7b" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -165,10 +165,10 @@ ul.flows b{color:var(--text)}
     </table>
     <div class="pager"><span>4 of 4 services for <b>Standard</b> — the four a hotel has; deep clean is not a service, it is a project (frame 7f)</span><span></span></div>
     <div class="cols" style="margin-top:16px">
-      <div class="card"><h3>Phases — Departure clean</h3><div class="kv"><div>1 · Strip</div><div>linen and towels out · rubbish · lost property · damage</div><div>2 · Clean</div><div>bathroom · surfaces · floors</div><div>3 · Make up</div><div>fresh bed · restock to standard <span class="tag absent">Inventory</span> · set-up</div><div>4 · Done</div><div>the attendant's <i>done</i> — the room is CLEAN, announced</div><div>5 · Inspect</div><div>only if the rule says — requested from the inspection app <span class="tag port">RC-Q1(6)</span></div></div><div style="margin-top:8px"><span class="btn sm">Reorder…</span><span class="btn sm off">Add a phase</span></div></div>
-      <div class="card"><h3>Copy this room type's numbers to…</h3><div class="mono">Deluxe King · Suite · Accessible — a starting point, edited per type after</div><div style="margin-top:8px"><span class="btn sm">Copy…</span></div></div>
+      <div class="card"><h3>Phases — Departure clean</h3><div class="kv"><div>1 · Strip</div><div>linen and towels out · rubbish · lost property · damage</div><div>2 · Clean</div><div>bathroom · surfaces · floors</div><div>3 · Make up</div><div>fresh bed · restock to standard <span class="tag absent">Inventory</span> · set-up</div><div>4 · Done</div><div>the attendant's <i>done</i> — the room is CLEAN, announced</div><div>5 · Inspect</div><div>only if the rule says — requested from the inspection app <span class="tag port">RC-Q1(6)</span></div></div><div style="margin-top:8px"><button class="btn sm">Reorder…</button><button class="btn sm off">Add a phase</button></div></div>
+      <div class="card"><h3>Copy this room type's numbers to…</h3><div class="mono">Deluxe King · Suite · Accessible — a starting point, edited per type after</div><div style="margin-top:8px"><button class="btn sm">Copy…</button></div></div>
     </div>
-    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (the four services, the phases, per room type × service), ADR 0044's row</b> — <i>"deep-clean and checkout-clean minutes and whether inspection is required"</i> is this table, as rows not columns (survey F19). The phase list is the property's per service; the defaults are the walkthrough's. <i>Add a phase</i> is drawn off because the v1 phases are fixed to the five the owner named — a redline point if a property needs a sixth.</div>
@@ -180,7 +180,7 @@ ul.flows b{color:var(--text)}
 <div id="f7c" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -217,7 +217,7 @@ ul.flows b{color:var(--text)}
       <div class="card">
         <h3>Priority ladder</h3>
         <div class="kv"><div>1</div><div>sold tonight</div><div>2</div><div>departures, unsold</div><div>3</div><div>daily service, by zone</div><div>4</div><div>refresh</div></div>
-        <div style="margin-top:8px"><span class="btn sm">Reorder…</span></div>
+        <div style="margin-top:8px"><button class="btn sm">Reorder…</button></div>
         <h3 style="margin-top:14px">Unsold departure</h3>
         <span class="radio">○ <b>clean today</b> &nbsp; ◉ <b>may wait</b> — the pending lane, one click promotes it (the charter)</span>
       </div>
@@ -234,7 +234,7 @@ ul.flows b{color:var(--text)}
         <div class="mono" style="margin-top:8px">on day N+1 the room is the supervisor's: a decision is required before the window closes on it, and every later DND day stays the supervisor's (S5 c9)</div>
       </div>
     </div>
-    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S4, S5 c1/c4/c5/c9, the charter, the scenario pass row 7.</b> Nine rules, nine rows in <code>property_policy</code> (chapter 03 §2.8), one version. Not here, by ruling: a per-weekday calendar, a preferred attendant, a per-stay cadence, a whole-stay opt-out.</div>
@@ -245,7 +245,7 @@ ul.flows b{color:var(--text)}
 <div id="f7d" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -266,16 +266,16 @@ ul.flows b{color:var(--text)}
         <h3>Zones — which room belongs to which zone <span class="mono">(RoomZoneAssignment, ADR 0044 — Room Care's)</span></h3>
         <table>
           <tr><th>Zone</th><th>Rooms</th><th>Effective</th><th></th></tr>
-          <tr><td>Zone 1 · floors 1–3</td><td class="num">0101 – 0324 · 45 rooms</td><td>since 01 Jan 2026</td><td><span class="btn sm">Edit…</span></td></tr>
-          <tr><td>Zone 2 · floors 4–6</td><td class="num">0401 – 0624 · 45 rooms</td><td>since 01 Jan 2026</td><td><span class="btn sm">Edit…</span></td></tr>
-          <tr class="sel"><td>Zone 3 · floors 7–9 + 12</td><td class="num">0701 – 0924, 1201 – 1212 · 57 rooms</td><td>since 15 Aug 2026 · <span class="mono">was floors 7–9</span></td><td><span class="btn sm">Edit…</span></td></tr>
-          <tr><td>Zone 4 · floors 10–11</td><td class="num">1001 – 1124 · 33 rooms</td><td>since 15 Aug 2026</td><td><span class="btn sm">Edit…</span></td></tr>
+          <tr><td>Zone 1 · floors 1–3</td><td class="num">0101 – 0324 · 45 rooms</td><td>since 01 Jan 2026</td><td><button class="btn sm">Edit…</button></td></tr>
+          <tr><td>Zone 2 · floors 4–6</td><td class="num">0401 – 0624 · 45 rooms</td><td>since 01 Jan 2026</td><td><button class="btn sm">Edit…</button></td></tr>
+          <tr class="sel"><td>Zone 3 · floors 7–9 + 12</td><td class="num">0701 – 0924, 1201 – 1212 · 57 rooms</td><td>since 15 Aug 2026 · <span class="mono">was floors 7–9</span></td><td><button class="btn sm">Edit…</button></td></tr>
+          <tr><td>Zone 4 · floors 10–11</td><td class="num">1001 – 1124 · 33 rooms</td><td>since 15 Aug 2026</td><td><button class="btn sm">Edit…</button></td></tr>
         </table>
         <div class="pager"><span>4 of 4 zones · 180 rooms, every room in exactly one zone; a room left out is a refusal, not a gap</span><span></span></div>
-        <div style="margin-top:8px"><span class="btn sm">Move rooms between zones…</span></div>
+        <div style="margin-top:8px"><button class="btn sm">Move rooms between zones…</button></div>
       </div>
     </div>
-    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (assignment), Workforce §3.8, ADR 0044.</b> Two things sit side by side and are different: the <b>zone a room is in</b> is Room Care's (<code>room_zone_assignment</code>, effective-dated); the <b>person posted to a zone</b> is Workforce's. Zones themselves — the entities — are Master Data's (<code>masterdata.zones</code>). Nothing on this tab names a person.</div>
@@ -286,7 +286,7 @@ ul.flows b{color:var(--text)}
 <div id="f7e" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -295,21 +295,21 @@ ul.flows b{color:var(--text)}
     <div style="margin-bottom:12px"><button class="chip on">All</button><button class="chip">Zone 1</button><button class="chip">Zone 2</button><button class="chip">Zone 3</button><button class="chip">Zone 4</button><button class="chip">Without a routine</button></div>
     <table>
       <tr><th>Area</th><th>Kind</th><th>Zone</th><th>Routine</th><th>Minutes</th><th>Inspection</th><th></th></tr>
-      <tr class="sel"><td>Lobby</td><td class="mono">lobby</td><td>Zone 1</td><td>every 2 h · 06:00 – 22:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Lobby toilets</td><td class="mono">back_of_house</td><td>Zone 1</td><td>every 45 min · 06:00 – 23:00</td><td><span class="field" style="min-width:60px">10</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Azure restaurant floor</td><td class="mono">restaurant</td><td>Zone 1</td><td>after breakfast 10:30 · after dinner 22:30</td><td><span class="field" style="min-width:60px">40</span></td><td><span class="field">spot-check ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Floor 1 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Floor 2 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Floor 3 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Pool deck</td><td class="mono">pool</td><td>Zone 2</td><td>at 05:30</td><td><span class="field" style="min-width:60px">45</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Pool changing rooms</td><td class="mono">back_of_house</td><td>Zone 2</td><td>every 2 h · 06:00 – 20:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Gym</td><td class="mono">back_of_house</td><td>Zone 2</td><td>at 05:00 · at 14:00</td><td><span class="field" style="min-width:60px">25</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Floor 4 corridor</td><td class="mono">corridor</td><td>Zone 2</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td>Floor 5 corridor</td><td class="mono">corridor</td><td>Zone 2</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
-      <tr><td class="dimtd">Plant room · level −1</td><td class="mono">plant_room</td><td class="dimtd">—</td><td class="dimtd">no routine — Engineering's space</td><td></td><td></td><td><span class="btn sm off">Add a routine</span></td></tr>
+      <tr class="sel"><td>Lobby</td><td class="mono">lobby</td><td>Zone 1</td><td>every 2 h · 06:00 – 22:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Lobby toilets</td><td class="mono">back_of_house</td><td>Zone 1</td><td>every 45 min · 06:00 – 23:00</td><td><span class="field" style="min-width:60px">10</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Azure restaurant floor</td><td class="mono">restaurant</td><td>Zone 1</td><td>after breakfast 10:30 · after dinner 22:30</td><td><span class="field" style="min-width:60px">40</span></td><td><span class="field">spot-check ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Floor 1 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Floor 2 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Floor 3 corridor</td><td class="mono">corridor</td><td>Zone 1</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Pool deck</td><td class="mono">pool</td><td>Zone 2</td><td>at 05:30</td><td><span class="field" style="min-width:60px">45</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Pool changing rooms</td><td class="mono">back_of_house</td><td>Zone 2</td><td>every 2 h · 06:00 – 20:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Gym</td><td class="mono">back_of_house</td><td>Zone 2</td><td>at 05:00 · at 14:00</td><td><span class="field" style="min-width:60px">25</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Floor 4 corridor</td><td class="mono">corridor</td><td>Zone 2</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td>Floor 5 corridor</td><td class="mono">corridor</td><td>Zone 2</td><td>once, after the morning window</td><td><span class="field" style="min-width:60px">20</span></td><td><span class="field">none ▾</span></td><td><button class="btn sm">Edit…</button></td></tr>
+      <tr><td class="dimtd">Plant room · level −1</td><td class="mono">plant_room</td><td class="dimtd">—</td><td class="dimtd">no routine — Engineering's space</td><td></td><td></td><td><button class="btn sm off">Add a routine</button></td></tr>
     </table>
-    <div class="pager"><span>1–12 of 23 · 12 per page at this height; a maximised window shows 24 · an area with no routine is drawn dim and produces nothing</span><span><span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">›</span></span></div>
-<div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="pager"><span>1–12 of 23 · 12 per page at this height; a maximised window shows 24 · an area with no routine is drawn dim and produces nothing</span><span><button class="pg">‹</button><button class="pg on">1</button><button class="pg">2</button><button class="pg">›</button></span></div>
+<div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S3 — public areas are Room Care's, one task model, scheduled by the property.</b> The areas are not created here: they are Master Data's location nodes (<code>masterdata/v1/dto.proto:207–219</code>), and this tab attaches a routine, minutes and an inspection rule to each. A routine is a Temporal Schedule the tick reads (chapter 03 §6.1). A spill or a one-off is a Jobs request, never a routine.</div>
@@ -320,7 +320,7 @@ ul.flows b{color:var(--text)}
 <div id="f7f" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -347,7 +347,7 @@ ul.flows b{color:var(--text)}
         </div>
       </div>
     </div>
-    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><button class="btn off">Save — nothing changed</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 · deep clean as a planned project.</b> This tab is the <i>plan</i> only — frequency per room type. Picking a window, requesting the block and raising the job are the Deep clean tab's (screens frame 6, <code>roomcare.plan</code>). Nothing on this tab schedules by weekday.</div>
@@ -358,7 +358,7 @@ ul.flows b{color:var(--text)}
 <div id="f7g" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -375,11 +375,11 @@ ul.flows b{color:var(--text)}
     </div>
     <table>
       <tr><th>Person</th><th>Posting (Workforce)</th><th>Holds</th><th>Since</th><th>Granted by</th><th></th></tr>
-      <tr><td>Arjun Mehta</td><td>Rooms division manager · <span class="mono">not posted in Housekeeping</span></td><td><span class="pill ok">roomcare_manager</span></td><td>01 Jan 2026</td><td>Vikram Shah (GM)</td><td><span class="btn sm danger">Revoke…</span></td></tr>
+      <tr><td>Arjun Mehta</td><td>Rooms division manager · <span class="mono">not posted in Housekeeping</span></td><td><span class="pill ok">roomcare_manager</span></td><td>01 Jan 2026</td><td>Vikram Shah (GM)</td><td><button class="btn sm danger">Revoke…</button></td></tr>
       <tr><td class="dimtd">Rekha Sinha</td><td class="dimtd">Housekeeping · head of department</td><td class="dimtd">everything already — from her posting; no grant needed or shown</td><td class="dimtd">—</td><td class="dimtd">—</td><td></td></tr>
     </table>
     <div class="pager"><span>1 grant at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings are listed dim for contrast and cannot be edited here</span><span></span></div>
-    <div style="margin-top:12px"><span class="btn pri">Grant to a person…</span></div>
+    <div style="margin-top:12px"><button class="btn pri">Grant to a person…</button></div>
     <div class="cols" style="margin-top:16px">
       <div class="card">
         <h3>What the grant gives</h3>
@@ -393,7 +393,7 @@ ul.flows b{color:var(--text)}
     <div class="dlg" style="margin-top:16px">
       <div class="sect" style="margin-top:0">Revoke Arjun Mehta's roomcare_manager?</div>
       <div class="mono" style="margin-bottom:10px">He keeps whatever his Workforce posting gives him — nothing in Housekeeping. Recorded: who, when.</div>
-      <span class="btn danger confirm">Revoke</span><span class="btn">Cancel</span>
+      <button class="btn danger confirm">Revoke</button><button class="btn">Cancel</button>
     </div>
   </div>
 </div>
@@ -403,6 +403,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-19 · 01c folded, RE-LOCKED</b>: the owner approved 01c. Every control inside a frame is the build's <code>&lt;button&gt;</code> (42 tabs, 37 actions, 4 pager buttons), and the pager rule is tied to its class, <code>.pager .pg</code>, not to the span. <b>Measured: 0 differing pixels, this whole page as locked against it revised, 1400 × 9,800 in Edge (83 controls)</b>. H4 (ARCH-Q20) closes on this.</li>
   <li><b>2026-09-19 · &ldquo;match&rdquo; completed, RE-LOCKED</b>: <code>.chip</code> (padding 5px 10px, margin 0 6px 6px 0) and <code>.strip</code> (gap 22px, centred), at the second set like the rest. The owner's &ldquo;match&rdquo; (<code>c69fde42</code>) chose one set across the application, and the first fold moved only the three classes Part A had then shown differing. These two were still at the first set, found when the retagged chips began to pair with the build.</li>
   <li><b>2026-09-19 · the page-64 audit's records folded, RE-LOCKED</b>: the owner, 2026-09-19, on 01b: <i>&ldquo;A small, B keep, C approved&rdquo;</i>. Section labels at .04em (APPS-Q33); the dates named as <code>en-GB</code> (H3); <code>--glass</code> derived (H6); chips as the build's <code>&lt;button&gt;</code> (H4) — <b>measured: 0 differing pixels, 1400 × 16,600 in Edge (10 chips)</b>; and every tab's save line drawn off with its reason while nothing is edited (§2), <b>drawn after the build</b>.</li>
   <li><b>2026-09-19 · &ldquo;match&rdquo; folded, RE-LOCKED</b>: the owner, <i>&ldquo;i choosed `match`&rdquo;</i> (<code>c69fde42</code>). <code>.mono</code> 12 &rarr; 11px, <code>.tag</code> padding 2px 6px &rarr; 1px 5px and margin-left 6 &rarr; 5px, <code>.pill</code> 2px 9px at 11px &rarr; 1px 8px at 10px. These are the second-set values the owner chose for the screens page (<code>19f203c5</code>). This page had declared each class once, at the first set.</li>

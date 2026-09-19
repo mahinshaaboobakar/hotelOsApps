@@ -92,8 +92,8 @@ label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppe
 .strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
 .strip b{color:var(--text);font-size:14px;margin-right:4px}
 .pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager span.pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
-.pager span.pg.on{color:var(--text);border-color:var(--indigo)}
+.pager .pg{display:inline-block;padding:2px 8px;border:1px solid var(--line);border-radius:6px;margin-left:4px;color:var(--dim)}
+.pager .pg.on{color:var(--text);border-color:var(--indigo)}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
 .subnav div{padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
 .subnav div.on{color:var(--text);border-bottom-color:var(--indigo)}
@@ -205,7 +205,7 @@ ul.flows b{color:var(--text)}
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab on">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -229,7 +229,7 @@ ul.flows b{color:var(--text)}
       <tr><td class="num">1204</td><td><span class="pill ok">CLEAN</span> <span class="mono">Anita 09:10</span> <span class="tag">disagreement</span></td><td>occupied</td><td>—</td><td>Daily service</td><td><span class="pill p3">3</span></td><td>Anita Pillai</td><td><span class="pill soft-warn">PMS says DIRTY 09:11</span></td><td>—</td></tr>
       <tr><td class="num">1105</td><td><span class="pill bad">DIRTY</span></td><td>vacant</td><td>—</td><td>Departure clean · unsold</td><td><span class="pill p2">2</span></td><td class="dimtd">— pending policy</td><td class="dimtd">may wait · one click</td><td>—</td></tr>
     </table>
-    <div class="pager"><span>1–12 of 62 · 12 per page at this height; a maximised window shows 24</span><span><span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">3</span><span class="pg">4</span><span class="pg">5</span><span class="pg">6</span><span class="pg">›</span></span></div>
+    <div class="pager"><span>1–12 of 62 · 12 per page at this height; a maximised window shows 24</span><span><button class="pg">‹</button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg">4</button><button class="pg">5</button><button class="pg">6</button><button class="pg">›</button></span></div>
   </div>
 </div>
 </div>
@@ -242,7 +242,7 @@ ul.flows b{color:var(--text)}
 <div id="f1a" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab on">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
@@ -266,7 +266,7 @@ ul.flows b{color:var(--text)}
 <div id="f1b" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab on">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
@@ -312,12 +312,12 @@ ul.flows b{color:var(--text)}
 <div id="f2" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab on">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab on">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
     <div class="strip"><span><b>Morning</b> 08:00 – 15:00 · open</span><span>prepared <b>08:00</b> by Rekha Sinha</span><span><b>62</b> tasks</span><span><b>3</b> changes since 08:00</span><span>trigger: <b>Prepare by button / HosPilot</b></span><span style="margin-left:auto">05 Sep 09:12</span></div>
-    <div style="margin:0 0 16px"><span class="btn pri">Add the new rooms (3)</span><span class="btn">Show what changed</span><span class="btn off">Prepare the day — done 08:00</span></div>
+    <div style="margin:0 0 16px"><button class="btn pri">Add the new rooms (3)</button><button class="btn">Show what changed</button><button class="btn off">Prepare the day — done 08:00</button></div>
     <div class="cols">
       <div class="card">
         <h3>Changes since 08:00 — collected, nothing created</h3>
@@ -335,10 +335,10 @@ ul.flows b{color:var(--text)}
           <div>Strategy</div><div>Same zone, then lowest load — the property's (Setup)</div>
           <div>Anita Pillai</div><div>9 rooms · 214 401 402 216 218 1204 … · 3 h 40 of 8 h</div>
           <div>Priya Das</div><div>8 rooms · 305 322 411 … · 3 h 05 of 8 h</div>
-          <div>Nobody available</div><div><span class="pill soft-bad">219</span> — every zone-3 attendant at capacity for a departure before 16:30 · <span class="btn sm">Assign anyway…</span></div>
+          <div>Nobody available</div><div><span class="pill soft-bad">219</span> — every zone-3 attendant at capacity for a departure before 16:30 · <button class="btn sm">Assign anyway…</button></div>
           <div>Who is here</div><div>from Workforce, through Context — 2 posted to zone 3, both clocked in <span class="tag port">Workforce ask · zone on the posting</span></div>
         </div>
-        <div style="margin-top:12px"><span class="btn pri">Accept the proposal</span><span class="btn">Move rooms…</span></div>
+        <div style="margin-top:12px"><button class="btn pri">Accept the proposal</button><button class="btn">Move rooms…</button></div>
       </div>
     </div>
   </div>
@@ -353,7 +353,7 @@ ul.flows b{color:var(--text)}
 <div id="f3" class="win phone" style="max-width:720px">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">My rooms</div>
+    <button class="tab on">My rooms</button>
     <div class="who">Anita Pillai · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -380,7 +380,7 @@ ul.flows b{color:var(--text)}
 <div id="f3b" class="win" style="max-width:720px">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">My rooms</div>
+    <button class="tab on">My rooms</button>
     <div class="who">Anita Pillai · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -389,14 +389,14 @@ ul.flows b{color:var(--text)}
       <span style="margin-left:auto" class="mono">started 09:04 · 40 min expected · arrival 15:00</span>
     </div>
     <div class="mono" style="margin-bottom:12px">phases: <b style="color:var(--ok)">strip ✓</b> · <b>clean</b> · make up · done · inspect (arrivals — required)</div>
-    <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Photo</span><span class="btn">Ask for extra time…</span><span class="btn">Found an issue…</span><span class="btn pri">End…</span></div>
+    <div style="margin:10px 0 14px"><button class="btn">Pause</button><button class="btn">Photo</button><button class="btn">Ask for extra time…</button><button class="btn">Found an issue…</button><button class="btn pri">End…</button></div>
     <div class="dlg" style="margin-bottom:14px">
       <div class="sect" style="margin-top:0">Found an issue — raise a job (Jobs is installed; Anita holds <code>job.create</code>)</div>
       <div class="cols">
         <div><label>What</label><div class="field" style="display:block">Air conditioning › Not cooling ▾ <span class="mono">— Jobs' catalogue, read through Context</span></div><label>Note</label><div class="field" style="display:block">Blowing warm since I came in; guest arriving 15:00</div></div>
         <div class="kv"><div>Room</div><div>214 — from the task, not typed</div><div>Photo</div><div>1 attached</div><div>Then</div><div>recorded here as the task's issue; published with a correlation id; Jobs creates the job and this room shows "J-1190 raised 09:38"</div></div>
       </div>
-      <div style="margin-top:12px"><span class="btn pri">Raise the job</span><span class="btn">Back</span></div>
+      <div style="margin-top:12px"><button class="btn pri">Raise the job</button><button class="btn">Back</button></div>
     </div>
     <div class="dlg">
       <div class="sect" style="margin-top:0">End — how did it go?</div>
@@ -411,7 +411,7 @@ ul.flows b{color:var(--text)}
           <div>Recorded as</div><div>Anita Pillai · 05 Sep 09:41 · done</div>
         </div>
       </div>
-      <div style="margin-top:12px"><span class="btn pri">Confirm</span><span class="btn">Back</span></div>
+      <div style="margin-top:12px"><button class="btn pri">Confirm</button><button class="btn">Back</button></div>
     </div>
   </div>
 </div>
@@ -426,7 +426,7 @@ ul.flows b{color:var(--text)}
 <div id="f4" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab on">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -436,14 +436,14 @@ ul.flows b{color:var(--text)}
       <span class="pill soft-warn">DISAGREEMENT · PMS says DIRTY 09:11</span>
     </div>
     <div class="mono" style="margin-bottom:12px">occupied · stay 3B70, in house until 07 Sep · not sold tonight · linen last changed 03 Sep (due 06 Sep) · deep clean due Nov 2026</div>
-    <div style="margin:0 0 14px"><span class="btn">Room state… </span><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
+    <div style="margin:0 0 14px"><button class="btn">Room state… </button><button class="btn">Raise a job for this room…</button><button class="btn">Record an exception…</button><button class="btn">Reassign…</button><button class="btn">More ▾</button></div>
     <div class="dlg" style="margin-bottom:14px">
       <div class="sect" style="margin-top:0">Room state — enter a fact by hand (always available; the PMS is the usual source here)</div>
       <div class="cols">
         <div><button class="chip">Guest arrived</button><button class="chip on">Guest departed</button><button class="chip">Occupied</button><button class="chip">Vacant</button><br><label>Arrival expected today</label><div class="field" style="display:inline-block;min-width:90px">15:00</div><span class="mono"> · sets "sold tonight"</span></div>
         <div class="kv"><div>Recorded as</div><div>source <b>manual</b> · Meera Krishnan · 05 Sep 09:52 — a deliberate act</div><div>If the PMS later says otherwise</div><div>older than this → history; newer and contradicting → a disagreement flag (S4)</div><div>Why now</div><div>the strip says <i>PMS silent since 09:40</i></div></div>
       </div>
-      <div style="margin-top:12px"><span class="btn pri">Record</span><span class="btn">Back</span></div>
+      <div style="margin-top:12px"><button class="btn pri">Record</button><button class="btn">Back</button></div>
     </div>
     <div class="subnav"><div class="on">Today</div><div>History · 14 days</div><div>Record</div></div>
     <div class="cols">
@@ -453,7 +453,7 @@ ul.flows b{color:var(--text)}
           <div class="kv">
             <div>Ours</div><div>CLEAN · Anita Pillai · 09:10 (a deliberate act)</div>
             <div>The PMS</div><div>DIRTY · occurred 09:11 · newer than our act → flagged, not applied</div>
-            <div>Clear as</div><div><span class="btn">Keep ours</span><span class="btn">Take theirs</span> — recorded: who, when, which side won</div>
+            <div>Clear as</div><div><button class="btn">Keep ours</button><button class="btn">Take theirs</button> — recorded: who, when, which side won</div>
           </div>
         </div>
         <div class="card" style="margin-top:14px">
@@ -502,33 +502,33 @@ ul.flows b{color:var(--text)}
 <div class="states"><div id="f4c" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab on">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
-    <div class="strip"><span><button class="chip on">Sheet</button><button class="chip">Tap grid</button><button class="chip">Compact</button></span><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>131</b> occupied</span><span><b>41</b> sold tonight</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div class="strip"><span><button class="chip on">Sheet</button><button class="chip">Tap grid</button><button class="chip">Compact</button></span><span><b>250</b> rooms</span><span><b>96</b> dirty</span><span><b>131</b> occupied</span><span><b>41</b> sold tonight</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><button class="btn pri">Save 14 changes</button><button class="btn">Discard</button></span></div>
     <div style="margin-bottom:6px"><span class="mono">group by</span> <button class="chip on">Zone</button><button class="chip">Building</button><button class="chip">Room type</button> <span class="mono" style="margin-left:14px">show</span> <button class="chip on">All</button><button class="chip">Dirty</button><button class="chip">Occupied</button><button class="chip">Vacant</button><button class="chip">Sold tonight</button><button class="chip" style="border-color:var(--warn);color:var(--warn)">Changed · 14</button><button class="chip" style="border-color:var(--bad);color:var(--bad)">Conflicts · 1</button></div>
     <div class="viewport">
     <table>
       <tr><th style="width:26px"><input type="checkbox"></th><th>Room</th><th>Condition</th><th>Occupancy</th><th>Sold tonight</th><th>Stay</th><th>Source · when</th><th></th></tr>
       <tr class="g"><td colspan="8">▾ Zone 1 · Garden villas · 18 rooms · 5 changed</td></tr>
-      <tr><td><input type="checkbox"></td><td class="num">G01</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">15:00</span></td><td><span class="sel">departed ▾</span></td><td class="mono">PMS 03:02</td><td><span class="btn sm">▸</span></td></tr>
-      <tr><td><input type="checkbox"></td><td class="num">G02</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><span class="btn sm">▸</span></td></tr>
-      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G03 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">13:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
-      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G04 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">14:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
-      <tr><td><input type="checkbox"></td><td class="num">G05</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><span class="btn sm">▸</span></td></tr>
-      <tr class="conf"><td><input type="checkbox" checked></td><td class="num">G06 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 · <b style="color:var(--bad)">PMS said "occupied" at 09:51 — newer</b></td><td><span class="btn sm">▸</span></td></tr>
-      <tr><td><input type="checkbox"></td><td class="num">G07</td><td><span class="sel">clean ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">none ▾</span></td><td class="mono">Anita 08:41</td><td><span class="btn sm">▸</span></td></tr>
-      <tr><td><input type="checkbox"></td><td class="num">G08</td><td><span class="sel">inspected ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">13:00</span></td><td><span class="sel">none ▾</span></td><td class="mono">Lakshmi 08:58</td><td><span class="btn sm">▸</span></td></tr>
-      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G09 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">15:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G01</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">15:00</span></td><td><span class="sel">departed ▾</span></td><td class="mono">PMS 03:02</td><td><button class="btn sm">▸</button></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G02</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><button class="btn sm">▸</button></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G03 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">13:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><button class="btn sm">▸</button></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G04 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">14:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><button class="btn sm">▸</button></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G05</td><td><span class="sel">dirty ▾</span></td><td><span class="sel">occupied ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">in house ▾</span></td><td class="mono">PMS 08:20</td><td><button class="btn sm">▸</button></td></tr>
+      <tr class="conf"><td><input type="checkbox" checked></td><td class="num">G06 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 · <b style="color:var(--bad)">PMS said "occupied" at 09:51 — newer</b></td><td><button class="btn sm">▸</button></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G07</td><td><span class="sel">clean ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">—</span></td><td><span class="sel">none ▾</span></td><td class="mono">Anita 08:41</td><td><button class="btn sm">▸</button></td></tr>
+      <tr><td><input type="checkbox"></td><td class="num">G08</td><td><span class="sel">inspected ▾</span></td><td><span class="sel">vacant ▾</span></td><td><span class="sel t">13:00</span></td><td><span class="sel">none ▾</span></td><td class="mono">Lakshmi 08:58</td><td><button class="btn sm">▸</button></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">G09 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">15:00</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><button class="btn sm">▸</button></td></tr>
       <tr><td><input type="checkbox"></td><td class="num">G10 – G18</td><td colspan="6" class="mono">nine more rows — drawn short here; on the screen every room is a row</td></tr>
       <tr class="g"><td colspan="8">▾ Zone 2 · Lake wing · 24 rooms · 9 changed</td></tr>
-      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">L01 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><span class="btn sm">▸</span></td></tr>
-      <tr><td></td><td class="num">L14</td><td colspan="5" class="mono">blocked · deep clean 01 – 05 Sep · out of order (its owner) — not editable here</td><td><span class="btn sm">▸</span></td></tr>
+      <tr class="chg"><td><input type="checkbox" checked></td><td class="num">L01 ✎</td><td><span class="sel chg">dirty ▾</span></td><td><span class="sel chg">vacant ▾</span></td><td><span class="sel t chg">—</span></td><td><span class="sel chg">departed ▾</span></td><td class="mono">manual · Meera 09:52 <span class="tag man">unsaved</span></td><td><button class="btn sm">▸</button></td></tr>
+      <tr><td></td><td class="num">L14</td><td colspan="5" class="mono">blocked · deep clean 01 – 05 Sep · out of order (its owner) — not editable here</td><td><button class="btn sm">▸</button></td></tr>
       <tr><td><input type="checkbox"></td><td class="num">L02 – L24</td><td colspan="6" class="mono">… and zones 3 – 9 below — one continuous sheet, scrolled within the window, the strip and the zone headers fixed</td></tr>
     </table>
     </div>
-    <div class="dock"><b>3 rows selected</b><span class="mono">set for all:</span><span class="sel">condition ▾</span><span class="sel">occupancy ▾</span><span class="sel t">sold at</span><span class="sel">stay ▾</span><span class="btn sm">Apply to selected</span><span class="mono" style="margin-left:auto">250 of 250 — no pages</span></div>
+    <div class="dock"><b>3 rows selected</b><span class="mono">set for all:</span><span class="sel">condition ▾</span><span class="sel">occupancy ▾</span><span class="sel t">sold at</span><span class="sel">stay ▾</span><button class="btn sm">Apply to selected</button><span class="mono" style="margin-left:auto">250 of 250 — no pages</span></div>
   </div>
 </div></div>
 <div class="note"><b>The manual source, as a screen — redline 5, owner, 2026-09-13.</b> The per-room dialog was rejected (<i>"250 room updates in that design is too heavy"</i>). Room states is <b>its own top tab after Prepare</b>, and — as the Board has Map and Wall — it has <b>three views of one data set</b>: Sheet · Tap grid · Compact, a chip between them, <b>one <i>Save N changes</i> across all three</b>. Every write is a <code>room_observation</code>, source <b>manual</b>, a deliberate act under S4's clause; a row the PMS has since updated is red before you save (G06). Available at every property, never gated by where facts usually come from; rides <code>roomcare.amend</code>. ▸ opens the room page — the advanced edit, unchanged.</div>
@@ -537,11 +537,11 @@ ul.flows b{color:var(--text)}
 <div class="states"><div id="f4d" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab on">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
-    <div class="strip"><span><button class="chip">Sheet</button><button class="chip on">Tap grid</button><button class="chip">Compact</button></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div class="strip"><span><button class="chip">Sheet</button><button class="chip on">Tap grid</button><button class="chip">Compact</button></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span style="margin-left:auto"><button class="btn pri">Save 14 changes</button><button class="btn">Discard</button></span></div>
     <div class="dock"><b>Paint with:</b>
       <span class="mono">condition</span><span class="segs bad"><span class="on">dirty</span><span>clean</span><span>inspected</span></span>
       <span class="mono">occupancy</span><span class="segs"><span class="on">vacant</span><span>occupied</span></span>
@@ -554,7 +554,7 @@ ul.flows b{color:var(--text)}
     <div class="tilegrid">
       <button class="tile dirty">G01<small>V 15:00</small></button><button class="tile dirty">G02<small>O</small></button><button class="tile dirty chg picked">G03<small>V 13:00</small></button><button class="tile dirty chg picked">G04<small>V 14:00</small></button><button class="tile dirty">G05<small>O</small></button><button class="tile dirty chg picked" style="outline-color:var(--bad)">G06<small>V ⚠</small></button><button class="tile clean">G07<small>V</small></button><button class="tile insp">G08<small>V 13:00</small></button><button class="tile dirty chg picked">G09<small>V 15:00</small></button><button class="tile dirty">G10<small>O</small></button><button class="tile dirty">G11<small>V 16:30</small></button><button class="tile clean">G12<small>O</small></button><button class="tile clean">G13<small>O</small></button><button class="tile dirty">G14<small>O</small></button><button class="tile clean">G15<small>V</small></button><button class="tile dirty">G16<small>O</small></button><button class="tile insp">G17<small>V</small></button><button class="tile clean">G18<small>O</small></button>
     </div>
-    <div class="mono" style="margin:8px 0 2px;color:var(--text)">Zone 2 · Lake wing · 24 &nbsp; <span class="btn sm">Select all 24</span></div>
+    <div class="mono" style="margin:8px 0 2px;color:var(--text)">Zone 2 · Lake wing · 24 &nbsp; <button class="btn sm">Select all 24</button></div>
     <div class="tilegrid">
       <button class="tile dirty chg picked">L01<small>V</small></button><button class="tile dirty chg picked">L02<small>V</small></button><button class="tile dirty chg picked">L03<small>V 12:00</small></button><button class="tile dirty chg picked">L04<small>V</small></button><button class="tile dirty chg picked">L05<small>V</small></button><button class="tile dirty chg picked">L06<small>V</small></button><button class="tile dirty chg picked">L07<small>V</small></button><button class="tile dirty chg picked">L08<small>V</small></button><button class="tile dirty chg picked">L09<small>V</small></button><button class="tile clean">L10<small>O</small></button><button class="tile clean">L11<small>O</small></button><button class="tile dirty">L12<small>O</small></button><button class="tile dirty">L13<small>O</small></button><button class="tile" style="background:repeating-linear-gradient(45deg,var(--color-surface-raised),var(--color-surface-raised) 4px,var(--line) 4px,var(--line) 8px);color:var(--dim);border-color:var(--line)">L14</button><button class="tile clean">L15<small>O</small></button><button class="tile clean">L16<small>V</small></button><button class="tile dirty">L17<small>O</small></button><button class="tile insp">L18<small>V 14:30</small></button><button class="tile clean">L19<small>O</small></button><button class="tile dirty">L20<small>O</small></button><button class="tile clean">L21<small>O</small></button><button class="tile dirty">L22<small>O</small></button><button class="tile clean">L23<small>O</small></button><button class="tile clean">L24<small>V</small></button>
     </div>
@@ -567,38 +567,38 @@ ul.flows b{color:var(--text)}
 <div class="states"><div id="f4e" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab on">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · Coral Cove Resort</div>
   </div>
   <div class="body">
-    <div class="strip"><span><button class="chip">Sheet</button><button class="chip">Tap grid</button><button class="chip on">Compact</button></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span class="mono">segmented controls, no dropdowns — one tap sets a value</span><span style="margin-left:auto"><span class="btn pri">Save 14 changes</span><span class="btn">Discard</span></span></div>
+    <div class="strip"><span><button class="chip">Sheet</button><button class="chip">Tap grid</button><button class="chip on">Compact</button></span><span><b>250</b> rooms</span><span style="color:var(--warn)"><b>PMS silent since 09:40</b></span><span class="mono">segmented controls, no dropdowns — one tap sets a value</span><span style="margin-left:auto"><button class="btn pri">Save 14 changes</button><button class="btn">Discard</button></span></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
       <div>
         <table>
           <tr class="g"><td colspan="5">▾ Zone 1 · Garden villas · 18 · 5 changed</td></tr>
           <tr><th>Room</th><th>Condition</th><th>Occ.</th><th>Stay · sold</th><th></th></tr>
-          <tr><td class="num">G01</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · 15:00</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">G02</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="chg"><td class="num">G03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">13:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="chg"><td class="num">G04 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">14:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">G05</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="conf"><td class="num">G06 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono" style="color:var(--bad)">⚠ PMS: occupied 09:51</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">G07</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">—</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">G08</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 13:00</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="chg"><td class="num">G09 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">15:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr><td class="num">G01</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · 15:00</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">G02</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="chg"><td class="num">G03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">13:00</span></span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="chg"><td class="num">G04 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">14:00</span></span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">G05</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="conf"><td class="num">G06 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono" style="color:var(--bad)">⚠ PMS: occupied 09:51</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">G07</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">—</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">G08</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 13:00</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="chg"><td class="num">G09 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">15:00</span></span></td><td><button class="btn sm">▸</button></td></tr>
           <tr><td class="num">G10 – G18</td><td colspan="4" class="mono">nine more</td></tr>
         </table>
       </div>
       <div>
         <table>
-          <tr class="g"><td colspan="5">▾ Zone 2 · Lake wing · 24 · 9 changed &nbsp; <span class="btn sm">Set all…</span></td></tr>
+          <tr class="g"><td colspan="5">▾ Zone 2 · Lake wing · 24 · 9 changed &nbsp; <button class="btn sm">Set all…</button></td></tr>
           <tr><th>Room</th><th>Condition</th><th>Occ.</th><th>Stay · sold</th><th></th></tr>
-          <tr class="chg"><td class="num">L01 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="chg"><td class="num">L02 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr class="chg"><td class="num">L03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">12:00</span></span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">L10</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">L14</td><td colspan="3" class="mono">blocked · deep clean — not editable here</td><td><span class="btn sm">▸</span></td></tr>
-          <tr><td class="num">L18</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 14:30</span></td><td><span class="btn sm">▸</span></td></tr>
+          <tr class="chg"><td class="num">L01 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="chg"><td class="num">L02 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr class="chg"><td class="num">L03 ✎</td><td><span class="segs bad"><span class="on">D</span><span>C</span><span>I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">departed · <span class="sel t">12:00</span></span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">L10</td><td><span class="segs ok"><span>D</span><span class="on">C</span><span>I</span></span></td><td><span class="segs"><span>V</span><span class="on">O</span></span></td><td><span class="mono">in house</span></td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">L14</td><td colspan="3" class="mono">blocked · deep clean — not editable here</td><td><button class="btn sm">▸</button></td></tr>
+          <tr><td class="num">L18</td><td><span class="segs"><span>D</span><span>C</span><span class="on">I</span></span></td><td><span class="segs"><span class="on">V</span><span>O</span></span></td><td><span class="mono">— · 14:30</span></td><td><button class="btn sm">▸</button></td></tr>
           <tr><td class="num">L04 – L24</td><td colspan="4" class="mono">eighteen more</td></tr>
         </table>
       </div>
@@ -613,7 +613,7 @@ ul.flows b{color:var(--text)}
 <div id="f4b" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab on">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -622,7 +622,7 @@ ul.flows b{color:var(--text)}
       <span class="pill ok">INSPECTED</span><span class="mono">set by inspection · Lakshmi Iyer · 05 Sep 09:05</span>
     </div>
     <div class="mono" style="margin-bottom:12px">vacant · sold tonight, arrival 13:00 · linen changed today (departure clean) · deep clean due Sep 2026</div>
-    <div style="margin:0 0 14px"><span class="btn">Raise a job for this room…</span><span class="btn">Record an exception…</span><span class="btn off">Reassign…</span><span class="btn">More ▾</span></div>
+    <div style="margin:0 0 14px"><button class="btn">Raise a job for this room…</button><button class="btn">Record an exception…</button><button class="btn off">Reassign…</button><button class="btn">More ▾</button></div>
     <div class="subnav"><div class="on">Today</div><div>History · 14 days</div><div>Record</div></div>
     <div class="cols">
       <div>
@@ -660,16 +660,16 @@ ul.flows b{color:var(--text)}
 <div id="f5" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab on">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab on">Supervision</button><button class="tab">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Meera Krishnan · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
     <div class="strip"><span><b>3</b> need a decision</span><span><b>1</b> decided today</span><span style="margin-left:auto">05 Sep 09:12</span></div>
     <table>
       <tr><th>Room</th><th>Why it is here</th><th>Since</th><th>What we know</th><th>Decision</th></tr>
-      <tr class="sel"><td class="num">312</td><td><span class="pill soft-bad">3rd day without service</span></td><td>03 Sep</td><td>declined at the door 03 Sep · DND both windows 04 Sep · guest in house until 09 Sep</td><td><span class="btn sm">DND approved — no cleaning</span><span class="btn sm">Clean it</span><span class="btn sm">Other…</span></td></tr>
-      <tr><td class="num">1204</td><td><span class="pill soft-warn">Disagreement</span></td><td>09:11</td><td>ours CLEAN (Anita 09:10) · PMS DIRTY (09:11)</td><td><span class="btn sm">Keep ours</span><span class="btn sm">Take theirs</span></td></tr>
-      <tr><td class="num">219</td><td><span class="pill soft-bad">Nobody available</span></td><td>09:12</td><td>departure · sold 16:30 · zone 3 at capacity</td><td><span class="btn sm">Assign anyway…</span><span class="btn sm">Leave for reconcile</span></td></tr>
+      <tr class="sel"><td class="num">312</td><td><span class="pill soft-bad">3rd day without service</span></td><td>03 Sep</td><td>declined at the door 03 Sep · DND both windows 04 Sep · guest in house until 09 Sep</td><td><button class="btn sm">DND approved — no cleaning</button><button class="btn sm">Clean it</button><button class="btn sm">Other…</button></td></tr>
+      <tr><td class="num">1204</td><td><span class="pill soft-warn">Disagreement</span></td><td>09:11</td><td>ours CLEAN (Anita 09:10) · PMS DIRTY (09:11)</td><td><button class="btn sm">Keep ours</button><button class="btn sm">Take theirs</button></td></tr>
+      <tr><td class="num">219</td><td><span class="pill soft-bad">Nobody available</span></td><td>09:12</td><td>departure · sold 16:30 · zone 3 at capacity</td><td><button class="btn sm">Assign anyway…</button><button class="btn sm">Leave for reconcile</button></td></tr>
       <tr><td class="num">1105</td><td class="dimtd">Arrival before window — decided</td><td>07:40</td><td class="dimtd">arrival 07:30 · window opens 08:00 · assigned to night staff · done 07:55</td><td class="dimtd">Meera Krishnan · 07:41 · "assigned outside window"</td></tr>
     </table>
     <div class="pager"><span>4 of 4 — the lane is short by nature; it pages at 12 like every list</span><span></span></div>
@@ -684,7 +684,7 @@ ul.flows b{color:var(--text)}
 <div id="f6" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab on">Deep clean</div><div class="tab">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab on">Deep clean</button><button class="tab">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -716,7 +716,7 @@ ul.flows b{color:var(--text)}
 <div id="f7" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
-    <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
+    <button class="tab">Board</button><button class="tab">Prepare</button><button class="tab">Room states</button><button class="tab">Supervision</button><button class="tab">Deep clean</button><button class="tab on">Setup</button>
     <div class="who">Rekha Sinha · Housekeeping · The Marina Bay</div>
   </div>
   <div class="body">
@@ -740,7 +740,7 @@ ul.flows b{color:var(--text)}
         </div>
       </div>
     </div>
-    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--line)"><button class="btn pri">Save</button><button class="btn">Discard</button><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note fix"><b>Redline folded (2026-09-05).</b> The owner: <i>"Setup — only 3 tabs mocked on a single screen; seven separate mock screens."</i> This frame had collapsed three tabs into one drawing. It now shows the first tab only, and all seven — Windows &amp; trigger · Services &amp; minutes · Rules · Assignment &amp; zones · Areas · Deep clean plan · Managers — are drawn one per frame on <code>02-the-roomcare-setup.html</code> (7a–7g), as Jobs' settings are on their own page.</div>
@@ -798,6 +798,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">G · redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-19 · 01c folded, RE-LOCKED</b>: the owner approved 01c. Every control inside a frame is the build's <code>&lt;button&gt;</code> (74 tabs, 72 actions, 8 pager buttons), and the pager rule is tied to its class, <code>.pager .pg</code>, not to the span. <b>Measured: 0 differing pixels, this whole page as locked against it revised, 1400 × 16,600 in Edge (154 controls)</b>. H4 (ARCH-Q20) closes on this.</li>
   <li><b>2026-09-19 · the page-64 audit's records folded, RE-LOCKED</b>: the owner, 2026-09-19, on 01b: <i>&ldquo;A small, B keep, C approved&rdquo;</i>. From the rulings, never copied from the build: section labels at .04em (APPS-Q33); the timeline's detail line at 12px / 19.8px in ink-muted and the legend at 12px / 19.8px (APPS-Q35, 64a); the dates named as <code>en-GB</code> (H3); <code>--glass</code> derived, not a literal (H6); and tiles and chips as the build's <code>&lt;button&gt;</code> (H4, ARCH-Q20), with the UA's button styles unset first. <b>H4 measured: 0 differing pixels, this page as locked against it retagged, 1400 × 16,600 in Edge (142 tiles, 46 chips)</b>. A and B left the frames as they are: the toolbar's small buttons stay small (C4), and Prepare's list keeps its card as an APPS-Q27 deviation (L1).</li>
   <li><b>2026-09-13 · redline 5 folded, RE-LOCKED</b> — the per-room <i>Room state</i> dialog (the earlier 4c) rejected: <i>"all room states on one screen; change from there; the advanced edit stays on the room page."</i> Three candidates drawn on a temp page; the owner: <i>"all three interesting — like the Board, a view option."</i> So <b>Room states is its own top tab after Prepare</b> with three views — Sheet (4c) · Tap grid (4d) · Compact (4e) — one data set, one Save; the six-tab bar on every frame.</li>
   <li><b>2026-09-13 · redline 4 folded, RE-LOCKED</b> — owner: <i>"we can lock both; mark the paged list removed by owner."</i> (1) the manual source drawn as its own frame, <b>4c</b> — <i>Room state…</i> at every property, source manual, the three sources named, S4's clause handling the PMS's return. (2) the board is <b>1a the map</b> and <b>1b the wall</b>, one data set, a chip between them; frame 1's paged list is <b>removed by the owner</b> and kept faint for the record.</li>
