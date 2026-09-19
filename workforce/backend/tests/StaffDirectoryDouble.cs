@@ -118,10 +118,25 @@ public sealed class StaffDirectoryDouble : IStaffDirectory
     /// <summary>What this property is called, when a test says.</summary>
     public string? PropertyName { get; set; }
 
+    /// <summary>
+    /// The property's time zone, as Master Data stores it — an IANA id.
+    /// </summary>
+    /// <remarks>
+    /// "UTC" by default because that is Master Data's own column default
+    /// (<c>Property.Timezone</c>), so a test that never says gets what a
+    /// property that never set one holds — not a zone chosen here.
+    /// </remarks>
+    public string Zone { get; set; } = "UTC";
+
     /// <inheritdoc />
     public Task<string?> FindPropertyNameAsync(
         Guid propertyId, CancellationToken cancellationToken)
         => Task.FromResult(PropertyName);
+
+    /// <inheritdoc />
+    public Task<string?> FindPropertyZoneAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+        => Task.FromResult<string?>(Zone);
 
     /// <inheritdoc />
     public Task<string?> FindPropertyCountryAsync(

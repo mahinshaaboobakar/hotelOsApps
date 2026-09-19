@@ -133,6 +133,17 @@ public interface IStaffDirectory
     /// </remarks>
     Task<string?> FindPropertyCountryAsync(Guid propertyId, CancellationToken cancellationToken);
 
+    /// <summary>The property's time zone — an IANA id — or <c>null</c> when Master Data has no such property.</summary>
+    /// <remarks>
+    /// <c>Property.Timezone</c>, which Master Data owns and defaults to
+    /// <c>"UTC"</c>. Every calendar day this application computes — which day a
+    /// duty is on, what "today" is — is a day at the property, and a day
+    /// computed in UTC is a day early or late for part of every day anywhere
+    /// else. Its own remark: <i>"storing UTC and hoping is how reports come out
+    /// a day wrong."</i>
+    /// </remarks>
+    Task<string?> FindPropertyZoneAsync(Guid propertyId, CancellationToken cancellationToken);
+
     /// <summary>What this property is called.</summary>
     /// <remarks>
     /// For the one line that names where the signed-in person is. Null when

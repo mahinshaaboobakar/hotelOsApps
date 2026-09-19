@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Domain;
@@ -33,14 +34,18 @@ public static class DutyView
         var directory = call.Service<IStaffDirectory>();
         var clock = call.Service<TimeProvider>();
 
+        // Days at the property, never UTC days — see PropertyCalendar.
+        var calendar = await PropertyCalendar.ForAsync(
+            directory, call.Scope.PropertyId, cancellationToken);
+
         var now = clock.GetUtcNow();
         var anchor = call.Optional("week") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : DateOnly.FromDateTime(now.UtcDateTime);
+            : calendar.DayOf(now);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
-        var from = new DateTimeOffset(monday.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-        var to = from.AddDays(7);
+        var from = calendar.StartOf(monday);
+        var to = calendar.StartOf(monday.AddDays(7));
 
         var week = await duties.ListAsync(call.Scope, from, to, cancellationToken);
 
@@ -69,7 +74,7 @@ public static class DutyView
                 .ToList(),
             now = Standing(holder, names),
             next = Standing(next, names),
-            duties = Bands(week, monday, names),
+            duties = Bands(week, monday, names, calendar),
 
             // **Who could hold it.** The dialog listed three people written
             // into the module — Anjali Menon, Rahul Nair, Vishnu Das, with
@@ -182,7 +187,8 @@ public static class DutyView
     private static List<object> Bands(
         IReadOnlyList<DutyAssignment> week,
         DateOnly monday,
-        IReadOnlyDictionary<Guid, string> names)
+        IReadOnlyDictionary<Guid, string> names,
+        PropertyCalendar calendar)
     {
         var bands = new List<object>();
 
@@ -192,12 +198,15 @@ public static class DutyView
 
             foreach (var band in new[] { "day", "night" })
             {
-                // Noon and midnight: the instant inside each band that no
-                // ordinary span can miss. Testing the band's edges instead would
-                // make a 08:00 handover belong to both bands or to neither.
-                var probe = new DateTimeOffset(
-                    day.ToDateTime(band == "day" ? new TimeOnly(12, 0) : new TimeOnly(23, 0)),
-                    TimeSpan.Zero);
+                // Noon and 23:00: the instant inside each band that no ordinary
+                // span can miss. Testing the band's edges instead would make a
+                // 08:00 handover belong to both bands or to neither.
+                //
+                // **At the property.** These were UTC noon and 23:00, so a Kochi
+                // night band was probed at 04:30 the next morning and read a
+                // covered night as "no MOD".
+                var probe = calendar.At(
+                    day, band == "day" ? new TimeOnly(12, 0) : new TimeOnly(23, 0));
 
                 var covering = week.FirstOrDefault(one => one.CoversAt(probe));
 

@@ -82,6 +82,9 @@ public sealed class PropertyRow
     public Guid Id { get; set; }
     public string? Name { get; set; }
     public string? Country { get; set; }
+
+    /// <summary>The property's IANA time zone — every calendar day here is computed in it.</summary>
+    public string? Timezone { get; set; }
 }
 
 /// <summary>Keyless, over Master Data's tables. Never written.</summary>

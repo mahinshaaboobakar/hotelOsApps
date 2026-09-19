@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
@@ -40,9 +41,13 @@ public static class RotaView
         var directory = call.Service<IStaffDirectory>();
         var clock = call.Service<TimeProvider>();
 
+        // Days at the property, never UTC days — see PropertyCalendar.
+        var calendar = await PropertyCalendar.ForAsync(
+            directory, call.Scope.PropertyId, cancellationToken);
+
         var anchor = call.Optional("week") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            : calendar.DayOf(clock.GetUtcNow());
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
         var sunday = monday.AddDays(6);
@@ -82,8 +87,8 @@ public static class RotaView
 
         var spans = await duties.ListAsync(
             call.Scope,
-            new DateTimeOffset(monday.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
-            new DateTimeOffset(sunday.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
+            calendar.StartOf(monday),
+            calendar.StartOf(sunday.AddDays(1)),
             cancellationToken);
 
         return new
@@ -124,7 +129,7 @@ public static class RotaView
             days = Enumerable.Range(0, 7)
                 .Select(offset => Wire.Day(monday.AddDays(offset)))
                 .ToList(),
-            duty = spans.Select(one => Span(one, monday, names)).ToList(),
+            duty = spans.Select(one => Span(one, monday, names, calendar)).ToList(),
             people = people
                 .Select(group => Person(group, monday, cells, approved, shifts, hours, names))
                 .ToList(),
@@ -307,11 +312,14 @@ public static class RotaView
 
     /// <summary>One duty span, positioned across the week's seven columns.</summary>
     private static object Span(
-        DutyAssignment duty, DateOnly monday, IReadOnlyDictionary<Guid, string> names)
+        DutyAssignment duty, DateOnly monday, IReadOnlyDictionary<Guid, string> names,
+        PropertyCalendar calendar)
     {
-        var start = DateOnly.FromDateTime(duty.StartsAt.UtcDateTime);
+        // The days AT THE PROPERTY that the duty starts and ends on. These were
+        // UTC dates, so at +05:30 a Tuesday 02:00 duty drew in Monday's column.
+        var start = calendar.DayOf(duty.StartsAt);
         var from = start.DayNumber - monday.DayNumber;
-        var end = DateOnly.FromDateTime(duty.EndsAt.UtcDateTime);
+        var end = calendar.DayOf(duty.EndsAt);
 
         return new
         {

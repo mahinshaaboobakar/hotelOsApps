@@ -144,6 +144,19 @@ public class MasterDataStaffDirectory(WorkforceDbContext database) : IStaffDirec
     }
 
     /// <inheritdoc />
+    public async Task<string?> FindPropertyZoneAsync(
+        Guid propertyId, CancellationToken cancellationToken)
+    {
+        var zone = await database.MasterDataProperties
+            .AsNoTracking()
+            .Where(property => property.Id == propertyId)
+            .Select(property => property.Timezone)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return string.IsNullOrWhiteSpace(zone) ? null : zone;
+    }
+
+    /// <inheritdoc />
     /// <remarks>
     /// <b>One query, where the gRPC surface needed one call per person.</b>
     /// That version's own comment looked forward to <i>the day `ListStaff`

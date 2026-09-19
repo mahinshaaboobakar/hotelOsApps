@@ -1,4 +1,5 @@
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Rota;
@@ -37,9 +38,13 @@ public static class ScheduleView
 
         var staffId = call.Id("staffId");
 
+        // Days at the property, never UTC days — see PropertyCalendar.
+        var calendar = await PropertyCalendar.ForAsync(
+            directory, call.Scope.PropertyId, cancellationToken);
+
         var anchor = call.Optional("month") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            : calendar.DayOf(clock.GetUtcNow());
 
         var first = new DateOnly(anchor.Year, anchor.Month, 1);
         var last = first.AddMonths(1).AddDays(-1);
@@ -55,10 +60,13 @@ public static class ScheduleView
         var approved = await leave.ApprovedBetweenAsync(call.Scope, first, last, cancellationToken);
         var mine = approved.Where(one => one.StaffId == staffId).ToList();
 
+        // The month from the property's first midnight to the one after its last
+        // day — UTC midnights would drop a duty early on the 1st and admit one
+        // from the next month's first hours.
         var spans = await duties.ListAsync(
             call.Scope,
-            new DateTimeOffset(first.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
-            new DateTimeOffset(last.AddDays(1).ToDateTime(TimeOnly.MinValue), TimeSpan.Zero),
+            calendar.StartOf(first),
+            calendar.StartOf(last.AddDays(1)),
             cancellationToken);
 
         var held = spans.Where(one => one.StaffId == staffId).ToList();
@@ -89,7 +97,7 @@ public static class ScheduleView
             // left" would eventually disagree, and this is the one nobody would
             // check.
             balance = (string?)null,
-            days = Calendar(first, last, cells, mine, held, byId),
+            days = Calendar(first, last, cells, mine, held, byId, calendar),
         };
     }
 
@@ -100,7 +108,8 @@ public static class ScheduleView
         IReadOnlyList<ShiftAssignment> cells,
         IReadOnlyList<LeaveRequest> away,
         IReadOnlyList<DutyAssignment> duties,
-        IReadOnlyDictionary<Guid, ShiftCatalogueEntry> shifts)
+        IReadOnlyDictionary<Guid, ShiftCatalogueEntry> shifts,
+        PropertyCalendar calendar)
     {
         var days = new List<object>();
         var lead = ((int)first.DayOfWeek + 6) % 7;
@@ -123,8 +132,9 @@ public static class ScheduleView
         {
             var assigned = cells.FirstOrDefault(one => one.Date == day);
             var leave = away.FirstOrDefault(one => one.From <= day && day <= one.To);
-            var duty = duties.FirstOrDefault(
-                one => DateOnly.FromDateTime(one.StartsAt.UtcDateTime) == day);
+            // The day the duty starts AT THE PROPERTY. This compared UTC dates,
+            // so a 02:00 duty at +05:30 sat on the day before.
+            var duty = duties.FirstOrDefault(one => calendar.DayOf(one.StartsAt) == day);
 
             var entry = assigned is not null
                         && shifts.TryGetValue(assigned.CatalogueEntryId, out var found)
