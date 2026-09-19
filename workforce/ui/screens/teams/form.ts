@@ -32,7 +32,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
-import { write, WriteRefused } from "../../roster";
+import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { Department, Team } from "../../roster/team";
 
 /** What the sheet is holding, and what the write will carry. */
@@ -114,7 +114,7 @@ export function formTeam(
       refusal.append(el("span", undefined,
         error instanceof WriteRefused
           ? error.message
-          : "That did not go through. Nothing was changed."));
+          : UNKNOWN_OUTCOME));
       acts.working(false);
 
       if (!(error instanceof WriteRefused)) throw error;

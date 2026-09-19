@@ -38,6 +38,41 @@ export * from "./model";
 // be reachable from the shipped path through this seam — `APPS-Q26(4)`. A
 // barrel that re-exported them is how a screen imports one without deciding to.
 
+/**
+ * What a failed save may say when nothing answered: the save may have gone
+ * through, so the outcome is not known and a blind retry could do it twice.
+ */
+export const NO_ANSWER =
+  "No answer came back, so it is not known whether that went through. "
+  + "Check before trying again.";
+
+/**
+ * What a failed save may say when the service reported a fault: it answered,
+ * but nothing establishes that it saved none of it.
+ */
+export const FAULTED =
+  "The service reported a fault, so it is not known whether any of that was saved. "
+  + "Check before trying again.";
+
+/**
+ * What a dialog says when its save failed in a way it did not expect — an
+ * exception it rethrows, from before or after the call. Whether the write ran
+ * is not known, so the sentence does not claim either.
+ */
+export const UNKNOWN_OUTCOME =
+  "Something went wrong, so it is not known whether that went through. "
+  + "Check before trying again.";
+
+/** What a failed save may say when the platform refused before anything ran. */
+export const REFUSED = "That did not go through. Nothing was changed.";
+
+/**
+ * Which failures refused the write before it ran — so "nothing was changed" is
+ * true of them and of nothing else. `model_unavailable` is here because an
+ * authority that could not decide never let the call reach the service.
+ */
+const REFUSALS = new Set(["forbidden", "local_forbidden", "user_forbidden", "model_unavailable"]);
+
 /** Why a write did not happen, in the words a person may be shown. */
 export class WriteRefused extends Error {
   /**
@@ -82,13 +117,23 @@ export async function write(
     return await host.call(capability, method, params);
   } catch (error) {
     if (error instanceof HostCallError) {
+      // The diagnostic kinds never reach a screen — ADR 0041. What replaces
+      // them is decided by what is KNOWN about the write, per kind.
+      //
+      // This said "That did not go through. Nothing was changed." for all of
+      // them, under a comment claiming *"the sentence says the truth a person
+      // can act on: it did not happen."* **For a save nobody answered, that was
+      // never known** — it may have gone through, and the sentence invited
+      // pressing Save again (KK's finding in Room Care, 2026-09-19). It stays
+      // only where the platform refused before anything ran.
       throw new WriteRefused(
         error.isForPeople
           ? error.message
-          // `internal` and `unavailable` carry a diagnostic, and putting one on
-          // a hotel's screen leaks a platform detail to a supervisor. The
-          // sentence says the truth a person can act on: it did not happen.
-          : "That did not go through. Nothing was changed.",
+          : REFUSALS.has(error.kind)
+            ? REFUSED
+            : error.kind === "internal"
+              ? FAULTED
+              : NO_ANSWER,
         error.kind);
     }
 

@@ -25,7 +25,7 @@ import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk"
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
-import { write, WriteRefused } from "../../roster";
+import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { PostingEnding, Supported } from "../../roster/team";
 
 /**
@@ -74,7 +74,7 @@ export function endPosting(
         refusal.append(el("span", undefined,
           error instanceof WriteRefused
             ? error.message
-            : "That did not go through. Nothing was changed."));
+            : UNKNOWN_OUTCOME));
         acts.working(false);
 
         if (!(error instanceof WriteRefused)) throw error;

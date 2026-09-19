@@ -22,7 +22,7 @@ import { span } from "../../chrome/clock";
 import { el } from "../../chrome/element";
 import { codeChip } from "../../chrome/code";
 import { foot } from "../../chrome/confirm";
-import { write, WriteRefused } from "../../roster";
+import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { Person, Shift, Week } from "../../roster";
 
 /**
@@ -135,7 +135,7 @@ export function picker(
       refusal.append(el("span", undefined,
         error instanceof WriteRefused
           ? error.message
-          : "That did not go through. Nothing was changed."));
+          : UNKNOWN_OUTCOME));
       acts.working(false);
 
       if (!(error instanceof WriteRefused)) throw error;
