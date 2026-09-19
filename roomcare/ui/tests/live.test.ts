@@ -95,3 +95,45 @@ describe("Apply to selected, on the Room states sheet", () => {
     }
   });
 });
+
+describe("a selection on the Room states sheet", () => {
+  // "Apply to selected" is a bulk change. A selection that outlives the screen lets it act on rows the person is no
+  // longer looking at (architect, 2026-09-19: a safety problem, not a small one). Leaving — for another section, or
+  // into a room — forgets it. The "show" filter is also remembered; whether it should be is the owner's choice and
+  // is not changed here.
+  const selectOne = async (root: HTMLElement): Promise<void> => {
+    click(root, ".chips button", "All");
+    await settle();
+    const box = root.querySelector<HTMLInputElement>('.body input[aria-label^="select "]:not([aria-label="select every room shown"])');
+    expect(box, "the sheet draws a box to select a room with").not.toBeNull();
+    if (!box!.checked) box!.click();
+    await settle();
+    expect(root.querySelector(".dock")?.textContent).not.toMatch(/^0 rows selected/u);
+  };
+  const nothingSelected = (root: HTMLElement): void => {
+    const dock = root.querySelector(".dock")?.textContent ?? "";
+    expect(dock).toMatch(/^0 rows selected/u);
+    expect(dock).toContain("Apply to selected — select rows first");
+  };
+
+  it("is forgotten when the person leaves for another section and comes back", async () => {
+    const root = await reach(SUPERVISOR, "Room states", null, []);
+    await selectOne(root);
+    click(root, ".head .tab", "Board");
+    await settle();
+    click(root, ".head .tab", "Room states");
+    await settle();
+    nothingSelected(root);
+  });
+
+  it("is forgotten when the person opens a room from the sheet and returns to Room states", async () => {
+    const root = await reach(SUPERVISOR, "Room states", null, []);
+    await selectOne(root);
+    click(root, ".body button", "▸");
+    await settle();
+    // A room's page has no back control; a person returns through the section tab.
+    click(root, ".head .tab", "Room states");
+    await settle();
+    nothingSelected(root);
+  });
+});

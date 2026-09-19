@@ -22,6 +22,16 @@ export const STAYS: readonly (readonly [string, string])[] = [["DEPARTED", "depa
 let show = "All";
 const selected = new Set<string>();
 
+/**
+ * Forget the sheet's selection — called each time Room states is entered, so leaving (another section, a room)
+ * drops it. "Apply to selected" is a bulk change; a selection that outlived the screen would act on rows the person
+ * is no longer looking at (architect, 2026-09-19). The unsaved edits already go the same way: `states()` makes new
+ * ones on every entry. `show` stays remembered: whether a filter is kept is the owner's choice, queued, not made here.
+ */
+export function forgetSelection(): void {
+  selected.clear();
+}
+
 export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflicts: ReadonlySet<string>, redraw: () => void, nav: Nav): HTMLElement[] {
   const shows: readonly (readonly [string, (r: StateRow) => boolean])[] = [
     ["All", () => true], ["Dirty", (r) => edits.value(r, "condition") === "DIRTY"], ["Occupied", (r) => edits.value(r, "occupancy") === "OCCUPIED"],
