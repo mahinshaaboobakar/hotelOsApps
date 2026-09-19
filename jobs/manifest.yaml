@@ -123,6 +123,13 @@ name: "Jobs"
 #   * **Nothing looks live and does nothing:** nine inert buttons wired, drawn
 #     off with their reason, or no longer buttons; a jobs manager's bar names
 #     the role; the Record tab shows no raw id.
+#   * **The property's time zone, everywhere (ADR 0174).** Seven defects: the
+#     AUTO pick asked for the UTC day's roster, service hours were read on the
+#     UTC clock, a scheduled job's promise began at UTC midnight, "closed today"
+#     and the widget's "done" counted the last 24 hours, and an unknown zone fell
+#     back to UTC. Now through PropertyCalendar, tested in Kolkata and Guatemala.
+#   * **Refusals in plain words:** nineteen named a wire field; none does now.
+#     The jobs-manager list shows names and times, never a raw id.
 version: 0.4.3
 publisher: hotelos
 category: operations
