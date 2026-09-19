@@ -11,16 +11,29 @@ namespace HotelOS.Workforce.Application.Rota;
 /// <param name="PlannedHours">Hours the rota plans for them in the window.</param>
 /// <param name="DailyExceedances">The days over the daily threshold, with their hours.</param>
 /// <param name="ExceedsWeekly">Whether the window's total is over the weekly threshold.</param>
+/// <param name="DailyThreshold">The property's daily threshold measured against, or null where none is set.</param>
+/// <param name="WeeklyThreshold">The property's weekly threshold measured against, or null where none is set.</param>
 /// <remarks>
+/// <para>
 /// A warning carries <b>the number</b>, not just the fact. <i>"Vishnu is over"</i>
 /// tells a manager nothing they can act on; <i>"Vishnu, 54.0 against 48"</i> tells
 /// them how much to move.
+/// </para>
+/// <para>
+/// <b>And the number it was measured against.</b> This said so and did not carry
+/// it, so the read composed <i>"over the weekly threshold"</i> in its place and
+/// the screen printed <i>"against over the weekly threshold"</i>. The check holds
+/// the policy it measured with, so that is where the thresholds come from.
+/// Two <c>decimal?</c> fields: construct by name, never by position.
+/// </para>
 /// </remarks>
 public sealed record OvertimeWarning(
     Guid StaffId,
     decimal PlannedHours,
     IReadOnlyList<(DateOnly Date, decimal Hours)> DailyExceedances,
-    bool ExceedsWeekly);
+    bool ExceedsWeekly,
+    decimal? DailyThreshold,
+    decimal? WeeklyThreshold);
 
 /// <summary>
 /// The overtime warning — at planning time, on planned hours, and never blocking.
@@ -123,7 +136,13 @@ public class OvertimeCheck(
 
             if (overDaily.Count > 0 || overWeekly)
             {
-                warnings.Add(new OvertimeWarning(person.Key, total, overDaily, overWeekly));
+                warnings.Add(new OvertimeWarning(
+                    StaffId: person.Key,
+                    PlannedHours: total,
+                    DailyExceedances: overDaily,
+                    ExceedsWeekly: overWeekly,
+                    DailyThreshold: policy.OvertimeDailyHours,
+                    WeeklyThreshold: policy.OvertimeWeeklyHours));
             }
         }
 

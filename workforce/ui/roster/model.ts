@@ -142,7 +142,21 @@ export interface OvertimeWarning {
    * stuttering where they met.
    */
   planned: number;
-  threshold: string;
+
+  /**
+   * Whether the week's total is over the weekly threshold, and that threshold.
+   *
+   * These replaced `threshold: string`, which the service filled with English
+   * it composed ("over the weekly threshold", "2 day over") and this screen
+   * placed after "against" — so a property read "against over the weekly
+   * threshold". The fixture sent "48", so no harness ever showed it.
+   */
+  weekly: boolean;
+  weeklyHours: number | null;
+
+  /** How many days are over the daily threshold, and that threshold. */
+  daysOver: number;
+  dailyHours: number | null;
 }
 
 /** A department's week, as the Team Rota draws it. */

@@ -142,5 +142,10 @@ export const recordedWeek: Week = {
 /** The same week, with somebody planned past the threshold. */
 export const recordedOvertime: Week = {
   ...recordedWeek,
-  overtime: [{ who: "Vishnu Das", planned: 60, threshold: "48" }],
+  // The wire's shape — RotaView.Week. This carried `threshold: "48"`, a field
+  // the service filled with a sentence, so the harness showed a warning no
+  // property would ever have read.
+  overtime: [{
+    who: "Vishnu Das", planned: 60, weekly: true, weeklyHours: 48, daysOver: 5, dailyHours: 9,
+  }],
 };

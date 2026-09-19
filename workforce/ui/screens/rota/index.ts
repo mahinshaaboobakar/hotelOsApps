@@ -11,7 +11,9 @@ import { legend } from "../../chrome/legend";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type Week } from "../../roster";
-import { formatDay, formatNumber, type HostApi, load } from "@hotelos/sdk";
+import type { OvertimeWarning } from "../../roster/model";
+import { formatDay, formatNumber, type HostApi, load, type PropertyEnvironment }
+  from "@hotelos/sdk";
 import { grid } from "./grid";
 import { picker } from "./picker";
 import { ribbon } from "./ribbon";
@@ -156,10 +158,7 @@ function overtime(week: Week, host: HostApi): HTMLElement {
   note.append(el("b", undefined, "Overtime — planned, not worked. "));
 
   for (const warning of week.overtime) {
-    note.append(el("span", undefined,
-      `${warning.who} is planned `
-      + `${formatNumber(warning.planned, host.property, "at-most-1")} hours `
-      + `against ${warning.threshold}. `));
+    note.append(el("span", undefined, `${overSentence(warning, host.property)} `));
   }
 
   note.append(el("span", undefined,
@@ -167,4 +166,32 @@ function overtime(week: Week, host: HostApi): HTMLElement {
 
   panel.append(note);
   return panel;
+}
+
+/**
+ * One person's warning, as a sentence — the weekly one where it applies.
+ *
+ * The service sends numbers and this writes the words (NUM-Q1, ADR 0174). The
+ * weekly total leads because it is the larger fact: a week over its threshold
+ * is over whatever its days did. A week over neither never arrives — the check
+ * warns only when one is crossed — and a threshold nobody set arrives as null
+ * and is never named.
+ */
+function overSentence(warning: OvertimeWarning, property: PropertyEnvironment): string {
+  const n = (value: number): string => formatNumber(value, property, "at-most-1");
+
+  if (warning.weekly && warning.weeklyHours !== null) {
+    return `${warning.who} is planned ${n(warning.planned)} hours against a weekly `
+      + `threshold of ${n(warning.weeklyHours)}.`;
+  }
+
+  if (warning.dailyHours !== null) {
+    const days = warning.daysOver === 1 ? "day" : "days";
+    return `${warning.who} is over the daily threshold of ${n(warning.dailyHours)} hours `
+      + `on ${formatNumber(warning.daysOver, property, "whole")} ${days}.`;
+  }
+
+  // Neither threshold named: say what was planned and nothing about a limit
+  // the wire did not give — a sentence ending "against" would be an invention.
+  return `${warning.who} is planned ${n(warning.planned)} hours.`;
 }

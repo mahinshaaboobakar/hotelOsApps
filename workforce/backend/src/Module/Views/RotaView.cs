@@ -138,12 +138,19 @@ public static class RotaView
                 // two words composed here and the rest there, stuttering where
                 // they met.
                 planned = one.PlannedHours,
-                // The threshold is the property's, not the warning's: the check
-                // returns what was planned and which days exceeded, and the
-                // number it was measured against is read from policy once.
-                threshold = one.ExceedsWeekly
-                    ? "over the weekly threshold"
-                    : one.DailyExceedances.Count + " day over",
+
+                // **Numbers, and the screen writes the sentence** (NUM-Q1, ADR
+                // 0174). This sent `threshold` as English composed here — "over
+                // the weekly threshold" or "2 day over" — into a screen that
+                // wrote "against {threshold}", so a property read "is planned 60
+                // hours against over the weekly threshold". The comment beside it
+                // said the threshold was "read from policy once"; nothing read
+                // it. The thresholds come from the check, which held the policy
+                // it measured with.
+                weekly = one.ExceedsWeekly,
+                weeklyHours = one.WeeklyThreshold,
+                daysOver = one.DailyExceedances.Count,
+                dailyHours = one.DailyThreshold,
             }).ToList(),
         };
     }

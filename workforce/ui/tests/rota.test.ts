@@ -2,6 +2,7 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { activate } from "../application";
+import type { Week } from "../roster";
 import { recordedOvertime, recordedWeek } from "../roster/recorded";
 
 /**
@@ -81,7 +82,12 @@ describe("the Team Rota", () => {
     // see a join — this sentence used to render "is planned 60 h planned hours
     // against 48", because the service composed two of its words and the
     // surface composed the rest.
-    expect(text).toContain("Vishnu Das is planned 60 hours against 48.");
+    //
+    // ADR 0034 again: this then asserted "…against 48.", which was the
+    // fixture's `threshold: "48"` — a contract the wire never had. The service
+    // sent a composed phrase there, and a property read "against over the
+    // weekly threshold". The fixture now carries the wire's numbers.
+    expect(text).toContain("Vishnu Das is planned 60 hours against a weekly threshold of 48.");
 
     // **The warning disables nothing — compared against the same screen with
     // no warning**, ADR 0034, rewritten rather than deleted. This asserted
@@ -95,6 +101,27 @@ describe("the Team Rota", () => {
       Array.from(node.querySelectorAll("[disabled]")).map((control) => control.textContent ?? "");
     const quiet = await mount(host(recordedWeek));
     expect(disabled(root)).toEqual(disabled(quiet));
+  });
+
+  it("writes the overtime sentence from the wire's numbers, for either threshold", async () => {
+    // **What the service actually sends** — `RotaView.Week`, and
+    // RotaOvertimeWireTests on the backend. It sent `threshold` as English it
+    // composed ("over the weekly threshold", "2 day over"), so a property read
+    // "is planned 60 hours against over the weekly threshold"; the fixture sent
+    // "48", which is why this screen never showed it. Two warnings whose
+    // numbers differ, so neither threshold can stand in for the other.
+    const week = {
+      ...recordedWeek,
+      overtime: [
+        { who: "Vishnu Das", planned: 60, weekly: true, weeklyHours: 48, daysOver: 5, dailyHours: 9 },
+        { who: "Sneha Iyer", planned: 24, weekly: false, weeklyHours: null, daysOver: 2, dailyHours: 10 },
+      ],
+    } as unknown as Week;
+
+    const text = (await mount(host(week))).textContent ?? "";
+
+    expect(text).toContain("Vishnu Das is planned 60 hours against a weekly threshold of 48.");
+    expect(text).toContain("Sneha Iyer is over the daily threshold of 10 hours on 2 days.");
   });
 
   it("says nothing about overtime when there is nothing to say", async () => {
