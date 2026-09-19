@@ -75,7 +75,7 @@ never `T` alone.
 | C6 | *"`.btn.danger.confirm` the confirm step … FILLED: background:var(--color-bad); color:var(--color-ink-on-accent); border-color:transparent; font-weight:600"* | `M` in the open confirm dialog | `OV` |
 | C7 | *"One class, modified. Not `.btn2`, `.create`, `.mini`, `.go`"* | `S` no second base class for a button | `SRC` |
 | C8 | *"A row that opens something is a real `<button>`, and the reset lives on the class"* | `S` DOM: every clickable row is a `button`; `M` no UA border, text left-aligned, family inherited | `ALL` |
-| C9 | *"`font:inherit` AND `line-height:inherit` on every control"* | `M` a control's computed `line-height` equals its parent's (the 2.5px defect is invisible in a capture) | `ALL` `FM` |
+| C9 | *"`font:inherit` AND `line-height:inherit` on every control"* | `S` every control class declares both; `M` for `button` and `input`: the control's `line-height ÷ font-size` equals its parent's — **a ratio, never pixels** (`inherit` passes a unitless ratio, so a smaller control computes a smaller px value and still inherits). **A `<select>` is `S` only** — Chromium measures its line-height `normal` even when set (audit note 1) | `ALL` `FM` |
 | C10 | *"The destructive twin lives in the chrome, not in a screen."* | `S` `.btn.danger.confirm` is defined once, in the app's chrome stylesheet | `SRC` |
 | C11 | *"A primary action with nothing to send is drawn `off`, with the reason beside it — never live-and-refusing"* | `T` a form with nothing to send renders `.btn.pri.off` and a visible reason | `FM` |
 
@@ -110,7 +110,7 @@ never `T` alone.
 | D1 | *"list viewport scrolls within the screen; the pager does not move"* | see G6 | `MP` |
 | D2 | *"table header .08em · field label .07em · section label .04em"* — RULED `APPS-Q33` | `M` letter-spacing per **role** | `ALL` `FM` |
 | D3 | *"Text that explains rather than reports is 12px. There is one size for it"*; *"Its line-height is `19.8px`"* — RULED `APPS-Q35`, `64a` | `M` on note-role nodes, found by the rule that governs them — *"never by replacing a figure wherever it occurs"* | `ALL` `F6` |
-| D4 | *"Where a surface needs quiet text a person still reads, the token is `--color-ink-muted`."* — RULED `64a` | `M` quiet-role nodes compute `ink-muted` | `ALL` |
+| D4 | *"Where a surface needs quiet text a person still reads, the token is `--color-ink-muted`."* — RULED `64a` | `M` quiet text **a person reads** — a date, a trailing detail, a value — computes `ink-muted`. **`ink-faint` elsewhere (labels, rules, decoration) is not a D4 failure**: §5 records those 432 uses as unclassified and the contrast question open (audit note 3) | `ALL` |
 | D5 | the weight of emphasis inside a note, 500 or 700 — **OPEN, `64c`, unruled** | `M` record the built weight; do not fail | `ALL` `F6` |
 
 ## §6 · The pager
@@ -122,12 +122,12 @@ never `T` alone.
 | G3 | *"`showing 1–14 of 14`, with the arrows disabled. A one-page list gets a pager like any other."* | `T` range text and disabled arrows; `C` | `1P` |
 | G4 | *"`last` is `first + rows.length - 1`, clamped by `total`. Not `(page + 1) * pageSize`."* | `T` range equals rows shown | `ML` `MP` |
 | G5 | *"An empty page says so — no rows on this page · 218 in the list"* | `T` barren text, no range | `E1` |
-| G6 | *"The page does not scroll. The heading and the pager both stay put, and the list is the scroll container."* — RULED `CORE-Q28`; the snippet: `.body:has(.pager){overflow:hidden}`, list `flex:1 1 auto;min-height:0;overflow-y:auto`, `.pager{flex:0 0 auto}` *"no sticky"* | `M` body `scrollHeight == clientHeight`; the list is the element that scrolls; no `position:sticky` on the pager | `MP` `1P` `E0` |
-| G7 | *"The pager is the list's floor. The list grows to take the free space, so a short list still puts the pager at the bottom"* — RULED 2026-09-05 | `M` pager bottom = body floor **and** list box taller than its rows — *"measured rather than inferred … the pager looks right even when the list has not grown"* | `1P` `E0` `E1` `ML` |
+| G6 | *"The page does not scroll. The heading and the pager both stay put, and the list is the scroll container."* — RULED `CORE-Q28`; the snippet: `.body:has(.pager){overflow:hidden}`, list `flex:1 1 auto;min-height:0;overflow-y:auto`, `.pager{flex:0 0 auto}` *"no sticky"* | `M` body `scrollHeight == clientHeight`; the list is the element that scrolls; no `position:sticky` on the pager. **A paged list inside a card is `N/A`** — §6's own Operations Center row: *"a card inside a scrolling page rather than a screen's floor, so there is no free space to distribute"*; G3–G5 still apply to it (audit note 2) | `MP` `1P` `E0` |
+| G7 | *"The pager is the list's floor. The list grows to take the free space, so a short list still puts the pager at the bottom"* — RULED 2026-09-05 | `M` pager bottom = body floor **and** list box taller than its rows — *"measured rather than inferred … the pager looks right even when the list has not grown"*. **`N/A` for a paged list inside a card** — see G6 (audit note 2) | `1P` `E0` `E1` `ML` |
 | G8 | *"Scoped to a body that has a pager"* — a rule about lists applied without one *"removes content"* | `M` on every screen **without** a pager, nothing is clipped past the body | `ALL` |
-| G9 | the pager is the table's next sibling — *"what `~` depends on and what a wrapper would silently break"* | `T` DOM sibling | `1P` `MP` `E0` |
+| G9 | the pager is a **later** sibling of the list wrapper — `CORE-Q28`'s rule is `.tbl:has(~ .pager)`, a general-sibling selector. **This line said *"the table's next sibling"***, quoting §6's description of GuestOps' pre-`CORE-Q28` test as though it were the rule; corrected with page 64 (audit note 8; `APPS-Q51` withdrawn) | `T` the pager and the list wrapper share a parent, pager later | `1P` `MP` `E0` |
 | G10 | the strip's colour *"from `--color-surface` and never from a literal"* | `S` | `SRC` |
-| G11 | **The empty list (`E0`) is not ruled.** §6 rules a single page (G3) and an empty page (G5); `pagedView` returns `empty: true` and says *"A caller draws its own empty state instead"* (`pager.ts:94`). Whether `E0` draws a pager, a count (`0 in the list`), or neither is **OPEN — drawn for the owner in `64f`** | `C` record what `E0` draws and where; G6, G7 still apply to its placement | `E0` |
+| G11 | **The empty list (`E0`) is not ruled.** §6 rules a single page (G3) and an empty page (G5); `pagedView` returns `empty: true` and says *"A caller draws its own empty state instead"* (`pager.ts:94`). **Split on the owner's direction, 2026-09-19** — *"if no data, need to show that in screen"*: **G11a — an explicit empty message in the list is required** (checkable now); **G11b — what sits with it** (pager, count, neither), **its wording and its picture remain OPEN, `64f`** (audit note 5) | `C` G11a: a message is drawn in the list area; G11b: record what sits with it. G6, G7 still apply to its placement | `E0` |
 
 ## §9 · Overlays
 
@@ -164,7 +164,7 @@ never `T` alone.
 
 | ID | Rule, quoted | Check | States |
 |---|---|---|---|
-| U1 | *"Every user-facing number goes through `@hotelos/sdk`'s `formatNumber`, in the property's locale."* — `NUM-Q1`, ADR 0174 | `S` no `toLocaleString`, `Intl.NumberFormat` or `toFixed` on a displayed number | `SRC` |
+| U1 | *"Every user-facing number goes through `@hotelos/sdk`'s `formatNumber`, in the property's locale."* — `NUM-Q1`, ADR 0174 | `S` **by call shape, not by the approved names**: every number that reaches a screen — `String(n)`, `${n}` in a template, `n.toString()`, `+ n` into text, as well as `toLocaleString`/`Intl.NumberFormat`/`toFixed` — goes through `formatNumber`. **This check listed only the three names, and Jobs passed it while writing ~40 numbers with `String(n)`** (audit note 6). A length with a unit (*"45 min"*) is a number here, not a duration — see note 4 | `SRC` |
 | U2 | *"When the property's locale is not established, `formatNumber` applies no grouping at all."* — a screen must not substitute one | `T` a grouped-size number renders ungrouped | `NL` |
 
 ## §13 · When a screen cannot read — `64b`, `64e`
@@ -197,6 +197,29 @@ never `T` alone.
 | H4 | *"A frame is drawn in the element types the build uses"* — `ARCH-Q20`; *"it draws the fixture the harness holds"*; *"the harness reaches the state"* and *"The drive asserts the state was reached"* | `C` frame review; `T` the drive's reached-state assertion | frames `FM` |
 | H5 | *"A capture harness refuses; it never renders a stand-in"* | `T` an unhandled route fails the capture | `SRC` |
 | H6 | *"declares no `:root` palette of its own"* | `S` frame source | frames |
+
+---
+
+## Notes from the audits — how the checklist handles each
+
+Raised by KK (Room Care, `roomcare/docs/page64-audit.md`, `03b14fd`) and HH
+(Jobs), 2026-09-19; decided by GG, who holds this file. **Where page 64 is
+silent, the decision is this checklist's reading and says so** — it binds an
+audit, not the standard.
+
+| # | Raised | Decision | Why |
+|---|---|---|---|
+| 1 | KK — C9 cannot be met by a `<select>`: Chromium measures its line-height `normal` even when set | **C9 is `S` for a `<select>`**: the declaration is checked in source, not measured | the rule is about the declaration; the measurement is the instrument, and for this element the instrument cannot see it. Not `N/A` — a `<select>` still owes the reset |
+| 2 | KK — G6/G7 do not fit a paged list inside a card | **`N/A` for a paged list inside a card**; G3–G5 still apply | §6 says it itself, of Operations Center's inbox: *"a card inside a scrolling page rather than a screen's floor, so there is no free space to distribute"* |
+| 3 | KK — D4 fails only on the ruled case | **D4 checks quiet text a person reads**; `ink-faint` on labels, rules and decoration is not a D4 failure | §5: the ruling is about *"quiet text a person still reads"*, and *"`ink-faint` appears 432 times … nobody has classified those uses … That is a separate question and it is open"* |
+| 4 | KK — `minutes()` shows a configured length (*"45 min"*), not the SDK's duration clock | **A configured length is a number with a unit: U1 applies, I1 does not** — the figure goes through `formatNumber`, the unit is the app's copy | §11's `formatDuration` renders *"a span of seconds"* measured between instants (`00:23:41`); a setting's length was never an elapsed time. *The checklist's reading — page 64 does not say* |
+| 5 | KK — G11 is already met by an explicit empty message, per `64f` | **G11 splits**: G11a, the message, is required — the owner's direction; G11b — what sits with it, its words, its picture — stays OPEN | the owner said *"if no data, need to show that in screen"*; `64f` itself is not ruled, so only the part the owner directed is checkable |
+| 6 | HH — U1 is narrower than its rule; Jobs passed while writing ~40 numbers with `String(n)` | **U1 searches by call shape** — `String(n)`, `${n}`, `.toString()`, `+ n` — not by the approved names | *a search for the mechanism's name finds only the places somebody was already thinking about it*. The check could not have failed on the defect it exists for |
+| 7 | HH — C9 fails a control with a smaller font even when it inherits correctly | **C9 compares `line-height ÷ font-size`, never pixels** | `inherit` carries a unitless ratio, so a 13px control under a 13.5px parent computes 20.15px against 20.925px and is correct. **GG met the same misread in Workforce's audit and resolved it by hand; the check should never have asked the question in pixels** |
+| 8 | HH — G9's *"the table's next sibling"* is stale | **G9 is a later sibling of the list wrapper** — `CORE-Q28`'s `.tbl:has(~ .pager)`. Page 64's §6 paragraph that described GuestOps' pre-`CORE-Q28` test as the rule is corrected, keeping what it said. **`APPS-Q51` withdrawn** — it asked exactly this | the selector is the rule; a test that asserted adjacency was one app's stricter guard, quoted as though it were the standard |
+
+**Audits already recorded against the earlier checks** are not re-scored here;
+each app's audit states which checklist revision it used.
 
 ---
 
@@ -260,7 +283,7 @@ row** (reported below):
 `64c` → D5 (OPEN) · `64d` → C4's card half is `APPS-Q43`, not 64d; X4, X7, X8,
 X13, X14, X15 carry 64d's eight items as OPEN.
 
-**Open lines, never failed:** C4 (card half) · D5 · G11 · X4 (stack) · X7
+**Open lines, never failed:** C4 (card half) · D5 · G11b (G11a is required since 2026-09-19) · X4 (stack) · X7
 (fill, *needs…* size) · X8 (the moment) · X13 · X14 · X15.
 
 ## What deriving this found about the standard itself
