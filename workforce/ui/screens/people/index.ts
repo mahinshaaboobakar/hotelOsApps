@@ -60,8 +60,14 @@ export async function people(
 
   const body = el("div", "body");
 
-  // Nobody posted is a real state with its own screen, not an empty table.
-  body.append(board.postings.length === 0 ? firstRun() : table(board.postings, onEnd, host.property));
+  // Nobody posted is a real state with its own screen, not an empty table —
+  // **and "nobody posted" is the list's TOTAL, counted by the service where the
+  // rows live, never this page's rows.** This read `board.postings.length`, so
+  // page 3 of a 42-person list drew "Post your first staff member" (app surface
+  // audit, 2026-09-19, G5/G7): a count taken from a capped read measures the
+  // page and calls it the property. An empty page of a non-empty list is an
+  // ordinary list saying it has nothing here.
+  body.append(board.paging.total === 0 ? firstRun() : table(board.postings, onEnd, host.property));
 
   body.append(ownership());
 
@@ -166,6 +172,11 @@ function table(
   for (const posting of postings) {
     list.append(row(posting, onEnd, property));
   }
+
+  // A page with no rows says so in the list — the owner's direction for `64f`,
+  // *"if no data, need to show that in screen"*. The words are §6's own for an
+  // empty page until `64f` rules what an empty list says.
+  if (postings.length === 0) list.append(el("div", "none", "No rows on this page."));
 
   return list;
 }

@@ -141,6 +141,25 @@ describe("the People pager", () => {
       .toBe("No rows on this page · 42 in the list");
   });
 
+  it("draws an ordinary empty page — never the first run — when the list has rows elsewhere", async () => {
+    // **The test above passed while this screen was wrong.** It asserted the
+    // pager's sentence, which was right, and never looked at the list above
+    // it — where page 3 of a 42-person list drew "Post your first staff
+    // member". First run was decided on this PAGE's rows, not the list's total:
+    // a count taken from a capped read, measuring the page and calling it the
+    // property (the app surface audit, 2026-09-19, G5/G7).
+    const root = await people({
+      ...recordedPeople,
+      postings: [],
+      paging: { page: 3, pageSize: 25, total: 42 },
+    });
+
+    expect(root.querySelector(".first"), "the first-run panel over a list of 42").toBeNull();
+    expect(root.querySelector(".rows .row.hd"), "the list keeps its header").not.toBeNull();
+    // The owner's direction for 64f: if there is no data, the screen says so.
+    expect(root.querySelector(".rows .none")?.textContent).toBe("No rows on this page.");
+  });
+
   it("is absent over an EMPTY property", async () => {
     const root = await people(recordedFirstRun);
 

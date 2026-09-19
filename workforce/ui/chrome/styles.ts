@@ -317,6 +317,9 @@ button{background:transparent;color:inherit;font:inherit;border:0;
    closes it. */
 .row.hd{font-size:11px;font-weight:500;letter-spacing:.08em;align-items:center;
         text-transform:uppercase;color:var(--color-ink-faint,#5a6172);padding:8px 10px}
+/* A page with no rows says so, where the rows would be — the owner's direction
+   for 64f. Quiet text a person reads, so ink-muted (§5). */
+.rows .none{padding:14px 10px;font-size:13px;color:var(--color-ink-muted,#8b93a7)}
 .row b{font-weight:600}
 .row s{text-decoration:none;display:block;font-size:11.5px;
        color:var(--color-ink-faint,#5a6172);margin-top:2px}
