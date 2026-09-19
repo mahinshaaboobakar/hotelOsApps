@@ -41,7 +41,11 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
   const filters = el("div", "chips");
   // Zone is the only grouping: said, not offered as a chip that does nothing when pressed (tests/live.test.ts).
   filters.append(el("span", "lbl", "grouped by zone"), el("span", "lbl", "show"));
-  for (const [label] of shows) filters.append(chip(label, show.split(" ·")[0] === label.split(" ·")[0], () => { show = label; redraw(); }));
+  // INTERIM, the safe behaviour until the owner chooses: changing the filter forgets the selection — the same one
+  // lifetime rule as leaving the sheet (`forgetSelection`). The invariant is not a choice: Apply never changes a row
+  // the person can't see (tests/live.test.ts). The alternative drawn for the owner keeps the selection and has Apply
+  // act only on the rows shown.
+  for (const [label] of shows) filters.append(chip(label, show.split(" ·")[0] === label.split(" ·")[0], () => { show = label; selected.clear(); redraw(); }));
   const keep = shows.find(([label]) => label.split(" ·")[0] === show.split(" ·")[0])?.[1] ?? (() => true);
 
   const house = el("div", "house");

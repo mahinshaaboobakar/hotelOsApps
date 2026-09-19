@@ -137,3 +137,33 @@ describe("a selection on the Room states sheet", () => {
     nothingSelected(root);
   });
 });
+
+describe("Apply to selected", () => {
+  // The invariant is not the owner's choice; how it holds is. Interim: a filter change clears the selection. The
+  // alternative the owner is shown is Apply acting only on the rows shown. This test holds either.
+  it("never changes a row the person can't see", async () => {
+    const root = await reach(SUPERVISOR, "Room states", null, []);
+    const shown = (): string[] => [...root.querySelectorAll<HTMLInputElement>('.body input[aria-label^="select "]:not([aria-label="select every room shown"])')]
+      .map((box) => box.getAttribute("aria-label")!.slice("select ".length));
+    click(root, ".chips button", "All");
+    await settle();
+    root.querySelector<HTMLInputElement>('.body input[aria-label="select every room shown"]')!.click();
+    await settle();
+    click(root, ".chips button", "Vacant");
+    await settle();
+    const visible = shown();
+    expect(visible.length, "some rooms are vacant, and some are not").toBeGreaterThan(0);
+    const condition = root.querySelector<HTMLSelectElement>(".dock select")!;
+    condition.value = condition.options[condition.options.length - 1]!.value;
+    condition.dispatchEvent(new Event("change"));
+    const apply = [...root.querySelectorAll<HTMLButtonElement>(".dock button")].find((b) => b.textContent === "Apply to selected");
+    apply?.click();
+    await settle();
+    click(root, ".chips button", "Changed");
+    await settle();
+    const changed = shown();
+    expect(changed.filter((room) => !visible.includes(room)), "rows changed while hidden by the filter").toEqual([]);
+    click(root, ".chips button", "All");
+    await settle();
+  });
+});
