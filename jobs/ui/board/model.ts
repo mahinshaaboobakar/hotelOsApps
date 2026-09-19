@@ -293,7 +293,7 @@ export interface Settings {
   rating: readonly Detail[];
   access: readonly { label: string; who: string; from: string }[];
   /** Who the general manager has made a jobs manager here — design §4.2. */
-  jobsManagers: readonly { userId: string; grantedAt: string; grantedBy: string }[];
+  jobsManagers: readonly { userId: string; name: string | null; grantedAt: string; grantedBy: string }[];
   numbering: string;
 }
 

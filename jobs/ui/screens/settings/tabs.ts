@@ -3,9 +3,10 @@
  * who is told, holds & reminders, closing & rating, access (read-only).
  */
 
-import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatNumber, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
+import { when } from "../../chrome/instant";
 import { choose, confirming, text, toggle as switchOf, values } from "../../chrome/form";
 import type { Detail, Settings } from "../../board";
 
@@ -201,6 +202,7 @@ export function closing(s: Settings, configure: boolean, save: Saving, discard: 
  * the field takes the id the shell shows, and the list shows ids back.
  */
 export function access(
+  host: HostApi,
   s: Settings, configure: boolean, save: Saving, discard: () => void,
 ): HTMLElement {
   // **Revoking is destructive and is drawn as destructive** — standard §2's
@@ -209,14 +211,20 @@ export function access(
   // A fidelity sweep measures the button that is there and finds it perfect;
   // nothing measures that it should have been the other button.
   const asked = el("div");
+  // The person by name and the grant's time in the property's form — the list
+  // showed the raw user id and the wire's ISO string (owner, 2026-09-19: never
+  // raw ids; §11). The id stays on the call that needs it, and off the screen.
   const held = s.jobsManagers.map((m) => [
-    m.userId,
-    m.grantedAt,
+    m.name ?? "no name on record",
+    when(host, m.grantedAt),
     configure
       ? control("btn sm danger", "Revoke…", () => {
+        // Pressed again while its question is open, it closes it: an opener
+        // that did nothing the second time was live and inert (dead-control guard).
+        if (asked.childElementCount > 0) { asked.replaceChildren(); return; }
         asked.replaceChildren(confirming(
           "Revoke this person's jobs-manager grant?",
-          `${m.userId} · granted ${m.grantedAt}. They keep every other permission they hold.`,
+          `${m.name ?? "This person"} · granted ${when(host, m.grantedAt)}. They keep every other permission they hold.`,
           () => {
             asked.replaceChildren();
             save("revokeJobsManager", { userId: m.userId });

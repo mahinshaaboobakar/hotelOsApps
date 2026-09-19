@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Queries;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Domain.Policy;
@@ -18,7 +19,7 @@ namespace HotelOS.Jobs.Module;
 /// other by a second is the shape a person would notice and nobody could
 /// reproduce.
 /// </remarks>
-public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, TimeProvider clock)
+public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, TimeProvider clock, IPropertyDirectory directory)
 {
     /// <summary>The catalogue as this property sees it — frame 7.</summary>
     public async Task<CatalogueView> CatalogueAsync(RequestScope scope, CancellationToken cancellationToken)
@@ -160,12 +161,19 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
             .OrderBy(g => g.GrantedAt)
             .ToListAsync(cancellationToken);
 
-        return live
-            .Select(g => new JobsManagerView(
+        // The name as the bar reads it — Master Data's staff record for the login —
+        // because the list showed the raw user id (owner, 2026-09-19: never raw ids).
+        var views = new List<JobsManagerView>();
+        foreach (var g in live)
+        {
+            views.Add(new JobsManagerView(
                 g.UserId.ToString(),
+                await directory.FindStaffNameAsync(g.UserId, cancellationToken),
                 g.GrantedAt.ToString("o"),
-                g.GrantedBy.ToString()))
-            .ToList();
+                g.GrantedBy.ToString()));
+        }
+
+        return views;
     }
 
     private async Task<IReadOnlyList<PresenceRowView>> PresenceAsync(RequestScope scope, CancellationToken cancellationToken)

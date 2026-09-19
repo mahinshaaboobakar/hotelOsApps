@@ -50,7 +50,7 @@ export async function settings(host: HostApi, main: HTMLElement, place: Settings
     });
   };
 
-  body.append(tab(s, place, configure, save, place.onChanged, host.property), said.line);
+  body.append(tab(s, place, configure, save, place.onChanged, host), said.line);
   main.replaceChildren(body);
 }
 
@@ -60,14 +60,15 @@ function tab(
   configure: boolean,
   save: (method: string, params: unknown) => void,
   discard: () => void,
-  property: HostApi["property"],
+  host: HostApi,
 ): HTMLElement {
+  const property = host.property;
   switch (place.tab) {
     case "Shifts & presence": return presence(s, configure, save, discard);
     case "Who is told": return whoIsTold(s, configure);
     case "Holds & reminders": return holds(s, configure, save, discard, property);
     case "Closing & rating": return closing(s, configure, save, discard);
-    case "Access": return access(s, configure, save, discard);
+    case "Access": return access(host, s, configure, save, discard);
     default:
       if (place.view === "list") return policies(s, configure, place.onView, property);
       if (place.view === "1" || place.view === "2" || place.view === "3") return policyFlow(s, place.view, place.onView);

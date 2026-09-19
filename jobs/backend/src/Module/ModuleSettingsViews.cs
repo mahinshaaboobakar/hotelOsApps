@@ -112,5 +112,6 @@ public static class ModuleSettingsViews
     /// renders whoever the shell can name and the id otherwise, which is the
     /// same rule every other person-shaped field on these screens follows.
     /// </remarks>
-    public sealed record JobsManagerView(string UserId, string GrantedAt, string GrantedBy);
+    /// <summary>A live jobs-manager grant: the id is for the Revoke call, the name is what a person reads (never the id).</summary>
+    public sealed record JobsManagerView(string UserId, string? Name, string GrantedAt, string GrantedBy);
 }
