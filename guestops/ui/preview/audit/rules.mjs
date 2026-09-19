@@ -182,7 +182,19 @@ judge("C5", pick((id, f) => f.btnDanger && state(id) === "ALL").map(([id, f]) =>
 // opens something is reachable through a real button — the row itself, or its
 // key text as an .opener — with the reset on the class. A whole-row button
 // would nest a row's own link inside it.
-judge("C8", pick((id, f) => state(id) === "ALL" && f.rowButtons.length > 0 && !f.sheet).map(([id, f]) => {
+judge("C6", pick((id, f) => f.btnConfirm && state(id) === "ALL").map(([id, f]) => {
+  const c = f.btnConfirm;
+  const ok = c["background-color"] === BAD && c["border-top-color"] === "rgba(0, 0, 0, 0)" && c["font-weight"] === "600";
+  return [id, ok ? "PASS" : "FAIL", `confirm fill ${c["background-color"]}, edge ${c["border-top-color"]}, weight ${c["font-weight"]}`];
+}));
+
+judge("L4", pick((id, f) => f.selRow).map(([id, f]) => {
+  const s = f.selRow;
+  const ok = /^color\(srgb 0\.50\d* 0\.54\d* 0\.97\d* \/ 0\.08\)$|0\.08\)$/u.test(s["background-color"]) && s["box-shadow"] === "none" && s["border-left-width"] === "0px";
+  return [id, ok ? "PASS" : "FAIL", `selected row ${s["background-color"]}, shadow ${s["box-shadow"]}, left edge ${s["border-left-width"]}`];
+}));
+
+judge("C8",pick((id, f) => state(id) === "ALL" && f.rowButtons.length > 0 && !f.sheet).map(([id, f]) => {
   const reached = f.rowButtons.map((tag, i) => tag === "BUTTON" || f.rowOpeners?.[i] !== null);
   const unreached = reached.filter((ok) => !ok).length;
   const reset = (f.rowOpeners ?? []).filter((o) => o !== null)

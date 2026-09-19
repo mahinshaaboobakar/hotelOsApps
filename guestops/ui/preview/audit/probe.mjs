@@ -105,6 +105,10 @@ export const PROBE = String.raw`(doc) => {
     btnPri: pick(doc.querySelector(".btn.pri:not(.sm):not(.off)"), ["border-top-color", "color", "background-image"]),
     btnPriOff: pick(doc.querySelector(".btn.pri.off"), ["background-image", "border-top-style", "color", "cursor"]),
     btnDanger: pick(doc.querySelector(".btn.danger:not(.confirm)"), ["color", "border-top-color"]),
+    // C6: the confirm step, filled — read in the open dialog.
+    btnConfirm: pick(doc.querySelector(".btn.danger.confirm"), ["background-color", "color", "border-top-color", "font-weight"]),
+    // L4: the selected row is a tint and nothing else.
+    selRow: pick(doc.querySelector(".tr.sel"), ["background-color", "box-shadow", "border-left-width"]),
     controls,
     rowButtons: all(".tr.act, .row.act").map((r) => r.tagName),
     // C8 as Jobs' board reads it: the row keeps its click, and its key text is
