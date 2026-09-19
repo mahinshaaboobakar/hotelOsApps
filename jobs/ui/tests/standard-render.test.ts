@@ -105,7 +105,7 @@ describe("app surface checklist — automated lines, Jobs", () => {
 
   it("Record (owner, 2026-09-19 c) — the number and the property's name, no raw id, instants in the property's form", async () => {
     const root = await mounted(host(ANSWERS));
-    root.querySelector<HTMLElement>("tr.pick")?.click();
+    root.querySelector<HTMLElement>("tr.pick .opener")?.click();
     await settle();
     press(root, "Record");
     await settle();
@@ -114,6 +114,43 @@ describe("app surface checklist — automated lines, Jobs", () => {
     expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/);
     expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
     expect(text).toContain("02 Sept, 13:31");
+  });
+
+  it("APPS-Q50 — a row opens through its main cell's button, stretched over the row, never the tr", async () => {
+    const root = await mounted(host(ANSWERS));
+    const row = root.querySelector<HTMLElement>("tr.pick");
+    const where = row?.querySelectorAll("td")[1];
+    where?.click();
+    await settle();
+    expect(root.querySelector("tr.pick"), "a click on the tr opened nothing").not.toBeNull();
+    const css = Array.from(root.querySelectorAll("style")).map((s) => s.textContent ?? "").join("\n");
+    expect(css).toMatch(/tr\.pick\{[^}]*position:relative/);
+    expect(css).toMatch(/\.opener::after\{[^}]*position:absolute[^}]*inset:0/);
+    root.querySelector<HTMLButtonElement>("tr.pick .opener")?.click();
+    await settle();
+    expect(root.querySelector("tr.pick"), "the button opens the job").toBeNull();
+  });
+
+  it("§9 (APPS-Q53) condition 3 — New item has an explicit Cancel that clears what was typed", async () => {
+    const root = await mounted(host(ANSWERS));
+    press(root, "Catalogue");
+    await settle();
+    const name = root.querySelector<HTMLInputElement>('.dlg input[name="name"]');
+    expect(name).not.toBeNull();
+    if (name) name.value = "Water dripping";
+    press(root, "Cancel");
+    expect(root.querySelector<HTMLInputElement>('.dlg input[name="name"]')?.value).toBe("");
+  });
+
+  it("the Catalogue's sub-tabs with nothing behind them are drawn off, with their reason", async () => {
+    const root = await mounted(host(ANSWERS));
+    press(root, "Catalogue");
+    await settle();
+    for (const label of ["This property", "Import / export"]) {
+      const tab = Array.from(root.querySelectorAll<HTMLButtonElement>(".subnav button")).find((b) => b.textContent === label);
+      expect(tab?.disabled, label).toBe(true);
+      expect(tab?.title, label).not.toBe("");
+    }
   });
 
   it("C8 — a board row that opens a job is reachable as a real button", async () => {

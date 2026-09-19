@@ -164,10 +164,11 @@ function ladderStep(): HTMLElement {
     box.append(fill(el("div", "row"), control("btn sm", "＋ step"), el("span", "mono", "drag to reorder")));
     grid.append(box);
   }
-  // **APPROVED DEVIATION from page 64 §9** (*"composing happens in a sheet"*;
-  // checklist O7) — APPS-Q27, as the Catalogue's New item: mockup 02, the
-  // ladder frame (*Add a step to P1*, drawn inline), owner-locked 2026-09-04,
-  // Part A countersigned (APPS-Q18). This surface only.
+  // **Allowed inline by §9 (APPS-Q53), not yet a composer.** Page 64 §9
+  // (045402b4) permits it under seven conditions, and it meets none of the
+  // ones that need it to work: its Add is off, its two fields are drawn rather
+  // than controls (4), and it has no Cancel (3). When adding a step is built,
+  // it is built to all seven. It was an APPS-Q27 deviation until §9 was amended.
   const dlg = el("div", "dlg");
   dlg.append(el("h3", undefined, "Add a step to P1"), el("label", "lbl", "Role"), el("div", "field", "Department manager ▾"), el("label", "lbl", "Becomes accountable"), el("div", "field", "when breached ▾ + 15 min"),
     fill(el("div", "row"), unavailable("Add", "Adding a step is not built yet.")));

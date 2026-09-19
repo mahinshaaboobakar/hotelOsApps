@@ -152,13 +152,10 @@ function table(host: HostApi, rows: readonly JobRow[], place: BoardPlace): HTMLE
 }
 
 function line(host: HostApi, row: JobRow, place: BoardPlace): HTMLElement {
+  // APPS-Q50 (page 64 §2/§4, 2026-09-19): the row opens through the real
+  // button in its main cell, stretched over the row, and never through the
+  // <tr> — a listener on the row reached a mouse and not a keyboard.
   const tr = el("tr", row.id === place.opened ? "pick sel" : "pick");
-  // The opener button handles its own click; without this the click would
-  // bubble here and open the job twice.
-  tr.addEventListener("click", (event) => {
-    if ((event.target as Element | null)?.closest(".opener")) return;
-    place.onOpen(row.id);
-  });
   const what = el("td", undefined, row.what);
   for (const t of row.tags) what.append(tag(t));
   tr.append(

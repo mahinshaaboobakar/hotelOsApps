@@ -70,7 +70,7 @@ function click(root: HTMLElement, selector: string, text: string): void {
 async function jobTab(label: string, h: HostApi = host()): Promise<HTMLElement> {
   const root = mount(h);
   await settle();
-  click(root, "tr.pick td", h === undefined ? "MRN-ENG-142" : "MRN-ENG-142");
+  click(root, "tr.pick .opener", h === undefined ? "MRN-ENG-142" : "MRN-ENG-142");
   await settle();
   if (label !== "Overview") {
     click(root, ".subnav .tab", label);
@@ -196,7 +196,7 @@ describe("frame 4 · Resolve", () => {
   it("draws the item's resolutions, Other, the note box and what follows", async () => {
     const root = mount();
     await settle();
-    click(root, "tr.pick td", "MRN-ENG-142");
+    click(root, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     click(root, ".btn", "Resolve…");
     await settle();
@@ -357,7 +357,7 @@ describe("the rated example", () => {
   it("carries its own history rather than the other job's", async () => {
     const root = mount(host({ ...live(), job: recordedRatedJob }));
     await settle();
-    click(root, "tr.pick td", "MRN-HK-388");
+    click(root, "tr.pick .opener", "MRN-HK-388");
     await settle();
     click(root, ".subnav .tab", "History");
     await settle();

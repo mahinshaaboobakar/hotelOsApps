@@ -47,7 +47,7 @@ export async function settle(): Promise<void> {
 export async function open(root: HTMLElement, steps: readonly string[]): Promise<void> {
   for (const step of steps) {
     if (step === "job") {
-      root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+      root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     } else {
       const target = Array.from(root.querySelectorAll<HTMLElement>("button"))
         .find((button) => button.textContent?.startsWith(step) === true);

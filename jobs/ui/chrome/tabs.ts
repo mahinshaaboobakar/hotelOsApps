@@ -5,7 +5,7 @@
 
 import { PAGER_LABELS, formatNumber, pagedView, type Paging, type PropertyEnvironment } from "@hotelos/sdk";
 
-import { control, el, fill } from "./element";
+import { control, el, fill, off } from "./element";
 import type { Operator } from "../board/model";
 
 /** A destination on the top bar or a sub-navigation. */
@@ -14,6 +14,9 @@ export interface Tab {
 
   /** A count shown after the label, when the screen has one. */
   count?: string;
+
+  /** Set when nothing stands behind the tab yet: drawn off, with this as its reason. */
+  off?: string;
 }
 
 /** The head: mark, top tabs, search, operator. */
@@ -70,7 +73,7 @@ export function subnav(tabs: readonly Tab[], current: string, go: (label: string
   const bar = el("div", "subnav");
   for (const tab of tabs) {
     const label = tab.count === undefined ? tab.label : `${tab.label} · ${tab.count}`;
-    bar.append(control(tab.label === current ? "tab on" : "tab", label, () => go(tab.label)));
+    bar.append(tab.off !== undefined ? off("tab", label, tab.off) : control(tab.label === current ? "tab on" : "tab", label, () => go(tab.label)));
   }
   if (tail !== undefined) fill(bar, el("span", "grow"), tail);
   return bar;

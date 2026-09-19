@@ -34,7 +34,13 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
       else said.say(done.refused ?? "the catalogue was not changed");
     });
   };
-  body.append(subnav([{ label: `${got.value.organisation} · master` }, { label: "This property" }, { label: "Import / export" }], `${got.value.organisation} · master`, () => {}));
+  // Only the organisation's master catalogue is built; the other two tabs had an
+  // empty handler, live and inert (2026-09-19), and are drawn off until built.
+  body.append(subnav([
+    { label: `${got.value.organisation} · master` },
+    { label: "This property", off: "this property's own view isn't available yet" },
+    { label: "Import / export", off: "import and export aren't available yet" },
+  ], `${got.value.organisation} · master`, () => {}));
   const grid = el("div", "cols");
   grid.style.gridTemplateColumns = "260px 1fr";
   const item = got.value.items[0];
@@ -135,12 +141,14 @@ function newItem(
   doing: (method: string, params: unknown) => void,
   say: (message: string) => void,
 ): HTMLElement {
-  // **APPROVED DEVIATION from page 64 §9** (*"composing happens in a sheet"*;
-  // checklist O7) — APPS-Q27: an owner-locked, countersigned artifact
-  // establishes a surface-specific deviation and does not amend the standard.
-  // The artifact: mockup 01, frame 7 (*New item in Air conditioning*, drawn
-  // inline), owner-locked 2026-09-04, Part A countersigned (APPS-Q18). This
-  // surface only; every other composer follows §9.
+  // **Compliant with §9 (APPS-Q53)**: an inline composer under the planner's
+  // seven conditions (page 64 §9, 045402b4). It creates an item of the list
+  // it sits beside (1, 2); Create item and Cancel are explicit (3 — Cancel
+  // clears what was typed, and it closes on nothing else); its fields and
+  // buttons are real controls (4); a refused write keeps what was typed and
+  // says why on the Catalogue's line (5); it holds nothing destructive (6);
+  // and it writes through job.curate, as any item write does (7). It was an
+  // APPS-Q27 deviation until §9 was amended.
   const dlg = el("div", "dlg");
   dlg.append(el("h3", undefined, "New item"));
   const grid = el("div", "cols");
@@ -161,7 +169,10 @@ function newItem(
     ),
   );
 
-  dlg.append(grid, fill(el("div", "row"), control("btn pri", "Create item", () => {
+  const cancel = control("btn", "Cancel", () => {
+    for (const field of Array.from(dlg.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea"))) field.value = "";
+  });
+  dlg.append(grid, fill(el("div", "row"), cancel, control("btn pri", "Create item", () => {
     const held = values(dlg);
     if (String(held.name ?? "").length === 0 || String(held.code ?? "").length === 0) {
       say("an item needs a name and a code");

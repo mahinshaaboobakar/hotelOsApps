@@ -63,7 +63,7 @@ One bucket per line; the five add to 86.
 | C5 | PASS | S · T | `.btn.danger` bad text, 45% bad border (`controls.test.ts`) |
 | C6 | PASS | T | the confirm step is filled (`controls.test.ts`). Jobs' confirm is inline, not an overlay |
 | C7 | PASS | T | one base class (`controls.test.ts`); `opener` admitted as C8's reset class, not a second geometry |
-| C8 | **F→fixed** | T · Board rows | Board rows opened on a click no keyboard reaches (`<tr>` listener). The job number is now a real `<button class="opener">`; the row's own click ignores it so the job opens once. Widget rows were already buttons. Proof: the C8 test failed first |
+| C8 | **F→fixed** | T · Board rows | Board rows opened on a click no keyboard reaches (`<tr>` listener). The job number is now a real `<button class="opener">`; the row's own click ignores it so the job opens once. Widget rows were already buttons. Proof: the C8 test failed first | · **APPS-Q50 (`723dd42b`), 2026-09-19**: the row's listener on the `<tr>` removed; the job number's button is stretched over the row (`.opener::after`, `tr.pick{position:relative}`). Measured in Edge: the centre of all nine cells hits that row's button, and the next row hits its own
 | C9 | PASS | M · 11 screens + the Raise inputs | every control and input inherits family and the 1.5 factor (13px → 19.5px). **The checklist's check misfires here** — see "about the checklist" |
 | C10 | PASS | SRC | `.btn.danger.confirm` defined once, in chrome |
 | C11 | **F→fixed** | T · Settings clock, policies, new policy 1 and 3 | three live primaries did nothing — Engineering's clock *Save* (and *Discard*), the add-a-step *Add* (and *Cancel*), and *Save policy*, which returned to the list and saved nothing. Now `.btn.pri.off`, disabled, reason beside it. `control()` marks what it wires (`data-acts`) so a check can see it. Proof: failed on the clock first; the widened walk proven by mutation (old primaries restored → *expected false*) |
@@ -123,7 +123,7 @@ One bucket per line; the five add to 86.
 | ID | Result | Surfaces · states | Evidence |
 |---|---|---|---|
 | O1–O6 | N/A | — | Jobs has **no overlay** — no scrim, sheet or positioned dialog. Raise and Resolve are full screens (APPS-Q26 names Raise's exception) |
-| O7 | **PASS — approved deviation** | C | two **inline** composers against §9 (*composing happens in a sheet*): the Catalogue's *New item* and the policy flow's *Add a step to P1*. **APPS-Q27**: an owner-locked and countersigned artifact establishes a surface-specific deviation. Mockup 01 frame 7 and mockup 02's ladder frame draw both inline, owner-locked 2026-09-04; Jobs' Part A is recorded countersigned (APPS-Q18). Labelled at `catalogue/index.ts` and `settings/policies.ts`. **Two in one app** — see *Routed* for the count |
+| O7 | **New item: compliant with §9 (APPS-Q53) · Add a step: not yet a composer** | C | page 64 §9 (`045402b4`) allows an inline composer under seven conditions, and retires the APPS-Q27 deviation label. **New item** now meets all seven — it had no Cancel (condition 3), added and shown failing first. **Add a step** meets none of those that need it to work: Add is off, its fields are drawn, it has no Cancel; it is built to all seven when adding a step is built |
 
 ### §10 · Fields
 

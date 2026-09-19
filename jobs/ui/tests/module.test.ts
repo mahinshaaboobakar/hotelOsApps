@@ -88,7 +88,7 @@ describe("the Jobs module", () => {
 
   it("opens a job on its row and draws every tab of the record", async () => {
     await settle();
-    click(root, "tr.pick td", "MRN-ENG-142");
+    click(root, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     const tabs = Array.from(root.querySelectorAll(".subnav .tab")).map((t) => t.textContent?.split(" · ")[0]);
     expect(tabs).toEqual(["Overview", "Work", "History", "Notes & photos", "Links & steps", "Rating", "Record"]);
@@ -99,7 +99,7 @@ describe("the Jobs module", () => {
   it("draws no work controls for a viewer who does not hold the job", async () => {
     const other = mount(host(ALL, { ...live(), job: { ...recordedJob, row: { ...recordedJob.row, viewerIsAssignee: false } } }));
     await settle();
-    click(other, "tr.pick td", "MRN-ENG-142");
+    click(other, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     expect(other.textContent).toContain("Resolve…");
     expect(other.textContent).not.toContain("Pause");
@@ -107,7 +107,7 @@ describe("the Jobs module", () => {
 
   it("draws the sessions on the Work tab, the running one as running", async () => {
     await settle();
-    click(root, "tr.pick td", "MRN-ENG-142");
+    click(root, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     click(root, ".subnav .tab", "Work");
     await settle();
@@ -119,7 +119,7 @@ describe("the Jobs module", () => {
   it("shows the guest's rating only on a guest-raised job, once closed", async () => {
     const rated = mount(host(ALL, { ...live(), job: recordedRatedJob, board: recordedBoard }));
     await settle();
-    click(rated, "tr.pick td", "MRN-HK-388");
+    click(rated, "tr.pick .opener", "MRN-HK-388");
     await settle();
     click(rated, ".subnav .tab", "Rating");
     await settle();
@@ -129,7 +129,7 @@ describe("the Jobs module", () => {
 
   it("draws the action row from the grants, and nothing when only read is held", async () => {
     await settle();
-    click(root, "tr.pick td", "MRN-ENG-142");
+    click(root, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     expect(root.textContent).toContain("Resolve…");
     expect(root.textContent).toContain("Take it");
@@ -138,7 +138,7 @@ describe("the Jobs module", () => {
 
     const reader = mount(host(["job.read"]));
     await settle();
-    click(reader, "tr.pick td", "MRN-ENG-142");
+    click(reader, "tr.pick .opener", "MRN-ENG-142");
     await settle();
     expect(reader.textContent).not.toContain("Resolve…");
     expect(reader.textContent).not.toContain("Take it");

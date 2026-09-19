@@ -227,7 +227,7 @@ describe("the controls that act", () => {
     const { host, calls } = watching();
     const root = mount(host);
     await settle();
-    root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+    root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     await settle();
 
     press(root, "Take it");
@@ -258,7 +258,7 @@ describe("the controls that act", () => {
     const { host, calls } = watching();
     const root = mount(host);
     await settle();
-    root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+    root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     await settle();
 
     press(root, "Put on hold…");
@@ -274,7 +274,7 @@ describe("the controls that act", () => {
     const { host, calls } = watching();
     const root = mount(host);
     await settle();
-    root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+    root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     await settle();
     tab(root, "Notes & photos");
     await settle();
@@ -292,7 +292,7 @@ describe("the controls that act", () => {
     const { host, calls } = watching();
     const root = mount(host);
     await settle();
-    root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+    root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     await settle();
     press(root, "Resolve…");
     await settle();
@@ -349,7 +349,7 @@ describe("the controls that act", () => {
     const { host, calls } = watching(["job.read"]);
     const root = mount(host);
     await settle();
-    root.querySelectorAll<HTMLElement>("tr.pick")[0]?.click();
+    root.querySelectorAll<HTMLElement>("tr.pick .opener")[0]?.click();
     await settle();
 
     expect(root.textContent).not.toContain("Take it");

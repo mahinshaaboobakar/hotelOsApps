@@ -42,6 +42,9 @@ const CHROME = `
    a keyboard reaches it. */
 .opener{background:none;border:0;padding:0;margin:0;font:inherit;line-height:inherit;
         color:inherit;text-align:left;cursor:pointer}
+/* APPS-Q50: the button's hit area is stretched over its row, so a person can
+   press anywhere on it; the row is the containing block, and never the control. */
+.opener::after{content:"";position:absolute;inset:0}
 .body{padding:22px;overflow:auto;min-height:0}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .subnav .tab{padding:8px 12px;font-size:12px;margin-bottom:-1px}
@@ -86,7 +89,7 @@ table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--color-ink-faint,#5a6172);font-weight:500;font-size:11px;letter-spacing:.08em;
    text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 td{padding:10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));vertical-align:top}
-tr.pick{cursor:pointer}
+tr.pick{cursor:pointer;position:relative}
 /* The row you came back from, tinted as frame 1 tints it — a person returning
    to the board should not have to find their place again. Mixed from the
    published brand rather than written as a colour: a module may not invent
