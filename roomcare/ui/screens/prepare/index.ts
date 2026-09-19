@@ -91,7 +91,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     const row = el("tr", "pick");
     row.addEventListener("click", () => nav.openRoom(c.roomId));
     const what = c.soldAt === null ? c.what : `${c.what} · sold ${clock(host, c.soldAt)}`;
-    row.append(el("td", "mono", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
+    row.append(el("td", "num", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
     table.append(row);
   }
   changesCard.append(table, pager(v.changesPaging, v.changes.length, "changes since the last press", goPage));

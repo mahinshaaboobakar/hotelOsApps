@@ -38,7 +38,7 @@ function line(host: HostApi, row: StateRow, edits: Edits, conflicts: ReadonlySet
   const open = el("td");
   open.append(control("btn sm", "▸", () => nav.openRoom(row.roomId)));
   if (row.blocked) {
-    const cell = el("td", "dim", "blocked · deep clean — not editable here");
+    const cell = el("td", "mono", "blocked · deep clean — not editable here");
     cell.setAttribute("colspan", "3");
     tr.append(el("td", "num", row.number), cell, open);
     return tr;
