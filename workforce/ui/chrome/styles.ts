@@ -466,11 +466,15 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 .db{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:4px 24px 16px}
 .df{flex:0 0 auto;padding:12px 24px 20px;border-top:1px solid var(--color-line,rgb(255 255 255/.07))}
 .fld{display:flex;flex-direction:column;gap:5px}
-.fld-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+/* Section 10's field. The label was .04em - the section label's tracking, not
+   a field's - and the box 7px 11px, radius 8, on the surface colour; the audit
+   of 2026-09-19 (F2 and D2) measured both, and APPS-Q27 ruled the box to the
+   written standard over the drawing. */
+.fld-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;
       color:var(--color-ink-faint,#5a6172)}
 .inp{border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
-        border-radius:8px;padding:7px 11px;font-size:13px;
-        background:var(--color-surface,#0b0d14);
+        border-radius:10px;padding:9px 12px;font-size:13px;
+        background:color-mix(in srgb, var(--color-ink,#e8ebf4) 2%, transparent);
         /* The same UA resets a control needs anywhere - 64 section 2. A field
            drawn as a div inherits the module's face for nothing; the moment it
            becomes an input or a select it leaves for the UA's, and font:inherit
