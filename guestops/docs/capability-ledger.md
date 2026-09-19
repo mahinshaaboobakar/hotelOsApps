@@ -28,8 +28,16 @@ service** (`CompositeCallerAuthenticator.cs:53-64` in the SDK). GuestOps is an
 SDK is built. GuestOps is the first to try. **Not a gap between rulings** — this
 ledger first said it was: `AUTHZ-Q18` already rules that packages are services
 and that .NET services accept an application certificate. The shared SDK
-authenticator does not yet, so it is an SDK defect, owned by BB (architect,
+authenticator did not, so it was an SDK defect, owned by BB (architect,
 2026-09-19). Nothing in GuestOps changes for it.
+
+**Fixed in the platform: ADR 0210, landed at HosPilotOS `7c00adf9`** —
+`GetOperatingDay` is platform-scoped and an application's certificate is
+accepted. **Live after the owner's next restart**, and not claimed before it is
+proved from `context.log`: `GetOperatingDay` answered, with no
+`AuthenticationFailedException`, after the restart time. Everything below that
+says *fails on the owner's platform (Context)* holds until then. Creating a
+booking asks Context for the business day too, so it is in the same position.
 
 What depends on that call (code):
 
@@ -60,7 +68,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 
 | Action | Code | Verdict |
 |---|---|---|
-| The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above** |
+| The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above**; live after the next restart (ADR 0210), to be proved |
 | Click a row / guest name | `screens/today/table.ts:75,108` | WORKS — opens the stay |
 | **＋ assign** on a row with no room | `screens/today/table.ts:92` | **LOOKS LIVE, DOES NOTHING.** Nothing assigns a room from this screen (`stay.assign` has no module door) |
 | Walk-in | `screens/today/index.ts:92` | REFUSES, SAYS WHY — opens a sheet saying a walk-in cannot be taken here yet (`application.ts:258-278`) |
