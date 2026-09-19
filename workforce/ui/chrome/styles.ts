@@ -112,6 +112,12 @@ button{background:transparent;color:inherit;font:inherit;border:0;
 .fail-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
 .fail-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
 .fail-mark.fail-faulted{color:var(--color-bad,#f87171)}
+/* 64e's three (owner, 2026-09-19): the two local refusals neutral like the
+   service's, the model red like a fault - waiting will not fix it. Stated per
+   class, because a class with no rule reads the same decided or forgotten. */
+.fail-mark.fail-unadmitted{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-ungranted{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-undecidable{color:var(--color-bad,#f87171)}
 /* Neutral on purpose, and stated rather than inherited. A question this bundle
    never asked is not a refusal and not a fault. 64b draws no such state; this
    is the app's own, and it takes the quietest colour available. */

@@ -80,6 +80,39 @@ describe("the failure screen's facts", () => {
   });
 });
 
+describe("contract v2's three states, as 64e draws them", () => {
+  // The two local refusals have different fixes, so their notes must name
+  // different things — the application, or the account. A surface that drew
+  // one note for both would hide which of them needs attention (SHELL-Q59).
+  it("names the application when the application is not admitted", () => {
+    const body = failureBody(failure("unadmitted"), { the: "the rota" }, QATAR);
+    const note = body.querySelector(".fail-note") as HTMLElement;
+
+    expect(note.textContent).toBe("This application was not granted roster.read at this property.");
+    expect(note.querySelector("b")?.textContent).toBe("roster.read");
+    expect(body.querySelector(".fail-mark.fail-unadmitted")).not.toBeNull();
+  });
+
+  it("names the account when the account lacks the grant", () => {
+    const body = failureBody(failure("ungranted"), { the: "the rota" }, QATAR);
+    const note = body.querySelector(".fail-note") as HTMLElement;
+
+    expect(note.textContent).toBe("This account has not been granted roster.read at this property.");
+    expect(body.querySelector(".fail-mark.fail-ungranted")).not.toBeNull();
+  });
+
+  it("names the model and never the person when the model cannot decide", () => {
+    const body = failureBody(failure("undecidable"), { the: "the rota" }, QATAR);
+    const said = body.querySelector(".fail-said")?.textContent ?? "";
+
+    expect(said).toBe("Access to the rota could not be checked");
+    expect(said).not.toMatch(/\byou\b|account/iu);
+    expect(body.querySelector(".fail-why b")?.textContent)
+      .toBe("the model it has loaded cannot decide this permission");
+    expect(body.querySelector(".fail-acts button")?.textContent).toBe("Copy these details");
+  });
+});
+
 describe("the widget's failure card", () => {
   const reach = {
     host: {} as HostApi,

@@ -64,12 +64,16 @@ body{margin:0}
 .wfail{justify-content:center;gap:7px;padding:14px}
 .wfail .wf-mark{color:var(--color-ink-muted,#8b93a7)}
 .wfail .wf-mark svg{width:20px;height:20px;display:block}
-/* The same three colours as the screen: a refusal neutral, a timeout amber, a
-   fault red. */
+/* The same colours as the screen: every refusal neutral, a timeout amber, a
+   fault and a model that cannot decide red - 64b's, and 64e's for the three
+   that contract v2 added. */
 .wfail .wf-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
-/* Stated, not inherited: the refusal is the neutral one, and a class with no
+/* Stated, not inherited: the refusals are the neutral ones, and a class with no
    rule reads the same whether that was decided or forgotten. */
 .wfail .wf-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.wfail .wf-mark.fail-unadmitted{color:var(--color-ink-muted,#8b93a7)}
+.wfail .wf-mark.fail-ungranted{color:var(--color-ink-muted,#8b93a7)}
+.wfail .wf-mark.fail-undecidable{color:var(--color-bad,#f87171)}
 .wfail .wf-mark.fail-faulted{color:var(--color-bad,#f87171)}
 .wf-said{font-size:13px;font-weight:600;line-height:1.4}
 .wf-why{font-size:11.5px;line-height:1.5;color:var(--color-ink-muted,#8b93a7)}

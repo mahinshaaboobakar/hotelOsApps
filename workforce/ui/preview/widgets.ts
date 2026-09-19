@@ -47,7 +47,6 @@ const PANELS: readonly { id: string; panel: (host: HostApi) => Promise<HTMLEleme
  * would photograph whatever a property happened to hold that afternoon, and the
  * frames it is set beside were drawn against stated content.
  */
-/** The host error kind a `fail=<cause>` capture answers with. */
 /**
  * The host's own error kind, taken from the SDK's constructor rather than
  * spelled out here, so a kind the protocol adds or removes is a build error in
@@ -55,9 +54,16 @@ const PANELS: readonly { id: string; panel: (host: HostApi) => Promise<HTMLEleme
  */
 type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
 
+/**
+ * The host error kind a `fail=<cause>` capture answers with. (This one-line
+ * comment sat orphaned above `Kind`'s, separated from the map it describes.)
+ */
 const WIDGET_FAIL: Record<string, Kind> = {
   unanswered: "unavailable",
   forbidden: "forbidden",
+  unadmitted: "local_forbidden",
+  ungranted: "user_forbidden",
+  undecidable: "model_unavailable",
   faulted: "internal",
 };
 

@@ -55,6 +55,9 @@ type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
 const FAIL: Record<string, Kind> = {
   unanswered: "unavailable",
   forbidden: "forbidden",
+  unadmitted: "local_forbidden",
+  ungranted: "user_forbidden",
+  undecidable: "model_unavailable",
   faulted: "internal",
 };
 

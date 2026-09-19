@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, causeOf, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { attendanceToday } from "../widgets/panel/attendance-today";
@@ -65,13 +65,43 @@ function defined(token: string): boolean {
   return new RegExp(String.raw`\.${token}(?![\w-])`, "u").test(WIDGET_CSS);
 }
 
+/**
+ * One host kind per cause — contract v2's six (ADR 0192, drawn in 64b and 64e).
+ *
+ * A list of kinds is not a list of causes: two kinds that map to one cause would
+ * render the same card twice and leave a colour unexamined. So the list is
+ * checked against the SDK's own mapping below, and each card is checked for the
+ * cause its kind should produce — which is also what proves the kind reached
+ * the host, rather than being refused locally for a capability `failing` does
+ * not grant.
+ */
+const KINDS = [
+  "unavailable",
+  "forbidden",
+  "local_forbidden",
+  "user_forbidden",
+  "model_unavailable",
+  "internal",
+] as const satisfies readonly Kind[];
+
 describe("a widget's classes live in the sheet a widget mounts", () => {
-  for (const kind of ["unavailable", "forbidden", "internal"] as const) {
+  it("renders every cause once, so no colour goes unexamined", () => {
+    // Six is the size of `Cause` in the SDK at contract v2. Spelled out rather
+    // than derived, because the type has no runtime list to derive it from —
+    // and a new cause should fail HERE, where its missing rule would otherwise
+    // go unseen.
+    expect(new Set(KINDS.map(causeOf)).size).toBe(6);
+  });
+
+  for (const kind of KINDS) {
     it(`draws nothing the widget sheet does not style, when a read is ${kind}`, async () => {
       const orphans: string[] = [];
 
       for (const panel of PANELS) {
         const card = await panel(failing(kind));
+        if (card.querySelector(`.fail-${causeOf(kind)}`) === null) {
+          orphans.push(`${panel.name}: did not draw .fail-${causeOf(kind)}`);
+        }
         for (const token of classes(card)) {
           if (!defined(token)) orphans.push(`${panel.name}: .${token}`);
         }
