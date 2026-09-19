@@ -55,7 +55,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         var code = Code(command.Code);
         _ = await db.Categories.FirstOrDefaultAsync(
                 c => c.Id == command.CategoryId && c.OrganizationId == organization && c.DeletedAt == null, cancellationToken)
-            ?? throw new InvalidRequestException("category_id is not a category of this organisation");
+            ?? throw new InvalidRequestException("that category isn't in this organisation's catalogue");
 
         var now = clock.GetUtcNow();
         var item = command.Id is { } id
@@ -96,7 +96,7 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         if (command.ItemId is { } itemId)
         {
             var item = await db.Items.FirstOrDefaultAsync(i => i.Id == itemId && i.OrganizationId == organization, cancellationToken)
-                ?? throw new InvalidRequestException("item_id is not an item of this organisation");
+                ?? throw new InvalidRequestException("that item isn't in this organisation's catalogue");
             if (command.CategoryId is { } given && given != item.CategoryId)
             {
                 throw new InvalidRequestException("the item is not in that category");
@@ -130,15 +130,15 @@ public class CatalogueService(JobsDbContext db, IKernelAuthorizer authorizer, Ti
         if (string.IsNullOrWhiteSpace(command.Name)) throw new InvalidRequestException("name is required");
         if (command.DefaultPriority is not (Priority.P1 or Priority.P2 or Priority.P3))
         {
-            throw new InvalidRequestException("default_priority must be P1, P2 or P3");
+            throw new InvalidRequestException("the default priority must be P1, P2 or P3");
         }
 
         if (!PhotoRule.All.Contains(command.PhotoOnCompletion))
         {
-            throw new InvalidRequestException("photo_on_completion must be NONE, OPTIONAL or REQUIRED");
+            throw new InvalidRequestException("a photo on completion must be none, optional or required");
         }
 
-        if (command.DueWithinMinutes is <= 0) throw new InvalidRequestException("due_within_minutes must be positive");
+        if (command.DueWithinMinutes is <= 0) throw new InvalidRequestException("the time allowed must be more than zero minutes");
     }
 
     private static string Code(string raw)

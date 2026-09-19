@@ -84,7 +84,7 @@ public class PresenceService(JobsDbContext db, IKernelAuthorizer authorizer, Tim
     private async Task<DepartmentPresence> FindOrAddAsync(Guid propertyId, string departmentCode, CancellationToken cancellationToken)
     {
         var code = departmentCode.Trim().ToUpperInvariant();
-        if (code.Length == 0) throw new InvalidRequestException("department_code is required");
+        if (code.Length == 0) throw new InvalidRequestException("a department is needed");
 
         var presence = await db.Presence.FirstOrDefaultAsync(
             p => p.PropertyId == propertyId && p.DepartmentCode == code, cancellationToken);

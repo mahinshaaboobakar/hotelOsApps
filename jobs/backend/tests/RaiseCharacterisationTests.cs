@@ -59,7 +59,7 @@ public class RaiseCharacterisationTests(JobsFixture fixture)
 
         var refusal = await Assert.ThrowsAsync<InvalidRequestException>(() => h.Jobs.RaiseAsync(
             h.Scope(), Staff(h) with { RaisedKind = RaisedKind.Guest, RaisedById = null, StayId = null }, default));
-        Assert.Contains("stay_id", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("the guest's stay", refusal.Message, StringComparison.Ordinal);
 
         var stay = Guid.CreateVersion7();
         var job = await h.RaiseNotCoolingAsync(h.Scope(), stay);

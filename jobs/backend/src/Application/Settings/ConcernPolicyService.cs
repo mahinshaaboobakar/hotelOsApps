@@ -113,7 +113,7 @@ public class ConcernPolicyService(JobsDbContext db, IKernelAuthorizer authorizer
 
         if (command.Rules.Any(r => r.AtRiskPercent is < 1 or > 99))
         {
-            throw new InvalidRequestException("at_risk_percent is 1 to 99");
+            throw new InvalidRequestException("at risk must be between 1 and 99 per cent");
         }
 
         if (command.Ladder.Any(s => !LadderRole.All.Contains(s.Role) || s.Trigger is not (Concern.AtRisk or Concern.Breached) || s.DelayMinutes < 0))

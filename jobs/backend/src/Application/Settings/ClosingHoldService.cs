@@ -42,7 +42,7 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
     public async Task<ClosingPolicy> SaveClosingAsync(RequestScope scope, ClosingCommand command, CancellationToken cancellationToken)
     {
         await ConfigurerAsync(scope, cancellationToken);
-        if (command.AutoCloseHours < 0) throw new InvalidRequestException("auto_close_hours cannot be negative");
+        if (command.AutoCloseHours < 0) throw new InvalidRequestException("the hours before a job closes on its own can't be negative");
 
         var code = command.DepartmentCode?.Trim().ToUpperInvariant();
         var policy = await db.ClosingPolicies.FirstOrDefaultAsync(

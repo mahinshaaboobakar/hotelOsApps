@@ -45,7 +45,7 @@ public class JobService(
 
         if (!await directory.LocationExistsAsync(scope.PropertyId, command.LocationId, cancellationToken))
         {
-            throw new InvalidRequestException("location_id is not a place at this property");
+            throw new InvalidRequestException("that place isn't at this property");
         }
 
         var now = records.Now;
@@ -138,12 +138,12 @@ public class JobService(
 
         if (!RaisedVia.All.Contains(command.RaisedVia) || !RaisedKind.All.Contains(command.RaisedKind))
         {
-            throw new InvalidRequestException("raised_via and raised_kind must be from the vocabulary");
+            throw new InvalidRequestException("how the job was raised, and by whom, weren't recognised");
         }
 
         if (command.RaisedKind == RaisedKind.Guest && command.StayId is null)
         {
-            throw new InvalidRequestException("a guest-raised job needs the stay_id — the stay is the guest");
+            throw new InvalidRequestException("a job raised by a guest needs the guest's stay");
         }
 
         if (command.Priority is { } p && !Priority.All.Contains(p))
@@ -179,7 +179,7 @@ public class JobService(
 
         var parent = await db.Jobs.FirstOrDefaultAsync(
                 j => j.Id == parentId && j.PropertyId == job.PropertyId && j.DeletedAt == null, cancellationToken)
-            ?? throw new InvalidRequestException("parent_job_id is not a job at this property");
+            ?? throw new InvalidRequestException("the job this is a step of isn't at this property");
         if (parent.IsStep)
         {
             throw new InvalidRequestException("a step cannot have steps of its own");

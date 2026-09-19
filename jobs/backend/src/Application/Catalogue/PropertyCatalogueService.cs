@@ -19,11 +19,11 @@ public class PropertyCatalogueService(JobsDbContext db, IKernelAuthorizer author
         await authorizer.RequireAsync(scope, Permissions.Configure, "property", scope.PropertyId, cancellationToken);
         Validate(command);
         _ = await db.Items.FirstOrDefaultAsync(i => i.Id == command.ItemId && i.DeletedAt == null, cancellationToken)
-            ?? throw new InvalidRequestException("item_id is not a catalogue item");
+            ?? throw new InvalidRequestException("that item isn't in the catalogue");
         if (command.ConcernPolicyId is { } policyId
             && !await db.ConcernPolicies.AnyAsync(p => p.Id == policyId && p.PropertyId == scope.PropertyId, cancellationToken))
         {
-            throw new InvalidRequestException("concern_policy_id is not a policy of this property");
+            throw new InvalidRequestException("that policy isn't one of this property's");
         }
 
         var policy = await db.ItemPolicies.FirstOrDefaultAsync(
@@ -51,19 +51,19 @@ public class PropertyCatalogueService(JobsDbContext db, IKernelAuthorizer author
     {
         if (command.DefaultPriority is { } p && p is not (Priority.P1 or Priority.P2 or Priority.P3))
         {
-            throw new InvalidRequestException("default_priority must be P1, P2, P3 or empty");
+            throw new InvalidRequestException("the default priority must be P1, P2, P3 or left empty");
         }
 
         if (command.AutoAssign is not (AutoAssignKind.User or AutoAssignKind.Team))
         {
-            throw new InvalidRequestException("auto_assign must be USER or TEAM");
+            throw new InvalidRequestException("automatic assignment must go to a person or a team");
         }
 
         if (command.AutoAssign == AutoAssignKind.Team && command.AutoAssignTeamId is null)
         {
-            throw new InvalidRequestException("auto_assign TEAM needs auto_assign_team_id");
+            throw new InvalidRequestException("automatic assignment to a team needs the team");
         }
 
-        if (command.DueWithinMinutes is <= 0) throw new InvalidRequestException("due_within_minutes must be positive");
+        if (command.DueWithinMinutes is <= 0) throw new InvalidRequestException("the time allowed must be more than zero minutes");
     }
 }

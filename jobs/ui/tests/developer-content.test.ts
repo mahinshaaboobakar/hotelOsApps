@@ -61,21 +61,13 @@ async function reached(h: HostApi, steps: readonly string[]): Promise<HTMLElemen
  */
 const SYSTEMS: readonly RegExp[] = [/\bMaster Data\b/g, /\bKernel\b/g];
 
-/**
- * What the wire carries and a person cannot read: a raw id (owner, 2026-09-19 —
- * "never raw ids") and an instant the property's formatter never touched (§11).
- */
-const RAW: readonly (readonly [string, RegExp])[] = [
-  ["a raw id", /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi],
-  ["an unformatted instant", /\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/g],
-];
-
+// A raw id and an unformatted instant are in the shared list now (KK, d540eb9b,
+// from be1c6730), so developerContent() finds them; no local copy.
 const read = (root: Element): string[] => {
   const text = readableText(root);
   return [
     ...developerContent(text),
     ...SYSTEMS.flatMap((p) => [...text.matchAll(p)].map((m) => `a system's name: ${m[0]}`)),
-    ...RAW.flatMap(([what, p]) => [...text.matchAll(p)].map((m) => `${what}: ${m[0]}`)),
   ];
 };
 

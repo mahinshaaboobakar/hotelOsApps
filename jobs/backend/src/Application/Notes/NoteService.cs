@@ -50,7 +50,7 @@ public class NoteService(JobsDbContext db, IKernelAuthorizer authorizer, JobReco
     {
         var job = await ReadableAsync(scope, jobId, cancellationToken);
         var user = scope.UserId ?? throw new InvalidRequestException("a reminder is a person's");
-        if (at <= records.Now) throw new InvalidRequestException("remind_at must be in the future");
+        if (at <= records.Now) throw new InvalidRequestException("a reminder must be for a time still to come");
 
         var reminder = new JobReminder
         {

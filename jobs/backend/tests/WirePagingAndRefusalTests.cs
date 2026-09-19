@@ -139,7 +139,7 @@ public class WirePagingAndRefusalTests(JobsFixture fixture)
             Context = h.Context(), ItemId = itemId, LocationId = Guid.CreateVersion7().ToString(), Summary = "warm",
             RaisedVia = RaisedVia.GuestApp, RaisedKind = RaisedKind.Guest,
         }).ResponseAsync);
-        Assert.Contains("stay_id", guest.Status.Detail, StringComparison.Ordinal);
+        Assert.Contains("the guest's stay", guest.Status.Detail, StringComparison.Ordinal);
     }
 
     [Fact]
