@@ -177,6 +177,14 @@ export const TONE: Readonly<Record<Cause, string>> = {
   unanswered: "var(--color-warn,#fbbf24)",
   forbidden: "var(--color-ink-muted,#8b93a7)",
   faulted: "var(--color-bad,#f87171)",
+  // ADR 0192's three, contract v2 (`d45f028d`). Colours read from page 64e,
+  // approved 2026-09-19, by the class each state's mark carries there — not
+  // chosen here. The names are the SDK's causes, not the wire kinds 64e labels
+  // them by: `causeOf` maps local_forbidden → unadmitted, user_forbidden →
+  // ungranted, model_unavailable → undecidable.
+  unadmitted: "var(--color-ink-muted,#8b93a7)", //  64e c-no — a refusal, like forbidden
+  ungranted: "var(--color-ink-muted,#8b93a7)", //   64e c-no — a refusal, like forbidden
+  undecidable: "var(--color-bad,#f87171)", //       64e c-fault — the model could not decide
 };
 
 /**

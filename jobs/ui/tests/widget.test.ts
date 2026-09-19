@@ -103,7 +103,15 @@ describe("the jobs-now widget", () => {
     // granted is not worth one, and the answer is the platform's own: refused.
     expect(called).toBe(false);
     expect(panel.querySelector(".wfail")).not.toBeNull();
-    expect(panel.textContent).toContain("You do not have access");
+
+    // **Rewritten for contract v2** (ADR 0034, ADR 0192, `d45f028d`). This
+    // expected "You do not have access" — the generic refusal — and the SDK now
+    // says who refused: a capability the APPLICATION was never granted is
+    // `unadmitted`, stopped by HotelOS before any service was asked. "You do not
+    // have access" would send the reader to a person's grant when what is
+    // missing is the package's admission.
+    expect(panel.textContent).toContain("Jobs has not been allowed to read");
+    expect(panel.textContent).not.toContain("You do not have access");
 
     // A refusal cannot be retried, so the card sends a person to the screen
     // that carries the facts — "Open Jobs →", never "Try again →".

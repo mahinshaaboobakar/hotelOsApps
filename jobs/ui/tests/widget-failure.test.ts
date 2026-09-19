@@ -52,7 +52,9 @@ const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
 const GRANTS = ["job.read"];
 
 /** A host that refuses every call with one kind — the kinds `causeOf` maps. */
-function failing(kind: "unavailable" | "forbidden" | "internal"): HostApi {
+function failing(
+  kind: "unavailable" | "forbidden" | "internal" | "local_forbidden" | "user_forbidden" | "model_unavailable",
+): HostApi {
   return {
     identity: { id: "jobs", version: "0.4.1", capabilities: GRANTS },
     property: PROPERTY,
@@ -67,6 +69,11 @@ const STATES = [
   { cause: "unanswered", kind: "unavailable", said: "Jobs did not answer in time", onward: "Try again →" },
   { cause: "forbidden", kind: "forbidden", said: "You do not have access to", onward: "Open Jobs →" },
   { cause: "faulted", kind: "internal", said: "Jobs could not build", onward: "Open Jobs →" },
+  // ADR 0192's three (contract v2, `d45f028d`), by the wire kind that produces
+  // each. Headlines are the SDK's; none can be retried, so each opens Jobs.
+  { cause: "unadmitted", kind: "local_forbidden", said: "Jobs has not been allowed to read", onward: "Open Jobs →" },
+  { cause: "ungranted", kind: "user_forbidden", said: "This account has not been granted", onward: "Open Jobs →" },
+  { cause: "undecidable", kind: "model_unavailable", said: "could not be checked", onward: "Open Jobs →" },
 ] as const;
 
 const WIDGETS: Record<string, (host: HostApi) => Promise<HTMLElement>> = { ...PANELS, "jobs-now": jobsNow };
