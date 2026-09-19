@@ -31,14 +31,6 @@ function cell(child: HTMLElement, className?: string): HTMLElement {
   return box;
 }
 
-/** The published tone a property's colour name maps onto. */
-function swatch(colour: string): string {
-  if (colour === "Cyan" || colour === "Indigo" || colour === "Violet") return "brand";
-  if (colour === "Emerald") return "ok";
-  if (colour === "Amber") return "warn";
-  return "neutral";
-}
-
 const COLUMNS = "1.5fr 110px 160px 1fr 150px";
 
 /** Draw the screen. */
@@ -118,10 +110,10 @@ function table(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
 
     item.append(
       name,
-      cell(codeChip(row.code, swatch(row.colour))),
+      cell(codeChip(row.code, row.tone)),
       el("div", "quiet", [span(row.hours, host.property), span(row.second, host.property)]
         .filter((one) => one !== null).join(", ") || "—"),
-      cell(colourDot(row.colour, swatch(row.colour)), "quiet"),
+      cell(colourDot(row.colour, row.tone), "quiet"),
       el("div", "quiet", row.inUse),
     );
 

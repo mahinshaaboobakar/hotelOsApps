@@ -37,8 +37,12 @@ import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
  * `Wording.Tone` maps a stored colour name to a tone; these are names it maps
  * to each tone the screen draws, so a shift reads in the colour its swatch
  * showed. `Slate` maps to nothing, which is neutral — deliberately.
+ *
+ * Exported for `tests/shift-tone`, which holds each entry to the service's own
+ * table by reading `Wording.cs`: this is the one colour→tone list left in the
+ * UI, because the choice exists before any shift does.
  */
-const PALETTE = [
+export const PALETTE = [
   { tone: "brand", name: "Cyan" },
   { tone: "ok", name: "Emerald" },
   { tone: "warn", name: "Amber" },

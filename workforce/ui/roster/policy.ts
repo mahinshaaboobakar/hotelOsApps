@@ -15,6 +15,16 @@ export interface CatalogueRow {
   /** A split shift's second window, or null. */
   second: Span | null;
   colour: string;
+
+  /**
+   * The published tone the colour is drawn in — the SERVICE's mapping
+   * (`Wording.Tone`), the one the rota and the schedule already draw.
+   *
+   * Sent rather than mapped here: Shifts and Policy each kept a `swatch()` that
+   * drew Rose neutral and Violet brand while the service made them bad and
+   * neutral, so one shift was two colours on two screens (ledger D3).
+   */
+  tone: "brand" | "ok" | "warn" | "bad" | "neutral";
   kind: "working" | "off";
 
   /** How many assignments reference it — the reason a retire is not a delete. */
@@ -66,32 +76,34 @@ export const recordedPolicy: Policy = {
     {
       name: "Morning", code: "M",
       hours: { from: "07:00", to: "15:00" }, second: null,
-      colour: "Cyan", kind: "working", inUse: "412 assignments"
+      colour: "Cyan", tone: "brand", kind: "working", inUse: "412 assignments"
     },
     {
       name: "Afternoon", code: "A",
       hours: { from: "15:00", to: "23:00" }, second: null,
-      colour: "Indigo", kind: "working", inUse: "380 assignments"
+      colour: "Indigo", tone: "brand", kind: "working", inUse: "380 assignments"
     },
     {
       name: "Night", code: "N",
       hours: { from: "23:00", to: "07:00" }, second: null,
-      colour: "Violet", kind: "working", inUse: "196 assignments"
+      // Neutral: the service's table has no Violet, and the fixture carries
+      // what the wire would, not what the old swatch() drew (brand).
+      colour: "Violet", tone: "neutral", kind: "working", inUse: "196 assignments"
     },
     {
       name: "Split — Banquet", code: "SB",
       hours: { from: "10:00", to: "14:00" },
       second: { from: "18:00", to: "22:00" },
-      colour: "Amber", kind: "working", inUse: "44 assignments"
+      colour: "Amber", tone: "warn", kind: "working", inUse: "44 assignments"
     },
     {
       name: "General", code: "G",
       hours: { from: "09:00", to: "18:00" }, second: null,
-      colour: "Emerald", kind: "working", inUse: "88 assignments"
+      colour: "Emerald", tone: "ok", kind: "working", inUse: "88 assignments"
     },
     {
       name: "Week-off", code: "OFF", hours: null, second: null,
-      colour: "None", kind: "off", inUse: "203 assignments"
+      colour: "None", tone: "neutral", kind: "off", inUse: "203 assignments"
     },
   ],
 

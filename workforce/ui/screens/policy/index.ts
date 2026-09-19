@@ -31,13 +31,6 @@ function cell(child: HTMLElement, className?: string): HTMLElement {
   return box;
 }
 
-/** The published tone a property's colour name maps onto. */
-function swatch(colour: string): string {
-  if (colour === "Cyan" || colour === "Indigo" || colour === "Violet") return "brand";
-  if (colour === "Emerald") return "ok";
-  if (colour === "Amber") return "warn";
-  return "neutral";
-}
 
 /** Draw the screen. */
 export async function policy(
@@ -115,12 +108,14 @@ function shifts(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
     item.style.gridTemplateColumns = columns;
     item.append(
       el("b", undefined, row.name),
-      cell(codeChip(row.code, swatch(row.colour))),
+      // The tone is the service's (row.tone, ledger D3): a local mapping drew
+      // Rose neutral here and red on the rota.
+      cell(codeChip(row.code, row.tone)),
       // Composed here: the separator between the two windows of a split shift
       // is the reader's too, and the service used to send ", " between them.
       el("div", "quiet", [span(row.hours, host.property), span(row.second, host.property)]
         .filter((one) => one !== null).join(", ") || "—"),
-      cell(colourDot(`${row.colour} · ${row.kind}`, swatch(row.colour)), "quiet"),
+      cell(colourDot(`${row.colour} · ${row.kind}`, row.tone), "quiet"),
       // Why retiring a shift is not deleting it: these assignments still name it,
       // and a rota worked under it has to stay readable.
       el("div", "quiet", row.inUse),
