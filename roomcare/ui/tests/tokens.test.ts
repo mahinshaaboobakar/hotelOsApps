@@ -52,10 +52,34 @@ describe("the module's token references", () => {
     expect(injected.size).toBe(TOKEN_NAMES.length);
   });
 
-  it("names only tokens the shell publishes", () => {
-    const published = new Set<string>([...TOKEN_NAMES, "font-sans"]);
+  /** Names the module defines itself (`--accent: …`), each with what it is built from. */
+  function defined(): Map<string, string> {
+    const names = new Map<string, string>();
+    for (const file of sheets(".")) {
+      for (const match of readFileSync(join(root, file), "utf8").matchAll(/--([a-z0-9-]+):([^;}]+)[;}]/g)) {
+        if (match[1] !== undefined && match[2] !== undefined && !TOKEN_NAMES.includes(match[1] as never)) names.set(match[1], match[2]);
+      }
+    }
+    return names;
+  }
+
+  it("names only tokens the shell publishes, or a name it derives from them itself", () => {
+    // Page 64 §1 and §2: the primary fill is "written once, as --accent, and derived". A name the
+    // module defines on its own root cannot fall to a fallback, so it is allowed — the next test
+    // holds what it may be built from.
+    const published = new Set<string>([...TOKEN_NAMES, "font-sans", ...defined().keys()]);
     const unknown = [...referenced()].filter((name) => !published.has(name));
     expect(unknown).toEqual([]);
+  });
+
+  it("derives every name it defines from published tokens alone — never a literal of its own", () => {
+    const own = [...defined()].map(([name, value]) => {
+      const uses = [...value.matchAll(/var\(--([a-z0-9-]+)/g)].map((m) => m[1]!);
+      const bare = value.replace(/var\(--[a-z0-9-]+,\s*(?:[^()]|\([^()]*\))+\)/g, "");
+      return { name, unpublished: uses.filter((u) => !TOKEN_NAMES.includes(u as never)), literal: /#[0-9a-f]{3,8}|rgba?\(\s*\d/iu.test(bare) };
+    });
+    expect(own.filter((o) => o.unpublished.length > 0 || o.literal)).toEqual([]);
+    expect(own.map((o) => o.name)).toEqual(["accent"]);
   });
 
   it("falls back to the platform's values, never the drawing's", () => {

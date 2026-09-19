@@ -21,19 +21,21 @@ export function stylesheet(parts: readonly string[] = []): HTMLStyleElement {
 
 const CHROME = `
 *{box-sizing:border-box}
+input,select,textarea{font:inherit;line-height:inherit}
 .rc{height:100vh;display:flex;flex-direction:column;min-width:0;position:relative;
     background:var(--color-surface,#0b0d14);color:var(--color-ink,#e8ebf4);
-    font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);font-variant-numeric:tabular-nums}
+    font:14px/1.5 var(--font-sans,system-ui, -apple-system, "Segoe UI", sans-serif);font-variant-numeric:tabular-nums;
+    --accent:linear-gradient(135deg, var(--color-brand,#818cf8), color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
 .head{display:flex;align-items:center;gap:22px;padding:0 22px;height:56px;flex:none;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 .app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
 .mark{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:12px;color:var(--color-ink-on-accent,#0b0d14);
-      background:linear-gradient(135deg, var(--color-brand,#818cf8), color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
+      background:var(--accent)}
 .tab{background:none;border:0;border-bottom:2px solid transparent;color:var(--color-ink-muted,#8b93a7);padding:19px 2px;
      font:inherit;line-height:inherit;font-size:13px;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
 .who{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:12px}
 .body{flex:1 1 auto;padding:22px;overflow:auto;min-height:0;display:flex;flex-direction:column}
-.body:has(.pager),.body:has(.house){overflow:hidden}
+.body:has(> .pager),.body:has(.house){overflow:hidden}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));flex:none}
 .subnav .tab{padding:8px 12px;font-size:12px;margin-bottom:-1px}
 .strip{display:flex;flex-wrap:wrap;gap:22px;font-size:12px;color:var(--color-ink-muted,#8b93a7);padding:8px 12px;margin-bottom:12px;align-items:center;flex:none;
@@ -46,7 +48,7 @@ const CHROME = `
 .btn{background:none;border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:8px;padding:7px 14px;
      font:inherit;line-height:inherit;font-size:13px;color:var(--color-ink,#e8ebf4);cursor:pointer;text-align:start}
 .btn.pri{border-color:transparent;color:var(--color-ink-on-accent,#0b0d14);
-         background:linear-gradient(135deg, var(--color-brand,#818cf8), color-mix(in srgb, var(--color-brand,#818cf8) 62%, var(--color-bad,#f87171)))}
+         background:var(--accent)}
 .btn.off{color:var(--color-ink-faint,#5a6172);border-style:dashed;cursor:default}
 .btn.danger{color:var(--color-bad,#f87171);border-color:color-mix(in srgb, var(--color-bad,#f87171) 45%, transparent)}
 .btn.danger.confirm{border-color:transparent;background:var(--color-bad,#f87171);color:var(--color-ink-on-accent,#0b0d14);font-weight:600}
@@ -61,7 +63,7 @@ select.btn.chip{background:var(--color-surface,#0b0d14)}
 .card h3 .mono{font-weight:400}
 .kv{display:grid;grid-template-columns:170px 1fr;gap:6px 14px;font-size:13px}
 .kv .k{color:var(--color-ink-faint,#5a6172)}
-.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin:18px 0 8px}
+.sect{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin:18px 0 8px}
 .note{border-left:3px solid var(--color-brand,#818cf8);padding:10px 16px;margin:10px 0;color:var(--color-ink-muted,#8b93a7);font-size:13px;
       background:color-mix(in srgb, var(--color-brand,#818cf8) 5%, transparent)}
 .note b{color:var(--color-ink,#e8ebf4)}
@@ -71,7 +73,7 @@ select.btn.chip{background:var(--color-surface,#0b0d14)}
 .tl{border-left:2px solid var(--color-line,rgb(255 255 255 / 0.07));padding-left:16px;margin:8px 0 0 6px}
 .tl .ev{margin-bottom:10px;font-size:13px}
 .tl .ev b{display:block;font-weight:600}
-.tl .ev span{color:var(--color-ink-faint,#5a6172);font-size:12px}
+.tl .ev span{color:var(--color-ink-muted,#8b93a7);font-size:12px;line-height:19.8px}
 .big{font-size:34px;font-weight:600;line-height:1}
 label.lbl{font-size:11px;color:var(--color-ink-faint,#5a6172);letter-spacing:.07em;text-transform:uppercase;display:block}
 .field{border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));border-radius:10px;padding:9px 12px;font-size:13px;
@@ -118,7 +120,7 @@ tr.dim td{color:var(--color-ink-faint,#5a6172)}
 
 const HOUSE = `
 .house{flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -22px;padding:0 22px}
-.legend{font-size:11px;color:var(--color-ink-faint,#5a6172);margin:4px 0 8px;flex:none}
+.legend{font-size:12px;line-height:19.8px;color:var(--color-ink-faint,#5a6172);margin:4px 0 8px;flex:none}
 .legend span{display:inline-block;margin-right:14px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:middle;margin-right:5px}
 .sw.dirty,.glyph.dirty,.tile.dirty{background:var(--color-bad,#f87171)}
@@ -148,9 +150,11 @@ const HOUSE = `
 .tile small{position:absolute;bottom:1px;right:3px;font-size:8px;opacity:.8}
 .tile.chg:after{content:"\\270E";position:absolute;top:-7px;right:-4px;font-size:10px;background:var(--color-surface,#0b0d14);color:var(--color-warn,#fbbf24);
       border-radius:8px;padding:0 3px;border:1px solid var(--color-warn,#fbbf24)}
+/* 5px 8px: the wall is the whole house in one scroll (page 64 §6, the departure the owner ruled); frame 1b draws it */
 table.wall td{padding:5px 8px;font-size:12px;line-height:1.3;vertical-align:middle;white-space:nowrap}
 table.wall th{padding:6px 8px;position:sticky;top:0;background:var(--color-surface,#0b0d14);z-index:2;white-space:nowrap}
 table.wall .src{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-muted,#8b93a7)}
+/* 7px 8px: a zone's group row, sticky above its rooms, as frame 1b draws it */
 table.wall tr.g td{background:var(--color-surface-raised,#11141f);color:var(--color-ink,#e8ebf4);font-weight:600;padding:7px 8px;position:sticky;top:29px;z-index:1;cursor:pointer}
 table.wall tr.dim td{opacity:.3}
 table.wall tr.chg td{background:var(--color-warn-soft,rgb(251 191 36 / 0.12))}
@@ -173,6 +177,7 @@ input.cell{border:1px solid var(--color-line-strong,rgb(255 255 255 / 0.14));bor
 .dock > .dim{font-size:11px;color:var(--color-ink-muted,#8b93a7)}
 .pairs{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 table.compact th,table.compact tr.g td{position:static}
+/* 4px 8px: Room states edits the whole house in one sheet (redline 5, frames 4c-4e) */
 table.wall.states td{padding:4px 8px;vertical-align:middle}
 table.wall.states td.mono{font-size:11px}
 `;
@@ -213,6 +218,6 @@ input.inline[type=time]{width:112px}
       background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
 .dlg-note .sect,.sect.first{margin-top:0}
 .card.accent{border-color:var(--color-brand,#818cf8);background:color-mix(in srgb, var(--color-brand,#818cf8) 6%, transparent)}
-.card.accent > h3{font-size:11px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
+.card.accent > h3{font-size:11px;font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--color-ink-faint,#5a6172)}
 .tabline{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px;flex:none}
 `;

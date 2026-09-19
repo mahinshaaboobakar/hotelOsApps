@@ -42,7 +42,8 @@ const WIDGET_CSS = `
 .wfig .bad b{color:var(--color-bad,#f87171)}
 .wfig .run b{color:var(--color-brand,#818cf8)}
 .wrow{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));
-      font-size:13px;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;color:inherit;font-family:inherit;line-height:inherit;cursor:pointer}
+      font-size:13px;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;color:inherit;font-family:inherit;line-height:inherit}
+button.wrow{cursor:pointer}
 .wrow:last-child{border-bottom:0}
 .wrow .num{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--color-ink-muted,#8b93a7)}
 .wrow .bad{color:var(--color-bad,#f87171)}
