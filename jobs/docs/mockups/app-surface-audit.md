@@ -30,9 +30,10 @@ One bucket per line; the five add to 86.
 
 | | Lines |
 |---|---|
-| **PASS** | 56 — of which four have an OPEN half, recorded: C4 (card half) · X4 (mono stack) · X7 (fill, *needs…* size) · X8 (the moment) |
+| **PASS** | 57 — of which four have an OPEN half, recorded: C4 (card half) · X4 (mono stack) · X7 (fill, *needs…* size) · X8 (the moment); and **O7 passes as an approved deviation** (APPS-Q27), labelled at both sites |
 | **FAIL → fixed in 0.4.2** (each shown failing first) | 14 — C2 · C8 · C11 · D2 · D3 · D4 · G1 · G2 · I3 · I5 · I6 · N4 · P5 · U1 |
-| **FAIL → not Jobs' to fix alone; routed** | 4 — H3 · H6 · N5 · O7 |
+| **FAIL → fixed after 0.4.2** (shown failing first; in no package yet) | 1 — N5, with its department clause OPEN on ADR 0203 |
+| **FAIL → the frames; drawn for the owner** (APPS-Q44) | 2 — H3 · H6 |
 | **OPEN** (recorded, not failed) | 5 — D5 · G11 · X13 · X14 · X15 |
 | **N/A** (with the reason) | 7 — G10 · O1–O6 |
 
@@ -75,7 +76,7 @@ One bucket per line; the five add to 86.
 | N2 | PASS | C | no left rail |
 | N3 | PASS | C | two tab levels (top; Settings' and a job's second). The policy flow's *1 · 2 · 3* is a view switcher in the body, which §3 allows |
 | N4 | **F→fixed** | T · ALL | a search box (*Search job number, room, summary…*) that was a `<div>` over no search. Removed. Proof: the N4 test failed first |
-| N5 | **FAIL — routed** | T · ALL, NUL | §3: *name · department · property*. The **real backend** returns `OperatorView("Signed in", <property code>)` — no name, no department, the property as a code; the harness's recorded *Priya Nair · ENG supervisor* hid it. Jobs can read the property's **name** (its Master Data read model); it has **no read for the person's name** (the bearer carries a user id) and the **department is `CTX-Q9`**. Needs a source for the signed-in person; not fixed here |
+| N5 | **FAIL → fixed** · department OPEN | T · ALL, NUL | §3: *name · department · property*. The backend returned `OperatorView("Signed in", <property code>)`, and the recorded *Priya Nair · ENG supervisor* hid it. **Now as Room Care reads it** (the architect's direction, 2026-09-19): the name from `masterdata.staff` by login, the property by name and else by code. **The department is ADR 0203's** (CTX-Q9): sent as `null` and drawn as the words *department not established*, never a stand-in. Failing first: backend `Me_*` (2) read *"Signed in"*; UI N5 (2) read *"Priya Nair · undefined"* and *"null · undefined"* |
 | N6 | PASS | C · every screen | no heading repeats the active tab; Raise's *Raise a job* names the composition, which is not a tab |
 | N7 | PASS | C | the strip's sub-line at its right; *Raise a job* at the right of the chips |
 | N8 | PASS | M · 24 | body top padding 22px |
@@ -122,7 +123,7 @@ One bucket per line; the five add to 86.
 | ID | Result | Surfaces · states | Evidence |
 |---|---|---|---|
 | O1–O6 | N/A | — | Jobs has **no overlay** — no scrim, sheet or positioned dialog. Raise and Resolve are full screens (APPS-Q26 names Raise's exception) |
-| O7 | **FAIL — routed** | C | two **inline** composers: the Catalogue's *New item* and the policy flow's *Add a step to P1*, both `.dlg` boxes in the page. §9: *composing happens in a sheet*. Both are drawn inline by the owner-locked frames; APPS-Q26's exception covers Raise only. **A frame against the standard — not moved unilaterally** |
+| O7 | **PASS — approved deviation** | C | two **inline** composers against §9 (*composing happens in a sheet*): the Catalogue's *New item* and the policy flow's *Add a step to P1*. **APPS-Q27**: an owner-locked and countersigned artifact establishes a surface-specific deviation. Mockup 01 frame 7 and mockup 02's ladder frame draw both inline, owner-locked 2026-09-04; Jobs' Part A is recorded countersigned (APPS-Q18). Labelled at `catalogue/index.ts` and `settings/policies.ts`. **Two in one app** — see *Routed* for the count |
 
 ### §10 · Fields
 
@@ -176,18 +177,19 @@ One bucket per line; the five add to 86.
 |---|---|---|---|
 | H1 | PASS | T | the harness injects exactly the published set (`tokens.test.ts`) |
 | H2 | PASS | C · the paged frames | the Board frame draws a full page (*1–12 of 47*); no paged frame draws fewer rows than its count |
-| H3 | **FAIL — routed** | frames | mockups 01 and 02 draw 65 dates and name no locale for them — only that Jobs *renders from `locale`* |
+| H3 | **FAIL — drawn for the owner** | frames | mockups 01 and 02 draw 65 dates and name no locale for them. Revision in `06-the-frame-revision.html`: every date through the SDK in en-GB · Asia/Qatar, labelled; four dates carried 2025's weekday; two shapes no SDK style draws (D1, D2) are the owner's |
 | H4 | PASS | T | the drive withholds *ready* on a missed step (`frame.ts`) |
 | H5 | PASS | T | the harness rejects a route it does not answer; the screen draws the failure, never a stand-in |
-| H6 | **FAIL — routed** | frames | both frames' `:root` declare 13 names of their own beside the published 19 (`--bad --bg --cyan --defer --dim --faint --glass --grad --indigo --line --ok --text --violet --warn`) |
+| H6 | **FAIL — drawn for the owner** | frames | both frames' `:root` declare 13 names of their own beside the published 19 (`--bad --bg --cyan --defer --dim --faint --glass --grad --indigo --line --ok --text --violet --warn`) |
 
 ## Routed, not fixed — each needs a decision that is not Jobs'
 
-1. **N5** — the signed-in person's name has no read Jobs can make, and the department is `CTX-Q9`.
-2. **O7** — two inline composers drawn by owner-locked frames against §9. An APPS-Q26-style
-   exception, or a redraw.
-3. **H3, H6** — the drawings themselves: name their dates' locale, and re-tokenise the 13 legacy
-   names out of `:root`. Appearance-neutral, but they are the owner-locked frames.
+1. **N5's department** — waits on ADR 0203 (BB's Context change). Drawn as *not established*.
+2. **O7's count** — two §9 deviations in one application, and Room Care's L1 a third on the same
+   day. APPS-Q27: *"repeated or intentional deviations trigger a standards-amendment question"*.
+   That question is the architect's to raise; it is not raised here.
+3. **H3, H6** — the frame revision, drawn under APPS-Q44 for the owner:
+   `jobs/docs/mockups/06-the-frame-revision.html`.
 
 ## About the checklist itself — for GG and the architect
 
