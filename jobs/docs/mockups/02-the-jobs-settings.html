@@ -26,131 +26,120 @@
   --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);--color-bad-soft:rgb(248 113 113 / 0.12);
   --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
 
-  /* This page's own names, kept as aliases so no selector drifts back. */
-  --bg:var(--color-surface);--glass:color-mix(in srgb,var(--color-ink) 3%,transparent);--line:var(--color-line);
-  --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
-  --indigo:var(--color-brand);
-  /*
-   * The timer's cyan and the gradient's violet were never published. The
-   * drawing taught two colours a module may not use, so both now resolve
-   * through the brand — the build had already made this correction, and the
-   * measurement is what found the drawing had not.
-   */
-  --cyan:var(--color-brand);--violet:color-mix(in srgb,var(--color-brand) 62%,var(--color-bad));
-  --grad:linear-gradient(135deg,var(--indigo),var(--violet));
-  --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);--defer:var(--color-ink-muted);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
-code{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--cyan)}
-.intro{max-width:920px;color:var(--dim);margin-bottom:40px}
-.intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
+body{margin:0;background:var(--color-surface);color:var(--color-ink);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
+code{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--color-brand)}
+.intro{max-width:920px;color:var(--color-ink-muted);margin-bottom:40px}
+.intro h1{color:var(--color-ink);font-size:26px;margin:0 0 8px}
 .intro p{margin:6px 0}
-h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:64px 0 18px;border-top:1px solid var(--line);padding-top:18px}
-h1.frame{font-size:17px;font-weight:500;color:var(--dim);margin:44px 0 12px}
-h1.frame b{color:var(--text);font-weight:600}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-ink-faint);margin:64px 0 18px;border-top:1px solid var(--color-line);padding-top:18px}
+h1.frame{font-size:17px;font-weight:500;color:var(--color-ink-muted);margin:44px 0 12px}
+h1.frame b{color:var(--color-ink);font-weight:600}
 /* window chrome */
-.win{border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
-.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--line);height:56px}
+.win,.widget{--accent:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad)))}
+.win{border:1px solid var(--color-line);border-radius:14px;background:color-mix(in srgb,var(--color-ink) 3%,transparent);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px color-mix(in srgb,var(--color-surface) 45%,transparent)}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--color-line);height:56px}
 .app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
-.mark{width:22px;height:22px;border-radius:6px;background:var(--grad);display:grid;place-items:center;font-size:12px}
-.tab{color:var(--dim);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
-.tab.on{color:var(--text);border-bottom-color:var(--indigo)}
-.search{margin-left:auto;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
-.who{color:var(--faint);font-size:12px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font-size:12px}
+.tab{color:var(--color-ink-muted);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
+.tab.on{color:var(--color-ink);border-bottom-color:var(--color-brand)}
+.search{margin-left:auto;color:var(--color-ink-faint);border:1px solid var(--color-line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
+.who{color:var(--color-ink-faint);font-size:12px}
 .body{padding:22px}
-.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint);margin:18px 0 8px}
 /* rows, pills, cards */
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
-td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{text-align:left;color:var(--color-ink-faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--color-line)}
+td{padding:10px;border-bottom:1px solid var(--color-line);vertical-align:top}
 tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
-.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
-.pill.ok{color:var(--ok);border-color:var(--ok)}
-.pill.warn{color:var(--warn);border-color:var(--warn)}
-.pill.bad{color:var(--bad);border-color:var(--bad)}
-.pill.run{color:var(--cyan);border-color:var(--cyan)}
-.pill.hold{color:var(--defer);border-color:var(--defer)}
-.pill.p1{background:var(--bad);color:var(--bg);border-color:var(--bad)}
-.pill.p2{background:var(--warn);color:var(--bg);border-color:var(--warn)}
-.pill.p3{background:var(--indigo);color:var(--text);border-color:var(--indigo)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--color-ink-muted)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--color-line);color:var(--color-ink-muted)}
+.pill.ok{color:var(--color-ok);border-color:var(--color-ok)}
+.pill.warn{color:var(--color-warn);border-color:var(--color-warn)}
+.pill.bad{color:var(--color-bad);border-color:var(--color-bad)}
+.pill.run{color:var(--color-brand);border-color:var(--color-brand)}
+.pill.hold{color:var(--color-ink-muted);border-color:var(--color-ink-muted)}
+.pill.p1{background:var(--color-bad);color:var(--color-surface);border-color:var(--color-bad)}
+.pill.p2{background:var(--color-warn);color:var(--color-surface);border-color:var(--color-warn)}
+.pill.p3{background:var(--color-brand);color:var(--color-ink);border-color:var(--color-brand)}
 .pill.nt{border-style:dashed}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.card{border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
+.card{border:1px solid var(--color-line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
 .card h3{margin:0 0 10px;font-size:13px;font-weight:600}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
-.kv div:nth-child(odd){color:var(--faint)}
-.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--text);margin-right:8px;line-height:inherit}
+.kv div:nth-child(odd){color:var(--color-ink-faint)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--color-ink);margin-right:8px;line-height:inherit}
 /* Text on an accent fill is what --color-ink-on-accent is published for; this
    page taught ordinary ink there until the 5 September measurement. */
-.btn.pri{background:var(--grad);border-color:transparent;color:var(--color-ink-on-accent)}
-.btn.off{color:var(--faint);border-style:dashed}
+.btn.pri{background:var(--accent);border-color:transparent;color:var(--color-ink-on-accent)}
+.btn.off{color:var(--color-ink-faint);border-style:dashed}
 .btn.sm{padding:2px 8px;font-size:11px}
 .btn.danger{color:var(--color-bad);border-color:color-mix(in srgb,var(--color-bad) 45%,transparent)}
 .btn.danger.confirm{background:var(--color-bad);border-color:transparent;color:var(--color-ink-on-accent);font-weight:600}
-.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
-.field.ph{color:var(--faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
-label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}
-.tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
+.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--color-ink);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
+.field.ph{color:var(--color-ink-faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
+label{font-size:11px;color:var(--color-ink-faint);letter-spacing:.07em;text-transform:uppercase}
+.tl{border-left:2px solid var(--color-line);padding-left:16px;margin:8px 0 0 6px}
 .tl div{margin-bottom:10px;font-size:13px}
-.tl b{display:block;color:var(--text);font-weight:600}
-.tl span{color:var(--faint);font-size:12px}
+.tl b{display:block;color:var(--color-ink);font-weight:600}
+.tl span{color:var(--color-ink-faint);font-size:12px}
 .big{font-size:34px;font-weight:600;line-height:1}
-.mono{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--dim)}
-.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;background:var(--ok)}
-.bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
-.chip{display:inline-block;border:1px solid var(--color-line-strong);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim);line-height:inherit}
-.chip.on{border-color:var(--indigo);color:var(--text)}
-.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
-.tog.on{background:var(--ok)}
-.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text)}
+.mono{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--color-ink-muted)}
+.bar{height:6px;border-radius:3px;background:var(--color-line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--color-ok)}
+.bar i.warn{background:var(--color-warn)}.bar i.bad{background:var(--color-bad)}
+.chip{display:inline-block;border:1px solid var(--color-line-strong);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--color-ink-muted);line-height:inherit}
+.chip.on{border-color:var(--color-brand);color:var(--color-ink)}
+.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--color-line);position:relative;vertical-align:middle;margin-right:8px}
+.tog.on{background:var(--color-ok)}
+.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--color-ink)}
 .tog.on i{left:18px}
 /* redline 2026-09-04 */
-.strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
-.strip b{color:var(--text);font-size:14px;margin-right:4px}
-.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager button.pg{display:inline-block;background:none;font:inherit;line-height:inherit;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--dim);line-height:inherit}
-.pager button.pg.on{color:var(--text);border-color:var(--indigo)}
+.strip{display:flex;gap:26px;font-size:12px;color:var(--color-ink-muted);margin-bottom:12px;padding:8px 12px;border:1px solid var(--color-line);border-radius:8px}
+.strip b{color:var(--color-ink);font-size:14px;margin-right:4px}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-ink-faint);padding:10px 4px 0}
+.pager button.pg{display:inline-block;background:none;font:inherit;line-height:inherit;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--color-ink-muted);line-height:inherit}
+.pager button.pg.on{color:var(--color-ink);border-color:var(--color-brand)}
 .scroll{max-height:168px;overflow:hidden;position:relative}
-.scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--bg))}
-.more{font-size:11px;color:var(--faint);text-align:center;padding-top:4px}
-.timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--cyan);line-height:1}
-.timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:10px;vertical-align:middle}
-.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
-.subnav button{background:none;border:none;font:inherit;line-height:inherit;cursor:pointer;padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
-.subnav button.on{color:var(--text);border-bottom-color:var(--indigo)}
-.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
-td.dimtd{color:var(--faint)}
+.scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--color-surface))}
+.more{font-size:11px;color:var(--color-ink-faint);text-align:center;padding-top:4px}
+.timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--color-brand);line-height:1}
+.timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--color-ok);margin-right:10px;vertical-align:middle}
+.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line)}
+.subnav button{background:none;border:none;font:inherit;line-height:inherit;cursor:pointer;padding:8px 12px;font-size:12px;color:var(--color-ink-muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav button.on{color:var(--color-ink);border-bottom-color:var(--color-brand)}
+.dlg{border:1px solid var(--color-brand);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
+td.dimtd{color:var(--color-ink-faint)}
 /* widget */
-.widget{max-width:360px;border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.widget{max-width:360px;border:1px solid var(--color-line);border-radius:14px;background:color-mix(in srgb,var(--color-ink) 3%,transparent);padding:16px;box-shadow:0 30px 80px color-mix(in srgb,var(--color-surface) 45%,transparent)}
 .widget h3{margin:0 0 12px;font-size:13px;display:flex;justify-content:space-between}
-.widget h3 span{color:var(--faint);font-weight:400}
-.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.widget h3 span{color:var(--color-ink-faint);font-weight:400}
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-line);font-size:13px}
 .wrow:last-child{border:0}
 /* notes under frames */
-.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
-.note b{color:var(--text)}
-.note.stop{border-color:var(--bad);background:var(--color-bad-soft)}
-.note.hold{border-color:var(--warn);background:var(--color-warn-soft)}
-.note.fix{border-color:var(--ok);background:var(--color-ok-soft)}
-.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
-.tag.obs{color:var(--bad);border-color:var(--bad)}
-.tag.later{color:var(--warn);border-color:var(--warn)}
-ul.flows{max-width:920px;color:var(--dim)}
+.note{max-width:1180px;border-left:3px solid var(--color-brand);padding:10px 16px;margin:14px 0;color:var(--color-ink-muted);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
+.note b{color:var(--color-ink)}
+.note.stop{border-color:var(--color-bad);background:var(--color-bad-soft)}
+.note.hold{border-color:var(--color-warn);background:var(--color-warn-soft)}
+.note.fix{border-color:var(--color-ok);background:var(--color-ok-soft)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--color-line);color:var(--color-ink-faint);margin-left:6px;vertical-align:middle}
+.tag.obs{color:var(--color-bad);border-color:var(--color-bad)}
+.tag.later{color:var(--color-warn);border-color:var(--color-warn)}
+ul.flows{max-width:920px;color:var(--color-ink-muted)}
 ul.flows li{margin-bottom:10px}
-ul.flows b{color:var(--text)}
+ul.flows b{color:var(--color-ink)}
 </style>
 </head>
 <body>
 
 <div class="intro">
   <h1>Jobs · the settings</h1>
+<p><b>Re-locked by the owner, 2026-09-19 — redline 6</b>, from <code>06-the-frame-revision.html</code> (<i>"A B E approved, D1 option 2, D2 option 1"</i>): the page uses only the published tokens, the primary fill written once as <code>--accent</code> and the shadow derived from the surface (A); every date is en-GB's output and says so (B); four weekdays that were 2025's went with D1 (C); a day is drawn as day and month, <code>03 Sept</code> (D1); the Due column is one shape, <code>03 Sept, 12:00</code> (D2); and the bar names <i>name · department · property</i> (E) — except where the frames give the person no department, which is open (see 06). 06 stays beside this page as the record of what changed and why.</p>
 <p><b>LOCKED by the owner, 2026-09-04</b>, after five redline passes the same day. These frames are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page, never a silent edit.</p>
   <p>Companion to <code>01-the-jobs-screens.html</code>, split out on the owner's leave (2026-09-04) when the concern-policy flow made one page too long. Same palette authority — the ADR 0106 tokens, no hex of its own — and the same chrome. Dark frames first.</p>
-  <p><b>Times:</b> every timestamp is a date and a time. The form — 24-hour or AM/PM, day-month or month-day — comes from the property, read through Context; Jobs configures none of it. <b>Corrected 2026-09-04:</b> the property carries <code>timezone</code> and <code>locale</code> (ADR 0075, CORE-Q16, ADR 0123) and no explicit hour-format setting; Jobs renders from <code>locale</code> until the architect rules whether Core adds one — chapter §9 carries the question.</p>
+  <p><b>Times:</b> every timestamp is a date and a time. The form — 24-hour or AM/PM, day-month or month-day — comes from the property, read through Context; Jobs configures none of it. <b>Corrected 2026-09-04:</b> the property carries <code>timezone</code> and <code>locale</code> (ADR 0075, CORE-Q16, ADR 0123) and no explicit hour-format setting; Jobs renders from <code>locale</code> until the architect rules whether Core adds one — chapter §9 carries the question. <b>Drawn in en-GB, for a property in Asia/Qatar</b> — every date on this page is that one locale's output, rendered through the SDK's own formatters; a property sees its own (page 64 §11; owner redline, 2026-09-19).</p>
 <p><b>Part A</b> is the Settings tab of the app, one frame per sub-tab, each with its purpose stated. <b>Part B</b> is the policies list for two departments, the three-step flow that creates one — scope picked as department › category › item — and the table of how a job finds its policy.</p>
 </div>
 
@@ -165,12 +154,12 @@ ul.flows b{color:var(--text)}
   </div>
   <div class="body">
     <div class="subnav"><button class="on">Concern policy</button>
-<button>Shifts &amp; presence</button><button>Who is told</button><button>Holds &amp; reminders</button><button>Closing &amp; rating</button><button>Access</button><div style="margin-left:auto;color:var(--faint)">Numbering · <code>MRN-ENG-…</code> · next 145 · property code from Master Data</div></div>
+<button>Shifts &amp; presence</button><button>Who is told</button><button>Holds &amp; reminders</button><button>Closing &amp; rating</button><button>Access</button><div style="margin-left:auto;color:var(--color-ink-faint)">Numbering · <code>MRN-ENG-…</code> · next 145 · property code from Master Data</div></div>
     <div class="cols" style="grid-template-columns:220px 1fr">
       <div class="card">
         <h3>Scope</h3>
         <div class="wrow"><span>Marina Bay · property</span><span class="mono">default</span></div>
-        <div class="wrow"><span style="color:var(--text)">Engineering</span><span class="pill">override</span></div>
+        <div class="wrow"><span style="color:var(--color-ink)">Engineering</span><span class="pill">override</span></div>
         <div class="wrow"><span>Housekeeping</span><span class="mono">inherits</span></div>
         <div class="wrow"><span>Front Office</span><span class="mono">inherits</span></div>
         <div class="wrow"><span>Food &amp; Beverage</span><span class="pill">override</span></div>
@@ -298,6 +287,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Purpose:</b> S2 D3's "auto close after n hours" needs the <i>n</i> somewhere, per department if the work differs (a towel does not need a four-hour reopen window; a compressor might). The rating half is S10 D2: a guest who raised a job through their stay link is asked once it closes. The photo rule is the catalogue item's; it is shown here so the property sees the whole closing story in one place, but it is edited in the catalogue.</div>
 
 <h1 class="frame">6 · <b>Settings · Access</b>. Who holds what — shown, not edited.</h1>
+<div class="note fix"><b>Built differently from this frame — owner ruling, 2026-09-19.</b> The <b>Comes from</b> column is not built: which system holds a fact is a note for the developer, and no live screen names a data source. The build draws <i>Label · Who</i>.</div>
 <div class="win" style="max-width:820px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Settings</div><div class="who" style="margin-left:auto">Rohan Desai · property jobs manager</div></div>
   <div class="body">
@@ -391,7 +381,7 @@ ul.flows b{color:var(--text)}
       <tr><td><span class="pill p3">P3</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">same shift</span></td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">80 %</span> of due</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">60 min</span></td><td>—</td><td>pauses</td></tr>
       <tr><td><span class="pill nt">NT</span></td><td class="dimtd">no clock</td><td class="dimtd">—</td><td><span class="field" style="display:inline-block;margin:0;padding:4px 10px">15 min</span> untriaged</td><td class="dimtd">—</td><td class="dimtd">—</td></tr>
     </table>
-    <div class="mono" style="margin-top:10px">Example, P1 raised 13:31: at risk from 02 Sep 14:00 (75 % of 40 min) · breached from 02 Sep 14:10 · stuck at 02 Sep 13:39 if nobody has accepted, or at 02 Sep 14:02 if accepted but nobody has started.</div>
+    <div class="mono" style="margin-top:10px">Example, P1 raised 13:31: at risk from 02 Sept, 14:00 (75 % of 40 min) · breached from 02 Sept, 14:10 · stuck at 02 Sept, 13:39 if nobody has accepted, or at 02 Sept, 14:02 if accepted but nobody has started.</div>
     <div style="margin-top:12px"><span class="btn pri">Next · the ladder</span><span class="btn">Back</span></div>
   </div>
 </div>

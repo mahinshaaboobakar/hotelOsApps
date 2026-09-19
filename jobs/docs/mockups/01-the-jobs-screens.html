@@ -26,134 +26,123 @@
   --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);--color-bad-soft:rgb(248 113 113 / 0.12);
   --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
 
-  /* This page's own names, kept as aliases so no selector drifts back. */
-  --bg:var(--color-surface);--glass:color-mix(in srgb,var(--color-ink) 3%,transparent);--line:var(--color-line);
-  --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
-  --indigo:var(--color-brand);
-  /*
-   * The timer's cyan and the gradient's violet were never published. The
-   * drawing taught two colours a module may not use, so both now resolve
-   * through the brand — the build had already made this correction, and the
-   * measurement is what found the drawing had not.
-   */
-  --cyan:var(--color-brand);--violet:color-mix(in srgb,var(--color-brand) 62%,var(--color-bad));
-  --grad:linear-gradient(135deg,var(--indigo),var(--violet));
-  --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);--defer:var(--color-ink-muted);
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
-code{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--cyan)}
-.intro{max-width:920px;color:var(--dim);margin-bottom:40px}
-.intro h1{color:var(--text);font-size:26px;margin:0 0 8px}
+body{margin:0;background:var(--color-surface);color:var(--color-ink);font:14px/1.5 Inter,system-ui,sans-serif;padding:40px 48px 120px}
+code{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--color-brand)}
+.intro{max-width:920px;color:var(--color-ink-muted);margin-bottom:40px}
+.intro h1{color:var(--color-ink);font-size:26px;margin:0 0 8px}
 .intro p{margin:6px 0}
-h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:64px 0 18px;border-top:1px solid var(--line);padding-top:18px}
-h1.frame{font-size:17px;font-weight:500;color:var(--dim);margin:44px 0 12px}
-h1.frame b{color:var(--text);font-weight:600}
+h2.sec{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-ink-faint);margin:64px 0 18px;border-top:1px solid var(--color-line);padding-top:18px}
+h1.frame{font-size:17px;font-weight:500;color:var(--color-ink-muted);margin:44px 0 12px}
+h1.frame b{color:var(--color-ink);font-weight:600}
 /* window chrome */
-.win{border:1px solid var(--line);border-radius:14px;background:var(--glass);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
-.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--line);height:56px}
+.win,.widget{--accent:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad)))}
+.win{border:1px solid var(--color-line);border-radius:14px;background:color-mix(in srgb,var(--color-ink) 3%,transparent);overflow:hidden;max-width:1180px;box-shadow:0 30px 80px color-mix(in srgb,var(--color-surface) 45%,transparent)}
+.head{display:flex;align-items:center;gap:22px;padding:0 22px;border-bottom:1px solid var(--color-line);height:56px}
 .app{display:flex;align-items:center;gap:10px;font-weight:600;margin-right:14px}
-.mark{width:22px;height:22px;border-radius:6px;background:var(--grad);display:grid;place-items:center;font-size:12px}
-.tab{color:var(--dim);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
-.tab.on{color:var(--text);border-bottom-color:var(--indigo)}
-.search{margin-left:auto;color:var(--faint);border:1px solid var(--line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
-.who{color:var(--faint);font-size:12px}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--accent);display:grid;place-items:center;font-size:12px}
+.tab{color:var(--color-ink-muted);padding:19px 2px;border-bottom:2px solid transparent;font-size:13px}
+.tab.on{color:var(--color-ink);border-bottom-color:var(--color-brand)}
+.search{margin-left:auto;color:var(--color-ink-faint);border:1px solid var(--color-line);border-radius:8px;padding:6px 12px;font-size:12px;min-width:220px}
+.who{color:var(--color-ink-faint);font-size:12px}
 .body{padding:22px}
-.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-ink-faint);margin:18px 0 8px}
 /* rows, pills, cards */
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
-td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{text-align:left;color:var(--color-ink-faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--color-line)}
+td{padding:10px;border-bottom:1px solid var(--color-line);vertical-align:top}
 tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
-.num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
-.pill.ok{color:var(--ok);border-color:var(--ok)}
-.pill.warn{color:var(--warn);border-color:var(--warn)}
-.pill.bad{color:var(--bad);border-color:var(--bad)}
-.pill.run{color:var(--cyan);border-color:var(--cyan)}
-.pill.hold{color:var(--defer);border-color:var(--defer)}
-.pill.p1{background:var(--bad);color:var(--bg);border-color:var(--bad)}
-.pill.p2{background:var(--warn);color:var(--bg);border-color:var(--warn)}
-.pill.p3{background:var(--indigo);color:var(--text);border-color:var(--indigo)}
+.num{font:12px ui-monospace,Menlo,monospace;color:var(--color-ink-muted)}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--color-line);color:var(--color-ink-muted)}
+.pill.ok{color:var(--color-ok);border-color:var(--color-ok)}
+.pill.warn{color:var(--color-warn);border-color:var(--color-warn)}
+.pill.bad{color:var(--color-bad);border-color:var(--color-bad)}
+.pill.run{color:var(--color-brand);border-color:var(--color-brand)}
+.pill.hold{color:var(--color-ink-muted);border-color:var(--color-ink-muted)}
+.pill.p1{background:var(--color-bad);color:var(--color-surface);border-color:var(--color-bad)}
+.pill.p2{background:var(--color-warn);color:var(--color-surface);border-color:var(--color-warn)}
+.pill.p3{background:var(--color-brand);color:var(--color-ink);border-color:var(--color-brand)}
 .pill.nt{border-style:dashed}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 .cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.card{border:1px solid var(--line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
+.card{border:1px solid var(--color-line);border-radius:var(--radius-panel);padding:16px;background:var(--color-surface-raised)}
 .card h3{margin:0 0 10px;font-size:13px;font-weight:600}
 .kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:13px}
-.kv div:nth-child(odd){color:var(--faint)}
-.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--text);margin-right:8px;line-height:inherit}
+.kv div:nth-child(odd){color:var(--color-ink-faint)}
+.btn{display:inline-block;padding:7px 14px;border-radius:8px;font-size:13px;border:1px solid var(--color-line-strong);color:var(--color-ink);margin-right:8px;line-height:inherit}
 /* Text on an accent fill is what --color-ink-on-accent is published for; this
    page taught ordinary ink there until the 5 September measurement. */
-.btn.pri{background:var(--grad);border-color:transparent;color:var(--color-ink-on-accent)}
-.btn.off{color:var(--faint);border-style:dashed}
+.btn.pri{background:var(--accent);border-color:transparent;color:var(--color-ink-on-accent)}
+.btn.off{color:var(--color-ink-faint);border-style:dashed}
 .btn.sm{padding:2px 8px;font-size:11px}
 .btn.danger{color:var(--color-bad);border-color:color-mix(in srgb,var(--color-bad) 45%,transparent)}
 .btn.danger.confirm{background:var(--color-bad);border-color:transparent;color:var(--color-ink-on-accent);font-weight:600}
-.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
-.field.ph{color:var(--faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
-label{font-size:11px;color:var(--faint);letter-spacing:.07em;text-transform:uppercase}
-.tl{border-left:2px solid var(--line);padding-left:16px;margin:8px 0 0 6px}
+.field{border:1px solid var(--color-line-strong);border-radius:10px;padding:9px 12px;color:var(--color-ink);font-size:13px;margin:4px 0 12px;background:color-mix(in srgb, var(--color-ink) 2%, transparent);font:inherit;line-height:inherit;font-size:13px}
+.field.ph{color:var(--color-ink-faint);background:color-mix(in srgb,var(--color-ink) 1%,transparent);border-style:dashed}
+label{font-size:11px;color:var(--color-ink-faint);letter-spacing:.07em;text-transform:uppercase}
+.tl{border-left:2px solid var(--color-line);padding-left:16px;margin:8px 0 0 6px}
 .tl div{margin-bottom:10px;font-size:13px}
-.tl b{display:block;color:var(--text);font-weight:600}
-.tl span{color:var(--faint);font-size:12px}
+.tl b{display:block;color:var(--color-ink);font-weight:600}
+.tl span{color:var(--color-ink-faint);font-size:12px}
 .big{font-size:34px;font-weight:600;line-height:1}
-.mono{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--dim)}
-.bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:8px}
-.bar i{display:block;height:100%;background:var(--ok)}
-.bar i.warn{background:var(--warn)}.bar i.bad{background:var(--bad)}
-.chip{display:inline-block;border:1px solid var(--color-line-strong);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim);line-height:inherit}
-.chip.on{border-color:var(--indigo);color:var(--text)}
-.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
-.tog.on{background:var(--ok)}
-.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text)}
+.mono{font:12px ui-monospace,Menlo,monospace;line-height:inherit;color:var(--color-ink-muted)}
+.bar{height:6px;border-radius:3px;background:var(--color-line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--color-ok)}
+.bar i.warn{background:var(--color-warn)}.bar i.bad{background:var(--color-bad)}
+.chip{display:inline-block;border:1px solid var(--color-line-strong);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--color-ink-muted);line-height:inherit}
+.chip.on{border-color:var(--color-brand);color:var(--color-ink)}
+.tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--color-line);position:relative;vertical-align:middle;margin-right:8px}
+.tog.on{background:var(--color-ok)}
+.tog i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--color-ink)}
 .tog.on i{left:18px}
 /* redline 2026-09-04 */
-.strip{display:flex;gap:26px;font-size:12px;color:var(--dim);margin-bottom:12px;padding:8px 12px;border:1px solid var(--line);border-radius:8px}
-.strip b{color:var(--text);font-size:14px;margin-right:4px}
-.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--faint);padding:10px 4px 0}
-.pager button.pg{display:inline-block;background:none;font:inherit;line-height:inherit;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--dim);line-height:inherit}
-.pager button.pg.on{color:var(--text);border-color:var(--indigo)}
+.strip{display:flex;gap:26px;font-size:12px;color:var(--color-ink-muted);margin-bottom:12px;padding:8px 12px;border:1px solid var(--color-line);border-radius:8px}
+.strip b{color:var(--color-ink);font-size:14px;margin-right:4px}
+.pager{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--color-ink-faint);padding:10px 4px 0}
+.pager button.pg{display:inline-block;background:none;font:inherit;line-height:inherit;font-size:12px;cursor:pointer;padding:2px 8px;border:1px solid var(--color-line-strong);border-radius:6px;margin-left:4px;color:var(--color-ink-muted);line-height:inherit}
+.pager button.pg.on{color:var(--color-ink);border-color:var(--color-brand)}
 .scroll{max-height:168px;overflow:hidden;position:relative}
-.scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--bg))}
-.more{font-size:11px;color:var(--faint);text-align:center;padding-top:4px}
-.timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--cyan);line-height:1}
-.timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--ok);margin-right:10px;vertical-align:middle}
-.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--line)}
-.subnav button{background:none;border:none;font:inherit;line-height:inherit;cursor:pointer;padding:8px 12px;font-size:12px;color:var(--dim);border-bottom:2px solid transparent;margin-bottom:-1px}
-.subnav button.on{color:var(--text);border-bottom-color:var(--indigo)}
-.dlg{border:1px solid var(--indigo);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
-td.dimtd{color:var(--faint)}
+.scroll:after{content:"";position:absolute;left:0;right:0;bottom:0;height:40px;background:linear-gradient(transparent,var(--color-surface))}
+.more{font-size:11px;color:var(--color-ink-faint);text-align:center;padding-top:4px}
+.timer{font:600 30px ui-monospace,Menlo,monospace;color:var(--color-brand);line-height:1}
+.timer i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--color-ok);margin-right:10px;vertical-align:middle}
+.subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line)}
+.subnav button{background:none;border:none;font:inherit;line-height:inherit;cursor:pointer;padding:8px 12px;font-size:12px;color:var(--color-ink-muted);border-bottom:2px solid transparent;margin-bottom:-1px}
+.subnav button.on{color:var(--color-ink);border-bottom-color:var(--color-brand)}
+.dlg{border:1px solid var(--color-brand);border-radius:12px;padding:16px;background:color-mix(in srgb,var(--color-brand) 6%,transparent)}
+td.dimtd{color:var(--color-ink-faint)}
 /* widget */
-.widget{max-width:360px;border:1px solid var(--line);border-radius:14px;background:var(--glass);padding:16px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.widget{max-width:360px;border:1px solid var(--color-line);border-radius:14px;background:color-mix(in srgb,var(--color-ink) 3%,transparent);padding:16px;box-shadow:0 30px 80px color-mix(in srgb,var(--color-surface) 45%,transparent)}
 .widget h3{margin:0 0 12px;font-size:13px;display:flex;justify-content:space-between}
-.widget h3 span{color:var(--faint);font-weight:400}
-.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.widget h3 span{color:var(--color-ink-faint);font-weight:400}
+.wrow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-line);font-size:13px}
 .wrow:last-child{border:0}
 /* notes under frames */
-.note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
-.note b{color:var(--text)}
-.note.stop{border-color:var(--bad);background:var(--color-bad-soft)}
-.note.hold{border-color:var(--warn);background:var(--color-warn-soft)}
-.note.fix{border-color:var(--ok);background:var(--color-ok-soft)}
-.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
-.tag.obs{color:var(--bad);border-color:var(--bad)}
-.tag.later{color:var(--warn);border-color:var(--warn)}
-ul.flows{max-width:920px;color:var(--dim)}
+.note{max-width:1180px;border-left:3px solid var(--color-brand);padding:10px 16px;margin:14px 0;color:var(--color-ink-muted);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
+.note b{color:var(--color-ink)}
+.note.stop{border-color:var(--color-bad);background:var(--color-bad-soft)}
+.note.hold{border-color:var(--color-warn);background:var(--color-warn-soft)}
+.note.fix{border-color:var(--color-ok);background:var(--color-ok-soft)}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--color-line);color:var(--color-ink-faint);margin-left:6px;vertical-align:middle}
+.tag.obs{color:var(--color-bad);border-color:var(--color-bad)}
+.tag.later{color:var(--color-warn);border-color:var(--color-warn)}
+ul.flows{max-width:920px;color:var(--color-ink-muted)}
 ul.flows li{margin-bottom:10px}
-ul.flows b{color:var(--text)}
+ul.flows b{color:var(--color-ink)}
 </style>
 </head>
 <body>
 
 <div class="intro">
   <h1>Jobs · the screens</h1>
+<p><b>Re-locked by the owner, 2026-09-19 — redline 6</b>, from <code>06-the-frame-revision.html</code> (<i>"A B E approved, D1 option 2, D2 option 1"</i>): the page uses only the published tokens, the primary fill written once as <code>--accent</code> and the shadow derived from the surface (A); every date is en-GB's output and says so (B); four weekdays that were 2025's went with D1 (C); a day is drawn as day and month, <code>03 Sept</code> (D1); the Due column is one shape, <code>03 Sept, 12:00</code> (D2); and the bar names <i>name · department · property</i> (E) — except where the frames give the person no department, which is open (see 06). 06 stays beside this page as the record of what changed and why.</p>
 <p><b>LOCKED by the owner, 2026-09-04</b>, after five redline passes the same day. These frames are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page, never a silent edit.</p>
   <p><b>Palette authority:</b> the tokens in <code>apps/desktop/src/styles.css</code> (ADR 0106). Every colour on this page is one of those tokens; no frame names a hex of its own. Chrome is the current era — one window, top tabs — copied from <code>55-the-marketplace-round.html</code>; notes and structure follow <code>pms-oracle/docs/mockups/01-oracle-connector.html</code>.</p>
   <p><b>Design of record:</b> <code>02-the-jobs-walkthrough-and-sign-off.md</code> (locked 2026-09-03) and <code>03-the-jobs-design.md</code>. Each frame's caption names the walkthrough section (S1–S10) or survey requirement (R-row) it draws.</p>
-  <p><b>The property:</b> The Marina Bay, code <code>mrn</code>, three departments in play — Engineering (ENG), Housekeeping (HK), Front Office (FO). Numbers are the numbers those screens would show on a Tuesday afternoon; none is lorem.</p>
+  <p><b>The property:</b> The Marina Bay, code <code>mrn</code>, three departments in play — Engineering (ENG), Housekeeping (HK), Front Office (FO). Numbers are the numbers those screens would show on a Wednesday afternoon; none is lorem.</p>
   <p><b>Owner redline of 2026-09-04 folded</b> — frames 1, 2, 5, 6, 7, 8 redrawn; each carries a green "Redline folded" note saying what changed. The one open point, the catalogue's home, was settled on 2026-09-04 (frame 7). Second pass the same day: the job view is tabbed (frames 2, 2b) and every job tab is drawn (frames 2 to 2g, Rating included); Settings and the concern-policy flow live on <code>02-the-jobs-settings.html</code>.</p>
-<p><b>Times:</b> every timestamp on these pages is a date and a time. The form — 24-hour or AM/PM, day-month or month-day — comes from the property, read through Context; Jobs configures none of it. <b>Corrected 2026-09-04:</b> the property carries <code>timezone</code> and <code>locale</code> (ADR 0075, CORE-Q16, ADR 0123) and no explicit hour-format setting; Jobs renders from <code>locale</code> until the architect rules whether Core adds one — chapter §9 carries the question. Marina Bay is set to 24-hour, day-month, so the frames show <code>02 Sep 13:31</code>. Durations (<code>00:23:41</code>) and hours-of-day rules (<code>07:00 – 23:00</code>) are not timestamps and carry no date.</p>
+<p><b>Times:</b> every timestamp on these pages is a date and a time. The form — 24-hour or AM/PM, day-month or month-day — comes from the property, read through Context; Jobs configures none of it. <b>Corrected 2026-09-04:</b> the property carries <code>timezone</code> and <code>locale</code> (ADR 0075, CORE-Q16, ADR 0123) and no explicit hour-format setting; Jobs renders from <code>locale</code> until the architect rules whether Core adds one — chapter §9 carries the question. Marina Bay is set to 24-hour, day-month, so the frames show <code>02 Sept, 13:31</code>. Durations (<code>00:23:41</code>) and hours-of-day rules (<code>07:00 – 23:00</code>) are not timestamps and carry no date. <b>Drawn in en-GB, for a property in Asia/Qatar</b> — every date on this page is that one locale's output, rendered through the SDK's own formatters; a property sees its own (page 64 §11; owner redline, 2026-09-19).</p>
 <p>Dark frames first. Every state that exists is drawn below or listed under <i>Deliberately not drawn</i>. No control on this page pretends to a feature the design does not have.</p>
 </div>
 
@@ -161,33 +150,34 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">A · the desk — board and one job</h2>
 
 <h1 class="frame">1 · <b>The board</b>. The department's open jobs, concern first.</h1>
+<div class="note fix"><b>Built differently from this frame — owner ruling, 2026-09-19 (a mock's notes for the developer are never built as UI).</b> <b>My departments</b> is built <b>off</b>, with <i>your departments aren't known yet</i> beside it, and the Board opens on <b>All departments</b>: nothing yet says which departments a person belongs to, so the tab could only ever show an empty list with a paragraph explaining why. It comes back on when that is known. Not a redraw of this frame, which the owner has not been asked to change.</div>
 <div class="win">
   <div class="head">
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search job number, room, summary…</div>
-    <div class="who">Priya Nair · ENG supervisor</div>
+    <div class="who">Priya Nair · Engineering · The Marina Bay</div>
   </div>
   <div class="body">
-    <div class="strip"><span><b>11</b> open</span><span><b>2</b> breached</span><span><b>1</b> stuck</span><span><b>3</b> running</span><span><b>18</b> closed today</span><span><b>41 min</b> avg to resolve</span><span style="margin-left:auto">ENG · Wed 2 Sep · 02 Sep 14:24</span></div>
+    <div class="strip"><span><b>11</b> open</span><span><b>2</b> breached</span><span><b>1</b> stuck</span><span><b>3</b> running</span><span><b>18</b> closed today</span><span><b>41 min</b> avg to resolve</span><span style="margin-left:auto">ENG · 02 Sept · 02 Sept, 14:24</span></div>
     <div style="margin-bottom:12px">
       <span class="chip on">My departments · ENG</span><span class="chip">All departments</span><span class="chip">Assigned to me</span><span class="chip">Raised by guests</span><span class="chip">Restricted</span><span class="chip">Closed</span>
       <span class="btn pri" style="float:right">＋ Raise a job</span>
     </div>
     <table>
       <tr><th>Job</th><th>Where</th><th>What</th><th>Pri</th><th>Status</th><th>Raised by</th><th>Assigned to</th><th>Concern</th><th>Due</th></tr>
-      <tr class="sel"><td class="num">MRN-ENG-142</td><td>Room 1204</td><td>Air conditioning › Not cooling</td><td><span class="pill p1">P1</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Guest · stay 7F2A</td><td>Arjun Menon</td><td><span class="pill bad">BREACHED · 14m</span></td><td>02 Sep 14:10</td></tr>
-      <tr><td class="num">MRN-ENG-141</td><td>Pool plant room</td><td>Pump › Vibration</td><td><span class="pill p2">P2</span></td><td><span class="pill hold">ON HOLD</span></td><td>Deepak Rao</td><td>Deepak Rao</td><td><span class="pill">waiting · parts, Thu</span></td><td>04 Sep 09:00</td></tr>
-      <tr><td class="num">MRN-ENG-140</td><td>Room 0817</td><td>Lighting › Bedside lamp dead</td><td><span class="pill p3">P3</span></td><td><span class="pill warn">ACCEPTED</span></td><td>Sana Rahman (FO)</td><td>Arjun Menon</td><td><span class="pill warn">AT RISK · 6m left</span></td><td>02 Sep 14:40</td></tr>
-      <tr><td class="num">MRN-ENG-139</td><td>Restaurant · Azure</td><td>Refrigeration › Walk-in warm</td><td><span class="pill p1">P1</span></td><td><span class="pill">ASSIGNED</span></td><td>Chef Anand (F&amp;B)</td><td>Team · Night shift</td><td><span class="pill bad">STUCK · not accepted 9m</span></td><td>02 Sep 14:25</td></tr>
-      <tr><td class="num">MRN-ENG-138</td><td>Room 1512</td><td>Plumbing › Shower drains slowly</td><td><span class="pill nt">NT</span></td><td><span class="pill">RAISED</span></td><td>Guest · QR · stay 9C11</td><td>—</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 16:00</td></tr>
-      <tr><td class="num">MRN-ENG-136</td><td>Lobby</td><td>Doors › Revolving door slow</td><td><span class="pill p2">P2</span></td><td><span class="pill">RAISED</span></td><td>Sana Rahman (FO)</td><td>AUTO · pending</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 15:50</td></tr>
-      <tr><td class="num">MRN-ENG-135</td><td>Room 0402</td><td>Plumbing › Tap dripping</td><td><span class="pill p3">P3</span></td><td><span class="pill warn">ACCEPTED</span></td><td>Meera Krishnan (HK)</td><td>Farhan Ali</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 17:00</td></tr>
-      <tr><td class="num">MRN-ENG-134</td><td>Terrace bar</td><td>Lighting › String lights out</td><td><span class="pill p3">P3</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Chef Anand (F&amp;B)</td><td>Farhan Ali</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 18:00</td></tr>
-      <tr><td class="num">MRN-ENG-133</td><td>Room 1105</td><td>Air conditioning › Noisy</td><td><span class="pill p2">P2</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Guest · WhatsApp · stay 3B70</td><td>Team · Day shift</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 15:30</td></tr>
-      <tr><td class="num">MRN-ENG-132</td><td>Floor 9 · corridor</td><td>Lighting › Emergency light fault <span class="tag">restricted</span></td><td><span class="pill p1">P1</span></td><td><span class="pill">ASSIGNED</span></td><td>Rohan Desai</td><td>Deepak Rao</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sep 14:50</td></tr>
+      <tr class="sel"><td class="num">MRN-ENG-142</td><td>Room 1204</td><td>Air conditioning › Not cooling</td><td><span class="pill p1">P1</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Guest · stay 7F2A</td><td>Arjun Menon</td><td><span class="pill bad">BREACHED · 14m</span></td><td>02 Sept, 14:10</td></tr>
+      <tr><td class="num">MRN-ENG-141</td><td>Pool plant room</td><td>Pump › Vibration</td><td><span class="pill p2">P2</span></td><td><span class="pill hold">ON HOLD</span></td><td>Deepak Rao</td><td>Deepak Rao</td><td><span class="pill">waiting · parts, Thu</span></td><td>04 Sept, 09:00</td></tr>
+      <tr><td class="num">MRN-ENG-140</td><td>Room 0817</td><td>Lighting › Bedside lamp dead</td><td><span class="pill p3">P3</span></td><td><span class="pill warn">ACCEPTED</span></td><td>Sana Rahman (FO)</td><td>Arjun Menon</td><td><span class="pill warn">AT RISK · 6m left</span></td><td>02 Sept, 14:40</td></tr>
+      <tr><td class="num">MRN-ENG-139</td><td>Restaurant · Azure</td><td>Refrigeration › Walk-in warm</td><td><span class="pill p1">P1</span></td><td><span class="pill">ASSIGNED</span></td><td>Chef Anand (F&amp;B)</td><td>Team · Night shift</td><td><span class="pill bad">STUCK · not accepted 9m</span></td><td>02 Sept, 14:25</td></tr>
+      <tr><td class="num">MRN-ENG-138</td><td>Room 1512</td><td>Plumbing › Shower drains slowly</td><td><span class="pill nt">NT</span></td><td><span class="pill">RAISED</span></td><td>Guest · QR · stay 9C11</td><td>—</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 16:00</td></tr>
+      <tr><td class="num">MRN-ENG-136</td><td>Lobby</td><td>Doors › Revolving door slow</td><td><span class="pill p2">P2</span></td><td><span class="pill">RAISED</span></td><td>Sana Rahman (FO)</td><td>AUTO · pending</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 15:50</td></tr>
+      <tr><td class="num">MRN-ENG-135</td><td>Room 0402</td><td>Plumbing › Tap dripping</td><td><span class="pill p3">P3</span></td><td><span class="pill warn">ACCEPTED</span></td><td>Meera Krishnan (HK)</td><td>Farhan Ali</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 17:00</td></tr>
+      <tr><td class="num">MRN-ENG-134</td><td>Terrace bar</td><td>Lighting › String lights out</td><td><span class="pill p3">P3</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Chef Anand (F&amp;B)</td><td>Farhan Ali</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 18:00</td></tr>
+      <tr><td class="num">MRN-ENG-133</td><td>Room 1105</td><td>Air conditioning › Noisy</td><td><span class="pill p2">P2</span></td><td><span class="pill run">IN PROGRESS</span></td><td>Guest · WhatsApp · stay 3B70</td><td>Team · Day shift</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 15:30</td></tr>
+      <tr><td class="num">MRN-ENG-132</td><td>Floor 9 · corridor</td><td>Lighting › Emergency light fault <span class="tag">restricted</span></td><td><span class="pill p1">P1</span></td><td><span class="pill">ASSIGNED</span></td><td>Rohan Desai</td><td>Deepak Rao</td><td><span class="pill ok">ON TRACK</span></td><td>02 Sept, 14:50</td></tr>
       <tr><td class="num">MRN-ENG-130</td><td>Room 1204</td><td>Air conditioning › Leak test <span class="tag">child 1/2 · blocked</span></td><td><span class="pill p2">P2</span></td><td><span class="pill">ASSIGNED</span></td><td>Arjun Menon</td><td>Arjun Menon</td><td class="dimtd">clock stopped</td><td>Wed</td></tr>
-      <tr><td class="num">MRN-HK-388</td><td>Room 1204</td><td>Housekeeping › Extra towels <span class="tag">linked</span></td><td><span class="pill p3">P3</span></td><td><span class="pill ok">RESOLVED</span></td><td>Guest · stay 7F2A</td><td>Meera Krishnan (HK)</td><td>—</td><td>auto-close 02 Sep 18:00</td></tr>
+      <tr><td class="num">MRN-HK-388</td><td>Room 1204</td><td>Housekeeping › Extra towels <span class="tag">linked</span></td><td><span class="pill p3">P3</span></td><td><span class="pill ok">RESOLVED</span></td><td>Guest · stay 7F2A</td><td>Meera Krishnan (HK)</td><td>—</td><td>auto-close 02 Sept, 18:00</td></tr>
     </table>
     <div class="pager"><span>1–12 of 47 · 12 per page at this height; a maximised window shows 24</span><span><button class="pg">‹</button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg">4</button><button class="pg">›</button></span></div>
   </div>
@@ -202,7 +192,7 @@ ul.flows b{color:var(--text)}
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search job number, room, summary…</div>
-    <div class="who">Priya Nair · ENG supervisor</div>
+    <div class="who">Priya Nair · Engineering · The Marina Bay</div>
   </div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:6px">
@@ -211,7 +201,7 @@ ul.flows b{color:var(--text)}
       <span class="pill p1">P1</span><span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED · 14m over</span>
       <span style="margin-left:auto" class="timer"><i></i>00:23:41</span>
     </div>
-    <div class="mono" style="margin-bottom:6px">Arjun Menon working · due 02 Sep 14:10 · accountable now <b>Priya Nair</b> (supervisor, ladder step 2) · raised 02 Sep 13:31 by the guest of stay 7F2A</div>
+    <div class="mono" style="margin-bottom:6px">Arjun Menon working · due 02 Sept, 14:10 · accountable now <b>Priya Nair</b> (supervisor, ladder step 2) · raised 02 Sept, 13:31 by the guest of stay 7F2A</div>
     <div style="margin:10px 0 14px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span><span class="btn">Put on hold…</span><span class="btn">Reassign…</span><span class="btn">More ▾</span></div>
     <div class="subnav"><button class="on">Overview</button>
 <button>Work · 2 sessions</button><button>History · 7</button><button>Notes &amp; photos · 3</button><button>Links &amp; steps · 3</button><button>Rating</button><button>Record</button></div>
@@ -222,7 +212,7 @@ ul.flows b{color:var(--text)}
           <div class="kv">
             <div>Category › item</div><div>Air conditioning › Not cooling</div>
             <div>Summary</div><div>Room feels warm since noon, set to 19 but blowing ambient.</div>
-            <div>Details</div><div>Guest has a medical need for a cool room; FO offered a fan at 02 Sep 13:40.</div>
+            <div>Details</div><div>Guest has a medical need for a cool room; FO offered a fan at 02 Sept, 13:40.</div>
             <div>Location</div><div>Room 1204 · Floor 12 · Tower B</div>
             <div>Asset</div><div>FCU-12-04 · Daikin FXFQ · filter changed 11 weeks ago · 2 earlier jobs</div>
             <div>Department</div><div>Engineering (ENG)</div>
@@ -232,8 +222,8 @@ ul.flows b{color:var(--text)}
         <div class="card" style="margin-top:14px">
           <h3>Who asked</h3>
           <div class="kv">
-            <div>Raised</div><div>GUEST · via the guest app · 02 Sep 13:31</div>
-            <div>Stay</div><div>7F2A · Mr. Okafor · 1204 · in-house, departs Thu 4 Sep</div>
+            <div>Raised</div><div>GUEST · via the guest app · 02 Sept, 13:31</div>
+            <div>Stay</div><div>7F2A · Mr. Okafor · 1204 · in-house, departs 04 Sept</div>
             <div>Rating</div><div>— asked after close</div>
           </div>
         </div>
@@ -244,7 +234,7 @@ ul.flows b{color:var(--text)}
           <div class="kv">
             <div>Priority</div><div>P1 · decided by <b>flow</b> (guest in room) · catalogue said P2</div>
             <div>Scheduled for</div><div>— raised now</div>
-            <div>Due at</div><div>02 Sep 14:10 · policy P1 = 40 min</div>
+            <div>Due at</div><div>02 Sept, 14:10 · policy P1 = 40 min</div>
             <div>Hold</div><div>—</div>
           </div>
         </div>
@@ -252,7 +242,7 @@ ul.flows b{color:var(--text)}
           <h3>Assignment</h3>
           <div class="kv">
             <div>Current</div><div><b>Arjun Menon</b> · ENG technician · shift 14:00–22:00</div>
-            <div>Accepted</div><div>02 Sep 13:47 · 14 min after assignment</div>
+            <div>Accepted</div><div>02 Sept, 13:47 · 14 min after assignment</div>
             <div>How</div><div>AUTO · on shift on the execution date, fewest open P1</div>
           </div>
         </div>
@@ -272,7 +262,7 @@ ul.flows b{color:var(--text)}
   <div class="head">
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab on">Board</div>
-    <div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div>
+    <div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div>
   </div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px">
@@ -286,10 +276,10 @@ ul.flows b{color:var(--text)}
       <div class="card">
         <h3>Now</h3>
         <div class="kv" style="grid-template-columns:100px 1fr">
-          <div>Working</div><div>Arjun Menon · since 02 Sep 14:06</div>
+          <div>Working</div><div>Arjun Menon · since 02 Sept, 14:06</div>
           <div>This session</div><div>00:23:41</div>
           <div>All sessions</div><div>00:31:12</div>
-          <div>Promise</div><div>due 02 Sep 14:10 · <span style="color:var(--bad)">14 min over</span></div>
+          <div>Promise</div><div>due 02 Sept, 14:10 · <span style="color:var(--color-bad)">14 min over</span></div>
         </div>
         <div style="margin-top:12px"><span class="btn">Pause</span><span class="btn">Stop</span><span class="btn pri">Resolve…</span></div>
       </div>
@@ -297,8 +287,8 @@ ul.flows b{color:var(--text)}
         <h3>Sessions</h3>
         <table>
           <tr><th>#</th><th>Who</th><th>Started</th><th>Paused · why</th><th>Resumed</th><th>Stopped</th><th>Worked</th></tr>
-          <tr><td>1</td><td>Arjun Menon</td><td>02 Sep 13:52</td><td>02 Sep 14:02 · fetch gauge</td><td>—</td><td>02 Sep 14:02</td><td>00:10:00</td></tr>
-          <tr><td>2</td><td>Arjun Menon</td><td>02 Sep 14:06</td><td>—</td><td>—</td><td><span class="pill run">running</span></td><td>00:23:41</td></tr>
+          <tr><td>1</td><td>Arjun Menon</td><td>02 Sept, 13:52</td><td>02 Sept, 14:02 · fetch gauge</td><td>—</td><td>02 Sept, 14:02</td><td>00:10:00</td></tr>
+          <tr><td>2</td><td>Arjun Menon</td><td>02 Sept, 14:06</td><td>—</td><td>—</td><td><span class="pill run">running</span></td><td>00:23:41</td></tr>
         </table>
         <div class="mono" style="margin-top:8px">A pause keeps the session; a stop ends it. Resolve stops the running one.</div>
       </div>
@@ -308,21 +298,21 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Draws S4, S2 D2.</b> Work is <code>job_work_session</code>: start / pause / resume / stop, one row per session, the timer counting the running one. PAUSED lives here, never as a job status.</div>
 <h1 class="frame">2c · <b>One job · History</b>. Status and concern, one timeline.</h1>
 <div class="win" style="max-width:900px">
-  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div></div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px"><span class="num" style="font-size:14px">MRN-ENG-142</span><span style="font-size:16px;font-weight:600">Air conditioning › Not cooling — Room 1204</span><span class="pill run">IN PROGRESS</span><span class="pill bad">BREACHED</span><span style="margin-left:auto" class="timer"><i></i>00:23:41</span></div>
     <div class="subnav"><button>Overview</button>
 <button>Work · 2</button><button class="on">History · 7</button><button>Notes &amp; photos · 3</button><button>Links &amp; steps · 3</button><button>Rating</button><button>Record</button></div>
     <table>
       <tr><th>When</th><th>Kind</th><th>What</th><th>By</th><th>Detail</th></tr>
-      <tr><td>02 Sep 14:10</td><td><span class="pill bad">concern</span></td><td>BREACHED</td><td>sweep</td><td>accountable → Priya Nair (step 2) · nudge in-app</td></tr>
-      <tr><td>02 Sep 14:06</td><td><span class="pill run">work</span></td><td>session 2 started</td><td>Arjun Menon</td><td></td></tr>
-      <tr><td>02 Sep 14:02</td><td><span class="pill run">work</span></td><td>session 1 paused, then stopped</td><td>Arjun Menon</td><td>fetch gauge</td></tr>
-      <tr><td>02 Sep 14:00</td><td><span class="pill warn">concern</span></td><td>AT_RISK</td><td>sweep</td><td>75 % of 40 min · nudge to Arjun Menon</td></tr>
-      <tr><td>02 Sep 13:52</td><td><span class="pill">status</span></td><td>IN_PROGRESS</td><td>Arjun Menon</td><td>session 1 started</td></tr>
-      <tr><td>02 Sep 13:47</td><td><span class="pill">status</span></td><td>ACCEPTED</td><td>Arjun Menon</td><td></td></tr>
-      <tr><td>02 Sep 13:33</td><td><span class="pill">status</span></td><td>ASSIGNED</td><td>AUTO</td><td>on shift on the execution date, fewest open P1 → Arjun Menon</td></tr>
-      <tr><td>02 Sep 13:31</td><td><span class="pill">status</span></td><td>RAISED</td><td>guest · stay 7F2A</td><td>via the guest app · priority P1 by flow (catalogue P2)</td></tr>
+      <tr><td>02 Sept, 14:10</td><td><span class="pill bad">concern</span></td><td>BREACHED</td><td>sweep</td><td>accountable → Priya Nair (step 2) · nudge in-app</td></tr>
+      <tr><td>02 Sept, 14:06</td><td><span class="pill run">work</span></td><td>session 2 started</td><td>Arjun Menon</td><td></td></tr>
+      <tr><td>02 Sept, 14:02</td><td><span class="pill run">work</span></td><td>session 1 paused, then stopped</td><td>Arjun Menon</td><td>fetch gauge</td></tr>
+      <tr><td>02 Sept, 14:00</td><td><span class="pill warn">concern</span></td><td>AT_RISK</td><td>sweep</td><td>75 % of 40 min · nudge to Arjun Menon</td></tr>
+      <tr><td>02 Sept, 13:52</td><td><span class="pill">status</span></td><td>IN_PROGRESS</td><td>Arjun Menon</td><td>session 1 started</td></tr>
+      <tr><td>02 Sept, 13:47</td><td><span class="pill">status</span></td><td>ACCEPTED</td><td>Arjun Menon</td><td></td></tr>
+      <tr><td>02 Sept, 13:33</td><td><span class="pill">status</span></td><td>ASSIGNED</td><td>AUTO</td><td>on shift on the execution date, fewest open P1 → Arjun Menon</td></tr>
+      <tr><td>02 Sept, 13:31</td><td><span class="pill">status</span></td><td>RAISED</td><td>guest · stay 7F2A</td><td>via the guest app · priority P1 by flow (catalogue P2)</td></tr>
     </table>
   </div>
 </div>
@@ -330,23 +320,23 @@ ul.flows b{color:var(--text)}
 
 <h1 class="frame">2d · <b>One job · Notes &amp; photos</b>.</h1>
 <div class="win" style="max-width:900px">
-  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div></div>
   <div class="body">
     <div class="subnav"><button>Overview</button>
 <button>Work · 2</button><button>History · 7</button><button class="on">Notes &amp; photos · 3</button><button>Links &amp; steps · 3</button><button>Rating</button><button>Record</button></div>
     <div class="cols" style="grid-template-columns:2fr 1fr">
       <div>
         <div class="tl">
-          <div><b>Arjun Menon · 02 Sep 14:07</b><span>Suction pressure low, likely refrigerant.</span></div>
-          <div><b>Sana Rahman (FO) · 02 Sep 13:40</b><span>Guest called too; offered fan meanwhile.</span></div>
-          <div><b>Guest · 02 Sep 13:31</b><span>Room feels warm since noon, set to 19 but blowing ambient. <i>(the raising text)</i></span></div>
+          <div><b>Arjun Menon · 02 Sept, 14:07</b><span>Suction pressure low, likely refrigerant.</span></div>
+          <div><b>Sana Rahman (FO) · 02 Sept, 13:40</b><span>Guest called too; offered fan meanwhile.</span></div>
+          <div><b>Guest · 02 Sept, 13:31</b><span>Room feels warm since noon, set to 19 but blowing ambient. <i>(the raising text)</i></span></div>
         </div>
         <div class="field ph" style="margin-top:12px">Write a note…</div>
         <span class="btn pri">Add note</span><span class="btn">Attach photo</span>
       </div>
       <div class="card">
         <h3>Photos · 1</h3>
-        <div style="border:1px solid var(--line);border-radius:8px;height:120px;display:grid;place-items:center;color:var(--faint)">gauge.jpg · 02 Sep 14:07</div>
+        <div style="border:1px solid var(--color-line);border-radius:8px;height:120px;display:grid;place-items:center;color:var(--color-ink-faint)">gauge.jpg · 02 Sept, 14:07</div>
         <div class="mono" style="margin-top:6px">Arjun Menon · 1.2 MB</div>
       </div>
     </div>
@@ -356,7 +346,7 @@ ul.flows b{color:var(--text)}
 
 <h1 class="frame">2e · <b>One job · Links &amp; steps</b>. Group links and parent › child.</h1>
 <div class="win" style="max-width:900px">
-  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div></div>
   <div class="body">
     <div class="subnav"><button>Overview</button>
 <button>Work · 2</button><button>History · 7</button><button>Notes &amp; photos · 3</button><button class="on">Links &amp; steps · 3</button><button>Rating</button><button>Record</button></div>
@@ -379,7 +369,7 @@ ul.flows b{color:var(--text)}
 
 <h1 class="frame">2f · <b>One job · Rating</b>. Drawn on a closed, guest-raised job — MRN-HK-388.</h1>
 <div class="win" style="max-width:900px">
-  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Anjali Rao · HK manager</div></div>
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Anjali Rao · Housekeeping · The Marina Bay</div></div>
   <div class="body">
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px"><span class="num" style="font-size:14px">MRN-HK-388</span><span style="font-size:16px;font-weight:600">Housekeeping › Extra towels — Room 1204</span><span class="pill p3">P3</span><span class="pill">CLOSED</span></div>
     <div class="subnav"><button>Overview</button>
@@ -387,16 +377,16 @@ ul.flows b{color:var(--text)}
     <div class="cols">
       <div class="card">
         <h3>The guest's rating</h3>
-        <div style="font-size:26px;letter-spacing:4px;color:var(--warn)">★★★★★</div>
+        <div style="font-size:26px;letter-spacing:4px;color:var(--color-warn)">★★★★★</div>
         <div style="margin:8px 0">"Towels came in six minutes. Thank you Meera."</div>
-        <div class="mono">stay 7F2A · Mr. Okafor · rated 02 Sep 18:14, 14 min after close · via the guest app</div>
+        <div class="mono">stay 7F2A · Mr. Okafor · rated 02 Sept, 18:14, 14 min after close · via the guest app</div>
       </div>
       <div class="card">
         <h3>How it was asked</h3>
         <div class="kv" style="grid-template-columns:130px 1fr">
-          <div>Asked</div><div>02 Sep 18:00 · on auto-close · in the guest app</div>
-          <div>Window</div><div>until departure Thu 4 Sep</div>
-          <div>Resolved by</div><div>Meera Krishnan · "Delivered" · 02 Sep 13:59</div>
+          <div>Asked</div><div>02 Sept, 18:00 · on auto-close · in the guest app</div>
+          <div>Window</div><div>until departure 04 Sept</div>
+          <div>Resolved by</div><div>Meera Krishnan · "Delivered" · 02 Sept, 13:59</div>
           <div>Raised → resolved</div><div>6 min</div>
         </div>
       </div>
@@ -408,13 +398,13 @@ ul.flows b{color:var(--text)}
 
 <h1 class="frame">2g · <b>One job · Record</b>. The audit columns and what was set by hand.</h1>
 <div class="win" style="max-width:900px">
-  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · ENG supervisor</div></div>
+  <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div></div>
   <div class="body">
     <div class="subnav"><button>Overview</button>
 <button>Work · 2</button><button>History · 7</button><button>Notes &amp; photos · 3</button><button>Links &amp; steps · 3</button><button>Rating</button><button class="on">Record</button></div>
     <div class="cols3">
       <div class="card"><h3>Identity</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>job_id</div><div class="mono">018f3c…9a1e</div><div>Number</div><div>MRN-ENG-142</div><div>Property</div><div>Marina Bay · mrn</div><div>Version</div><div>9</div></div></div>
-      <div class="card"><h3>Audit</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Created</div><div>02 Sep 13:31 · guest · stay 7F2A</div><div>Updated</div><div>02 Sep 14:07 · Arjun Menon</div><div>Deleted</div><div>—</div></div></div>
+      <div class="card"><h3>Audit</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Created</div><div>02 Sept, 13:31 · guest · stay 7F2A</div><div>Updated</div><div>02 Sept, 14:07 · Arjun Menon</div><div>Deleted</div><div>—</div></div></div>
       <div class="card"><h3>Reminders</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Mine</div><div>none</div></div><div style="margin-top:8px"><span class="btn" style="padding:3px 10px;font-size:12px">Remind me…</span></div></div>
     </div>
   </div>
@@ -429,7 +419,7 @@ ul.flows b{color:var(--text)}
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab on">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search job number, room, summary…</div>
-    <div class="who">Sana Rahman · FO agent</div>
+    <div class="who">Sana Rahman · Front Office · The Marina Bay</div>
   </div>
   <div class="body">
     <div class="cols">
@@ -443,7 +433,7 @@ ul.flows b{color:var(--text)}
       <div>
         <label>Department</label><input class="field" readonly value="Engineering (ENG)"><div class="hint mono">from the catalogue item</div>
         <label>Priority</label><input class="field" readonly value="P3"><div class="hint mono">catalogue default · you may override</div>
-        <label>Due</label><input class="field" readonly value="Today 02 Sep 15:40"><div class="hint mono">policy: P3 within 60 min</div>
+        <label>Due</label><input class="field" readonly value="Today 02 Sept, 15:40"><div class="hint mono">policy: P3 within 60 min</div>
         <label>Assign to · on shift today</label><input class="field ph" readonly placeholder="AUTO — or pick: Arjun Menon · Deepak Rao · Team · Day shift">
         <label>Schedule for later · optional</label><input class="field ph" readonly placeholder="Leave empty to raise now">
         <div style="margin-top:8px"><span class="tog"><i></i></span><span class="mono">Restricted · off (catalogue default for this item)</span></div>
@@ -461,7 +451,7 @@ ul.flows b{color:var(--text)}
   <div class="head">
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab on">Board</div>
-    <div class="who" style="margin-left:auto">Arjun Menon · ENG technician</div>
+    <div class="who" style="margin-left:auto">Arjun Menon · Engineering · The Marina Bay</div>
   </div>
   <div class="body">
     <div style="font-weight:600;margin-bottom:4px">Resolve MRN-ENG-142 · Air conditioning › Not cooling</div>
@@ -525,12 +515,12 @@ ul.flows b{color:var(--text)}
         <div class="bar"><i style="width:10%"></i></div><div class="mono">2 open · 0 breached</div>
       </div>
     </div>
-    <p class="sect" style="margin-top:22px">Concern · property · last 60-second sweep 02 Sep 14:24:00</p>
+    <p class="sect" style="margin-top:22px">Concern · property · last 60-second sweep 02 Sept, 14:24:00</p>
     <table>
       <tr><th>Job</th><th>Dept</th><th>State</th><th>Since</th><th>Accountable now</th><th>Last nudge</th></tr>
-      <tr><td class="num">MRN-ENG-142</td><td>ENG</td><td><span class="pill bad">BREACHED</span></td><td>02 Sep 14:10</td><td>Priya Nair · supervisor</td><td>02 Sep 14:10 · in-app</td></tr>
-      <tr><td class="num">MRN-ENG-139</td><td>ENG</td><td><span class="pill bad">STUCK</span></td><td>02 Sep 14:15</td><td>Priya Nair · supervisor</td><td>02 Sep 14:15 · in-app</td></tr>
-      <tr><td class="num">MRN-ENG-140</td><td>ENG</td><td><span class="pill warn">AT RISK</span></td><td>02 Sep 14:34</td><td>Arjun Menon · assignee</td><td>02 Sep 14:34 · in-app</td></tr>
+      <tr><td class="num">MRN-ENG-142</td><td>ENG</td><td><span class="pill bad">BREACHED</span></td><td>02 Sept, 14:10</td><td>Priya Nair · supervisor</td><td>02 Sept, 14:10 · in-app</td></tr>
+      <tr><td class="num">MRN-ENG-139</td><td>ENG</td><td><span class="pill bad">STUCK</span></td><td>02 Sept, 14:15</td><td>Priya Nair · supervisor</td><td>02 Sept, 14:15 · in-app</td></tr>
+      <tr><td class="num">MRN-ENG-140</td><td>ENG</td><td><span class="pill warn">AT RISK</span></td><td>02 Sept, 14:34</td><td>Arjun Menon · assignee</td><td>02 Sept, 14:34 · in-app</td></tr>
     </table>
     <div class="pager"><span>3 of 3 in concern · ON TRACK rows are not listed here</span><span></span></div>
   </div>
@@ -544,15 +534,15 @@ ul.flows b{color:var(--text)}
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab">Board</div><div class="tab">Live</div><div class="tab on">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search job number, room, summary…</div>
-    <div class="who">Priya Nair · ENG supervisor</div>
+    <div class="who">Priya Nair · Engineering · The Marina Bay</div>
   </div>
   <div class="body">
     <table>
       <tr><th>Scheduled for</th><th>Job</th><th>Where</th><th>What</th><th>Raised by</th><th>Assigned to</th><th>Due</th></tr>
-      <tr><td>Wed 3 Sep</td><td class="num">MRN-ENG-131</td><td>Floor 12 · all rooms</td><td>Air conditioning › Filter change <span class="tag">parent · 24 steps</span></td><td>APPLICATION · Engineering</td><td>Team · Day shift</td><td>03 Sep 18:00</td></tr>
-      <tr><td>Wed 3 Sep</td><td class="num">MRN-ENG-144</td><td>Room 1204</td><td>Air conditioning › Filter replace <span class="tag">child 2/2 of 142</span></td><td>Arjun Menon</td><td>AUTO on the day</td><td>Wed 12:00</td></tr>
-      <tr><td>Mon 15 Sep</td><td class="num">MRN-ENG-118</td><td>Plant room B</td><td>Generator › Load test</td><td>APPLICATION · Engineering</td><td>Deepak Rao</td><td>Mon 15 Sep 17:00</td></tr>
-      <tr><td>Fri 19 Sep</td><td class="num">MRN-HK-402</td><td>Suite 2001</td><td>Housekeeping › Deep clean</td><td>Sana Rahman (FO)</td><td>Team · Floor 20</td><td>Fri 19 Sep 15:00</td></tr>
+      <tr><td>03 Sept</td><td class="num">MRN-ENG-131</td><td>Floor 12 · all rooms</td><td>Air conditioning › Filter change <span class="tag">parent · 24 steps</span></td><td>APPLICATION · Engineering</td><td>Team · Day shift</td><td>03 Sept, 18:00</td></tr>
+      <tr><td>03 Sept</td><td class="num">MRN-ENG-144</td><td>Room 1204</td><td>Air conditioning › Filter replace <span class="tag">child 2/2 of 142</span></td><td>Arjun Menon</td><td>AUTO on the day</td><td>03 Sept, 12:00</td></tr>
+      <tr><td>15 Sept</td><td class="num">MRN-ENG-118</td><td>Plant room B</td><td>Generator › Load test</td><td>APPLICATION · Engineering</td><td>Deepak Rao</td><td>15 Sept, 17:00</td></tr>
+      <tr><td>19 Sept</td><td class="num">MRN-HK-402</td><td>Suite 2001</td><td>Housekeeping › Deep clean</td><td>Sana Rahman (FO)</td><td>Team · Floor 20</td><td>19 Sept, 15:00</td></tr>
     </table>
     <div class="pager"><span>1–4 of 4</span><span></span></div>
     <div class="mono" style="margin-top:14px">A scheduled job becomes RAISED at 00:00 on its day and its concern clock starts then. What put it here — a person, or the Engineering app's PPM plan — is only the raiser; Jobs holds the job, not the plan.</div>
@@ -641,7 +631,7 @@ ceiling wet under AC</textarea>
     <div class="wrow"><span>Scheduled today</span><span>1</span></div>
   </div>
   <div class="widget">
-    <h3>Jobs now <span>ENG · 02 Sep 14:24</span></h3>
+    <h3>Jobs now <span>ENG · 02 Sept, 14:24</span></h3>
     <div class="wrow"><span>Open</span><span>11</span></div>
     <div class="wrow"><span>Running</span><span class="pill run">3</span></div>
     <div class="wrow"><span>At risk</span><span class="pill warn">1</span></div>
