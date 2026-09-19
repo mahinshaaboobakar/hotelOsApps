@@ -42,6 +42,21 @@ namespace HotelOS.GuestOps.Module;
 /// transaction is what makes it leave nothing.
 /// </para>
 /// <para>
+/// <b>An ALLOWED walk-in cannot succeed on the real platform — proven only against
+/// a stand-in authorizer</b> (architect, 2026-09-19). ADR 0061: <i>"Canonical
+/// entity lifecycle events are the source of authorization object registration.
+/// The Kernel's authorization subsystem consumes them and materialises the
+/// graph."</i> A stay's tuples come from <c>stay.created</c> after it is relayed —
+/// which is after this transaction commits — so <c>stay.assign</c> on the stay
+/// just created, asked inside it, finds no tuples and is refused every time. And
+/// today it is refused one step earlier still: <c>stay</c> is not among the
+/// types the Kernel registers, and no GuestOps permission declares a
+/// <c>stay</c> scope. Acting on an object in the step that creates it is Room
+/// Care's <c>RC-Q8</c> shape, and the architect has put the two to the planner as
+/// one question. <b>What this class guarantees regardless of the answer: a
+/// refused walk-in leaves nothing.</b>
+/// </para>
+/// <para>
 /// <b>Check-in requires a room, and this refuses without one</b> (S8) — the one
 /// hard gate the assignment ruling creates, checked by <c>Draft.From</c> before
 /// the transaction opens, so it costs nothing to refuse.

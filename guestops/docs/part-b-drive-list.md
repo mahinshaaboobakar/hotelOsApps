@@ -322,11 +322,30 @@ allowed                   ConcurrencyException: has changed since         1 book
 ```
 
 Figures are *(bookings, stays, guests, events)*. Full backend suite 139/139.
-**Not demonstrated**: a mutation removing only `CommitAsync` — the positive
-control should catch it (it would find 0 bookings), which is reasoning, not a run.
+
+*This said "Not demonstrated: a mutation removing only `CommitAsync` … reasoning,
+not a run" until the architect asked for the run.* **Now shown**, in a detached
+worktree at `e53a439` (contains `f13e47c`): with only `CommitAsync` removed the
+mutant compiles and the allowed case fails **Expected (1, 1, 1) · Actual
+(0, 0, 0)** while both refused cases still pass; restored, 3/3; worktree removed.
+
+**THE ALLOWED ROW IS PROVEN ONLY AGAINST A STAND-IN AUTHORIZER — on the real
+platform it cannot pass** (architect, 2026-09-19). ADR 0061: *"Canonical entity
+lifecycle events are the source of authorization object registration. The
+Kernel's authorization subsystem consumes them and materialises the graph."* A
+stay's tuples come from `stay.created` after the event is relayed — **after this
+transaction commits** — so `stay.assign` on the new stay, asked inside it, finds
+no tuples and is refused every time. Today it is refused a step earlier:
+`stay` is not among the 13 types the Kernel registers
+(`events/registration/mod.rs:142`), and no GuestOps permission declares a
+`stay` scope. **The row proves the transaction commits when allowed — nothing
+about whether a walk-in can be.** Acting on an object in the step that creates it
+is Room Care's `RC-Q8` shape; the architect has put both to the planner as one
+question. **Kept whatever the answer: a refused walk-in leaves nothing.**
 
 **The handler is still not wired**: its assign and check-in steps are
-stay-scoped and wait on ADR 0193 being built (architect, 2026-09-19).
+stay-scoped and wait on ADR 0193 being built — and on that question
+(architect, 2026-09-19).
 
 **Found beside it, unattributed and left alone**: three per-run application
 roles on the development cluster — `hotelos_app_guestops_071c86a5`, `_44c7833f`,

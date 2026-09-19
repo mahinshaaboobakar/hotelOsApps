@@ -34,7 +34,19 @@ namespace HotelOS.GuestOps.Tests;
 /// <b>The third case is the positive control.</b> A walk-in that rolled back
 /// every time would pass the first two; only a walk-in that is allowed and
 /// commits proves the transaction is closed on the way out as well as on the
-/// way down.
+/// way down. <b>Shown, not reasoned</b>: with only <c>CommitAsync</c> removed it
+/// fails <c>Expected (1, 1, 1) · Actual (0, 0, 0)</c> while the other two still
+/// pass (detached worktree, 2026-09-19, then restored).
+/// </para>
+/// <para>
+/// <b>It proves the TRANSACTION, not that a walk-in can be allowed.</b> The
+/// authorizer here is a stand-in that answers yes. The real one cannot: a
+/// stay's tuples are materialised from <c>stay.created</c> after the event is
+/// relayed (ADR 0061), which is after this transaction commits, so
+/// <c>stay.assign</c> asked inside it finds none — and today <c>stay</c> is not a
+/// registered type or a declared scope at all. The case exists so a rollback
+/// that swallowed every walk-in cannot pass as atomicity; it is not evidence
+/// about the platform. See <c>WalkInCommand</c>'s remarks and <c>RC-Q8</c>.
 /// </para>
 /// </remarks>
 public sealed class WalkInAtomicityTests
