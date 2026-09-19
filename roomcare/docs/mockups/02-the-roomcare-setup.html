@@ -41,7 +41,7 @@ th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spac
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
 tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .num{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
-.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:10px;font-weight:600;letter-spacing:.04em;border:1px solid var(--line);color:var(--dim)}
 .pill.ok{color:var(--ok);border-color:var(--ok)}
 .pill.warn{color:var(--warn);border-color:var(--warn)}
 .pill.soft-warn{background:var(--color-warn-soft);color:var(--warn);border-color:transparent}
@@ -59,7 +59,7 @@ tr.sel td{background:color-mix(in srgb,var(--color-brand) 8%,transparent)}
 .btn.danger.confirm{background:var(--bad);color:var(--color-ink-on-accent);border-color:transparent;font-weight:600}
 .field{border:1px solid var(--line);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;margin:4px 0 12px;background:var(--color-surface);display:inline-block;min-width:120px}
 label{font-size:11px;color:var(--faint);letter-spacing:.08em;text-transform:uppercase;display:block}
-.mono{font:12px ui-monospace,Menlo,monospace;color:var(--dim)}
+.mono{font:11px ui-monospace,Menlo,monospace;color:var(--dim)}
 .chip{display:inline-block;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;margin:0 8px 8px 0;color:var(--dim)}
 .chip.on{border-color:var(--indigo);color:var(--text)}
 .tog{display:inline-block;width:34px;height:18px;border-radius:9px;background:var(--line);position:relative;vertical-align:middle;margin-right:8px}
@@ -79,7 +79,7 @@ td.dimtd{color:var(--faint)}
 .note{max-width:1180px;border-left:3px solid var(--indigo);padding:10px 16px;margin:14px 0;color:var(--dim);font-size:13px;background:color-mix(in srgb,var(--color-brand) 5%,transparent)}
 .note b{color:var(--text)}
 .note.hold{border-color:var(--warn);background:var(--color-warn-soft)}
-.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:6px;vertical-align:middle}
+.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:1px 5px;border-radius:4px;border:1px solid var(--line);color:var(--faint);margin-left:5px;vertical-align:middle}
 .tag.port{color:var(--warn);border-color:var(--warn)}
 .tag.absent{color:var(--faint);border-style:dashed}
 .radio{display:block;margin:4px 0;font-size:13px}
@@ -94,6 +94,7 @@ ul.flows b{color:var(--text)}
 
 <div class="intro">
   <h1>Room Care · setup</h1>
+  <p><b>2026-09-19 · the owner chose &ldquo;match&rdquo;</b>: <i>&ldquo;i choosed `match`&rdquo;</i> (HosPilotOS <code>c69fde42</code>). <code>.mono</code>, <code>.tag</code> and <code>.pill</code> are redrawn at the screens page&rsquo;s second set, so one style set runs across the application. Size and spacing only; no colour changes. See the redline log.</p>
   <p><b>LOCKED by the owner, 2026-09-05</b>, with <code>01-the-roomcare-screens.html</code> — the log at the foot. Seven frames, one per Setup tab — redrawn from the single collapsed frame 7 of <code>01-the-roomcare-screens.html</code> on the owner's redline of 2026-09-05 (<i>"seven separate mock screens"</i>). Jobs' settings live on their own page for the same reason.</p>
   <p><b>The rule every frame draws:</b> S3's — <i>everything on the walkthrough that reads like a fact about how a hotel works is a property configuration with a sensible default, never a constant.</i> Every control here is a row in <code>roomcare</code>'s standard (chapter 03 §2.8), versioned; the day's decisions are stamped with the version they used, so editing a setting never rewrites a past day.</p>
   <p><b>Chrome and palette:</b> page 64 throughout — the seventeen tokens at the shell's values, one <code>.btn</code>, the 56 px bar with <code>name · department · property</code>, Setup's tabs as the second level (two levels are the ceiling, §3), bare tables with a numbered pager and the row count on every list (§4, §6, §8).</p>
@@ -398,6 +399,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-19 · &ldquo;match&rdquo; folded, RE-LOCKED</b>: the owner, <i>&ldquo;i choosed `match`&rdquo;</i> (<code>c69fde42</code>). <code>.mono</code> 12 &rarr; 11px, <code>.tag</code> padding 2px 6px &rarr; 1px 5px and margin-left 6 &rarr; 5px, <code>.pill</code> 2px 9px at 11px &rarr; 1px 8px at 10px. These are the second-set values the owner chose for the screens page (<code>19f203c5</code>). This page had declared each class once, at the first set.</li>
   <li><b>2026-09-13 · redline 5 folded, RE-LOCKED</b> — the six-tab bar (Room states after Prepare) on every frame; 7c Rules gains <i>Default views</i> for the Board and Room states.</li>
   <li><b>2026-09-13 · redline 4 folded, RE-LOCKED</b> — 7c Rules gains <i>Stay facts usually come from</i> (PMS · GuestOps · entered here); the manual control itself is never gated.</li>
   <li><b>2026-09-05 · LOCKED</b> — with the screens page, on the owner's confirmation that pagination follows page 64 (pager at the bottom, paged-with-total, rows per page stated).</li>
