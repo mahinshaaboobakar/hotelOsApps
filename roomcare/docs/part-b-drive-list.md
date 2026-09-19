@@ -1,11 +1,13 @@
 # Room Care Part B — the drive list
 
-Prepared 2026-09-19 by KK against `HotelOsApps` at `20b99d8` and platform
+Prepared 2026-09-19 by KK against `HotelOsApps` at `105cb24` and platform
 `HosPilotOS` at `8fa9de0c`, for the run after the owner installs
-**`roomcare-0.1.0.hopkg`** — 16,721,639 bytes, sha256
-`93e07f7b03d69c18527c38cf8f18b25ca00d307d54d75ab8dba40deb5d6c8453`, signed by
+**`roomcare-0.1.1.hopkg`** — 16,721,717 bytes, sha256
+`29bb38a08ab2c27ac5ac1fc745be798a05086e25415dcb00e3cc2388060eeea0`, signed by
 `dev-local`, staged in `%LOCALAPPDATA%\HotelOS\packages\registry` on the
-owner's machine. **Nothing below has been run yet; every result cell is empty
+owner's machine. Its UI bundles are the bytes Part A measured at `71ff149`.
+(0.1.0, built before Part A's style moves, was staged, never installed, and
+removed.) **Nothing below has been run yet; every result cell is empty
 on purpose.** The shape is FF's (`guestops/docs/part-b-drive-list.md`), so the
 two certificates read alike.
 
@@ -57,7 +59,7 @@ evidence that `roomcare.assign` works, and whether it stays is the architect's.
 
 ## Preconditions, checked at the start and quoted
 
-1. Software Center lists **Room Care 0.1.0, Running**.
+1. Software Center lists **Room Care 0.1.1, Running**.
 2. The signed-in user is admin on the property: the Board answers rather than
    drawing *Not permitted*. A refusal there ends the run as a precondition
    failure, not twenty failed rows.
