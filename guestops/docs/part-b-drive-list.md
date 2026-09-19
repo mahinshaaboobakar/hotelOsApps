@@ -26,6 +26,21 @@ A third value is used and is neither pass nor fail:
 > object type (`stay`) that no mechanism registers, so it is refused for every
 > caller by construction. Recorded, never scored.
 
+**AUTHZ-Q37 is RULED, and the label stays on the architect's instruction
+(2026-09-19).** ADR 0193 closed it that morning: *"An installable application
+may declare the authorization object types it owns in its signed package
+manifest. The Kernel registers those declarations when the package is
+installed/activated."* What blocks these rows now is that mechanism **not yet
+being built**, not the question being open — so a reader must not take the
+label to mean the ruling is pending.
+
+**What 0193 does and does not say about GuestOps.** Its worked table names
+`jobs` (`job`), `roomcare` (`room_task`) and `workforce`; **it does not name
+GuestOps or `stay`.** That GuestOps' permission definitions move into its own
+package and it declares `owned_types: stay` with its stay-scoped permissions is
+**the architect's statement of 2026-09-19**, applying 0193 — cited as that, not
+as 0193's text, until a document records it.
+
 ## Where authorization actually happens — measured, not assumed
 
 Read where it is **enforced**, not where it is declared (CLAUDE.md, *a
@@ -54,9 +69,19 @@ The Kernel resolves a permission against the object type's declared scope
 (`authz/registry.rs:282`), and none of these declares `stay`, so each is refused
 with **InvalidArgument** — *"permission "stay.override" may be checked against
 property, but the object is a stay"* — for every caller, however granted. That
-is the AUTHZ-Q37 class, with a **second prerequisite**: even once object types
-are admitted, `permissions.yaml` has to gain the `stay` scope its own comment
-promises.
+is the AUTHZ-Q37 class.
+
+*This page first listed the missing `stay` scope as a **second prerequisite**
+beside AUTHZ-Q37.* **It is not a second one**: under ADR 0193 GuestOps' own
+package carries its stay-scoped permission definitions with `owned_types: stay`,
+so the scope arrives with the same piece of work (architect, 2026-09-19). Kept
+visible so the correction can be checked.
+
+**How the refusal reaches a screen, recorded as found and not reclassified.**
+The Kernel's error is **InvalidArgument**, and the SDK draws `invalid` as its
+*faulted* state — *"Service fault"* — for what is an authorization-scope
+refusal. Whether it should be `MODEL_UNAVAILABLE` under ADR 0192 is with the
+planner (architect, 2026-09-19). The ledger quotes what the run shows.
 
 **No screen read reaches one of the ten.** The only module-door paths into a
 stay-scoped check are `CancelCommand` and `WalkInCommand`. `RegistrationService`
@@ -120,7 +145,7 @@ from the store it came from.
 
 | # | Operation | Door | Reached by a person | Status |
 |---|---|---|---|---|
-| C1 | cancel a booking | module, `stay.override` | Bookings → booking → **Cancel…** → confirm | **BLOCKED BY AUTHZ-Q37.** Driven once to capture the refusal as evidence: expected the InvalidArgument above, surfaced by the SDK as a *faulted* state. Read-back: the booking and every stay unchanged — the refusal comes before any write (`StayLifecycleService.RequireWritableAsync` authorizes on its first line, on the first stay) |
+| C1 | cancel a booking | module, `stay.override` | Bookings → booking → **Cancel…** → confirm | **BLOCKED BY AUTHZ-Q37 — and NOT DRIVABLE on this property: the store holds no booking to cancel** (precondition 3, measured). *Planned* as one drive to capture the refusal — expected the InvalidArgument above, drawn by the SDK as *faulted* — and it runs only if a booking reaches the store by a supported path. Read-back: the booking and every stay unchanged — the refusal comes before any write (`StayLifecycleService.RequireWritableAsync` authorizes on its first line, on the first stay) |
 | C2 | walk-in | module, `stay.create` → then `stay.assign` + `stay.override` on the stay | **not reachable** — the sheet's *Create and check in* has no handler (`screens/walkin/index.ts:87`; a gap reported earlier, not built) | **BLOCKED BY AUTHZ-Q37** for its assign and override halves, and unreachable besides |
 | C3 | assign a room | gRPC `AssignRoom`, `stay.assign` | no screen | **BLOCKED BY AUTHZ-Q37** |
 | C4 | check in · check out · cancel stay · no-show · correct | gRPC, `stay.override` | no screen | **BLOCKED BY AUTHZ-Q37** |
@@ -144,17 +169,82 @@ constant.
 |---|---|---|---|
 | D1 | `job.created` → a request learns its job | NATS, `JobCreatedHandler` → `StayRequestService.RecordJobAsync` (no authorization — a consumer has no person) | **cannot occur** until C7 can log a request for a job to answer |
 
-## Open before the run — one question, with the facts
+## Method — the read-back instrument
 
-**Which instrument reads the `guestops` store back on the owner's property?**
-The database credential is sealed. ADR 0156's words are about **tests** —
-*"Tests must not read, export, or otherwise bypass the installed secret-store
-boundary"* — and a Part B run is not a test; but nothing grants it an exception
-either, and deciding that one exists is not mine. The reads in A can be compared
-against a second door (the gRPC `ListStays` over the same store), but that is
-**the same code read twice**, not a read-back, and the certificate would say so.
-Until an instrument is ruled, the read-back column records *not measured here*,
-never a value.
+> **An instrument the ARCHITECT CHOSE, 2026-09-19 — not a ruling.** Told to the
+> owner, who may overrule it. Nobody should read this row later as ruled.
+
+```text
+docker exec hotelos-postgres psql -U postgres -d hotelos
+    inside BEGIN READ ONLY … COMMIT
+    SELECT only
+    the development cluster only — NEVER port 15432
+    every query recorded WORD FOR WORD in the ledger, beside its result
+```
+
+Why it crosses no boundary, in the architect's words: it never reads the sealed
+application credential, so ADR 0156's boundary is not crossed, and it is not
+test code, where CLAUDE.md's *no SQL in a test* applies.
+
+**Measured before trusting it — is the dev cluster the property the drive
+writes to?** The installed product's Kernel (`C:\ProgramData\HotelOS\config\
+hotelos.toml`) is configured for **15432**, and a read-back of a different
+database than the one written would measure nothing. Asked of the instrument
+itself, 2026-09-19:
+
+```sql
+BEGIN READ ONLY;
+SELECT package_id, version, state, updated_at FROM platform.packages ORDER BY package_id;
+COMMIT;
+```
+```text
+guestops  | 0.1.0 | stopped | 2026-09-17 10:14:31+00
+jobs      | 0.4.1 | running | 2026-09-19 04:24:48+00
+openai    | 1.0.0 | stopped | 2026-09-04 11:25:45+00
+workforce | 0.3.0 | running | 2026-09-19 04:24:46+00
+```
+
+That is the installation the architect described (*"the installed GuestOps is
+0.1.0 (stopped)"*), so **the owner's property is on the development cluster and
+the instrument reads the database the drive will write.** The 15432 Kernel is a
+separate installed product that does not host GuestOps. Re-checked at the start
+of the run: after the install this row must read **0.3.1 · running**.
+
+## Precondition 3, measured before the run — the store is empty
+
+```sql
+BEGIN READ ONLY;
+SELECT 'bookings', count(*) FROM guestops.bookings
+UNION ALL SELECT 'room_stays', count(*) FROM guestops.room_stays
+UNION ALL SELECT 'guests', count(*) FROM guestops.guests
+UNION ALL SELECT 'stay_disagreements', count(*) FROM guestops.stay_disagreements
+UNION ALL SELECT 'held_facts', count(*) FROM guestops.held_facts
+UNION ALL SELECT 'settings', count(*) FROM guestops.settings
+UNION ALL SELECT '__migrations', count(*) FROM guestops.__migrations;
+COMMIT;
+```
+```text
+bookings 0 · room_stays 0 · guests 0 · stay_disagreements 0 · held_facts 0 · settings 0 · __migrations 2
+```
+
+Three consequences, stated now so the certificate does not discover them:
+
+1. **Every read in A answers empty.** That is *served* under ADR 0148 (a
+   legitimate empty result), and the certificate says what it therefore proves:
+   **the pipe — door, authorization, route, query, render — and not the logic**
+   that computes a count from rows.
+2. **C1 cannot be driven.** There is no booking to press *Cancel…* on, so the
+   refusal cannot be captured as evidence. It stays BLOCKED BY AUTHZ-Q37 and
+   **not driven**, never *driven and refused*.
+3. **No supported path on this property creates a booking.** `stay.create` is
+   gRPC-only, the walk-in sheet's submit has no handler, and no PMS connector
+   is installed (the four rows above are all there is). A row written by hand
+   would start the world outside every supported path — the fixture rule of
+   ADR 0166 — so none is written.
+
+A first query guessed the table name `guestops.stays`; it does not exist
+(`room_stays` does). Read-only, so nothing happened; recorded because a guess
+that errors is a query like any other.
 
 ## What the certificate will say it did not prove
 
