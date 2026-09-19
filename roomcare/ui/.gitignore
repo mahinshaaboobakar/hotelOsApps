@@ -5,3 +5,4 @@ module.js
 widgets/*.js
 .build-tokens.mjs
 .parta/
+.audit/

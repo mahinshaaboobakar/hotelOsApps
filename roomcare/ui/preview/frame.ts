@@ -15,6 +15,19 @@
  * the real `load` classifies them: every widget read on `?screen=widgets`, or the
  * one read named by `&at=<method>` on a screen. Without it the harness could only
  * ever show a timeout, which is the one state a missing answer produces.
+ *
+ * The page-64 audit's states (`docs/app-surface-checklist.md`, 3d521cef), each
+ * DERIVED from the recording rather than recorded, and stamped so on the page:
+ *
+ * - `?list=E0|E1|1P|MP|ML` shapes the screen's paged read (`PAGED` below):
+ *   empty list; an empty page of a non-empty list; a short single page (4
+ *   rows); a full first page; a short last page (3 rows). Rows are the recorded
+ *   rows, repeated in order to fill a page, and `total` is stated.
+ * - `?nl=1`: a property with no locale and no zone.
+ * - `&open=<text>` presses the button that says so once the screen is reached.
+ *   The harness holds no answer for any write, so a write the audit then makes
+ *   fails as `unanswered` (the OV state's "its write failing"), and every call
+ *   with no recorded answer is counted on `data-unanswered-calls`.
  */
 
 import { HostCallError, type Cause, type HostApi } from "@hotelos/sdk";
@@ -54,6 +67,37 @@ const ANSWERS: Record<string, unknown> = {
 };
 const L09 = (roomL09 as { line: { id: string } }).line.id;
 
+/** Each paged read, and where its rows and its paging sit in the answer. */
+const PAGED: Record<string, { rows: string; paging: string }> = {
+  deepCleans: { rows: "rows", paging: "paging" },
+  myRooms: { rows: "rows", paging: "paging" },
+  prepare: { rows: "changes", paging: "changesPaging" },
+  areas: { rows: "rows", paging: "paging" },
+  supervision: { rows: "rows", paging: "paging" },
+};
+
+/** `[page, rows on it, total]` per list state, `size` being the recorded page size. */
+const SHAPES: Record<string, (size: number) => [number, number, number]> = {
+  E0: () => [0, 0, 0],
+  E1: (size) => [2, 0, 2 * size],
+  "1P": () => [0, 4, 4],
+  MP: (size) => [0, size, 2 * size + 3],
+  ML: (size) => [2, 3, 2 * size + 3],
+};
+const LIST = params.get("list");
+if (LIST !== null && SHAPES[LIST] === undefined) throw new Error(`?list=${LIST} is not a list state`);
+
+/** The recorded answer, shaped to the list state asked for. */
+function shaped(method: string, answer: unknown): unknown {
+  const where = PAGED[method];
+  if (LIST === null || where === undefined) return answer;
+  const recorded = answer as Record<string, unknown>;
+  const rows = recorded[where.rows] as unknown[];
+  const size = (recorded[where.paging] as { pageSize: number }).pageSize;
+  const [page, count, total] = SHAPES[LIST]!(size);
+  return { ...recorded, [where.rows]: Array.from({ length: count }, (_, i) => rows[i % rows.length]), [where.paging]: { page, pageSize: size, total } };
+}
+
 /** The host kind each cause is produced by — the platform's, so `load`'s own mapping decides. */
 const KINDS = {
   unanswered: "unavailable",
@@ -69,11 +113,13 @@ const failing = (method: string): boolean =>
 
 const host: HostApi = {
   identity: { id: "roomcare", version: "0.1.0", capabilities: attendant ? ["roomcare.read", "room.clean"] : ["roomcare.read", "roomcare.assign", "roomcare.amend", "roomcare.configure", "roomcare.plan"] },
-  property: { timezone: "Asia/Kolkata", locale: "en-GB" },
+  property: params.get("nl") === null ? { timezone: "Asia/Kolkata", locale: "en-GB" } : { timezone: null, locale: null },
   call(capability, method, body) {
     if (failing(method)) return Promise.reject(new HostCallError({ kind: KINDS[fail!], message: `the harness failed ${method} as ${fail}` }));
     if (method === "room") return Promise.resolve((body as { roomId: string }).roomId === L09 ? roomL09 : roomG03);
-    const answer = ANSWERS[method];
+    const answer = shaped(method, ANSWERS[method]);
+    // Counted, so the audit's write state is judged only where a write actually went out.
+    if (answer === undefined) document.documentElement.setAttribute("data-unanswered-calls", String(Number(document.documentElement.getAttribute("data-unanswered-calls") ?? "0") + 1));
     return answer === undefined
       ? Promise.reject(new HostCallError({ kind: "unavailable", message: `the harness holds no answer for ${capability}/${method}` }))
       : Promise.resolve(answer);
@@ -125,13 +171,25 @@ async function drive(): Promise<void> {
   };
   const tab = params.get("tab");
   const setupSteps = screen === "setup" ? [() => click("button.tab", "Setup"), ...(tab === null ? [] : [() => click(".subnav button.tab", tab)])] : [];
-  for (const step of [...(steps[screen] ?? []), ...setupSteps]) {
+  const opened = params.get("open");
+  const overlaySteps = opened === null ? [] : [() => click("button", opened)];
+  for (const step of [...(steps[screen] ?? []), ...setupSteps, ...overlaySteps]) {
     step();
     await settle();
   }
 }
 
+/** Say on the capture which state was DERIVED from the recording, not recorded. */
+function stamp(): void {
+  const derived = [
+    LIST === null ? null : `list state ${LIST}, derived from the recorded ${Object.keys(PAGED).join("/")} answer`,
+    params.get("nl") === null ? null : "a property with no locale and no zone",
+  ].filter((said) => said !== null);
+  if (derived.length > 0) document.documentElement.setAttribute("data-derived", derived.join("; "));
+}
+
 void drive().then(() => {
+  stamp();
   document.documentElement.setAttribute("data-ready", "true");
   if (missed.length > 0) {
     const note = document.createElement("div");
