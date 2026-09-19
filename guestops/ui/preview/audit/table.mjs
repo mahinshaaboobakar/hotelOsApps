@@ -68,7 +68,7 @@ const STATED = {
   H3: ["PASS", "C", "frames draw dates as the recorded strings they are"],
   H4: ["PASS", "T", "the drive throws on a step it cannot reach (preview/frame.ts)"],
   H5: ["PASS", "S", "both harnesses refuse an unhandled method"],
-  H6: ["FAIL", "S", "all three mockups declare their own :root palette (01-guestops-gold.html line 11)"],
+  H6: ["PASS", "S", "the mockups link ui/preview/tokens.css and declare no copy of the published tokens; 02's private palette points at them (2026-09-19). 04-06 were drawn that way"],
   L4: ["NOT REACHED", "M", "no drive reaches a selected row; the rule in source is tint only (.tr.sel brand 8%)"],
 };
 

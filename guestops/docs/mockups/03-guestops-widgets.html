@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>GuestOps widgets — the five frames</title>
+<!-- The published tokens at the shell's own values — the harness's file, held
+     equal to TOKEN_NAMES by ui/tests/tokens.test.ts. This page declares no copy of
+     them (page 64 §8, checklist H6). -->
+<link rel="stylesheet" href="../../ui/preview/tokens.css">
 <style>
   /*
-   * Drawn 2026-09-05, APPS-Q4. The palette is the gold file's, copied stop for
-   * stop, so these frames and the seventeen cannot disagree about a colour.
+   * Drawn 2026-09-05, APPS-Q4. The published tokens come from tokens.css, linked
+   * above; this block keeps only what the gold file derives from them. Until
+   * 2026-09-19 it declared a copy of the palette, "copied stop for stop" from the
+   * gold file — ruled out by page 64 §8 (checklist H6).
    */
   :root{
-    --color-surface:#0b0d14;--color-surface-raised:#11141f;
-    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
-    --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
-    --color-ink-on-accent:#0b0d14;
-    --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
-    --color-ok-soft:rgb(52 211 153 / 0.12);
-    --color-warn-soft:rgb(251 191 36 / 0.12);
-    --color-bad-soft:rgb(248 113 113 / 0.12);
-    --radius-panel:1rem;
-    --font-sans:system-ui, -apple-system, "Segoe UI", sans-serif;
 
     --ovr:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
     --accent:linear-gradient(135deg,var(--color-brand),var(--ovr));
@@ -27,7 +23,7 @@
     --faint:var(--color-ink-faint);--line:var(--color-line);--line2:var(--color-line-strong);
     --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);
     --glass:var(--color-surface-raised);
-  }
+}
 
   body{background:#04050a;color:var(--text);padding:26px;
        font:13.5px/1.55 var(--font-sans);font-variant-numeric:tabular-nums}

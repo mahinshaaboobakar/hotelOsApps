@@ -1,18 +1,29 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>GuestOps Flows</title>
+<!-- The published tokens at the shell's own values — the harness's file, held
+     equal to TOKEN_NAMES by ui/tests/tokens.test.ts. This page declares no copy of
+     them (page 64 §8, checklist H6). -->
+<link rel="stylesheet" href="../../ui/preview/tokens.css">
 <style>
+  /* This drawing's names, pointed at the published tokens (page 64 §8, H6).
+     Until 2026-09-19 they were a private palette — a cyan and a violet no
+     running module can receive. Derived as the gold page derives them. */
   :root{
-    --bg:#0a0c12;--glass:rgba(22,26,40,.62);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);
-    --text:#eef1f8;--dim:#98a0b4;--faint:#5c6375;
-    --indigo:#818cf8;--cyan:#7dd3fc;--violet:#c084fc;
-    --ok:#34d399;--warn:#fbbf24;--bad:#f87171;--pms:#7dd3fc;--ovr:#c084fc;--other:#34d399;
+    --bg:var(--color-surface);--glass:var(--color-surface-raised);
+    --line:var(--color-line);--line2:var(--color-line-strong);
+    --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
+    --indigo:var(--color-brand);--cyan:var(--color-brand);
+    --violet:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);
+    --pms:var(--color-brand);--ovr:color-mix(in srgb, var(--color-brand) 62%, var(--color-bad));
+    --other:var(--color-ok);
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
   }
   *{box-sizing:border-box;margin:0}
   ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:transparent}
   ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:3px}::-webkit-scrollbar-button{display:none}
-  body{background:#04050a;color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
+  body{background:var(--color-surface);color:var(--text);font:13.5px/1.55 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;padding:26px;font-variant-numeric:tabular-nums}
   h1{font-size:16px;font-weight:600;max-width:1220px;margin:38px auto 12px;color:var(--dim);text-wrap:balance}
   h1 b{color:var(--text)}
   .cap{max-width:1220px;margin:10px auto 0;color:var(--dim);font-size:12.5px;line-height:1.7}

@@ -1,27 +1,19 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <title>GuestOps Gold Mockup</title>
+<!-- The published tokens at the shell's own values — the harness's file, held
+     equal to TOKEN_NAMES by ui/tests/tokens.test.ts. This page declares no copy of
+     them (page 64 §8, checklist H6). -->
+<link rel="stylesheet" href="../../ui/preview/tokens.css">
 <style>
-  /* The fourteen published tokens — SHELL-Q30 — at the shell's own dark values,
-     copied from apps/desktop/src/styles.css. A mock declares these and nothing
-     else, so what is drawn is what can ship: a drawing that invents `--indigo`
-     teaches a vocabulary no running module can receive, which is how this file
-     and guestops/ui came to disagree about seven colours.
-     The standard: docs/working/64-the-app-surface-standard.md. */
+  /* The published tokens come from tokens.css, linked above — the set the shell
+     publishes, at its own values. Until 2026-09-19 this block declared its own
+     copy of them ("the fourteen published tokens … copied from
+     apps/desktop/src/styles.css"), which page 64 §8 and checklist H6 rule out: a
+     copy drifts the day the set grows, and it had — the set is larger now.
+     What stays here is only what is derived from the published names, so what is
+     drawn is still what can ship. */
   :root{
-    --color-surface:#0b0d14;--color-surface-raised:#11141f;
-    --color-line:rgb(255 255 255 / 0.07);--color-line-strong:rgb(255 255 255 / 0.14);
-    --color-ink:#e8ebf4;--color-ink-muted:#8b93a7;--color-ink-faint:#5a6172;
-    --color-ink-on-accent:#0b0d14;
-    --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
-    /* The three soft tones, published 2026-09-04 (894e230). Tints, so that
-       three apps stop hand-mixing three different greens. */
-    --color-ok-soft:rgb(52 211 153 / 0.12);
-    --color-warn-soft:rgb(251 191 36 / 0.12);
-    --color-bad-soft:rgb(248 113 113 / 0.12);
-    --radius-panel:1rem;
-    --font-sans:system-ui, -apple-system, "Segoe UI", sans-serif;
-
     /* Derived, never declared — mirrors guestops/ui/chrome/styles.ts stop for
        stop, so the drawing and the module cannot disagree about a colour. */
     --pms:var(--color-brand);
@@ -53,7 +45,7 @@
     --bad:var(--color-bad);--grad:var(--accent);--glass:var(--color-surface-raised);
     --cyan:var(--pms);--violet:var(--ovr);--other:var(--color-ok);
     --shadow:0 24px 70px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.35);
-  }
+}
   *{box-sizing:border-box;margin:0}
   /* ARCH-Q20 / 64 §8: this drawing renders its controls as <button>, because
      the build does and the sweep pairs on tag + text. The UA resets the font
