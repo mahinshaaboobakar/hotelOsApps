@@ -92,6 +92,7 @@
   const loose = smalls.filter((b) => b.closest("tr") === null && b.closest(".card, .sheet, .dlg") === null);
   if (inCard.length > 0) add("C4", "OPEN", `card half (APPS-Q43): ${[...new Set(inCard.map((b) => text(b)))].join(" · ")} — .btn.sm inside a card, not a row`);
   for (const b of loose) add("C4", "FAIL", `${name(b)} is .btn.sm in neither a row nor a card`);
+  if (loose.length === 0 && all(".btn").length > 0) add("C4", "PASS", "no .btn.sm outside a row or a card");
   judge("C5", all(".btn.danger:not(.confirm)"), (b) => {
     const s = cs(b); const out = [];
     if (s.color !== C.bad) out.push(`color ${s.color}`);
@@ -315,6 +316,7 @@
     const clipped = cs(body).overflowY === "hidden" && body.scrollHeight > body.clientHeight + 1;
     if (pagers.length === 0) add("G8", clipped ? "FAIL" : "PASS", clipped ? `body clips ${body.scrollHeight - body.clientHeight}px with no pager` : `body ${cs(body).overflowY}, nothing clipped`);
     else if (clipped) add("G8", "FAIL", `body:has(.pager) clips ${body.scrollHeight - body.clientHeight}px of this screen — content below the fold is unreachable`);
+    else add("G8", "PASS", `a screen with a pager clips nothing (body ${cs(body).overflowY})`);
   }
 
   // ---------------------------------------------------------------- §9 overlays
