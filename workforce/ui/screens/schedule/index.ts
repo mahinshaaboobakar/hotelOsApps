@@ -149,12 +149,9 @@ function figures(month: Schedule, property: PropertyEnvironment): HTMLElement {
     fig(n(month.duty), duties(month, property)),
   );
 
-  const balance = el("div", "mpush");
-  const [figure, ...rest] = month.balance.split(" ");
-  balance.append(el("i", undefined, `${figure} ${rest[0] ?? ""}`),
-    el("span", undefined, rest.slice(1).join(" ")));
-
-  strip.append(balance);
+  // **No balance: the service sends none** — "the balance sentence belongs to
+  // Leave and is read there" (ScheduleView). This split a string on spaces that
+  // only the fixture ever held, so a real property's schedule threw here.
   return strip;
 }
 
@@ -194,16 +191,16 @@ function cell(day: ScheduleDay, property: PropertyEnvironment): HTMLElement {
   // of it — MOD is property-wide and the person keeps their own posting — and it
   // prints its span, because a duty crossing midnight is the one whose hours a
   // person actually needs.
-  if (day.dutyFrom !== undefined && day.dutyTo !== undefined) {
+  // `!= null`, not `!== undefined`: the wire sends null on an ordinary day, and
+  // null reached the formatter as the epoch — "MOD 05:30→05:30" drawn on every
+  // day that had no duty at all.
+  if (day.dutyFrom != null && day.dutyTo != null) {
     box.append(el("div", "cduty",
       `MOD ${formatInstant(day.dutyFrom, property, "time")}`
       + `→${formatInstant(day.dutyTo, property, "time")}`));
   }
 
-  // The next day carries the tail, quieter: the duty ends there.
-  if (day.tail !== undefined) {
-    box.append(el("div", "cduty tail", day.tail));
-  }
+  // No tail on the day a duty ends — nothing sends one (see `ScheduleDay`).
 
   return box;
 }

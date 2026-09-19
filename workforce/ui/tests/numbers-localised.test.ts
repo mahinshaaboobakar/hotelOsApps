@@ -62,15 +62,12 @@ const EXEMPT = [...carried(ANSWERS)].sort((a, b) => b.length - a.length);
  * now its own check — tests/register-ids.test.ts — because it was never a
  * number to exempt: it was copy that should not have been on the screen.
  */
-// The widgets' entries — figure, row value and meta, on five cards — went when
-// WidgetViews started sending numbers: each one failed here with "the wire was
-// fixed", which is the mechanism doing its job.
-const OWED: Record<string, readonly { selector: string; why: string }[]> = {
-  schedule: [
-    { selector: ".mpush", why: "Schedule.balance is a composed sentence (\"4 of 8 casual remaining\")" },
-    { selector: ".cduty.tail", why: "ScheduleDay.tail is a composed clock (\"…08:00\")" },
-  ],
-};
+// **Empty, and kept.** The widgets' entries went when WidgetViews started
+// sending numbers; the schedule's two (`balance`, `tail`) went when it turned
+// out the service sent neither — both were the fixture's alone. Each failed
+// here with "the wire was fixed" first, which is the mechanism doing its job.
+// The next string the service formats gets an entry here, not a silent pass.
+const OWED: Record<string, readonly { selector: string; why: string }[]> = {};
 
 /** The text a person reads, less what is owed and what the fixture wrote. */
 function read(root: HTMLElement, owed: readonly { selector: string }[] = []): string {

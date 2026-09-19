@@ -28,19 +28,25 @@ export interface ScheduleDay {
    * screen says them in the property's clock, because a duty rendered in the
    * server's would put a handover on the wrong side of midnight.
    */
-  dutyFrom?: string;
-  dutyTo?: string;
-
-  /** The day the register is being read on, drawn with an emphasised border. */
-  today?: boolean;
+  // Null on a day with no duty — which is what ScheduleView sends; absent on a
+  // leading blank. Typed `?: string` it let a null through to the formatter.
+  dutyFrom?: string | null;
+  dutyTo?: string | null;
 
   /**
-   * The tail of a duty that began the day before, at reduced weight.
+   * The day the register is being read on, drawn with an emphasised border.
    *
-   * A duty running 20:00→08:00 belongs to two dates, so the second one shows
-   * where it ends — otherwise the grid says the duty stopped at midnight.
+   * **The service does not send it** (`ScheduleView.Calendar`); only the fixture
+   * did. Owed, recorded in the audit — the screen draws it the day one arrives.
    */
-  tail?: string;
+  today?: boolean;
+
+  // **No `tail`.** The second date of a duty crossing midnight carried a
+  // composed clock ("…08:00") that only the fixture ever sent — ScheduleView
+  // has no such field. The value it would say is the previous day's `dutyTo`,
+  // in the property's zone, and nothing here can yet say which calendar day an
+  // instant falls on in a zone: that needs either the service to send the tail
+  // day's end or an SDK helper. Owed, both arms in the audit, neither chosen.
 }
 
 /** The month. */
@@ -65,7 +71,14 @@ export interface Schedule {
   dutyFrom: string | null;
   dutyTo: string | null;
 
-  balance: string;
+  /**
+   * The leave balance — null, which is what the service sends every time.
+   *
+   * `ScheduleView`: *"the balance sentence belongs to Leave and is read there"*.
+   * This was typed `string` and split on spaces, so on a real property the
+   * screen threw before drawing a day; only the fixture ever sent one.
+   */
+  balance: string | null;
 
   /** Six weeks of seven, Monday first, with blanks at both ends. */
   days: readonly ScheduleDay[];
@@ -104,7 +117,8 @@ export const recordedSchedule: Schedule = {
   duty: 1,
   dutyFrom: at(28, 20),
   dutyTo: at(29, 8),
-  balance: "4 / 8 casual remaining",
+  // What the service sends. This carried "4 / 8 casual remaining".
+  balance: null,
 
   days: [
     blank(28), blank(29), blank(30), blank(31),
@@ -119,15 +133,14 @@ export const recordedSchedule: Schedule = {
     work(21, "A", "ok"), work(22, "M", "brand"), work(23, "OFF", "neutral"),
     work(24, "M", "brand"),
     work(25, "M", "brand"), work(26, "M", "brand"), work(27, "M", "brand"),
-    // The duty crosses midnight, so it is drawn on BOTH dates — the badge names
-    // its span here, and the 29th carries the tail. A duty running 20:00→08:00
-    // genuinely belongs to two dates (WF-Q8), and a month grid that showed it on
-    // one would be the per-day shape the ruling refused.
+    // The duty crosses midnight; the badge names its span on the day it starts.
+    // The 29th carried a tail ("…08:00") and the 28th `today: true` — neither
+    // is anything the service sends, so neither is here (see `ScheduleDay`).
     {
-      date: 28, mark: "M", tone: "brand", today: true,
+      date: 28, mark: "M", tone: "brand",
       dutyFrom: at(28, 20), dutyTo: at(29, 8),
     },
-    { date: 29, mark: "OFF", tone: "neutral", tail: "…08:00" },
+    work(29, "OFF", "neutral"),
     work(30, "A", "ok"), work(31, "A", "ok"),
   ],
-};;
+};
