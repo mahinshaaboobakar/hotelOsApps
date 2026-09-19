@@ -78,7 +78,7 @@ export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: s
 
 function disagreement(host: HostApi, nav: Nav, page: RoomPage): HTMLElement {
   const d = page.disagreement!;
-  const view = card(`Disagreement — ${page.whoLeads === "PMS" ? "the PMS leads" : "Room Care leads"} at this property (S4)`);
+  const view = card(`Disagreement — ${page.whoLeads === "PMS" ? "the PMS leads" : "Room Care leads"} at this property`);
   view.classList.add("accent");
   const kv = el("div", "kv");
   kv.append(

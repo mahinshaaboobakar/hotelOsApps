@@ -72,7 +72,7 @@ export function grid(host: HostApi, data: RoomStates, edits: Edits, conflicts: R
         const occupied = edits.value(row, "occupancy") === "OCCUPIED" ? "O" : "V";
         tile.append(el("small", undefined, row.soldAt === null ? occupied : `${occupied} ${clock(host, row.soldAt)}`));
       }
-      tile.title = `${condition.toLowerCase()} · ${edits.value(row, "occupancy").toLowerCase()} · ${edits.value(row, "stay").toLowerCase()}`;
+      tile.title = `${condition.toLowerCase()} · ${edits.value(row, "occupancy").toLowerCase()} · ${STAYS.find(([value]) => value === edits.value(row, "stay"))?.[1] ?? edits.value(row, "stay").toLowerCase()}`;
       tile.addEventListener("click", () => {
         if (row.blocked) return;
         if (edits.has(row.roomId)) edits.clear(row.roomId);

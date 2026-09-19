@@ -122,7 +122,7 @@ function proposal(host: HostApi, nav: Nav, v: PrepareView, refuse: (because: str
     kv.append(el("div", "k", "Nobody available"), cell);
   }
   const here = el("div");
-  here.append(document.createTextNode(`from Workforce — ${whole(host, p.candidates)} posted to Housekeeping; grouped by department until the zone is on the posting `), el("span", "tag port", "Workforce ask · zone on the posting"));
+  here.append(document.createTextNode(`${whole(host, p.candidates)} posted to Housekeeping`));
   kv.append(el("div", "k", "Who is here"), here);
   view.append(kv);
   if (holds(host, "roomcare.assign")) {

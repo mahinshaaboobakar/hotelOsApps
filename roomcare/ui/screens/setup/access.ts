@@ -3,7 +3,9 @@
  * AUTHZ-Q25). Every other role comes from Workforce; this tab says so on its
  * face. Room Care announces the grant and writes no tuple; the Kernel folds it.
  * A person's posting is Workforce's, read through Context, which apps cannot
- * call yet (PKG-Q8) — so the posting column says where it will come from.
+ * call yet (PKG-Q8). The column draws a dash: it used to say "read through
+ * Context" with the register id, developer content the owner ruled off the
+ * screen (2026-09-19). Whether the column stays is queued for the owner.
  */
 
 import type { HostApi } from "@hotelos/sdk";
@@ -49,23 +51,23 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
   for (const grant of got.value.grants) {
     const tr = el("tr");
     const posting = el("td", "dim");
-    posting.append(document.createTextNode("read through Context"), el("span", "tag port", "PKG-Q8"));
+    posting.append(document.createTextNode("—"));
     const holds = el("td");
-    holds.append(el("span", "pill ok", "roomcare_manager"));
+    holds.append(el("span", "pill ok", "property-wide access"));
     const revoke = el("td");
     revoke.append(control("btn sm danger", "Revoke…", () => confirmRevoke(host, nav, grant.userId, grant.name)));
     tr.append(el("td", undefined, grant.name), posting, holds, el("td", undefined, day(host, grant.grantedAt.slice(0, 10))), el("td", undefined, grant.grantedBy ?? "—"), revoke);
     table.append(tr);
   }
   const n = got.value.grants.length;
-  const count = el("div", "count", `${n === 0 ? "no grants" : n === 1 ? "1 grant" : `${whole(host, n)} grants`} at this property · granted and revoked by the general manager only (S6; AUTHZ-Q25) · postings come from Workforce and cannot be edited here`);
+  const count = el("div", "count", `${n === 0 ? "no grants" : n === 1 ? "1 grant" : `${whole(host, n)} grants`} at this property · granted and revoked by the general manager only · postings come from Workforce and cannot be edited here`);
   const grantRow = el("div", "row");
   grantRow.style.marginTop = "12px";
   grantRow.append(control("btn pri", "Grant to a person…", () => grant(host, nav)));
 
   const gives = el("div", "kv");
-  gives.append(el("div", "k", "roomcare_manager"), el("div", undefined, "every Room Care capability, for every room at the property — read · assign · amend · configure · plan"),
-    el("div", "k", "Not the grant"), el("div", undefined, "an attendant's done (rides the assignment) · an inspector's sign-off (the inspection app's) · placing a room out of order (its owner's)"));
+  gives.append(el("div", "k", "Property-wide access"), el("div", undefined, "every Room Care capability, for every room at the property — read · assign · amend · configure · plan"),
+    el("div", "k", "Not the grant"), el("div", undefined, "an attendant's done · an inspector's sign-off · placing a room out of order"));
   const others = el("div", "kv");
   others.append(el("div", "k", "Floor supervisors"), el("div", undefined, "assign · amend — because Workforce posts them as supervisor in Housekeeping"),
     el("div", "k", "Attendants"), el("div", undefined, "their own rooms — because they are assigned them"),
@@ -91,7 +93,7 @@ function grant(host: HostApi, nav: Nav): void {
 }
 
 function confirmRevoke(host: HostApi, nav: Nav, userId: string, name: string): void {
-  const overlay = dialog(nav.frame, `Revoke ${name}'s roomcare_manager?`);
+  const overlay = dialog(nav.frame, `Revoke ${name}'s property-wide access?`);
   overlay.body.append(el("p", undefined, "They keep whatever their Workforce posting gives them. Recorded: who, when."));
   actions(overlay, "Revoke", () => void (async () => {
     const done = await act(host, "roomcare.configure", "revokeManager", { userId });

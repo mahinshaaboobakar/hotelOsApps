@@ -39,7 +39,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
   const count = el("div", "count");
   count.append(el("span", undefined, `${whole(host, data.windows.length)} of ${whole(host, data.windows.length)} — the two windows a hotel has; a window may cross midnight (a night shift is 22:00 → 06:00, not two ranges)`));
   const windowsCard = card("Windows", table, count,
-    el("div", "mono aside", "A room is attempted in each window it is due in; outside a window nothing is attempted — and nothing is dropped: it is collected (S5 c2, S0)."));
+    el("div", "mono aside", "A room is attempted in each window it is due in; outside a window nothing is attempted — and nothing is dropped: it is collected."));
 
   let trigger = data.policy.triggerMode;
   const choose = (value: string): void => { trigger = value; };
@@ -47,7 +47,7 @@ export function windows(host: HostApi, body: HTMLElement, nav: Nav, data: SetupD
   kv.style.marginTop = "12px";
   const rerun = el("div");
   rerun.append(document.createTextNode("adds new rooms · updates open "), el("i", undefined, "unstarted"), document.createTextNode(" tasks whose facts changed · never takes a room off an attendant · never reshuffles what the supervisor accepted"));
-  kv.append(el("div", "k", "HosPilot"), el("div", undefined, "always on — not a mode: it presses the button as the person asking (S7)"),
+  kv.append(el("div", "k", "HosPilot"), el("div", undefined, "always on — not a mode: it presses the button as the person asking"),
     el("div", "k", "Re-run after the button"), rerun,
     el("div", "k", "Changes between presses"), el("div", undefined, "counted on the board — \"N new since 08:00\" — created by nobody"));
   const triggerCard = card("Trigger — who prepares the day",

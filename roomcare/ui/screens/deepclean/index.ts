@@ -67,11 +67,10 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
     const tr = el("tr");
     const block = el("td");
     if (row.blockAppliedAt !== null) block.append(el("span", "pill ok", `applied ${day(host, row.blockAppliedAt.slice(0, 10))}`));
-    else if (row.blockRequestedAt !== null) block.append(el("span", "pill soft-warn", `requested ${when(host, row.blockRequestedAt)}`), el("span", "tag port", "applied by the state's owner"));
+    else if (row.blockRequestedAt !== null) block.append(el("span", "pill soft-warn", `requested ${when(host, row.blockRequestedAt)}`));
     else block.append(document.createTextNode("—"));
     const job = el("td", "mono");
     job.append(document.createTextNode(row.jobId === null ? (row.blockRequestedAt === null ? "—" : "raised with the plan") : row.jobStatus === null ? "job raised — no status heard yet " : `job ${lower(row.jobStatus)} `));
-    if (row.jobId !== null) job.append(el("span", "tag port", "progress · JOBS-Q2"));
     const state = el("td");
     const tone = row.state === "DUE" ? "warn" : row.state === "IN_PROGRESS" ? "run" : row.state === "DONE" ? "ok" : "";
     state.append(el("span", `pill ${tone}`, row.state.replaceAll("_", " ")));
@@ -88,13 +87,12 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
 
 /** The job's progress card — open or closed only, until JOBS-Q2 publishes more (the port, drawn honestly). */
 function progress(host: HostApi, nav: Nav, row: Row): HTMLElement {
-  const view = card(`${row.room} — the job's progress, as Jobs publishes it`);
+  const view = card(`${row.room} — the job's progress`);
   view.style.cssText = "margin-top:14px;flex:none";
   const kv = el("div", "kv");
-  const hands = el("div");
-  hands.append(document.createTextNode("today Room Care hears only job.created / job.closed "), el("span", "tag port", "hands by day · JOBS-Q2"));
   kv.append(el("div", "k", "Job"), el("div", undefined, `${row.jobStatus === null ? "job raised — no status heard yet" : `job ${lower(row.jobStatus)}`} · window ${day(host, row.windowFrom)} – ${day(host, row.windowTo)}`),
-    el("div", "k", "Hands"), hands,
+    // "Hands" (who works the job, by day) is not drawn: Room Care hears only that a job opened and closed until
+    // JOBS-Q2, and the reason was a register id and two event names on the screen (owner ruling, 2026-09-19).
     el("div", "k", "On close"), el("div", undefined, `${row.room} → dirty → departure clean → clean again → release requested → sold again`));
   view.append(kv);
   if (holds(host, "roomcare.plan")) {
@@ -114,7 +112,7 @@ function plan(host: HostApi, nav: Nav, row: Row): void {
   to.type = "date";
   overlay.body.append(
     el("label", "lbl", "From"), from, el("label", "lbl", "To"), to,
-    el("p", "dim", "Two requests leave with correlation ids: the block, to the owner of the room's out-of-order state, and the job, to Jobs. The room leaves the day while it is blocked."),
+    el("p", "dim", "The room leaves the day while it is blocked."),
   );
   actions(overlay, "Plan and request", () => void (async () => {
     const done = await act(host, "roomcare.plan", "planDeepClean", { roomId: row.roomId, from: from.value, to: to.value });

@@ -37,7 +37,7 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
     every.style.whiteSpace = "nowrap";
     every.append(months, document.createTextNode(" months"));
     const length = el("td", "dim");
-    length.append(document.createTextNode("—"), el("span", "tag port", "JOBS-Q2"));
+    length.append(document.createTextNode("—"));
     tr.append(el("td", undefined, row.roomType), every, length, el("td", "num", whole(host, row.rooms)),
       el("td", undefined, row.everyMonths === null ? "—" : whole(host, row.dueThisQuarter)));
     table.append(tr);
@@ -47,13 +47,13 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
 
   const kv = el("div", "kv");
   const work = el("div");
-  work.append(document.createTextNode("a Jobs job — raised by Room Care with a correlation id; the hands change by day and shift in Jobs "), el("span", "tag port", "JOBS-Q2"));
+  work.append(document.createTextNode("a Jobs job — the hands change by day and shift in Jobs"));
   const room = el("div");
-  room.append(document.createTextNode("out of order for the window — requested by Room Care, placed by the state's owner "), el("span", "tag port", "architect · ADR 0051/0056"));
+  room.append(document.createTextNode("out of order for the window"));
   kv.append(el("div", "k", "The work"), work,
     el("div", "k", "The room"), room,
     el("div", "k", "Return to sale"), el("div", undefined, "departure clean + inspection when its app is installed → clean again → release requested"),
-    el("div", "k", "Typical length"), el("div", undefined, "informational — from the last jobs of this type once Jobs publishes them, never a promise"));
+    el("div", "k", "Typical length"), el("div", undefined, "informational, never a promise"));
 
   const cols = el("div", "cols");
   cols.append(card("The plan — per room type", table, count), card("What a deep clean is, at this property", kv));

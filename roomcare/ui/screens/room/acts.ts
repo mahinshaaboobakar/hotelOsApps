@@ -34,7 +34,7 @@ export function roomState(host: HostApi, nav: Nav, room: BoardRoom): void {
     el("label", "lbl", "What happened"), choices,
     el("label", "lbl", "Arrival expected today · sets sold tonight"), arrival,
     el("label", "lbl", "Condition"), condition,
-    el("p", "dim", "Recorded as source manual — a deliberate act. If the PMS later says otherwise: older than this is history; newer and contradicting is a disagreement flag (S4)."),
+    el("p", "dim", "Recorded as source manual — a deliberate act. If the PMS later says otherwise: older than this is history; newer and contradicting is a disagreement flag."),
   );
   actions(overlay, "Record", () => {
     void (async () => {

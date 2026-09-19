@@ -75,7 +75,7 @@ export function record(host: HostApi, page: RoomPage): HTMLElement {
 }
 
 function decision(host: HostApi, page: RoomPage): HTMLElement {
-  const title = "The decision Room Care made — recorded, not re-derived";
+  const title = "The decision Room Care made";
   const d = page.decision;
   if (d === null) return card(title, el("div", "dim", "no service was decided for this room today"));
   const kv = el("div", "kv");

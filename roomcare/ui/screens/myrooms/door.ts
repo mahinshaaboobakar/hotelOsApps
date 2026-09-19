@@ -137,7 +137,7 @@ function issue(host: HostApi, nav: Nav, taskId: string): void {
   const overlay = sheet(nav.frame, "Found an issue");
   const note = el("textarea", "field") as HTMLTextAreaElement;
   overlay.body.append(el("label", "lbl", "What is wrong"), note,
-    el("p", "dim", "Recorded on this room's task, never lost. It is published with a correlation id; Jobs, when installed, creates the job and the room shows its number."));
+    el("p", "dim", "Recorded on this room's task, never lost. Jobs, when installed, creates the job and the room shows its number."));
   actions(overlay, "Record the issue", () => void (async () => {
     const done = await act(host, "room.clean", "issue", { taskId, note: note.value });
     if (!done.ok) return overlay.refuse(done.because);

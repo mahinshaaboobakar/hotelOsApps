@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { activate } from "../application";
-import { TABS } from "../screens/setup";
-import { ATTENDANT, SUPERVISOR, click, host, mount, recorded, settle, type Call } from "./host";
+import { SUPERVISOR, settle } from "./host";
+import { PLACES, current, pressable, reach } from "./places";
+import type { Call } from "./host";
 
 /**
  * No control looks live and does nothing (owner ruling, 2026-09-19: dead
@@ -16,39 +16,9 @@ import { ATTENDANT, SUPERVISOR, click, host, mount, recorded, settle, type Call 
  * exemption is the CURRENT choice (`aria-pressed="true"`, or the pager's page
  * being shown): pressing what is already chosen changes nothing, correctly.
  * That exemption is why a choice with no alternative is tested on its own
- * below — the walk cannot see it. The places are derived from the module's own
- * section and Setup tab lists, so a place added later is walked.
+ * below — the walk cannot see it. The places are `tests/places.ts`'s, shared with
+ * the developer-content walk.
  */
-const PLACES: readonly (readonly [string, readonly string[], string, string | null])[] = [
-  ...["Board", "Prepare", "Room states", "Supervision", "Deep clean"].map((s) => [s, SUPERVISOR, s, null] as const),
-  ...TABS.map((t) => [`Setup · ${t}`, SUPERVISOR, "Setup", t] as const),
-  ["My rooms", ATTENDANT, "My rooms", null],
-];
-
-async function reach(capabilities: readonly string[], section: string, tab: string | null, calls: Call[]): Promise<HTMLElement> {
-  const root = mount(activate, host(capabilities, pagedMyRooms(), calls));
-  await settle();
-  if (section !== "My rooms" && section !== "Board") click(root, ".head .tab", section);
-  await settle();
-  if (tab !== null) click(root, ".subnav .tab", tab);
-  await settle();
-  return root;
-}
-
-/** My rooms with a second page, so its pager has somewhere to go. */
-function pagedMyRooms(): Record<string, unknown> {
-  const mine = recorded<{ paging: { page: number; pageSize: number; total: number } }>("my-rooms");
-  return { myRooms: { ...mine, paging: { ...mine.paging, total: mine.paging.pageSize + 1 } } };
-}
-
-function pressable(root: HTMLElement): HTMLButtonElement[] {
-  return [...root.querySelectorAll<HTMLButtonElement>(".body button")].filter((b) => !b.hasAttribute("disabled"));
-}
-
-function current(button: HTMLButtonElement): boolean {
-  return button.getAttribute("aria-pressed") === "true" || button.matches(".pg.on");
-}
-
 describe("every control a person can press", () => {
   for (const [place, capabilities, section, tab] of PLACES) {
     it(`does something when pressed — ${place}`, async () => {

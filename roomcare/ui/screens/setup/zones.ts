@@ -52,13 +52,13 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
   const continuity = toggle(v.strategy === "CONTINUITY", "Continuity");
   const line = (control: HTMLElement, text: string): HTMLElement => { const d = el("div"); d.append(control, document.createTextNode(text)); return d; };
   const posted = el("div", "mono aside");
-  posted.append(document.createTextNode("who is posted to which zone today is Workforce's posting, read through Context "), el("span", "tag port", "Workforce ask · zone on the posting"));
+  posted.append(document.createTextNode("who is posted to which zone today is Workforce's posting"));
   const kv = el("div", "kv");
   kv.append(el("div", "k", "First"), line(first, " — an attendant gets rooms in the zone they are posted to"),
     el("div", "k", "Then"), line(inlineSelect([["LOWEST_LOAD", "lowest load"]], "LOWEST_LOAD"), " — the fewest minutes already planned"),
     el("div", "k", "Continuity"), line(continuity, "the attendant who did the room yesterday gets it again"),
-    el("div", "k", "Within"), el("div", undefined, "the shift's minutes, from Workforce through Context — never a number set here"),
-    el("div", "k", "If nobody fits"), el("div", undefined, "\"nobody available\" on the board and in the supervision lane — never silence (S0)"));
+    el("div", "k", "Within"), el("div", undefined, "the shift's minutes — never a number set here"),
+    el("div", "k", "If nobody fits"), el("div", undefined, "\"nobody available\" on the board and in the supervision lane — never silence"));
   const strategy = card("Strategy — how the proposal matches rooms to the attendants on shift", kv, posted);
 
   const table = el("table");
@@ -78,7 +78,7 @@ export async function zones(host: HostApi, body: HTMLElement, nav: Nav, data: Se
   moveRow.style.marginTop = "8px";
   moveRow.append(control("btn sm", "Move rooms between zones…", () => move(host, nav, v, v.zones[0]?.zoneId ?? "")));
   const title = el("span");
-  title.append(document.createTextNode("Zones — which room belongs to which zone "), el("span", "mono", "(RoomZoneAssignment, ADR 0044 — Room Care's)"));
+  title.append(document.createTextNode("Zones — which room belongs to which zone "));
   const zonesCard = card(title, table, count, moveRow);
 
   const cols = el("div", "cols");

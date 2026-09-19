@@ -26,12 +26,12 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
   const linen = card("Linen",
     sentence("radio", radio("linenRuleKind", "EVERY_N_DEFERRABLE", p.linenRuleKind === "EVERY_N_DEFERRABLE", "Every N nights, the guest may defer", "— N =", set("linenRuleKind")), inlineNumber(p.linenEveryDays, set("linenEveryDays"))),
     radio("linenRuleKind", "MUST_BY_N", p.linenRuleKind === "MUST_BY_N", "Must be changed by day N", "— no deferral; the door offers Done or Partial-with-linen only", set("linenRuleKind")),
-    aside("counted on the ROOM — \"linen last changed\", reset by every departure clean; nights empty do not count (S5 c4, c11)"));
+    aside("counted on the ROOM — \"linen last changed\", reset by every departure clean; nights empty do not count"));
 
   const towels = card("Towels",
     radio("towels", "DAILY", p.towels === "DAILY", "Replace daily", "", set("towels")),
     radio("towels", "GREEN_PROGRAMME", p.towels === "GREEN_PROGRAMME", "Green programme", "— hung towels kept, floor towels replaced", set("towels")),
-    aside("a property rule — the guest does not choose (S5 c5)"),
+    aside("a property rule — the guest does not choose"),
     sub("On departure"), sentence("radio", "the room becomes", inlineSelect([["DIRTY", "dirty"]], p.onDepartureCondition)),
     sub("Stay facts usually come from"),
     sentence("row", radio("staySource", "PMS", p.staySource === "PMS", "the PMS", "", set("staySource")), radio("staySource", "GUESTOPS", p.staySource === "GUESTOPS", "GuestOps", "(no PMS)", set("staySource")),
@@ -45,7 +45,7 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
   const leads = card("Who decides a room's condition",
     radio("whoLeads", "ROOM_CARE", p.whoLeads === "ROOM_CARE", "Room Care leads", "(default) — attendants mark rooms in the app; a PMS change that disagrees is flagged for a supervisor", set("whoLeads")),
     radio("whoLeads", "PMS", p.whoLeads === "PMS", "The PMS / front desk leads", "— rooms change when the PMS says so; Room Care records and announces it", set("whoLeads")),
-    aside("either way an observation is applied unless it contradicts a later act here (S4)"));
+    aside("either way an observation is applied unless it contradicts a later act here"));
 
   let ladder = [...p.priorityLadder];
   const rungs = el("div", "kv");
@@ -64,11 +64,11 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
     sentence("radio", "a clean vacant room unsold for", inlineNumber(p.refreshAfterDays, set("refreshAfterDays")), "days gets a refresh"),
     sub("DND at the door"),
     sentence("radio", "re-check every", inlineNumber(p.dndRecheckMinutes, set("dndRecheckMinutes")), "min, until", inlineSelect([["WINDOW_END", "the window ends"]], "WINDOW_END")),
-    el("div", "mono", "turndown is a fresh attempt on a DND room (S5 c1)"));
+    el("div", "mono", "turndown is a fresh attempt on a DND room"));
 
   const supervisor = card("The supervisor steps in",
-    sentence("radio", "after", inlineNumber(p.supervisorAfterDays, set("supervisorAfterDays")), "days without service — declined or DND, either counts (row 7)"),
-    aside("on day N+1 the room is the supervisor's: a decision is required before the window closes on it, and every later DND day stays the supervisor's (S5 c9)"));
+    sentence("radio", "after", inlineNumber(p.supervisorAfterDays, set("supervisorAfterDays")), "days without service — declined or DND, either counts"),
+    aside("on day N+1 the room is the supervisor's: a decision is required before the window closes on it, and every later DND day stays the supervisor's"));
 
   const top = el("div", "cols3");
   top.append(linen, towels, leads);

@@ -51,7 +51,7 @@ export function phasesCard(host: HostApi, nav: Nav, row: ServiceRow, reordered: 
   });
   if (row.service === "DEPARTURE_CLEAN") {
     const inspect = el("div");
-    inspect.append(document.createTextNode("only if the rule says — requested from the inspection app"), el("span", "tag port", "RC-Q1(6)"));
+    inspect.append(document.createTextNode("only if the rule says"));
     kv.append(el("div", "k", `${whole(host, row.phases.length + 1)} · Inspect`), inspect);
   }
   const buttons = el("div", "row");
