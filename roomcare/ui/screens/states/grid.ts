@@ -59,7 +59,7 @@ export function grid(host: HostApi, data: RoomStates, edits: Edits, conflicts: R
     const tiles = el("div", "tilegrid");
     for (const row of zone.rooms) {
       const condition = edits.value(row, "condition");
-      const classes = ["tile", "big", row.blocked ? "blocked" : conditionClass(condition)];
+      const classes = ["tile", row.blocked ? "blocked" : conditionClass(condition)];
       if (edits.has(row.roomId)) classes.push("chg");
       if (conflicts.has(row.roomId)) classes.push("picked");
       const tile = el("button", classes.join(" "), row.number);
