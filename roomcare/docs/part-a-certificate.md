@@ -1,5 +1,59 @@
 # Room Care Part A — frame beside capture
 
+Run 2026-09-19 by KK against the frames **as re-locked at `65762c95`** (01b, the owner: *"A small, B keep, C
+approved"*), with 02's "match" completed at `a81783e`. **Built by the run, from `b43b949`, clean.** The provenance
+stamp names seven artifacts by digest. `module.js` (`2a87ed40…`) and the five widget bundles are the bytes in
+**`roomcare-0.1.3.hopkg`** (`c3485aa2…`), which is staged, and Part B certifies it.
+
+## Result
+
+```text
+drawn 1,657 · built 1,566 · paired 427 (25.8% of drawn, was 377 · 22.8%) · identical 302 · differing 125
+every one of the 125 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+| Class | n | Moves |
+|---|---|---|
+| sticky-header-ground | 23 | neither |
+| font-shorthand-line-height | 47 | drawing |
+| flex-blockified | 2 | neither |
+| button-type-size | 8 | drawing |
+| selected-row-example | 2 | neither |
+| named, one each | 43 | 25 drawing · 15 adjudicate · 3 neither |
+
+## What the re-lock changed
+
+- **50 more nodes pair.** The frames now draw tiles and chips as the build's `<button>`. H4's retagging rendered
+  identically (0 differing pixels over each whole page), so the new pairs are a measurement that is newly possible,
+  not a change in the drawing.
+- **36 of the new pairs differ, and each is named on its own in `classify.mjs`:**
+  - **22 chips, the drawing moves.** Their border is `--line` in the frame, and §2 gives every `.btn` `line-strong`.
+    They also carry the next item's two differences.
+  - **12 chips, adjudicate.** Every chip is blockified in the build's flex row (neither), and is spaced by its own
+    6px bottom margin in the frame but by the row's 6px gap in the build. Nothing rules which spacing is right. One
+    of the 12 (frame 4's *Guest departed*) is also drawn chosen, where nothing is chosen on arrival.
+  - **2 tiles, data.** G09 and G10 on 1a: the frame's Marina Bay states are not the recorded Coral Cove states.
+- **Found by the re-run and closed before naming:** 02's `.chip` and `.strip` were still at the first set. The
+  owner's "match" had chosen one set, and my first fold moved only the three classes Part A had then shown. It was
+  completed at `a81783e`, which closed the setup chips' padding difference instead of naming it.
+- **The re-lock's own records now agree with the build**: `.sect` at `.04em`, the legend and the timeline's detail
+  line at 12px / 19.8px. They left no difference to name.
+
+## What this does not prove
+
+The paired share is still the finding: 427 of 1,657 drawn nodes, from 9.1% (7e) to 57.1% (7c). Two causes remain.
+The frames draw tabs, actions and pager buttons as `div`/`span`: 239 controls, which is H4's open remainder, drawn
+for the owner as its own page. And the frames draw Marina Bay while the harness renders the recorded Coral Cove
+morning.
+
+---
+
+## Superseded by the re-lock at `65762c95` — kept, not deleted
+
+*The certificate below measured the frames as they were before 01b's records were folded in. Its figures are right
+for what it measured, and they no longer describe the locked frames.*
+
+
 Run 2026-09-19 by KK. **Built by the run, from `14742a3`, clean** — the
 provenance stamp `ui/.parta/provenance.json` names seven artifacts by digest,
 and the five widget bundles and `module.js` in **`roomcare-0.1.2.hopkg`**
@@ -13,7 +67,7 @@ bundles' digests at `14742a3` are those at `89777a1`, so 0.1.2 stands. Earlier
 certificates are in this file's history: `71ff149` with 87 differences, and
 `89777a1` with 80.
 
-## Method
+### Method
 
 - **The instrument is shared, not private**: `HosPilotOS/scripts/review-measure.mjs`
   sweeps each drawing and each build rendering (Edge, computed styles) and
@@ -30,7 +84,7 @@ certificates are in this file's history: `71ff149` with 87 differences, and
   it. Where the standard is silent the class is `adjudicate` and it stays in
   the report.
 
-## Proved to fail before the green was counted
+### Proved to fail before the green was counted
 
 ```text
 an unknown frame id                     run.mjs exits 2, naming the ids
@@ -40,7 +94,7 @@ the style restored                      frame 7g re-swept clean from 71ff149, ex
 the second set, old rules (f7ba0df)     classify.mjs exits 1 — 14 UNCLASSIFIED, all on 7b–7g
 ```
 
-## Result
+### Result
 
 ```text
 drawn 1,657 · built 1,566 · paired 377 (22.8% of drawn) · identical 302 · differing 75
@@ -97,7 +151,7 @@ six classes to the second set (`86c504f`) and the three moves above
 (`f7ba0df`): 87 became 80. The drawing's move for "match" (`3f1cfbd`) took it
 to 75.
 
-## What this does not prove — read before quoting the 22.8%
+### What this does not prove — read before quoting the 22.8%
 
 **The paired share is the finding, not a footnote.** 377 of 1,657 drawn nodes
 paired, from 5.9% (the map) to 55.6% (Rules). Two causes, both measured:
@@ -117,7 +171,7 @@ them; about the other 77% of each drawing it says nothing, and does not claim
 to. The visual audit of 2026-09-13 (frame beside capture, by eye) covered the
 rest and is recorded in chapter 03 §9.
 
-## For the owner, drawn
+### For the owner, drawn
 
 1. **The screens page contradicted itself. Decided: the second set** (owner,
    2026-09-19, 19f203c5, *"we can go with second"*). The build carries it.
