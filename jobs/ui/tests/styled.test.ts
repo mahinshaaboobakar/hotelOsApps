@@ -3,6 +3,7 @@ import { join, relative } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { TONE } from "../chrome/failure";
 import { MARKS_CSS } from "../chrome/marks";
 import { stylesheet as moduleSheet } from "../chrome/styles";
 import { stylesheet as widgetSheet } from "../widgets/sheet";
@@ -152,7 +153,10 @@ describe("every emitted class is defined in the realm that emits it", () => {
   const SIZES: Readonly<Record<string, readonly string[]>> = {
     module: [
       "gap", "gap-state", "gap-mark", "gap-label", "gap-said", "gap-why",
-      "gap-do", "gap-ask", "gap-facts", "gap-unanswered", "gap-forbidden", "gap-faulted",
+      "gap-do", "gap-ask", "gap-facts",
+      // One per cause, from TONE's keys — so a cause the SDK adds is expected
+      // here the moment it is given a colour, and not when someone remembers.
+      ...Object.keys(TONE).map((cause) => `gap-${cause}`),
     ],
     widget: ["wfail", "wfail-mark", "wfail-said", "wfail-why", "wfail-open"],
   };

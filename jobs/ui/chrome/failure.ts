@@ -163,7 +163,16 @@ function facts(drawing: FailureDrawing, capability: string): HTMLElement {
   return list;
 }
 
-/** The colour each state's mark takes — `.st-mark.wait / .no / .fault`. */
+/**
+ * The colour each state's mark takes — `.st-mark.wait / .no / .fault`.
+ *
+ * **The one list of causes in this module.** The screen's per-cause rules and
+ * the stylesheet guard's expectations are both derived from its keys, so a
+ * cause the SDK adds is one entry here and cannot be half-added — a colour with
+ * no rule, or a rule the guard does not know to expect. `Record<Cause, …>`
+ * makes a missing entry a compile error the moment the SDK's union grows, which
+ * is the point: a new state must be given its drawn colour, not inherit one.
+ */
 export const TONE: Readonly<Record<Cause, string>> = {
   unanswered: "var(--color-warn,#fbbf24)",
   forbidden: "var(--color-ink-muted,#8b93a7)",
@@ -186,9 +195,7 @@ export const FAILURE_CSS = `
 .gap-state{width:min(560px, 92%);padding:34px 0;text-align:left}
 .gap-mark{margin-bottom:12px}
 .gap-mark svg{width:26px;height:26px;display:block}
-.gap-unanswered .gap-mark{color:${TONE.unanswered}}
-.gap-forbidden .gap-mark{color:${TONE.forbidden}}
-.gap-faulted .gap-mark{color:${TONE.faulted}}
+${Object.entries(TONE).map(([cause, tone]) => `.gap-${cause} .gap-mark{color:${tone}}`).join("\n")}
 .gap-label{font-family:ui-monospace,"Cascadia Mono",Menlo,monospace;font-size:11px;letter-spacing:.1em;
            text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin-bottom:6px}
 .gap-said{font-size:19px;font-weight:600;letter-spacing:-.01em;line-height:1.4;margin-bottom:8px;
