@@ -1,13 +1,17 @@
 # Room Care Part A — frame beside capture
 
-Run 2026-09-19 by KK. **Built by the run, from `89777a1`, clean** — the
+Run 2026-09-19 by KK. **Built by the run, from `14742a3`, clean** — the
 provenance stamp `ui/.parta/provenance.json` names seven artifacts by digest,
 and the five widget bundles and `module.js` in **`roomcare-0.1.2.hopkg`**
 (sha256 `7b7b6ec0…fdc00a6f`) are those bytes, checked from inside the archive.
 
 **Re-run after the owner chose the second set** (19f203c5, *"we can go with
-second"*). The build carries it from `86c504f`. The certificate before this
-one, from `71ff149` with 87 named differences, is in this file's history.
+second"*). The build carries it from `86c504f`. The owner then chose
+**"match"** for the setup page (c69fde42, *"i choosed `match`"*). 02 is
+redrawn at the second set (`3f1cfbd`), and the build did not change: the
+bundles' digests at `14742a3` are those at `89777a1`, so 0.1.2 stands. Earlier
+certificates are in this file's history: `71ff149` with 87 differences, and
+`89777a1` with 80.
 
 ## Method
 
@@ -39,19 +43,18 @@ the second set, old rules (f7ba0df)     classify.mjs exits 1 — 14 UNCLASSIFIED
 ## Result
 
 ```text
-drawn 1,657 · built 1,566 · paired 377 (22.8% of drawn) · identical 297 · differing 80
-every one of the 80 is named; classify.mjs exits 0; 0 frames unreached
+drawn 1,657 · built 1,566 · paired 377 (22.8% of drawn) · identical 302 · differing 75
+every one of the 75 is named; classify.mjs exits 0; 0 frames unreached
 ```
 
 | Class | n | Moves | Why |
 |---|---|---|---|
-| setup-page-first-set | 13 | **adjudicate** | the setup page declares `.mono .tag .pill` once, at the first set; the build carries the owner's second |
 | sticky-header-ground | 23 | neither | the wall's header sticks over the scrolling house; same pixels |
-| font-shorthand-line-height | 31 | drawing | the frame's `font:` shorthand resets line-height (64 §2's fourth reset) |
+| font-shorthand-line-height | 39 | drawing | the frame's `font:` shorthand resets line-height (64 §2's fourth reset) |
 | flex-blockified | 2 | neither | a span in a flex row computes block |
 | button-type-size | 2 | drawing | 64 §2 fixes `.btn` at 13px; the frame's `font:inherit` makes it 14 |
 | selected-row-example | 2 | neither | the frame draws a row selected; nothing is on arrival |
-| named, one each | 7 | 2 drawing · 4 adjudicate · 1 neither | in `classify.mjs`, with reasons |
+| named, one each | 7 | 3 drawing · 3 adjudicate · 1 neither | in `classify.mjs`, with reasons |
 
 ### What the second set closed, and what remains
 
@@ -67,13 +70,22 @@ every one of the 80 is named; classify.mjs exits 0; 0 frames unreached
   there keeps 11px against `table.wall td` (4c ×2, 4e); the priority pill's
   border is its fill colour (3b). *This certificate's earlier count of 24
   therefore overstated the class question by five.*
-- **Remaining: 13 on the setup page, plus one second cause.** The move opened
-  them. `02-the-roomcare-setup.html` declares these classes once, at the
-  first values, and 01a drew the screens page only, so the owner's choice
-  did not address that page. They are `adjudicate` and not the drawing's to
-  move by assumption. The build has one sheet: either 02 is redrawn at the
-  second set, or Setup keeps the first set under its own scope. 7e's `lobby`
-  cell carries this and the selected-row example, so it is named on its own.
+- **Opened, then closed by "match": 13 on the setup page.** The move opened
+  them, because 02 declared these classes once, at the first set, and 01a had
+  drawn only the screens page. At `89777a1` they were `adjudicate`. With 02
+  redrawn (`3f1cfbd`), all 13 left the rule, which is now removed. 5 are
+  identical: the three `.tag`s on 7b, the `.tag` on 7f and the `.pill` on 7g.
+  8 differ only in line-height, from the frame's `.mono` `font:` shorthand, and
+  are counted under that rule (31 → 39). **None remains for a reason of its
+  own.**
+- **The one cell with two causes: 7e, `lobby`.** The frame draws its row
+  selected (the selected-row example, where neither side moves), and its
+  `.mono` shorthand resets line-height (the drawing moves). It is named on its
+  own, with both. Until `3f1cfbd` its size differed too. *Once the size
+  difference was gone, the `selected-row-example` rule absorbed it, because
+  that rule allowed line-height. It is the same fault as the old
+  page-redeclares rule. The rule now matches background colour alone, which
+  surfaced nothing else.*
 - **The other named classes are unchanged**, and so is the paired share,
   because the move changed values, not which nodes pair.
 
@@ -82,7 +94,8 @@ the standard silent: the radio's bold at 700, the states tables' 4px rows, the
 widget scope at 13px, the *group by* label muted, the card heading's mono
 aside at 400 (119 differences became 87). Then, after the owner's choice, the
 six classes to the second set (`86c504f`) and the three moves above
-(`f7ba0df`): 87 became 80.
+(`f7ba0df`): 87 became 80. The drawing's move for "match" (`3f1cfbd`) took it
+to 75.
 
 ## What this does not prove — read before quoting the 22.8%
 
@@ -107,11 +120,10 @@ rest and is recorded in chapter 03 §9.
 ## For the owner, drawn
 
 1. **The screens page contradicted itself. Decided: the second set** (owner,
-   2026-09-19, 19f203c5, *"we can go with second"*). The build carries it. **Now
-   open: the setup page.** It draws `.mono .tag .pill` at the first set, and 01a
-   did not show it. Either 02 is redrawn at the second set, or Setup keeps the
-   first in the build under its own scope. That is 13 differences, drawn in
-   `setup-page-first-set`. *History: this item said "nine classes" and "the
+   2026-09-19, 19f203c5, *"we can go with second"*). The build carries it.
+   **The setup page: decided, "match"** (owner, 2026-09-19, c69fde42, *"i
+   choosed `match`"*). 02 is redrawn at the second set (`3f1cfbd`), and its 13
+   differences closed. *History: this item said "nine classes" and "the
    build follows the first" until 2026-09-19, and 01a
    (`docs/mockups/01a-the-classes-declared-twice.html`) drew the eleven.*
 2. **Measurable frames.** Redrawing the frames in the build's element types
