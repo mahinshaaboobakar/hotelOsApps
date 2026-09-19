@@ -11,7 +11,7 @@
     "build:module": "node ../../scripts/build-module.mjs",
     "build:widgets": "node ../../scripts/build-module.mjs widgets/rooms-ready.js widgets/entry/rooms-ready.ts && node ../../scripts/build-module.mjs widgets/arrivals-waiting.js widgets/entry/arrivals-waiting.ts && node ../../scripts/build-module.mjs widgets/attention.js widgets/entry/attention.ts && node ../../scripts/build-module.mjs widgets/attendants-now.js widgets/entry/attendants-now.ts && node ../../scripts/build-module.mjs widgets/pending-policy.js widgets/entry/pending-policy.ts",
     "test": "npm run build && vitest run",
-    "capture": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
+    "harness": "esbuild preview/frame.ts --bundle --format=esm --outfile=preview/frame.js"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",

@@ -33,7 +33,7 @@ export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflic
   const keep = shows.find(([label]) => label.split(" ·")[0] === show.split(" ·")[0])?.[1] ?? (() => true);
 
   const house = el("div", "house");
-  const table = el("table", "wall");
+  const table = el("table", "wall states");
   const head = el("tr");
   const all = el("input") as HTMLInputElement;
   all.type = "checkbox";

@@ -236,7 +236,7 @@ ul.flows b{color:var(--text)}
 <div class="note hold"><b>219 is "new since 08:00".</b> The PMS checkout arrived after <i>Prepare the day</i>; in <b>Prepare</b> mode nothing is created behind the manager's back — it is shown, counted, and added by the next press (frame 2). In <b>Automatic</b> mode this row would already carry a proposal.</div>
 
 <h1 class="frame">1a · <b>The board — the map</b>. Coral Cove Resort — 250 rooms at ground level, four zones. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="win">
+<div id="f1a" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -260,7 +260,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Candidate A — the map.</b> One tile per room; <b>fill is the condition and only the condition</b> — dirty · clean · inspected, the thing Room Care owns; the ring is today's service state; the corner marks are the exceptions. Grouped by <b>zone</b> because every Room Care property has zones (Room Care's own <code>RoomZoneAssignment</code>); building/wing, floor or room type are offered only where Master Data's tree has them — Coral Cove has no floors, so that chip is dashed. Filters <b>dim</b> tiles, never remove them. Click a tile → the room (frame 4); hover → service · attendant · outcome so far. Answers <i>"where are we"</i> in one glance; does <b>not</b> show service, attendant or outcome without hovering — the owner's objection, which is why candidate B exists.</div>
 
 <h1 class="frame">1b · <b>The board — the wall</b>. The same house, every room one line, no pages. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="win">
+<div id="f1b" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -306,7 +306,7 @@ ul.flows b{color:var(--text)}
 <div class="note fix"><b>Redline 4 folded — owner, 2026-09-13: "we can lock both."</b> The board is <b>two views of one data set</b>, switched by the Map / Wall chip: the map for the glance, the wall for the work. Both grouped by zone by default. The paged list (frame 1) is removed. Drawn on a flat property so no candidate can lean on floors; the grouping is by zone by default and by whatever else Master Data's tree holds. Both also carry the <i>PMS ok · last fact</i> line in the strip and the manual source, per part 1 of this redline.</div>
 
 <h1 class="frame">2 · <b>Prepare</b>. The window's state, what changed, the proposal, the button.</h1>
-<div class="win">
+<div id="f2" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab on">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -347,7 +347,7 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">B · the attendant — my rooms, and the door</h2>
 
 <h1 class="frame">3 · <b>My rooms</b>. Anita's list, in priority order.</h1>
-<div class="win phone" style="max-width:720px">
+<div id="f3" class="win phone" style="max-width:720px">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">My rooms</div>
@@ -374,7 +374,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>Deliberately no "pick your own rooms"</b> — assignment is the supervisor's (S0). No zone picker, no capacity number — those are Workforce's. No restock line on any row: <span class="tag absent">absent</span> until Inventory is installed (RC-Q2).</div>
 
 <h1 class="frame">3b · <b>At the door</b>. Room 214, in progress — and how a room ends.</h1>
-<div class="win" style="max-width:720px">
+<div id="f3b" class="win" style="max-width:720px">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">My rooms</div>
@@ -420,7 +420,7 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">C · one room, and the supervisor's lane</h2>
 
 <h1 class="frame">4 · <b>A room</b>. 1204 — condition with its source, the day, and a disagreement.</h1>
-<div class="win">
+<div id="f4" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -496,7 +496,7 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">C2 · room states — every room, edited from one screen</h2>
 
 <h1 class="frame">4c · <b>Room states — the sheet</b>. Its own tab; every room a row; change the cell; save once. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="states"><div class="win">
+<div class="states"><div id="f4c" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -531,7 +531,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>The manual source, as a screen — redline 5, owner, 2026-09-13.</b> The per-room dialog was rejected (<i>"250 room updates in that design is too heavy"</i>). Room states is <b>its own top tab after Prepare</b>, and — as the Board has Map and Wall — it has <b>three views of one data set</b>: Sheet · Tap grid · Compact, a chip between them, <b>one <i>Save N changes</i> across all three</b>. Every write is a <code>room_observation</code>, source <b>manual</b>, a deliberate act under S4's clause; a row the PMS has since updated is red before you save (G06). Available at every property, never gated by where facts usually come from; rides <code>roomcare.amend</code>. ▸ opens the room page — the advanced edit, unchanged.</div>
 
 <h1 class="frame">4d · <b>Room states — the tap grid</b>. Pick a state, tap the rooms, save. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="states"><div class="win">
+<div class="states"><div id="f4d" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -561,7 +561,7 @@ ul.flows b{color:var(--text)}
 <div class="note"><b>The tap grid.</b> Choose what to paint — <i>dirty · vacant · departed</i>, 15:00 — then tap rooms; every tap is an undoable ✎ until Save. <i>Select all 24</i> on a zone header is the whole-wing checkout in one gesture. The facts behind a tile are on hover and on ▸.</div>
 
 <h1 class="frame">4e · <b>Room states — compact</b>. One tap per fact, two zones side by side. <span class="tag" style="color:var(--ok);border-color:var(--ok)">LOCKED · owner · 2026-09-13</span></h1>
-<div class="states"><div class="win">
+<div class="states"><div id="f4e" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab on">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -607,7 +607,7 @@ ul.flows b{color:var(--text)}
 <div class="note hold"><b>Which view opens by default</b> is a per-property choice on Setup › Rules (like the Board's default view), and the chip remembers the person's last choice on that desk — page 64's local-preference case.</div>
 
 <h1 class="frame">4b · <b>A room, inspected</b>. 401 — a departure clean whose rule says <i>arrivals only</i>, requested and answered.</h1>
-<div class="win">
+<div id="f4b" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab on">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -654,7 +654,7 @@ ul.flows b{color:var(--text)}
 <div class="note fix"><b>Redline 2 folded (2026-09-05) — "where is the inspection info?"</b> Every room page now carries an <i>Inspection — today</i> card: the rule that applied, whether it was requested and when, who answered and how, and what a failure does. Room Care <i>decides whether</i> (the rule, 7b), <i>requests by event</i>, and <i>applies the outcome</i> to the room's condition (RC-Q1(6)); the checklist and the inspector's screen are the inspection application's. With that application absent the card reads "no inspection application at this property — rule: none".</div>
 
 <h1 class="frame">5 · <b>Supervision</b>. The rooms that are the supervisor's today.</h1>
-<div class="win">
+<div id="f5" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab on">Supervision</div><div class="tab">Deep clean</div><div class="tab">Setup</div>
@@ -678,7 +678,7 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">D · deep clean, and setup</h2>
 
 <h1 class="frame">6 · <b>Deep clean</b>. Due, planned, blocked, in the job's hands, returning.</h1>
-<div class="win">
+<div id="f6" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab on">Deep clean</div><div class="tab">Setup</div>
@@ -710,7 +710,7 @@ ul.flows b{color:var(--text)}
 <div class="note hold"><b>One port left, drawn honestly.</b> The block's shape is final (request → the owner applies → Room Care hears it); the column reads "requested" only until the owner's event arrives. Until Jobs' post-certification round publishes progress (<code>JOBS-Q2</code>), the progress card shows <i>job open</i> / <i>job closed</i> only — the hands-by-day line above is what it will show, not what it shows today.</div>
 
 <h1 class="frame">7 · <b>Setup</b>. Seven tabs — each drawn as its own frame on <code>02-the-roomcare-setup.html</code>. This is the first.</h1>
-<div class="win">
+<div id="f7" class="win">
   <div class="head">
     <div class="app"><div class="mark">◫</div>Room Care</div>
     <div class="tab">Board</div><div class="tab">Prepare</div><div class="tab">Room states</div><div class="tab">Supervision</div><div class="tab">Deep clean</div><div class="tab on">Setup</div>
@@ -746,7 +746,7 @@ ul.flows b{color:var(--text)}
 <h2 class="sec">E · the five widgets — one question each</h2>
 
 <h1 class="frame">8 · <b>Widgets</b>. Rooms Ready · Arrivals Waiting · Attention · Attendants Now · Pending.</h1>
-<div class="wgrid">
+<div id="f8" class="wgrid">
   <div class="widget"><h3>Rooms Ready <span>today's departures</span></h3>
     <div style="display:flex;gap:26px;margin-bottom:10px"><div><div class="big" style="color:var(--ok)">22</div><div class="mono">ready</div></div><div><div class="big" style="color:var(--warn)">9</div><div class="mono">in progress</div></div><div><div class="big" style="color:var(--bad)">13</div><div class="mono">dirty</div></div></div>
     <div class="wrow"><span>44 departures</span><span class="mono">50% ready · 09:12</span></div>

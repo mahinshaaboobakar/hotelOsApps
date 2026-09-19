@@ -16,7 +16,7 @@ export function compact(host: HostApi, data: RoomStates, edits: Edits, conflicts
   const house = el("div", "house");
   const pairs = el("div", "pairs");
   for (const zone of data.zones) {
-    const table = el("table", "wall compact");
+    const table = el("table", "wall compact states");
     const changed = zone.rooms.filter((r) => edits.has(r.roomId)).length;
     const group = el("tr", "g");
     const cell = el("td", undefined, `▾ ${zone.name} · ${zone.rooms.length}${changed > 0 ? ` · ${changed} changed` : ""}`);

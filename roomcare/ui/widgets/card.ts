@@ -33,7 +33,7 @@ const WIDGET_CSS = `
        background:var(--color-surface,#0b0d14);padding:16px;font-variant-numeric:tabular-nums;
        min-height:100vh;display:flex;flex-direction:column}
 .whead{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin:0 0 12px}
-.whead span{color:var(--color-ink-faint,#5a6172);font-weight:400;font-size:12px}
+.whead span{color:var(--color-ink-faint,#5a6172);font-weight:400;font-size:13px}
 .wfig{display:flex;gap:26px;margin-bottom:10px}
 .wfig b{display:block;font-size:30px;font-weight:600;line-height:1.1}
 .wfig .lbl{font-family:ui-monospace,Menlo,monospace;color:var(--color-ink-muted,#8b93a7);font-size:11px}
