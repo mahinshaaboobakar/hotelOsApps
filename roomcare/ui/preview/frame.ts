@@ -9,14 +9,15 @@
  * top of the capture, so a capture that was not driven to its screen cannot be
  * mistaken for one that was.
  *
- * `?fail=<cause>` makes reads fail in each of the three ways the platform has —
- * `unanswered`, `forbidden`, `faulted` — through the host's own error kinds, so
+ * `?fail=<cause>` makes reads fail in each of the six ways contract v2 has
+ * (`unanswered`, `forbidden`, `unadmitted`, `ungranted`, `undecidable`,
+ * `faulted`) through the host's own error kinds, so
  * the real `load` classifies them: every widget read on `?screen=widgets`, or the
  * one read named by `&at=<method>` on a screen. Without it the harness could only
  * ever show a timeout, which is the one state a missing answer produces.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, type Cause, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
 import { arrivalsWaiting, attendantsNow, attention, pendingPolicy, roomsReady } from "../widgets/panel/panels";
@@ -54,7 +55,14 @@ const ANSWERS: Record<string, unknown> = {
 const L09 = (roomL09 as { line: { id: string } }).line.id;
 
 /** The host kind each cause is produced by — the platform's, so `load`'s own mapping decides. */
-const KINDS = { unanswered: "unavailable", forbidden: "forbidden", faulted: "internal" } as const;
+const KINDS = {
+  unanswered: "unavailable",
+  forbidden: "forbidden",
+  unadmitted: "local_forbidden",
+  ungranted: "user_forbidden",
+  undecidable: "model_unavailable",
+  faulted: "internal",
+} as const satisfies Record<Cause, string>;
 const fail = params.get("fail") as keyof typeof KINDS | null;
 const failing = (method: string): boolean =>
   fail !== null && (params.get("at") === null ? screen === "widgets" && method.startsWith("widget") : params.get("at") === method);
