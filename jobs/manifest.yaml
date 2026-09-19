@@ -76,7 +76,26 @@ name: "Jobs"
 # composition. The widget size is now its own surface, as 64b draws it.
 # Measured by role against the frame's own declarations: 224 of 224, in
 # `docs/mockups/measured-64b.json`.
-version: 0.4.1
+#
+# **0.4.2 — contract v2, and the whole app surface standard.** A patch number,
+# and not by modesty: every change here conforms Jobs to rulings it was already
+# bound by, and none adds a feature. But three things make this build different
+# in kind from 0.4.1, and an installer should know them:
+#
+#   * **It is module contract v2** (d45f028d, ADR 0195): a v1 desktop refuses it.
+#     Cut only once the owner's desktop was v2.
+#   * **The `scheduled` read changed shape** — `{ rows, paging }`, paged like the
+#     board, where it was one capped page with the total dropped (checklist G1).
+#     The UI and the backend ship together in this package, so nothing else
+#     reads it.
+#   * **It was audited against every line of page 64** — GG's checklist,
+#     3d521ce: 86 lines, 14 fails fixed each shown failing first, 4 routed as not
+#     Jobs' alone (N5, O7, H3, H6). `docs/mockups/app-surface-audit.md`.
+#
+# With it: 64e's colours for the three new causes; the SDK's own failure words
+# at both sizes, the time in the property's locale; the pager at the floor with
+# only the list scrolling (CORE-Q28); and the empty-list notice drawn in full.
+version: 0.4.2
 publisher: hotelos
 category: operations
 description: >-
