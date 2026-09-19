@@ -1,5 +1,13 @@
 # GuestOps Part B — the drive list
 
+> **Scope, and the certificate's first line: 16 reads served against an EMPTY
+> store prove the door, authorization, route, query and render — not the logic
+> that computes figures from rows.** Empty answers are reported as empty, never
+> as correct figures. Cancel is BLOCKED BY AUTHZ-Q37 and **not driven**: no
+> booking exists to cancel. — *architect's decision, 2026-09-19: run pipe-only as
+> soon as 0.3.1 is installed, and certify exactly that. The data-bearing run is a
+> second, separate certificate, not a blocker for this one.*
+
 Prepared 2026-09-18 by FF against `HotelOsApps` at `a4b6723` and platform
 `HosPilotOS` at `885677ec`. **To run once the owner has installed 0.3.1**
 (`guestops-0.3.1.hopkg`, 16,278,129 bytes, sha256 `4248ecf5…fd1ca8`) on the
@@ -245,6 +253,53 @@ Three consequences, stated now so the certificate does not discover them:
 A first query guessed the table name `guestops.stays`; it does not exist
 (`room_stays` does). Read-only, so nothing happened; recorded because a guess
 that errors is a query like any other.
+
+## The second certificate — a supported path to a booking, and what walk-in measured
+
+The data-bearing run needs a booking to reach the store by a supported path.
+Two routes exist and both are further off (architect, 2026-09-19): **the PMS
+connector feeding** — the Oracle milestone after *Test connection* — or **the
+walk-in submit wired.** *No row is written by hand* (ADR 0166).
+
+**Walk-in, MEASURED 2026-09-19 before anyone builds its handler — it is NOT one
+transaction.** `WalkInCommand` calls `BookingService.CreateAsync`, then
+`StayAssignmentService.AssignAsync`, then `StayLifecycleService.CheckInAsync`,
+and `CreateAsync` commits on its own (`SaveChangesAsync`, line 56); nothing in
+GuestOps or the platform's module door opens a transaction around the three.
+
+Run, not read: a service-suite test on a per-run scratch database (ADR 0157),
+the real `EventAppender` into the real event store, and an authorizer answering
+as the Kernel does — property scope answered, `stay` refused with
+`authz/registry.rs:282`'s sentence:
+
+```text
+checks asked         stay.create on property -> stay.assign on stay
+refused with         permission "stay.assign" may be checked against property, but the object is a stay
+committed bookings   1
+committed stays      1   [Booked, walk_in=True]   -- no room, never checked in
+committed assignments 0
+committed events     3   [guest.created, reservation.created, stay.created]
+```
+
+**So a refused walk-in leaves a half-written booking and announces it**: three
+events reach the outbox, and every consumer is told a guest, a booking and a
+walk-in stay exist for somebody the desk turned away. The only double in the
+run is the authorizer; which exception it throws cannot change the answer,
+because `CreateAsync` has committed before the second check is asked.
+
+**The measurement was not kept as a test** — it asserts nothing about what
+*should* happen, and a committed test recording a defect as its expectation
+would lock in the behaviour it was written to question. It was run twice and removed. **The handler is not
+wired**: its check-in step is stay-scoped and waits on the AUTHZ-Q37 mechanism
+anyway (architect, 2026-09-19).
+
+**Found beside it, unattributed and left alone**: three per-run application
+roles on the development cluster — `hotelos_app_guestops_071c86a5`, `_44c7833f`,
+`_6e0f62b9` — with no scratch database behind them. **This session's runs add
+none and leave none** (role list before and after a run: 3 and 3, identical),
+so the teardown works and they are older runs that never reached it. Not
+dropped: they cannot be attributed, and a cluster role is not mine to remove on
+a name match.
 
 ## What the certificate will say it did not prove
 
