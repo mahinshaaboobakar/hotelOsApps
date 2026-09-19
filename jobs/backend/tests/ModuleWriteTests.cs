@@ -253,6 +253,32 @@ public class ModuleWriteTests(JobsFixture fixture)
     }
 
     /// <summary>The raise every write test starts from.</summary>
+    [Fact]
+    public async Task A_refusal_a_person_reads_names_no_system()
+    {
+        // Owner, 2026-09-19: no system's name on a screen. A refused write is shown
+        // to the person (act() → done.refused), so these two sentences are screens.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        var h = module.Data;
+        await h.SeedCatalogueAsync();
+
+        h.Directory.PropertyCode = null;
+        var raised = await module.CallAsync(Permissions.Create, "raise", Job(h));
+        h.Directory.Organization = null;
+        var curated = await module.CallAsync(Permissions.Curate, "saveCategory", new { name = "Plumbing", code = "PLUMB", department = "ENG" });
+
+        foreach (var (answer, words) in new[]
+        {
+            (raised, "this property has no code yet, so a job number can't be made"),
+            (curated, "this property isn't linked to an organisation yet, so its catalogue can't be changed"),
+        })
+        {
+            var said = answer.Body?.ToString() ?? string.Empty;
+            Assert.True(said.Contains(words), $"{answer.Status}: {said}");
+            Assert.DoesNotContain("Master Data", said);
+        }
+    }
+
     private static object Job(JobsHarness h) => new
     {
         itemId = h.NotCooling.Id.ToString(),
