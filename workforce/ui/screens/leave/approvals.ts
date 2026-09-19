@@ -9,7 +9,7 @@
  * head otherwise. One rule, one queue.
  */
 
-import { formatDay, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatDay, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { codeChip } from "../../chrome/code";
 import { days } from "../../chrome/dates";
@@ -37,7 +37,7 @@ export function queue(items: readonly Waiting[],
     row.style.gridTemplateColumns = columns;
 
     const what = el("div");
-    what.append(el("b", undefined, item.who), el("s", undefined, item.what));
+    what.append(el("b", undefined, item.who), el("s", undefined, describe(item, property)));
 
     // A leave row carries a span and a swap row carries the day it was
     // accepted. They shared one field while both were rendered strings,
@@ -53,6 +53,18 @@ export function queue(items: readonly Waiting[],
   }
 
   return list;
+}
+
+/**
+ * What a queue row is, in words — "Casual · 3 days" composed here from the
+ * type and the number the service sends (NUM-Q1, ADR 0174); a swap row sends
+ * its own words.
+ */
+function describe(item: Waiting, property: PropertyEnvironment): string {
+  if (item.days === undefined) return item.what ?? "";
+
+  const days = formatNumber(item.days, property);
+  return `${item.type ?? "Leave"} · ${days} ${item.days === 1 ? "day" : "days"}`;
 }
 
 /**

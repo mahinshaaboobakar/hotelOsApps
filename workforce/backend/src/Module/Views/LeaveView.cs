@@ -300,8 +300,12 @@ public static class LeaveView
         var rows = leave.Select(one => (object)new
         {
             who = names.TryGetValue(one.StaffId, out var name) ? name : null,
-            what = (types.TryGetValue(one.LeaveTypeId, out var type) ? type.Name : "Leave")
-                   + " · " + one.Days + " days",
+            // **The type and the number, never the sentence** — NUM-Q1, ADR
+            // 0174. This composed `type + " · " + days + " days"`: a number, a
+            // separator and an English plural in the service's culture. Null
+            // for a type no longer in the catalogue; the screen says "Leave".
+            type = types.TryGetValue(one.LeaveTypeId, out var type) ? type.Name : null,
+            days = one.Days,
             kind = "Leave",
             dates = Dates(one.From, one.To),
         }).ToList();

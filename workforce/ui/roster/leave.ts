@@ -65,8 +65,17 @@ export interface Waiting {
   /** Who it concerns. */
   who: string;
 
-  /** What it is, in the queue's own words. */
-  what: string;
+  /** A swap row's own words. Absent on a leave row, which sends values instead. */
+  what?: string;
+
+  /**
+   * A leave row's type and length — the screen writes "Casual · 3 days".
+   *
+   * The service sent that sentence whole, in its own culture (NUM-Q1, ADR
+   * 0174). `type` is null for a type no longer in the catalogue.
+   */
+  type?: string | null;
+  days?: number;
 
   /** Which of the two kinds. */
   kind: "Leave" | "Swap";
@@ -167,16 +176,23 @@ export const recordedLeave: LeaveBoard = {
     },
   ],
 
+  // The wire's shape (LeaveView.Queue): a swap row's fixed words, and a leave
+  // row's type and days as values. These carried "accepted by Sneha" (the
+  // service names nobody there) and "Earned · 4 days · balance 1 of 15" — a
+  // balance the queue has never sent.
   waiting: [
     {
       who: "Anjali Menon & Sneha Iyer",
-      what: "Swap — accepted by Sneha, awaiting you",
+      what: "Swap — accepted, awaiting you",
       kind: "Swap", accepted: "2026-08-27",
     },
-    { who: "Joseph Kurian", what: "Casual · 2 days", kind: "Leave", dates: { from: "2026-09-07", to: "2026-09-08" } },
     {
-      who: "Rani Rajan", what: "Earned · 4 days · balance 1 of 15",
-      kind: "Leave", dates: { from: "2026-09-12", to: "2026-09-15" },
+      who: "Joseph Kurian", type: "Casual", days: 2, kind: "Leave",
+      dates: { from: "2026-09-07", to: "2026-09-08" },
+    },
+    {
+      who: "Rani Rajan", type: "Earned", days: 4, kind: "Leave",
+      dates: { from: "2026-09-12", to: "2026-09-15" },
     },
   ],
 
