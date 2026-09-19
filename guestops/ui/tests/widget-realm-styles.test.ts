@@ -80,7 +80,7 @@ describe("a widget realm's failure", () => {
     const card = unanswered(
       "Today at the Desk",
       failureDrawing(
-        { cause, capability: "reservation.read", method: "today", said: null, at: new Date() },
+        { cause, capability: "reservation.read", method: "desk", said: null, at: new Date() },
         { app: "GuestOps", the: "today at this property" },
       ),
       { retry: () => {}, open: () => {} },

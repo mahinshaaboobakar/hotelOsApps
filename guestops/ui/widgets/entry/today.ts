@@ -17,6 +17,7 @@ import { connectToHost, type HostApi } from "@hotelos/sdk";
 import { failureDrawing, load } from "@hotelos/sdk";
 
 import { APP } from "../../app";
+import { instant } from "../../chrome/when";
 import { serve } from "../mount";
 import { card, el, label, note, opener, row, stat, stylesheet, unanswered } from "../card";
 
@@ -25,11 +26,22 @@ interface Arrival {
   guest: string;
   /** Null until a room is assigned — drawn as the gap, never as a guess. */
   room: string | null;
-  at: string;
+
+  /** When they are expected — an ISO instant, or null when never recorded. */
+  at: string | null;
+
   stay: string;
 }
 
-/** The day. Any count may be absent; the domain answers what it can. */
+/**
+ * The day, from the widget's own read — `desk`.
+ *
+ * It read `today`, the screen's read, which has never sent these fields: on a
+ * property every count was absent and the list empty, and only the harness's
+ * fixture had this shape (found 2026-09-19). `DeskView` sends exactly this.
+ * Any count may be null — unknown, which the card draws as nothing, never as 0.
+ * The four are disjoint: a guest who has arrived is no longer due in.
+ */
 interface Today {
   dueIn: number | null;
   arrived: number | null;
@@ -44,7 +56,7 @@ connectToHost((host: HostApi) => {
   const open = opener(host, () => root);
 
   async function draw(into: HTMLElement): Promise<void> {
-    const answer = await load<Today>(host, "reservation.read", "today");
+    const answer = await load<Today>(host, "reservation.read", "desk");
 
     // A read that did not answer IS the card — APPS-Q42. The canvas is
     // 320x384 and does not scroll, so a failure cannot sit above content;
@@ -83,7 +95,7 @@ connectToHost((host: HostApi) => {
           arrival.room === null
             ? el("span", "rc miss", "— unassigned")
             : el("span", "rc", arrival.room),
-          el("span", "rc t", arrival.at),
+          el("span", "rc t", instant(arrival.at, host.property, "time")),
         ],
         `stay/${arrival.stay}`,
         open,

@@ -33,6 +33,8 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<StayListService>();
         services.AddScoped<BookingReadService>();
         services.AddScoped<Module.TodayView>();
+        services.AddScoped<Module.DeskView>();
+        services.AddScoped<Module.StayLabels>();
         services.AddScoped<Module.AttentionView>();
         services.AddScoped<Module.OperatorView>();
         services.AddScoped<Module.StayDetailView>();

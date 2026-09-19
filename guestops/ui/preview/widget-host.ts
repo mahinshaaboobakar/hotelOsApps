@@ -60,7 +60,7 @@ if (cause !== null && kind === null) {
 
 /** What each widget reads, loaded. */
 const LOADED: Record<string, unknown> = {
-  today: recorded.today,
+  desk: recorded.desk,
   occupancy: recorded.occupancy,
   feed: recorded.pms,
   mix: recorded.mix,

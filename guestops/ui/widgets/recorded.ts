@@ -14,21 +14,24 @@
  * bundle reaching for it would be the fallback coming back.
  */
 
-/** Today at the Desk — the four counts and the next five arrivals. */
-export const today = {
+/**
+ * Today at the Desk — the four counts and the next five arrivals, in the shape
+ * `desk` sends: disjoint counts, arrival times as instants.
+ */
+export const desk = {
   dueIn: 18,
   arrived: 11,
   dueOut: 14,
   departed: 12,
   arrivals: [
-    { guest: "Anand Menon", room: "Dlx 402", at: "14:20", stay: "a1" },
-    { guest: "Priya Nair", room: "Std 217", at: "14:45", stay: "a2" },
-    { guest: "R. Balakrishnan", room: "Ste 601", at: "15:00", stay: "a3" },
-    { guest: "Fatima Al Zahra", room: "Dlx 408", at: "15:30", stay: "a4" },
+    { guest: "Anand Menon", room: "Dlx 402", at: "2026-09-01T14:20:00+05:30", stay: "a1" },
+    { guest: "Priya Nair", room: "Std 217", at: "2026-09-01T14:45:00+05:30", stay: "a2" },
+    { guest: "R. Balakrishnan", room: "Ste 601", at: "2026-09-01T15:00:00+05:30", stay: "a3" },
+    { guest: "Fatima Al Zahra", room: "Dlx 408", at: "2026-09-01T15:30:00+05:30", stay: "a4" },
 
     // The gap rather than a guess — the canvas's own footnote, and the reason
     // this row is drawn at all rather than filtered out of the list.
-    { guest: "Joseph Thomas", room: null, at: "16:10", stay: "a5" },
+    { guest: "Joseph Thomas", room: null, at: "2026-09-01T16:10:00+05:30", stay: "a5" },
   ],
 };
 

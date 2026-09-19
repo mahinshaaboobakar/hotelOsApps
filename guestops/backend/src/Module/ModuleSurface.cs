@@ -107,6 +107,11 @@ public static class ModuleSurface
             // the day's arrivals has already decided its screens may name the
             // person reading them, and a tenth permission for the bar's right
             // slot is a decision an administrator would have to make twice.
+            // Today at the Desk's own read — the widget's counts, which the
+            // screen's `today` never carried (DeskView's remarks).
+            "desk" => services.GetRequiredService<DeskView>()
+                .AnswerAsync(request.Scope, cancellationToken),
+
             "me" => services.GetRequiredService<OperatorView>()
                 .AnswerAsync(request.Scope, cancellationToken),
 

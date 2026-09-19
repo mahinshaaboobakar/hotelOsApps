@@ -121,6 +121,68 @@ public sealed class StayListService(
     /// exists and a no-show is reportable (ADR 0062).
     /// </para>
     /// </remarks>
+    /// <summary>
+    /// A view's stays on one day, counted by lifecycle — every one of them.
+    /// </summary>
+    /// <remarks>
+    /// Counted where the rows live, never from a page: a count taken from a
+    /// capped read says the cap. Departures need the day's bounds, and without
+    /// them the filter answers nothing — so a caller that could not establish
+    /// the bounds must not call this for departures and read the empty result
+    /// as zero.
+    /// </remarks>
+    /// <param name="scope">The caller.</param>
+    /// <param name="view">Which list.</param>
+    /// <param name="day">The business day.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>How many of the view's stays are in each lifecycle; absent means none.</returns>
+    public async Task<IReadOnlyDictionary<StayLifecycle, int>> CountByLifecycleAsync(
+        RequestScope scope, StayView view, DateOnly day, CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.ReservationRead, ResourceTypes.Property, scope.PropertyId,
+            cancellationToken);
+
+        var stays = await FilterAsync(
+            scope, db.Stays.Where(s => s.PropertyId == scope.PropertyId), view, day, cancellationToken);
+
+        return await stays
+            .GroupBy(s => s.Lifecycle)
+            .Select(group => new { group.Key, Count = group.Count() })
+            .ToDictionaryAsync(group => group.Key, group => group.Count, cancellationToken);
+    }
+
+    /// <summary>The first few of a view's stays in one lifecycle, in arrival order.</summary>
+    /// <param name="scope">The caller.</param>
+    /// <param name="view">Which list.</param>
+    /// <param name="day">The business day.</param>
+    /// <param name="lifecycle">Which of them.</param>
+    /// <param name="take">How many.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>The stays.</returns>
+    public async Task<IReadOnlyList<RoomStay>> FirstAsync(
+        RequestScope scope,
+        StayView view,
+        DateOnly day,
+        StayLifecycle lifecycle,
+        int take,
+        CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.ReservationRead, ResourceTypes.Property, scope.PropertyId,
+            cancellationToken);
+
+        var stays = await FilterAsync(
+            scope, db.Stays.Where(s => s.PropertyId == scope.PropertyId), view, day, cancellationToken);
+
+        return await stays
+            .Where(s => s.Lifecycle == lifecycle)
+            .OrderBy(s => s.ArrivalAt.At)
+            .ThenBy(s => s.Id)
+            .Take(take)
+            .ToListAsync(cancellationToken);
+    }
+
     private async Task<IQueryable<RoomStay>> FilterAsync(
         RequestScope scope,
         IQueryable<RoomStay> stays,
