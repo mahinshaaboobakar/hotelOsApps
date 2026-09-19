@@ -12,7 +12,7 @@
 import { formatClock, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type Day, type DayRow } from "../../roster/attendance";
@@ -47,9 +47,12 @@ function header(day: Day): HTMLElement {
   picker.append(el("span", undefined, day.department), el("i", undefined, "▾"));
 
   const grow = el("div", "grow");
+  // Neither control is wired, and the stepper's label was a literal — *"Fri
+  // 28 Aug"* on every day but one (the app surface audit, 2026-09-19). The day
+  // is the sub-line's, so the stepper carries only its arrows.
   head.append(title, picker, grow,
-    el("div", "btn", "‹ Fri 28 Aug ›"),
-    el("div", "btn pri", "＋ Mark attendance"));
+    unavailable("btn", "‹ ›", "Other days cannot be opened here yet."),
+    unavailable("btn pri", "＋ Mark attendance", "Attendance cannot be marked here yet."));
   return head;
 }
 

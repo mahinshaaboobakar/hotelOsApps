@@ -21,7 +21,7 @@ import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment 
   from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
-import { el, fill } from "../../chrome/element";
+import { control, el, fill, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import { type Week } from "../../roster";
@@ -63,13 +63,17 @@ export async function printed(
   const week = gotWeek.value;
 
   const page = el("div", "page");
+  // **No "changes since issued" list.** It printed four personnel records —
+  // *"S. Iyer marked sick … approved by P. Thomas"* — as literals, on every
+  // property's paper, and no service records a change to an issued rota (the
+  // app surface audit, 2026-09-19). The section returns when something does.
   page.append(
-    masthead(week), grid(week, gotDuty.value, host.property), legend(week, host.property), changes());
+    masthead(week, host.property), grid(week, gotDuty.value, host.property), legend(week, host.property));
 
   const paper = el("div", "paper");
   paper.append(page);
 
-  root.append(preview(back), paper);
+  root.append(preview(back, week, host.property), paper);
 }
 
 /**
@@ -82,37 +86,51 @@ export async function printed(
  * that does not work yet — so Back is here as well, and it does work.
  *
  * @param back leave the preview and return to the rota
+ * @param week the week being printed — its department and dates are the line
+ * @param property the locale the dates are read in
  * @returns the row
  */
-function preview(back: () => void): HTMLElement {
+function preview(back: () => void, week: Week, property: PropertyEnvironment): HTMLElement {
   const row = el("div", "title pbar");
   const name = el("div");
 
+  // The week the service sent. This was the literal *"Front Office · 24 – 30
+  // August 2026 · A4 landscape"* — a department, a week and a page setup nobody
+  // set, on every property (the app surface audit, 2026-09-19).
   name.append(
     el("div", "ht", "Print preview"),
     el("div", "hsub",
-      "Front Office · 24 – 30 August 2026 · A4 landscape"));
+      `${week.department} · ${formatDay(week.monday, property, "day-month-year")}`
+      + ` – ${formatDay(week.sunday, property, "day-month-year")}`));
 
-  const leave = el("button", "btn", "‹ Back to the rota");
-  leave.setAttribute("type", "button");
-  leave.addEventListener("click", back);
+  const leave = control("btn", "‹ Back to the rota", back);
 
   return fill(row, name, el("div", "grow"), leave,
-    el("div", "btn", "Page setup"), el("div", "btn pri", "⎙ Print"));
+    unavailable("btn", "Page setup", "Page setup is not available yet."),
+    unavailable("btn pri", "⎙ Print", "Printing is not wired yet — the shell's print dialog is the next step."));
 }
 
-/** Who issued it and when — a printed page has no other provenance. */
-function masthead(week: Week): HTMLElement {
+/**
+ * What the page is: the department, and the week it covers.
+ *
+ * **It said who issued it, when, at which property, and how many pages** —
+ * *"Kochi Beach Resort · Week of Monday 24 August 2026 · issued Fri 21 Aug,
+ * 16:40 by P. Thomas"* and *"Page 1 of 1 · Printed 24 Aug 2026"* — every word a
+ * literal, on every property's paper (the app surface audit, 2026-09-19). A
+ * printed page has no other provenance, which is why an invented one is the
+ * worst kind: nothing beside it can disagree. Issue and page count return when
+ * something records them; the week is the week the service sent.
+ */
+function masthead(week: Week, property: PropertyEnvironment): HTMLElement {
   const head = el("div", "phead");
   const title = el("div");
 
   title.append(
     el("div", "pt", `${week.department} — Duty Rota`),
-    el("div", "psub",
-      "Kochi Beach Resort · Week of Monday 24 August 2026 · issued Fri 21 Aug, 16:40 by P. Thomas"),
+    el("div", "psub", `Week of ${formatDay(week.monday, property, "day-month-year")}`),
   );
 
-  head.append(title, el("div", "psub", "Page 1 of 1 · Printed 24 Aug 2026"));
+  head.append(title);
   return head;
 }
 
@@ -192,33 +210,6 @@ function entry(code: string, name: string, hours: string | null): HTMLElement {
   }
 
   return item;
-}
-
-/**
- * What changed after the page was issued.
- *
- * The week's record rather than somebody's memory — rendered from the events
- * the application already publishes, not kept as a second list that could
- * disagree. Saturday's missing MOD prints as an absence, **stated**.
- */
-function changes(): HTMLElement {
-  const box = el("div", "pchanges");
-
-  box.append(el("div", "pct", "Changes since this rota was issued"));
-
-  const list = el("ul", "pcl");
-
-  for (const line of [
-    "Tue 25 — R. Nair took MOD 20:00–08:00 in place of P. Thomas.",
-    "Wed 26 — S. Iyer marked sick; her afternoon was covered by J. Kurian (split shift).",
-    "Thu 27 — A. Menon and S. Iyer swapped (M ⇄ A), approved by P. Thomas.",
-    "Sat 29 — no Manager on Duty assigned for 20:00–08:00.",
-  ]) {
-    list.append(el("li", undefined, line));
-  }
-
-  box.append(list);
-  return box;
 }
 
 /** A duty band's hours on paper, in the property's clock. */

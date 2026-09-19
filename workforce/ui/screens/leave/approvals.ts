@@ -13,7 +13,7 @@ import { formatDay, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { codeChip } from "../../chrome/code";
 import { days } from "../../chrome/dates";
-import { el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import type { SwapDetail, Waiting } from "../../roster/leave";
 
 /** The queue. */
@@ -98,7 +98,9 @@ export function swapCard(swap: SwapDetail): HTMLElement {
   );
 
   const acts = el("div", "acts");
-  acts.append(el("div", "btn", "Decline…"), el("div", "btn pri", "Approve swap"));
+  acts.append(
+    unavailable("btn", "Decline…", "Swaps cannot be decided here yet."),
+    unavailable("btn pri", "Approve swap", "Swaps cannot be decided here yet."));
 
   card.append(title, steps, pair, preview(swap), note, atomic, acts);
   return card;

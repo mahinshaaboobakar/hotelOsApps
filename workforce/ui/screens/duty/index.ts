@@ -16,7 +16,7 @@
 import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import { assignDuty } from "./dialog";
@@ -95,16 +95,14 @@ function header(
 
   const grow = el("div", "grow");
   head.append(title, grow,
-    el("div", "btn", `‹ ${weekRange(register.days, property)} ›`),
+    unavailable("btn", `‹ ${weekRange(register.days, property)} ›`, "Other weeks cannot be opened here yet."),
     assign(open));
   return head;
 }
 
 /** The button that opens the dialog. */
 function assign(open: () => void): HTMLElement {
-  const button = el("div", "btn pri", "＋ Assign duty");
-  button.addEventListener("click", open);
-  return button;
+  return control("btn pri", "＋ Assign duty", open);
 }
 
 /** The two lines a duty manager opens this screen for. */

@@ -43,6 +43,38 @@ export function control(className: string, text: string, onClick?: () => void): 
 }
 
 /**
+ * A control the design draws and nothing behind it can do yet — drawn `off`,
+ * disabled, and saying why.
+ *
+ * §2: *"A primary action with nothing to send is drawn `off`, with the reason
+ * beside it — never live-and-refusing."* The app surface audit (2026-09-19,
+ * C8 · C11) found **twenty** such controls across Workforce drawn live as
+ * `div`s — each looking like it would act, none wired. A control that looks
+ * pressable and does nothing is the button's version of a fabricated value.
+ *
+ * **A primary carries its reason beside it**, as the rule says. A secondary
+ * carries it as its `title`: a header of three unavailable controls with three
+ * sentences beside them would bury the screen, and the dashed drawing already
+ * says *unavailable* at a glance.
+ *
+ * @param className the design's control class — `btn`, `btn pri`
+ * @param text the label
+ * @param reason what cannot be done yet, in a sentence
+ * @returns the control, or for a primary, the control with its reason
+ */
+export function unavailable(className: string, text: string, reason: string): HTMLElement {
+  const button = control(`${className} off`, text);
+  button.setAttribute("disabled", "true");
+  button.setAttribute("title", reason);
+
+  if (!className.split(" ").includes("pri")) return button;
+
+  const pair = el("span", "unavail");
+  pair.append(el("span", "why", reason), button);
+  return pair;
+}
+
+/**
  * Append a run of children, skipping the ones that turned out to be absent.
  *
  * Screens assemble from optional parts — a banner that may not exist, a chip

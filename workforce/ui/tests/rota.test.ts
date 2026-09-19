@@ -82,7 +82,19 @@ describe("the Team Rota", () => {
     // against 48", because the service composed two of its words and the
     // surface composed the rest.
     expect(text).toContain("Vishnu Das is planned 60 hours against 48.");
-    expect(root.querySelectorAll("[disabled]")).toHaveLength(0);
+
+    // **The warning disables nothing — compared against the same screen with
+    // no warning**, ADR 0034, rewritten rather than deleted. This asserted
+    // `querySelectorAll("[disabled]")` had length 0: *nothing on the screen is
+    // disabled, for any reason* — wider than WF-Q14, and true only while every
+    // unwired control was a live-looking `div`. When the app surface audit
+    // (2026-09-19, C8 · C11) drew those as honestly unavailable, the old
+    // assertion failed on a screen the rule has no quarrel with. What WF-Q14
+    // forbids is the WARNING blocking something, so that is what is compared.
+    const disabled = (node: HTMLElement): string[] =>
+      Array.from(node.querySelectorAll("[disabled]")).map((control) => control.textContent ?? "");
+    const quiet = await mount(host(recordedWeek));
+    expect(disabled(root)).toEqual(disabled(quiet));
   });
 
   it("says nothing about overtime when there is nothing to say", async () => {

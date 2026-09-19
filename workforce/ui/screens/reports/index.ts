@@ -11,7 +11,7 @@
 
 import { formatDay, formatNumber, type HostApi, load } from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import { type Month, type MonthRow } from "../../roster/reports";
@@ -67,7 +67,8 @@ function header(month: Month, host: HostApi): HTMLElement {
 
   const grow = el("div", "grow");
   head.append(title, picker, grow,
-    el("div", "btn", "⎙ Print"), el("div", "btn", "↓ Export CSV"));
+    unavailable("btn", "⎙ Print", "Reports cannot be printed here yet."),
+    unavailable("btn", "↓ Export CSV", "Reports cannot be exported here yet."));
   return head;
 }
 

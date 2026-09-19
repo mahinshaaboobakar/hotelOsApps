@@ -11,7 +11,7 @@
 import { formatDay, type HostApi, load, type PropertyEnvironment, type ReadFailure }
   from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import { type People, type Posting } from "../../roster/people";
@@ -129,7 +129,8 @@ function header(board: People, ending: string | null): HTMLElement {
   picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
 
   const grow = el("div", "grow");
-  head.append(title, picker, grow, el("div", "btn pri", "＋ Post a staff member"));
+  head.append(title, picker, grow,
+    unavailable("btn pri", "＋ Post a staff member", "Postings cannot be made here yet."));
   return head;
 }
 
@@ -293,7 +294,7 @@ function firstRun(): HTMLElement {
     el("div", "note",
       "It also opens the department folders in My Hotel: until a property has "
       + "postings, department-based document access has nobody to resolve to."),
-    el("div", "btn pri", "＋ Post a staff member"),
+    unavailable("btn pri", "＋ Post a staff member", "Postings cannot be made here yet."),
   );
 
   return panel;

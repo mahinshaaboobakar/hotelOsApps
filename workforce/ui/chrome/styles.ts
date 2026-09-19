@@ -490,6 +490,14 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 .note.warn{color:var(--color-warn,#fbbf24)}
 .note.warn b{color:var(--color-warn,#fbbf24)}
 .acts{display:flex;gap:8px;justify-content:flex-end;align-items:center}
+/* Why a primary is off, beside it — §2's "with the reason beside it". It
+   explains rather than reports, so it is note text (§5, APPS-Q35). */
+.acts .why{order:-1;margin-right:auto;font-size:12px;line-height:19.8px;
+           color:var(--color-ink-muted,#8b93a7)}
+/* The same pair outside a dialog's actions — a header's unavailable primary
+   and its reason, side by side (chrome/element.ts, unavailable()). */
+.unavail{display:inline-flex;align-items:center;gap:10px}
+.unavail .why{font-size:12px;line-height:19.8px;color:var(--color-ink-muted,#8b93a7)}
 
 .sel{display:flex;gap:8px;align-items:center;justify-content:space-between;
      background:var(--color-surface-raised,#11141f);

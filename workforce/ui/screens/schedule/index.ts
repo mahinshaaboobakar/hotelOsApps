@@ -13,7 +13,7 @@ import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment,
   type Read }
   from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen, unaskableScreen } from "../../chrome/failure";
 import type { Operator } from "../../roster/model";
@@ -117,9 +117,10 @@ function header(month: Schedule, property: PropertyEnvironment): HTMLElement {
   head.append(picker, grow,
     // Formatted here. `month` is an ISO day now, and rendering it raw would
     // print "2026-08-01" — which the compiler cannot see, both being strings.
-    el("div", "btn", `‹ ${formatDay(month.month, property, "month-year")} ›`),
-    el("div", "btn", "⇄ Propose swap"),
-    el("div", "btn pri", "＋ Request leave"));
+    unavailable("btn", `‹ ${formatDay(month.month, property, "month-year")} ›`,
+      "Other months cannot be opened here yet."),
+    unavailable("btn", "⇄ Propose swap", "Swaps cannot be proposed from here yet."),
+    unavailable("btn pri", "＋ Request leave", "Leave is requested from Leave & Requests."));
   return head;
 }
 

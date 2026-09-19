@@ -20,7 +20,7 @@
 import { formatDay, formatInstant, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
-import { el, fill } from "../../chrome/element";
+import { el, fill, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import type { Team, TeamDetail, Teams } from "../../roster/team";
@@ -181,7 +181,7 @@ function header(
   // The detail pane asks about a day, so the day belongs in the header beside
   // it — the same shape the rota and attendance headers already use.
   if (open !== null) {
-    head.append(title, grow, el("div", "btn",
+    head.append(title, grow, unavailable("btn",
       // `day-month-year`, not `weekday-day`. The SDK publishes no style that
       // renders weekday-day-MONTH, which is what this chip and the pane's
       // "Members on ..." actually want - a supervisor paging days needs the
@@ -189,7 +189,8 @@ function header(
       // crosses a month. Reported rather than composed here: building the
       // string myself would put culture-sensitive formatting straight back
       // into this module, which is the thing ADR 0175 removes.
-      `‹ ${formatDay(board.onDate, property, "day-month-year")} ›`), form);
+      `‹ ${formatDay(board.onDate, property, "day-month-year")} ›`,
+      "Other days cannot be opened here yet."), form);
     return head;
   }
 
@@ -197,7 +198,9 @@ function header(
   picker.append(el("span", undefined, "All departments"), el("i", undefined, "▾"));
 
   return fill(head, title, board.teams.length === 0 ? null : picker, grow,
-    board.teams.length === 0 ? null : el("div", "btn", "Show stood down"), form);
+    board.teams.length === 0 ? null
+      : unavailable("btn", "Show stood down", "Stood-down teams cannot be shown here yet."),
+    form);
 }
 
 /**

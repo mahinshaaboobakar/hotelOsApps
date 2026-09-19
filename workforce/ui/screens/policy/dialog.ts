@@ -12,7 +12,13 @@
  * consequence of its code — the code is what survives when colour is lost.
  */
 
-import { el } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
+
+/**
+ * What an empty value box shows. §10 draws `.inp.ph` *"when nobody has
+ * supplied a value"*; the dash is §11's mark for absent.
+ */
+const NOTHING = "—";
 
 /**
  * The dialog, drawn over the screen beneath it.
@@ -32,8 +38,8 @@ export function newShift(close: () => void): HTMLElement {
 
   dialog.append(
     head,
-    field("Name", "Split — Banquet", "What people read. Any length."),
-    field("Short code", "SB",
+    field("Name", "What people read. Any length."),
+    field("Short code",
       "Two or three characters — what fits a rota cell and survives a "
       + "black-and-white photocopy. You choose it, because Morning and Mid-shift "
       + "would both want \u201cM\u201d, and two shifts that look identical on paper is "
@@ -52,13 +58,20 @@ export function newShift(close: () => void): HTMLElement {
   return overlay;
 }
 
-/** A labelled field, and the sentence that says why it is asked for. */
-function field(label: string, value: string, note: string): HTMLElement {
+/**
+ * A labelled field, and the sentence that says why it is asked for.
+ *
+ * **Its box is the placeholder, always.** This drew the frame's example —
+ * *"Split — Banquet"*, *"SB"* — as though a person had entered it, in a box
+ * nothing can be typed into (§10: *"A field renders a value the desk has
+ * already chosen"*; nobody chose these). The app surface audit, 2026-09-19.
+ */
+function field(label: string, note: string): HTMLElement {
   const row = el("div", "fld");
 
   row.append(
     el("div", "fld-label", label),
-    el("div", "inp", value),
+    el("div", "inp ph", NOTHING),
     el("div", "note", note),
   );
 
@@ -70,8 +83,10 @@ function kind(): HTMLElement {
   const row = el("div", "fld");
   const choices = el("div", "choices");
 
-  const working = el("div", "choice on", "Working ✓");
-  const off = el("div", "choice", "Off — ");
+  // Neither chosen: the frame showed *Working* ticked, which is a choice nobody
+  // made on a form that cannot record one.
+  const working = el("div", "choice", "Working");
+  const off = el("div", "choice", "Off");
 
   choices.append(working, off);
 
@@ -95,8 +110,8 @@ function times(): HTMLElement {
   const spans = el("div", "spans four");
 
   spans.append(
-    el("div", "inp", "10:00"), el("div", "inp", "14:00"),
-    el("div", "inp", "18:00"), el("div", "inp", "22:00"),
+    el("div", "inp ph", NOTHING), el("div", "inp ph", NOTHING),
+    el("div", "inp ph", NOTHING), el("div", "inp ph", NOTHING),
   );
 
   row.append(
@@ -116,7 +131,8 @@ function colour(): HTMLElement {
   const swatches = el("div", "swatches");
 
   for (const tone of ["brand", "ok", "warn", "bad", "neutral"]) {
-    swatches.append(el("div", `sw ${tone}${tone === "warn" ? " on" : ""}`));
+    // None chosen — the frame picked amber.
+    swatches.append(el("div", `sw ${tone}`));
   }
 
   row.append(
@@ -133,14 +149,24 @@ function colour(): HTMLElement {
 
 function actions(close: () => void): HTMLElement {
   const row = el("div", "acts");
-  const cancel = el("div", "btn", "Cancel");
-
-  cancel.addEventListener("click", close);
+  const cancel = control("btn", "Cancel", close);
 
   // Inert for the same reason as Raise request, one screen over:
   // `roster.configure · defineShift` takes a name, a code, a colour and a date,
-  // and `field()` below draws each of them as a div. The dialog shows what a
-  // shift looks like; it does not yet ask.
-  row.append(cancel, el("div", "btn pri", "Create shift"));
+  // and `field()` draws each of them as a div. The dialog shows what a shift
+  // is made of; it does not yet ask.
+  //
+  // **So the primary is OFF, and says why** — §2: *"A primary action with
+  // nothing to send is drawn `off`, with the reason beside it — never
+  // live-and-refusing."* It was a live `div.btn.pri` over nothing (the app
+  // surface audit, 2026-09-19, C11 · C8).
+  const create = control("btn pri off", "Create shift");
+  create.setAttribute("disabled", "true");
+
+  row.append(
+    cancel,
+    create,
+    el("span", "why", "Shifts cannot be entered here yet, so there is nothing to create."),
+  );
   return row;
 }

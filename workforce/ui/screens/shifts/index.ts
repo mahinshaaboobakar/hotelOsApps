@@ -17,7 +17,7 @@
 import { type HostApi, load } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
-import { el } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
@@ -75,12 +75,12 @@ function header(catalogue: readonly CatalogueRow[], open: () => void): HTMLEleme
 
   title.append(
     el("div", "ht", "Shifts"),
-    el("div", "hsub",
-      `Kochi Beach Resort · ${catalogue.length} shifts · shared by every department`),
+    // No property name: it was a literal — "Kochi Beach Resort" — on every
+    // property's catalogue (the app surface audit, 2026-09-19).
+    el("div", "hsub", `${catalogue.length} shifts · shared by every department`),
   );
 
-  const add = el("div", "btn pri", "＋ New shift");
-  add.addEventListener("click", open);
+  const add = control("btn pri", "＋ New shift", open);
 
   head.append(title, el("div", "grow"), add);
   return head;

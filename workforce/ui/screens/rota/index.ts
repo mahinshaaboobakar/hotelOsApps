@@ -6,7 +6,7 @@
  * warning, and saying when it is not looking at the property's own data.
  */
 
-import { el } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import { legend } from "../../chrome/legend";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
@@ -125,14 +125,16 @@ function header(week: Week, host: HostApi, print: () => void): HTMLElement {
   // "24/08/2026 – 30 Aug Week" — a locale's full short-date pattern, a second
   // format for the other end, and a word this line was already writing — so a
   // real property read "… Week  Week" (ADR 0175).
-  const week_ = el("div", "btn",
+  const week_ = unavailable("btn",
     `‹ ${formatDay(week.monday, host.property, "day-month")}`
-    + ` – ${formatDay(week.sunday, host.property, "day-month")} Week ›`);
-  const copy = el("div", "btn", "⧉ Copy last week");
-  const swap = el("div", "btn", "⇄ Swap");
-  const printBtn = el("div", "btn", "⎙ Print");
-  printBtn.addEventListener("click", print);
-  const assign = el("div", "btn pri", "＋ Assign shift");
+    + ` – ${formatDay(week.sunday, host.property, "day-month")} Week ›`,
+    "Other weeks cannot be opened here yet.");
+  const copy = unavailable("btn", "⧉ Copy last week", "A week cannot be copied here yet.");
+  const swap = unavailable("btn", "⇄ Swap", "Swaps cannot be proposed from here yet.");
+  const printBtn = control("btn", "⎙ Print", print);
+  // Shifts are assigned by picking a cell, which works; this header button
+  // was never wired to anything (the app surface audit, 2026-09-19, C8 · C11).
+  const assign = unavailable("btn pri", "＋ Assign shift", "Pick a cell in the week to assign a shift.");
 
   head.append(title, picker, grow, week_, copy, swap, printBtn, assign);
   return head;

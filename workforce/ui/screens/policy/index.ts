@@ -16,7 +16,7 @@
 import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
-import { el } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
@@ -76,15 +76,18 @@ function header(config: Policy, open: () => void): HTMLElement {
   title.append(el("div", "hsub", config.property));
 
   const grow = el("div", "grow");
-  const add = el("div", "btn", "＋ New shift");
-  add.addEventListener("click", open);
+  const add = control("btn", "＋ New shift", open);
 
   // **Inert, and this one has nothing to save.** `setOvertime` and
   // `setLeaveType` are both served, and every row on this screen is read-only:
   // the overtime threshold renders as a `div.field`, and the shift and leave
   // tables are listings. A Save with no editable field in front of it is a
   // button that could only ever re-send what is already stored.
-  head.append(title, grow, add, el("div", "btn pri", "Save changes"));
+  //
+  // It knew it was inert and was drawn live anyway, until the app surface
+  // audit (2026-09-19, C8 · C11). Now it says so.
+  head.append(title, grow, add,
+    unavailable("btn pri", "Save changes", "Nothing on this screen can be edited yet, so there is nothing to save."));
   return head;
 }
 

@@ -7,7 +7,7 @@
 
 import { type HostApi, load } from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
 import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type LeaveBoard } from "../../roster/leave";
@@ -60,16 +60,13 @@ export async function leave(
 
   main.replaceChildren(header(board, open), tabs(board, tab, go), body);
 
-  if (dialog) {
-    // The Earned balance, because that is the one the frame raises the warning
-    // against — a form that showed a healthy balance would demonstrate nothing.
-    const earned = board.balances.find((balance) => balance.days < 0)
-      ?? board.balances[0];
-
-    if (earned !== undefined) {
-      main.append(requestForm("Joseph Kurian", "Priya Thomas", earned, close));
-    }
-  }
+  // The form chooses nothing on the person's behalf. This passed two people as
+  // literals and the overdrawn balance, *"because that is the one the frame
+  // raises the warning against — a form that showed a healthy balance would
+  // demonstrate nothing"* — the drawing's demonstration, shipped as a request
+  // (the app surface audit, 2026-09-19). And it opened only when the board had
+  // a balance, so on a property with none the button silently did nothing.
+  if (dialog) main.append(requestForm(close));
 }
 
 /** The header, with counts derived from the board. */
@@ -88,8 +85,7 @@ function header(board: LeaveBoard, open: () => void): HTMLElement {
   );
 
   const grow = el("div", "grow");
-  const raise = el("div", "btn pri", "＋ Request leave");
-  raise.addEventListener("click", open);
+  const raise = control("btn pri", "＋ Request leave", open);
 
   head.append(title, grow, raise);
   return head;

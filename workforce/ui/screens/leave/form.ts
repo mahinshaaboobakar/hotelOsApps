@@ -13,43 +13,44 @@
  * `WF-Q9`(b). Most of the workforce has no login, so a supervisor raises most
  * of these — and the form says whose request it is and who is raising it, in a
  * sentence rather than a field somebody has to interpret.
+ *
+ * # Both of those need a CHOICE, and this form cannot take one yet
+ *
+ * **It drew a finished request nobody made** (the app surface audit,
+ * 2026-09-19, C11 · F1 · C8): two people named as literals in the screen —
+ * *"for"* one, *"raised by"* another — the overdrawn balance, chosen *"because
+ * that is the one the frame raises the warning against"*, two dates, a note,
+ * and *"3 days. 2 of your team are already away on the 15th."* — a fact
+ * computed about dates nobody entered. Under it, a live *Raise request*.
+ *
+ * Every value box is now §10's placeholder, and the two rules above return the
+ * day a person and a type can be chosen here: the balance beside the chosen
+ * type, and the provenance sentence naming the two people it is true of. **Until
+ * then the form states the rules, not a record that does not exist.**
  */
 
-import { el } from "../../chrome/element";
-import type { Balance } from "../../roster/leave";
+import { control, el } from "../../chrome/element";
+
+/**
+ * What an empty value box shows. §10 draws `.inp.ph` *"when nobody has
+ * supplied a value"*; the dash is §11's mark for absent.
+ */
+const NOTHING = "—";
 
 /**
  * Build the form.
  *
- * @param who the person the request is for
- * @param raisedBy the account raising it
- * @param balance the balance for the chosen type
  * @param close called when it is dismissed
  * @returns the overlay
  */
-export function requestForm(
-  who: string,
-  raisedBy: string,
-  balance: Balance,
-  close: () => void,
-): HTMLElement {
+export function requestForm(close: () => void): HTMLElement {
   const scrim = el("div", "scrim");
   const dialog = el("div", "dlg");
 
   const head = el("div");
-  head.append(
-    el("div", "ht", "Request leave"),
-    el("div", "hsub", `Raised by ${raisedBy}`),
-  );
+  head.append(el("div", "ht", "Request leave"));
 
-  dialog.append(
-    head,
-    forWhom(who, raisedBy),
-    type(balance),
-    dates(),
-    note(),
-    actions(close),
-  );
+  dialog.append(head, forWhom(), type(), dates(), note(), actions(close));
 
   scrim.append(dialog);
   scrim.addEventListener("click", (event) => {
@@ -59,99 +60,68 @@ export function requestForm(
   return scrim;
 }
 
-/** Who it is for, and the sentence that keeps the record honest. */
-function forWhom(who: string, raisedBy: string): HTMLElement {
+/** Who it is for — and the rule the record keeps, stated rather than filled in. */
+function forWhom(): HTMLElement {
   const row = el("div", "fld");
-  const picker = el("div", "inp");
-
-  picker.append(el("span", "av", initials(who)), el("span", undefined, who));
 
   row.append(
     el("div", "fld-label", "For"),
-    picker,
+    el("div", "inp ph", NOTHING),
     el("div", "note",
-      `Recorded as raised by ${raisedBy} on behalf of ${who}. `
-      + "The record never claims they did it themselves."),
+      "Raised for somebody else, it is recorded as raised on their behalf — "
+      + "the record never claims they did it themselves."),
   );
 
   return row;
 }
 
 /**
- * The type, and the balance beside it.
- *
- * The warning carries **the number and the permission in one breath**: what the
- * balance is, and that the request can still be made. A warning that only said
- * "insufficient balance" would read as a refusal.
+ * The type. Its balance is shown beside it once one is chosen — `WF-Q5`, warn
+ * and never block — and not before: a balance beside no type is a figure about
+ * nothing.
  */
-function type(balance: Balance): HTMLElement {
+function type(): HTMLElement {
   const row = el("div", "fld");
-
-  row.append(el("div", "fld-label", "Type"), el("div", "inp", `${balance.type} leave`));
-
-  if (balance.days < 0) {
-    const warn = el("div", "warnrow");
-    warn.append(
-      el("span", undefined, "⚠"),
-      el("span", undefined,
-        `Balance is ${balance.days} of ${balance.of}. The request can still be made `
-        + "and approved — your manager sees the balance on the decision."),
-    );
-    row.append(warn);
-  }
-
+  row.append(el("div", "fld-label", "Type"), el("div", "inp ph", NOTHING));
   return row;
 }
 
-/** The two dates, and what they add up to. */
+/** The two dates. What they add up to, and who else is away, follow the dates. */
 function dates(): HTMLElement {
   const row = el("div", "fld");
   const pair = el("div", "spans");
 
-  pair.append(el("div", "inp", "14 Sep 2026"), el("div", "inp", "16 Sep 2026"));
-
-  row.append(
-    el("div", "fld-label", "Dates"),
-    pair,
-    // The second sentence is the one that matters: the form knows who else is
-    // away, which is the fact a manager would otherwise discover after
-    // approving.
-    el("div", "note", "3 days. 2 of your team are already away on the 15th."),
-  );
+  pair.append(el("div", "inp ph", NOTHING), el("div", "inp ph", NOTHING));
+  row.append(el("div", "fld-label", "Dates"), pair);
 
   return row;
 }
 
 function note(): HTMLElement {
   const row = el("div", "fld");
-
-  row.append(
-    el("div", "fld-label", "Note"),
-    el("div", "inp", "Brother's wedding — travelling on the 13th."),
-  );
-
+  row.append(el("div", "fld-label", "Note"), el("div", "inp ph", NOTHING));
   return row;
 }
 
 function actions(close: () => void): HTMLElement {
   const row = el("div", "acts");
-  const cancel = el("div", "btn", "Cancel");
+  const cancel = control("btn", "Cancel", close);
 
-  cancel.addEventListener("click", close);
+  // **Off, and says why** — §2: *"A primary action with nothing to send is
+  // drawn `off`, with the reason beside it — never live-and-refusing."*
+  // `leave.request · raise` is served and needs no staff id at all — ADR 0172
+  // derives the requester from the scope, so *whose leave* is not a field and
+  // cannot be one. What this sheet has no way to supply is the person's own
+  // answers: every value box above is a rendered `div`, not a control, so there
+  // is nothing to read a date or a note out of. Building those is a surface,
+  // not a wiring. It was a live `div.btn.pri` over nothing until 2026-09-19.
+  const raise = control("btn pri off", "Raise request");
+  raise.setAttribute("disabled", "true");
 
-  // **Inert, and the reason is above rather than at the wire.** `leave.request ·
-  // raise` is served and needs no staff id at all — ADR 0172 derives the
-  // requester from the scope, so *whose leave* is not a field and cannot be
-  // one. The type's id crosses on the board's balances. What this sheet has no
-  // way to supply is the person's own answers: every field above is
-  // `el("div", "inp", …)`, a rendered value rather than a control, so there is
-  // nothing to read a date or a note out of. Building those is a surface, not
-  // a wiring.
-  row.append(cancel, el("div", "btn pri", "Raise request"));
+  row.append(
+    cancel,
+    raise,
+    el("span", "why", "Dates and a note cannot be entered here yet, so there is nothing to send."),
+  );
   return row;
-}
-
-/** Initials, derived here so every avatar in this module derives them alike. */
-function initials(name: string): string {
-  return name.split(" ").map((part) => part[0] ?? "").join("").slice(0, 2);
 }

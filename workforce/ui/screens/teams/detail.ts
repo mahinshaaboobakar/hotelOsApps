@@ -11,7 +11,7 @@
 
 import { formatDay, formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
 
-import { el, fill } from "../../chrome/element";
+import { el, fill, unavailable } from "../../chrome/element";
 import type { Member, TeamDetail } from "../../roster/team";
 import type { TeamPlace } from ".";
 
@@ -39,7 +39,7 @@ export function detail(
   // so those two are real — an inert button beside a working one is only
   // confusing when nothing distinguishes them, and here the dialog does.
   head.append(name, el("div", "grow"),
-    el("div", "btn", "Rename"), action("Stand down", "down", place));
+    unavailable("btn", "Rename", "Teams cannot be renamed here yet."), action("Stand down", "down", place));
 
   pane.append(head, department(open), count(open, property), el("div", "tsec", "Members"),
     members(open.members, property), action("＋ Add a member", "member", place), why());
@@ -91,7 +91,7 @@ function members(
         `since ${formatDay(person.since, property, "day-month-year")}`));
 
     row.append(el("div", "av", person.initials), who, el("div", "grow"),
-      el("div", "btn", "Remove"));
+      unavailable("btn", "Remove", "Members cannot be removed here yet."));
 
     list.append(row);
   }
