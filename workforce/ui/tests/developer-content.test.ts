@@ -18,7 +18,7 @@ import { formTeam } from "../screens/teams/form";
 import { addMember } from "../screens/teams/member";
 import { renameTeam } from "../screens/teams/rename";
 import { standDown } from "../screens/teams/stand-down";
-import { developerContent, readableText } from "../../../scripts/developer-content";
+import { developerNotes, readableText } from "../../../packages/developer-notes/src";
 import { readable, SURFACES, surfaceHost } from "./surfaces";
 
 /**
@@ -47,30 +47,15 @@ import { readable, SURFACES, surfaceHost } from "./surfaces";
  * Rendered rather than read from source: a comment citing a ruling is a record
  * and is right, and only what reaches the screen is a claim to staff.
  *
- * **The citation shapes are the estate's list**, `scripts/developer-content.ts`
- * (15e2654), which widened this check across the four applications and asks
- * each to import it rather than keep a private copy. Its reader walks text
- * nodes one by one and reads `placeholder` too; this one joined `textContent`,
- * which welds neighbouring elements and can cost a pattern its word boundary.
- *
- * **What stays here is what that list does not carry**: the platform systems
- * by name, and "design page". Kept local rather than added to the shared file,
- * which the other three applications' guards also read — widening it is theirs
- * to agree to, and a name there that one of them renders on purpose would turn
- * a neighbour red from this commit.
+ * **The shapes and the reader are the estate's one copy**,
+ * `packages/developer-notes` — the union of this check, GuestOps'
+ * `document-citations` and the interim `scripts/developer-content.ts`
+ * (architect, 2026-09-19). This file walks Workforce's surfaces and nothing
+ * else; the system names and "design page" it used to keep locally are in the
+ * package now.
  */
-const SYSTEMS: readonly (readonly [string, RegExp])[] = [
-  ["a design page", /\bdesign page\b/gi],
-  ["a platform system", /\b(?:Master Data|Kernel|OpenFGA|Context Service|Integration Hub)\b/g],
-];
-
 function found(root: HTMLElement): string[] {
-  const text = readableText(readable(root));
-  return [
-    ...developerContent(text),
-    ...SYSTEMS.flatMap(([what, pattern]) =>
-      [...text.matchAll(pattern)].map((match) => `${what}: ${match[0]}`)),
-  ];
+  return developerNotes(readableText(readable(root)));
 }
 
 const host = surfaceHost("en-GB");
@@ -143,7 +128,7 @@ describe("developer content", () => {
       + "<p>per ADR 0174 and the design page</p>";
 
     expect(found(planted).map((one) => one.split(":")[0])).toEqual(expect.arrayContaining([
-      "a decision-register id", "an ADR", "a code identifier",
+      "a register id", "an ADR", "a code identifier",
       "a design page", "a platform system",
     ]));
   });
