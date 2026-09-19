@@ -120,6 +120,9 @@ name: "Jobs"
 #     screenshot, and it is gone.
 #   * **Redline 6's dates:** a day is "03 Sept", the strip's time "02 Sept,
 #     14:24". A name Master Data does not hold reads "no name on record".
+#   * **Nothing looks live and does nothing:** nine inert buttons wired, drawn
+#     off with their reason, or no longer buttons; a jobs manager's bar names
+#     the role; the Record tab shows no raw id.
 version: 0.4.3
 publisher: hotelos
 category: operations
