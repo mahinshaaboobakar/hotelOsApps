@@ -218,6 +218,38 @@ public class ModuleReadTests(JobsFixture fixture)
     }
 
     [Fact]
+    public async Task Me_names_the_role_in_the_department_clause_for_a_jobs_manager()
+    {
+        // Owner, 2026-09-19: a person whose role spans every department shows the
+        // role there — "Rohan Desai · Jobs manager · The Marina Bay". Jobs holds
+        // the jobs-manager grant itself, so this is established, not guessed.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        await module.Data.Grants.GrantAsync(module.Data.Scope(Guid.CreateVersion7()), module.Caller, default);
+
+        var me = await module.CallAsync(Permissions.Read, "me");
+
+        Assert.Equal("Jobs manager", me.Text("department"));
+    }
+
+    [Fact]
+    public async Task The_record_tab_shows_the_job_number_and_the_property_name_and_no_raw_id()
+    {
+        // Owner, 2026-09-19 (c): the job number and the property's name, never raw ids.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        module.Data.Directory.PropertyName = "Marina Bay";
+        await module.Data.SeedCatalogueAsync();
+        var raised = await module.Data.RaiseNotCoolingAsync(module.Data.Scope(module.Caller));
+
+        var job = await module.CallAsync(Permissions.Read, "job", new { id = raised.Id.ToString() });
+        var record = job.At("record").EnumerateArray()
+            .ToDictionary(r => r.GetProperty("k").GetString()!, r => r.GetProperty("v").GetString()!);
+
+        Assert.Equal(raised.JobNumber, record["Number"]);
+        Assert.Equal("Marina Bay", record["Property"]);
+        Assert.DoesNotContain(record, r => Guid.TryParse(r.Value, out _));
+    }
+
+    [Fact]
     public async Task A_method_the_capability_does_not_have_is_refused_by_name()
     {
         await using var module = await ModuleHarness.StartAsync(fixture);

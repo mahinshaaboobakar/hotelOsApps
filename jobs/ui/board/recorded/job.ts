@@ -73,12 +73,15 @@ export const recordedJob: JobDetail = {
   ],
   rating: null,
   record: [
-    { k: "Job id", v: "018f3c…9a1e" },
+    // The backend's own rows (JobProjection.RecordAsync): the number and the
+    // property's name, never a raw id (owner, 2026-09-19), and the two instants
+    // as the wire sends them. Who created and last changed it is drawn by frame
+    // 2g and sent by nothing — the ledger records it as not built.
     { k: "Number", v: "MRN-ENG-142" },
-    { k: "Property", v: "Marina Bay · mrn" },
+    { k: "Property", v: "The Marina Bay" },
     { k: "Version", v: "9" },
-    { k: "Created", v: "02 Sep 13:31 · guest · stay 7F2A" },
-    { k: "Updated", v: "02 Sep 14:07 · Arjun Menon" },
+    { k: "Created", v: at("13:31") },
+    { k: "Updated", v: at("14:07") },
     { k: "Deleted", v: "—" },
     { k: "Reminders", v: "none" },
   ],

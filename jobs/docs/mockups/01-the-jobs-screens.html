@@ -136,6 +136,7 @@ ul.flows b{color:var(--color-ink)}
 
 <div class="intro">
   <h1>Jobs · the screens</h1>
+<p><b>Redline 7 — owner, 2026-09-19:</b> a person whose role spans every department shows the role in the department clause (<i>Rohan Desai · Jobs manager · The Marina Bay</i>; the organisation admin likewise, drawn with the organisation she works across, <i>Nadia Rahman · Organisation admin · Marina Hotels</i>); <i>"Follow Workforce shifts"</i> stays; and the Record tab shows the job number and the property's name, never raw ids (frame 2g).</p>
 <p><b>Re-locked by the owner, 2026-09-19 — redline 6</b>, from <code>06-the-frame-revision.html</code> (<i>"A B E approved, D1 option 2, D2 option 1"</i>): the page uses only the published tokens, the primary fill written once as <code>--accent</code> and the shadow derived from the surface (A); every date is en-GB's output and says so (B); four weekdays that were 2025's went with D1 (C); a day is drawn as day and month, <code>03 Sept</code> (D1); the Due column is one shape, <code>03 Sept, 12:00</code> (D2); and the bar names <i>name · department · property</i> (E) — except where the frames give the person no department, which is open (see 06). 06 stays beside this page as the record of what changed and why.</p>
 <p><b>LOCKED by the owner, 2026-09-04</b>, after five redline passes the same day. These frames are the ones the build is audited against, frame beside capture. A change from here is a new redline, recorded on the page, never a silent edit.</p>
   <p><b>Palette authority:</b> the tokens in <code>apps/desktop/src/styles.css</code> (ADR 0106). Every colour on this page is one of those tokens; no frame names a hex of its own. Chrome is the current era — one window, top tabs — copied from <code>55-the-marketplace-round.html</code>; notes and structure follow <code>pms-oracle/docs/mockups/01-oracle-connector.html</code>.</p>
@@ -397,13 +398,14 @@ ul.flows b{color:var(--color-ink)}
 <div class="note fix"><b>Redline folded (2026-09-04, third pass).</b> Rating was a line inside "Who asked"; it is now its own tab and its own table on the page. Every tab of the job view is drawn: Overview, Work, History, Notes &amp; photos, Links &amp; steps, Rating, Record.</div>
 
 <h1 class="frame">2g · <b>One job · Record</b>. The audit columns and what was set by hand.</h1>
+<div class="note fix"><b>Redline folded — owner, 2026-09-19:</b> <i>"The Record tab shows the job number and the property's name, never raw ids."</i> The <code>job_id</code> row is gone and the property reads <b>The Marina Bay</b>, not <code>Marina Bay · mrn</code>.</div>
 <div class="win" style="max-width:900px">
   <div class="head"><div class="app"><div class="mark">⚒</div>Jobs</div><div class="tab on">Board</div><div class="who" style="margin-left:auto">Priya Nair · Engineering · The Marina Bay</div></div>
   <div class="body">
     <div class="subnav"><button>Overview</button>
 <button>Work · 2</button><button>History · 7</button><button>Notes &amp; photos · 3</button><button>Links &amp; steps · 3</button><button>Rating</button><button class="on">Record</button></div>
     <div class="cols3">
-      <div class="card"><h3>Identity</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>job_id</div><div class="mono">018f3c…9a1e</div><div>Number</div><div>MRN-ENG-142</div><div>Property</div><div>Marina Bay · mrn</div><div>Version</div><div>9</div></div></div>
+      <div class="card"><h3>Identity</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Number</div><div>MRN-ENG-142</div><div>Property</div><div>The Marina Bay</div><div>Version</div><div>9</div></div></div>
       <div class="card"><h3>Audit</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Created</div><div>02 Sept, 13:31 · guest · stay 7F2A</div><div>Updated</div><div>02 Sept, 14:07 · Arjun Menon</div><div>Deleted</div><div>—</div></div></div>
       <div class="card"><h3>Reminders</h3><div class="kv" style="grid-template-columns:110px 1fr"><div>Mine</div><div>none</div></div><div style="margin-top:8px"><span class="btn" style="padding:3px 10px;font-size:12px">Remind me…</span></div></div>
     </div>
@@ -478,7 +480,7 @@ ul.flows b{color:var(--color-ink)}
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab">Board</div><div class="tab on">Live</div><div class="tab">Scheduled</div><div class="tab">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search job number, room, summary…</div>
-    <div class="who">Rohan Desai · property jobs manager</div>
+    <div class="who">Rohan Desai · Jobs manager · The Marina Bay</div>
   </div>
   <div class="body">
     <div class="cols3">
@@ -559,7 +561,7 @@ ul.flows b{color:var(--color-ink)}
     <div class="app"><div class="mark">⚒</div>Jobs</div>
     <div class="tab">Board</div><div class="tab">Live</div><div class="tab">Scheduled</div><div class="tab on">Catalogue</div><div class="tab">Settings</div>
     <div class="search">Search categories, items, aliases…</div>
-    <div class="who">Nadia Rahman · Marina Hotels · organisation admin</div>
+    <div class="who">Nadia Rahman · Organisation admin · Marina Hotels</div>
   </div>
   <div class="body">
     <div class="subnav"><button class="on">Marina Hotels · master</button>

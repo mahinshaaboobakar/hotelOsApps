@@ -103,6 +103,19 @@ describe("app surface checklist — automated lines, Jobs", () => {
     expect(end).toMatch(/\d{2} [A-Z][a-z]+, \d{2}:\d{2}$/);
   });
 
+  it("Record (owner, 2026-09-19 c) — the number and the property's name, no raw id, instants in the property's form", async () => {
+    const root = await mounted(host(ANSWERS));
+    root.querySelector<HTMLElement>("tr.pick")?.click();
+    await settle();
+    press(root, "Record");
+    await settle();
+    const text = root.textContent ?? "";
+    expect(text).not.toContain("Job id");
+    expect(text).not.toMatch(/[0-9a-f]{8}-[0-9a-f]{4}-/);
+    expect(text).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
+    expect(text).toContain("02 Sept, 13:31");
+  });
+
   it("C8 — a board row that opens a job is reachable as a real button", async () => {
     const root = await mounted(host(ANSWERS));
     const rows = Array.from(root.querySelectorAll("tr.pick"));

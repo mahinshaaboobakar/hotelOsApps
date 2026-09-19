@@ -1,6 +1,8 @@
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Queries;
+using HotelOS.Jobs.Infrastructure;
 using HotelOS.Platform;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using static HotelOS.Platform.ModuleEnvelope;
@@ -133,6 +135,14 @@ public static class ReadCapability
         var name = request.Scope.UserId is { } user ? await directory.FindStaffNameAsync(user, cancellationToken) : null;
         var called = await directory.FindPropertyNameAsync(property, cancellationToken)
             ?? (await directory.FindPropertyCodeAsync(property, cancellationToken))?.ToUpperInvariant();
-        return new ModuleViews.OperatorView(name, Department: null, called);
+
+        // Owner, 2026-09-19: a role that spans every department is named in the
+        // department clause. The jobs-manager grant is Jobs' own record, so this
+        // one is established; an organisation admin is not known to Jobs at all,
+        // and is not guessed.
+        var db = services.GetRequiredService<JobsDbContext>();
+        var managesJobs = request.Scope.UserId is { } holder && await db.JobsManagerGrants
+            .AnyAsync(g => g.PropertyId == property && g.UserId == holder && g.RevokedAt == null, cancellationToken);
+        return new ModuleViews.OperatorView(name, managesJobs ? "Jobs manager" : null, called);
     }
 }

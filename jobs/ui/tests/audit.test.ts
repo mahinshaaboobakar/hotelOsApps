@@ -154,8 +154,11 @@ describe("frame 2e · One job · Links & steps", () => {
 describe("frame 2g · One job · Record", () => {
   it("draws identity, audit and the viewer's own reminders", async () => {
     const root = await jobTab("Record");
-    has(root, "Identity", "Job id", "018f3c…9a1e", "Number", "MRN-ENG-142", "Property", "Marina Bay · mrn", "Version", "9");
-    has(root, "Audit", "Created", "guest · stay 7F2A", "Updated", "Arjun Menon", "Deleted");
+    // Owner, 2026-09-19 (c): the number and the property's name, never raw ids.
+    has(root, "Identity", "Number", "MRN-ENG-142", "Property", "The Marina Bay", "Version", "9");
+    expect(root.textContent).not.toContain("Job id");
+    // Who created and last changed it: drawn by 2g, sent by nothing — not built (ledger).
+    has(root, "Audit", "Created", "02 Sept, 13:31", "Updated", "02 Sept, 14:07", "Deleted");
     has(root, "Reminders", "none", "Remind me…");
   });
 });

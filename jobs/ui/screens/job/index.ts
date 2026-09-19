@@ -134,7 +134,7 @@ function tab(host: HostApi, d: JobDetail, place: JobPlace): HTMLElement {
     case "Notes & photos": return notes(host, d, place.onChanged);
     case "Links & steps": return links(d, may(host, JOB_AMEND), host.property);
     case "Rating": return rating(host, d);
-    case "Record": return record(d);
+    case "Record": return record(host, d);
     default: return overview(d);
   }
 }

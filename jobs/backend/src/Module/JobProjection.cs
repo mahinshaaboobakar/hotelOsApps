@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Queries;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Infrastructure;
@@ -25,7 +26,7 @@ namespace HotelOS.Jobs.Module;
 /// through the one formatter and wears the property's zone and locale.
 /// </para>
 /// </remarks>
-public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardProjection board, TimeProvider clock)
+public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardProjection board, TimeProvider clock, IPropertyDirectory directory)
 {
     /// <summary>The whole job view.</summary>
     public async Task<JobDetailView> DetailAsync(RequestScope scope, Guid jobId, CancellationToken cancellationToken)
@@ -55,7 +56,7 @@ public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardPro
             await StepsAsync(scope, rows, cancellationToken),
             await LinksAsync(scope, rows, job, cancellationToken),
             Rating(rows, job),
-            Record(job));
+            await RecordAsync(job, cancellationToken));
     }
 
     private static string Accountable(JobRow row) =>
@@ -189,16 +190,17 @@ public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardPro
     }
 
     /// <summary>The Record tab — the row as it is stored, for the person who needs the fact.</summary>
-    private static IReadOnlyList<DetailView> Record(Job job) =>
+    /// <remarks>
+    /// Owner, 2026-09-19 (c): the job number and the property's name, never raw
+    /// ids. The job's id and the category, item, location, asset and policy ids
+    /// were sent here; the category, item and place are already named on the
+    /// Overview, so nothing a person reads is lost.
+    /// </remarks>
+    private async Task<IReadOnlyList<DetailView>> RecordAsync(Job job, CancellationToken cancellationToken) =>
     [
-        new("Job id", job.Id.ToString()),
         new("Number", job.JobNumber),
-        new("Property", job.PropertyId.ToString()),
-        new("Category", job.CategoryId.ToString()),
-        new("Item", job.ItemId.ToString()),
-        new("Location", job.LocationId.ToString()),
-        new("Asset", job.AssetId?.ToString() ?? "—"),
-        new("Policy", job.ConcernPolicyId?.ToString() ?? "—"),
+        new("Property", await directory.FindPropertyNameAsync(job.PropertyId, cancellationToken)
+            ?? (await directory.FindPropertyCodeAsync(job.PropertyId, cancellationToken))?.ToUpperInvariant() ?? "—"),
         new("Created", job.CreatedAt.ToString("o")),
         new("Updated", job.UpdatedAt.ToString("o")),
         new("Version", job.Version.ToString()),
