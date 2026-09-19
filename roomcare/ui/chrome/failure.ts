@@ -138,6 +138,9 @@ export const FAILURE_CSS = `
 .fail-mark svg{width:26px;height:26px;display:block}
 .fail-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
 .fail-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-unadmitted{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-ungranted{color:var(--color-ink-muted,#8b93a7)}
+.fail-mark.fail-undecidable{color:var(--color-bad,#f87171)}
 .fail-mark.fail-faulted{color:var(--color-bad,#f87171)}
 .fail-label{font-family:ui-monospace,"Cascadia Mono",Menlo,monospace;font-size:11px;letter-spacing:.1em;
             text-transform:uppercase;color:var(--color-ink-faint,#5a6172);margin-bottom:6px}

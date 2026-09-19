@@ -57,6 +57,9 @@ const WIDGET_CSS = `
 .wf-mark svg{width:20px;height:20px;display:block}
 .wf-mark.fail-unanswered{color:var(--color-warn,#fbbf24)}
 .wf-mark.fail-forbidden{color:var(--color-ink-muted,#8b93a7)}
+.wf-mark.fail-unadmitted{color:var(--color-ink-muted,#8b93a7)}
+.wf-mark.fail-ungranted{color:var(--color-ink-muted,#8b93a7)}
+.wf-mark.fail-undecidable{color:var(--color-bad,#f87171)}
 .wf-mark.fail-faulted{color:var(--color-bad,#f87171)}
 .wf-said{font-size:13px;font-weight:600;line-height:1.4}
 .wf-why{font-size:11.5px;line-height:1.5;color:var(--color-ink-muted,#8b93a7)}

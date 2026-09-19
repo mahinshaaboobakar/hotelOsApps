@@ -83,11 +83,11 @@ describe("the read seam", () => {
     expect(!got.ok && got.failure.cause).toBe("unanswered");
   });
 
-  it("refuses without a round trip, naming the capability, when this person was not granted it", async () => {
+  it("refuses without a round trip, naming the capability, when the application was not admitted to it", async () => {
     const calls: { method: string }[] = [];
     const got = await load(host([], {}, calls as never), "roomcare.read", "board");
     expect(calls).toEqual([]);
-    expect(!got.ok && [got.failure.cause, got.failure.capability]).toEqual(["forbidden", "roomcare.read"]);
+    expect(!got.ok && [got.failure.cause, got.failure.capability]).toEqual(["unadmitted", "roomcare.read"]);
   });
 
   it("does not turn a programming error into a sentence a person would believe", async () => {
@@ -118,6 +118,6 @@ describe("a widget that cannot read", () => {
   it("offers no Try again on a refusal — asking again cannot change it — and opens Room Care instead", async () => {
     const card = await roomsReady(host([]));
     expect(card.querySelector(".wf-open")?.textContent).toBe("Open Room Care →");
-    expect(card.textContent).toContain("You do not have access to today's departures");
+    expect(card.textContent).toContain("Room Care has not been allowed to read this");
   });
 });

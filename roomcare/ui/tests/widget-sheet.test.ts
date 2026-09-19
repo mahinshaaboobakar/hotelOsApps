@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, type Cause, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
+import { FAILURE_CSS } from "../chrome/failure";
 import { stylesheet } from "../widgets/card";
 import * as PANELS from "../widgets/panel/panels";
 import { host } from "./host";
@@ -27,7 +28,7 @@ import { host } from "./host";
  *   this asks, per element and per class, whether a selector naming the class
  *   matches the element — or hooks a real element below it (`.wf-mark svg`).
  * - **Every widget the manifest ships**, answered and failing in each of the
- *   platform's three ways, through the host's own error kinds.
+ *   platform's six ways (contract v2), through the host's own error kinds.
  */
 
 const ROOT = join(process.cwd(), "..");
@@ -48,6 +49,20 @@ function shippedWidgets(): Record<string, (h: HostApi) => Promise<HTMLElement>> 
 const WIDGETS = shippedWidgets();
 
 type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
+
+/**
+ * Contract v2's six causes, each reached through a host error kind that the
+ * SDK's `causeOf` maps to it — the SDK exports the type, not a list, so the
+ * list is here, and the drawn class names prove each kind reached its cause.
+ */
+const CAUSES = [
+  ["unanswered", "unavailable"],
+  ["forbidden", "forbidden"],
+  ["unadmitted", "local_forbidden"],
+  ["ungranted", "user_forbidden"],
+  ["undecidable", "model_unavailable"],
+  ["faulted", "internal"],
+] as const satisfies readonly (readonly [Cause, Kind])[];
 
 function failing(kind: Kind): HostApi {
   return { ...host(["roomcare.read"]), call: () => Promise.reject(new HostCallError({ kind, message: "the test asked" })) };
@@ -102,22 +117,42 @@ describe("a Room Care widget's classes are styled by the sheet a widget mounts",
     expect(await check(host(["roomcare.read"]))).toEqual([]);
   });
 
-  for (const [cause, kind] of [["unanswered", "unavailable"], ["forbidden", "forbidden"], ["faulted", "internal"]] as const) {
+  for (const [cause, kind] of CAUSES) {
     it(`draws nothing its own sheet does not style, when a read is ${cause}`, async () => {
       expect(await check(failing(kind))).toEqual([]);
     });
   }
 
-  it("draws each cause as its own state, so the three runs above measured three different cards", async () => {
-    const drawn = await Promise.all([failing("unavailable"), failing("forbidden"), failing("internal")].map(async (h) => {
+  it("draws each cause as its own state, so the six runs above measured six different cards", async () => {
+    const drawn = await Promise.all(CAUSES.map(([, kind]) => failing(kind)).map(async (h) => {
       const card = await WIDGETS["rooms-ready"]!(h);
       return [card.querySelector(".wf-mark")?.className, card.querySelector(".wf-said")?.textContent, card.querySelector(".wf-open")?.textContent];
     }));
     expect(drawn).toEqual([
       ["wf-mark fail-unanswered", "Room Care did not answer in time", "Try again →"],
       ["wf-mark fail-forbidden", "You do not have access to today's departures", "Open Room Care →"],
+      ["wf-mark fail-unadmitted", "Room Care has not been allowed to read this", "Open Room Care →"],
+      ["wf-mark fail-ungranted", "This account has not been granted this", "Open Room Care →"],
+      ["wf-mark fail-undecidable", "Access to this could not be checked", "Open Room Care →"],
       ["wf-mark fail-faulted", "Room Care could not build this", "Open Room Care →"],
     ]);
+  });
+
+  it("colours each cause as 64e approved, in the widget's sheet and the screen's — refusals grey, the model state red", () => {
+    for (const [sheet, owner] of [[stylesheet().textContent ?? "", "wf-mark"], [FAILURE_CSS, "fail-mark"]] as const) {
+      const colours = CAUSES.map(([cause]) => {
+        const rule = new RegExp(String.raw`\.${owner}\.fail-${cause}\{color:var\(--color-([\w-]+),`, "u").exec(sheet);
+        return [cause, rule?.[1]];
+      });
+      expect(colours).toEqual([
+        ["unanswered", "warn"],
+        ["forbidden", "ink-muted"],
+        ["unadmitted", "ink-muted"],
+        ["ungranted", "ink-muted"],
+        ["undecidable", "bad"],
+        ["faulted", "bad"],
+      ]);
+    }
   });
 
   it("sizes the mark, which the class walk cannot see — the svg carries no class", () => {
