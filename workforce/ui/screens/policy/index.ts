@@ -16,7 +16,8 @@
 import { formatNumber, type HostApi, load } from "@hotelos/sdk";
 
 import { span } from "../../chrome/clock";
-import { control, el, unavailable } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
+import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
@@ -58,10 +59,17 @@ export async function policy(
 
   const config = got.value;
 
-  const body = el("div", "body");
-  body.append(shifts(config.catalogue, host), leave(config.leave, host), overtime(config, host), holidays(config));
+  // The thresholds are the one thing on this screen that saves, and Save is in
+  // the header — so the section and the button are built together and share one
+  // draft. A save re-reads, so the screen draws what is stored, not what was typed.
+  const thresholds = overtime(config, host,
+    () => void policy(host, main, dialog, close, open));
 
-  main.replaceChildren(header(config, open), body);
+  const body = el("div", "body");
+  body.append(shifts(config.catalogue, host), leave(config.leave, host), thresholds.section,
+    holidays(config));
+
+  main.replaceChildren(header(config, open, thresholds.save), body);
 
   // Drawn over the screen it belongs to, not on a page of its own: a shift is
   // created from the catalogue it joins, and the list behind it is the context
@@ -69,7 +77,7 @@ export async function policy(
   if (dialog) main.append(newShift(host, close, close));
 }
 
-function header(config: Policy, open: () => void): HTMLElement {
+function header(config: Policy, open: () => void, save: HTMLElement): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
@@ -78,16 +86,12 @@ function header(config: Policy, open: () => void): HTMLElement {
   const grow = el("div", "grow");
   const add = control("btn", "＋ New shift", open);
 
-  // **Inert, and this one has nothing to save.** `setOvertime` and
-  // `setLeaveType` are both served, and every row on this screen is read-only:
-  // the overtime threshold renders as a `div.field`, and the shift and leave
-  // tables are listings. A Save with no editable field in front of it is a
-  // button that could only ever re-send what is already stored.
-  //
-  // It knew it was inert and was drawn live anyway, until the app surface
-  // audit (2026-09-19, C8 · C11). Now it says so.
-  head.append(title, grow, add,
-    unavailable("btn pri", "Save changes", "Nothing on this screen can be edited yet, so there is nothing to save."));
+  // **Save saves the overtime thresholds.** It was drawn off because "every
+  // row on this screen is read-only: the overtime threshold renders as a
+  // div.field" — and the owner met it dead on 0.3.3. The thresholds are inputs
+  // now and `setOvertime` takes them. The leave and shift tables stay listings:
+  // their writes need an id and a version the Policy read does not send.
+  head.append(title, grow, add, save);
   return head;
 }
 
@@ -179,22 +183,119 @@ function leave(rows: readonly LeaveRow[], host: HostApi): HTMLElement {
   return section;
 }
 
-/** One threshold, warning at planning time. */
-function overtime(config: Policy, host: HostApi): HTMLElement {
+/**
+ * The overtime thresholds, and the Save that writes them.
+ *
+ * `setOvertime` writes both every time and clears an omitted one, so the form
+ * sends what its two boxes hold and an empty box is "no threshold" — said on the
+ * screen. **Absent is not zero**: an unset threshold opens as an empty box,
+ * never "0", which would read as "warn on every hour".
+ *
+ * @param config the policy as read
+ * @param host the bridge
+ * @param saved called after the write lands, so the screen re-reads
+ * @returns the section, and the Save for the header
+ */
+function overtime(
+  config: Policy, host: HostApi, saved: () => void,
+): { section: HTMLElement; save: HTMLElement } {
   const section = el("div", "sect");
-
   section.append(el("div", "stitle", "Overtime"));
+
+  const start = { daily: text(config.overtimeDaily), weekly: text(config.overtimeWeekly) };
+  const draft = { ...start };
+
+  const why = el("span", "why");
+  const button = control("btn pri", "Save changes", () => { void send(); });
+  const save = el("span", "unavail");
+  save.append(why, button);
+
+  const refusal = el("div", "note warn");
+
+  function redraw(): void {
+    const waiting = waitingFor(draft, start);
+    why.textContent = waiting ?? "";
+    button.classList.toggle("off", waiting !== null);
+    button.toggleAttribute("disabled", waiting !== null);
+  }
+
+  async function send(): Promise<void> {
+    if (waitingFor(draft, start) !== null) return;
+
+    refusal.replaceChildren();
+    button.toggleAttribute("disabled", true);
+
+    try {
+      await write(host, "roster.configure", "setOvertime", {
+        ...(draft.daily.trim() === "" ? {} : { daily: Number(draft.daily) }),
+        ...(draft.weekly.trim() === "" ? {} : { weekly: Number(draft.weekly) }),
+      });
+      saved();
+    } catch (error) {
+      refusal.append(el("span", undefined,
+        error instanceof WriteRefused ? error.message : UNKNOWN_OUTCOME));
+      redraw();
+
+      if (!(error instanceof WriteRefused)) throw error;
+    }
+  }
 
   const row = el("div", "otrow");
   row.append(
     el("span", "quiet", "Overtime begins after"),
-    el("div", "field", threshold(config.overtimeDaily, "day", host)),
-    el("div", "field", threshold(config.overtimeWeekly, "week", host)),
-    el("span", "quiet", "Warns while the rota is being built. Never blocks."),
+    hours("daily", draft.daily, "hours a day", (value) => { draft.daily = value; redraw(); }),
+    hours("weekly", draft.weekly, "hours a week", (value) => { draft.weekly = value; redraw(); }),
+    el("span", "quiet", "Leave a box empty for no threshold. Warns while the rota is being "
+      + "built — never blocks."),
   );
 
-  section.append(row);
-  return section;
+  section.append(row, refusal);
+  redraw();
+  return { section, save };
+}
+
+/** A threshold as the box shows it — empty where none is set, never "0". */
+function text(hours: number | null): string {
+  return hours === null ? "" : String(hours);
+}
+
+/** What Save waits for — the reasons the service would otherwise refuse with. */
+function waitingFor(
+  draft: { daily: string; weekly: string }, start: { daily: string; weekly: string },
+): string | null {
+  if (draft.daily === start.daily && draft.weekly === start.weekly) {
+    return "Change a threshold to save it";
+  }
+
+  for (const [value, cap, over] of [
+    [draft.daily, 24, "A day has 24 hours"],
+    [draft.weekly, 168, "A week has 168 hours"],
+  ] as const) {
+    if (value.trim() === "") continue;
+    const hours = Number(value);
+    if (!Number.isFinite(hours) || hours <= 0) return "A threshold is a number of hours above zero";
+    if (hours > cap) return over;
+  }
+
+  return null;
+}
+
+/** One threshold's box, and the unit it is counted in. */
+function hours(
+  name: string, value: string, unit: string, set: (value: string) => void,
+): HTMLElement {
+  const field = el("label", "field");
+  const input = document.createElement("input");
+  input.className = "inp";
+  input.type = "number";
+  input.name = name;
+  input.min = "0";
+  input.step = "0.5";
+  input.value = value;
+  input.addEventListener("input", () => { set(input.value); });
+
+  field.append(input, el("span", "quiet", ` ${unit}`));
+  return field;
 }
 
 /** The one thing this screen shows and cannot change. */
@@ -214,24 +315,4 @@ function holidays(config: Policy): HTMLElement {
 
   section.append(title, note);
   return section;
-}
-
-/**
- * An overtime threshold, or the absence of one.
- *
- * @param hours the threshold, null where the property set none
- * @param per the period it is measured over
- * @param host for the property's locale
- * @returns the sentence a person reads
- *
- * @remarks
- * This was `Hours(decimal?, string)` in the service, building `"9 h / day"` —
- * so the unit, the separator and the English word for the period were all
- * decided one component away from the reader, in one language, and an em-dash
- * stood in for absence with no way for a surface to say it differently.
- */
-function threshold(hours: number | null, per: string, host: HostApi): string {
-  return hours === null
-    ? "—"
-    : `${formatNumber(hours, host.property, "at-most-2")} h / ${per}`;
 }

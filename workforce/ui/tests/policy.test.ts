@@ -41,23 +41,30 @@ async function drawn(answer: unknown, locale?: string): Promise<string> {
 }
 
 describe("policy, where a property has set nothing", () => {
-  it("draws an em-dash for an overtime threshold nobody set", async () => {
-    const text = await drawn({ ...recordedPolicy, overtimeDaily: null });
-
-    expect(text).toContain("—");
+  // **Both rewritten under ADR 0034 when the thresholds became inputs
+  // (2026-09-19).** They read the page's text for "—" and "9 h / day"; an
+  // input's value is not text. And the em-dash test had gone vacuous before
+  // that — other em-dashes on the page satisfied `toContain("—")` whatever the
+  // threshold drew. The rule is unchanged and re-asserted on the box itself.
+  it("opens an empty box, never zero, for an overtime threshold nobody set", async () => {
+    const main = document.createElement("div");
+    await policy(host({ ...recordedPolicy, overtimeDaily: null }), main, false, () => {}, () => {});
 
     // The half the name of the old backend test carried: **not as zero**. A
     // property that set no threshold and one that set zero are different facts,
     // and zero is the one that reads as "never warn".
-    expect(text).not.toContain("0 h / day");
+    expect(main.querySelector<HTMLInputElement>("input[name=daily]")?.value).toBe("");
   });
 
-  it("draws the threshold with its unit when there is one", async () => {
-    const text = await drawn({ ...recordedPolicy, overtimeDaily: 9 });
+  it("opens the threshold's number, with its unit beside it", async () => {
+    const main = document.createElement("div");
+    await policy(host({ ...recordedPolicy, overtimeDaily: 9 }), main, false, () => {}, () => {});
 
-    // Composed on this side now — the number, the unit and the word for the
-    // period. The service sends 9 and says nothing about how it reads.
-    expect(text).toContain("9 h / day");
+    // The service sends 9 and says nothing about how it reads; the unit is
+    // the screen's.
+    const box = main.querySelector<HTMLInputElement>("input[name=daily]");
+    expect(box?.value).toBe("9");
+    expect(box?.parentElement?.textContent).toContain("hours a day");
   });
 
   it("renders the accrual in the property's locale, not the machine's", async () => {
