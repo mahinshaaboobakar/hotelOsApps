@@ -1,6 +1,7 @@
 import { HOST_CONTRACT_RANGE } from "@hotelos/sdk";
 
 import * as recorded from "../widgets/recorded";
+import { statedProperty } from "./property";
 /**
  * The five widgets, side by side, at the popover's size.
  *
@@ -171,7 +172,7 @@ function handshake(frame: HTMLIFrameElement, capabilities: readonly string[]): v
       contract: HOST_CONTRACT_RANGE.current,
       minContract: HOST_CONTRACT_RANGE.min,
       module: { id: "guestops", version: "0.1.0", capabilities },
-      property: { timezone: null, locale: null },
+      property: statedProperty(),
     }, "*", [channel.port2]);
   };
 

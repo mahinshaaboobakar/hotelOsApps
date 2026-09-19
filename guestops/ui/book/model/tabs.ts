@@ -21,9 +21,12 @@ import type { Chip, Tag } from "./day";
  * is orphaned.
  */
 export interface ActivityEntry {
-  /** `28 Aug` and `09:14`, as two lines. */
-  date: string;
-  time: string;
+  /**
+   * When it happened — an ISO-8601 instant, drawn as a date over a time in the
+   * property's zone and locale. The service sent both already rendered until
+   * 2026-09-19, on its own clock; page 64 §11 puts the rendering here.
+   */
+  at: string;
 
   /** Who said it — `Opera`, `Anitha M.`, `Room Care`, `Jobs`. */
   who: Chip;

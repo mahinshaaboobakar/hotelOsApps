@@ -2,6 +2,8 @@
  * The Activity tab — everything that happened, with who said it. Frame 4.
  */
 
+import { formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
+
 import type { Activity, ActivityEntry } from "../../book";
 import { control, el } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
@@ -20,10 +22,11 @@ const COLUMNS = ["When", "Who", "What"] as const;
  * never removes one.
  *
  * @param activity the filters, and what is showing
+ * @param property whose zone and locale the times are drawn in
  * @returns the tab's contents
  */
-export function activityTab(activity: Activity): readonly HTMLElement[] {
-  return [sources(activity), list(activity.entries), provenance()];
+export function activityTab(activity: Activity, property: PropertyEnvironment): readonly HTMLElement[] {
+  return [sources(activity), list(activity.entries, property), provenance()];
 }
 
 /** The four source filters, and the note about ordering. */
@@ -42,7 +45,7 @@ function sources(activity: Activity): HTMLElement {
 }
 
 /** The rows. */
-function list(entries: readonly ActivityEntry[]): HTMLElement {
+function list(entries: readonly ActivityEntry[], property: PropertyEnvironment): HTMLElement {
   const element = el("div", "tbl");
   const head = el("div", "ev hd");
 
@@ -60,17 +63,20 @@ function list(entries: readonly ActivityEntry[]): HTMLElement {
   }
 
   for (const entry of entries) {
-    element.append(line(entry));
+    element.append(line(entry, property));
   }
 
   return element;
 }
 
-function line(entry: ActivityEntry): HTMLElement {
+function line(entry: ActivityEntry, property: PropertyEnvironment): HTMLElement {
   const element = el("div", `ev${entry.disagrees ? " disagrees" : ""}`);
 
   const when = el("div", "tm");
-  when.append(el("b", undefined, entry.date), el("span", undefined, entry.time));
+  when.append(
+    el("b", undefined, formatInstant(entry.at, property, "date")),
+    el("span", undefined, formatInstant(entry.at, property, "time")),
+  );
 
   const who = el("div");
   who.append(mark(entry.who));

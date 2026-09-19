@@ -39,7 +39,7 @@ public sealed class StayTabViewTests
 {
     /// <summary>What `ActivityEntry` in `ui/book/model/tabs.ts` reads.</summary>
     private static readonly string[] EntryFields =
-        ["date", "time", "who", "what", "detail", "disagrees"];
+        ["at", "who", "what", "detail", "disagrees"];
 
     /// <summary>Serialise the way the envelope does, and read it back.</summary>
     private static JsonElement Wire(object? answer)

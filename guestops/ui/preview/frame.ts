@@ -23,6 +23,7 @@ import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { start } from "../application";
 import { listState, page, repeated, rowsFor } from "./lists";
+import { statedProperty } from "./property";
 import {
   recordedActivity,
   recordedAttention,
@@ -54,10 +55,12 @@ function host(granted: readonly string[]): HostApi {
     identity: { id: "guestops", version: "0.1.0", capabilities: granted },
 
     // The host tells a module its property's zone and locale. Both are `null`
-    // here on purpose: the SDK types them nullable because a property that has
-    // not been configured is a real state, and a double that invented
-    // "Asia/Kolkata" would hide every place this module forgets to handle it.
-    property: { timezone: null, locale: null },
+    // unless the capture's address states them: the SDK types them nullable
+    // because a property that has not been configured is a real state, and a
+    // double that invented "Asia/Kolkata" would hide every place this module
+    // forgets to handle it. `?locale=&tz=` is a choice made by the capture that
+    // needs it, visible in its URL — preview/property.ts.
+    property: statedProperty(),
 
     call(capability: string, method: string, params?: unknown): Promise<unknown> {
       const answers: Record<string, unknown> = {

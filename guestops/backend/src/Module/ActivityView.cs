@@ -64,8 +64,12 @@ public sealed class ActivityView(GuestOpsDbContext db)
 
             entries = events.Select(one => new
             {
-                date = one.OccurredAt.ToString("d MMM"),
-                time = one.OccurredAt.ToString("HH:mm"),
+                // The instant, not a rendering of it. This sent "d MMM" and
+                // "HH:mm" until 2026-09-19 — on the server's offset and in no
+                // locale, so an event at 23:40 UTC showed a property in Kolkata
+                // the day before. The screen formats it for the property
+                // (page 64 §11, I1).
+                at = one.OccurredAt.ToString("O"),
                 who = Who(one.ActorType, one.Source),
                 what = What(one.EventType),
 
