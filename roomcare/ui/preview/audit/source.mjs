@@ -14,7 +14,8 @@ import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const UI = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-const PLATFORM = resolve(UI, "..", "..", "..", "HosPilotOS");
+// The platform checkout: the sibling of this repository, or HOSPILOTOS_ROOT for a worktree that has no sibling.
+const PLATFORM = process.env.HOSPILOTOS_ROOT ?? resolve(UI, "..", "..", "..", "HosPilotOS");
 const atHead = (path) => execFileSync("git", ["-C", PLATFORM, "show", `HEAD:${path}`], { encoding: "utf8" });
 
 function walk(dir) {
@@ -94,8 +95,21 @@ verdict("C10", twins.length === 1 && twins[0].at.startsWith("chrome/") ? "PASS" 
 
 // L6 — a td padded under 10px says why.
 const tight = hits(/td\{[^}]*padding:\s*(\d+)px[^}]*\}/gu).filter((h) => Number(h.m[1]) < 10);
-const unexplained = tight.filter((h) => !/\/\*[^*]*\*\/\s*$/.test(h.f.text.slice(Math.max(0, h.m.index - 400), h.m.index).split("\n").slice(-3).join("\n")));
+// The reason sits on the line above the rule — read from the rule's own line start, not from its "td{".
+const unexplained = tight.filter((h) => {
+  const lineStart = h.f.text.lastIndexOf("\n", h.m.index) + 1;
+  return !/\/\*[^*]*\*\/\s*$/.test(h.f.text.slice(Math.max(0, lineStart - 400), lineStart));
+});
 verdict("L6", unexplained.length === 0 ? "PASS" : "FAIL", `${tight.length} td rule(s) under 10px; ${unexplained.length} without a reason beside it`, unexplained);
+
+// G1 — every paged read takes its window from the SDK's server half (HotelOS.Platform Paging.Of,
+// CORE-Q13), never its own `Skip(page * size)`: two clamps drift. Read from the backend's projections.
+const PROJECTIONS = resolve(UI, "..", "backend", "src", "Module", "Projections");
+const projections = readdirSync(PROJECTIONS).filter((n) => n.endsWith(".cs")).map((n) => ({ path: `backend/src/Module/Projections/${n}`, text: readFileSync(join(PROJECTIONS, n), "utf8") }));
+const handWindows = projections.flatMap((f) => [...f.text.matchAll(/\.Skip\((?:[^()]|\([^()]*\))*\*(?:[^()]|\([^()]*\))*\)/gu)].map((m) => `${f.path}:${lineOf(f.text, m.index)}  ${m[0]}`));
+const sdkWindows = projections.flatMap((f) => [...f.text.matchAll(/Paging\.Of\(/gu)].map((m) => `${f.path}:${lineOf(f.text, m.index)}`));
+verdict("G1", handWindows.length === 0 && sdkWindows.length > 0 ? "PASS" : "FAIL",
+  `${sdkWindows.length} paged read(s) windowed by the SDK's Paging.Of; ${handWindows.length} computing their own. The module seam carries page → {page, pageSize, total}: the paged pattern, not a third`, [...handWindows, ...sdkWindows]);
 
 // G1 · G2 — the pager's contract and its arithmetic.
 const pagerUses = hits(/pagedView\(|PAGER_LABELS\./gu);
