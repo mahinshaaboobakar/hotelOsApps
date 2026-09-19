@@ -40,10 +40,9 @@ export async function shiftBoard(host: HostApi): Promise<HTMLElement> {
 
   return card("Shift Board", [
     figures([
-      { value: formatNumber(board.onNow, host.property, "whole"), label: "on now", tone: "ink" },
-      { value: formatNumber(board.departments, host.property, "whole"), label: "departments",
-        tone: "muted" },
-    ]),
+      { count: board.onNow, of: null, label: "on now", tone: "ink" },
+      { count: board.departments, of: null, label: "departments", tone: "muted" },
+    ], host.property),
     section("On now"),
     // Composed here, on `coming-up`'s precedent: a panel that knows its rows
     // are spans renders them, because the service cannot — the separator and

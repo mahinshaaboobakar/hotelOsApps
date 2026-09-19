@@ -41,7 +41,7 @@ export async function pendingRequests(host: HostApi): Promise<HTMLElement> {
   const queue = got.value;
 
   return card("Pending Requests", [
-    figures(queue.figures),
+    figures(queue.figures, host.property),
     section("Oldest first"),
     rows(queue.rows, host),
     note("Age is time waiting, not time until the shift."),

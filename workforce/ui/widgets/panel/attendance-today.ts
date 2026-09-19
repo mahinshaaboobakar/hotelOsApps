@@ -39,7 +39,7 @@ export async function attendanceToday(host: HostApi): Promise<HTMLElement> {
   const day = got.value;
 
   return card("Attendance Today", [
-    figures(day.figures),
+    figures(day.figures, host.property),
     bar(day.share),
     section("Absent against the rota"),
     rows(day.byDepartment, host),

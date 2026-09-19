@@ -46,7 +46,8 @@ public static class WidgetViews
             rows = view.Rows.Select(one => Row(
                 one.DepartmentCode,
                 null,
-                one.OnNow.ToString(),
+                one.OnNow,
+                Form.Count,
                 "muted",
                 "rota?department=" + one.DepartmentCode,
                 Wire.Clock(one.StartsAt),
@@ -75,9 +76,9 @@ public static class WidgetViews
         {
             figures = new[]
             {
-                Figure(view.Present + " of " + view.Rostered, "present", "ink"),
-                Figure(view.Late.ToString(), "late", view.Late == 0 ? "muted" : "warn"),
-                Figure(view.Absent.ToString(), "absent", view.Absent == 0 ? "muted" : "bad"),
+                Figure(view.Present, "present", "ink", of: view.Rostered),
+                Figure(view.Late, "late", view.Late == 0 ? "muted" : "warn"),
+                Figure(view.Absent, "absent", view.Absent == 0 ? "muted" : "bad"),
             },
             // The proportion bar is three segments over the rostered total, so
             // it adds up to what was planned rather than to what happened.
@@ -89,14 +90,17 @@ public static class WidgetViews
             },
             byDepartment = view.ByDepartment.Select(one => Row(
                 one.DepartmentCode,
-                one.Rostered + " rostered",
-                one.Absent.ToString(),
+                null,
+                one.Absent,
+                Form.Count,
                 one.Absent == 0 ? "muted" : "bad",
-                "attendance?department=" + one.DepartmentCode)).ToList(),
+                "attendance?department=" + one.DepartmentCode,
+                context: Context(one.Rostered, "rostered"))).ToList(),
             lateIn = view.LateIn.Select(one => Row(
                 one.Person.Name,
                 one.DepartmentCode,
-                (int)one.LateBy.TotalMinutes + " min",
+                (int)one.LateBy.TotalMinutes,
+                Form.Minutes,
                 "warn",
                 "attendance?department=" + one.DepartmentCode)).ToList(),
         };
@@ -113,15 +117,16 @@ public static class WidgetViews
         {
             figures = new[]
             {
-                Figure(view.Leave.ToString(), "leave", view.Leave == 0 ? "muted" : "ink"),
-                Figure(view.Swaps.ToString(), "swaps", view.Swaps == 0 ? "muted" : "ink"),
+                Figure(view.Leave, "leave", view.Leave == 0 ? "muted" : "ink"),
+                Figure(view.Swaps, "swaps", view.Swaps == 0 ? "muted" : "ink"),
             },
             rows = view.Rows.Select(one => Row(
                 one.Raiser.Name,
                 one.Colleague?.Name is { } colleague
                     ? one.DepartmentCode + " · with " + colleague
                     : one.DepartmentCode,
-                one.WaitingDays + "d",
+                one.WaitingDays,
+                Form.Days,
                 one.WaitingDays >= 3 ? "warn" : "muted",
                 "leave?department=" + one.DepartmentCode)).ToList(),
         };
@@ -143,9 +148,13 @@ public static class WidgetViews
         {
             figures = new[]
             {
-                Figure(view.OverlappingLeave.ToString(), "overlaps",
+                // The approved frame's words. These said "overlaps" and
+                // "expiring" — an implementation choice nobody ruled — while
+                // the widget's own test and the owner's canvas both read
+                // "overlapping leave" and "certs expiring".
+                Figure(view.OverlappingLeave, "overlapping leave",
                     view.OverlappingLeave == 0 ? "muted" : "warn"),
-                Figure(view.CertsExpiring.ToString(), "expiring",
+                Figure(view.CertsExpiring, "certs expiring",
                     view.CertsExpiring == 0 ? "muted" : "warn"),
             },
             overlaps = view.Overlaps.Select(one => Dated(
@@ -153,14 +162,16 @@ public static class WidgetViews
                     ? named
                     : one.DepartmentCode,
                 one.On.ToString("yyyy-MM-dd"),
-                one.Away + " away",
-                "of " + one.Posted,
+                Context(one.Away, "away"),
+                one.Posted,
+                Form.OutOf,
                 "warn",
                 "leave?department=" + one.DepartmentCode)).ToList(),
             expiring = view.Expiring.Select(one => Row(
                 one.Capability + " · " + one.Person.Name,
                 null,
-                one.InDays + "d",
+                one.InDays,
+                Form.Days,
                 one.InDays <= 7 ? "bad" : "warn",
                 "people?capability=expiring")).ToList(),
         };
@@ -175,9 +186,9 @@ public static class WidgetViews
         {
             figures = new[]
             {
-                Figure(view.AwayToday.ToString(), "away today",
+                Figure(view.AwayToday, "away today",
                     view.AwayToday == 0 ? "muted" : "ink"),
-                Figure(view.AwayThisWeek.ToString(), "this week",
+                Figure(view.AwayThisWeek, "this week",
                     view.AwayThisWeek == 0 ? "muted" : "muted"),
             },
             today = view.Today.Select(Away).ToList(),
@@ -191,29 +202,58 @@ public static class WidgetViews
         // The people, where Master Data answered for them. An id would be an
         // identifier on a card that has room for a name and nothing else.
         string.Join(", ", away.People.Select(one => one.Name).Where(one => one is not null)),
-        away.People.Count.ToString(),
+        away.People.Count,
+        Form.Count,
         "muted",
         "leave?department=" + away.DepartmentCode);
 
+    /// <summary>
+    /// How a row's number is written — the widget writes it, in the property's
+    /// digits (NUM-Q1, ADR 0174). The words are the widget's too.
+    /// </summary>
+    /// <remarks>
+    /// These were strings composed here — <c>"22 min"</c>, <c>"5d"</c>,
+    /// <c>"of 5"</c> — in whatever culture this service runs under. The number
+    /// travels now, and this says which of the drawing's forms it takes.
+    /// </remarks>
+    private static class Form
+    {
+        public const string Count = "count";
+        public const string Minutes = "minutes";
+        public const string Days = "days";
+        public const string OutOf = "out-of";
+    }
+
+    /// <summary>A number that qualifies a row — "7 rostered", "3 away".</summary>
+    private static object Context(int count, string word) => new { count, word };
+
     /// <summary>A row about a particular day — the day travels as ISO.</summary>
     private static object Dated(
-        string name, string on, string meta, string value, string tone, string opens)
-        => new { name, on, meta, value, tone, opens };
+        string name, string on, object context, int value, string form, string tone, string opens)
+        => new { name, on, meta = (string?)null, context, value, form, tone, opens };
 
     /// <summary>One row of a widget's list.</summary>
+    /// <remarks>
+    /// <c>meta</c> is text only now; a number that used to live inside it
+    /// travels as <c>context</c>, which the widget writes.
+    /// </remarks>
     private static object Row(
         string? name,
         string? meta,
-        string value,
+        int value,
+        string form,
         string tone,
         string opens,
         string? from = null,
-        string? to = null)
+        string? to = null,
+        object? context = null)
         => new
         {
             name,
             meta = string.IsNullOrWhiteSpace(meta) ? null : meta,
+            context,
             value,
+            form,
             tone,
             opens,
 
@@ -224,9 +264,14 @@ public static class WidgetViews
             to,
         };
 
-    /// <summary>One of a card's headline numbers.</summary>
-    private static object Figure(string value, string label, string tone)
-        => new { value, label, tone };
+    /// <summary>One of a card's headline numbers, and what it is out of where it is.</summary>
+    /// <remarks>
+    /// The number, not the text. This was documented as <i>"already formatted —
+    /// a widget never computes one"</i>, which put every figure in the service's
+    /// culture. <c>of</c> is the "of 6" in "5 of 6", null where there is none.
+    /// </remarks>
+    private static object Figure(int count, string label, string tone, int? of = null)
+        => new { count, of, label, tone };
 
     /// <summary>One band of the proportion bar.</summary>
     private static object Segment(int count, string tone) => new { count = Math.Max(0, count), tone };

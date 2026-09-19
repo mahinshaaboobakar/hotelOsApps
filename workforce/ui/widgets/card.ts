@@ -16,13 +16,14 @@
 
 
 import {
-  HostCallError, type FailureDrawing, type HostApi, type ReadFailure,
+  formatNumber, HostCallError, type FailureDrawing, type HostApi, type PropertyEnvironment,
+  type ReadFailure,
 } from "@hotelos/sdk";
 
 import { APPLICATION } from "../chrome/application";
 import { el, fill } from "../chrome/element";
 import { drawing, markEl, type Subject } from "../chrome/failure";
-import type { Figure, Segment, SummaryRow } from "../roster/widget";
+import type { Figure, RowForm, Segment, SummaryRow } from "../roster/widget";
 
 import { WIDGET_CSS } from "./styles";
 
@@ -131,13 +132,17 @@ export function stylesheet(): HTMLElement {
  * @param figures two or four — the frames use both and nothing else
  * @returns the grid
  */
-export function figures(values: readonly Figure[]): HTMLElement {
+export function figures(
+  values: readonly Figure[], property: PropertyEnvironment,
+): HTMLElement {
   const grid = el("div", values.length > 2 ? "wfigures four" : "wfigures");
+  const n = (value: number): string => formatNumber(value, property, "whole");
 
   for (const figure of values) {
     const cell = el("div", "wfigure");
     cell.append(
-      el("span", `wvalue ${figure.tone}`, figure.value),
+      el("span", `wvalue ${figure.tone}`,
+        figure.of === null ? n(figure.count) : `${n(figure.count)} of ${n(figure.of)}`),
       el("span", "wlabel", figure.label),
     );
     grid.append(cell);
@@ -203,17 +208,35 @@ export function rows(entries: readonly SummaryRow[], host: HostApi): HTMLElement
       void open(host, row, entry.opens);
     });
 
+    const n = (value: number): string => formatNumber(value, host.property, "whole");
+    const meta = entry.context === null
+      ? entry.meta
+      : `${n(entry.context.count)} ${entry.context.word}`;
+
     fill(
       row,
       el("span", "wname", entry.name),
-      entry.meta === null ? null : el("span", "wmeta", entry.meta),
-      el("span", `wfig ${entry.tone}`, entry.value),
+      meta === null ? null : el("span", "wmeta", meta),
+      el("span", `wfig ${entry.tone}`, written(entry.value, entry.form, n)),
     );
 
     list.append(row);
   }
 
   return list;
+}
+
+/**
+ * A row's number in the drawing's form — the service names the form, this
+ * writes it in the property's digits (NUM-Q1, ADR 0174).
+ */
+function written(value: number, form: RowForm, n: (value: number) => string): string {
+  switch (form) {
+    case "minutes": return `${n(value)} min`;
+    case "days": return `${n(value)}d`;
+    case "out-of": return `of ${n(value)}`;
+    case "count": return n(value);
+  }
 }
 
 /**

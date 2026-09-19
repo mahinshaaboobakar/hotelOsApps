@@ -62,21 +62,14 @@ const EXEMPT = [...carried(ANSWERS)].sort((a, b) => b.length - a.length);
  * now its own check — tests/register-ids.test.ts — because it was never a
  * number to exempt: it was copy that should not have been on the screen.
  */
-const FIGURE = { selector: ".wvalue", why: "Figure.value is a string the service formatted" };
-const ROW_VALUE = { selector: ".wfig", why: "SummaryRow.value is a string the service formatted" };
-
+// The widgets' entries — figure, row value and meta, on five cards — went when
+// WidgetViews started sending numbers: each one failed here with "the wire was
+// fixed", which is the mechanism doing its job.
 const OWED: Record<string, readonly { selector: string; why: string }[]> = {
   schedule: [
     { selector: ".mpush", why: "Schedule.balance is a composed sentence (\"4 of 8 casual remaining\")" },
     { selector: ".cduty.tail", why: "ScheduleDay.tail is a composed clock (\"…08:00\")" },
   ],
-  "attendance today": [FIGURE, ROW_VALUE,
-    { selector: ".wmeta", why: "SummaryRow.meta carries a composed clock (\"07:00\")" }],
-  "coming up": [FIGURE],
-  "on leave": [FIGURE, ROW_VALUE],
-  "pending requests": [FIGURE],
-  // Its figures are counts the panel formats itself; only the rows are owed.
-  "shift board": [ROW_VALUE],
 };
 
 /** The text a person reads, less what is owed and what the fixture wrote. */

@@ -44,7 +44,7 @@ export async function comingUp(host: HostApi): Promise<HTMLElement> {
   return card("Coming Up", [
     // A number in the copy is still a number a person reads (U1).
     section(`Next ${formatNumber(7, host.property, "whole")} days`),
-    figures(ahead.figures),
+    figures(ahead.figures, host.property),
     section("Two or more away, same department"),
     rows(dated(ahead.overlaps, host.property), host),
     section("Certifications expiring"),

@@ -33,7 +33,7 @@ export async function onLeave(host: HostApi): Promise<HTMLElement> {
   const away = got.value;
 
   return card("On Leave", [
-    figures(away.figures),
+    figures(away.figures, host.property),
     section("Away today"),
     rows(away.today, host),
     section("Rest of the week"),

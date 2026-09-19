@@ -26,8 +26,18 @@ export type Tone = "ink" | "muted" | "ok" | "warn" | "bad";
 
 /** One figure in a widget's headline row. */
 export interface Figure {
-  /** The number, already formatted. A widget never computes one. */
-  value: string;
+  /**
+   * The number — and the widget writes it, in the property's digits.
+   *
+   * This was `value: string`, documented *"the number, already formatted. A
+   * widget never computes one"* — which put every figure in the service's
+   * culture (NUM-Q1, ADR 0174). Writing is not computing: the count is the
+   * service's, the digits are the reader's.
+   */
+  count: number;
+
+  /** What it is out of — the "38" in "34 of 38" — or null where there is none. */
+  of: number | null;
 
   /** What it counts, in the frame's own words. */
   label: string;
@@ -35,6 +45,21 @@ export interface Figure {
   /** How it reads. */
   tone: Tone;
 }
+
+/**
+ * How a row's number is written — the drawing's four forms.
+ *
+ * ```text
+ * count     5
+ * minutes   22 min
+ * days      5d
+ * out-of    of 5
+ * ```
+ *
+ * The service composed these (`"22 min"`, `"5d"`, `"of 5"`); it names the form
+ * now and the card writes it.
+ */
+export type RowForm = "count" | "minutes" | "days" | "out-of";
 
 /** One row of a widget's list: what it is, a qualifier, and a value. */
 export interface SummaryRow {
@@ -64,11 +89,20 @@ export interface SummaryRow {
   from?: string;
   to?: string;
 
-  /** The qualifier beside it, or null when the row has none. */
+  /** The qualifier beside it, as text, or null when the row has none. */
   meta: string | null;
 
-  /** The value at the right. */
-  value: string;
+  /**
+   * A number that qualifies the row — "9 rostered", "3 away" — or null.
+   *
+   * It used to live inside `meta` as text the service wrote; the number
+   * travels now and the card writes it, taking `meta`'s place.
+   */
+  context: { count: number; word: string } | null;
+
+  /** The number at the right, and how the drawing writes it. */
+  value: number;
+  form: RowForm;
 
   /** How the value reads. */
   tone: Tone;
