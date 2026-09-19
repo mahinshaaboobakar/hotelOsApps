@@ -121,9 +121,14 @@ public sealed class AttentionView(GuestOpsDbContext db)
             status = (object?)null,
             rows = new object[]
             {
-                new { label = "From", value = fact.IntegrationId, tags = Array.Empty<object>() },
-                new { label = "Received", value = fact.ReceivedAt.ToString("dd MMM HH:mm"), tags = Array.Empty<object>() },
-                new { label = "Why it is held", value = fact.Reason.ToString(), tags = Array.Empty<object>() },
+                // "From" showed the integration's id (`ohip`) until 2026-09-19 —
+                // its configured name is not reachable here yet, so the function.
+                new { label = "From", value = "the PMS", at = (string?)null, tags = Array.Empty<object>() },
+
+                // An instant, drawn by the screen for the property; it was
+                // "dd MMM HH:mm" on the server's clock.
+                new { label = "Received", value = "", at = (string?)fact.ReceivedAt.ToString("O"), tags = Array.Empty<object>() },
+                new { label = "Why it is held", value = HeldReasonWords.Said(fact.Reason), at = (string?)null, tags = Array.Empty<object>() },
             },
             note = (string?)null,
 

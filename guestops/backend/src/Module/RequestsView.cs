@@ -56,7 +56,11 @@ public sealed class RequestsView(
         {
             ours = requests.Select(request => new
             {
-                key = request.LoggedAt.ToString("HH:mm"),
+                // When it was logged, as an instant the screen draws for the
+                // property — "HH:mm" on the server's clock until 2026-09-19.
+                // `key` is for a row whose label is a word, which this is not.
+                key = (string?)null,
+                at = request.LoggedAt.ToString("O"),
                 what = request.Text,
                 state = State(request.HandedOff, request.JobId, installed),
                 stateTone = request.HandedOff ? "warn" : "neutral",

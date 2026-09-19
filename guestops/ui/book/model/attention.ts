@@ -9,6 +9,10 @@ export interface AttentionRow {
   value: string;
   strong?: string;
   tail?: string;
+
+  /** An instant for the value, drawn by the screen for the property — or null. */
+  at?: string | null;
+
   tags: readonly Tag[];
 }
 

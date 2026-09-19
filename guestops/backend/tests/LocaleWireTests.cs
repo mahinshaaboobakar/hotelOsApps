@@ -111,7 +111,7 @@ public sealed class LocaleWireTests
         harness.Db.HeldFacts.Add(new HeldFact
         {
             Id = Guid.CreateVersion7(), PropertyId = DeskHarness.Property, IntegrationId = "ohip",
-            Payload = "{}", Reason = default, ReceivedAt = Late,
+            Payload = "{}", Reason = HeldReason.CandidateLink, ReceivedAt = Late,
         });
         await harness.Db.SaveChangesAsync();
 

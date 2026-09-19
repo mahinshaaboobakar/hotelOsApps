@@ -184,7 +184,8 @@ public sealed class StayDetailView(GuestOpsDbContext db)
             detail = $"You have {row.OurValue} — the PMS says {row.PmsValue}, not applied.",
             attribution = "Your entry stands everywhere until somebody decides.",
             actions = new[] { $"Keep {row.OurValue}", $"Take {row.PmsValue}" },
-            time = row.RaisedAt.ToString("HH:mm"),
+            // A `time` rendered "HH:mm" was sent here until 2026-09-19 and no
+            // screen ever read it; it went rather than being converted.
             tone = "warn",
         };
 

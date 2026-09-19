@@ -65,8 +65,14 @@ export interface Activity {
 
 /** One guest request, and whatever became of it — frame 5. */
 export interface Request {
-  /** `14:35`, or a reference where the row is a job. */
-  key: string;
+  /**
+   * A word for the row — a job's reference, `Assigned` — or null where the
+   * row is labelled by when it happened.
+   */
+  key: string | null;
+
+  /** When it happened — an ISO instant the screen draws as a time; else null. */
+  at: string | null;
 
   what: string;
 

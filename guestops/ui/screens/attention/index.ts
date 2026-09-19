@@ -14,13 +14,14 @@
  * the colour is what stops a person reading it as evidence.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import type { HostApi, PropertyEnvironment } from "@hotelos/sdk";
 
 import { APP, failureDrawing, load, type AttentionCard, type AttentionPage } from "../../book";
 import { pager } from "../../chrome/pager";
 import { el, fill } from "../../chrome/element";
 import { mark, failed } from "../../chrome/marks";
 import { actions, card, detail } from "../../chrome/panel";
+import { instant } from "../../chrome/when";
 
 /**
  * Render the attention list.
@@ -87,7 +88,7 @@ export async function attention(
   }
 
   for (const item of loaded.value.cards) {
-    stack.append(one(item));
+    stack.append(one(item, host.property));
   }
 
   body.append(stack);
@@ -102,11 +103,15 @@ export async function attention(
 }
 
 /** One card: the band, the two sides, why it is here, and the ways out. */
-function one(item: AttentionCard): HTMLElement {
+function one(item: AttentionCard, property: PropertyEnvironment): HTMLElement {
   const { root, body } = card(item.kind, aside(item.status));
 
   for (const row of item.rows) {
-    body.append(detail({ ...row, tags: row.tags }));
+    body.append(detail({
+      ...row,
+      value: row.at === undefined || row.at === null ? row.value : instant(row.at, property, "date-time"),
+      tags: row.tags,
+    }));
   }
 
   fill(

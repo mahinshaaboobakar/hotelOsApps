@@ -51,7 +51,7 @@ public sealed class FeedView(GuestOpsDbContext db)
 
             facts = held.Select(fact => new
             {
-                reason = fact.Reason.ToString(),
+                reason = HeldReasonWords.Said(fact.Reason),
                 // The integration's id (`ohip`) stood here — an identifier, not a
                 // name a person uses. Null until the configured name is reachable.
                 source = (string?)null,

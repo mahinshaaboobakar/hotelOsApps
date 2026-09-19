@@ -2,9 +2,12 @@
  * The Requests tab — ours always, Jobs' when Jobs is here. Frames 5 and 5b.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
 import type { Request, Requests } from "../../book";
 import { el, unavailable } from "../../chrome/element";
 import { card } from "../../chrome/panel";
+import { instant } from "../../chrome/when";
 
 /**
  * Draw the tab.
@@ -20,11 +23,12 @@ import { card } from "../../chrome/panel";
  * an absent dependency loses its capability, never the flow.*
  *
  * @param requests what the guest asked for, and what became of it
+ * @param property whose zone and locale the times are drawn in
  * @returns the tab's contents
  */
-export function requestsTab(requests: Requests): readonly HTMLElement[] {
+export function requestsTab(requests: Requests, property: PropertyEnvironment): readonly HTMLElement[] {
   const cols = el("div", "cols even");
-  cols.append(ours(requests), neighbour(requests));
+  cols.append(ours(requests, property), neighbour(requests, property));
 
   return requests.jobsInstalled === false
     ? [cols, renamed()]
@@ -32,7 +36,7 @@ export function requestsTab(requests: Requests): readonly HTMLElement[] {
 }
 
 /** What the guest asked for — always here, whatever else is installed. */
-function ours(requests: Requests): HTMLElement {
+function ours(requests: Requests, property: PropertyEnvironment): HTMLElement {
   const { root, body } = card(
     "Guest requests",
     // It carried "GuestOps owns these" beside Jobs' panel — which application
@@ -41,7 +45,7 @@ function ours(requests: Requests): HTMLElement {
   );
 
   for (const request of requests.ours) {
-    body.append(row(request));
+    body.append(row(request, property));
   }
 
   const why = "Logging a request from GuestOps is not available yet.";
@@ -50,7 +54,7 @@ function ours(requests: Requests): HTMLElement {
 }
 
 /** What Jobs made of them — or the invitation to install it. */
-function neighbour(requests: Requests): HTMLElement {
+function neighbour(requests: Requests, property: PropertyEnvironment): HTMLElement {
   if (requests.jobsInstalled === false || requests.jobs === null) {
     return absent();
   }
@@ -62,7 +66,7 @@ function neighbour(requests: Requests): HTMLElement {
   // Removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
 
   for (const job of requests.jobs) {
-    body.append(row(job));
+    body.append(row(job, property));
   }
 
   return root;
@@ -103,7 +107,7 @@ function absent(): HTMLElement {
 }
 
 /** One request or job. */
-function row(request: Request): HTMLElement {
+function row(request: Request, property: PropertyEnvironment): HTMLElement {
   const element = el("div", "fr");
   const value = el("div", "v");
 
@@ -117,7 +121,7 @@ function row(request: Request): HTMLElement {
     value.append(el("span", "hint", request.note));
   }
 
-  element.append(el("div", "k", request.key), value);
+  element.append(el("div", "k", request.key ?? instant(request.at, property, "time")), value);
   return element;
 }
 

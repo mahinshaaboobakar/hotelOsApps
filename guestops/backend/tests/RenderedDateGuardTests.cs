@@ -34,13 +34,10 @@ public sealed class RenderedDateGuardTests
     /// <summary>Views still sending a rendering, and how many each holds.</summary>
     private static readonly Dictionary<string, int> NotYetConverted = new()
     {
-        ["AttentionView.cs"] = 1,
         ["BookingView.cs"] = 7,
         ["BookingsView.cs"] = 2,
         ["CancelPlanView.cs"] = 6,
         ["PaymentView.cs"] = 1,
-        ["RequestsView.cs"] = 1,
-        ["StayDetailView.cs"] = 1,
     };
 
     private static readonly Regex Rendered = new(

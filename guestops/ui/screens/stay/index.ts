@@ -140,7 +140,7 @@ export async function stay(
   if (tab === "Overview") {
     fill(body, page.banner === null ? null : banner(page.banner), overview(page, () => go("Activity")));
   } else if (tab.startsWith("Requests")) {
-    fill(body, ...requestsTab(requests));
+    fill(body, ...requestsTab(requests, host.property));
   } else if (tab === "Activity") {
     // **Read when the tab is shown, not when the page is.** `requests` and
     // `servicing` are eager because the tab *bar* needs them — a count and a
