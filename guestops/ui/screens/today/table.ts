@@ -20,7 +20,10 @@
  * would hide a booking the desk has to complete.
  */
 
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
 import type { DayRow } from "../../book/model";
+import { day } from "../../chrome/when";
 import { el, fill, opener, unavailable } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
@@ -38,6 +41,7 @@ export function table(
   rows: readonly DayRow[],
   total: number,
   open: (row: DayRow) => void,
+  property: PropertyEnvironment,
 ): HTMLElement {
   const element = el("div", "tbl");
   const head = el("div", "tr hd");
@@ -62,13 +66,13 @@ export function table(
   }
 
   for (const row of rows) {
-    element.append(line(row, open));
+    element.append(line(row, open, property));
   }
 
   return element;
 }
 
-function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
+function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnvironment): HTMLElement {
   const element = el("div", "tr act");
 
   const name = el("div", "nm");
@@ -79,7 +83,8 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
   // absent (GUEST-Q12) and a party count is not, so this renders whichever
   // exists and nothing at all when neither does — never an empty span holding
   // the row's height open for a value nobody has.
-  const second = row.contact ?? row.party;
+  const second = row.contact
+    ?? (row.party === null ? null : `party of ${formatNumber(row.party, property, "whole")}`);
   if (second !== null) {
     name.append(el("span", undefined, second));
   }
@@ -101,10 +106,29 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
     el("div", undefined, row.booking),
     el("div", undefined, row.roomType),
     room,
-    el("div", undefined, row.nights),
+    el("div", undefined, nights(row, property)),
     chips,
   );
 
   element.addEventListener("click", () => open(row));
   return element;
+}
+
+/**
+ * A stay's nights, in the property's form: `03 Sept → 07 Sept`, or the day-use
+ * form when the stay arrives and leaves on one day.
+ *
+ * Composed here, from the two ISO days the service sends — the order and the
+ * month's abbreviation are the property's locale's, never the server's. An
+ * unrecorded arrival is the dash, never a guessed date.
+ */
+function nights(row: DayRow, property: PropertyEnvironment): string {
+  if (row.arrive === null) return day(null, property, "day-month");
+
+  const arrive = day(row.arrive, property, "day-month");
+  if (row.depart === null) return arrive;
+
+  return row.depart === row.arrive
+    ? `${arrive} · day use`
+    : `${arrive} → ${day(row.depart, property, "day-month")}`;
 }

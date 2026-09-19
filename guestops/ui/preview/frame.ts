@@ -217,7 +217,7 @@ function shaped(method: string, answer: unknown, params: unknown): unknown {
     const [first, ...rest] = day.lists;
     if (first === undefined) return answer;
     const { rows, total } = page(repeated(first.rows, n), params);
-    return { ...day, lists: [{ ...first, rows, count: String(total) }, ...rest] };
+    return { ...day, lists: [{ ...first, rows, count: total }, ...rest] };
   }
 
   const record = answer as Record<string, unknown>;

@@ -23,7 +23,9 @@ import type { PropertyEnvironment } from "@hotelos/sdk";
 
 import type { Activity } from "../book";
 import { day, instant } from "../chrome/when";
+import type { DayRow } from "../book/model";
 import { activityTab } from "../screens/stay/activity-tab";
+import { table } from "../screens/today/table";
 
 const KOLKATA: PropertyEnvironment = { locale: "en-IN", timezone: "Asia/Kolkata" };
 const UNKNOWN: PropertyEnvironment = { locale: null, timezone: null };
@@ -72,5 +74,25 @@ describe("an absent instant", () => {
   it("is the value's rendering when there is one", () => {
     expect(instant(LATE, UNKNOWN, "time")).toBe("23:40 UTC");
     expect(day("2026-09-01", UNKNOWN, "day-month")).toBe("2026-09-01");
+  });
+});
+
+describe("Today's nights", () => {
+  const row = (arrive: string | null, depart: string | null): DayRow => ({
+    id: "s1", guest: "Guest", unnamed: false, contact: null, booking: "BK-1",
+    roomType: "Deluxe", room: "214", party: null, arrive, depart, chips: [],
+  });
+
+  const drawn = (r: DayRow, property: PropertyEnvironment): string =>
+    table([r], 1, () => {}, property).querySelector(".tr.act > div:nth-child(5)")?.textContent ?? "";
+
+  it("composes the range from the two days, in the property's form", () => {
+    expect(drawn(row("2026-08-31", "2026-09-02"), UNKNOWN)).toBe("2026-08-31 → 2026-09-02");
+    expect(drawn(row("2026-08-31", "2026-08-31"), UNKNOWN)).toBe("2026-08-31 · day use");
+    expect(drawn(row("2026-08-31", "2026-09-02"), KOLKATA)).toMatch(/^31 .+ → 02 /u);
+  });
+
+  it("draws an unrecorded arrival as the dash, never a guessed day", () => {
+    expect(drawn(row(null, "2026-09-02"), KOLKATA)).toBe("—");
   });
 });

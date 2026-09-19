@@ -37,10 +37,10 @@ export const recordedTodayConnected: Today = {
   // not: six arrivals with no room is work, and an outage batch is a group of
   // held facts rather than six unrelated ones.
   stats: [
-    { value: "14", label: "Arrivals · 6 unassigned" },
-    { value: "42", label: "In house" },
-    { value: "11", label: "Departures" },
-    { value: "2", label: "Attention · 1 outage batch" },
+    { value: 14, label: "Arrivals" },
+    { value: 42, label: "In house" },
+    { value: 11, label: "Departures" },
+    { value: 2, label: "Attention" },
   ],
 
   lists: recordedToday.lists.map((list) =>
@@ -61,7 +61,7 @@ function rows(): Today["lists"][number]["rows"] {
     {
       id: "c1", guest: "Rajesh Pillai", contact: null, party: null, unnamed: false,
       booking: "BK-4471 · 1 of 3", roomType: "Deluxe King", room: "214",
-      nights: "31 Aug → 4 Sep",
+      arrive: "2026-08-31", depart: "2026-09-04",
       chips: [
         { kind: "mark", tone: "override", text: "override" },
         { kind: "mark", tone: "disagrees", text: "disagrees" },
@@ -70,7 +70,7 @@ function rows(): Today["lists"][number]["rows"] {
     {
       id: "c2", guest: "Meera Krishnan", contact: null, party: null, unnamed: false,
       booking: "BK-4482", roomType: "Executive Suite", room: "506",
-      nights: "31 Aug → 1 Sep",
+      arrive: "2026-08-31", depart: "2026-09-01",
       chips: [
         { kind: "mark", tone: "override", text: "override" },
         { kind: "pill", tone: "ok", text: "confirmed 15:44" },
@@ -79,7 +79,7 @@ function rows(): Today["lists"][number]["rows"] {
     {
       id: "c3", guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
       booking: "created here", roomType: "Deluxe Twin", room: "308",
-      nights: "31 Aug → 1 Sep",
+      arrive: "2026-08-31", depart: "2026-09-01",
       chips: [
         { kind: "mark", tone: "walkin", text: "walk-in" },
         { kind: "mark", tone: "unknown", text: "Opera doesn't know" },
@@ -88,7 +88,7 @@ function rows(): Today["lists"][number]["rows"] {
     {
       id: "c4", guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
       booking: "BK-4488", roomType: "Deluxe Twin", room: "309",
-      nights: "31 Aug · day use",
+      arrive: "2026-08-31", depart: "2026-08-31",
       chips: [{ kind: "mark", tone: "pms", text: "from Opera" }],
     },
   ];

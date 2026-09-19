@@ -11,7 +11,7 @@
  * by construction rather than by two calls that could drift.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import { formatNumber, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
 
 import {
   APP, failureDrawing, load,
@@ -19,6 +19,7 @@ import {
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
+import { day as calendarDay, instant } from "../../chrome/when";
 import { tabs } from "../../chrome/panel";
 import { pager } from "../../chrome/pager";
 import { table } from "./table";
@@ -79,7 +80,7 @@ export async function today(
   const showing = day.lists.find((one) => one.label === list) ?? day.lists[0];
 
   const views = tabs(
-    day.lists.map((one) => ({ label: one.label, count: one.count })),
+    day.lists.map((one) => ({ label: one.label, count: formatNumber(one.count, host.property, "whole") })),
     showing?.label ?? "",
     go,
   );
@@ -103,10 +104,10 @@ export async function today(
     // and it changes no rule on the screen below it.
     day.stale === null ? null : stale(day.stale),
 
-    strip(day.stats, showing?.label ?? "", day),
+    strip(day.stats, showing?.label ?? "", day, host.property),
     views,
-    table(showing?.rows ?? [], Number(showing?.count ?? 0), open),
-    pager(Number(showing?.count ?? 0), page, PAGE, showing?.rows.length ?? 0, turn, host.property),
+    table(showing?.rows ?? [], showing?.count ?? 0, open, host.property),
+    pager(showing?.count ?? 0, page, PAGE, showing?.rows.length ?? 0, turn, host.property),
   );
 
   // No page heading. It said "Today", which the bar already says — the same
@@ -125,7 +126,7 @@ export async function today(
  * The selected entry is matched by label rather than by index, so the strip
  * and the tabs cannot disagree about which list is showing.
  */
-function strip(stats: readonly Stat[], showing: string, day: Today): HTMLElement {
+function strip(stats: readonly Stat[], showing: string, day: Today, property: PropertyEnvironment): HTMLElement {
   const element = el("div", "strip");
 
   for (const stat of stats) {
@@ -139,11 +140,11 @@ function strip(stats: readonly Stat[], showing: string, day: Today): HTMLElement
     const selected = stat.label.split(" · ")[0]?.toLowerCase() === showing.toLowerCase();
     const entry = el("span", selected ? "on" : undefined);
 
-    entry.append(el("b", undefined, stat.value), document.createTextNode(stat.label));
+    entry.append(el("b", undefined, formatNumber(stat.value, property, "whole")), document.createTextNode(stat.label));
     element.append(entry);
   }
 
-  element.append(context(day));
+  element.append(context(day, property));
   return element;
 }
 
@@ -168,14 +169,14 @@ function stale(what: Staleness): HTMLElement {
 }
 
 /** The business day, pushed right — Jobs' board carries its date here. */
-function context(day: Today): HTMLElement {
+function context(day: Today, property: PropertyEnvironment): HTMLElement {
   const ctx = el("span", "ctx");
 
   ctx.append(
     document.createTextNode("Business day "),
-    el("b", undefined, day.businessDate),
+    el("b", undefined, calendarDay(day.businessDate, property, "day-month")),
     document.createTextNode(
-      ` · rolls at ${day.rollsAt} · `
+      ` · rolls at ${instant(day.rollsAt, property, "time")} · `
       + (day.connected
         // Named Opera until 2026-09-19, whatever PMS the property runs.
         ? "Connected to the PMS — the PMS writes the lifecycle"

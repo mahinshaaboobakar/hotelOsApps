@@ -85,7 +85,8 @@ export interface DayRow {
   contact: string | null;
 
   /**
-   * `party of 2` — how many people the source said, where the row has no name.
+   * How many people the source said, where the row has no name — a number the
+   * screen words as `party of 2`. Null when nobody said.
    *
    * Its own field rather than a second meaning for `contact`, because it is a
    * *count* and counts are producible. Folding it into the contact slot would
@@ -93,7 +94,7 @@ export interface DayRow {
    * readable this row would start showing a phone number where it used to say
    * how many people were coming.
    */
-  party: string | null;
+  party: number | null;
 
   /** True for a party member with no name yet, drawn italic in the design. */
   unnamed: boolean;
@@ -106,8 +107,13 @@ export interface DayRow {
   /** Null renders the design's inline `＋ assign` action, not a static chip. */
   room: string | null;
 
-  /** `31 Aug → 2 Sep`, or the day-use form `31 Aug · day use`. */
-  nights: string;
+  /**
+   * The stay's arrival and departure days, ISO, or null where unrecorded — the
+   * screen composes the range in the property's form. The service sent a
+   * composed `31 Aug → 2 Sep` until 2026-09-19.
+   */
+  arrive: string | null;
+  depart: string | null;
 
   /**
    * What the row carries at its right.
@@ -125,13 +131,17 @@ export interface DayRow {
 export interface DayList {
   key: string;
   label: string;
-  count: string;
+
+  /** How many the list holds in all — a number, formatted by the screen. */
+  count: number;
+
   rows: readonly DayRow[];
 }
 
 /** A stat-strip tile. The first is selected — it is a filter, not a label. */
 export interface Stat {
-  value: string;
+  /** A number, formatted by the screen for the property (§12, U1). */
+  value: number;
   label: string;
 }
 
@@ -155,8 +165,11 @@ export interface Staleness {
 
 /** The front desk day — gold frames 1 and 11. */
 export interface Today {
-  businessDate: string;
-  rollsAt: string;
+  /** The business day, ISO — null when it could not be established. */
+  businessDate: string | null;
+
+  /** When the day rolls, an instant — null when the bounds are unknown. */
+  rollsAt: string | null;
 
   /** Null when everything the property expects is arriving. */
   stale: Staleness | null;

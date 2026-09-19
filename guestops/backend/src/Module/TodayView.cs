@@ -53,11 +53,13 @@ public sealed class TodayView(
             {
                 key = view.ToString().ToLowerInvariant(),
                 label,
-                count = found.Total.ToString(),
+                // A number, formatted by the screen for the property (§12, U1)
+                // — sent as a string until 2026-09-19.
+                count = found.Total,
                 rows,
             });
 
-            stats.Add(new { value = found.Total.ToString(), label });
+            stats.Add(new { value = found.Total, label });
         }
 
         return new
@@ -66,12 +68,18 @@ public sealed class TodayView(
             // rather than today's date when Context cannot answer: a business
             // day this application computed would be the one thing ADR 0128 §6
             // says it must never do.
-            businessDate = date?.ToString("dd MMM"),
+            //
+            // An ISO day; the screen draws it for the property. "dd MMM" until
+            // 2026-09-19 (page 64 §11, I1).
+            businessDate = date?.ToString("yyyy-MM-dd"),
 
             // The roll time, read off the boundary the property configured. The
             // offset is baked into `Start` by the adapter, so formatting it
             // gives the property's own local hour rather than the server's.
-            rollsAt = bounds?.Start.ToString("HH:mm"),
+            //
+            // An instant, drawn as a time in the property's zone and hour
+            // cycle; it was "HH:mm" until 2026-09-19.
+            rollsAt = bounds?.Start.ToString("O"),
 
             // Whether a PMS writes this property's lifecycle. A feed mark exists
             // only once a fact has arrived through the Hub, so this is a fact
@@ -206,6 +214,14 @@ public sealed class TodayView(
             guest = named ? name : "Not yet named",
             unnamed = !named,
 
+            // How many people the source said, for a row with no name — a
+            // number, worded and formatted by the screen. Never sent until
+            // 2026-09-19: the screen read `party` and only the harness's fixture
+            // had it. Zero is nobody having said, so it is null, never 0.
+            party = named || stay.Source is not { } said || said.Adults + said.Children == 0
+                ? (int?)null
+                : said.Adults + said.Children,
+
             // **Absent, and this is a reported gap rather than an oversight.**
             // The design draws `+91 98470 •••• 12`; contacts are stored
             // encrypted and `IContactProtector` has only a write direction, so
@@ -225,35 +241,13 @@ public sealed class TodayView(
                 ? number
                 : null,
 
-            nights = Nights(stay),
+            // The stay's two days, ISO; the screen composes the range in the
+            // property's form. A composed "31 Aug → 2 Sep" until 2026-09-19 —
+            // one locale's order and abbreviation, decided on the server.
+            arrive = stay.ArrivalAt.Date?.ToString("yyyy-MM-dd"),
+            depart = stay.DepartureAt.Date?.ToString("yyyy-MM-dd"),
             chips = Chips(stay),
         };
-    }
-
-    /// <summary>`31 Aug → 2 Sep`, or the day-use form.</summary>
-    /// <remarks>
-    /// An unknown instant renders as nothing rather than as a date: a stay whose
-    /// arrival nobody has recorded is a real state, and
-    /// <see cref="StayTime.None"/> exists to keep it distinct from midnight.
-    /// </remarks>
-    private static string? Nights(RoomStay stay)
-    {
-        var from = stay.ArrivalAt.Date;
-        var to = stay.DepartureAt.Date;
-
-        if (from is null)
-        {
-            return null;
-        }
-
-        var arrival = from.Value.ToString("d MMM");
-
-        if (to is null)
-        {
-            return arrival;
-        }
-
-        return to.Value == from.Value ? $"{arrival} · day use" : $"{arrival} → {to.Value:d MMM}";
     }
 
     /// <summary>What the row is missing, in the design's vocabulary.</summary>
