@@ -242,10 +242,31 @@ async function confirm(
     return;
   }
 
-  const banner = el("div", "ban gone");
-  banner.append(el("b", undefined, "Nothing was cancelled."), el("span", "why", result.refused));
-
   // Prepended, because a refusal a person has to scroll to is a refusal they
   // will press the button again without reading.
-  body.prepend(banner);
+  body.prepend(notCancelled(result.refused, result.unchanged === true));
+}
+
+/**
+ * The banner over a cancellation that did not succeed.
+ *
+ * **Its heading says only what is known.** It read *"Nothing was cancelled."*
+ * over every failure until 2026-09-19 — a non-answer included, when the cancel
+ * may have landed and a person told otherwise presses it again. Found auditing
+ * the "nothing was changed" wording KK found in Room Care; the word search for
+ * that sentence could not see this one, which says the same thing differently.
+ *
+ * @param why what the platform, or `perform`, said
+ * @param unchanged true only when it is known nothing ran
+ * @returns the banner
+ */
+export function notCancelled(why: string, unchanged: boolean): HTMLElement {
+  const banner = el("div", "ban gone");
+  banner.append(
+    el("b", undefined, unchanged
+      ? "Nothing was cancelled."
+      : "Whether the booking was cancelled is not known."),
+    el("span", "why", why),
+  );
+  return banner;
 }

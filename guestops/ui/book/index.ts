@@ -63,6 +63,17 @@ export interface Performed<T> {
 
   /** Null when it worked. The platform's own words when ADR 0041 permits them. */
   refused: string | null;
+
+  /**
+   * Whether it is KNOWN that nothing changed — null when it worked.
+   *
+   * `true` for a failure decided before anything ran; `false` where the write
+   * may have landed (no answer, or a fault after it reached the service). A
+   * screen that heads a failure with *"Nothing was cancelled"* reads this rather
+   * than assuming it: the dialog said so over every failure, a non-answer
+   * included, until 2026-09-19.
+   */
+  unchanged: boolean | null;
 }
 
 /**
@@ -74,11 +85,18 @@ export interface Performed<T> {
  * @param params the application's own JSON body
  * @returns what it did, or why it did not
  *
- * **There is no fallback, and that is the difference from `load`.** A read that
- * cannot reach the platform can show recorded facts and say so; a write that
- * cannot reach the platform has *not happened*, and anything that looked like
- * success would be a receptionist believing a room was released. So this
- * returns the refusal and the screen renders it.
+ * **There is no fallback**: anything that looked like success would be a
+ * receptionist believing a room was released. So this returns why it did not
+ * succeed, and the screen renders it.
+ *
+ * **What that sentence may claim depends on who stopped the write** — 2026-09-19,
+ * the fault KK found in Room Care. This said *"a write that cannot reach the
+ * platform has not happened"* and answered every unshowable error with *"The
+ * platform refused this. Nothing was changed."* — a non-answer included. A
+ * write that got no answer may have landed, and a person told nothing changed
+ * presses again. (It also said a failed read "can show recorded facts", which
+ * `APPS-Q42` had already removed.) See {@link outcome}; held by
+ * `tests/perform.test.ts`.
  *
  * A capability the property did not grant is refused in the same shape rather
  * than thrown, because on this side of the seam it is the same fact: the thing
@@ -91,24 +109,72 @@ export async function perform<T>(
   params: Record<string, unknown>,
 ): Promise<Performed<T>> {
   if (!host.identity.capabilities.includes(capability)) {
+    // Nothing was asked, so nothing changed.
     return {
       value: null,
       refused: `This property has not granted ${capability} to GuestOps.`,
+      unchanged: true,
     };
   }
 
   try {
-    return { value: (await host.call(capability, method, params)) as T, refused: null };
+    return {
+      value: (await host.call(capability, method, params)) as T,
+      refused: null,
+      unchanged: null,
+    };
   } catch (error) {
     if (error instanceof HostCallError) {
-      return {
-        value: null,
-        refused: error.isForPeople
-          ? error.message
-          : "The platform refused this. Nothing was changed.",
-      };
+      // `rejected` and `invalid` are the service deciding — a validation or a
+      // domain refusal, and the one write this UI makes rolls back on either.
+      return error.isForPeople
+        ? { value: null, refused: error.message, unchanged: true }
+        : { value: null, ...outcome(error.kind) };
     }
 
     throw error;
+  }
+}
+
+/** Where the outcome of a write is not known, and what to do about it. */
+const NOT_KNOWN = "so whether that was done is not known — check before trying again.";
+
+/**
+ * What a write that did not succeed may say about what happened.
+ *
+ * ```text
+ * forbidden · local_forbidden · user_forbidden   decided before anything ran —
+ * model_unavailable                              the one write this UI makes,
+ *                                                cancelling a booking, commits
+ *                                                in one transaction, so a
+ *                                                refusal on any stay undoes all
+ * internal                                       a fault after it reached the
+ *                                                service: it may have landed
+ * unavailable, and anything unknown              no answer: it may have landed
+ * ```
+ *
+ * **The model state is not a refusal and never says one** — AUTHZ-Q34: it
+ * *"must never be converted into a statement that the user lacks permission"*.
+ * Nothing ran, so nothing changed; but the reason is that access could not be
+ * checked, not that it was denied.
+ *
+ * **An unknown kind is "not known", never "nothing changed"**: a sentence that
+ * cannot tell which happened must not choose the reassuring one.
+ */
+function outcome(kind: string): { refused: string; unchanged: boolean } {
+  switch (kind) {
+    case "forbidden":
+    case "local_forbidden":
+    case "user_forbidden":
+      return { refused: "That was not permitted, so nothing was changed.", unchanged: true };
+    case "model_unavailable":
+      return {
+        refused: "Whether that is permitted could not be checked, so nothing was changed.",
+        unchanged: true,
+      };
+    case "internal":
+      return { refused: `GuestOps could not finish that, ${NOT_KNOWN}`, unchanged: false };
+    default:
+      return { refused: `GuestOps did not answer, ${NOT_KNOWN}`, unchanged: false };
   }
 }

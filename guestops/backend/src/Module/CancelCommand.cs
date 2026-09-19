@@ -2,6 +2,7 @@ using System.Text.Json;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Domain;
+using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
 
 namespace HotelOS.GuestOps.Module;
@@ -26,8 +27,19 @@ namespace HotelOS.GuestOps.Module;
 /// that out loud; this command has no outbound path at all, which is the
 /// stronger form of the same statement — there is no call to forget to make.
 /// </para>
+/// <para>
+/// <b>One transaction across the stays</b> — an implementation choice made
+/// 2026-09-19, reversible, with its reason. Each stay still gets its own
+/// cancellation, its own event and its own reinstatement; what the transaction
+/// adds is that they commit together or not at all. Before it, each
+/// <c>CancelAsync</c> committed on its own, so a refusal, a conflict or a fault
+/// on the second stay of a group arrived after the first was cancelled and
+/// announced — measured <c>("Cancelled,Booked", 1)</c> — while the screen told
+/// the desk <i>"nothing was changed"</i>. <c>CancelAtomicityTests</c> holds it.
+/// </para>
 /// </remarks>
 public sealed class CancelCommand(
+    GuestOpsDbContext db,
     BookingReadService bookings,
     StayLifecycleService lifecycle)
 {
@@ -53,6 +65,12 @@ public sealed class CancelCommand(
         // list, and where a property has configured none the desk types one.
         var reason = Text(request, "reason")
             ?? throw new InvalidRequestException("a cancellation needs a reason");
+
+        // Every stay's cancellation and its event, in one transaction: each
+        // `CancelAsync` still saves, and disposing without `CommitAsync` rolls
+        // every one of them back. The services share this request's DbContext,
+        // which is what puts their writes inside it.
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
         var record = await bookings.GetAsync(scope, bookingId, cancellationToken);
 
@@ -87,6 +105,8 @@ public sealed class CancelCommand(
             await lifecycle.CancelAsync(scope, stay.Id, reason, version, cancellationToken);
             cancelled.Add(stay.Id.ToString());
         }
+
+        await transaction.CommitAsync(cancellationToken);
 
         return new
         {
