@@ -29,12 +29,12 @@ const RULES = [
   {
     name: "page-redeclares-a-class",
     moves: "adjudicate",
-    why: "01-the-roomcare-screens.html declares .pill, .mono, .tag, .tile, .tilegrid, .btn, .chip, .legend and "
-       + ".strip TWICE: the second set arrived with redline 5's Room states frames, unscoped, and re-renders every "
-       + "earlier frame (pill 11px/2px 9px becomes 10px/1px 8px; mono 12px becomes 11px; tag 2px 6px becomes "
-       + "1px 5px). 02-the-roomcare-setup.html declares each once, at the first values. The build has one class "
-       + "each and follows the FIRST declaration — the one both pages were locked with on 2026-09-05. The drawing "
-       + "contradicting itself is the owner's to settle, drawn.",
+    why: "01-the-roomcare-screens.html declares eleven classes twice; three (.btn .note .num) identically, and "
+       + "EIGHT differently — .pill .mono .chip .strip .tag .tilegrid .tile .legend, size and spacing only. The "
+       + "second set arrived with redline 5's Room states frames, unscoped, and re-renders every earlier frame. "
+       + "02-the-roomcare-setup.html declares each once, at the first values. The build follows the first for "
+       + ".pill .mono .tag .tile .tilegrid, the second for .chip .strip, and neither for .legend (measured "
+       + "2026-09-19; this rule said 'nine' and 'the first' until then). Drawn for the owner in 01a.",
     hit: (p) => (was(p, "font-size", "10px", "11px") && was(p, "padding-top", "1px", "2px"))
       || (was(p, "font-size", "11px", "12px") && only(p, ["font-size", "line-height", "color", "padding-top", "padding-bottom", "letter-spacing"]))
       || (was(p, "padding-top", "1px", "2px") && only(p, ["padding-top", "padding-bottom", "line-height"])),

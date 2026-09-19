@@ -40,7 +40,7 @@ every one of the 87 is named; classify.mjs exits 0; 0 frames unreached
 
 | Class | n | Moves | Why |
 |---|---|---|---|
-| page-redeclares-a-class | 24 | **adjudicate** | the screens page declares nine classes twice; the setup page once |
+| page-redeclares-a-class | 24 | **adjudicate** | the screens page declares eleven classes twice, eight of them differently; the setup page once |
 | sticky-header-ground | 23 | neither | the wall's header sticks over the scrolling house; same pixels |
 | font-shorthand-line-height | 27 | drawing | the frame's `font:` shorthand resets line-height (64 §2's fourth reset) |
 | flex-blockified | 2 | neither | a span in a flex row computes block |
@@ -77,9 +77,15 @@ rest and is recorded in chapter 03 §9.
 ## For the owner, drawn
 
 1. **The screens page contradicts itself.** Redline 5 added a second,
-   unscoped declaration of `.pill .mono .tag .tile .tilegrid .btn .chip
-   .legend .strip`, which re-renders every earlier frame at the new values; the
-   setup page keeps the first. The build follows the first. Which is intended?
+   unscoped declaration of eleven classes — `.btn .note .num` identically, and
+   **eight differently**: `.pill .mono .chip .strip .tag .tilegrid .tile
+   .legend`, size and spacing only — which re-renders every earlier frame at
+   the new values; the setup page keeps the first. **The build follows the
+   first for five, the second for `.chip` and `.strip`, and neither for
+   `.legend`.** *Corrected 2026-09-19: this said "nine classes" and "the build
+   follows the first", from a search that looked for the classes already
+   suspected and a claim checked against three of them.* Drawn for the owner in
+   `docs/mockups/01a-the-classes-declared-twice.html`.
 2. **Measurable frames.** Redrawing the frames in the build's element types
    and the harness's data would take the pairing share toward the
    whole screen. That changes locked drawings, so it is yours to ask for.
