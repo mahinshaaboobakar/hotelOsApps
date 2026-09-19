@@ -16,7 +16,7 @@
 manifest_version: 1
 id: roomcare
 name: "Room Care"
-version: 0.1.3
+version: 0.1.4
 publisher: hotelos
 category: operations
 description: >-
