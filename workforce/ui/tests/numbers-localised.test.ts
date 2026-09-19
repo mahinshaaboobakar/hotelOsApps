@@ -1,35 +1,7 @@
-import { formatNumber, HostCallError, type HostApi } from "@hotelos/sdk";
+import { formatNumber } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
-import { recordedDay } from "../roster/attendance";
-import { recordedRegister } from "../roster/duty";
-import { recordedLeave } from "../roster/leave";
-import { recordedPeople } from "../roster/people";
-import { recordedPolicy } from "../roster/policy";
-import { recordedWeek } from "../roster/recorded";
-import { recordedMonth } from "../roster/reports";
-import { recordedSchedule } from "../roster/schedule";
-import {
-  recordedAttendanceToday, recordedComingUp, recordedOnLeave, recordedPendingRequests,
-  recordedShiftBoard,
-} from "../roster/summaries";
-import { recordedTeams } from "../roster/teams";
-import { attendance } from "../screens/attendance";
-import { duty } from "../screens/duty";
-import { leave } from "../screens/leave";
-import { people } from "../screens/people";
-import { policy } from "../screens/policy";
-import { printed } from "../screens/printed";
-import { reports } from "../screens/reports";
-import { rota } from "../screens/rota";
-import { schedule } from "../screens/schedule";
-import { shifts } from "../screens/shifts";
-import { teams } from "../screens/teams";
-import { attendanceToday } from "../widgets/panel/attendance-today";
-import { comingUp } from "../widgets/panel/coming-up";
-import { onLeave } from "../widgets/panel/on-leave";
-import { pendingRequests } from "../widgets/panel/pending-requests";
-import { shiftBoard } from "../widgets/panel/shift-board";
+import { ANSWERS, readable, SURFACES, surfaceHost } from "./surfaces";
 
 /**
  * Every number a person reads is in the property's locale — U1, `NUM-Q1`,
@@ -50,38 +22,19 @@ import { shiftBoard } from "../widgets/panel/shift-board";
  * digits; one that went through `String` comes out as `3`, and is caught.
  *
  * **Digits inside words the fixture itself carries are exempt**, and only those:
- * a zone called `Zone 3` or a balance sentence the service composed is data,
- * not a number this screen formatted. They are derived by walking the fixture,
- * not listed — and a string that is ONLY digits is not words, so it is not
- * exempt.
+ * a balance sentence the service composed is data, not a number this screen
+ * formatted. They are derived by walking the fixture, not listed — and a string
+ * that is ONLY digits is not words, so it is not exempt.
  */
 
-const LOCALE = "ar-EG";
-
-const ANSWERS: Record<string, unknown> = {
-  day: recordedDay, register: recordedRegister, leave: recordedLeave,
-  people: recordedPeople, policy: recordedPolicy, week: recordedWeek,
-  month: recordedMonth, schedule: recordedSchedule, teams: recordedTeams,
-  attendanceToday: recordedAttendanceToday, comingUp: recordedComingUp,
-  onLeave: recordedOnLeave, pendingRequests: recordedPendingRequests,
-  shiftBoard: recordedShiftBoard,
-};
-
-const host: HostApi = {
-  identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
-  property: { timezone: "Asia/Kolkata", locale: LOCALE },
-  call: (_capability: string, method: string) => method in ANSWERS
-    ? Promise.resolve(ANSWERS[method])
-    : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" })),
-  on: () => () => {},
-};
+const host = surfaceHost("ar-EG");
 
 /** Every string in the fixtures that carries an ASCII digit — data, exempt. */
 function carried(value: unknown, into: Set<string> = new Set()): Set<string> {
   if (typeof value === "string") {
-    // Words with a digit in them — `Zone 3`, `3 valid`, `4d`. A string that is
-    // only a number is a number, and exempting it removed every matching digit
-    // from the page: the first run passed twelve surfaces on bare "1"…"9".
+    // Words with a digit in them — `3 valid`, `4d`. A string that is only a
+    // number is a number, and exempting it removed every matching digit from
+    // the page: the first run passed twelve surfaces on bare "1"…"9".
     if (/[0-9]/.test(value) && /\p{L}/u.test(value)) into.add(value);
   } else if (Array.isArray(value)) {
     for (const one of value) carried(one, into);
@@ -104,6 +57,10 @@ const EXEMPT = [...carried(ANSWERS)].sort((a, b) => b.length - a.length);
  * Each entry also asserts its element still shows ASCII digits: **the day the
  * wire is fixed, the exemption fails and has to be removed**, rather than
  * standing on as a hole nobody remembers opening.
+ *
+ * A register id (`WF-Q18`) used to be stripped here as "not a quantity". It is
+ * now its own check — tests/register-ids.test.ts — because it was never a
+ * number to exempt: it was copy that should not have been on the screen.
  */
 const FIGURE = { selector: ".wvalue", why: "Figure.value is a string the service formatted" };
 const ROW_VALUE = { selector: ".wfig", why: "SummaryRow.value is a string the service formatted" };
@@ -122,21 +79,13 @@ const OWED: Record<string, readonly { selector: string; why: string }[]> = {
   "shift board": [ROW_VALUE],
 };
 
-/**
- * An identifier from the decision register is not a quantity. Reports' note
- * cites `WF-Q18` in its copy — whether a register id belongs on a hotel's
- * screen at all is a separate finding, recorded in the audit.
- */
-const IDENTIFIER = /\b[A-Z]+-Q[0-9]+\b/g;
-
-/** The text a person reads — style sheets are not text. */
+/** The text a person reads, less what is owed and what the fixture wrote. */
 function read(root: HTMLElement, owed: readonly { selector: string }[] = []): string {
-  const copy = root.cloneNode(true) as HTMLElement;
-  for (const style of Array.from(copy.querySelectorAll("style"))) style.remove();
+  const copy = readable(root);
   for (const { selector } of owed) {
     for (const one of Array.from(copy.querySelectorAll(selector))) one.remove();
   }
-  let text = (copy.textContent ?? "").replace(IDENTIFIER, " ");
+  let text = copy.textContent ?? "";
   for (const data of EXEMPT) text = text.split(data).join(" ");
   return text;
 }
@@ -148,39 +97,15 @@ function ascii(text: string): string[] {
       .replace(/\s+/g, " ").trim());
 }
 
-const SCREENS: [string, (main: HTMLElement) => Promise<unknown>][] = [
-  ["attendance", (main) => attendance(host, main)],
-  ["duty", (main) => duty(host, main)],
-  ["leave · requests", (main) => leave(host, main, "Requests", () => {})],
-  ["leave · approvals", (main) => leave(host, main, "Approvals", () => {})],
-  ["people", (main) => people(host, main)],
-  ["policy", (main) => policy(host, main)],
-  ["printed", (main) => printed(host, main)],
-  ["reports", (main) => reports(host, main)],
-  ["rota", (main) => rota(host, main)],
-  ["schedule", (main) => schedule(host, main, {
-    ok: true,
-    value: { staffId: "a3f1c064-5d21-4e8b-9f02-1a7c6b40d911", name: "Anjali Menon",
-      department: "Front Office", role: "Receptionist", property: "" },
-  })],
-  ["shifts", (main) => shifts(host, main)],
-  ["teams", (main) => teams(host, main)],
-  ["attendance today", async (main) => { main.append(await attendanceToday(host)); }],
-  ["coming up", async (main) => { main.append(await comingUp(host)); }],
-  ["on leave", async (main) => { main.append(await onLeave(host)); }],
-  ["pending requests", async (main) => { main.append(await pendingRequests(host)); }],
-  ["shift board", async (main) => { main.append(await shiftBoard(host)); }],
-];
-
 describe("numbers in the property's locale", () => {
   it("has a locale whose digits are not ASCII — or this proves nothing", () => {
     expect(formatNumber(3, host.property, "whole")).not.toBe("3");
   });
 
-  for (const [name, draw] of SCREENS) {
+  for (const [name, draw] of SURFACES) {
     it(`${name} draws no number in ASCII digits`, async () => {
       const main = document.createElement("div");
-      await draw(main);
+      await draw(host, main);
 
       // A surface that drew its failure state has no numbers to check, and
       // would pass for that reason alone.
