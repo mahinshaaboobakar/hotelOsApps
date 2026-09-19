@@ -167,6 +167,13 @@ public sealed class CancelPlanView(
             });
         }
 
+        // **THE KNOWN ADR 0175 MIGRATION SITE, WAITING ON NUM-Q2.** ADR 0175 names
+        // this line: money is not an exception — the service sends amount and
+        // currency, and the screen formats them. What TYPE the amount has on the
+        // wire is NUM-Q2, with the planner (2026-09-19); until it is ruled this
+        // stays server-formatted — "N2" in the server's culture, which varies by
+        // grouping and separator — and the SDK has no money style to migrate to.
+        // Not a pass: the page-64 audit records U1 as blocked on NUM-Q2 here.
         return Row(
             label,
             dates,

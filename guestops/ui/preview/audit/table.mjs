@@ -55,8 +55,8 @@ const STATED = {
   I4: ["FAIL", "T", "follows I1: with no locale the backend still writes '31 Aug', never the marked ISO form"],
   I5: ["PASS", "S", "elapsed figures ('+3h') come from the service"],
   I6: ["PASS", "S", "no locale-dependent example written without its locale in the UI source"],
-  U1: ["FAIL", "S", "the pager now uses formatNumber; the strip's and cards' counts still arrive as backend strings"],
-  U2: ["FAIL", "T", "follows U1: backend-formatted counts are grouped whatever the property's locale"],
+  U1: ["BLOCKED", "S", "money is blocked on NUM-Q2 (the wire type of an amount; ADR 0175 already rules the screen formats it) — the amounts in PaymentView and CancelPlanView stay server-formatted until it is ruled, labelled at CancelPlanView.cs. Counts are a separate half, converting view by view (Today, Payment, Requests done; Booking, Bookings and the cancel plan remaining)"],
+  U2: ["BLOCKED", "T", "follows U1: money on NUM-Q2; counts as U1 says"],
   X1: ["PASS", "M", "72 failure cells: the failure drawn, no list"],
   X9: ["PASS", "T", "tests/failure-surface.test.ts — no refusal routes to a person"],
   X10: ["PASS", "S", "every read failure is failureDrawing's; cannot() draws only states with no read"],
@@ -103,7 +103,8 @@ Against GG's checklist \`docs/app-surface-checklist.md\` (HotelOsApps \`3d521ce\
 Verdicts: PASS · FAIL · OPEN (the checklist's nine unsettled lines — recorded,
 never failed) · N/A (with why) · NOT REACHED (a state no drive reaches — never a
 pass) · DEVIATION (APPS-Q27: the frame as the owner approved it differs from the
-written standard for this surface; labelled at the site, never an amendment).
+written standard for this surface; labelled at the site, never an amendment) ·
+BLOCKED (waits on a named open question — neither a pass nor a fail).
 
 **Two deviations, L3 and D2** — APPS-Q27: *"repeated or intentional deviations
 trigger a standards-amendment question rather than a third, fourth and fifth
