@@ -15,7 +15,7 @@ import { type HostApi, load } from "@hotelos/sdk";
 import { ROSTER_READ } from "../../chrome/permissions";
 
 import type { OnLeave } from "../../roster/widget";
-import { failureCard, card, figures, note, rows, section } from "../card";
+import { failureCard, card, figures, rows, section } from "../card";
 
 /**
  * Draw the card.
@@ -38,6 +38,9 @@ export async function onLeave(host: HostApi): Promise<HTMLElement> {
     rows(away.today, host),
     section("Rest of the week"),
     rows(away.restOfWeek, host),
-    note("Department comes from the staff member's posting, not the request."),
+    // No foot note. The artboard drew "Department comes from the staff
+    // member's posting, not the request" — where a figure comes from is a note
+    // for the developer, never UI (owner ruling, 2026-09-19). The rule itself
+    // stands, and is this file's header.
   ]);
 }

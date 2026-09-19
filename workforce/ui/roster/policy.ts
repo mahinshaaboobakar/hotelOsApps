@@ -110,9 +110,11 @@ export const recordedPolicy: Policy = {
   overtimeDaily: 9,
   overtimeWeekly: 48,
 
-  // What Core Administration establishes. Shown so a manager knows the rota
-  // plans around it — and shown as text, because this screen cannot edit it.
-  holidays:
-    "14 declared holidays this year — 26 Jan, 1 May, 15 Aug, 2 Oct, "
-    + "Onam (4 days), Diwali (2), Christmas…",
+  // What the service sends: PolicyView answers holidays = null, because the
+  // property's holiday calendar has no owner yet. This carried "14 declared
+  // holidays this year — 26 Jan, 1 May, 15 Aug, 2 Oct, Onam (4 days), Diwali
+  // (2), Christmas…" — a list nobody declared, and one country's calendar in a
+  // product sold into India and the GCC — so every capture showed it and no
+  // property ever could.
+  holidays: null,
 };

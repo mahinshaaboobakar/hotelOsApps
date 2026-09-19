@@ -148,16 +148,13 @@ function missing(month: Month): HTMLElement | null {
   const panel = el("div", "panel");
   const note = el("div", "note");
 
-  // WF-Q18 is the ruling, and it stays here rather than on the screen: a
-  // register id is how an engineer finds a decision, and to a supervisor it
-  // is a code with nothing behind it (tests/register-ids.test.ts).
+  // WF-Q18 is the ruling, and it stays here rather than on the screen. So do
+  // the rest of the reasons this said aloud — which application owns the
+  // calendar, and why a dash rather than a zero — the developer's, not the
+  // payroll clerk's (owner ruling, 2026-09-19; tests/developer-content).
   note.append(
-    el("b", undefined, "Holidays worked is not computed. "),
-    el("span", undefined,
-      "It needs the property's holiday calendar, which Core Administration owns "
-      + "and which does not exist yet. It is shown absent rather than "
-      + "as zero, because a zero cannot be told apart from a month in which "
-      + "nobody worked a holiday."),
+    el("b", undefined, "Holidays worked is not counted yet. "),
+    el("span", undefined, "This property has no holiday calendar to count it against."),
   );
 
   panel.append(note);

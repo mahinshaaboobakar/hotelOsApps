@@ -194,10 +194,11 @@ function why(candidates: readonly Candidate[], department: string): HTMLElement 
   const refused = candidates.filter((one) => one.refused !== null);
   const names = refused.map((one) => one.name.split(" ")[0]).join(" and ");
 
+  // The reason a person is refused, and not the reason the rule exists — "a
+  // member who cannot be assigned there is a row that lies" was the
+  // developer's (owner ruling, 2026-09-19).
   note.append(el("span", undefined,
-    `${names} holds no posting in ${department} on the day above. A team exists `
-    + "to receive work in its own department, so a member who cannot be "
-    + "assigned there is a row that lies."));
+    `${names} holds no posting in ${department} on the day above.`));
 
   return note;
 }

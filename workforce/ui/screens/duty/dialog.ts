@@ -140,8 +140,10 @@ function span(
     // Describes the FIELD, now that the example span it described has gone.
     // "12 hours" was true of two literals nobody chose; the shape is the
     // rule - WF-Q8, two datetimes rather than a date.
+    // What a person does, not how the field is typed: "two datetimes, not a
+    // date" was the developer's description (owner ruling, 2026-09-19).
     el("div", "note",
-      "Two datetimes, not a date. A duty crossing midnight carries both days."),
+      "A duty can cross midnight — set the day it ends as well as the time."),
   );
 
   return row;

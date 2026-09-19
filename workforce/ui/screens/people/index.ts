@@ -71,7 +71,9 @@ export async function people(
   // ordinary list saying it has nothing here.
   body.append(board.paging.total === 0 ? firstRun() : table(board.postings, onEnd, host.property));
 
-  body.append(ownership());
+  // No ownership panel. It read "Identity is Master Data's and read-only here.
+  // … This screen owns what is operational" — which system owns which field is
+  // a note for the developer, never UI (owner ruling, 2026-09-19).
 
   // **Inside the body, as the list's floor** — §6 as ruled 2026-09-05.
   //
@@ -291,9 +293,9 @@ function firstRun(): HTMLElement {
       "A posting says where a person works and as what. Everything else in "
       + "Workforce is built on it — the rota, leave, the duty roster and "
       + "attendance all need somebody posted first."),
-    el("div", "note",
-      "It also opens the department folders in My Hotel: until a property has "
-      + "postings, department-based document access has nobody to resolve to."),
+    // A second paragraph explained that postings resolve My Hotel's department
+    // document access — how two systems connect, a developer's note (owner
+    // ruling, 2026-09-19).
     unavailable("btn pri", "＋ Post a staff member", "Postings cannot be made here yet."),
   );
 
@@ -323,19 +325,3 @@ function standing(posting: Posting, property: PropertyEnvironment): string {
   return `${formatNumber(posting.certificates, property, "whole")} ${posting.standing}`;
 }
 
-/** What this screen owns, and what it does not. */
-function ownership(): HTMLElement {
-  const panel = el("div", "panel");
-  const note = el("div", "note");
-
-  note.append(
-    el("b", undefined, "Identity is Master Data's and read-only here. "),
-    el("span", undefined,
-      "Name, employee number, contact and photograph belong to the person and are "
-      + "edited in Core Administration. This screen owns what is operational — the "
-      + "posting, the job role, the reporting line, the zone and the department head."),
-  );
-
-  panel.append(note);
-  return panel;
-}

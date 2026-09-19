@@ -62,7 +62,11 @@ export async function shifts(
   const catalogue = got.value.catalogue;
 
   const body = el("div", "body");
-  body.append(table(catalogue, host), note());
+  // No foot note: "nothing is preset beyond the starting template — the
+  // property invents the shifts it actually runs" was the design's reasoning,
+  // the developer's (owner ruling, 2026-09-19). The header already says the
+  // catalogue is shared by every department.
+  body.append(table(catalogue, host));
 
   main.replaceChildren(header(catalogue, open, host.property), body);
 
@@ -125,20 +129,4 @@ function table(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
   }
 
   return list;
-}
-
-/** One catalogue, and nothing preset beyond the starting template. */
-function note(): HTMLElement {
-  const panel = el("div", "panel");
-  const text = el("div", "note");
-
-  text.append(
-    el("span", undefined,
-      "One catalogue, used by every department at this property. Nothing is preset "
-      + "beyond the starting template — "),
-    el("b", undefined, "the property invents the shifts it actually runs."),
-  );
-
-  panel.append(text);
-  return panel;
 }

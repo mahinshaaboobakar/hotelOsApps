@@ -342,11 +342,10 @@ function status(team: Team): HTMLElement {
 function oneDepartment(): HTMLElement {
   const panel = el("div", "note");
 
-  panel.append(el("b", undefined, "A team belongs to one department. "),
-    el("span", undefined,
-      "Assignment routing is departmental — a job's pool, its policy and its "
-      + "accountability are all per department — so a team spanning two would "
-      + "make which pool does this sit in unanswerable."));
+  // The rule, and not its reason. The span after it explained assignment
+  // routing and "which pool does this sit in" — why the rule exists is the
+  // developer's, not the supervisor's (owner ruling, 2026-09-19).
+  panel.append(el("b", undefined, "A team belongs to one department."));
 
   return panel;
 }

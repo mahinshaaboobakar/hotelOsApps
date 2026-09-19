@@ -190,8 +190,9 @@ function reading(): HTMLElement {
     el("b", undefined, "Reading it. "),
     el("span", undefined,
       "Upper band, day duties. Lower band, night duties, which cross midnight. "
-      + "Dashed means nobody holds the duty. MOD is property-wide — the person "
-      + "keeps their own department and posting."),
+      + "Dashed means nobody holds the duty."),
+    // How to read the chart stays; why MOD is property-wide (WF-Q1) was the
+    // developer's reason, not the reader's (owner ruling, 2026-09-19).
   );
 
   panel.append(note);

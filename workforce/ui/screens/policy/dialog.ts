@@ -305,9 +305,7 @@ function from(set: (value: string) => void): HTMLElement {
   row.append(
     el("div", "fld-label", "Available from"),
     input,
-    el("div", "note",
-      "The first day it can be put on the rota. Changing a shift's hours later "
-      + "starts a new version from a new day, so a past week keeps what was worked."),
+    el("div", "note", "The first day it can be put on the rota."),
   );
 
   return row;

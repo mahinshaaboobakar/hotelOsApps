@@ -169,9 +169,11 @@ function leave(rows: readonly LeaveRow[], host: HostApi): HTMLElement {
   }
 
   const note = el("div", "note");
+  // What the administrator needs to know, not where the list came from:
+  // "seeded from a template chosen for this property" was provenance, the
+  // developer's (owner ruling, 2026-09-19).
   note.append(el("span", undefined,
-    "Seeded from a template chosen for this property, then edited here. A balance "
-    + "may be overdrawn — the manager sees it and decides."));
+    "A balance may be overdrawn — the manager sees it and decides."));
 
   section.append(list, note);
   return section;
@@ -200,16 +202,14 @@ function holidays(config: Policy): HTMLElement {
   const section = el("div", "sect");
   const title = el("div", "stitle");
 
-  title.append(
-    el("span", undefined, "Holidays"),
-    el("span", "pill neu", "read-only · Core Administration"),
-  );
+  // No provenance pill and no "Workforce plans around them": which
+  // application owns the calendar is the developer's note, not the reader's
+  // (owner ruling, 2026-09-19).
+  title.append(el("span", undefined, "Holidays"));
 
   const note = el("div", "note");
   note.append(
     el("span", undefined, config.holidays ?? "No holiday calendar is configured."),
-    el("b", undefined,
-      " The administrator sets these for the property; Workforce plans around them."),
   );
 
   section.append(title, note);

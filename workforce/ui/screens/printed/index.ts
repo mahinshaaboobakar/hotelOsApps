@@ -112,7 +112,10 @@ function preview(back: () => void, week: Week, property: PropertyEnvironment): H
 
   return fill(row, name, el("div", "grow"), leave,
     unavailable("btn", "Page setup", "Page setup is not available yet."),
-    unavailable("btn pri", "⎙ Print", "Printing is not wired yet — the shell's print dialog is the next step."));
+    // Plain words: "not wired yet — the shell's print dialog is the next step"
+    // named a mechanism and a plan, which are the developer's (owner ruling,
+    // 2026-09-19).
+    unavailable("btn pri", "⎙ Print", "Printing is not available here yet."));
 }
 
 /**

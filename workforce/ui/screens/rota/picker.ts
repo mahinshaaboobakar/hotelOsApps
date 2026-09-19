@@ -107,8 +107,9 @@ export function picker(
     el("s", undefined, "this day only — adjusts the shift chosen above"),
   );
 
-  const note = el("div", "note",
-    "The property's own catalogue — Policy → Shifts adds to this list.");
+  // Where to add one, which a person can act on; "the property's own
+  // catalogue" described the design (owner ruling, 2026-09-19).
+  const note = el("div", "note", "New shifts are added in Policy → Shifts.");
 
   const refusal = el("div", "note warn");
   const acts = foot("Assign", "Assigning…", close);

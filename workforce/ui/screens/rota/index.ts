@@ -170,9 +170,9 @@ function header(week: Week, host: HostApi, print: () => void, nav: RotaNav): HTM
     step("›", "Next week", () => { nav.onWeek(shifted(week.monday, 7)); }),
   );
   const copy = control("btn", "⧉ Copy last week", nav.onCopy);
-  const swap = unavailable("btn", "⇄ Swap",
-    "Choosing two cells to exchange is not built — the week does not yet say which "
-    + "assignment each cell holds.");
+  // What is missing is the developer's (see above); what a person reads is
+  // plain — owner ruling, 2026-09-19.
+  const swap = unavailable("btn", "⇄ Swap", "Swapping two shifts is not available here yet.");
   const printBtn = control("btn", "⎙ Print", print);
   // Shifts are assigned by picking a cell, which works; this header button
   // was never wired to anything (the app surface audit, 2026-09-19, C8 · C11).
