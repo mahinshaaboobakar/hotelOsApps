@@ -18,6 +18,12 @@ namespace HotelOS.RoomCare.Domain;
 public static class OperatingDay
 {
     /// <summary>The business date, and the property-local time it was taken at.</summary>
+    /// <remarks>
+    /// <b>PENDING WF-Q21</b> (with the planner): calendar day or operating day. This is the one place Room Care
+    /// decides; every "today" and every day an instant fell on comes through here. Until the ruling it is the
+    /// operating day, as Room Care's chapters specify (01 §6.1, R12). If the ruling is the calendar day, the change
+    /// is here: a boundary of 00:00.
+    /// </remarks>
     public static (DateOnly Date, DateTime Local) At(DateTimeOffset instant, string timezone, TimeOnly boundary)
     {
         var zone = Zone(timezone);

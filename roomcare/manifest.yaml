@@ -36,9 +36,19 @@
 #     leaves, and when the filter changes, so Apply never changes a row the
 #     person can't see. (The filter half is interim; the owner chooses between
 #     it and Apply acting only on the rows shown.)
-#   * **"Vacant for N days" counts the property's days.** It counted UTC days:
-#     a day too many at a positive offset for part of every day, and a day
-#     too few at a negative one. The count decides when a room is refreshed.
+#   * **Room Care works in the property's time zone.** Every line that reads
+#     or makes a time was swept by call shape (docs/property-time-sweep.md):
+#     26 backend lines, of which 18 store an instant, 5 are already the
+#     property's day, 2 are correct wall-clock arithmetic, and 1 was a
+#     defect, now fixed. That defect: a "not before" time sent without its
+#     offset was read in the server's zone; it is now refused. Earlier in
+#     0.1.4, "vacant for N days" counted UTC days and now counts the
+#     property's (a day too many at +05:30, too few at −06:00, which decided
+#     whether a room was refreshed). None of Room Care's own UI code reads the
+#     clock. A source guard refuses the bad shapes. Whether the day is the
+#     calendar day or the hotel's operating day is with the planner (WF-Q21);
+#     until then it is the operating day, as Room Care's chapters specify, in
+#     one function.
 #   * **No developer note on any screen**: no register ids, design sections,
 #     event names, relation ids or system names.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.

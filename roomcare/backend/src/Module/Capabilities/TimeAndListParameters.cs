@@ -23,10 +23,27 @@ public static class TimeAndListParameters
             ? day
             : throw new InvalidRequestException($"{name} must be a date, yyyy-MM-dd");
 
-    public static DateTimeOffset Instant(this JsonElement? body, string name) =>
-        DateTimeOffset.TryParse(body.Text(name), CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
+    /// <summary>An instant, which must carry its offset — <c>Z</c> or <c>±hh:mm</c>.</summary>
+    /// <remarks>
+    /// A time with no offset is refused, never read: <c>DateTimeOffset.TryParse</c> would read it in the server's own
+    /// zone, which is neither UTC nor the property's, and on a server set to the property's zone the mistake is
+    /// invisible (owner instruction, 2026-09-19: a wall-clock time becomes an instant only through the property's
+    /// zone). A screen that has a property-local time sends it as a time, and the service makes the instant.
+    /// </remarks>
+    public static DateTimeOffset Instant(this JsonElement? body, string name)
+    {
+        var text = body.Text(name);
+        if (!OffsetAtEnd.IsMatch(text))
+        {
+            throw new InvalidRequestException($"{name} must be an ISO 8601 instant with its offset (Z or ±hh:mm)");
+        }
+
+        return DateTimeOffset.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var at)
             ? at
-            : throw new InvalidRequestException($"{name} must be an ISO 8601 instant");
+            : throw new InvalidRequestException($"{name} must be an ISO 8601 instant with its offset (Z or ±hh:mm)");
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex OffsetAtEnd = new(@"T.*(Z|[+-][0-9]{2}:[0-9]{2})$");
 
     public static decimal Decimal(this JsonElement? body, string name, decimal whenAbsent = 0) =>
         Property(body, name) is { ValueKind: JsonValueKind.Number } value ? value.GetDecimal() : whenAbsent;
