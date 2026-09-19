@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Room Care · 02 · setup</title>
 <style>
+/* H4 (ARCH-Q20): tiles and chips are the build's <button>; the UA's button styles unset first, so
+   the rules below apply exactly as they did to the divs and spans — 01b, owner 2026-09-19. */
+:where(button){all:unset;box-sizing:border-box}
 /* Same scaffold as 01-the-roomcare-screens.html — page 64; the seventeen tokens at the shell's values. */
 :root{
   --color-surface:#0b0d14;--color-surface-raised:#11141f;
@@ -13,7 +16,7 @@
   --color-brand:#818cf8;--color-ok:#34d399;--color-warn:#fbbf24;--color-bad:#f87171;
   --color-ok-soft:rgb(52 211 153 / 0.12);--color-warn-soft:rgb(251 191 36 / 0.12);--color-bad-soft:rgb(248 113 113 / 0.12);
   --radius-panel:1rem;--font-sans:system-ui,-apple-system,"Segoe UI",sans-serif;
-  --bg:var(--color-surface);--glass:rgba(255,255,255,.035);--line:var(--color-line);
+  --bg:var(--color-surface);--glass:color-mix(in srgb,var(--color-ink) 3.5%,transparent);--line:var(--color-line);
   --text:var(--color-ink);--dim:var(--color-ink-muted);--faint:var(--color-ink-faint);
   --indigo:var(--color-brand);--ok:var(--color-ok);--warn:var(--color-warn);--bad:var(--color-bad);
   --accent:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad)));
@@ -35,7 +38,7 @@ h1.frame b{color:var(--text);font-weight:600}
 .tab.on{color:var(--text);border-bottom-color:var(--indigo)}
 .who{margin-left:auto;color:var(--faint);font-size:12px}
 .body{padding:22px}
-.sect{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
+.sect{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--faint);margin:18px 0 8px}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{text-align:left;color:var(--faint);font-weight:500;font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -94,6 +97,7 @@ ul.flows b{color:var(--text)}
 
 <div class="intro">
   <h1>Room Care · setup</h1>
+  <p><b>2026-09-19 · the page-64 audit's records folded</b>: the owner, 2026-09-19, on 01b: <i>&ldquo;A small, B keep, C approved&rdquo;</i>. Every date in these frames is <code>en-GB</code>, Marina Bay's locale. Each tab's save line is drawn as it arrives, with nothing edited: <b>Save — nothing changed</b>, off, <span class="tag" style="color:var(--warn);border-color:var(--warn)">drawn after the build</span> (page 64 §2; the build drew it first).</p>
   <p><b>2026-09-19 · the owner chose &ldquo;match&rdquo;</b>: <i>&ldquo;i choosed `match`&rdquo;</i> (HosPilotOS <code>c69fde42</code>). <code>.mono</code>, <code>.tag</code> and <code>.pill</code> are redrawn at the screens page&rsquo;s second set, so one style set runs across the application. Size and spacing only; no colour changes. See the redline log.</p>
   <p><b>LOCKED by the owner, 2026-09-05</b>, with <code>01-the-roomcare-screens.html</code> — the log at the foot. Seven frames, one per Setup tab — redrawn from the single collapsed frame 7 of <code>01-the-roomcare-screens.html</code> on the owner's redline of 2026-09-05 (<i>"seven separate mock screens"</i>). Jobs' settings live on their own page for the same reason.</p>
   <p><b>The rule every frame draws:</b> S3's — <i>everything on the walkthrough that reads like a fact about how a hotel works is a property configuration with a sensible default, never a constant.</i> Every control here is a row in <code>roomcare</code>'s standard (chapter 03 §2.8), versioned; the day's decisions are stamped with the version they used, so editing a setting never rewrites a past day.</p>
@@ -135,7 +139,7 @@ ul.flows b{color:var(--text)}
         </div>
       </div>
     </div>
-    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (the trigger, ruled; the two presses), S5 c2 (two windows).</b> The window's <i>to</i> is when the tick closes it and writes the outcome for every room not reached (§6.1) — nothing here is a cron in UTC (survey F3).</div>
@@ -151,7 +155,7 @@ ul.flows b{color:var(--text)}
   </div>
   <div class="body">
     <div class="subnav"><div>Windows &amp; trigger</div><div class="on">Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div>Areas</div><div>Deep clean plan</div><div>Managers</div></div>
-    <div style="margin-bottom:12px"><span class="chip on">Standard</span><span class="chip">Deluxe King</span><span class="chip">Suite</span><span class="chip">Accessible</span><span class="mono" style="margin-left:12px">room types are Master Data's; this tab holds Room Care's numbers for each</span></div>
+    <div style="margin-bottom:12px"><button class="chip on">Standard</button><button class="chip">Deluxe King</button><button class="chip">Suite</button><button class="chip">Accessible</button><span class="mono" style="margin-left:12px">room types are Master Data's; this tab holds Room Care's numbers for each</span></div>
     <table>
       <tr><th>Service</th><th>Minutes</th><th>Credits</th><th>Phases, in order</th><th>Inspection</th><th>Checklist</th></tr>
       <tr class="sel"><td><b>Departure clean</b><br><span class="mono">the guest checked out — full turnover</span></td><td><span class="field">35</span></td><td><span class="field">1.0</span></td><td>strip → clean → make up → done → inspect</td><td><span class="field">arrivals only ▾</span><br><span class="mono">none · all departures · arrivals only · every Nth · VIP</span></td><td class="dimtd">— <span class="tag absent">inspection app</span></td></tr>
@@ -164,7 +168,7 @@ ul.flows b{color:var(--text)}
       <div class="card"><h3>Phases — Departure clean</h3><div class="kv"><div>1 · Strip</div><div>linen and towels out · rubbish · lost property · damage</div><div>2 · Clean</div><div>bathroom · surfaces · floors</div><div>3 · Make up</div><div>fresh bed · restock to standard <span class="tag absent">Inventory</span> · set-up</div><div>4 · Done</div><div>the attendant's <i>done</i> — the room is CLEAN, announced</div><div>5 · Inspect</div><div>only if the rule says — requested from the inspection app <span class="tag port">RC-Q1(6)</span></div></div><div style="margin-top:8px"><span class="btn sm">Reorder…</span><span class="btn sm off">Add a phase</span></div></div>
       <div class="card"><h3>Copy this room type's numbers to…</h3><div class="mono">Deluxe King · Suite · Accessible — a starting point, edited per type after</div><div style="margin-top:8px"><span class="btn sm">Copy…</span></div></div>
     </div>
-    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (the four services, the phases, per room type × service), ADR 0044's row</b> — <i>"deep-clean and checkout-clean minutes and whether inspection is required"</i> is this table, as rows not columns (survey F19). The phase list is the property's per service; the defaults are the walkthrough's. <i>Add a phase</i> is drawn off because the v1 phases are fixed to the five the owner named — a redline point if a property needs a sixth.</div>
@@ -230,7 +234,7 @@ ul.flows b{color:var(--text)}
         <div class="mono" style="margin-top:8px">on day N+1 the room is the supervisor's: a decision is required before the window closes on it, and every later DND day stays the supervisor's (S5 c9)</div>
       </div>
     </div>
-    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S4, S5 c1/c4/c5/c9, the charter, the scenario pass row 7.</b> Nine rules, nine rows in <code>property_policy</code> (chapter 03 §2.8), one version. Not here, by ruling: a per-weekday calendar, a preferred attendant, a per-stay cadence, a whole-stay opt-out.</div>
@@ -271,7 +275,7 @@ ul.flows b{color:var(--text)}
         <div style="margin-top:8px"><span class="btn sm">Move rooms between zones…</span></div>
       </div>
     </div>
-    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 (assignment), Workforce §3.8, ADR 0044.</b> Two things sit side by side and are different: the <b>zone a room is in</b> is Room Care's (<code>room_zone_assignment</code>, effective-dated); the <b>person posted to a zone</b> is Workforce's. Zones themselves — the entities — are Master Data's (<code>masterdata.zones</code>). Nothing on this tab names a person.</div>
@@ -288,7 +292,7 @@ ul.flows b{color:var(--text)}
   <div class="body">
     <div class="subnav"><div>Windows &amp; trigger</div><div>Services &amp; minutes</div><div>Rules</div><div>Assignment &amp; zones</div><div class="on">Areas</div><div>Deep clean plan</div><div>Managers</div></div>
     <div class="strip"><span><b>23</b> public areas at this property</span><span><b>19</b> with a routine</span><span><b>4</b> without</span><span style="margin-left:auto">from Master Data's location tree · read, never created here</span></div>
-    <div style="margin-bottom:12px"><span class="chip on">All</span><span class="chip">Zone 1</span><span class="chip">Zone 2</span><span class="chip">Zone 3</span><span class="chip">Zone 4</span><span class="chip">Without a routine</span></div>
+    <div style="margin-bottom:12px"><button class="chip on">All</button><button class="chip">Zone 1</button><button class="chip">Zone 2</button><button class="chip">Zone 3</button><button class="chip">Zone 4</button><button class="chip">Without a routine</button></div>
     <table>
       <tr><th>Area</th><th>Kind</th><th>Zone</th><th>Routine</th><th>Minutes</th><th>Inspection</th><th></th></tr>
       <tr class="sel"><td>Lobby</td><td class="mono">lobby</td><td>Zone 1</td><td>every 2 h · 06:00 – 22:00</td><td><span class="field" style="min-width:60px">15</span></td><td><span class="field">none ▾</span></td><td><span class="btn sm">Edit…</span></td></tr>
@@ -305,7 +309,7 @@ ul.flows b{color:var(--text)}
       <tr><td class="dimtd">Plant room · level −1</td><td class="mono">plant_room</td><td class="dimtd">—</td><td class="dimtd">no routine — Engineering's space</td><td></td><td></td><td><span class="btn sm off">Add a routine</span></td></tr>
     </table>
     <div class="pager"><span>1–12 of 23 · 12 per page at this height; a maximised window shows 24 · an area with no routine is drawn dim and produces nothing</span><span><span class="pg">‹</span><span class="pg on">1</span><span class="pg">2</span><span class="pg">›</span></span></div>
-<div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+<div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S3 — public areas are Room Care's, one task model, scheduled by the property.</b> The areas are not created here: they are Master Data's location nodes (<code>masterdata/v1/dto.proto:207–219</code>), and this tab attaches a routine, minutes and an inspection rule to each. A routine is a Temporal Schedule the tick reads (chapter 03 §6.1). A spill or a one-off is a Jobs request, never a routine.</div>
@@ -343,7 +347,7 @@ ul.flows b{color:var(--text)}
         </div>
       </div>
     </div>
-    <div class="save"><span class="btn pri">Save</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
+    <div class="save"><span class="btn off">Save — nothing changed</span><span class="btn">Discard</span><span class="mono">version 7 · Rekha Sinha · 01 Sep 16:40</span></div>
   </div>
 </div>
 <div class="note"><b>Draws S0 · deep clean as a planned project.</b> This tab is the <i>plan</i> only — frequency per room type. Picking a window, requesting the block and raising the job are the Deep clean tab's (screens frame 6, <code>roomcare.plan</code>). Nothing on this tab schedules by weekday.</div>
@@ -399,6 +403,7 @@ ul.flows b{color:var(--text)}
 
 <h2 class="sec">redline log</h2>
 <ul class="flows">
+  <li><b>2026-09-19 · the page-64 audit's records folded, RE-LOCKED</b>: the owner, 2026-09-19, on 01b: <i>&ldquo;A small, B keep, C approved&rdquo;</i>. Section labels at .04em (APPS-Q33); the dates named as <code>en-GB</code> (H3); <code>--glass</code> derived (H6); chips as the build's <code>&lt;button&gt;</code> (H4) — <b>measured: 0 differing pixels, 1400 × 16,600 in Edge (10 chips)</b>; and every tab's save line drawn off with its reason while nothing is edited (§2), <b>drawn after the build</b>.</li>
   <li><b>2026-09-19 · &ldquo;match&rdquo; folded, RE-LOCKED</b>: the owner, <i>&ldquo;i choosed `match`&rdquo;</i> (<code>c69fde42</code>). <code>.mono</code> 12 &rarr; 11px, <code>.tag</code> padding 2px 6px &rarr; 1px 5px and margin-left 6 &rarr; 5px, <code>.pill</code> 2px 9px at 11px &rarr; 1px 8px at 10px. These are the second-set values the owner chose for the screens page (<code>19f203c5</code>). This page had declared each class once, at the first set.</li>
   <li><b>2026-09-13 · redline 5 folded, RE-LOCKED</b> — the six-tab bar (Room states after Prepare) on every frame; 7c Rules gains <i>Default views</i> for the Board and Room states.</li>
   <li><b>2026-09-13 · redline 4 folded, RE-LOCKED</b> — 7c Rules gains <i>Stay facts usually come from</i> (PMS · GuestOps · entered here); the manual control itself is never gated.</li>
