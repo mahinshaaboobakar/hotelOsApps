@@ -145,6 +145,11 @@ async function overlays(
     return (await import("./stand-down")).standDown(host, place.close, open, done);
   }
 
+  // Also the pane's team, and also only with one open.
+  if (place.dialog === "rename" && open !== null) {
+    return (await import("./rename")).renameTeam(host, open, place.close, done);
+  }
+
   return null;
 }
 

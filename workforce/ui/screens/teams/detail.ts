@@ -34,12 +34,12 @@ export function detail(
     el("s", undefined, `${open.team.departmentName} · formed `
       + formatInstant(open.team.formed, property, "date-year")));
 
-  // Rename is inert until a client lands, like every other write on this
-  // screen. Stand down and Add a member open dialogs the module already draws,
-  // so those two are real — an inert button beside a working one is only
-  // confusing when nothing distinguishes them, and here the dialog does.
+  // All three open dialogs that write. Rename said *"inert until a client
+  // lands, like every other write on this screen"* and was drawn off; the
+  // owner met it dead on 0.3.3, and `posting.assign · rename` was served all
+  // along, so the client landed (2026-09-19).
   head.append(name, el("div", "grow"),
-    unavailable("btn", "Rename", "Teams cannot be renamed here yet."), action("Stand down", "down", place));
+    action("Rename", "rename", place), action("Stand down", "down", place));
 
   pane.append(head, department(open), count(open, property), el("div", "tsec", "Members"),
     members(open.members, property), action("＋ Add a member", "member", place), why());
