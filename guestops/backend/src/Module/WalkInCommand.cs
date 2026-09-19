@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Stays;
+using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
 
 namespace HotelOS.GuestOps.Module;
@@ -17,20 +18,37 @@ namespace HotelOS.GuestOps.Module;
 /// is created.
 /// </para>
 /// <para>
-/// <b>Three services, one order, and no transaction spanning them.</b> Create,
-/// assign, check in. Each is its own service's operation with its own event,
-/// and the reason they are not wrapped together here is that they are already
-/// three business facts: a booking was taken, a room was given, a guest
-/// arrived. A failure part-way leaves the earlier facts standing, which is
-/// what actually happened at the desk.
+/// <b>Three services, one order, ONE TRANSACTION</b> — architect, 2026-09-19,
+/// after the half-write was measured. Create, assign, check in: each is its own
+/// service's operation with its own event, and all three with their events
+/// commit together or not at all (CLAUDE.md, <i>events are appended in the
+/// caller's transaction</i>).
+/// </para>
+/// <para>
+/// <b>This said the opposite until then</b>, and it is kept so the reversal can
+/// be checked: <i>"no transaction spanning them … A failure part-way leaves the
+/// earlier facts standing, which is what actually happened at the desk."</i> It
+/// was not what happened at the desk. A walk-in refused at <c>stay.assign</c> left
+/// <b>1 booking · 1 stay · 1 guest · 3 events</b> — a guest the desk turned away,
+/// announced to every consumer — and one refused at check-in left the room
+/// assigned as well. S13 is <i>"one action"</i>, and a half-committed action is
+/// not one.
+/// </para>
+/// <para>
+/// <b>Why the checks are not simply asked first.</b> <c>stay.assign</c> and the
+/// check-in are asked against the <i>stay</i>, whose id the create mints — there
+/// is nothing to ask about until it exists, and asking at property scope instead
+/// would widen the grant. So a refusal can still arrive after the create; the
+/// transaction is what makes it leave nothing.
 /// </para>
 /// <para>
 /// <b>Check-in requires a room, and this refuses without one</b> (S8) — the one
-/// hard gate the assignment ruling creates. It refuses <i>before</i> creating
-/// anything, so a rejected walk-in leaves no half-made booking behind.
+/// hard gate the assignment ruling creates, checked by <c>Draft.From</c> before
+/// the transaction opens, so it costs nothing to refuse.
 /// </para>
 /// </remarks>
 public sealed class WalkInCommand(
+    GuestOpsDbContext db,
     BookingService bookings,
     StayAssignmentService assignments,
     StayLifecycleService lifecycle)
@@ -44,6 +62,13 @@ public sealed class WalkInCommand(
         RequestScope scope, JsonElement? body, CancellationToken cancellationToken)
     {
         var draft = Draft.From(body);
+
+        // Each service still calls SaveChangesAsync; inside this transaction
+        // those writes and their event rows are visible to the next step and to
+        // nobody else, and disposing without CommitAsync rolls all of them back.
+        // The three services share this request's one DbContext, which is what
+        // puts their writes in the transaction at all.
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
 
         var booking = await bookings.CreateAsync(
             scope,
@@ -91,7 +116,7 @@ public sealed class WalkInCommand(
         // overriding a double booking — the desk is standing at the counter and
         // can pick another room. The override path exists on the assignment
         // screen, where a person has the other stay in front of them.
-        await assignments.AssignAsync(
+        var assigned = await assignments.AssignAsync(
             scope,
             stay.Id,
             draft.RoomId,
@@ -100,8 +125,16 @@ public sealed class WalkInCommand(
             stay.Version,
             cancellationToken);
 
+        // **The version the assign PRODUCED, not the create's plus one.** This
+        // was `stay.Version + 1` — but `stay` is the instance this context
+        // tracks, so the assign's own bump had already moved it, and the check-in
+        // asked for a version one past the row's. An allowed walk-in threw
+        // ConcurrencyException every time; nothing had ever driven one to the
+        // end, and the positive control in WalkInAtomicityTests is what found it.
         var arrived = await lifecycle.CheckInAsync(
-            scope, stay.Id, stay.Version + 1, cancellationToken);
+            scope, stay.Id, assigned.Version, cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
 
         return new
         {

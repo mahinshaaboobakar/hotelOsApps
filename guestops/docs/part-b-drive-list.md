@@ -3,7 +3,7 @@
 > **Scope, and the certificate's first line: 16 reads served against an EMPTY
 > store prove the door, authorization, route, query and render — not the logic
 > that computes figures from rows.** Empty answers are reported as empty, never
-> as correct figures. Cancel is BLOCKED BY AUTHZ-Q37 and **not driven**: no
+> as correct figures. Cancel is BLOCKED BY ADR 0193 and **not driven**: no
 > booking exists to cancel. — *architect's decision, 2026-09-19: run pipe-only as
 > soon as 0.3.1 is installed, and certify exactly that. The data-bearing run is a
 > second, separate certificate, not a blocker for this one.*
@@ -30,17 +30,19 @@ And the scope sentence the certificate must carry, from ADR 0143:
 
 A third value is used and is neither pass nor fail:
 
-> **BLOCKED BY AUTHZ-Q37** — the operation is authorized against a GuestOps-owned
-> object type (`stay`) that no mechanism registers, so it is refused for every
-> caller by construction. Recorded, never scored.
+> **BLOCKED BY ADR 0193** — the operation is authorized against a GuestOps-owned
+> object type (`stay`) that no mechanism registers yet, so it is refused for
+> every caller by construction. Recorded, never scored. **ADR 0193 is RULED and
+> UNBUILT**: what blocks these rows is II's manifest schema and CC's composer,
+> not an open question.
 
-**AUTHZ-Q37 is RULED, and the label stays on the architect's instruction
-(2026-09-19).** ADR 0193 closed it that morning: *"An installable application
-may declare the authorization object types it owns in its signed package
-manifest. The Kernel registers those declarations when the package is
-installed/activated."* What blocks these rows now is that mechanism **not yet
-being built**, not the question being open — so a reader must not take the
-label to mean the ruling is pending.
+**The label was *BLOCKED BY AUTHZ-Q37* until 2026-09-19** and changed on the
+architect's instruction, because AUTHZ-Q37, Q37a, Q37b and Q37c are all ruled —
+ADR 0193 closed Q37 that morning: *"An installable application may declare the
+authorization object types it owns in its signed package manifest. The Kernel
+registers those declarations when the package is installed/activated."* A label
+naming a closed question reads as a ruling still pending; a label naming the
+ruled, unbuilt ADR says what the rows are actually waiting for.
 
 **What 0193 does and does not say about GuestOps.** Its worked table names
 `jobs` (`job`), `roomcare` (`room_task`) and `workforce`; **it does not name
@@ -77,7 +79,7 @@ The Kernel resolves a permission against the object type's declared scope
 (`authz/registry.rs:282`), and none of these declares `stay`, so each is refused
 with **InvalidArgument** — *"permission "stay.override" may be checked against
 property, but the object is a stay"* — for every caller, however granted. That
-is the AUTHZ-Q37 class.
+is the class AUTHZ-Q37 named and ADR 0193 rules on — built, it resolves these.
 
 *This page first listed the missing `stay` scope as a **second prerequisite**
 beside AUTHZ-Q37.* **It is not a second one**: under ADR 0193 GuestOps' own
@@ -153,17 +155,17 @@ from the store it came from.
 
 | # | Operation | Door | Reached by a person | Status |
 |---|---|---|---|---|
-| C1 | cancel a booking | module, `stay.override` | Bookings → booking → **Cancel…** → confirm | **BLOCKED BY AUTHZ-Q37 — and NOT DRIVABLE on this property: the store holds no booking to cancel** (precondition 3, measured). *Planned* as one drive to capture the refusal — expected the InvalidArgument above, drawn by the SDK as *faulted* — and it runs only if a booking reaches the store by a supported path. Read-back: the booking and every stay unchanged — the refusal comes before any write (`StayLifecycleService.RequireWritableAsync` authorizes on its first line, on the first stay) |
-| C2 | walk-in | module, `stay.create` → then `stay.assign` + `stay.override` on the stay | **not reachable** — the sheet's *Create and check in* has no handler (`screens/walkin/index.ts:87`; a gap reported earlier, not built) | **BLOCKED BY AUTHZ-Q37** for its assign and override halves, and unreachable besides |
-| C3 | assign a room | gRPC `AssignRoom`, `stay.assign` | no screen | **BLOCKED BY AUTHZ-Q37** |
-| C4 | check in · check out · cancel stay · no-show · correct | gRPC, `stay.override` | no screen | **BLOCKED BY AUTHZ-Q37** |
-| C5 | capture a registration · read it back | gRPC, `registration.capture` · `reservation.read` on a stay | no screen; the card's `Save` captures nothing | **BLOCKED BY AUTHZ-Q37** — including the READ at `RegistrationService:102` |
-| C6 | record a filing | gRPC `RecordFiling`, `reporting.file` | no screen | **BLOCKED BY AUTHZ-Q37** |
-| C7 | log a request · add a note | gRPC, `request.handle` | no screen | **BLOCKED BY AUTHZ-Q37** |
+| C1 | cancel a booking | module, `stay.override` | Bookings → booking → **Cancel…** → confirm | **BLOCKED BY ADR 0193 — and NOT DRIVABLE on this property: the store holds no booking to cancel** (precondition 3, measured). *Planned* as one drive to capture the refusal — expected the InvalidArgument above, drawn by the SDK as *faulted* — and it runs only if a booking reaches the store by a supported path. Read-back: the booking and every stay unchanged — the refusal comes before any write (`StayLifecycleService.RequireWritableAsync` authorizes on its first line, on the first stay) |
+| C2 | walk-in | module, `stay.create` → then `stay.assign` + `stay.override` on the stay | **not reachable** — the sheet's *Create and check in* has no handler (`screens/walkin/index.ts:87`; a gap reported earlier, not built) | **BLOCKED BY ADR 0193** for its assign and override halves, and unreachable besides |
+| C3 | assign a room | gRPC `AssignRoom`, `stay.assign` | no screen | **BLOCKED BY ADR 0193** |
+| C4 | check in · check out · cancel stay · no-show · correct | gRPC, `stay.override` | no screen | **BLOCKED BY ADR 0193** |
+| C5 | capture a registration · read it back | gRPC, `registration.capture` · `reservation.read` on a stay | no screen; the card's `Save` captures nothing | **BLOCKED BY ADR 0193** — including the READ at `RegistrationService:102` |
+| C6 | record a filing | gRPC `RecordFiling`, `reporting.file` | no screen | **BLOCKED BY ADR 0193** |
+| C7 | log a request · add a note | gRPC, `request.handle` | no screen | **BLOCKED BY ADR 0193** |
 | C8 | reconciliation (clear · accept) | none — `ReconciliationService` is registered and called by nothing | no door at all | **not reachable by any door**; its two stay-scoped checks would also block |
 
 `stay.create` on its own (`CreateBooking` on gRPC) is property-scoped and is
-not blocked by AUTHZ-Q37 — but it has no screen, and a booking made on the
+not blocked by ADR 0193 — but it has no screen, and a booking made on the
 owner's live property is a write this list does not propose without the
 owner's yes.
 
@@ -242,7 +244,7 @@ Three consequences, stated now so the certificate does not discover them:
    **the pipe — door, authorization, route, query, render — and not the logic**
    that computes a count from rows.
 2. **C1 cannot be driven.** There is no booking to press *Cancel…* on, so the
-   refusal cannot be captured as evidence. It stays BLOCKED BY AUTHZ-Q37 and
+   refusal cannot be captured as evidence. It stays BLOCKED BY ADR 0193 and
    **not driven**, never *driven and refused*.
 3. **No supported path on this property creates a booking.** `stay.create` is
    gRPC-only, the walk-in sheet's submit has no handler, and no PMS connector
@@ -289,9 +291,42 @@ because `CreateAsync` has committed before the second check is asked.
 
 **The measurement was not kept as a test** — it asserts nothing about what
 *should* happen, and a committed test recording a defect as its expectation
-would lock in the behaviour it was written to question. It was run twice and removed. **The handler is not
-wired**: its check-in step is stay-scoped and waits on the AUTHZ-Q37 mechanism
-anyway (architect, 2026-09-19).
+would lock in the behaviour it was written to question. It was run twice and
+removed.
+
+**FIXED in source for GuestOps' next version (architect's assignment,
+2026-09-19): a refused walk-in now leaves nothing.** Create, assign and check-in
+run in one transaction with their events. The checks cannot all be asked first
+— `stay.assign` and the check-in are asked of the stay the create mints, and
+asking at property scope would widen the grant — so the transaction is the
+mechanism, and the reason is written at the site.
+
+**The positive control found a second defect nobody had driven into: an ALLOWED
+walk-in could never succeed.** Check-in was asked for `stay.Version + 1`, but the
+assign had already bumped the tracked instance, so it asked for a version one
+past the row's and threw `ConcurrencyException` every time. It now passes the
+version the assign returned.
+
+`WalkInAtomicityTests`, committed, asserting the correct behaviour — red at HEAD,
+then green:
+
+```text
+                          at HEAD (unfixed)                              fixed
+refused at stay.assign    (1, 1, 1, "guest.created, reservation.created,   (0, 0, 0, "")
+                                      stay.created")
+refused at check-in       (1, 1, 1, "guest.created, reservation.created,   (0, 0, 0, "")
+                                      stay.assigned, …")  — room kept too
+allowed                   ConcurrencyException: has changed since         1 booking · 1 stay
+                          version 3 was read                              in house, events incl.
+                                                                          stay.assigned, stay.arrived
+```
+
+Figures are *(bookings, stays, guests, events)*. Full backend suite 139/139.
+**Not demonstrated**: a mutation removing only `CommitAsync` — the positive
+control should catch it (it would find 0 bookings), which is reasoning, not a run.
+
+**The handler is still not wired**: its assign and check-in steps are
+stay-scoped and wait on ADR 0193 being built (architect, 2026-09-19).
 
 **Found beside it, unattributed and left alone**: three per-run application
 roles on the development cluster — `hotelos_app_guestops_071c86a5`, `_44c7833f`,
