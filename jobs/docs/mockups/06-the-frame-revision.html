@@ -32,7 +32,7 @@
   section { margin-top:52px; border-top:1px solid var(--color-line); padding-top:24px }
   .dim { color:var(--color-ink-faint) }
 
-  .asks { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; margin:22px 0 6px }
+  .asks { display:grid; grid-template-columns:repeat(2, 1fr); gap:14px; margin:22px 0 6px }
   @media (max-width:860px) { .asks { grid-template-columns:1fr } }
   .ask { border:1px solid var(--color-line-strong); border-radius:12px; background:var(--color-surface-raised); padding:14px 16px }
   .ask .k { font-family:ui-monospace, "Cascadia Mono", Menlo, monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--color-brand) }
@@ -94,6 +94,7 @@
   <div class="asks">
     <div class="ask"><div class="k">Approve · A</div><p><b>The palette.</b> The 13 names go, and each use takes the published name it already resolved to. The only visible change is the window's shadow.</p></div>
     <div class="ask"><div class="k">Approve · B and C</div><p><b>The dates, drawn in en-GB for a property in Asia/Qatar</b>, and labelled that way. Also four dates' weekdays corrected: the frames draw 2025's weekdays for 2026's dates.</p></div>
+    <div class="ask"><div class="k">Approve · E</div><p><b>The bar names three things, not two.</b> The frames draw <i>Priya Nair · ENG supervisor</i> in 24 places. Your ruling of 2026-09-04 is <i>name · department · property</i>.</p></div>
     <div class="ask"><div class="k">Choose · D1 and D2</div><p><b>Two shapes the platform can't draw yet.</b> A day shown with its weekday and month, and a Due column with three shapes. Each option is drawn below.</p></div>
   </div>
 
@@ -177,10 +178,22 @@
   </section>
 
   <section>
+    <h2>E · The bar: three clauses, as ruled</h2>
+    <p><span class="tag fix">correction</span> Page 64 §3, your ruling of 2026-09-04: <i>"The signed-in person reads <code>name · department · property</code>. Three clauses, not two."</i> The reason given is that a desk machine is shared and every write is attributed, so the bar says <i>who</i>, <i>for which department</i> and <i>at which hotel</i>. Both Jobs frames still draw two clauses, a name and a role, in all 24 of their bars (13 in 01, 11 in 02). §3's change log says the mock was amended to three clauses. That amendment was made in GuestOps' gold file, and Jobs' frames were never amended.</p>
+    <p>Drawn from the ruling, with the frames' own facts: the person the frames already name, the department that person's role belongs to, and the property the frames' header names.</p>
+    <div class="pair">
+      <figure style="margin:0"><figcaption>Locked: two clauses</figcaption>
+        <div class="win locked"><div class="bar"><span class="mk">J</span>Jobs <span class="faint">· Board</span><span style="margin-left:auto" class="muted">Priya Nair · ENG supervisor</span></div></div></figure>
+      <figure style="margin:0"><figcaption>Revised: name · department · property</figcaption>
+        <div class="win revised"><div class="bar"><span class="mk">J</span>Jobs <span class="faint">· Board</span><span style="margin-left:auto" class="muted">Priya Nair · Engineering · The Marina Bay</span></div></div></figure>
+    </div>
+    <p style="margin-top:14px"><b>What the build draws until then.</b> Nothing yet tells Jobs which department a person is posted to. ADR 0203 is to establish it. Until then the build draws <i>Priya Nair · <i>department not established</i> · The Marina Bay</i>: the gap stated in words, never a guessed department. The frame draws the ruled surface and not that interim state. A frame that drew the gap would be specifying the gap.</p>
+  </section>
+
+  <section>
     <h2>Not in this revision</h2>
     <ul>
       <li><b>O7</b>, the Catalogue's inline <i>New item</i> and the ladder's inline <i>Add a step to P1</i>. Settled by APPS-Q27: an owner-locked and countersigned frame sets a surface-specific deviation. Both are labelled as that in the code. The frames don't change.</li>
-      <li><b>The name in the bar.</b> The frames draw <code>Priya Nair · ENG supervisor</code>, which is two clauses. Page 64 §3 rules three (<i>name · department · property</i>). The build now draws the department as <i>not established</i> until ADR 0203 establishes one. Redrawing the frame's bar is a row the architect didn't put in this revision, so it's raised here and not drawn.</li>
     </ul>
   </section>
 
