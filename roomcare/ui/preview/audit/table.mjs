@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { SCREENS } from "./cases.mjs";
-import { JUDGED } from "./judged.mjs";
+import { DEVIATIONS, JUDGED } from "./judged.mjs";
 
 const [afterDir, beforeDir] = process.argv.slice(2);
 const checklist = readFileSync(resolve(process.cwd(), "..", "..", "docs", "app-surface-checklist.md"), "utf8");
@@ -27,10 +27,10 @@ const SHORT = {
   "Setup › Areas": "areas", "Setup › Deep clean plan": "plan", "Setup › Property-wide access": "access",
   "Setup (its own read)": "setup", Widgets: "wdg", Source: "src", Frames: "frm",
 };
-const RANK = { FAIL: 4, OPEN: 3, PASS: 2, NA: 1 };
-const MARK = { FAIL: "**F**", OPEN: "O", PASS: "P", NA: "–" };
+const RANK = { FAIL: 5, DEV: 4, OPEN: 3, PASS: 2, NA: 1 };
+const MARK = { FAIL: "**F**", DEV: "D", OPEN: "O", PASS: "P", NA: "–" };
 
-function load(dir) {
+function load(dir, when = "after") {
   const run = JSON.parse(readFileSync(join(dir, "results.json"), "utf8"));
   const source = readFileSync(join(dir, "source.txt"), "utf8");
   const cells = new Map();
@@ -51,10 +51,17 @@ function load(dir) {
     if (r.record.X15 !== undefined) put("X15", column, "OPEN", r.record.X15, r.id);
   }
   for (const m of source.matchAll(/^([A-Z]\d+)\s+(PASS|FAIL|OPEN|NA)\s+(.*)$/gmu)) put(m[1], "Source", m[2], m[3], "source walk");
-  for (const j of JUDGED) {
+  for (const j0 of JUDGED) {
+    // A judgement records the state it was made against; a "before" run takes the line's state at that commit.
+    const j = when === "before" && j0.before !== undefined ? { ...j0, ...j0.before } : j0;
     if (j.v === "SEE") continue;
     const where = j.where === "screens" || j.where === "overlays" ? SCREENS.map((s) => s.surface) : j.where === "widgets" ? ["Widgets"] : j.where === "frames" ? ["Frames"] : ["Source"];
     for (const column of where) put(j.id, column, j.v, j.why, `judged (${j.how})`);
+  }
+  // An owner-approved deviation (APPS-Q27): the probe still measures the divergence; the cell says D, with its ruling.
+  for (const d of when === "before" ? [] : DEVIATIONS) {
+    const cell = cells.get(`${d.id}|${d.column}`);
+    if (cell !== undefined && cell.v === "FAIL") { cell.v = "DEV"; cell.notes.push(`DEV approved deviation: ${d.why}`); }
   }
   // D1 is G6's measurement (§5 refers to §6).
   for (const column of COLUMNS) { const g6 = cells.get(`G6|${column}`); if (g6) cells.set(`D1|${column}`, g6); }
@@ -62,7 +69,7 @@ function load(dir) {
 }
 
 const after = load(afterDir);
-const before = beforeDir === undefined ? null : load(beforeDir);
+const before = beforeDir === undefined ? null : load(beforeDir, "before");
 
 const out = [];
 out.push(`| Line | ${COLUMNS.map((c) => SHORT[c]).join(" | ")} |`, `|---|${COLUMNS.map(() => ":-:").join("|")}|`);
@@ -74,6 +81,10 @@ out.push("", `Lines asked of no surface: ${unasked.length === 0 ? "none" : unask
 const fails = [...after.cells].filter(([, cell]) => cell.v === "FAIL");
 out.push("", `## Every FAIL after — ${fails.length} cell(s)`, "");
 for (const [key, cell] of fails) out.push(`- **${key.replace("|", " · ")}** — ${[...new Set(cell.notes.filter((n) => n.startsWith("FAIL")))].slice(0, 4).join("; ")}`);
+
+const devs = [...after.cells].filter(([, cell]) => cell.v === "DEV");
+out.push("", `## D — owner-approved deviations, each labelled where it diverges — ${devs.length} cell(s)`, "");
+for (const [key, cell] of devs) out.push(`- ${key.replace("|", " · ")} — ${cell.notes.find((n) => n.startsWith("DEV"))?.replace(/^DEV approved deviation: /u, "")}`);
 
 const opens = [...after.cells].filter(([, cell]) => cell.v === "OPEN");
 out.push("", `## OPEN — what is built, recorded and not failed — ${opens.length} cell(s)`, "");

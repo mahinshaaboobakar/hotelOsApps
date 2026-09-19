@@ -118,6 +118,9 @@ function dock(host: HostApi, edits: Edits, redraw: () => void, total: number): H
   const stay = make("stay", STAYS);
   const sold = el("input", "cell") as HTMLInputElement;
   sold.placeholder = "sold at";
+  // Deliberately .btn.sm outside a list's row: the owner chose small for a toolbar's buttons (01b, 2026-09-19,
+  // "A small"), against page 64 §2's "inside a row or a card". A labelled deviation, not a defect; APPS-Q43's
+  // card half is a separate question and still open.
   bar.append(el("b", undefined, `${whole(host, selected.size)} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay,
     control("btn sm", "Apply to selected", () => {
       for (const id of selected) {

@@ -52,6 +52,9 @@ export function grid(host: HostApi, data: RoomStates, edits: Edits, conflicts: R
 
   const house = el("div", "house");
   for (const zone of data.zones) {
+    // Deliberately .btn.sm outside a list's row: the owner chose small for a toolbar's buttons (01b, 2026-09-19,
+    // "A small"), against page 64 §2's "inside a row or a card". A labelled deviation, not a defect; APPS-Q43's
+    // card half is a separate question and still open.
     const header = el("div", "grp mono");
     header.append(el("b", undefined, `${zone.name} · ${whole(host, zone.rooms.length)}`), control("btn sm", `Select all ${whole(host, zone.rooms.length)}`, () => {
       for (const row of zone.rooms) edits.set(row.roomId, paint.fact, paint.value);

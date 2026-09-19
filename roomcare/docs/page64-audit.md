@@ -46,11 +46,13 @@ the timeline's detail line · quiet text the timeline's date and basis line
 
 ## The table — every line × every surface, after
 
-`P` pass · `**F**` fail · `O` open (built and recorded, never failed) · `–` not applicable, with
-its reason in `results.json` · `·` not asked of that surface in any state. A cell is the
-worst verdict any state gave it. Screen columns include their overlays. `setup` is Setup's own
-read failing; `wdg` the five widgets; `src` the source walk; `frm` the two locked frames.
-Lines asked of no surface: **none**.
+`P` pass · `**F**` fail · `D` an owner-approved deviation (APPS-Q27), labelled where it diverges · `O` open (built and
+recorded, never failed) · `–` not applicable, with its reason in `results.json` · `·` not asked of that surface in
+any state. A cell is the worst verdict any state gave it. Screen columns include their overlays. `setup` is Setup's
+own read failing; `wdg` the five widgets; `src` the source walk; `frm` the two locked frames. Lines asked of no
+surface: **none**. *Updated 2026-09-19 after the owner decided 01b ("A small, B keep, C approved", `65762c95`):
+C4 (2 cells) and L1 (1) are now D; H3 and H6 pass against the re-locked frames; H4 is narrowed and still fails. The
+build's measurements are the certificate run's (`020f1eff`), and nothing in the build changed.*
 
 | Line | map | wall | room | insp | prep | sheet | grid | cmpct | sup | deep | mine | door | win | svc | rules | zones | areas | plan | access | setup | wdg | src | frm |
 |---|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
@@ -63,7 +65,7 @@ Lines asked of no surface: **none**.
 | C1 | P | · | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · |
 | C2 | P | · | P | · | P | P | · | · | P | P | P | P | P | P | P | P | P | P | P | P | · | P | · |
 | C3 | · | · | P | · | P | P | P | P | · | P | · | P | P | P | P | P | P | P | P | · | · | · | · |
-| C4 | P | P | P | · | P | **F** | **F** | P | P | P | P | P | P | O | O | O | P | P | P | P | · | · | · |
+| C4 | P | P | P | · | P | D | D | P | P | P | P | P | P | O | O | O | P | P | P | P | · | · | · |
 | C5 | · | · | · | · | · | · | · | · | · | P | · | · | · | · | · | · | · | · | P | · | · | · | · |
 | C6 | · | · | · | · | · | · | · | · | · | P | · | · | · | · | · | · | · | · | P | · | · | · | · |
 | C7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
@@ -79,7 +81,7 @@ Lines asked of no surface: **none**.
 | N6 | P | P | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · |
 | N7 | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · | · |
 | N8 | P | P | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · |
-| L1 | · | · | · | · | **F** | · | · | · | P | P | P | · | · | · | · | · | P | · | · | · | · | · | · |
+| L1 | · | · | · | · | D | · | · | · | P | P | P | · | · | · | · | · | P | · | · | · | · | · | · |
 | L2 | · | · | · | · | P | · | · | · | P | P | P | · | · | · | · | · | P | · | · | · | · | · | · |
 | L3 | · | · | · | · | P | · | · | · | P | P | P | · | · | · | · | · | P | · | · | · | · | · | · |
 | L4 | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · | · | · | · | · | · | · | · | · |
@@ -136,10 +138,10 @@ Lines asked of no surface: **none**.
 | X15 | O | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | O | · |
 | H1 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
 | H2 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
-| H3 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **F** |
+| H3 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
 | H4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **F** |
 | H5 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
-| H6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | **F** |
+| H6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P |
 
 ## Each fix, and the check that failed before it
 
@@ -159,7 +161,26 @@ Lines asked of no surface: **none**.
 | O4 | nothing held it | `982c801` `tests/overlay.test.ts` | the test fails with the scrim check removed |
 | U1 | 21 numbers through `String()`, none through `formatNumber` | `6655c01` `whole(host, n)` everywhere | `tests/number.test.ts` failed first ("expected [ '1234', '5678' ] to deeply equal [ '1.234', '5.678' ]") |
 
-## What still fails, and why Room Care alone cannot close it
+## What still fails — 8 cells
+
+1. **C8, table rows (7 cells).** §2 against §4: a `<tr>` cannot be a `<button>`, and Jobs' baseline opens its rows
+   the same way. The planner has it as **APPS-Q50**, and the rows stay as they are.
+2. **H4, the frames (1 cell), narrowed and not closed.** The owner approved retagging the tiles and chips, and the
+   re-locked frames (`65762c95`) draw them as `<button>`: 0 differing pixels, each whole page as locked against it
+   retagged, 1400 × 16,600 in Edge. **Still drawn as div or span: 116 tabs, 111 actions (`span.btn`) and 12 pager
+   buttons.** The same retagging does not render the same for them. Measured: 4,284,723 pixels differ on 01 and
+   808,917 on 02 (a `div` and an unset `button` do not share a display type). So they need a drawn revision for
+   the owner, not a mechanical one.
+
+**Settled by the owner on 01b** (2026-09-19, *"A small, B keep, C approved"*):
+- **C4**: the toolbar's small buttons stay small. Recorded as a deviation at `screens/states/sheet.ts` and
+  `grid.ts`. APPS-Q43's card half is still open.
+- **L1**: Prepare's list keeps its card. Recorded as an APPS-Q27 deviation, citing the owner and frame 2, at
+  `screens/prepare/index.ts`.
+- **H3, H6** and the records from APPS-Q33, APPS-Q35, 64a and §2: folded into 01 and 02, which are re-locked.
+
+<details><summary>As first written, before the owner's answer</summary>
+
 
 **The table is not clean, so nothing here goes to the owner as done.** Every
 remaining FAIL needs a ruling or an owner's approval, and each is stated as
@@ -192,6 +213,14 @@ the question it is:
    the build in those places too. Under APPS-Q44 a revision to a locked frame
    is drawn by the stream and approved by the owner. **KK draws the batch;
    the owner approves it.**
+
+</details>
+
+## D — owner-approved deviations, each labelled where it diverges — 3 cell(s)
+
+- L1 · Prepare — APPS-Q27: locked frame 2 draws the changes list in a card, and the owner kept it (01b, 2026-09-19, "B keep") — labelled at screens/prepare/index.ts
+- C4 · Room states · sheet — the owner, 01b, 2026-09-19: "A small" — Apply to selected stays .btn.sm in the selection dock (screens/states/sheet.ts). APPS-Q43's card half is still open
+- C4 · Room states · grid — the owner, 01b, 2026-09-19: "A small" — Select all N stays .btn.sm on a zone's row (screens/states/grid.ts). APPS-Q43's card half is still open
 
 ## OPEN — what is built, recorded and not failed — 76 cell(s)
 

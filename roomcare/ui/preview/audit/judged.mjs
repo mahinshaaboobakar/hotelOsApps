@@ -23,8 +23,20 @@ export const JUDGED = [
   { id: "X15", where: "source", v: "OPEN", how: "S", why: "Partial failures Room Care draws (64d items 6, 7): the bar's own read failing draws in the identity slot (board-map--f6-me); Move rooms and Reassign draw the whole failure inside the sheet when the rooms or the people cannot be read; Copy refuses in place with the SDK's sentence for a room type it could not read" },
   { id: "H1", where: "source", v: "PASS", how: "T", why: "tests/tokens.test.ts — the harness injects exactly TOKEN_NAMES, set equality" },
   { id: "H2", where: "frames", v: "PASS", how: "frames", why: "Every drawn pager's range matches the rows drawn (1–12 of 62 over 12; 3 of 3; 9 of 9; 4 of 4; 1–6 of 6; 2 of 2); the wall, drawn short, says so inside the list" },
-  { id: "H3", where: "frames", v: "FAIL", how: "frames", why: "The frames say 'Marina Bay is 24-hour, day-month' and never name the locale (en-GB) of the dates they draw", fix: "owner" },
-  { id: "H4", where: "frames", v: "FAIL", how: "frames", why: "The frames draw tiles, chips and actions as div and span where the build uses button (ARCH-Q20, 2026-09-10, came after the frames of 2026-09-05); Part A pairs 22.8% of drawn nodes for this reason", fix: "owner" },
+  { id: "H3", where: "frames", v: "PASS", how: "frames", why: "Re-locked 65762c95 (01b, owner: C approved): every date in 01 and 02 is named en-GB. Before: 'Marina Bay is 24-hour, day-month', no locale", before: { v: "FAIL", why: "The frames say 'Marina Bay is 24-hour, day-month' and never name the locale (en-GB) of the dates they draw" } },
+  { id: "H4", where: "frames", v: "FAIL", how: "frames", why: "Narrowed, not closed. Re-locked 65762c95: tiles and chips are <button> (0 differing pixels, each whole page, 1400 x 16,600; 01: 142 tiles, 46 chips; 02: 10 chips). Still drawn as div/span: 116 tabs, 111 actions (span.btn), 12 pager buttons. The same retagging does NOT render the same for them (measured: 4,284,723 px on 01, 808,917 on 02), so they need a drawn revision for the owner, not a mechanical one", fix: "owner", before: { v: "FAIL", why: "The frames draw tiles, chips and actions as div and span where the build uses button (ARCH-Q20)" } },
   { id: "H5", where: "source", v: "PASS", how: "C", why: "The harness answers an unrecorded call with a refusal, never a stand-in: every write case in this audit drew the refusal (preview/frame.ts)" },
-  { id: "H6", where: "frames", v: "FAIL", how: "frames", why: "Both frames declare --glass: rgba(255,255,255,.035), a literal of their own; every other alias resolves to a published token", fix: "owner" },
+  { id: "H6", where: "frames", v: "PASS", how: "frames", why: "Re-locked 65762c95: --glass is color-mix(ink 3.5%), derived; before, rgba(255,255,255,.035), the frames' one literal", before: { v: "FAIL", why: "Both frames declare --glass: rgba(255,255,255,.035), a literal of their own" } },
+];
+
+/**
+ * Owner-approved, surface-specific deviations (APPS-Q27: "an owner-locked artifact can establish an approved
+ * surface-specific DEVIATION from a written standard"). The probe still measures the divergence; the table
+ * shows it as D, with its ruling, never as a pass and never as an open failure. Each is labelled in the code
+ * where it diverges.
+ */
+export const DEVIATIONS = [
+  { id: "C4", column: "Room states · sheet", why: "the owner, 01b, 2026-09-19: \"A small\" — Apply to selected stays .btn.sm in the selection dock (screens/states/sheet.ts). APPS-Q43's card half is still open" },
+  { id: "C4", column: "Room states · grid", why: "the owner, 01b, 2026-09-19: \"A small\" — Select all N stays .btn.sm on a zone's row (screens/states/grid.ts). APPS-Q43's card half is still open" },
+  { id: "L1", column: "Prepare", why: "APPS-Q27: locked frame 2 draws the changes list in a card, and the owner kept it (01b, 2026-09-19, \"B keep\") — labelled at screens/prepare/index.ts" },
 ];

@@ -70,6 +70,8 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     el("span", "end", when(host, v.at)),
   );
 
+  // A list in a card: an owner-approved deviation from page 64 §4 ("a list sits bare on the page") under APPS-Q27,
+  // drawn so in locked frame 2 and kept by the owner (01b, 2026-09-19, "B keep"). Only this surface; §4 still governs every other list.
   const changesCard = card(`Changes since ${since} — collected, nothing created`);
   const buttons = el("div", "row");
   buttons.style.marginBottom = "12px";
