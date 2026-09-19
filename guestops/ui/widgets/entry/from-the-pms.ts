@@ -37,7 +37,8 @@ import { card, el, label, opener, row, stat, stylesheet, unanswered } from "../c
 /** One fact the Hub could not place, and why. */
 interface Held {
   reason: string;
-  source: string;
+  /** The integration it came from, by name — null until that name is reachable. */
+  source: string | null;
 
   /** When it arrived — an ISO instant; this widget draws its time. */
   at: string;
@@ -95,7 +96,7 @@ connectToHost((host: HostApi) => {
 
     for (const fact of feed.facts.slice(0, 3)) {
       body.append(row(
-        [fact.reason, el("span", "rc", fact.source), el("span", "rc t", instant(fact.at, host.property, "time"))],
+        [fact.reason, ...(fact.source === null ? [] : [el("span", "rc", fact.source)]), el("span", "rc t", instant(fact.at, host.property, "time"))],
         `attention/${fact.stay}`,
         open,
       ));

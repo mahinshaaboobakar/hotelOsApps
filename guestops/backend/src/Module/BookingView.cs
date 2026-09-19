@@ -51,7 +51,10 @@ public sealed class BookingView(
             // Only where a source manages it. In a standalone property there is
             // no PMS to name, and a sentence saying one manages this booking
             // would be an attribution to a system nobody installed.
-            managedBy = record.Reference is null ? null : "Opera manages this booking",
+            // It named Opera until 2026-09-19, whatever PMS the property runs. The
+            // configured name is the Integration Hub's and not reachable from here
+            // yet (SourceNameTests' remarks), so it says the function instead.
+            managedBy = record.Reference is null ? null : "The PMS manages this booking",
 
             // **Paged, though a booking bounds its own stays** — `64` §8. Two
             // stays here and three in the group frame, and a coach party with
@@ -264,7 +267,10 @@ public sealed class BookingView(
 
         var missing = expected - record.Stays.Count;
 
-        return $"Opera says this booking has {expected} rooms and has sent "
+        // It named Opera until 2026-09-19, whatever PMS the property runs. The
+        // configured name is the Integration Hub's and not reachable from here
+        // yet (SourceNameTests' remarks), so it says the function instead.
+        return $"The PMS says this booking has {expected} rooms and has sent "
             + $"{record.Stays.Count}. The other {missing} "
             + (missing == 1 ? "is not a row" : "are not rows")
             + " — not a placeholder, and not counted. They appear when the "

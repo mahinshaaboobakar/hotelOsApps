@@ -164,7 +164,10 @@ public sealed class BookingsView(BookingReadService bookings)
 
         if (booking.Reference is not null)
         {
-            chips.Add(new { text = "Opera", mark = "pms" });
+            // It named Opera until 2026-09-19, whatever PMS the property runs. The
+            // configured name is the Integration Hub's and not reachable from here
+            // yet (SourceNameTests' remarks), so it says the function instead.
+            chips.Add(new { text = "PMS", mark = "pms" });
         }
 
         if (booking.Overridden)

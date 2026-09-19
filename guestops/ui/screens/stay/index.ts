@@ -288,7 +288,7 @@ function actions(
   if (tab === "Payment") {
     // A link, not an integration: it takes the user to the system that holds
     // the folio and asserts nothing about what is in it.
-    return [unavailable("btn", "Open in Opera", "Opening the PMS from GuestOps is not available yet.")];
+    return [unavailable("btn", "Open in the PMS", "Opening the PMS from GuestOps is not available yet.")];
   }
 
   // Check in, check out, move and cancel have no door in GuestOps' module yet

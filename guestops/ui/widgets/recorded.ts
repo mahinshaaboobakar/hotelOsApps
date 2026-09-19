@@ -60,8 +60,8 @@ export const pms = {
   held: 2,
   lastFactAt: "2026-09-01T09:41:00+05:30",
   facts: [
-    { reason: "Unmatched stay reference", source: "OHIP", at: "2026-09-01T09:12:00+05:30", stay: "h1" },
-    { reason: "Rate code not known here", source: "OHIP", at: "2026-09-01T07:48:00+05:30", stay: "h2" },
+    { reason: "Unmatched stay reference", source: null, at: "2026-09-01T09:12:00+05:30", stay: "h1" },
+    { reason: "Rate code not known here", source: null, at: "2026-09-01T07:48:00+05:30", stay: "h2" },
   ],
 };
 

@@ -60,7 +60,10 @@ public sealed class AvailabilityView(
             },
 
             mode = await ConnectedAsync(scope, cancellationToken)
-                ? "PMS-connected — Opera writes the lifecycle"
+                // It named Opera until 2026-09-19, whatever PMS the property runs. The
+                // configured name is the Integration Hub's and not reachable from here
+                // yet (SourceNameTests' remarks), so it says the function instead.
+                ? "Connected to the PMS — the PMS writes the lifecycle"
                 : "Standalone — this property is the book",
 
             // **Every room type, unpaged — the owner's ruling on New booking,
@@ -117,7 +120,11 @@ public sealed class AvailabilityView(
             sold = type.HeldByStays,
 
             outOfOrder = type.OutOfOrder,
-            outOfOrderBy = type.OutOfOrder > 0 ? "EngineeringOps" : null,
+            // Named "EngineeringOps" for every out-of-order room until
+            // 2026-09-19. Nothing records who took a room out of order — the
+            // projection carries no source, and no consumer writes it yet — so
+            // there is no owner to name, and none is invented.
+            outOfOrderBy = (string?)null,
 
             stopSold = type.StopSold,
 

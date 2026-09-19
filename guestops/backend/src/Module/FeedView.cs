@@ -52,7 +52,9 @@ public sealed class FeedView(GuestOpsDbContext db)
             facts = held.Select(fact => new
             {
                 reason = fact.Reason.ToString(),
-                source = fact.IntegrationId,
+                // The integration's id (`ohip`) stood here — an identifier, not a
+                // name a person uses. Null until the configured name is reachable.
+                source = (string?)null,
                 at = fact.ReceivedAt.ToString("O"),
 
                 // The held fact names no stay — that is why it is held. The

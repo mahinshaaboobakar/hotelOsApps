@@ -105,7 +105,10 @@ public sealed class StayDetailView(GuestOpsDbContext db)
 
             // Only where a source manages it — the rule the booking uses. A
             // standalone property has no PMS to name.
-            managedBy = reference is null ? null : "Opera manages this stay",
+            // It named Opera until 2026-09-19, whatever PMS the property runs. The
+            // configured name is the Integration Hub's and not reachable from here
+            // yet (SourceNameTests' remarks), so it says the function instead.
+            managedBy = reference is null ? null : "The PMS manages this stay",
 
             actions = Actions(stay),
             tabs = Tabs(),

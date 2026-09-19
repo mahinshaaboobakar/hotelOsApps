@@ -256,8 +256,11 @@ public sealed class CancelPlanView(
     /// had been released in Opera, and the room would be sold twice.
     /// </remarks>
     private const string NotTold =
-        "Opera will not be told. This records the cancellation in HotelOS only "
-        + "— it does not reach the PMS, and Opera will keep showing this booking "
+        // It named Opera until 2026-09-19, whatever PMS the property runs. The
+        // configured name is the Integration Hub's and not reachable from here
+        // yet (SourceNameTests' remarks), so it says the function instead.
+        "The PMS will not be told. This records the cancellation in HotelOS only "
+        + "— it does not reach the PMS, and the PMS will keep showing this booking "
         + "as live until somebody cancels it there too.";
 
     /// <summary>

@@ -177,7 +177,8 @@ function context(day: Today): HTMLElement {
     document.createTextNode(
       ` · rolls at ${day.rollsAt} · `
       + (day.connected
-        ? "PMS-connected — Opera writes the lifecycle"
+        // Named Opera until 2026-09-19, whatever PMS the property runs.
+        ? "Connected to the PMS — the PMS writes the lifecycle"
         : "standalone — this property is the book"),
     ),
   );
