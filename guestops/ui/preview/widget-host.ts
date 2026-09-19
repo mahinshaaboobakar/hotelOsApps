@@ -1,4 +1,6 @@
 import { HOST_CONTRACT_RANGE } from "@hotelos/sdk";
+
+import * as recorded from "../widgets/recorded";
 /**
  * The five widgets, side by side, at the popover's size.
  *
@@ -13,9 +15,6 @@ import { HOST_CONTRACT_RANGE } from "@hotelos/sdk";
  * design names as the one outcome worse than a tap that says why.
  */
 
-// A module, so top-level `await` is legal — the file has no imports of its
-// own and would otherwise be a script.
-export {};
 
 const WIDGETS = [
   "today", "occupancy", "from-the-pms", "business-mix", "watchlist",
@@ -35,14 +34,37 @@ const only = new URLSearchParams(location.search).get("only");
 const drawn = only === null ? WIDGETS : WIDGETS.filter((w) => w === only);
 
 /**
- * `?fail=unanswered|forbidden|faulted` — which of `64b`'s three states the read
- * returns. The harness answers no widget read with data, so without this every
- * card could only ever be photographed not answering, and the other two states
- * would ship unseen.
+ * `?fail=<cause>` — which of contract v2's six causes the read returns, by the
+ * host kind the SDK maps to it (`64b`, `64e`).
+ *
+ * **With no `?fail=`, the widget LOADS** — the checklist's `W` asks for every
+ * widget loaded as well as failing, and until 2026-09-19 this harness answered
+ * every read with a failure, so no loaded card had been photographed here. The
+ * answers are `widgets/recorded.ts`, the approved artboards' figures, keyed by
+ * the method each widget asks for.
  */
-const KINDS = { unanswered: "unavailable", forbidden: "forbidden", faulted: "internal" } as const;
-const cause = new URLSearchParams(location.search).get("fail") ?? "unanswered";
-const kind = KINDS[cause as keyof typeof KINDS] ?? "unavailable";
+const KINDS = {
+  unanswered: "unavailable",
+  forbidden: "forbidden",
+  unadmitted: "local_forbidden",
+  ungranted: "user_forbidden",
+  undecidable: "model_unavailable",
+  faulted: "internal",
+} as const;
+const cause = new URLSearchParams(location.search).get("fail");
+const kind = cause === null ? null : KINDS[cause as keyof typeof KINDS] ?? null;
+if (cause !== null && kind === null) {
+  throw new Error(`no cause '${cause}' — the harness knows ${Object.keys(KINDS).join(", ")}`);
+}
+
+/** What each widget reads, loaded. */
+const LOADED: Record<string, unknown> = {
+  today: recorded.today,
+  occupancy: recorded.occupancy,
+  feed: recorded.pms,
+  mix: recorded.mix,
+  watchlist: recorded.watchlist,
+};
 
 for (const name of drawn) {
   const bundle = await (await fetch(`../widgets/${name}.js`)).text();
@@ -114,7 +136,9 @@ function handshake(frame: HTMLIFrameElement, capabilities: readonly string[]): v
     const channel = new MessageChannel();
 
     channel.port1.addEventListener("message", (event: MessageEvent) => {
-      const message = event.data as { type?: string; id?: number; capability?: string };
+      const message = event.data as {
+        type?: string; id?: number; capability?: string; method?: string;
+      };
 
       if (message.type === "hotelos.ready") {
         settled = true;
@@ -123,11 +147,21 @@ function handshake(frame: HTMLIFrameElement, capabilities: readonly string[]): v
 
       if (message.type !== "hotelos.call") return;
 
-      channel.port1.postMessage(message.capability === "reservation.read"
+      // Anything but the widgets' own read is refused, so a tap-through shows
+      // its refusal rather than appearing to work. An unknown method is refused
+      // too — a harness answers what it holds, and never a stand-in (§8, H5).
+      const known = message.method !== undefined && message.method in LOADED;
+      channel.port1.postMessage(message.capability !== "reservation.read"
         ? { type: "hotelos.result", id: message.id, ok: false,
-            error: { kind, message: `the harness failed this read as ${kind}` } }
-        : { type: "hotelos.result", id: message.id, ok: false,
-            error: { kind: "rejected", message: "the desk is not open in this harness" } });
+            error: { kind: "rejected", message: "the desk is not open in this harness" } }
+        : kind !== null
+          ? { type: "hotelos.result", id: message.id, ok: false,
+              error: { kind, message: `the harness failed this read as ${kind}` } }
+          : known
+            ? { type: "hotelos.result", id: message.id, ok: true,
+                value: LOADED[message.method as string] }
+            : { type: "hotelos.result", id: message.id, ok: false,
+                error: { kind: "rejected", message: `no answer held for ${message.method}` } });
     });
 
     channel.port1.start();

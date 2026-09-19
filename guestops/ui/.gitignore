@@ -10,3 +10,7 @@ gallery.html
 # `node preview/parta/run.mjs`. Not a source, and not evidence once the
 # artifacts it measured have been rebuilt.
 .parta/
+
+# App surface checklist audit output — `node preview/audit/run.mjs`. The same
+# reason: evidence about one build, and none once that build is replaced.
+.audit/

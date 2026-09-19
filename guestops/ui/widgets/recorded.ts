@@ -1,14 +1,17 @@
 /**
- * The canvas's own numbers, for a widget whose data has not arrived.
+ * The canvas's own numbers — the capture harness's answer for a LOADED widget.
  *
  * The same reasoning as `book/recorded.ts`: these are the **approved
  * artboards' figures**, transcribed, so a capture taken for the frame-beside-
  * capture audit compares the build against the drawing rather than against
  * something invented alongside it.
  *
- * They sit behind `read()`, so a widget never chooses between live and
- * recorded — it asks once and is told which it got, and says so on the card
- * when the answer is not the property's.
+ * **No widget imports this, and none may.** It used to say *"They sit behind
+ * `read()`, so a widget never chooses between live and recorded"* — the fallback
+ * `APPS-Q42` removed, when a failed read stopped rendering recorded values. That
+ * sentence outlived the mechanism by a fortnight, describing a path that no
+ * longer ran. It is `preview/widget-host.ts`'s now, and nothing else's; a widget
+ * bundle reaching for it would be the fallback coming back.
  */
 
 /** Today at the Desk — the four counts and the next five arrivals. */

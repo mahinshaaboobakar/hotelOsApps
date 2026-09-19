@@ -22,6 +22,7 @@
 import { HostCallError, type HostApi } from "@hotelos/sdk";
 
 import { start } from "../application";
+import { listState, page, repeated, rowsFor } from "./lists";
 import {
   recordedActivity,
   recordedAttention,
@@ -58,7 +59,7 @@ function host(granted: readonly string[]): HostApi {
     // "Asia/Kolkata" would hide every place this module forgets to handle it.
     property: { timezone: null, locale: null },
 
-    call(capability: string, method: string): Promise<unknown> {
+    call(capability: string, method: string, params?: unknown): Promise<unknown> {
       const answers: Record<string, unknown> = {
         // `?connected` is frame 11 — the same screen with a late feed, which
         // is a fact about the property rather than a route.
@@ -102,9 +103,12 @@ function host(granted: readonly string[]): HostApi {
         }));
       }
 
-      return method in answers
-        ? Promise.resolve(answers[method])
-        : Promise.reject(new Error(`unhandled ${capability}/${method}`));
+      if (!(method in answers)) {
+        return Promise.reject(new Error(`unhandled ${capability}/${method}`));
+      }
+
+      // `?list=` shapes the five paged answers; everything else is as recorded.
+      return Promise.resolve(shaped(method, answers[method], params));
     },
 
     on(): () => void {
@@ -135,7 +139,84 @@ const connected = params.get("connected") === "true";
  * `granted=none`: an ungranted capability stops the drive at the first screen,
  * and a stay's Payment tab could then never be photographed refused.
  */
-const KINDS = { unanswered: "unavailable", forbidden: "forbidden", faulted: "internal" } as const;
+const KINDS = {
+  unanswered: "unavailable",
+  forbidden: "forbidden",
+  unadmitted: "local_forbidden",
+  ungranted: "user_forbidden",
+  undecidable: "model_unavailable",
+  faulted: "internal",
+} as const;
+
+/** `?list=E0|E1|1P|MP|ML` — see `lists.ts`. */
+const list = listState(params);
+
+/**
+ * The list each paged method carries, and where its rows live.
+ *
+ * Booking's page size is written here because its request names none — the
+ * screen pages by 12 while the backend, asked for no size, answers 500. That
+ * mismatch is under audit (G1/G4), and sizing the dataset by what the screen
+ * believes is what lets the harness show it.
+ */
+const PAGED: Record<string, { key: string; size: (params: unknown) => number }> = {
+  today: { key: "rows", size: sized(25) },
+  bookings: { key: "rows", size: sized(25) },
+  attention: { key: "cards", size: sized(10) },
+  booking: { key: "stays", size: () => 12 },
+  availability: { key: "types", size: sized(12) },
+};
+
+function sized(fallback: number): (params: unknown) => number {
+  return (params) => {
+    const asked = (params as { pageSize?: unknown } | undefined)?.pageSize;
+    return typeof asked === "number" && asked > 0 ? asked : fallback;
+  };
+}
+
+/** How many answers each paged method has given — E1 shrinks after the first. */
+const answered = new Map<string, number>();
+
+/**
+ * The paged read each screen is audited on — and ONLY that one is re-paged.
+ *
+ * The first cut re-paged every paged answer, so driving to a booking passed
+ * through a Bookings list the same `?list=E0` had emptied, and the drive found
+ * no row to open: two cells of the first baseline never reached their screen.
+ */
+const AUDITED: Record<string, string> = {
+  today: "today",
+  bookings: "bookings",
+  attention: "attention",
+  booking: "booking",
+  newbooking: "availability",
+};
+
+/** A recorded answer, re-paged into the requested list state. */
+function shaped(method: string, answer: unknown, params: unknown): unknown {
+  const paged = PAGED[method];
+  if (list === null || paged === undefined || AUDITED[screen] !== method) return answer;
+
+  const count = answered.get(method) ?? 0;
+  answered.set(method, count + 1);
+
+  const sizes = rowsFor(list, paged.size(params));
+  const n = count === 0 ? sizes.before : sizes.after;
+
+  // Today's paged list is its first — Arrivals, the tab it opens on.
+  if (method === "today") {
+    const day = answer as { lists: readonly { rows: readonly unknown[] }[] };
+    const [first, ...rest] = day.lists;
+    if (first === undefined) return answer;
+    const { rows, total } = page(repeated(first.rows, n), params);
+    return { ...day, lists: [{ ...first, rows, count: String(total) }, ...rest] };
+  }
+
+  const record = answer as Record<string, unknown>;
+  const all = record[paged.key] as readonly unknown[];
+  const { rows, total } = page(repeated(all, n), params);
+  return { ...record, [paged.key]: rows, total };
+}
 
 const fail = params.get("fail");
 const failing = fail !== null && fail in KINDS
@@ -197,6 +278,20 @@ async function drive(): Promise<void> {
   try {
     for (const step of PATHS[screen] ?? []) {
       click(step.selector, step.text);
+      await settled();
+    }
+
+    // ML and E1 are the LAST page — reached by pressing it, as a person does.
+    // For E1 the list has shrunk since the pager was drawn, so this request
+    // asks for a page the list no longer has.
+    if (list === "ML" || list === "E1") {
+      const numbered = Array.from(document.querySelectorAll<HTMLElement>(".pager .pg"))
+        .filter((node) => /^\d+$/u.test(node.textContent ?? ""));
+      const last = numbered.at(-1);
+      if (last === undefined || numbered.length < 2) {
+        throw new Error(`no second page to reach for list=${list} — the drive could not reach it`);
+      }
+      last.click();
       await settled();
     }
   } catch (error) {
