@@ -47,13 +47,31 @@ export async function act(host: HostApi, capability: string, method: string, par
   }
 }
 
-/** The words a person sees for a refused act — the service's own when ADR 0041 lets them cross. */
+/**
+ * The words a person sees for an act that did not succeed — the service's own
+ * when ADR 0041 lets them cross. What the sentence may claim depends on who
+ * stopped the act: a refusal was decided before anything ran, so "nothing was
+ * changed" is true of it; a non-answer or a fault may have landed, and saying
+ * nothing changed would invite the person to do it twice (CLAUDE.md, "a false
+ * claim about a write"). Held by `tests/saying.test.ts`.
+ */
 export function saying(error: unknown): string {
-  if (error instanceof HostCallError) {
-    return error.isForPeople ? error.message : "Room Care could not do that just now — nothing was changed.";
+  if (!(error instanceof HostCallError)) return NOT_KNOWN;
+  if (error.isForPeople) return error.message;
+  switch (error.kind) {
+    case "forbidden":
+    case "local_forbidden":
+    case "user_forbidden":
+    case "model_unavailable":
+      return "That was not permitted, so nothing was changed.";
+    case "internal":
+      return "Room Care could not finish that, and whether any of it was done is not known — check before trying again.";
+    default:
+      return NOT_KNOWN;
   }
-  return "Room Care did not answer — nothing was changed.";
 }
+
+const NOT_KNOWN = "Room Care did not answer, so whether that was done is not known — check before trying again.";
 
 /** Whether this person, in this module, was granted a capability. */
 export function holds(host: HostApi, capability: string): boolean {
