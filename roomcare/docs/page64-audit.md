@@ -62,14 +62,14 @@ build's measurements are the certificate run's (`020f1eff`), and nothing in the 
 | P4 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
 | P5 | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · | · |
 | P6 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
-| C1 | P | · | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · |
+| C1 | P | · | P | · | P | P | · | · | P | P | P | P | P | P | P | P | P | P | P | P | · | · | · |
 | C2 | P | · | P | · | P | P | · | · | P | P | P | P | P | P | P | P | P | P | P | P | · | P | · |
 | C3 | · | · | P | · | P | P | P | P | · | P | · | P | P | P | P | P | P | P | P | · | · | · | · |
 | C4 | P | P | P | · | P | D | D | P | P | P | P | P | P | O | O | O | P | P | P | P | · | · | · |
 | C5 | · | · | · | · | · | · | · | · | · | P | · | · | · | · | · | · | · | · | P | · | · | · | · |
 | C6 | · | · | · | · | · | · | · | · | · | P | · | · | · | · | · | · | · | · | P | · | · | · | · |
 | C7 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
-| C8 | P | **F** | P | · | **F** | **F** | P | **F** | **F** | P | **F** | P | P | **F** | P | P | P | P | P | P | P | · | · |
+| C8 | P | P | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · |
 | C9 | P | P | P | · | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | P | · | · |
 | C10 | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | P | · |
 | C11 | · | · | P | · | P | P | P | P | P | P | · | P | P | P | P | P | P | P | P | · | · | · | · |
@@ -150,6 +150,7 @@ build's measurements are the certificate run's (`020f1eff`), and nothing in the 
 | C2 | the primary fill written twice, no `--accent` | `adea750` `--accent` on `.rc`, derived | source walk at `d98785f4`: "2 135deg fill(s); 0 --accent" |
 | C4 | "‹ My rooms", a loose `.btn.sm` above the door's failure | `6655c01` a full `.btn` | the audit, 6 cases (`at-the-door--f6-*`) |
 | C8 | widget rows that open nothing showed the pointer | `adea750` only `button.wrow` | the audit, `widgets--w` |
+| C8 | table rows that open something, with no button (7 cells; 13 places with the sheets and dialogs) | `7a2f013f` APPS-Q50: `button.opener` in the main cell; the pointer only on the Wall's zone header. `bf9bd7bc` the detector learns the ruled shape | `tests/row-openers.test.ts` (31 rows missing); the audit with the new detector at `15e2654`, 13 places |
 | C9 | inputs and toggles at `line-height: normal` | `adea750` `input,select,textarea{font:inherit;line-height:inherit}` | the audit, 8 screens |
 | C11 | Setup's Save live with nothing edited; ten overlay primaries live with nothing to send | `2636e33` `saveLine` watches its fields; `readyWhen` | `tests/save.test.ts` and `tests/ready.test.ts` fail first; the audit's pressed-empty cases |
 | D2 | section labels at `.12em` | `adea750` `.04em` (APPS-Q33) | the audit, room page and Property-wide access |
@@ -161,10 +162,18 @@ build's measurements are the certificate run's (`020f1eff`), and nothing in the 
 | O4 | nothing held it | `982c801` `tests/overlay.test.ts` | the test fails with the scrim check removed |
 | U1 | 21 numbers through `String()`, none through `formatNumber` | `6655c01` `whole(host, n)` everywhere | `tests/number.test.ts` failed first ("expected [ '1234', '5678' ] to deeply equal [ '1.234', '5.678' ]") |
 
-## What still fails — 7 cells, all C8
+## What still fails — nothing
 
-1. **C8, table rows (7 cells).** §2 against §4: a `<tr>` cannot be a `<button>`, and Jobs' baseline opens its rows
-   the same way. It is with the planner as **APPS-Q50**, and the rows stay as they are.
+Run from `bf9bd7bc`, clean: 249 cases, 0 unreached, **0 FAIL cells**, 3 D, 76 OPEN.
+
+**C8 is closed** by APPS-Q50 (planner, 2026-09-19): a table row that opens something keeps its pointer for a mouse,
+and its main cell holds one real button, `button.opener` (`7a2f013f`). The detector learned the ruled shape
+(`bf9bd7bc`) and was proven against `15e2654`, where it still fails on 13 places. 43 rows pass in that shape. *Before
+the ruling this section read: "C8, table rows (7 cells). §2 against §4: a `<tr>` cannot be a `<button>`, and Jobs'
+baseline opens its rows the same way. It is with the planner as APPS-Q50, and the rows stay as they are."*
+
+**A pass here is harness fidelity to page 64, not sign-off.** It is measured on recorded fixtures (owner ruling,
+2026-09-19). What a person meets on the installed build is the live walk's.
 
 **H4 is closed** by 01c. The owner approved it, and the frames were re-locked at `fff2d96b`: every control in a
 frame is the build's `<button>`, and the pager rule is tied to its class. Measured: 0 differing pixels over each
