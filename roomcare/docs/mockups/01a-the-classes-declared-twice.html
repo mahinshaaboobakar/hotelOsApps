@@ -32,10 +32,14 @@ code{font:.9em var(--mono);color:var(--ink);background:var(--raised);border:1px 
 .viewport iframe{position:absolute;top:0;left:0;width:1240px;border:0;transform-origin:0 0}
 .tools{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-top:26px;font-size:14px;color:var(--dim)}
 .tools label{cursor:pointer}
+.approved{border:1px solid var(--ok);border-radius:12px;padding:12px 16px;margin:0 0 18px;font-size:14px;color:var(--ink)} .approved b{color:var(--ok)}
 @media (max-width:900px){.pair,.choice{grid-template-columns:1fr}}
 </style>
 <div class="page">
-  <p class="eyebrow">roomcare/docs/mockups/01a · the screens page, revisited · FOR THE OWNER · 2026-09-19 · drawn by KK</p>
+  <p class="eyebrow">roomcare/docs/mockups/01a · the screens page, revisited · FOR THE OWNER · 2026-09-19 · drawn by KK · APPROVED 2026-09-19</p>
+  <div class="approved"><b>APPROVED — the second set.</b> The owner, 2026-09-19: <i>&ldquo;we can go with second&rdquo;</i> (HosPilotOS <code>19f203c5</code>).
+  The build carries it from HotelOsApps <code>86c504f</code>: <code>.chip</code> and <code>.strip</code> already matched, and the other six moved, <code>.legend</code> exactly.
+  <b>Not covered by this page:</b> <code>02-the-roomcare-setup.html</code> declares <code>.mono .tag .pill</code> once, at the first set. This page drew the screens page only, so that question is open (Part A certificate, <code>setup-page-first-set</code>).</div>
   <h1>The classes the screens page declares twice</h1>
   <p class="lede"><code>01-the-roomcare-screens.html</code> declares eleven classes twice. <b>Three are redeclared with identical values
   and change nothing</b> — <code>.btn</code>, <code>.note</code>, <code>.num</code>. <b>Eight differ</b>, and in every one the difference is <b>size and spacing — no colour changes</b>.
@@ -45,7 +49,7 @@ code{font:.9em var(--mono);color:var(--ink);background:var(--raised);border:1px 
   <code>4959365</code>, not assumed: the <b>first</b> for <code>.pill .mono .tag .tile .tilegrid</code>, the <b>second</b> for
   <code>.chip .strip</code>, and <b>neither</b> exactly for <code>.legend</code>. (Earlier reports said "the build follows the first" —
   true of five of the eight; this page corrects it.)</p>
-  <p class="lede"><b>Nothing in the build changes unless you choose.</b> This page recommends nothing.</p>
+  <p class="lede"><i>History: as drawn, before the choice —</i> <b>Nothing in the build changes unless you choose.</b> This page recommends nothing.</p>
   <div class="choice">
     <div><b>First</b>The page's first declarations govern; the build moves <code>.chip</code>, <code>.strip</code> and <code>.legend</code> to them, and the redline-5 block is scoped to its own frames.</div>
     <div><b>Second</b>The later declarations govern every frame; KK rebuilds <code>.pill .mono .tag .tile .tilegrid</code> (and <code>.legend</code>) to them.</div>
