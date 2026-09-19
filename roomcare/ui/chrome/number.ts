@@ -1,8 +1,8 @@
 /**
  * Every count a Room Care screen shows, in the property's locale — the SDK's
  * `formatNumber` bound to what the host handed at connect (page 64 §12,
- * `NUM-Q1`, ADR 0174). A screen calls this and never `String()`,
- * `toLocaleString` or `Intl` for a number a person reads.
+ * `NUM-Q1`, ADR 0174). A screen calls this for every number a person reads,
+ * and never a formatter of its own or the machine's.
  *
  * Two kinds of number stay machine-form, and they are not display: a value a
  * person types back into a field (a grouped figure would not read back as a

@@ -96,6 +96,7 @@ export const CASES = [
       { id, surface, state: "OV", url: base },
       { id: `${id}-filled`, surface, state: "FM", url: base, fill: true },
       { id: `${id}-write`, surface, state: "OV", url: `${base}&write=1`, write: true },
+      { id: `${id}-empty`, surface, state: "FM", url: base, empty: true },
     ];
   }),
 ];

@@ -112,10 +112,21 @@ try {
       await sleep(400);
       c.writes = Number(await evaluate("document.documentElement.getAttribute('data-unanswered-calls') ?? '0'")) - c.before;
     }
+    // C11: press the overlay's primary the moment it opens, with nothing chosen. A live primary that
+    // then sends nothing, or refuses in place, is a primary with nothing to send drawn live.
+    if (c.empty) {
+      c.before = Number(await evaluate("document.documentElement.getAttribute('data-unanswered-calls') ?? '0'"));
+      c.primary = await evaluate(`(() => { const b = document.querySelector(".sheet .df > :last-child, .dlg .df > :last-child");
+        if (b === null) return null; const live = b.tagName === "BUTTON" && !b.disabled; const said = { cls: b.className, text: b.textContent.trim(), live };
+        if (live) b.click(); return said; })()`);
+      await sleep(400);
+      c.writes = Number(await evaluate("document.documentElement.getAttribute('data-unanswered-calls') ?? '0'")) - c.before;
+      c.after = await evaluate(`(() => ({ open: document.querySelector(".sheet, .dlg") !== null, said: document.querySelector(".sheet .said.bad, .dlg .said.bad, .dlg .said")?.textContent?.trim() ?? null }))()`);
+    }
     if (c.fill) await evaluate(`(() => { for (const f of document.querySelectorAll(".sheet input, .sheet textarea, .dlg input, .dlg textarea")) {
       if (f.type === "checkbox" || f.type === "radio") continue; if (f.value === "") { f.value = "12"; f.dispatchEvent(new Event("input", { bubbles: true })); } } })()`);
     const derived = await evaluate("document.documentElement.getAttribute('data-derived')");
-    const probed = await evaluate(`(${PROBE})(${JSON.stringify({ state: c.state, cause: c.cause ?? null, at: /&at=(\w+)/.exec(c.url)?.[1] ?? null, write: c.write === true, writes: c.writes ?? 0, widgets: c.widgets === true })})`);
+    const probed = await evaluate(`(${PROBE})(${JSON.stringify({ state: c.state, cause: c.cause ?? null, at: /&at=(\w+)/.exec(c.url)?.[1] ?? null, write: c.write === true, writes: c.writes ?? 0, empty: c.empty ? { primary: c.primary, writes: c.writes, ...c.after } : null, widgets: c.widgets === true })})`);
     const shot = await send("Page.captureScreenshot", { format: "png" });
     writeFileSync(join(OUT, "shots", `${c.id}.png`), Buffer.from(shot.result.data, "base64"));
     results.push({ id: c.id, surface: c.surface, state: c.state, cause: c.cause ?? null, url: c.url, derived, ...probed });

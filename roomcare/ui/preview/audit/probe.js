@@ -146,6 +146,18 @@
     add("C11", around.length > 3 ? "PASS" : "FAIL", around.length > 3 ? `${name(b)} beside "${around.slice(0, 50)}"` : `${name(b)} has no reason beside it`);
   }
   for (const b of all("button.btn.pri[disabled]")) add("C11", "FAIL", `${name(b)} is disabled, not drawn off`);
+  // A screen as it arrives has nothing edited: its Save is drawn off with its reason, never live.
+  if (["ALL", "NL"].includes(ctx.state)) {
+    for (const s of all(".save > button.btn.pri")) add("C11", "FAIL", `"${text(s)}" is live with nothing edited`);
+    for (const s of all(".btn.off").filter((b) => /^Save — \S/.test(text(b)))) add("C11", "PASS", `"${text(s)}" drawn off, its reason in its words`);
+  }
+  if (ctx.empty !== null && ctx.empty !== undefined) {
+    const e = ctx.empty;
+    if (e.primary === null) add("C11", "NA", "the overlay has no primary action");
+    else if (!e.primary.live) add("C11", / — \S/.test(e.primary.text) ? "PASS" : "FAIL", `nothing chosen: "${e.primary.text}" drawn ${e.primary.cls}${/ — \S/.test(e.primary.text) ? "" : ", with no reason"}`);
+    else if (e.writes > 0) add("C11", "PASS", `nothing chosen still sends: "${e.primary.text}" wrote ${e.writes} (a complete act by default)`);
+    else add("C11", "FAIL", `nothing chosen: "${e.primary.text}" is live and ${e.open ? `refuses in place${e.said ? ` ("${e.said.slice(0, 60)}")` : ""}` : "closes having sent nothing"}`);
+  }
 
   // ---------------------------------------------------------------- §3 navigation
   const head = document.querySelector(".rc .head");
@@ -215,14 +227,21 @@
       if (t.verticalAlign !== "top") out.push(`vertical-align ${t.verticalAlign}`);
       return out.join("; ");
     });
-    const sel = [...table.querySelectorAll("tr.sel")];
-    if (sel.length > 0) judge("L4", sel.flatMap((tr) => [...tr.children]), (td) => (cs(td).boxShadow !== "none" || px(cs(td).borderLeftWidth) > 0 ? "an inset bar beside the tint" : ""));
     const rows = [...table.querySelectorAll("tr")].filter((tr) => tr.querySelector("td") !== null);
     if (rows.length > 0) {
       const last = rows[rows.length - 1].querySelector("td");
       add("L5", cs(last).borderBottomWidth === "1px" ? "PASS" : "FAIL", `${where}: last row's rule ${cs(last).borderBottomWidth}`);
     }
   }
+
+  // L4 — every selected row on the page, paged or not: a tint and nothing else.
+  const selected = all("tr.sel");
+  judge("L4", selected.flatMap((tr) => [...tr.children]), (td) => {
+    const out = [];
+    if (!/color\(srgb 0\.50\d+ 0\.54\d+ 0\.97\d+ \/ 0\.08\)|rgba\(129, 140, 248, 0\.08\)/.test(cs(td).backgroundColor)) out.push(`tint ${cs(td).backgroundColor}`);
+    if (cs(td).boxShadow !== "none" || px(cs(td).borderLeftWidth) > 0) out.push("an inset bar beside the tint");
+    return out.join("; ");
+  });
 
   // ---------------------------------------------------------------- §5 density (roles above)
   judge("D2", all("th"), (th) => (Math.abs(em(th) - 0.08) > 0.003 ? `table header at ${em(th)}em` : ""));
@@ -397,7 +416,7 @@
     for (const card of all(".wcard")) {
       if (card.querySelector("dl") !== null) add("X12", "FAIL", `${name(card)} carries the facts on the card`);
     }
-    record.X13 = [...new Set(all(".wf-mark").map((m) => Math.round(m.closest("div[style]")?.getBoundingClientRect().height ?? 0)))];
+    record.X13 = [...new Set(all(".wcard").map((c) => Math.round(c.getBoundingClientRect().height)))];
     record.X14 = [...new Set(all(".wf-open").map(text))];
   }
   record.partial = !failing && document.querySelector(".body .fail-body, .body .fail") !== null;

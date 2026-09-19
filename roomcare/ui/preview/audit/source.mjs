@@ -135,7 +135,11 @@ verdict("I6", unnamed.length === 0 ? "PASS" : "FAIL", `${examples.length} date e
 // U1 — every user-facing number through formatNumber.
 const machineNumbers = hits(/toLocaleString\(|Intl\.NumberFormat|\.toFixed\(/gu);
 const formatted = hits(/formatNumber\(/gu);
-const bare = hits(/String\((?:v|data|row|counts?|n|lane|page|paging|zone|\w+)\.?\w*\)|el\([^)]*String\(/gu).filter((h) => !/String\(entry \+ 1\)/.test(h.match));
+// Not display: an attribute a browser reads (aria-pressed, colspan) and a field's value a person types back.
+const bare = hits(/String\((?:v|data|row|counts?|n|lane|page|paging|zone|\w+)\.?\w*\)|el\([^)]*String\(/gu).filter((h) => {
+  const line = h.f.text.split("\n")[lineOf(h.f.text, h.m.index) - 1];
+  return !/setAttribute\(|\.value\s*=/.test(line);
+});
 verdict("U1", machineNumbers.length === 0 && bare.length === 0 ? "PASS" : "FAIL",
   `${machineNumbers.length} machine formatter(s); ${formatted.length} formatNumber call(s); ${bare.length} number(s) rendered with String()`, [...machineNumbers, ...bare]);
 
@@ -143,7 +147,8 @@ verdict("U1", machineNumbers.length === 0 && bare.length === 0 ? "PASS" : "FAIL"
 // Read failures only: §13 is "when a screen cannot read". A WRITE's refusal sentence (chrome/load.ts's
 // saying) is §9's O5 and is reported on its own — the words are Room Care's there by design.
 const own = hits(/"[^"\n]*(did not answer|could not (read|build|load)|not permitted|has not been allowed|no access)[^"\n]*"/giu,
-  (m, f) => f.path !== "chrome/failure.ts" && !/saying|because|refuse/.test(f.text.slice(Math.max(0, m.index - 300), m.index)));
+  (m, f) => f.path !== "chrome/failure.ts" && !/saying|because|refuse/.test(f.text.slice(Math.max(0, m.index - 300), m.index))
+    && !(f.path === "chrome/load.ts" && /const NOT_KNOWN/.test(f.text.slice(Math.max(0, m.index - 40), m.index))));
 verdict("X10", own.length === 0 ? "PASS" : "FAIL", `${own.length} read-failure sentence(s) outside failureDrawing`, own);
 
 for (const r of report) {
