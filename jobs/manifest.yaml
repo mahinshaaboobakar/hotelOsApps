@@ -95,7 +95,18 @@ name: "Jobs"
 # With it: 64e's colours for the three new causes; the SDK's own failure words
 # at both sizes, the time in the property's locale; the pager at the floor with
 # only the list scrolling (CORE-Q28); and the empty-list notice drawn in full.
-version: 0.4.2
+#
+# **0.4.3 — the bar names who is signed in, and 0.4.2 is not to be installed.**
+# A patch: it conforms to page 64 §3 (owner, 2026-09-04) and adds no feature.
+# The `me` read changed shape — `{ name, department, property }` where it was
+# `{ name, where }` and the name was the words "Signed in" — so **the backend
+# and the UI must ship together**: the 0.4.2 UI against this backend draws
+# "null · undefined". They are in this one package, and nothing else reads it.
+# The name is Master Data's staff record for the login and the property its
+# name, as Room Care reads them; the department is drawn as *not established*
+# until ADR 0203 gives Jobs a posting to read. Also in it: the two inline
+# composers labelled as APPS-Q27 deviations (comments, no behaviour).
+version: 0.4.3
 publisher: hotelos
 category: operations
 description: >-
