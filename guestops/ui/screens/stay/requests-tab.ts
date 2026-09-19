@@ -3,7 +3,7 @@
  */
 
 import type { Request, Requests } from "../../book";
-import { control, el, fill } from "../../chrome/element";
+import { el, fill, unavailable } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
 
@@ -56,7 +56,8 @@ function ours(requests: Requests): HTMLElement {
     ));
   }
 
-  body.append(control("btn sm", "＋ Log a request"));
+  const why = "Logging a request from GuestOps is not available yet.";
+  body.append(unavailable("btn sm", "＋ Log a request", why), el("div", "hint", why));
   return root;
 }
 

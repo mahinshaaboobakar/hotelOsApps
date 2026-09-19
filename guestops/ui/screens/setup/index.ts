@@ -22,7 +22,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { APP, failureDrawing, load, type Setup } from "../../book";
-import { control, el, fill } from "../../chrome/element";
+import { control, el, fill, unavailable } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
 import { row, settings } from "./card";
@@ -96,13 +96,13 @@ function sections(
   // screen is an input (every field is a drawn `.inp`, §10), and saving settings
   // is reachable only through the gRPC door, so pressing Save did nothing and
   // said nothing. Found by the page-64 audit, 2026-09-19.
-  const save = control("btn pri off", "Save");
-  const discard = control("btn off", "Discard");
-  for (const unavailable of [save, discard]) unavailable.setAttribute("disabled", "");
+  const why = "Settings are shown here and cannot be changed from this screen yet.";
+  const save = unavailable("btn pri", "Save", why);
+  const discard = unavailable("btn", "Discard", why);
 
   bar.append(
     el("div", "grow"),
-    el("span", "hint", "Settings are shown here and cannot be changed from this screen yet."),
+    el("span", "hint", why),
     discard,
     save,
   );

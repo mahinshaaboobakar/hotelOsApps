@@ -5,7 +5,7 @@
 import { formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
 
 import type { Activity, ActivityEntry } from "../../book";
-import { control, el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
 const COLUMNS = ["When", "Who", "What"] as const;
@@ -34,7 +34,10 @@ function sources(activity: Activity): HTMLElement {
   const row = el("div", "acts");
 
   for (const filter of activity.filters) {
-    row.append(control(filter.on ? "btn sm pri" : "btn sm", filter.label));
+    // The service names the filters and nothing here applies one yet: the
+    // chosen one is drawn as the state it is, and none can be pressed.
+    row.append(unavailable(filter.on ? "btn sm pri" : "btn sm", filter.label,
+      "Filtering this list is not available yet."));
   }
 
   // Both facts a reader needs to interpret the list, and neither is guessable:

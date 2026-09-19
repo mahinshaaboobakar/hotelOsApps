@@ -22,7 +22,7 @@
  */
 
 import type { Banner } from "../../book/model";
-import { control, el } from "../../chrome/element";
+import { el, unavailable } from "../../chrome/element";
 
 /**
  * Draw the band.
@@ -45,9 +45,11 @@ export function banner(banner: Banner): HTMLElement {
 
   const acts = el("div", "grow");
 
-  banner.actions.forEach((label, index) => {
-    acts.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
-  });
+  // Settling a disagreement has no door in GuestOps' module yet: both choices
+  // drawn off, with the reason beside them.
+  const reason = "Settling a disagreement with the PMS is not available from this screen yet.";
+  for (const label of banner.actions) acts.append(unavailable("btn sm", label, reason));
+  if (banner.actions.length > 0) acts.append(el("div", "hint", reason));
 
   element.append(said, acts);
   return element;

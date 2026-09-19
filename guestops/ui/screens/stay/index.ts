@@ -45,7 +45,7 @@ import {
   type StayPage,
   type Tab,
 } from "../../book";
-import { control, el, fill } from "../../chrome/element";
+import { control, el, fill, unavailable } from "../../chrome/element";
 import { cannot, mark, failed } from "../../chrome/marks";
 import { card, detail, tabs } from "../../chrome/panel";
 import { activityTab } from "./activity-tab";
@@ -138,7 +138,7 @@ export async function stay(
   );
 
   if (tab === "Overview") {
-    fill(body, page.banner === null ? null : banner(page.banner), overview(page));
+    fill(body, page.banner === null ? null : banner(page.banner), overview(page, () => go("Activity")));
   } else if (tab.startsWith("Requests")) {
     fill(body, ...requestsTab(requests));
   } else if (tab === "Activity") {
@@ -243,6 +243,11 @@ function header(page: StayPage, tab: string, requests: Requests): HTMLElement {
   const acts = el("div", "grow");
   fill(acts, ...actions(page, tab, requests));
 
+  // The reason, in words, beside what cannot be pressed — a tooltip is found
+  // only by a pointer that goes looking.
+  const off = acts.querySelector<HTMLButtonElement>("button:disabled");
+  if (off !== null) acts.append(el("div", "hint", off.title));
+
   head.append(title, acts);
   return head;
 }
@@ -261,35 +266,41 @@ function actions(
   if (tab === "Activity") {
     // **Dimmed, and it says why.** Handing a file to the user is the half of
     // SHELL-Q23 still open: a print dialog and a file-save are different shell
-    // capabilities, and this one does not exist. A live button would produce
-    // nothing and look broken.
-    const off = control("btn off", "Export");
-    off.append(el("span", "lock no", "NEEDS SHELL-Q23'S FILE-SAVE HALF"));
-    return [off];
+    // capabilities, and this one does not exist. It carried a lock reading
+    // "NEEDS SHELL-Q23'S FILE-SAVE HALF" until 2026-09-19 — a register id shown
+    // to staff, which the owner ruled out; the reason is now a sentence.
+    return [unavailable("btn", "Export", "Saving this list as a file is not available yet.")];
   }
 
   if (tab.startsWith("Requests")) {
+    // Drawn off either way until GuestOps can hand a job over; the reason
+    // differs, because "Jobs is not installed" is something the property can
+    // change and "not available yet" is not.
     return requests.jobsInstalled === false
-      ? [control("btn off", "＋ Raise a job")]
-      : [control("btn pri", "＋ Raise a job")];
+      ? [unavailable("btn", "＋ Raise a job", "Jobs is not installed at this property.")]
+      : [unavailable("btn", "＋ Raise a job", "Raising a job from GuestOps is not available yet.")];
   }
 
   if (tab === "Servicing") {
-    return [control("btn", "Ask for service")];
+    return [unavailable("btn", "Ask for service", "Asking for service from GuestOps is not available yet.")];
   }
 
   if (tab === "Payment") {
     // A link, not an integration: it takes the user to the system that holds
     // the folio and asserts nothing about what is in it.
-    return [control("btn", "Open in Opera")];
+    return [unavailable("btn", "Open in Opera", "Opening the PMS from GuestOps is not available yet.")];
   }
 
-  return page.actions.map(
-    (action) => control(action.danger ? "btn danger" : "btn", action.label));
+  // Check in, check out, move and cancel have no door in GuestOps' module yet
+  // (capability ledger, 2026-09-19): drawn where the frame puts them, off, with
+  // one reason for the group. Not "btn danger" — a red outline on something
+  // that cannot be pressed still reads as a warning about pressing it.
+  return page.actions.map((action) => unavailable("btn", action.label,
+    "Checking in, checking out, moving and cancelling a stay are not available from this screen yet."));
 }
 
 /** The two columns: the stay's own values, and what happened to it. */
-function overview(page: StayPage): HTMLElement {
+function overview(page: StayPage, toActivity: () => void): HTMLElement {
   const cols = el("div", "cols");
 
   const stayCard = card(
@@ -301,7 +312,7 @@ function overview(page: StayPage): HTMLElement {
     stayCard.body.append(detail(row));
   }
 
-  const activity = card("What happened, in order", control("link", "Full activity →"));
+  const activity = card("What happened, in order", control("link", "Full activity →", toActivity));
   activity.body.append(timeline(page.timeline), el("div", "note", page.consequence));
 
   cols.append(stayCard.root, activity.root);

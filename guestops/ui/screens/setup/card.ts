@@ -3,7 +3,7 @@
  */
 
 import type { SettingBlock, SettingCard, SettingRow } from "../../book";
-import { control, el, fill } from "../../chrome/element";
+import { el, fill, unavailable } from "../../chrome/element";
 import { card } from "../../chrome/panel";
 import { tags } from "../../chrome/marks";
 
@@ -34,7 +34,7 @@ function block(one: SettingBlock): HTMLElement {
     const acts = el("div", "acts");
 
     for (const [index, label] of one.labels.entries()) {
-      acts.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
+      acts.append(unavailable(index === 0 ? "btn sm pri" : "btn sm", label, "Not available from this screen yet."));
     }
 
     return acts;

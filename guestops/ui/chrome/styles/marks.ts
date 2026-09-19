@@ -39,5 +39,9 @@ export const MARKS = `
 .pill.bad{background:var(--go-bad-wash);color:var(--color-bad,#f87171)}
 .link{color:var(--color-brand,#818cf8);background:none;border:0;padding:0;font:inherit;
   cursor:pointer}
+/* A link GuestOps cannot follow yet (chrome/element.ts, unavailable): faint, and
+   no pointer — a brand-coloured word that does nothing is the dead control the
+   capability ledger found. */
+.link.off{color:var(--color-ink-faint,#5a6172);cursor:default}
 .un{color:var(--color-ink-faint,#5a6172);font-style:italic}
 `;

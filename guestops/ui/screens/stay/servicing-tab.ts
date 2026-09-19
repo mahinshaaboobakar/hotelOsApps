@@ -3,7 +3,7 @@
  */
 
 import type { Night, Servicing } from "../../book";
-import { control, el, fill } from "../../chrome/element";
+import { el, fill, unavailable } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
 
@@ -87,7 +87,7 @@ function cell(night: Night): HTMLElement {
     night.mark === null ? null : mark(night.mark),
     night.state === null ? null : el("span", `pill ${night.stateTone}`, night.state),
     night.detail === null ? null : el("span", "hint", night.detail),
-    night.action === null ? null : control("link", night.action),
+    night.action === null ? null : unavailable("link", night.action, "Not available from this screen yet."),
   );
 
   element.append(date, state);

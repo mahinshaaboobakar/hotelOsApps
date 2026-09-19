@@ -7,7 +7,7 @@
  */
 
 import type { DetailRow, Tab } from "../book/model";
-import { control, el, fill } from "./element";
+import { control, el, fill, unavailable } from "./element";
 import { tags } from "./marks";
 
 /**
@@ -93,19 +93,21 @@ export function tabs(
 }
 
 /**
- * A row of controls, the first of them primary.
+ * A row of controls GuestOps cannot perform yet, with the reason beside them.
+ *
+ * These were live-looking buttons with no action until 2026-09-19 (capability
+ * ledger). The labels still come from the service, so the design's choices stay
+ * visible; they are drawn off, and the reason is on the screen in words.
  *
  * @param labels the actions, in the design's order
+ * @param why why none of them can be used yet, for a person
  * @returns the row, or null when there are none
  */
-export function actions(labels: readonly string[]): HTMLElement | null {
+export function actions(labels: readonly string[], why: string): HTMLElement | null {
   if (labels.length === 0) return null;
 
   const row = el("div", "acts");
-
-  labels.forEach((label, index) => {
-    row.append(control(index === 0 ? "btn sm pri" : "btn sm", label));
-  });
-
+  for (const label of labels) row.append(unavailable("btn sm", label, why));
+  row.append(el("div", "hint", why));
   return row;
 }

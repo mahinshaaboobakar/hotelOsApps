@@ -113,7 +113,7 @@ function one(item: AttentionCard): HTMLElement {
     body,
     item.note === null ? null : el("div", "note", item.note),
     item.hint === null ? null : el("div", "hint", item.hint),
-    actions(item.actions),
+    actions(item.actions, "Settling this from GuestOps is not available yet."),
   );
 
   return root;

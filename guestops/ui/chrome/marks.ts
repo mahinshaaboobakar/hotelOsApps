@@ -20,7 +20,7 @@
 import { type Fact, type FailureDrawing } from "@hotelos/sdk";
 
 import type { Chip, Tag } from "../book/model";
-import { control, el } from "./element";
+import { control, el, unavailable } from "./element";
 import { stateMark, tone } from "./glyph";
 
 /**
@@ -76,7 +76,7 @@ function one(tag: Tag): HTMLElement {
   if (tag.kind === "link") {
     // A link is an action. It is a button for the same reason every control
     // here is: the mockup's `<span class="link">` is not reachable by keyboard.
-    return control("link", tag.text);
+    return unavailable("link", tag.text, "Not available from this screen yet.");
   }
 
   return mark({ mark: tag.tone as Chip["mark"], text: tag.text });

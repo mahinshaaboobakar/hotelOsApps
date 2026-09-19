@@ -21,7 +21,7 @@
  */
 
 import type { DayRow } from "../../book/model";
-import { control, el, fill, opener } from "../../chrome/element";
+import { el, fill, opener, unavailable } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const;
@@ -89,7 +89,7 @@ function line(row: DayRow, open: (row: DayRow) => void): HTMLElement {
     row.room === null
       // Inline, and a control rather than a chip: the state with the
       // affordance, which is what the list is for.
-      ? control("link", "＋ assign")
+      ? unavailable("link", "＋ assign", "Assigning a room from GuestOps is not available yet.")
       : document.createTextNode(row.room),
   );
 

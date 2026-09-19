@@ -47,6 +47,11 @@ export const PANEL = `
 .cols.even{grid-template-columns:1fr 1fr}
 /* A column of rows inside a card body that is itself two columns. */
 .stack{display:flex;flex-direction:column;gap:11px}
+/* Its members keep their own height. Attention's stack is the list that
+   scrolls (CORE-Q28), and a card that may shrink shrinks instead of the list
+   scrolling: with .card's overflow:hidden, each card was squeezed and its note
+   and actions clipped away (found in a capture, 2026-09-19). */
+.stack>*{flex:0 0 auto}
 /* Three equal cards — frame 9's facts about a group. Not the two-column
    grid, because these are peers with no principal among them: that grid is
    1.55fr/1fr and says one side is the subject. */

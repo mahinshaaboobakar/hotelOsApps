@@ -30,15 +30,43 @@ export function el(tag: string, className?: string, text?: string): HTMLElement 
  * and wrong for a product: a div is not focusable, not announced, and not
  * operable from a keyboard. The class is the mockup's; the element is a button.
  *
+ * **What it does is required.** It used to be optional — *"omitted while the
+ * action is not yet wired"* — and sixteen controls on the owner's platform
+ * looked live and did nothing (capability ledger, 2026-09-19). A control that
+ * cannot act is now {@link unavailable}, which says why; a live-looking button
+ * with no action can no longer be written.
+ *
  * @param className the design's control class
  * @param text the label
- * @param onClick what it does; omitted while the action is not yet wired
+ * @param onClick what it does
  * @returns the control
  */
-export function control(className: string, text: string, onClick?: () => void): HTMLElement {
+export function control(className: string, text: string, onClick: () => void): HTMLElement {
   const button = el("button", className, text);
   button.setAttribute("type", "button");
-  if (onClick !== undefined) button.addEventListener("click", onClick);
+  button.addEventListener("click", onClick);
+  return button;
+}
+
+/**
+ * A control drawn where the design puts it, that GuestOps cannot perform yet.
+ *
+ * Disabled and dashed, so it does not look pressable, and it carries its reason
+ * in words a person at the desk understands — as its accessible description and
+ * as the tooltip a pointer finds. Where a screen has room for the reason as a
+ * visible line, the screen draws that line too.
+ *
+ * @param className the design's control class; `off` is added here
+ * @param text the label
+ * @param why why it cannot be used, for a person — never a document or a code
+ * @returns the control
+ */
+export function unavailable(className: string, text: string, why: string): HTMLElement {
+  const button = el("button", `${className} off`, text) as HTMLButtonElement;
+  button.setAttribute("type", "button");
+  button.disabled = true;
+  button.title = why;
+  button.setAttribute("aria-description", why);
   return button;
 }
 
