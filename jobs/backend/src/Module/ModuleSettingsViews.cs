@@ -64,7 +64,8 @@ public static class ModuleSettingsViews
         string Department,
         bool Enabled,
         bool FollowShifts,
-        string Hours,
+        string? HoursFrom,
+        string? HoursTo,
         string Now);
 
     /// <summary>A line of the scope tree at the head of the policies tab.</summary>

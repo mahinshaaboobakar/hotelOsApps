@@ -277,7 +277,9 @@ export interface PresenceRow {
   department: string;
   enabled: boolean;
   followShifts: boolean;
-  hours: string;
+  /** Service hours as the wire carries them (HH:mm), or null for all day. */
+  hoursFrom: string | null;
+  hoursTo: string | null;
   now: string;
 }
 

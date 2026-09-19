@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Infrastructure;
 using HotelOS.Platform;
@@ -34,7 +35,7 @@ public class JobRecords(JobsDbContext db, TimeProvider clock)
         if (!JobStatus.IsOpen(job.JobStatus) && job.JobStatus != JobStatus.Scheduled)
         {
             throw new InvalidRequestException(
-                $"job {job.JobNumber} is {job.JobStatus} and cannot be changed");
+                $"job {job.JobNumber} is {Said.Status(job.JobStatus)} and can't be changed");
         }
     }
 

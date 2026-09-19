@@ -63,7 +63,7 @@ public static class ConcernEvaluator
 
     private static Verdict OnHold(Facts facts, DateTimeOffset now) =>
         facts.HoldUntil is { } until && now > until
-            ? new Verdict(Domain.Concern.Stuck, 2, LadderRole.Supervisor, $"hold date {until:yyyy-MM-dd} passed")
+            ? new Verdict(Domain.Concern.Stuck, 2, LadderRole.Supervisor, "the hold's date has passed")
             : new Verdict(Domain.Concern.OnTrack, 0, LadderRole.Assignee, "on hold; clock stopped");
 
     private static Verdict Untriaged(Facts facts, int minutes, DateTimeOffset now) =>

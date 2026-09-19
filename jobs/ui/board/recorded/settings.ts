@@ -32,10 +32,10 @@ export const recordedSettings: Settings = {
     { priority: "P3", due: "same shift", atRisk: "80 %", notAccepted: "60 min", noSession: "—", ladder: "assignee → supervisor", managerAtRisk: false },
   ],
   presence: [
-    { department: "Engineering", enabled: true, followShifts: true, hours: "07:00 – 23:00", now: "present · day shift since 07:00" },
-    { department: "Housekeeping", enabled: true, followShifts: true, hours: "07:00 – 22:00", now: "present · since 07:00" },
-    { department: "Food & Beverage", enabled: true, followShifts: false, hours: "06:00 – 00:00", now: "present · by hours" },
-    { department: "Front Office", enabled: false, followShifts: false, hours: "—", now: "property clock · always running" },
+    { department: "Engineering", enabled: true, followShifts: true, hoursFrom: "07:00", hoursTo: "23:00", now: "present · day shift since 07:00" },
+    { department: "Housekeeping", enabled: true, followShifts: true, hoursFrom: "07:00", hoursTo: "22:00", now: "present · since 07:00" },
+    { department: "Food & Beverage", enabled: true, followShifts: false, hoursFrom: "06:00", hoursTo: "00:00", now: "present · by hours" },
+    { department: "Front Office", enabled: false, followShifts: false, hoursFrom: null, hoursTo: null, now: "property clock · always running" },
   ],
   whoIsTold: [
     { role: "Assignee", atRisk: true, breached: "yes", stuck: "—", untriaged: false, repeat: "10 min", departments: "own jobs" },

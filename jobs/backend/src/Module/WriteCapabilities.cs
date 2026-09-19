@@ -37,7 +37,7 @@ public static class WriteCapabilities
     public static async Task<object?> CreateAsync(
         IServiceProvider services, ModuleRequest request, CancellationToken cancellationToken)
     {
-        if (request.Method != "raise") throw new InvalidRequestException($"job.create has no method '{request.Method}'");
+        if (request.Method != "raise") throw new InvalidRequestException("that isn't something this app can do");
 
         var body = request.Body;
         var job = await services.GetRequiredService<JobService>().RaiseAsync(
@@ -101,7 +101,7 @@ public static class WriteCapabilities
 
             "accept" => await assignment.AcceptAsync(request.Scope, body.Id("id"), body.Version(), cancellationToken),
 
-            _ => throw new InvalidRequestException($"job.assign has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException("that isn't something this app can do"),
         };
 
         return Answer(job);
@@ -148,7 +148,7 @@ public static class WriteCapabilities
                     request.Scope, id, body.Version(), body.OptionalText("note"), cancellationToken));
 
             default:
-                throw new InvalidRequestException($"job.complete has no method '{request.Method}'");
+                throw new InvalidRequestException("that isn't something this app can do");
         }
     }
 
@@ -156,7 +156,7 @@ public static class WriteCapabilities
     public static async Task<object?> CancelAsync(
         IServiceProvider services, ModuleRequest request, CancellationToken cancellationToken)
     {
-        if (request.Method != "cancel") throw new InvalidRequestException($"job.cancel has no method '{request.Method}'");
+        if (request.Method != "cancel") throw new InvalidRequestException("that isn't something this app can do");
 
         var body = request.Body;
         var job = await services.GetRequiredService<CancellationService>().CancelAsync(
@@ -224,7 +224,7 @@ public static class WriteCapabilities
                 return new { read = await notes.ReadNudgesAsync(request.Scope, id, cancellationToken) };
 
             default:
-                throw new InvalidRequestException($"job.amend has no method '{request.Method}'");
+                throw new InvalidRequestException("that isn't something this app can do");
         }
     }
 

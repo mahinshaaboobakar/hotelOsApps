@@ -23,6 +23,12 @@ public class RefusalWordsGuardTests
         ("a wire field's name", new Regex(@"\b[a-z]+(?:_[a-z]+)+\b")),
         ("a document citation", new Regex(@"§|\(S\d+|\bADR\b|\b[A-Z]+-Q\d+")),
         ("a system's name", new Regex(@"Master Data|Kernel|OpenFGA|Temporal")),
+        // KK's additions from Room Care (d540eb9b's round, 2026-09-19): what a
+        // literal-only reading could not see.
+        ("a wire token", new Regex(@"\b[A-Z]{2,}(?:_[A-Z]+)+\b|\b(?:RAISED|SCHEDULED|ASSIGNED|ACCEPTED|RESOLVED|CLOSED|CANCELLED|REOPENED)\b")),
+        ("a capability's id", new Regex(@"\bjob\.[a-z]+\b")),
+        ("a hole that echoes the request or prints a raw value",
+            new Regex(@"\{(?!job\.JobNumber\}|item\.Name\}|resolution\.Name\}|code\}|Said\.)[^}]+\}")),
     ];
 
     [Fact]
@@ -31,8 +37,10 @@ public class RefusalWordsGuardTests
         var found = new List<string>();
         foreach (var file in Directory.EnumerateFiles(SourceRoot(), "*.cs", SearchOption.AllDirectories))
         {
+            // Grpc/ answers other services over the wire, not a person on a screen.
             if (file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")
-                || file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"))
+                || file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
+                || file.Contains($"{Path.DirectorySeparatorChar}Grpc{Path.DirectorySeparatorChar}"))
             {
                 continue;
             }

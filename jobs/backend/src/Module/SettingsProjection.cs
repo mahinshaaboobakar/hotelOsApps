@@ -184,9 +184,11 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
             p.DepartmentCode,
             p.Enabled,
             p.FollowShifts,
-            hours.FirstOrDefault(h => h.DepartmentCode == p.DepartmentCode) is { } window
-                ? $"{window.From:HH\\:mm}–{window.To:HH\\:mm}"
-                : "all day",
+            // The two clock times as data ("HH:mm", formatClock's wire form); the
+            // screen draws them in the property's hour cycle. They were one composed
+            // "07:00–23:00", which fixed a 24-hour clock for every reader.
+            hours.FirstOrDefault(h => h.DepartmentCode == p.DepartmentCode)?.From.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture),
+            hours.FirstOrDefault(h => h.DepartmentCode == p.DepartmentCode)?.To.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture),
             p.Staffed ? $"staffed · {p.OnShift} on shift" : "nobody on shift")).ToList();
     }
 

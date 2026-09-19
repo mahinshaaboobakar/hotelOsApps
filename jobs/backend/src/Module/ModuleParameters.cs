@@ -28,7 +28,7 @@ public static class ModuleParameters
         var text = Text(body, name);
         return Guid.TryParse(text, out var id) && id != Guid.Empty
             ? id
-            : throw new InvalidRequestException($"{name} must be an id");
+            : throw new InvalidRequestException("something this needs wasn't sent in a form it can read");
     }
 
     /// <summary>An optional GUID — absent, null or empty all mean nothing was named.</summary>
@@ -44,7 +44,7 @@ public static class ModuleParameters
     {
         var value = OptionalText(body, name);
         return string.IsNullOrWhiteSpace(value)
-            ? throw new InvalidRequestException($"{name} is required")
+            ? throw new InvalidRequestException("something this needs is missing")
             : value;
     }
 

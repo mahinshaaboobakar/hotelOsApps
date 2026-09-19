@@ -7,6 +7,7 @@
 import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
+import { words } from "../../chrome/wire";
 import { when } from "../../chrome/instant";
 import { concern } from "../../chrome/marks";
 import { JOB_READ } from "../../chrome/permissions";
@@ -73,7 +74,7 @@ function table(host: HostApi, l: Live): HTMLElement {
     const tr = el("tr");
     tr.append(
       el("td", "num", r.number), el("td", undefined, r.department), fill(el("td"), concern(r.concern)),
-      el("td", undefined, when(host, r.since)), el("td", undefined, r.accountable), el("td", undefined, r.lastNudge),
+      el("td", undefined, when(host, r.since)), el("td", undefined, words(host, r.accountable)), el("td", undefined, words(host, r.lastNudge)),
     );
     t.append(tr);
   }

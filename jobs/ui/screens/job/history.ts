@@ -6,6 +6,7 @@
 import type { HostApi } from "@hotelos/sdk";
 
 import { el, fill } from "../../chrome/element";
+import { words } from "../../chrome/wire";
 import { when } from "../../chrome/instant";
 import type { JobDetail } from "../../board";
 
@@ -20,7 +21,7 @@ export function history(host: HostApi, d: JobDetail): HTMLElement {
     tr.append(
       el("td", undefined, when(host, line.at)),
       fill(el("td"), el("span", `pill ${tone}`.trim(), line.kind)),
-      el("td", undefined, line.what), el("td", undefined, line.by), el("td", undefined, line.detail),
+      el("td", undefined, words(host, line.what)), el("td", undefined, words(host, line.by)), el("td", undefined, words(host, line.detail)),
     );
     t.append(tr);
   }

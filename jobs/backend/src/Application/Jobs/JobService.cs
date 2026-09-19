@@ -148,7 +148,7 @@ public class JobService(
 
         if (command.Priority is { } p && !Priority.All.Contains(p))
         {
-            throw new InvalidRequestException($"priority {p} is not P1, P2, P3 or NOT_TRIAGED");
+            throw new InvalidRequestException("the priority must be P1, P2, P3 or not triaged");
         }
     }
 

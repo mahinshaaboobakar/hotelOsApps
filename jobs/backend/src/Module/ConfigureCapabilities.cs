@@ -106,7 +106,7 @@ public static class ConfigureCapabilities
                 return new { revoked = taken is not null, revokedAt = taken?.RevokedAt };
 
             default:
-                throw new InvalidRequestException($"job.configure has no method '{request.Method}'");
+                throw new InvalidRequestException("that isn't something this app can do");
         }
     }
 
@@ -196,7 +196,7 @@ public static class ConfigureCapabilities
                 return new { id = used.Id.ToString(), version = used.Version };
 
             default:
-                throw new InvalidRequestException($"job.curate has no method '{request.Method}'");
+                throw new InvalidRequestException("that isn't something this app can do");
         }
     }
 

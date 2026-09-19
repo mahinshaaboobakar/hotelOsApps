@@ -81,7 +81,7 @@ public static class ReadCapability
 
             "me" => await MeAsync(services, request, cancellationToken),
 
-            _ => throw new InvalidRequestException($"job.read has no method '{request.Method}'"),
+            _ => throw new InvalidRequestException("that isn't something this app can do"),
         };
     }
 

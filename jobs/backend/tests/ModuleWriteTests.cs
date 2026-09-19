@@ -141,7 +141,7 @@ public class ModuleWriteTests(JobsFixture fixture)
         // The service's own sentence, carried by the envelope's own mapping
         // (the platform's 755ee02, which landed while this round ran and made
         // Jobs' own middleware redundant) — a bare string, not a wrapper.
-        Assert.Contains("cannot be held", tooEarly.Text(), StringComparison.Ordinal);
+        Assert.Contains("is raised and can't be held", tooEarly.Text(), StringComparison.Ordinal);
 
         var assigned = await module.CallAsync(Permissions.Assign, "assign", new
         {

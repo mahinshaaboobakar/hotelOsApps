@@ -3,15 +3,21 @@
  * assignment, resolution. What you need to act.
  */
 
+import type { HostApi } from "@hotelos/sdk";
+
 import { el, fill } from "../../chrome/element";
+import { words } from "../../chrome/wire";
 import type { Detail, JobDetail } from "../../board";
 
-export function overview(d: JobDetail): HTMLElement {
-  const left = fill(el("div", "stack"), card("What and where", d.whatAndWhere), card("Who asked", d.whoAsked));
+export function overview(host: HostApi, d: JobDetail): HTMLElement {
+  // The backend sends each value as data — an ISO instant, a day, a token — and
+  // the cards say it in the property's words (tests/wire-shaped.test.ts).
+  const said = (lines: readonly Detail[]): Detail[] => lines.map((l) => ({ ...l, v: words(host, l.v) }));
+  const left = fill(el("div", "stack"), card("What and where", said(d.whatAndWhere)), card("Who asked", said(d.whoAsked)));
   const right = fill(
     el("div", "stack"),
-    card("Priority and time", d.priorityAndTime),
-    card("Assignment", d.assignment),
+    card("Priority and time", said(d.priorityAndTime)),
+    card("Assignment", said(d.assignment)),
     resolution(d.resolution),
   );
   return fill(el("div", "cols"), left, right);

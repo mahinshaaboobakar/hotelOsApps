@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Events;
@@ -19,7 +20,7 @@ public class WorkSessionService(JobsDbContext db, JobAnnouncer announcer, JobRec
         var (job, actor) = await OwnJobAsync(scope, jobId, cancellationToken);
         if (job.JobStatus is not (JobStatus.Accepted or JobStatus.InProgress))
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus}; accept it first");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)}; accept it first");
         }
 
         if (await records.OpenSessionAsync(job.Id, cancellationToken) is not null)

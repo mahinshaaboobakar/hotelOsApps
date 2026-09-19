@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Domain;
@@ -27,7 +28,7 @@ public class CompletionService(
         JobRecords.RequireVersion(job, command.ExpectedVersion);
         if (job.JobStatus is not (JobStatus.Accepted or JobStatus.InProgress or JobStatus.OnHold))
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus} and cannot be resolved");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)} and can't be resolved");
         }
 
         await ValidateResolutionAsync(job, command, cancellationToken);
@@ -60,7 +61,7 @@ public class CompletionService(
         JobRecords.RequireVersion(job, expectedVersion);
         if (job.JobStatus != JobStatus.Resolved)
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus}; resolve it first");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)}; resolve it first");
         }
 
         records.Move(scope, job, JobStatus.Closed);
@@ -82,7 +83,7 @@ public class CompletionService(
         JobRecords.RequireVersion(job, expectedVersion);
         if (job.JobStatus != JobStatus.Resolved)
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus}; only RESOLVED reopens");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)}; only a resolved job reopens");
         }
 
         var assigned = await records.CurrentAssignmentAsync(job.Id, cancellationToken) is not null;

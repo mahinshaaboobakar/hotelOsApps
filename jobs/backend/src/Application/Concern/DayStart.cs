@@ -33,7 +33,7 @@ public class DayStart(
 
         foreach (var job in due)
         {
-            records.Move(scope, job, JobStatus.Raised, byWhat: "SWEEP", note: $"day {job.ScheduledFor:yyyy-MM-dd} began");
+            records.Move(scope, job, JobStatus.Raised, byWhat: "SWEEP", note: "its scheduled day began");
             announcer.Announce(scope, job, EventTypes.JobCreated, records.Now, "scheduled day began");
         }
 

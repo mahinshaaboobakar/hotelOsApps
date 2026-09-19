@@ -64,9 +64,9 @@ function tab(
 ): HTMLElement {
   const property = host.property;
   switch (place.tab) {
-    case "Shifts & presence": return presence(s, configure, save, discard);
+    case "Shifts & presence": return presence(host, s, configure, save, discard);
     case "Who is told": return whoIsTold(s, configure);
-    case "Holds & reminders": return holds(s, configure, save, discard, property);
+    case "Holds & reminders": return holds(s, configure, save, discard, host);
     case "Closing & rating": return closing(s, configure, save, discard);
     case "Access": return access(host, s, configure, save, discard);
     default:

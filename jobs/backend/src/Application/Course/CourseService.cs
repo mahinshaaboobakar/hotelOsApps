@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Domain;
@@ -30,7 +31,7 @@ public class CourseService(
 
         if (job.JobStatus is not (JobStatus.Assigned or JobStatus.Accepted or JobStatus.InProgress))
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus} and cannot be held");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)} and can't be held");
         }
 
         var now = records.Now;
@@ -75,7 +76,7 @@ public class CourseService(
 
         if (command.Priority is { } priority)
         {
-            if (!Priority.All.Contains(priority)) throw new InvalidRequestException($"priority {priority} is not known");
+            if (!Priority.All.Contains(priority)) throw new InvalidRequestException("that priority isn't one this property uses");
             job.Priority = priority;
             job.PriorityDecidedBy = PriorityDecidedBy.Manual;
         }

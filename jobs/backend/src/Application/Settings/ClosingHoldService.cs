@@ -20,10 +20,10 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
         await ConfigurerAsync(scope, cancellationToken);
         foreach (var command in commands)
         {
-            if (!LadderRole.All.Contains(command.Role)) throw new InvalidRequestException($"role {command.Role} is not known");
+            if (!LadderRole.All.Contains(command.Role)) throw new InvalidRequestException("that role isn't one the ladder has");
             if (!Concern.All.Contains(command.Concern) && command.Concern != "NOT_TRIAGED")
             {
-                throw new InvalidRequestException($"concern {command.Concern} is not known");
+                throw new InvalidRequestException("that concern isn't one the ladder has");
             }
         }
 
@@ -62,7 +62,7 @@ public class ClosingHoldService(JobsDbContext db, IKernelAuthorizer authorizer)
     public async Task<HoldPolicy> SaveHoldAsync(RequestScope scope, HoldPolicyCommand command, CancellationToken cancellationToken)
     {
         await ConfigurerAsync(scope, cancellationToken);
-        if (!LadderRole.All.Contains(command.WarnRole)) throw new InvalidRequestException($"role {command.WarnRole} is not known");
+        if (!LadderRole.All.Contains(command.WarnRole)) throw new InvalidRequestException("that role isn't one the ladder has");
         if (command.MaxHoldDays < 1 || command.WarnDaysBefore < 0) throw new InvalidRequestException("hold days must be sensible");
 
         var policy = await db.HoldPolicies.FirstOrDefaultAsync(p => p.PropertyId == scope.PropertyId, cancellationToken);

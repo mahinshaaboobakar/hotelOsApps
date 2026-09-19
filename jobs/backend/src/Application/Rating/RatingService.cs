@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Application.Jobs;
 using HotelOS.Jobs.Domain;
 using HotelOS.Jobs.Events;
@@ -25,7 +26,7 @@ public class RatingService(JobsDbContext db, JobAnnouncer announcer, JobRecords 
 
         if (job.JobStatus != JobStatus.Closed)
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus}; a rating waits for CLOSED");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)}; a rating waits until it is closed");
         }
 
         if (stars is < 1 or > 5) throw new InvalidRequestException("stars must be 1 to 5");

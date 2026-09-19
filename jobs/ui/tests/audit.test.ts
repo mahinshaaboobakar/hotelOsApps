@@ -120,7 +120,8 @@ describe("frame 2c · One job · History", () => {
     has(root, "When", "Kind", "What", "By", "Detail");
     has(root, "BREACHED", "sweep", "accountable → Priya Nair (step 2) · nudge in-app");
     has(root, "session 1 paused, then stopped", "fetch gauge", "75 % of 40 min · nudge to Arjun Menon");
-    has(root, "IN_PROGRESS", "ACCEPTED", "ASSIGNED", "RAISED");
+    // The pills' vocabulary, without the wire's underscore (chrome/wire.ts).
+    has(root, "IN PROGRESS", "ACCEPTED", "ASSIGNED", "RAISED");
     expect(root.querySelectorAll("table tr").length).toBe(recordedJob.history.length + 1);
   });
 });

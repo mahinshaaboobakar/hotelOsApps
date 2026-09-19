@@ -118,7 +118,7 @@ public class ConcernPolicyService(JobsDbContext db, IKernelAuthorizer authorizer
 
         if (command.Ladder.Any(s => !LadderRole.All.Contains(s.Role) || s.Trigger is not (Concern.AtRisk or Concern.Breached) || s.DelayMinutes < 0))
         {
-            throw new InvalidRequestException("a ladder step is a role, AT_RISK or BREACHED, and a non-negative delay");
+            throw new InvalidRequestException("a ladder step needs a role, at risk or breached, and a delay of zero or more");
         }
 
         if (command.Ladder.GroupBy(s => (s.Priority, s.StepNo)).Any(g => g.Count() > 1))

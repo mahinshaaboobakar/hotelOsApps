@@ -1,3 +1,4 @@
+using HotelOS.Jobs.Application;
 using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Jobs;
@@ -100,7 +101,7 @@ public class AssignmentService(
 
         if (job.JobStatus != JobStatus.Assigned)
         {
-            throw new InvalidRequestException($"job {job.JobNumber} is {job.JobStatus}, not ASSIGNED");
+            throw new InvalidRequestException($"job {job.JobNumber} is {Said.Status(job.JobStatus)}, not assigned");
         }
 
         var now = records.Now;

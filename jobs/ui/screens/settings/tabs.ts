@@ -3,10 +3,11 @@
  * who is told, holds & reminders, closing & rating, access (read-only).
  */
 
-import { formatNumber, type HostApi, type PropertyEnvironment } from "@hotelos/sdk";
+import { formatClock, formatNumber, type HostApi } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
 import { when } from "../../chrome/instant";
+import { words } from "../../chrome/wire";
 import { choose, confirming, text, toggle as switchOf, values } from "../../chrome/form";
 import type { Detail, Settings } from "../../board";
 
@@ -62,11 +63,16 @@ function kv(lines: readonly Detail[]): HTMLElement {
 }
 
 /** Frame 2 — when a department's clock runs. */
-export function presence(s: Settings, configure: boolean, save: Saving, discard: () => void): HTMLElement {
+/** Service hours in the property's hour cycle — the wire's HH:mm through formatClock (§11). */
+function hoursOf(host: HostApi, from: string | null, to: string | null): string {
+  return from === null || to === null ? "all day" : `${formatClock(from, host.property)} – ${formatClock(to, host.property)}`;
+}
+
+export function presence(host: HostApi, s: Settings, configure: boolean, save: Saving, discard: () => void): HTMLElement {
   const rows = s.presence.map((p) => [
     p.department, p.enabled ? el("span", "pill ok", "on") : el("span", "pill", "off"),
     p.enabled ? toggle(p.followShifts, p.followShifts ? "yes" : "no · hours only") : el("span", "dim", "—"),
-    p.enabled ? p.hours : el("span", "dim", "—"), p.now,
+    p.enabled ? hoursOf(host, p.hoursFrom, p.hoursTo) : el("span", "dim", "—"), p.now,
   ]);
   // One department at a time, because that is what the service takes and what
   // a person changes: a department's clock is its own decision.
@@ -127,15 +133,16 @@ export function holds(
   configure: boolean,
   save: Saving,
   discard: () => void,
-  property: PropertyEnvironment,
+  host: HostApi,
 ): HTMLElement {
+  const property = host.property;
   const grid = el("div", "cols");
   grid.append(
     fill(el("div", "card"), el("h3", undefined, "Putting a job on hold"), kv(s.holds)),
     fill(
       el("div", "card"),
       el("h3", undefined, "Warn before the date"),
-      table(["When", "Who"], s.holdWarnings.map((w) => [w.when, w.who])),
+      table(["When", "Who"], s.holdWarnings.map((w) => [words(host, w.when), w.who])),
       // The read returns the ten nearest, so the card says so rather than
       // looking like the whole set — a truncated list that does not admit it is
       // the defect the conformance pass looks for.

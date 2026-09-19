@@ -30,6 +30,9 @@ public class ZoneSourceGuardTests
         ("a day or a time of day taken from the UTC clock", new Regex(@"(DateOnly|TimeOnly)\.FromDateTime\([^;]*\.UtcDateTime")),
         ("a day taken from the UTC clock", new Regex(@"\.UtcDateTime\.Date\b")),
         ("a wall-clock time made an instant at offset zero", new Regex(@"new DateTimeOffset\([^;]*TimeSpan\.Zero\)")),
+        // KK's finding (Room Care, 2026-09-19): a time formatted into a sentence on
+        // the server is fixed to one form before any property reads it.
+        ("a date or time formatted into words on the server", new Regex(@"\{[^}]*:\s*(?:yyyy|HH|dd)[^}]*\}")),
     ];
 
     [Fact]

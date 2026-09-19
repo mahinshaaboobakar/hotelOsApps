@@ -7,6 +7,7 @@
 import { load, type HostApi, formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { control, el, fill } from "../../chrome/element";
+import { words } from "../../chrome/wire";
 import { elapsed, when } from "../../chrome/instant";
 import { concern, priority, status } from "../../chrome/marks";
 import { JOB_AMEND, JOB_ASSIGN, JOB_CANCEL, JOB_COMPLETE, JOB_READ } from "../../chrome/permissions";
@@ -143,7 +144,7 @@ function tab(host: HostApi, d: JobDetail, place: JobPlace, acts: WorkActs): HTML
     case "Links & steps": return links(d, may(host, JOB_AMEND), host.property);
     case "Rating": return rating(host, d);
     case "Record": return record(host, d);
-    default: return overview(d);
+    default: return overview(host, d);
   }
 }
 
@@ -178,7 +179,7 @@ function header(host: HostApi, d: JobDetail, place: JobPlace, doing: Doing, ask:
 function raisedLine(host: HostApi, d: JobDetail): string {
   const parts = [
     d.runningWho === null ? null : `${d.runningWho} working`,
-    `raised ${when(host, d.raised.at)} via ${d.raised.via} by ${d.raised.who}`,
+    `raised ${when(host, d.raised.at)} via ${words(host, d.raised.via)} by ${d.raised.who}`,
     d.endedAt === null ? `due ${when(host, d.row.dueAt)}` : `closed ${when(host, d.endedAt)}`,
     `accountable now ${d.accountable}`,
   ];
