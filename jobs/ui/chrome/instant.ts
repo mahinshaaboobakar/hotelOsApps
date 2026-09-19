@@ -6,7 +6,7 @@
 
 import { formatDay, formatDuration, formatInstant, type HostApi } from "@hotelos/sdk";
 
-/** `02 Sep 13:31` (en-GB, Asia/Qatar) — date and time, always both (owner, 2026-09-04). */
+/** `02 Sept, 13:31` (en-GB, Asia/Qatar) — date and time, always both (owner, 2026-09-04); the board's strip and the Due column (redline 6, D2). */
 export function when(host: HostApi, iso: string | null): string {
   return iso === null ? "—" : formatInstant(iso, host.property);
 }
@@ -16,14 +16,12 @@ export function clock(host: HostApi, iso: string | null): string {
   return iso === null ? "—" : formatInstant(iso, host.property, "time");
 }
 
-/** `Tue 02 Sept, 14:24` (en-GB, Asia/Qatar) — a line that names today, as the board's strip does. */
-export function today(host: HostApi, iso: string): string {
-  return formatInstant(iso, host.property, "weekday-time");
-}
-
-/** `03 Sep 2026` (en-GB) — a calendar day the property named. */
+/**
+ * `03 Sept` (en-GB) — a calendar day the property named, as day and month: the
+ * owner's D1 option 2 on 06, redline 6 (2026-09-19). No weekday, no year.
+ */
 export function day(host: HostApi, isoDate: string): string {
-  return formatDay(isoDate, host.property);
+  return formatDay(isoDate, host.property, "day-month");
 }
 
 /** `00:23:41` — a worked duration. */

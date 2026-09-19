@@ -30,7 +30,7 @@ export const recordedJob: JobDetail = {
   ],
   whoAsked: [
     { k: "Raised", v: "GUEST · via the guest app · 02 Sep 13:31" },
-    { k: "Stay", v: "7F2A · Mr. Okafor · 1204 · in-house, departs Thu 04 Sep" },
+    { k: "Stay", v: "7F2A · Mr. Okafor · 1204 · in-house, departs 04 Sept" },
     { k: "Rating", v: "— asked after close" },
   ],
   priorityAndTime: [

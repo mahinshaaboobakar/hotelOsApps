@@ -88,6 +88,21 @@ describe("app surface checklist — automated lines, Jobs", () => {
     }
   });
 
+  it("D1 (redline 6) — a scheduled day is day and month, with no weekday and no year", async () => {
+    const root = await mounted(host(ANSWERS));
+    press(root, "Scheduled");
+    await settle();
+    const first = root.querySelectorAll("table tr")[1]?.querySelector("td")?.textContent ?? "";
+    expect(first).toMatch(/^\d{2} [A-Z][a-z]+$/);
+  });
+
+  it("D2 (redline 6) — the strip says when it was read in date-time, not with a weekday", async () => {
+    const root = await mounted(host(ANSWERS));
+    const end = root.querySelector(".strip .end")?.textContent ?? "";
+    expect(end).not.toMatch(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/);
+    expect(end).toMatch(/\d{2} [A-Z][a-z]+, \d{2}:\d{2}$/);
+  });
+
   it("C8 — a board row that opens a job is reachable as a real button", async () => {
     const root = await mounted(host(ANSWERS));
     const rows = Array.from(root.querySelectorAll("tr.pick"));
