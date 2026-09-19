@@ -25,6 +25,7 @@ import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk"
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { PostingEnding, Supported } from "../../roster/team";
 
@@ -41,9 +42,6 @@ export function endPosting(
   ending: PostingEnding,
   done: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
   const head = el("div");
   head.append(
     el("div", "ht", `End ${ending.who}'s posting in ${ending.department}?`));
@@ -82,21 +80,20 @@ export function endPosting(
     })();
   });
 
-  fill(dialog, head, lastDay(ending, host.property),
-    // Absent when the posting holds nothing open — the panel is a statement
-    // about this posting, not furniture that appears empty.
-    ending.alsoEnds.length === 0
-      ? null
-      : consequence(ending.alsoEnds, ending.department, host.property),
-    refusal,
-    acts.row);
-
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // A dialog: the person is confirming an end (§9).
+  return overlay("dialog", {
+    head: [head],
+    body: [
+      lastDay(ending, host.property),
+      // Absent when the posting holds nothing open — the panel is a statement
+      // about this posting, not furniture that appears empty.
+      ...(ending.alsoEnds.length === 0
+        ? []
+        : [consequence(ending.alsoEnds, ending.department, host.property)]),
+      refusal,
+    ],
+    foot: [acts.row],
+  }, close);
 }
 
 /**

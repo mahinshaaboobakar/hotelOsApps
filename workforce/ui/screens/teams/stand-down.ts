@@ -20,6 +20,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { TeamDetail } from "../../roster/team";
 
@@ -38,9 +39,6 @@ export function standDown(
   open: TeamDetail,
   done: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
   const members = open.members.length;
 
   // The toggle's position, held here because the write carries it. It starts
@@ -91,16 +89,12 @@ export function standDown(
     })();
   });
 
-  dialog.append(head, what(),
-    keep(members, (on) => { keepMembers = on; }),
-    refusal, acts.row);
-
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // A dialog: the person is confirming a stand-down (§9).
+  return overlay("dialog", {
+    head: [head],
+    body: [what(), keep(members, (on) => { keepMembers = on; }), refusal],
+    foot: [acts.row],
+  }, close);
 }
 
 /** What standing down does, and what it does not. */

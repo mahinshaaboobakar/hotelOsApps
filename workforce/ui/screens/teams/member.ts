@@ -19,6 +19,7 @@ import { formatDay, type HostApi } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { Candidate, TeamDetail } from "../../roster/team";
 
@@ -40,9 +41,6 @@ export function addMember(
   open: TeamDetail | null,
   done: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
   const department = open?.team.departmentName ?? "its department";
   const candidates = open?.candidates ?? [];
 
@@ -88,26 +86,20 @@ export function addMember(
 
   acts.onConfirm(() => { void submit(); });
 
-  fill(
-    dialog,
-    head,
-    from(onDate, host),
-    who(candidates, (candidate) => { chosen = candidate; acts.waitingFor(waiting()); }),
-    // The refusal explains itself only when there is one to explain.
-    candidates.some((one) => one.refused !== null)
-      ? why(candidates, department)
-      : null,
-    refusal,
-    acts.row);
-
   acts.waitingFor(waiting());
 
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // A sheet: the person is composing a membership (§9).
+  return overlay("sheet", {
+    head: [head],
+    body: [
+      from(onDate, host),
+      who(candidates, (candidate) => { chosen = candidate; acts.waitingFor(waiting()); }),
+      // The refusal explains itself only when there is one to explain.
+      ...(candidates.some((one) => one.refused !== null) ? [why(candidates, department)] : []),
+      refusal,
+    ],
+    foot: [acts.row],
+  }, close);
 }
 
 /**

@@ -11,6 +11,7 @@ import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk"
 
 import { foot } from "../../chrome/confirm";
 import { el } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { DutyCandidate } from "../../roster/duty";
 
@@ -28,9 +29,6 @@ export function assignDuty(
   property: PropertyEnvironment,
   done: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
   let chosen: DutyCandidate | null = null;
 
   const head = el("div");
@@ -88,20 +86,18 @@ export function assignDuty(
     })();
   });
 
-  dialog.append(head,
-    span(day, (which, value) => { draft[which] = value; acts.waitingFor(waiting()); }),
-    who(candidates, (one) => { chosen = one; acts.waitingFor(waiting()); }),
-    refusal,
-    acts.row);
-
   acts.waitingFor(waiting());
 
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // A sheet: the person is composing an assignment (§9).
+  return overlay("sheet", {
+    head: [head],
+    body: [
+      span(day, (which, value) => { draft[which] = value; acts.waitingFor(waiting()); }),
+      who(candidates, (one) => { chosen = one; acts.waitingFor(waiting()); }),
+      refusal,
+    ],
+    foot: [acts.row],
+  }, close);
 }
 
 /** The two ends, and what they come to. */

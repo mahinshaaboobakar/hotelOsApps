@@ -37,13 +37,14 @@ function leaveHost(): HostApi {
 async function leaveForm(): Promise<HTMLElement> {
   const main = document.createElement("main");
   await leave(leaveHost(), main, "Requests", () => {}, true);
-  const form = main.querySelector(".dlg");
+  // A sheet since O1 — the person is composing a request (§9).
+  const form = main.querySelector(".sheet");
   if (form === null) throw new Error("the leave form did not open");
   return form as HTMLElement;
 }
 
 function shiftForm(): HTMLElement {
-  const form = newShift(() => {}).querySelector(".dlg");
+  const form = newShift(() => {}).querySelector(".sheet");
   if (form === null) throw new Error("the shift form did not open");
   return form as HTMLElement;
 }

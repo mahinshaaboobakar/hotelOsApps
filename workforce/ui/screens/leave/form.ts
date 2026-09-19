@@ -30,6 +30,7 @@
  */
 
 import { control, el } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 
 /**
  * What an empty value box shows. §10 draws `.inp.ph` *"when nobody has
@@ -38,26 +39,17 @@ import { control, el } from "../../chrome/element";
 const NOTHING = "—";
 
 /**
- * Build the form.
+ * Build the form — a sheet, because a person composes a request here (§9).
  *
  * @param close called when it is dismissed
  * @returns the overlay
  */
 export function requestForm(close: () => void): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
-  const head = el("div");
-  head.append(el("div", "ht", "Request leave"));
-
-  dialog.append(head, forWhom(), type(), dates(), note(), actions(close));
-
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  return overlay("sheet", {
+    head: [el("div", "ht", "Request leave")],
+    body: [forWhom(), type(), dates(), note()],
+    foot: [actions(close)],
+  }, close);
 }
 
 /** Who it is for — and the rule the record keeps, stated rather than filled in. */

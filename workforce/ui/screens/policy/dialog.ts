@@ -13,6 +13,7 @@
  */
 
 import { control, el } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 
 /**
  * What an empty value box shows. §10 draws `.inp.ph` *"when nobody has
@@ -21,23 +22,18 @@ import { control, el } from "../../chrome/element";
 const NOTHING = "—";
 
 /**
- * The dialog, drawn over the screen beneath it.
+ * The sheet — a person composes a shift here (§9).
  *
  * @param close called when it is dismissed
  * @returns the overlay
  */
 export function newShift(close: () => void): HTMLElement {
-  const overlay = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
-  const head = el("div");
-  head.append(
-    el("div", "ht", "New shift"),
-    el("div", "hsub", "It appears in the rota picker the moment it is saved"),
-  );
-
-  dialog.append(
-    head,
+  return overlay("sheet", {
+    head: [
+      el("div", "ht", "New shift"),
+      el("div", "hsub", "It appears in the rota picker the moment it is saved"),
+    ],
+    body: [
     field("Name", "What people read. Any length."),
     field("Short code",
       "Two or three characters — what fits a rota cell and survives a "
@@ -47,15 +43,9 @@ export function newShift(close: () => void): HTMLElement {
     kind(),
     times(),
     colour(),
-    actions(close),
-  );
-
-  overlay.append(dialog);
-  overlay.addEventListener("click", (event) => {
-    if (event.target === overlay) close();
-  });
-
-  return overlay;
+    ],
+    foot: [actions(close)],
+  }, close);
 }
 
 /**

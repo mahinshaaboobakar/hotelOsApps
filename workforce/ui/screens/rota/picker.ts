@@ -50,7 +50,9 @@ export function picker(
   close: () => void,
   done: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
+  // `mid`: a popover over a cell, not a §9 sheet. The bare `.scrim` is the
+  // sheet's and holds the right edge; this was centred and stays so.
+  const scrim = el("div", "scrim mid");
   const pop = el("div", "pick");
 
   // The day, with its month: this names one particular day, and a column

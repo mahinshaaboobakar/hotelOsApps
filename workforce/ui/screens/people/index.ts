@@ -12,6 +12,7 @@ import { formatDay, type HostApi, load, type PropertyEnvironment, type ReadFailu
   from "@hotelos/sdk";
 
 import { el, unavailable } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { failureScreen } from "../../chrome/failure";
 import { type People, type Posting } from "../../roster/people";
@@ -198,25 +199,19 @@ function table(
 function cannotRead(
   failure: ReadFailure, property: PropertyEnvironment, close: () => void,
 ): HTMLElement {
-  const scrim = el("div", "scrim");
-  const dialog = el("div", "dlg");
-
-  dialog.append(
-    failureBody(failure, { the: "what ending this posting would close" }, property));
-
   const acts = el("div", "acts");
   const cancel = el("button", "btn", "Close");
   cancel.setAttribute("type", "button");
   cancel.addEventListener("click", close);
   acts.append(el("div", "grow"), cancel);
-  dialog.append(acts);
 
-  scrim.append(dialog);
-  scrim.addEventListener("click", (event) => {
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // A dialog: nothing is being composed, a failure is being acknowledged (§9).
+  // The failure body carries its own heading, so the head is empty.
+  return overlay("dialog", {
+    head: [],
+    body: [failureBody(failure, { the: "what ending this posting would close" }, property)],
+    foot: [acts],
+  }, close);
 }
 
 /**

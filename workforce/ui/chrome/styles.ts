@@ -440,25 +440,31 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 /* The range, on the left. It is the half a reader actually reads. */
 .pager .showing{color:var(--color-ink-muted,#8b93a7)}
 
-/* The dialog, and the fields inside one. Here rather than in a screen because
-   three screens open one — Policy, Leave and Teams — and the shape a person
-   meets on the third has to be the shape they learned on the first. */
-.scrim{position:absolute;inset:0;display:grid;place-items:center;padding:24px;
-      background:color-mix(in srgb, var(--color-surface) 45%, transparent);
-      backdrop-filter:blur(1.5px)}
-/* 440 and 22/24 are the drawing's own numbers, not a taste: every dialog in
-   both mockups is one rule, and the built one was 560 wide with 20 of padding
-   — near enough to read as right beside a frame, and wrong in every capture. */
-.dlg{width:min(440px,100%);max-height:100%;overflow:auto;display:flex;
-     flex-direction:column;gap:14px;padding:22px 24px;border-radius:16px;
+/* The overlays — page 64 §9, built once in chrome/overlay.ts. A SHEET composes
+   (440px, full height, from the right, a left border); a DIALOG confirms (520px,
+   radius-panel + 2px, on a scrim that centres it). Same head, body and foot.
+
+   These were the drawing's numbers — a 440 dialog, a 390 sheet, a 45% scrim —
+   under a comment that said "440 and 22/24 are the drawing's own numbers, not a
+   taste: every dialog in both mockups is one rule". §9 states 440 for a sheet,
+   520 for a dialog and 55% for the scrim; the owner has ruled the written
+   standard over the drawing twice, for the input box in APPS-Q27 and buttons in APPS-Q29,
+   and the app surface audit (2026-09-19, O1 · O7) moved these to §9 on that
+   precedent. The drawing is the stale side. */
+.scrim{position:absolute;inset:0;display:flex;justify-content:flex-end;
+      background:color-mix(in srgb, var(--color-surface) 55%, transparent)}
+.scrim.mid{justify-content:center;align-items:center;padding:24px}
+.sheet,.dlg{display:flex;flex-direction:column;overflow:hidden;
      background:var(--color-surface-raised,#11141f);
-     border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
      box-shadow:0 24px 60px color-mix(in srgb, var(--color-surface,#0b0d14) 72%, transparent)}
-/* The right-hand sheet. A form that is a place rather than a question: it holds
-   the screen's edge, keeps its full height, and does not cover the list the
-   name is being checked against. Frame 3 draws Form a team this way. */
-.scrim.edge{place-items:stretch;padding:10px}
-.dlg.sheet{width:390px;max-width:100%;margin-left:auto;border-radius:16px}
+.sheet{width:min(440px,100%);height:100%;
+       border-left:1px solid var(--color-line-strong,rgb(255 255 255/.14))}
+.dlg{width:min(520px,100%);max-height:100%;
+     border:1px solid var(--color-line-strong,rgb(255 255 255/.14));
+     border-radius:calc(var(--radius-panel,1rem) + 2px)}
+.dh{flex:0 0 auto;padding:20px 24px 12px}
+.db{flex:1 1 auto;overflow-y:auto;display:flex;flex-direction:column;gap:14px;padding:4px 24px 16px}
+.df{flex:0 0 auto;padding:12px 24px 20px;border-top:1px solid var(--color-line,rgb(255 255 255/.07))}
 .fld{display:flex;flex-direction:column;gap:5px}
 .fld-label{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
       color:var(--color-ink-faint,#5a6172)}

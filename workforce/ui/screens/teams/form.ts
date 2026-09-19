@@ -32,6 +32,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { foot } from "../../chrome/confirm";
 import { el, fill } from "../../chrome/element";
+import { overlay } from "../../chrome/overlay";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { Department, Team } from "../../roster/team";
 
@@ -60,9 +61,6 @@ export function formTeam(
 ): HTMLElement {
   // A sheet rather than a centred dialog: the name is being checked against
   // the list behind it, so the form holds the edge and leaves the list visible.
-  const scrim = el("div", "scrim edge");
-  const sheet = el("div", "dlg sheet");
-
   const draft: Draft = { department: null, name: "" };
 
   const head = el("div");
@@ -123,24 +121,19 @@ export function formTeam(
 
   acts.onConfirm(() => { void submit(); });
 
-  sheet.append(
-    head,
-    department(forReader(departments, host.property.locale),
-      (code) => { draft.department = code; redraw(); }),
-    name(taken, (value) => { draft.name = value; redraw(); }),
-    refusal,
-    acts.row);
-
   redraw();
 
-  scrim.append(sheet);
-  scrim.addEventListener("click", (event) => {
-    // The scrim dismisses; the surface does not. A click inside a sheet is a
-    // person working in it, and closing on that throws away what they entered.
-    if (event.target === scrim) close();
-  });
-
-  return scrim;
+  // The scrim dismisses; the surface does not — `overlay()` keeps that rule.
+  return overlay("sheet", {
+    head: [head],
+    body: [
+      department(forReader(departments, host.property.locale),
+        (code) => { draft.department = code; redraw(); }),
+      name(taken, (value) => { draft.name = value; redraw(); }),
+      refusal,
+    ],
+    foot: [acts.row],
+  }, close);
 }
 
 /**
