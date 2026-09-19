@@ -65,6 +65,10 @@ public sealed class MasterDataHouseReader(RoomCareDbContext db) : IHouse
             .Where(s => s.UserId != null && ids.Contains(s.UserId) && s.DeletedAt == null)
             .Select(s => new { s.UserId, s.DisplayName })
             .ToListAsync(cancellationToken);
-        return rows.GroupBy(r => r.UserId!.Value).ToDictionary(g => g.Key, g => g.First().DisplayName);
+        // A staff record with no display name, or a blank one, is a person whose name is not known: absent from the
+        // answer, never an empty string drawn as a name. Each caller says what it shows instead.
+        return rows.Where(r => !string.IsNullOrWhiteSpace(r.DisplayName))
+            .GroupBy(r => r.UserId!.Value)
+            .ToDictionary(g => g.Key, g => g.First().DisplayName!.Trim());
     }
 }

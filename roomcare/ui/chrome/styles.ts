@@ -34,6 +34,7 @@ input,select,textarea{font:inherit;line-height:inherit}
      font:inherit;line-height:inherit;font-size:13px;cursor:pointer}
 .tab.on{color:var(--color-ink,#e8ebf4);border-bottom-color:var(--color-brand,#818cf8)}
 .who{margin-left:auto;color:var(--color-ink-faint,#5a6172);font-size:12px}
+.who .unnamed{font-style:italic}
 .body{flex:1 1 auto;padding:22px;overflow:auto;min-height:0;display:flex;flex-direction:column}
 .body:has(> .pager),.body:has(.house){overflow:hidden}
 .subnav{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));flex:none}

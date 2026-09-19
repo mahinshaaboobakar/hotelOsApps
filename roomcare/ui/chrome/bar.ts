@@ -27,7 +27,14 @@ export function head(sections: readonly string[], current: string, operator: Rea
   if (operator !== null && !operator.ok) bar.append(el("div", "who", `${drawing(operator.failure, "who is signed in").label} · who is signed in`));
   if (operator !== null && operator.ok) {
     const o = operator.value;
-    bar.append(el("div", "who", [o.name, o.department, o.property].filter((part) => part !== null && part !== "").join(" · ")));
+    const who = el("div", "who");
+    // Master Data allows a staff record with no display name. The bar says so where the name would be, never a
+    // placeholder name, and never drops the clause so that two clauses pass for three (page 64 §3; HH, 2026-09-19).
+    const name = o.name?.trim() ?? "";
+    who.append(name === "" ? el("span", "unnamed", "no name in Master Data") : document.createTextNode(name));
+    const rest = [o.department, o.property].filter((part): part is string => part !== null && part.trim() !== "");
+    if (rest.length > 0) who.append(document.createTextNode(` · ${rest.join(" · ")}`));
+    bar.append(who);
   }
   return bar;
 }

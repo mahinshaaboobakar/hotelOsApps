@@ -4,6 +4,8 @@ using HotelOS.Applications.TestSupport;
 using HotelOS.Platform.TestSupport;
 using HotelOS.RoomCare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Xunit;
 
 namespace HotelOS.RoomCare.Tests;
@@ -202,6 +204,26 @@ public sealed class RoomCareFixture : IAsyncLifetime
         // the convention instead of improvising one.
 
         PropertyId = Guid.CreateVersion7();
+    }
+
+    /// <summary>
+    /// Master Data's <c>staff</c> table in the scratch database, shaped as Master Data declares it — <c>display_name</c>
+    /// nullable (<c>People.cs</c>: <c>string? DisplayName</c>) — with these rows, readable by the application role.
+    /// </summary>
+    /// <remarks>
+    /// Room Care's own suite reads Master Data through <see cref="HouseDouble"/>, which can never hold a value the
+    /// read model's mapping refuses. This is the real table, created by EF from a mapping of Master Data's shape,
+    /// so <see cref="HotelOS.RoomCare.Infrastructure.MasterDataHouseReader"/> reads what a property can hold.
+    /// </remarks>
+    public async Task MasterDataStaffAsync(IEnumerable<(Guid UserId, string? DisplayName)> rows)
+    {
+        var database = _database ?? throw NotInitialised();
+        await using var source = new MasterDataStaffSource(ProvisionerConnection(database.Name));
+        await source.Database.GetService<IRelationalDatabaseCreator>().CreateTablesAsync();
+        source.Staff.AddRange(rows.Select(r => new MasterDataStaffSource.Row { Id = Guid.CreateVersion7(), UserId = r.UserId, DisplayName = r.DisplayName }));
+        await source.SaveChangesAsync();
+        await GrantAsync(ProvisionerConnection(database.Name),
+            $"GRANT USAGE ON SCHEMA masterdata TO {ApplicationRole}; GRANT SELECT ON masterdata.staff TO {ApplicationRole}");
     }
 
     /// <summary>A context over the scratch database, as the application role.</summary>

@@ -139,7 +139,11 @@ public sealed class MasterDataStaff
 
     public Guid? UserId { get; set; }
 
-    public string DisplayName { get; set; } = string.Empty;
+    /// <summary>
+    /// Nullable because Master Data's is (<c>People.cs</c>: <c>string? DisplayName</c>). Declared required here, a
+    /// single staff row with no name made every read that names staff throw (HH, 2026-09-19).
+    /// </summary>
+    public string? DisplayName { get; set; }
 
     public DateTimeOffset? DeletedAt { get; set; }
 }

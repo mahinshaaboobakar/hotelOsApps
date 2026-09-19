@@ -5,6 +5,7 @@ using System.Text.Json;
 using HotelOS.RoomCare.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -13,9 +14,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HotelOS.RoomCare.Infrastructure.Migrations
 {
     [DbContext(typeof(RoomCareDbContext))]
-    partial class RoomCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260919102235_MasterDataStaffDisplayNameNullable")]
+    partial class MasterDataStaffDisplayNameNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
