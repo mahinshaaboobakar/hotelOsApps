@@ -169,7 +169,7 @@ the question it is:
    APPS-Q43's precedent (*a guard must not decide a disagreement by failing*),
    this is a question about the standard, not seven Room Care defects: **does
    §2's row rule govern a table row, and if it does, what should a table row
-   that opens something be?** It goes to the architect.
+   that opens something be?** It is with the planner as **APPS-Q50**, and the rows stay as they are.
 2. **C4, small buttons outside a row or a card (2 cells).** "Apply to
    selected" on the states sheet's toolbar and "Select all N" on the grid's
    zone rows are drawn `.btn.sm` in the locked frames 4c and 4d. §2 says
@@ -329,9 +329,10 @@ inside the archive     52 entries declared, 52 in the payload, 0 findings; manif
 UI bundles             module.js and the five widgets are byte-for-byte what the certificate run (020f1eff) measured
 ```
 
-**Not staged.** The owner installs 0.1.2 at tonight's restart, and Part B runs on it. This table is not
-clean, so nothing here is shown to the owner as done. 0.1.3 waits in `roomcare/.build` until it is
-asked for.
+**Staged, 2026-09-19.** Part B certifies 0.1.3, the version that carries the fixes; the owner updates
+to it from 0.1.2. *Corrected: this said "not staged — the owner installs 0.1.2 at tonight's restart".
+That premise was wrong. 0.1.2 was already installed earlier today.* The table is still not clean, so
+the audit is not shown to the owner as done.
 
 ## Captures
 

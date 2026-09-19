@@ -1,14 +1,15 @@
 # Room Care Part B — the drive list
 
-Prepared 2026-09-19 by KK against `HotelOsApps` at `1800ce7` and platform
-`HosPilotOS` at `999b022f` (module contract v2, `d45f028d`), for the run after
-the owner installs **`roomcare-0.1.2.hopkg`**: 16,727,377 bytes, sha256
-`7b7b6ec08479c6fca474b64b033413cfb3aac5c96a86b036c9bca371fdc00a6f`, signed by
+Prepared 2026-09-19 by KK, for the run after the owner updates to
+**`roomcare-0.1.3.hopkg`**: 16,729,943 bytes, sha256
+`c3485aa282bbbab409bdb2258b9cc9e3a31a0ea80075b805b496e81e5e54c634`, signed by
 `dev-local`, staged in `%LOCALAPPDATA%\HotelOS\packages\registry` on the
-owner's machine. Its UI bundles are the bytes Part A measured at `89777a1`.
-Neither 0.1.0 (built before Part A's style moves) nor 0.1.1 (built before
-the second set and contract v2) was ever installed. Each was staged and then
-removed, so no version names two builds. **Nothing below has been run yet; every result cell is empty
+owner's machine. It was built from clean worktrees of `HotelOsApps` `16bdeed`
+and `HosPilotOS` `ff7926fb`, and its UI bundles are the bytes the page-64 audit
+measured at `020f1eff` (`docs/page64-audit.md`). **Part B certifies 0.1.3, the
+version that carries the audit's fixes.** 0.1.2 is installed today and stays in
+the registry as the version 0.1.3 replaces. Neither 0.1.0 nor 0.1.1 was ever
+installed, and each was removed, so no version names two builds. **Nothing below has been run yet; every result cell is empty
 on purpose.** The shape is FF's (`guestops/docs/part-b-drive-list.md`), so the
 two certificates read alike.
 
@@ -47,18 +48,19 @@ room scope       room.inspect        InspectionOutcome:24 — the inspection app
 no Kernel check  room.clean          AttendantWork · RoomActs — the assignee's acts, checked on Room Care's row
 ```
 
-**A finding against the build, reported and not relied on.** `PrepareService:41–56`
-answers the **first** *Prepare the day* on a property — when no `room_task`
-exists to ask on — with `roomcare.configure` **on the property**. That is an
-assign-gated act answered at property scope, which CLAUDE.md names *"a privilege
-expansion wearing a repair's clothes"*. It was an implementation choice of the
-build (2026-09-13), now **RC-Q8**, with the planner. The code stays as it is
-until the ruling, and it is not driven here as evidence that `roomcare.assign`
-works.
+**RC-Q8, ruled (ADR 0193).** `PrepareService:41–56` answers the **first**
+*Prepare the day* on a property, when no `room_task` exists yet, with
+`roomcare.configure` **on the property**. The ruling makes that the first of two
+phases. Phase 1 authorizes the **creation**, creates the tasks and commits.
+Phase 2 comes after `room_task.created` is relayed: the object-scoped action
+(`roomcare.assign` on the task) is authorized on the object. The permission is
+never widened to property scope. So the first press stays on
+`roomcare.configure`, as built, and is driven as **B8**. Every later
+assign-gated act is in D and waits on ADR 0193's registration.
 
 ## Preconditions, checked at the start and quoted
 
-1. Software Center lists **Room Care 0.1.2, Running**.
+1. Software Center lists **Room Care 0.1.3, Running**.
 2. The signed-in user is admin on the property: the Board answers rather than
    drawing *Not permitted*. A refusal there ends the run as a precondition
    failure, not twenty failed rows.
@@ -102,6 +104,7 @@ lists proves the pipe and not the logic, and will say so.
 | B5 | `saveArea` | Setup › Areas → Edit… | | |
 | B6 | `saveDeepCleanPlan` | Setup › Deep clean plan → Save | | |
 | B7 | `grantManager` · `revokeManager` | Setup › Property-wide access | | |
+| B8 | `prepare`, the **first** press on a property: phase 1 of RC-Q8 (ADR 0193), which creates the day's tasks | Prepare → Prepare the day | | |
 
 ## C · Plan — `roomcare.plan`, property scope
 
