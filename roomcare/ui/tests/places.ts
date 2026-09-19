@@ -39,7 +39,8 @@ export function pressable(root: HTMLElement): HTMLButtonElement[] {
   return [...root.querySelectorAll<HTMLButtonElement>(".body button")].filter((b) => !b.hasAttribute("disabled"));
 }
 
-/** Whether a button is what is already chosen — pressing it rightly changes nothing. */
+/** Whether a button is what is already chosen — pressing it rightly changes nothing. A row's opener in the chosen
+ * row (Services' `tr.sel`) is the current choice too. */
 export function current(button: HTMLButtonElement): boolean {
-  return button.getAttribute("aria-pressed") === "true" || button.matches(".pg.on");
+  return button.getAttribute("aria-pressed") === "true" || button.matches(".pg.on") || button.matches("tr.sel button.opener");
 }

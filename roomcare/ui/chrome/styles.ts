@@ -92,6 +92,9 @@ th{text-align:left;color:var(--color-ink-faint,#5a6172);font-weight:500;font-siz
    padding:8px 10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07))}
 td{padding:10px;border-bottom:1px solid var(--color-line,rgb(255 255 255 / 0.07));vertical-align:top}
 tr.pick{cursor:pointer}
+.opener{background:none;border:0;padding:0;margin:0;font:inherit;line-height:inherit;color:inherit;text-align:start;cursor:pointer}
+.opener:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-offset:2px;border-radius:4px}
+table.wall:not(.states) tr.g{cursor:pointer}
 tr.sel td{background:color-mix(in srgb, var(--color-brand,#818cf8) 8%, transparent)}
 .body > .list:has(~ .pager){flex:1 1 auto;min-height:0;overflow-y:auto;margin:0 -22px;padding:0 22px}
 .card .pager{padding-top:8px}
@@ -156,7 +159,7 @@ table.wall td{padding:5px 8px;font-size:12px;line-height:1.3;vertical-align:midd
 table.wall th{padding:6px 8px;position:sticky;top:0;background:var(--color-surface,#0b0d14);z-index:2;white-space:nowrap}
 table.wall .src{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--color-ink-muted,#8b93a7)}
 /* 7px 8px: a zone's group row, sticky above its rooms, as frame 1b draws it */
-table.wall tr.g td{background:var(--color-surface-raised,#11141f);color:var(--color-ink,#e8ebf4);font-weight:600;padding:7px 8px;position:sticky;top:29px;z-index:1;cursor:pointer}
+table.wall tr.g td{background:var(--color-surface-raised,#11141f);color:var(--color-ink,#e8ebf4);font-weight:600;padding:7px 8px;position:sticky;top:29px;z-index:1}
 table.wall tr.dim td{opacity:.3}
 table.wall tr.chg td{background:var(--color-warn-soft,rgb(251 191 36 / 0.12))}
 table.wall tr.conf td{background:var(--color-bad-soft,rgb(248 113 113 / 0.12))}

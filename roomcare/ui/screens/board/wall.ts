@@ -6,7 +6,7 @@
 
 import type { HostApi } from "@hotelos/sdk";
 
-import { el } from "../../chrome/element";
+import { el, fill, opener } from "../../chrome/element";
 import { clock } from "../../chrome/instant";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
@@ -29,7 +29,10 @@ export function wall(host: HostApi, data: Board, lit: Lit, collapsed: Set<string
     const c = zone.counts;
     const group = el("tr", "g");
     const extra = [c.dnd > 0 ? `${whole(host, c.dnd)} DND` : null, c.blocked > 0 ? `${whole(host, c.blocked)} blocked` : null, c.supervision > 0 ? `${whole(host, c.supervision)} supervision` : null].filter((x) => x !== null);
-    const cell = el("td", undefined, `${collapsed.has(zone.name) ? "▸" : "▾"} ${[zone.name, `${whole(host, c.rooms)} rooms`, `${whole(host, c.dirty)} dirty`, `${whole(host, c.inProgress)} in progress`, `${whole(host, c.ready)} ready`, ...extra].join(" · ")}`);
+    const fold = opener(`${collapsed.has(zone.name) ? "▸" : "▾"} ${[zone.name, `${whole(host, c.rooms)} rooms`, `${whole(host, c.dirty)} dirty`, `${whole(host, c.inProgress)} in progress`, `${whole(host, c.ready)} ready`, ...extra].join(" · ")}`);
+    fold.setAttribute("aria-expanded", String(!collapsed.has(zone.name)));
+    const cell = el("td");
+    cell.append(fold);
     cell.setAttribute("colspan", String(COLUMNS.length));
     group.append(cell);
     group.addEventListener("click", () => {
@@ -60,7 +63,7 @@ function line(host: HostApi, room: BoardRoom, lit: boolean, nav: Nav): HTMLEleme
     : [service(room.service), room.reduction, room.earliestAt !== null ? `not before ${clock(host, room.earliestAt)}` : null].filter((x) => x !== null).join(" · ");
   const attendant = room.attendant ?? (room.outcome.kind === "NOBODY_AVAILABLE" ? "— nobody available" : room.marks.pending ? "— pending policy" : room.outcome.kind === "SUPERVISION" ? "— supervisor's room" : "—");
   row.append(
-    el("td", "num", room.number),
+    fill(el("td", "num"), opener(room.number)),
     condition,
     el("td", undefined, occ),
     el("td", undefined, room.soldAt !== null && room.marks.soldTonight ? `★ ${clock(host, room.soldAt)}` : "—"),

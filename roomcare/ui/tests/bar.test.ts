@@ -6,7 +6,9 @@ import { SUPERVISOR, host, mount, recorded, settle } from "./host";
 /**
  * The bar names who is signed in as name · department · property (page 64 §3). Master Data allows a staff
  * record with no display name (HH, 2026-09-19). The bar then says so, where the name would be, and never
- * draws a placeholder name, nor quietly drops the clause so that two clauses pass for three.
+ * draws a placeholder name, nor quietly drops the clause so that two clauses pass for three. The words are
+ * "no name on record", the same as Jobs': they name no system to staff (owner ruling on developer content,
+ * 2026-09-19; it said "no name in Master Data" until then).
  */
 describe("the bar, for a person Master Data holds no name for", () => {
   const me = recorded<Record<string, unknown>>("me");
@@ -15,8 +17,9 @@ describe("the bar, for a person Master Data holds no name for", () => {
     it(`says the name is missing when the record has ${what}`, async () => {
       const root = mount(activate, host(SUPERVISOR, { me: { ...me, name } }));
       await settle();
-      expect(root.querySelector(".who")?.textContent).toBe("no name in Master Data · Housekeeping · Coral Cove Resort");
-      expect(root.querySelector(".who .unnamed")?.textContent).toBe("no name in Master Data");
+      expect(root.querySelector(".who")?.textContent).toBe("no name on record · Housekeeping · Coral Cove Resort");
+      expect(root.querySelector(".who .unnamed")?.textContent).toBe("no name on record");
+      expect(root.querySelector(".who")?.textContent).not.toMatch(/Master Data/u);
     });
   }
 

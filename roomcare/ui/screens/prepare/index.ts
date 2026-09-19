@@ -9,7 +9,7 @@ import type { HostApi } from "@hotelos/sdk";
 import { card } from "../../chrome/card";
 import { failed } from "../../chrome/failure";
 import { pager } from "../../chrome/bar";
-import { control, el } from "../../chrome/element";
+import { control, el, fill, opener } from "../../chrome/element";
 import { clock, minutes, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
@@ -94,7 +94,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
     const row = el("tr", "pick");
     row.addEventListener("click", () => nav.openRoom(c.roomId));
     const what = c.soldAt === null ? c.what : `${c.what} · sold ${clock(host, c.soldAt)}`;
-    row.append(el("td", "num", clock(host, c.at)), el("td", undefined, c.room), el("td", undefined, what), el("td", undefined, c.onNextPress));
+    row.append(el("td", "num", clock(host, c.at)), fill(el("td"), opener(c.room)), el("td", undefined, what), el("td", undefined, c.onNextPress));
     table.append(row);
   }
   changesCard.append(table, pager(host, v.changesPaging, v.changes.length, "changes since the last press", goPage));

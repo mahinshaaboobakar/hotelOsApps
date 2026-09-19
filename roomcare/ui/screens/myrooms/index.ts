@@ -8,7 +8,7 @@ import type { HostApi } from "@hotelos/sdk";
 
 import { failed } from "../../chrome/failure";
 import { pager, scroller } from "../../chrome/bar";
-import { el } from "../../chrome/element";
+import { el, fill, opener } from "../../chrome/element";
 import { clock, minutes } from "../../chrome/instant";
 import { READ, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
@@ -74,7 +74,7 @@ export async function myRooms(
     pri.append(el("span", `pill p${Math.min(row.priority, 3)}`, whole(host, row.priority)));
     const earliest = el("td");
     earliest.append(row.earliestAt === null ? document.createTextNode("—") : el("b", undefined, clock(host, row.earliestAt)));
-    tr.append(el("td", "num", row.room), what, pri, earliest, linen(host, row), stateCell(host, row));
+    tr.append(fill(el("td", "num"), opener(row.room)), what, pri, earliest, linen(host, row), stateCell(host, row));
     table.append(tr);
   }
 

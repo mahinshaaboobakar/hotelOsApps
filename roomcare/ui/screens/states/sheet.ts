@@ -122,16 +122,28 @@ function dock(host: HostApi, edits: Edits, redraw: () => void, total: number): H
   // Deliberately .btn.sm outside a list's row: the owner chose small for a toolbar's buttons (01b, 2026-09-19,
   // "A small"), against page 64 §2's "inside a row or a card". A labelled deviation, not a defect; APPS-Q43's
   // card half is a separate question and still open.
-  bar.append(el("b", undefined, `${whole(host, selected.size)} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay,
-    selected.size === 0 ? el("span", "btn sm off", "Apply to selected — select rows first") : control("btn sm", "Apply to selected", () => {
-      for (const id of selected) {
-        if (condition.value !== "") edits.set(id, "condition", condition.value);
-        if (occupancy.value !== "") edits.set(id, "occupancy", occupancy.value);
-        if (stay.value !== "") edits.set(id, "stay", stay.value);
-        if (sold.value.trim() !== "") edits.set(id, "soldAt", sold.value.trim());
-      }
-      redraw();
-    }),
+  // Apply is live only when it would change something: rows selected AND a value chosen. Otherwise it is drawn off
+  // with the missing half named — it used to be a live button that did nothing with no value chosen.
+  const live = control("btn sm", "Apply to selected", () => {
+    for (const id of selected) {
+      if (condition.value !== "") edits.set(id, "condition", condition.value);
+      if (occupancy.value !== "") edits.set(id, "occupancy", occupancy.value);
+      if (stay.value !== "") edits.set(id, "stay", stay.value);
+      if (sold.value.trim() !== "") edits.set(id, "soldAt", sold.value.trim());
+    }
+    redraw();
+  });
+  let apply: HTMLElement = el("span");
+  const refresh = (): void => {
+    const chosen = [condition.value, occupancy.value, stay.value, sold.value.trim()].some((v) => v !== "");
+    const next = selected.size === 0 ? el("span", "btn sm off", "Apply to selected — select rows first")
+      : !chosen ? el("span", "btn sm off", "Apply to selected — choose what to set first") : live;
+    if (next !== apply) { apply.replaceWith(next); apply = next; }
+  };
+  for (const field of [condition, occupancy, stay]) field.addEventListener("change", refresh);
+  sold.addEventListener("input", refresh);
+  bar.append(el("b", undefined, `${whole(host, selected.size)} rows selected`), el("span", "dim", "set for all:"), condition, occupancy, sold, stay, apply,
     el("span", "grow mono", `${whole(host, total)} of ${whole(host, total)} — no pages`));
+  refresh();
   return bar;
 }
