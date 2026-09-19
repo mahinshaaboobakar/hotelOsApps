@@ -22,6 +22,13 @@ describe("a write that did not succeed", () => {
     }
   });
 
+  it("never calls the model's silence a refusal: it could not be checked, and nothing says the person lacks a grant", () => {
+    // AUTHZ-Q34/35a and 64e: model_unavailable is the model unable to decide — it says nothing about a grant. FF's finding.
+    const said = saying(failing("model_unavailable"));
+    expect(said).not.toMatch(/not permitted|not allowed|no access|forbidden/iu);
+    expect(said).toMatch(/could not be checked/u);
+  });
+
   it("gives the service's own sentence where ADR 0041 lets it cross", () => {
     for (const kind of ["rejected", "invalid"] as const) expect(saying(failing(kind)), kind).toBe("the test asked");
   });

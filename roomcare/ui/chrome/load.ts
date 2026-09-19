@@ -62,8 +62,11 @@ export function saying(error: unknown): string {
     case "forbidden":
     case "local_forbidden":
     case "user_forbidden":
-    case "model_unavailable":
       return "That was not permitted, so nothing was changed.";
+    // 64e's model-unavailable state: the authorization model could not decide, which says nothing about this
+    // person's grant (AUTHZ-Q34/35a). The act was stopped before it ran, so nothing changed; it was not refused.
+    case "model_unavailable":
+      return "Access to that could not be checked, so nothing was changed. Nothing was refused.";
     case "internal":
       return "Room Care could not finish that, and whether any of it was done is not known — check before trying again.";
     default:
