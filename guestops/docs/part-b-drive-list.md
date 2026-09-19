@@ -294,6 +294,15 @@ because `CreateAsync` has committed before the second check is asked.
 would lock in the behaviour it was written to question. It was run twice and
 removed.
 
+> **SUPERSEDED the same day — RC-Q8a and RC-Q8b-2 (ADR 0193).** The promise
+> below, *"a refused walk-in leaves nothing"*, was withdrawn: it *"was never an
+> architectural decision"*. A walk-in is now two authorized operations — phase 1
+> creates and commits the stay, phase 2 (assign + check-in, all or nothing) is
+> authorized when it starts — and **a refused phase 2 leaves a booked, room-less
+> stay and tells the desk so**. `WalkInAtomicityTests` became
+> `WalkInPhasesTests`, rewritten under ADR 0034. What follows is kept as the
+> record of the one-transaction version.
+
 **FIXED in source for GuestOps' next version (architect's assignment,
 2026-09-19): a refused walk-in now leaves nothing.** Create, assign and check-in
 run in one transaction with their events. The checks cannot all be asked first
@@ -341,7 +350,7 @@ no tuples and is refused every time. Today it is refused a step earlier:
 `stay` scope. **The row proves the transaction commits when allowed — nothing
 about whether a walk-in can be.** Acting on an object in the step that creates it
 is Room Care's `RC-Q8` shape; the architect has put both to the planner as one
-question. **Kept whatever the answer: a refused walk-in leaves nothing.**
+question. ~~Kept whatever the answer: a refused walk-in leaves nothing.~~ *Withdrawn by RC-Q8a — see the note above.*
 
 **The handler is still not wired**: its assign and check-in steps are
 stay-scoped and wait on ADR 0193 being built — and on that question
