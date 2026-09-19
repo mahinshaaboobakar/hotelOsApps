@@ -30,7 +30,7 @@ export const LEAVE_CSS = `
 .steps{display:flex;gap:8px;align-items:center;font-size:11.5px;
        color:var(--color-ink-faint,#5a6172)}
 .steps em{font-style:normal;padding:2px 9px;border-radius:99px;
-          background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+          background:var(--color-ok-soft);
           color:var(--color-ok,#34d399);font-weight:600}
 .steps em.now{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
               color:var(--color-brand,#818cf8)}

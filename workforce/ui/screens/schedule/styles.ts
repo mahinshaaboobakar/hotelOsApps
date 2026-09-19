@@ -22,12 +22,12 @@ export const SCHEDULE_CSS = `
     border-radius:6px;padding:2px 6px;width:fit-content}
 .cm.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
           color:var(--color-brand,#818cf8)}
-.cm.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+.cm.ok{background:var(--color-ok-soft);
        color:var(--color-ok,#34d399)}
-.cm.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+.cm.warn{background:var(--color-warn-soft);
          color:var(--color-warn,#fbbf24)}
 .cm.neutral{color:var(--color-ink-faint,#5a6172)}
-.cm.leave{background:color-mix(in srgb, var(--color-bad) 13%, transparent);
+.cm.leave{background:var(--color-bad-soft);
           color:var(--color-bad,#f87171)}
 .cday.today{border-color:var(--color-brand,#818cf8)}
 .cduty{margin-top:4px;font-size:9.5px;font-weight:600;letter-spacing:.01em;

@@ -27,8 +27,8 @@ export const ROTA_CSS = `
 .chip i{font-style:normal;font-size:10.5px;color:var(--color-ink-faint,#5a6172)}
 .chip.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
             border-color:var(--color-brand,#818cf8);color:var(--color-brand,#818cf8)}
-.chip.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);color:var(--color-ok,#34d399)}
-.chip.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
+.chip.ok{background:var(--color-ok-soft);color:var(--color-ok,#34d399)}
+.chip.warn{background:var(--color-warn-soft);color:var(--color-warn,#fbbf24)}
 .chip.neutral{color:var(--color-ink-faint,#5a6172)}
 
 /* The one-off span rides ON the chip — WF-Q17: a different fact, anchored to a
@@ -39,11 +39,11 @@ export const ROTA_CSS = `
 
 .away{border-radius:9px;min-height:44px;display:grid;place-items:center;
       font-size:11.5px;font-weight:600;
-      background:color-mix(in srgb, var(--color-bad) 13%, transparent);color:var(--color-bad,#f87171)}
+      background:var(--color-bad-soft);color:var(--color-bad,#f87171)}
 .gap{border-radius:9px;min-height:44px;display:grid;place-items:center;
      font-size:11px;cursor:pointer;
      border:1px dashed var(--color-warn,#fbbf24);color:var(--color-warn,#fbbf24);
-     background:color-mix(in srgb, var(--color-warn) 13%, transparent)}
+     background:var(--color-warn-soft)}
 .empty{border-radius:9px;min-height:44px;display:grid;place-items:center;
        font-size:14px;cursor:pointer;
        border:1px dashed var(--color-line-strong,rgb(255 255 255/.14));
@@ -57,7 +57,7 @@ export const ROTA_CSS = `
       border:1px solid var(--color-line,rgb(255 255 255/.07))}
 .bar{position:absolute;top:3px;bottom:3px;border-radius:6px;display:flex;gap:5px;
      align-items:center;padding:0 8px;font-size:11px;white-space:nowrap;overflow:hidden;
-     background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
+     background:var(--color-warn-soft);color:var(--color-warn,#fbbf24)}
 .bar s{text-decoration:none;color:var(--color-ink-faint,#5a6172);font-size:10px}
 .bar.none{background:transparent;color:var(--color-ink-faint,#5a6172);
           border:1px dashed var(--color-line-strong,rgb(255 255 255/.14))}

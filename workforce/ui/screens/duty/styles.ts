@@ -16,7 +16,7 @@ export const DUTY_CSS = `
 .dgrid{display:grid;grid-template-columns:110px repeat(7,1fr);gap:6px}
 .dstack{display:flex;flex-direction:column;gap:4px}
 .dband{border-radius:8px;padding:5px 8px;font-size:11px;
-       background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+       background:var(--color-warn-soft);
        color:var(--color-warn,#fbbf24)}
 /* Night duties read one step quieter than day duties, so the two bands are
    distinguishable without colour — which is what the printed sheet needs. */

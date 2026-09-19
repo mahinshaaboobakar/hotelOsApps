@@ -342,7 +342,7 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
 
 .wn{font-size:13px;display:flex;gap:6px;align-items:center;min-width:0}
 .wn em{font-style:normal;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;
-       background:color-mix(in srgb, var(--color-warn) 13%, transparent);color:var(--color-warn,#fbbf24)}
+       background:var(--color-warn-soft);color:var(--color-warn,#fbbf24)}
 
 .rlab{font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
       color:var(--color-warn,#fbbf24)}
@@ -360,9 +360,9 @@ button.row:focus-visible{outline:2px solid var(--color-brand,#818cf8);outline-of
           font-size:11.5px;font-weight:600}
 .pk .code.brand{background:color-mix(in srgb, var(--color-brand) 13%, transparent);
                 color:var(--color-brand,#818cf8)}
-.pk .code.ok{background:color-mix(in srgb, var(--color-ok) 13%, transparent);
+.pk .code.ok{background:var(--color-ok-soft);
              color:var(--color-ok,#34d399)}
-.pk .code.warn{background:color-mix(in srgb, var(--color-warn) 13%, transparent);
+.pk .code.warn{background:var(--color-warn-soft);
                color:var(--color-warn,#fbbf24)}
 .pk .code.neutral{color:var(--color-ink-faint,#5a6172)}
 
