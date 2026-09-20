@@ -27,6 +27,13 @@ import type { Call } from "./host";
  * has something to clear; and a field's value or where focus is counts as an
  * effect. "The walk itself" below proves it tells a dead handler from a live one.
  * First run: the door's End… sheet drew its chosen ending without `aria-pressed`.
+ *
+ * **Proved against planted empty handlers** (2026-09-20, the architect's ask after
+ * HH's Jobs guard passed two tabs wired to `() => {}`): in a detached worktree at
+ * `863ff6b`, the Board's Wall chip and Property-wide access's "Grant to a person…"
+ * were each rewired to `() => {}`. This walk named both — `1: "Wall"` and
+ * `8: "Grant to a person…"` — on those two places and nowhere else. It asks for an
+ * effect, never for a handler, so there was nothing to fix.
  */
 /** The text fields a press could act on: filled before each press, so a Cancel or a Clear has something to clear. */
 function fill(root: HTMLElement): void {
