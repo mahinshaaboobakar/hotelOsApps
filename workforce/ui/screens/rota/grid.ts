@@ -78,7 +78,9 @@ function who(person: Person): HTMLElement {
 
   text.append(
     name,
-    el("div", "wr", person.zone === null ? person.role : `${person.role} · ${person.zone}`),
+    // The role alone (owner, 2026-09-20, `64g` §5): the zone the frames drew
+    // here was never sent, and the posting's zone is People's.
+    el("div", "wr", person.role),
   );
 
   row.append(el("div", "av", person.initials), text);

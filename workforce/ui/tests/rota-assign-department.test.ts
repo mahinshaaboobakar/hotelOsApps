@@ -38,7 +38,7 @@ const unfiltered: Week = { ...recordedWeek, department: null, departmentCode: ""
 
 const meera: Person = {
   id: "p-meera", name: "Meera Pillai", initials: "MP", role: "Room attendant",
-  departmentCode: "HK", zone: null, head: false,
+  departmentCode: "HK", head: false,
   week: recordedWeek.people[0]!.week.map(() => ({ shift: null, override: null, leave: null, gap: false })),
 };
 

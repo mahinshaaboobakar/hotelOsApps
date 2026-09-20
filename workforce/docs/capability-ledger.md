@@ -204,6 +204,44 @@ Reads: `attendanceToday · comingUp · onLeave · pendingRequests · shiftBoard`
 | D7 | **The service writes the attendance verdict as English** — `"Late 20 min"` — and the screen counts late people by reading that sentence back | `AttendanceView.cs:170`, `screens/attendance/index.ts:66` | a property in another language reads the server's English, and the count breaks the day the sentence changes |
 | D8 | **The service writes "412 assignments"**, unformatted, and "1 assignments" for one | `PolicyView.cs:63` | the number is not in the property's own number format, and the grammar is wrong for one |
 
+## The drawings against the service — ruled, 2026-09-20 (`64g` §5)
+
+**The owner ruled each difference between the approved frames and what a
+property receives.** Two are sent; four are dropped from the drawings.
+
+| | Ruled |
+|---|---|
+| the shift's start on each late row | **sent** — the service already knows it |
+| a night duty's tail, and today's date | **sent** — a 22:00–06:00 duty drawn only on its start day is absent from the morning the person is still working. Today comes from Context's operating day (ADR 0211) |
+| rostered as its own figure | **dropped** — it stays folded into "34 of 38" |
+| the kind word and paired names on a pending row | **dropped** — the row is the name, with what the service sends under it |
+| the zone line on the rota **and** on Attendance | **dropped**, ruled together so nobody is zoned on one screen and unzoned on the next. The posting's zone is still People's (`WF-Q7`) |
+
+**Corrected in this round**: the two approved widget frames, the gold mockup's
+rota, printed week and Attendance rows (13 zone lines), the fixtures, and the
+rota's own row — the service no longer sends a `zone` field at all, and the
+screen's type makes one unassignable rather than leaving a null nobody can
+fill.
+
+**Why the frames looked supported.** The harness's sample data was written to
+match the drawings rather than the wire, so every capture agreed with the frame
+and none of this was visible. That is fixed — the fixtures now carry what the
+service sends — which is why these differences could be listed at all.
+
+**Found while correcting, NOT changed, because the ruling does not cover them:**
+
+* **The Attendance Today widget orders its figures differently from the
+  service** — the frame draws present, absent, late; the service sends present,
+  late, absent.
+* **Pending Requests orders its two figures the other way round** — the frame
+  draws swaps then leave; the service sends leave then swaps.
+* **The department on a widget row is a code** (`HK`, `KIT`), because that is
+  what the service sends. The frames drew full names; they now draw codes, and
+  whether a person should read `HK` or `Housekeeping` there is the owner's.
+* **The Approvals queue still draws a zone** under two names in the gold mockup
+  (`01-workforce-gold.html:662,664`). The ruling names the rota and Attendance,
+  so these were left alone rather than swept in with them.
+
 ## A check this stream owes, and has not run
 
 **The cross-repository consumer check for the SDK's money style is not done.**

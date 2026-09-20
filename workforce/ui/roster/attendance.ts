@@ -80,31 +80,31 @@ export const recordedDay: Day = {
   department: null,
   rows: [
     {
-      who: "Priya Thomas", role: "Supervisor · Zone 1", rostered: true, postedAt: "07:00",
+      who: "Priya Thomas", role: "Supervisor", rostered: true, postedAt: "07:00",
       in: "06:52", out: "15:04", against: "On time", tone: "ok", source: "manual",
     },
     {
-      who: "Anjali Menon", role: "Receptionist · Zone 3", rostered: true, postedAt: "07:00",
+      who: "Anjali Menon", role: "Receptionist", rostered: true, postedAt: "07:00",
       in: "07:20", out: "15:10", against: "Late 20 min", tone: "warn", source: "manual",
     },
     {
-      who: "Vishnu Das", role: "Night auditor · Zone 1", rostered: true, postedAt: "23:00",
+      who: "Vishnu Das", role: "Night auditor", rostered: true, postedAt: "23:00",
       in: "22:55", out: null, against: "On shift", tone: "neu", source: "manual",
     },
     {
-      who: "Sneha Iyer", role: "Receptionist · Zone 2", rostered: true, postedAt: "15:00",
+      who: "Sneha Iyer", role: "Receptionist", rostered: true, postedAt: "15:00",
       in: "15:38", out: "23:02", against: "Late 38 min", tone: "warn", source: "manual",
     },
     // Rostered, and nobody recorded them arriving. A record with no arrival says
     // somebody looked; no record at all would say only that nobody looked.
     {
-      who: "Rani Rajan", role: "Guest relations · Zone 2", rostered: true, postedAt: "15:00",
+      who: "Rani Rajan", role: "Guest relations", rostered: true, postedAt: "15:00",
       in: null, out: null, against: "Absent", tone: "bad", source: null,
     },
     // The row that matters most: attendance contradicting the rota. Both facts
     // are kept and the discrepancy is shown, never silently reconciled.
     {
-      who: "Joseph Kurian", role: "Bell captain · Zone 1", rostered: false, postedAt: null,
+      who: "Joseph Kurian", role: "Bell captain", rostered: false, postedAt: null,
       in: "09:05", out: "17:30", against: "Present, not rostered",
       tone: "warn", source: "manual",
     },

@@ -91,7 +91,16 @@ export interface Person {
   departmentCode: string;
 
   /** The zone the posting carries, when it carries one — `WF-Q7`. Optional. */
-  zone: string | null;
+  /**
+   * **Gone from the rota** — owner, 2026-09-20, on `64g` §5.
+   *
+   * The frames drew "Night auditor · Zone 1" under each name and the service
+   * has never sent a zone here, so a real property read the role alone. Ruled
+   * together with Attendance's, so nobody is zoned on one screen and unzoned
+   * on the next. The posting's zone still lives on People, where `WF-Q7` put
+   * it: this is the rota's row, not the fact.
+   */
+  zone?: never;
 
   /** Whether this posting is the department's headship. */
   head: boolean;

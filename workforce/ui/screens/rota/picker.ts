@@ -65,16 +65,16 @@ export function picker(
     ? ""
     : formatDay(week.days[day], property, "day-month-year");
 
-  // The DEPARTMENT, not the job role. The rota is a department's, and what makes
-  // a zone mean anything is the department beside it — WF-Q7's whole argument,
-  // in the one place a manager is about to change the posting's day.
+  // The DEPARTMENT, not the job role. The rota is a department's, and this is
+  // the one place a manager is about to change the posting's day.
   //
   // The ROW's department — the one this cell is assigned under — as its code,
   // the form People's rows show it in. It was the week's, which a real
   // property's read sends as null, and the line read "null · one shift per day".
-  const where = [person.departmentCode, person.zone]
-    .filter((one) => one !== null && one !== "")
-    .join(" · ");
+  //
+  // No zone beside it (owner, 2026-09-20, `64g` §5): the rota's rows do not
+  // carry one, so this cannot name one either.
+  const where = person.departmentCode;
 
   const head = el("div");
   head.append(
