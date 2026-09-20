@@ -1,4 +1,4 @@
-import { FAILURE_LABELS, HostCallError, type HostApi, type ReadFailure } from "@hotelos/sdk";
+import { FAILURE_LABELS, HostCallError, failureDrawing, type HostApi, type ReadFailure } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -259,9 +259,29 @@ describe("app surface checklist — automated lines, Jobs", () => {
       // X11: the model state names the model and never the person.
       if (cause === "undecidable") expect(text).not.toMatch(/\byou\b|\baccount\b/i);
 
-      // X8: the facts are a labelled list, the permission its own run.
+      // X8: the facts are a labelled list, and "Asked for" says what could not be
+      // read in plain words — owner, 2026-09-20, 64g §2 B (SDK 6751c7de). It said
+      // "job.read · board" until then, which is the developer-content ruling's own
+      // case: a service's vocabulary in front of somebody at a front desk. This
+      // line asserted that old contract and is corrected, not relaxed.
       expect(panel.querySelector("dl.gap-facts dt")?.textContent).toBe("Asked for");
-      expect(panel.querySelector("dl.gap-facts dd b")?.textContent).toBe("job.read");
+      expect(panel.querySelector("dl.gap-facts dd")?.textContent).toBe("this board");
+      // Nothing this screen composes carries the code name. The one place left is
+      // the SDK's own onward note for the three refusals — "This screen needs
+      // job.read, and no grant…" (failure.ts:564-570), which 6751c7de did not
+      // change. Measured here rather than stripped: Jobs draws a platform
+      // sentence as the platform writes it, and editing it here would make one
+      // app's refusal read differently from the other three. Reported for GG.
+      const note = panel.querySelector(".gap-ask");
+      const withoutTheNote = panel.cloneNode(true) as HTMLElement;
+      withoutTheNote.querySelector(".gap-ask")?.remove();
+      expect(withoutTheNote.textContent ?? "", "a code name outside the SDK's note").not.toContain("job.read");
+
+      const fromTheSdkNote = cause === "forbidden" || cause === "unadmitted" || cause === "ungranted";
+      expect((note?.textContent ?? "").includes("job.read"), "the SDK's note, unchanged by 6751c7de").toBe(fromTheSdkNote);
+
+      // And it is not lost: the line a person copies for support still carries it.
+      expect(failureDrawing(failing(cause), { app: "Jobs", the: "this board" }).wire).toContain("job.read");
     });
   }
 });

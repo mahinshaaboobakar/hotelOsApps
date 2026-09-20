@@ -207,8 +207,18 @@ function facts(drawing: FailureDrawing, property: PropertyEnvironment): HTMLElem
 /**
  * One fact's value, composed here from the values the seam hands over.
  *
- * `asked` sets the permission apart from its method, as 64b draws *Asked for
- * <b>roster.read</b> · me*; the separator is this surface's, not the SDK's.
+ * `asked` says **what could not be read, in plain words** — the seam's own
+ * `value`, which is the sentence this screen already passes for "the". It drew
+ * `<b>job.read</b> · board` until 2026-09-20: 64b approved that block, and the
+ * owner's developer-content ruling of 2026-09-19 forbids a service's vocabulary
+ * on a person's screen. The owner settled it in 64g §2 B, and the SDK's fact
+ * carries the words (`6751c7de`).
+ *
+ * **Jobs did not change with the shared surface, because it was not taking that
+ * line from it**: the seam handed over the fact and this file composed its own
+ * from `permission` and `method`. Those two are still on the fact — for the
+ * clipboard and diagnostics, marked *not for drawing* — and the code name still
+ * reaches support on `wire`, which the Copy act writes.
  * `at` is the instant, formatted in the property's locale and zone (JOBS-Q1(8))
  * — it reached a hotel's screen as `2026-09-18T11:05:48.691Z` until 0.4.2, and
  * the clipboard's `wire` keeps the ISO form, which is the quotable one.
@@ -216,7 +226,7 @@ function facts(drawing: FailureDrawing, property: PropertyEnvironment): HTMLElem
 function factValue(fact: Fact, property: PropertyEnvironment): Node[] {
   switch (fact.kind) {
     case "asked":
-      return [el("b", undefined, fact.permission), document.createTextNode(` · ${fact.method}`)];
+      return [document.createTextNode(fact.value)];
     case "at":
       return [document.createTextNode(formatInstant(fact.at, property, "date-time"))];
     case "answer":
