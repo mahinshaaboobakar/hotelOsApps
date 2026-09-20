@@ -109,6 +109,59 @@ public class WidgetWireTests(WorkforceFixture fixture)
         Assert.Equal("count", row.GetProperty("form").GetString());
     }
 
+    [Fact]
+    public async Task A_late_row_sends_the_shift_start_the_service_already_knew()
+    {
+        // `64g` §5, ruled sent. The approved frame draws the shift's start on
+        // every late row — *twenty minutes late* is a different fact for a
+        // seven o'clock start than for a three o'clock one — and the wire did
+        // not carry it, though `LateArrival.ExpectedAt` has held it since the
+        // summary was written. Only a test at the wire can see that: the card's
+        // own suite renders a fixture, and a fixture is a claim about the wire.
+        var harness = new ModuleHarness(fixture);
+        var scope = ModuleHarness.Property();
+        var today = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd");
+
+        var staff = Guid.CreateVersion7();
+        harness.Directory.WithName(staff, "S. Kumar");
+
+        await harness.CallAsync(PeopleView.Write, scope, "post", new
+        {
+            staffId = staff, department = "FO", role = "Receptionist", from = "2026-01-01",
+        });
+
+        var shift = await harness.CallAsync(PolicyView.Write, scope, "defineShift", new
+        {
+            name = "Morning", code = "M", colour = "Cyan",
+            startsAt = "07:00", endsAt = "15:00", from = "2026-01-01",
+        });
+
+        await harness.CallAsync(RotaView.Write, scope, "assign", new
+        {
+            staffId = staff,
+            date = today,
+            shiftId = shift.GetProperty("id").GetGuid(),
+            department = "FO",
+        });
+
+        await harness.CallAsync(AttendanceView.Record, scope, "record", new
+        {
+            staffId = staff, on = today, @in = "07:22",
+        });
+
+        var card = await harness.CallAsync(ReadViews.Answer, scope, "attendanceToday");
+        var late = card.GetProperty("lateIn");
+
+        // Positive control: the row exists at all, so an assertion about its
+        // fields is about a row rather than about an empty list.
+        Assert.Equal(1, late.GetArrayLength());
+        Assert.Equal(22, late[0].GetProperty("value").GetInt32());
+
+        // The shift's start, as a clock and never a rendered time: the hour
+        // cycle is the reader's (ADR 0175).
+        Assert.Equal("07:00", late[0].GetProperty("at").GetString());
+    }
+
     /// <summary>Every string leaf, recording those carrying a digit; returns how many leaves.</summary>
     private static int Walk(JsonElement node, string path, string? key, List<string> written)
     {

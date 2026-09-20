@@ -21,6 +21,7 @@ import { control, el } from "../../chrome/element";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
+import { assignments } from "../policy/catalogue";
 import { newShift } from "../policy/dialog";
 import { type CatalogueRow, type Policy } from "../../roster/policy";
 
@@ -114,7 +115,9 @@ function table(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
       el("div", "quiet", [span(row.hours, host.property), span(row.second, host.property)]
         .filter((one) => one !== null).join(", ") || "—"),
       cell(colourDot(row.colour, row.tone), "quiet"),
-      el("div", "quiet", row.inUse),
+      // The same sentence Policy's table writes, from the same place — the
+      // service used to compose it, in English, with its own grouping.
+      el("div", "quiet", assignments(row.inUse, host.property)),
     );
 
     list.append(item);

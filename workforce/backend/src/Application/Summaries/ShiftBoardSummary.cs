@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Domain;
 using HotelOS.Workforce.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -79,6 +80,7 @@ public sealed record ShiftBoardView(
 public class ShiftBoardSummary(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
+    IStaffDirectory directory,
     TimeProvider clock)
 {
     /// <summary>What the property is working, at this moment.</summary>
@@ -91,8 +93,23 @@ public class ShiftBoardSummary(
         await authorizer.RequireAsync(
             scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
+        // **The property's wall clock, not the operating day** — and this is the
+        // one place on this screen where those differ and the operating day
+        // would be wrong. This board asks *who is on shift at this moment*, so
+        // the date and the time have to be the two halves of one wall-clock
+        // reading: a property whose day rolls at 04:00 is still working the
+        // 02:00 of today's calendar, and pairing yesterday's operating day with
+        // 02:00 would read the wrong night's rota. ADR 0211 governs "what day is
+        // it"; this is "what time is it", and ADR 0174 governs that.
+        //
+        // It was the UTC date and the UTC time, so at +05:30 the board answered
+        // with the rota of five and a half hours ago.
+        var calendar = await PropertyCalendar.ForAsync(
+            directory, scope.PropertyId, cancellationToken);
+
         var now = clock.GetUtcNow();
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
+        var local = calendar.LocalAt(now);
+        var today = DateOnly.FromDateTime(local);
         var dates = ShiftCoverage.DatesCovering(today);
         var from = dates[0];
         var to = today.AddDays(1);
@@ -123,7 +140,7 @@ public class ShiftBoardSummary(
             .Select(cell => (Cell: cell, Hours: InForce(revisions, cell)))
             .ToList();
 
-        var time = TimeOnly.FromDateTime(now.UtcDateTime);
+        var time = TimeOnly.FromDateTime(local);
 
         var onNow = worked
             .Where(w => ShiftCoverage.Covers(w.Cell, w.Hours, today, time))
@@ -141,7 +158,7 @@ public class ShiftBoardSummary(
             OnNow: onNow.Select(w => w.Cell.StaffId).Distinct().Count(),
             Departments: onNow.Select(w => w.Cell.DepartmentCode).Distinct().Count(),
             Rows: rows,
-            NextChange: NextChange(worked, now, today, time));
+            NextChange: NextChange(worked, calendar, local, today, time));
     }
 
     /// <summary>One department-and-shift row, or nothing when it has no times.</summary>
@@ -179,15 +196,21 @@ public class ShiftBoardSummary(
     /// </remarks>
     private static Changeover? NextChange(
         IReadOnlyList<(ShiftAssignment Cell, ShiftHours? Hours)> worked,
-        DateTimeOffset now,
+        PropertyCalendar calendar,
+        DateTime local,
         DateOnly today,
         TimeOnly time)
     {
-        var horizon = now.UtcDateTime.AddDays(1);
+        // **Both sides of this comparison are the property's wall clock.**
+        // `ShiftCoverage.Boundaries` builds each moment from a cell's date and
+        // its hours — 07:00 at the property — and this compared them against
+        // `now` in UTC, so at +05:30 the next change was five and a half hours
+        // out and the board could call a finished shift current.
+        var horizon = local.AddDays(1);
 
         var next = worked
             .SelectMany(w => ShiftCoverage.Boundaries(w.Cell, w.Hours))
-            .Where(moment => moment > now.UtcDateTime && moment <= horizon)
+            .Where(moment => moment > local && moment <= horizon)
             .DefaultIfEmpty()
             .Min();
 
@@ -199,8 +222,11 @@ public class ShiftBoardSummary(
         var before = Covered(worked, today, time);
         var after = Covered(worked, DateOnly.FromDateTime(next), TimeOnly.FromDateTime(next));
 
+        // The instant that wall-clock moment IS at the property. It was
+        // `TimeSpan.Zero` — the property's 07:00 sent as 07:00Z, which every
+        // screen then rendered in its own zone as a different time entirely.
         return new Changeover(
-            new DateTimeOffset(next, TimeSpan.Zero),
+            calendar.At(DateOnly.FromDateTime(next), TimeOnly.FromDateTime(next)),
             On: after.Except(before).Count(),
             Off: before.Except(after).Count());
     }

@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
@@ -28,7 +29,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
             fixture.Scope(), Record(Guid.CreateVersion7(), "Speaks Arabic"), default);
 
         Assert.False(capability.Lapses);
-        Assert.Equal(ExpiryBand.DoesNotLapse, service.BandOf(capability));
+        Assert.Equal(ExpiryBand.DoesNotLapse, service.BandOf(capability, Today()));
     }
 
     [Fact]
@@ -44,7 +45,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         // The date is the discriminator — there is no `kind` to set, and so no
         // way to record an ability that carries an expiry.
         Assert.True(capability.Lapses);
-        Assert.Equal(ExpiryBand.Valid, service.BandOf(capability));
+        Assert.Equal(ExpiryBand.Valid, service.BandOf(capability, Today()));
     }
 
     [Theory]
@@ -95,7 +96,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
             Record(Guid.CreateVersion7(), "Pool lifeguard", Today().AddDays(3)),
             default);
 
-        Assert.Equal(ExpiryBand.Within7Days, service.BandOf(capability));
+        Assert.Equal(ExpiryBand.Within7Days, service.BandOf(capability, Today()));
 
         var renewed = await service.AmendAsync(
             scope,
@@ -107,7 +108,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
             },
             default);
 
-        Assert.Equal(ExpiryBand.Valid, service.BandOf(renewed));
+        Assert.Equal(ExpiryBand.Valid, service.BandOf(renewed, Today()));
         Assert.Equal(2, renewed.Version);
     }
 
@@ -171,7 +172,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         await service.RecordAsync(scope, Record(staff, "Later card", Today().AddDays(200)), default);
         await service.RecordAsync(scope, Record(staff, "Speaks Tamil"), default);
 
-        var attention = await service.AttentionAsync(scope, new AttentionQuery(), default);
+        var attention = await service.AttentionAsync(scope, new AttentionQuery(), Today(), default);
         var mine = attention.Where(c => c.StaffId == staff).ToList();
 
         // The expired one is on the list: a certificate that has lapsed does not
@@ -202,7 +203,7 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
         await service.RecordAsync(scope, Record(unposted, "Other card", Today().AddDays(5)), default);
 
         var spa = await service.AttentionAsync(
-            scope, new AttentionQuery { DepartmentCode = "spa" }, default);
+            scope, new AttentionQuery { DepartmentCode = "spa" }, Today(), default);
 
         // ADR 0116 §6: department membership derives from postings only, which is
         // why this application can answer "whose people are these" at all — and
@@ -326,14 +327,25 @@ public class CapabilityCharacterisationTests(WorkforceFixture fixture)
     {
         authorizer = new RecordingAuthorizer();
         var db = fixture.Context();
+        var directory = new StaffDirectoryDouble();
+
+        // One directory, named, rather than three fresh doubles. They were
+        // already three — the posting service's, the announcer's and the team
+        // service's — so a test setting a zone or a name on one would have been
+        // configuring an object the other two had never heard of.
+        //
+        // What day it is comes from `IOperatingDay` now (ADR 0211), and
+        // `CalendarOperatingDay` over this directory's `"UTC"` default answers
+        // what these services worked out for themselves before.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
 
         return (
             new CapabilityService(db, authorizer, TimeProvider.System),
             new PostingService(
-                db, authorizer, new StaffDirectoryDouble(),
-                new PostingAnnouncer(new RecordingEventAppender(), new StaffDirectoryDouble()),
-                new TeamService(
-                    db, authorizer, new StaffDirectoryDouble(), TimeProvider.System),
+                db, authorizer, directory,
+                new PostingAnnouncer(new RecordingEventAppender(), directory),
+                new TeamService(db, authorizer, directory, days, TimeProvider.System),
+                days,
                 TimeProvider.System));
     }
 }

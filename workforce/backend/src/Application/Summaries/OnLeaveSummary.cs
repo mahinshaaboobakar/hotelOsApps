@@ -57,7 +57,7 @@ public class OnLeaveSummary(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
     IStaffDirectory directory,
-    TimeProvider clock)
+    IOperatingDay days)
 {
     /// <summary>The week this looks over, today included.</summary>
     private const int Days = 7;
@@ -72,7 +72,10 @@ public class OnLeaveSummary(
         await authorizer.RequireAsync(
             scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // ADR 0211 — who is away "today" is a question about the property's day.
+        var today = OperatingDay.OrUnavailable(
+            await days.TodayAsync(scope, cancellationToken));
+
         var horizon = today.AddDays(Days - 1);
 
         var away = await db.LeaveRequests

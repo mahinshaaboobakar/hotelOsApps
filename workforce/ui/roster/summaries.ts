@@ -97,9 +97,15 @@ export const recordedAttendanceToday: AttendanceToday = {
     row("FO", null, 1, "count", "bad", "attendance?department=FO",
       { context: { count: 6, word: "rostered" } }),
   ],
+  // The shift's start is on the row again — `64g` §5, ruled sent. It was in the
+  // drawing, was taken out of this fixture because the wire did not carry it,
+  // and `WidgetViews` now sends it from `LateArrival.ExpectedAt`. Two different
+  // starts, so a card drawing one for both rows fails rather than passes.
   lateIn: [
-    row("S. Kumar", "HK", 22, "minutes", "warn", "attendance?department=HK"),
-    row("A. Fernandes", "KIT", 14, "minutes", "warn", "attendance?department=KIT"),
+    row("S. Kumar", "HK", 22, "minutes", "warn", "attendance?department=HK",
+      { at: "07:00" }),
+    row("A. Fernandes", "KIT", 14, "minutes", "warn", "attendance?department=KIT",
+      { at: "15:00" }),
   ],
 };
 

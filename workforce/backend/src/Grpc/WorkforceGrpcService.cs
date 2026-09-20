@@ -1,3 +1,4 @@
+using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Contracts.V1;
@@ -28,12 +29,26 @@ namespace HotelOS.Workforce.Grpc;
 /// business decisions, including who may make them, belong one layer in —
 /// CLAUDE.md §"No business logic in API routes".
 /// </para>
+/// <para>
+/// <b>A <c>using</c> is per FILE, not per partial class.</b> The split here is
+/// deliberate — one partial per subject — and that makes it the shape where
+/// this bites: a dependency added to the constructor in this file is used in a
+/// sibling partial, and the sibling needs its own import for the same
+/// namespace. ADR 0211's <c>IOperatingDay</c> arrived that way, in this file's
+/// constructor and in <c>.Capabilities.cs</c>'s body, and neither imported
+/// <c>Application.Abstractions</c> — the estate's consumer check reported this
+/// application broken until both did.
+/// </para>
 /// </remarks>
 public partial class WorkforceGrpcService(
     PostingService postings,
-    CapabilityService capabilities)
+    CapabilityService capabilities,
+    IOperatingDay days)
     : WorkforceService.WorkforceServiceBase
 {
     private readonly PostingService postings = postings;
     private readonly CapabilityService capabilities = capabilities;
+
+    /// <summary>What day it is at the property — ADR 0211, asked once per request.</summary>
+    private readonly IOperatingDay days = days;
 }

@@ -1,4 +1,6 @@
 using HotelOS.Platform;
+using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Domain;
 using HotelOS.Workforce.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +44,7 @@ namespace HotelOS.Workforce.Application.Shifts;
 public class ShiftBoundaryAnnouncer(
     WorkforceDbContext db,
     IEventAppender events,
+    IStaffDirectory directory,
     TimeProvider clock)
 {
     /// <summary>
@@ -73,8 +76,21 @@ public class ShiftBoundaryAnnouncer(
     public async Task<int> AnnounceDueAsync(
         RequestScope scope, CancellationToken cancellationToken)
     {
+        // **The property's wall clock, not the operating day.** A shift's hours
+        // are wall-clock times there, so "has 07:00 passed" is a question about
+        // the property's own clock — ADR 0174, and the same distinction the
+        // shift board needed. ADR 0211's operating day is the answer to *which
+        // day is it*, which is not what a boundary is compared against.
+        //
+        // Both sides were UTC, so at +05:30 a 07:00 start was announced as due
+        // at 12:30 local, and every consumer of `shift.started` was five and a
+        // half hours late.
+        var calendar = await PropertyCalendar.ForAsync(
+            directory, scope.PropertyId, cancellationToken);
+
         var now = clock.GetUtcNow();
-        var today = DateOnly.FromDateTime(now.UtcDateTime);
+        var local = calendar.LocalAt(now);
+        var today = DateOnly.FromDateTime(local);
         var from = today.AddDays(-LookbackDays);
 
         var cells = await db.ShiftAssignments
@@ -103,7 +119,7 @@ public class ShiftBoundaryAnnouncer(
 
         var appended = 0;
 
-        foreach (var due in Due(worked, now))
+        foreach (var due in Due(worked, calendar, local))
         {
             var key = (due.DepartmentCode, due.CatalogueEntryId, due.BusinessDate, due.Kind);
 
@@ -112,7 +128,7 @@ public class ShiftBoundaryAnnouncer(
                 continue;
             }
 
-            Announce(scope, due, worked, now);
+            Announce(scope, due, worked, calendar, now);
             appended++;
         }
 
@@ -130,8 +146,17 @@ public class ShiftBoundaryAnnouncer(
     /// coming on at seven is one fact about Housekeeping, and nine events would
     /// be nine consumers doing the same aggregation the wrong way.
     /// </remarks>
+    /// <remarks>
+    /// <b>The comparison is wall clock against wall clock</b>, and the instant
+    /// it yields is that moment converted through the property's zone. It used
+    /// to build each boundary at <c>TimeSpan.Zero</c> and compare it against a
+    /// UTC now, which at +05:30 made every announcement five and a half hours
+    /// late and stamped each event with an instant the property never saw.
+    /// </remarks>
     private static IEnumerable<DueBoundary> Due(
-        IReadOnlyList<(ShiftAssignment Cell, ShiftHours? Hours)> worked, DateTimeOffset now)
+        IReadOnlyList<(ShiftAssignment Cell, ShiftHours? Hours)> worked,
+        PropertyCalendar calendar,
+        DateTime local)
     {
         var seen = new HashSet<(string, Guid, DateOnly, ShiftBoundaryKind)>();
 
@@ -144,12 +169,15 @@ public class ShiftBoundaryAnnouncer(
                 // Boundaries come out in span order — start, end, start, end —
                 // so an even index is a start.
                 var kind = i % 2 == 0 ? ShiftBoundaryKind.Started : ShiftBoundaryKind.Ended;
-                var at = new DateTimeOffset(moments[i], TimeSpan.Zero);
 
-                if (at > now)
+                if (moments[i] > local)
                 {
                     continue;
                 }
+
+                // The instant that wall-clock moment IS at the property.
+                var at = calendar.At(
+                    DateOnly.FromDateTime(moments[i]), TimeOnly.FromDateTime(moments[i]));
 
                 var key = (cell.DepartmentCode, cell.CatalogueEntryId, cell.Date, kind);
 
@@ -167,19 +195,26 @@ public class ShiftBoundaryAnnouncer(
         RequestScope scope,
         DueBoundary due,
         IReadOnlyList<(ShiftAssignment Cell, ShiftHours? Hours)> worked,
+        PropertyCalendar calendar,
         DateTimeOffset now)
     {
         // Coverage **immediately after** the boundary, which is what a consumer
         // sets its presence from. At a handover the ended and started events
         // both carry this number, so the boolean is right whichever arrives
         // last.
+        // **Read at the property's own clock.** `due.At` is an instant now, and
+        // a shift's hours are wall-clock times: asking who is covered used the
+        // instant's UTC face, which is a different time of day everywhere but
+        // Greenwich.
+        var when = calendar.LocalAt(due.At);
+
         var onNowAfter = worked
             .Where(w => w.Cell.DepartmentCode == due.DepartmentCode)
             .Where(w => ShiftCoverage.Covers(
                 w.Cell,
                 w.Hours,
-                DateOnly.FromDateTime(due.At.UtcDateTime),
-                TimeOnly.FromDateTime(due.At.UtcDateTime)))
+                DateOnly.FromDateTime(when),
+                TimeOnly.FromDateTime(when)))
             .Select(w => w.Cell.StaffId)
             .Distinct()
             .Count();

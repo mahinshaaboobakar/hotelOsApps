@@ -377,7 +377,20 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
         Assert.Equal("Morning", shift.GetProperty("name").GetString());
         Assert.Equal("M", shift.GetProperty("code").GetString());
         Assert.Equal("working", shift.GetProperty("kind").GetString());
-        Assert.Equal("0 assignments", shift.GetProperty("inUse").GetString());
+
+        // **This asserted `"0 assignments"`** — an English noun composed here,
+        // with the figure in the service's own culture inside it, so a property
+        // writing `1.234` read `1234` and the word could not be said in any
+        // other language (NUM-Q1, ADR 0174). The screen writes the sentence now
+        // and this carries the count. Recorded rather than quietly replaced:
+        // the old assertion is what shows the change was deliberate (ADR 0034).
+        Assert.Equal(JsonValueKind.Number, shift.GetProperty("inUse").ValueKind);
+        Assert.Equal(0, shift.GetProperty("inUse").GetInt32());
+
+        // And the tone the rota already draws this shift in, which this read
+        // never sent at all — both screens rendered `row.tone` and only the
+        // fixture had it, so a real property drew `undefined` as a class.
+        Assert.Equal("brand", shift.GetProperty("tone").GetString());
     }
 
     [Fact]
@@ -517,11 +530,26 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
             AttendanceView.Day, scope, "day",
             new { date = day.ToString("yyyy-MM-dd"), department = "FO" });
 
+        // **The day as a day.** This read `"Friday 28 August · business day"`,
+        // built here with `ToString("dddd d MMMM")` — a weekday and a month
+        // name in whatever culture this service runs under, on every property's
+        // screen, with the clause welded on after it (ADR 0175).
+        Assert.Equal("2026-08-28", answer.GetProperty("date").GetString());
+
         var row = answer.GetProperty("rows")[0];
         Assert.Equal("Anjali Menon", row.GetProperty("who").GetString());
         Assert.Equal("07:20", row.GetProperty("in").GetString());
         Assert.Equal("15:10", row.GetProperty("out").GetString());
-        Assert.Equal("Late 20 min", row.GetProperty("against").GetString());
+
+        // **This asserted `against` = `"Late 20 min"`** — a sentence composed
+        // here, with the number and its unit inside it, so a property in
+        // another language read this server's English AND the screen counted
+        // late people with `against.startsWith("Late")`: the service's own
+        // prose parsed back as data (NUM-Q1, ADR 0174). The state is a word
+        // this service owns and the minutes are a number; the screen writes the
+        // sentence. Recorded rather than replaced (ADR 0034).
+        Assert.Equal("late", row.GetProperty("state").GetString());
+        Assert.Equal(20, row.GetProperty("lateBy").GetInt32());
         Assert.Equal("warn", row.GetProperty("tone").GetString());
         Assert.Equal("manual", row.GetProperty("source").GetString());
     }
@@ -549,7 +577,14 @@ public class ModuleSurfaceTests(WorkforceFixture fixture)
             new { date = day.ToString("yyyy-MM-dd"), department = "FO" });
 
         var row = answer.GetProperty("rows")[0];
-        Assert.Equal("Absent", row.GetProperty("against").GetString());
+
+        // `against` = `"Absent"` until 2026-09-20: the word this service chose,
+        // in this service's language (ADR 0174). It is a state the screen says
+        // in its own words now, and `lateBy` is null because *not applicable*
+        // is not *no minutes* — a zero there would be somebody who arrived
+        // exactly on time, which is `onTime`.
+        Assert.Equal("absent", row.GetProperty("state").GetString());
+        Assert.Equal(JsonValueKind.Null, row.GetProperty("lateBy").ValueKind);
 
         // Nobody entered an absence, so nothing wrote it — "manual" here would
         // attribute a record to a person who made none.

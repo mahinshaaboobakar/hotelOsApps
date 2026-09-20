@@ -28,6 +28,7 @@ public class LeaveService(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
     ApproverResolver approvers,
+    IOperatingDay days,
     TimeProvider clock)
 {
     /// <summary>Raise a request, for oneself or on somebody's behalf.</summary>
@@ -65,10 +66,14 @@ public class LeaveService(
             // Resolved now rather than at decision time: a request that changed
             // hands because a posting moved while it waited is one nobody is
             // accountable for.
+            // The approver as the posting stands on the property's own day —
+            // ADR 0211. This was the UTC day, so a posting that changed hands
+            // at midnight local was read a day late, and a request could be
+            // sent to the person who had just stopped being responsible.
             ApproverStaffId = await approvers.ResolveAsync(
                 scope.PropertyId,
                 command.StaffId,
-                DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime),
+                OperatingDay.OrUnavailable(await days.TodayAsync(scope, cancellationToken)),
                 cancellationToken),
 
             CreatedAt = now,
@@ -205,7 +210,12 @@ public class LeaveService(
             LeaveTypeId = command.LeaveTypeId,
             Days = command.Days,
             Kind = LeaveLedgerKind.Adjustment,
-            OccurredOn = DateOnly.FromDateTime(now.UtcDateTime),
+
+            // The day the correction happened AT THE PROPERTY — ADR 0211. A
+            // ledger row is read back as "what happened on the 3rd", and the
+            // UTC day put an evening correction in Guatemala on the next one.
+            OccurredOn = OperatingDay.OrUnavailable(
+                await days.TodayAsync(scope, cancellationToken)),
             RecordedByUserId = scope.UserId,
             Note = note,
             CreatedAt = now,
@@ -236,6 +246,47 @@ public class LeaveService(
             .ToListAsync(cancellationToken);
 
         return sums.ToDictionary(s => s.TypeId, s => s.Days);
+    }
+
+    /// <summary>What several people have, by person and type — one query.</summary>
+    /// <remarks>
+    /// <para>
+    /// For the approver's queue, which shows the balance a decision would leave
+    /// behind (owner, 2026-09-20, `64g` §4 B). Asking <see cref="BalancesAsync"/>
+    /// per row would be a round trip and an authorization per person, for one
+    /// screen that already knows every person it is about — CLAUDE.md's
+    /// per-round-trip review of a hot path.
+    /// </para>
+    /// <para>
+    /// Summed here as they are there, and a person with no ledger row is absent
+    /// from the result rather than present with a zero: nothing has been posted
+    /// for them, and a zero is a claim that something was.
+    /// </para>
+    /// </remarks>
+    /// <param name="scope">Who is asking, and where.</param>
+    /// <param name="staffIds">The people.</param>
+    /// <param name="cancellationToken">Cancellation.</param>
+    /// <returns>The balance for each person and type that has one.</returns>
+    public async Task<IReadOnlyDictionary<(Guid StaffId, Guid TypeId), decimal>> BalancesForAsync(
+        RequestScope scope,
+        IReadOnlyCollection<Guid> staffIds,
+        CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
+
+        if (staffIds.Count == 0)
+        {
+            return new Dictionary<(Guid, Guid), decimal>();
+        }
+
+        var sums = await db.LeaveLedger
+            .Where(e => e.PropertyId == scope.PropertyId && staffIds.Contains(e.StaffId))
+            .GroupBy(e => new { e.StaffId, e.LeaveTypeId })
+            .Select(g => new { g.Key.StaffId, g.Key.LeaveTypeId, Days = g.Sum(e => e.Days) })
+            .ToListAsync(cancellationToken);
+
+        return sums.ToDictionary(s => (s.StaffId, s.LeaveTypeId), s => s.Days);
     }
 
     /// <summary>The requests waiting on one approver.</summary>

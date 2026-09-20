@@ -65,7 +65,7 @@ public sealed record AttendanceTodayView(
 public class AttendanceTodaySummary(
     DayComparison comparison,
     IStaffDirectory directory,
-    TimeProvider clock)
+    IOperatingDay days)
 {
     /// <summary>How today's rota and today's attendance compare.</summary>
     /// <param name="scope">The caller.</param>
@@ -74,7 +74,11 @@ public class AttendanceTodaySummary(
     public async Task<AttendanceTodayView> ReadAsync(
         RequestScope scope, CancellationToken cancellationToken)
     {
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // The property's operating day — ADR 0211. This was the UTC calendar
+        // day, so the widget that says who is in today said it about yesterday
+        // for the first five and a half hours of every Indian morning.
+        var today = OperatingDay.OrUnavailable(
+            await days.TodayAsync(scope, cancellationToken));
 
         // `DayComparison` authorizes with `roster.read`, so this does not ask a
         // second time: two checks for one read is one place for them to disagree.

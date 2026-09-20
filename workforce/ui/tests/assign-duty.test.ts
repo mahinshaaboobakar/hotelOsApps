@@ -27,14 +27,18 @@ interface Sent {
   params: unknown;
 }
 
-function host(sent: Sent[], refuse?: HostCallError): HostApi {
+function host(
+  sent: Sent[],
+  refuse?: HostCallError,
+  timezone: string | null = "Asia/Kolkata",
+): HostApi {
   return {
     identity: {
       id: "workforce",
       version: "0.1.0",
       capabilities: ["roster.read", "duty.assign"],
     },
-    property: { timezone: "Asia/Kolkata", locale: "en-IN" },
+    property: { timezone, locale: "en-IN" },
     call: (capability: string, method: string, params?: unknown) => {
       if (method === "register") return Promise.resolve(recordedRegister);
       if (capability === "roster.read") {
@@ -64,9 +68,13 @@ function find<T extends HTMLElement>(root: HTMLElement, selector: string, text: 
   return hit;
 }
 
-async function dialog(sent: Sent[], refuse?: HostCallError): Promise<HTMLElement> {
+async function dialog(
+  sent: Sent[],
+  refuse?: HostCallError,
+  timezone?: string | null,
+): Promise<HTMLElement> {
   const root = document.createElement("div");
-  activate(host(sent, refuse)).mount(root);
+  activate(host(sent, refuse, timezone)).mount(root);
   await settle();
 
   find(root, ".head .tab", "Duty").click();
@@ -156,6 +164,62 @@ describe("assigning a duty", () => {
     // Instants on the wire, and the two ends really do cross midnight.
     expect(new Date(params.to).getTime())
       .toBeGreaterThan(new Date(params.from).getTime());
+  });
+
+  it("times the duty at the property, not on the machine that drew it", async () => {
+    // **Two properties, one typed string.** `datetime-local` holds wall clock
+    // with no zone, and `new Date("2026-08-28T20:00")` reads it in the zone of
+    // whatever machine the desktop is running on — correct on a machine set to
+    // the property's own zone, and hours out on any other, silently.
+    //
+    // The fixture is chosen so the two candidates disagree: a single machine
+    // cannot be in both zones, so this cannot pass by coincidence of where it
+    // is run. A test using only the property's own zone would have passed on a
+    // developer's machine in India with the conversion removed.
+    const sentIn: Sent[] = [];
+    const sentUs: Sent[] = [];
+
+    const india = await dialog(sentIn, undefined, "Asia/Kolkata");
+    const america = await dialog(sentUs, undefined, "America/New_York");
+
+    for (const [root, sent] of [[india, sentIn], [america, sentUs]] as const) {
+      root.querySelector<HTMLButtonElement>("button.pk")!.click();
+      type(root, 0, "2026-08-28T20:00");
+      type(root, 1, "2026-08-29T08:00");
+      await settle();
+
+      find<HTMLButtonElement>(root, ".acts button.btn", "Assign duty").click();
+      await settle();
+
+      expect(sent).toHaveLength(1);
+    }
+
+    const at = (sent: Sent[]): string => (sent[0]!.params as { from: string }).from;
+
+    // 20:00 at +05:30, and 20:00 at −04:00 — the same wall clock, two moments.
+    expect(at(sentIn)).toBe("2026-08-28T14:30:00.000Z");
+    expect(at(sentUs)).toBe("2026-08-29T00:00:00.000Z");
+  });
+
+  it("waits rather than timing a duty in a zone nobody answered", async () => {
+    // Absent is an answer. With no zone there is no instant to send, so the
+    // write is not offered and the reason is on the button — rather than the
+    // machine's own zone standing in for a measurement nobody took.
+    const sent: Sent[] = [];
+    const root = await dialog(sent, undefined, null);
+
+    root.querySelector<HTMLButtonElement>("button.pk")!.click();
+    type(root, 0, "2026-08-28T20:00");
+    type(root, 1, "2026-08-29T08:00");
+    await settle();
+
+    expect(root.querySelector(".acts .note")?.textContent)
+      .toBe("This property's timezone has not been read yet");
+
+    find<HTMLButtonElement>(root, ".acts button.btn", "Assign duty").click();
+    await settle();
+
+    expect(sent).toHaveLength(0);
   });
 
   it("keeps the dialog open on a refusal, carrying the reason", async () => {

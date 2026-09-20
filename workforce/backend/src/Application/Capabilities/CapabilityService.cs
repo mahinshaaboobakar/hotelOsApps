@@ -164,13 +164,25 @@ public class CapabilityService(
     /// three without three round trips.
     /// </para>
     /// </remarks>
+    /// <param name="scope">The caller.</param>
+    /// <param name="query">Which department, if one.</param>
+    /// <param name="today">
+    /// The property's operating day — ADR 0211, taken by the caller rather than
+    /// read here. This computed it from <c>clock.GetUtcNow()</c>, which is the
+    /// UTC calendar day and names the wrong day at every property for part of
+    /// every day. The caller holds it so one request answers from one day, the
+    /// same reason <see cref="BandOf"/> takes it.
+    /// </param>
+    /// <param name="cancellationToken">Cancellation.</param>
     public async Task<IReadOnlyList<Capability>> AttentionAsync(
-        RequestScope scope, AttentionQuery query, CancellationToken cancellationToken)
+        RequestScope scope,
+        AttentionQuery query,
+        DateOnly today,
+        CancellationToken cancellationToken)
     {
         await authorizer.RequireAsync(
             scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
-        var today = Today();
         var horizon = today.AddDays(60);
 
         var capabilities = db.Capabilities.Where(
@@ -222,17 +234,27 @@ public class CapabilityService(
             .ToListAsync(cancellationToken);
     }
 
-    /// <summary>The band a capability is in today, at this property.</summary>
+    /// <summary>The band a capability is in on a day at this property.</summary>
     /// <remarks>
-    /// On the service rather than computed by each caller, so one clock decides
-    /// it. Two callers reading the same row on the same day must not disagree
-    /// about whether it has expired.
+    /// <para>
+    /// <b>The day is the caller's to supply, and it is the property's operating
+    /// day</b> — ADR 0211. This used to read a clock here, which made it the UTC
+    /// calendar day: a certificate expiring today read as expired from 18:30 the
+    /// evening before at a Kolkata property.
+    /// </para>
+    /// <para>
+    /// The old remark said computing it here stopped two callers disagreeing.
+    /// It did the opposite — a caller that already held the property's day
+    /// passed it to <c>BandOn</c> while this one used UTC's, so the same row
+    /// could be drawn two ways on one screen. One day, obtained once per
+    /// request, is what actually makes them agree.
+    /// </para>
     /// </remarks>
     /// <param name="capability">The capability to judge.</param>
+    /// <param name="today">The property's operating day.</param>
     /// <returns>Its band.</returns>
-    public ExpiryBand BandOf(Capability capability) => capability.BandOn(Today());
-
-    private DateOnly Today() => DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+    public ExpiryBand BandOf(Capability capability, DateOnly today)
+        => capability.BandOn(today);
 
     private static IQueryable<Capability> Ordered(IQueryable<Capability> capabilities) =>
         capabilities.OrderBy(c => c.Name).ThenBy(c => c.ValidUntil);

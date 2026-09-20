@@ -62,9 +62,28 @@ public static class LeaveView
             ? await leave.BalancesAsync(call.Scope, person, cancellationToken)
             : new Dictionary<Guid, decimal>();
 
+        // **What the approver decides with** — owner, 2026-09-20, `64g` §4 B:
+        // the balance a decision would leave behind, and who else is already
+        // away then. Both are read once for the whole queue rather than per
+        // row: a decision panel that opened a query per person would be a
+        // round trip per glance.
+        var held = await leave.BalancesForAsync(
+            call.Scope, waiting.Select(one => one.StaffId).Distinct().ToList(), cancellationToken);
+
+        // The window every waiting request touches, so one read answers "who
+        // else is off" for all of them. Empty queue, no window, no query.
+        var alsoOff = waiting.Count == 0
+            ? []
+            : await leave.ApprovedBetweenAsync(
+                call.Scope,
+                waiting.Min(one => one.From),
+                waiting.Max(one => one.To),
+                cancellationToken);
+
         var people = waiting.Select(one => one.StaffId)
             .Concat(proposals.Select(one => one.ProposerStaffId))
             .Concat(proposals.Select(one => one.ColleagueStaffId))
+            .Concat(alsoOff.Select(one => one.StaffId))
             .Distinct()
             .ToList();
 
@@ -96,7 +115,7 @@ public static class LeaveView
                 accruesPerMonth = type.AccrualPerMonth,
             }).ToList(),
             requests = mine.Select(one => Request(one, byId)).ToList(),
-            waiting = Queue(waiting, proposals, byId, names),
+            waiting = Queue(waiting, proposals, byId, names, held, alsoOff),
             // The swap detail pane is the open proposal's, and there is no open
             // proposal until somebody picks one. Null rather than the first in
             // the queue: a pane that opened itself onto a decision is a decision
@@ -280,11 +299,24 @@ public static class LeaveView
     };
 
     /// <summary>One of somebody's own requests.</summary>
+    /// <remarks>
+    /// <b>The id and the version travel with the row</b>, because withdrawing
+    /// one needs both: <c>leave.request · withdraw</c> takes an id and the
+    /// version it expects. Without them the screen could draw a Withdraw
+    /// control it could never send — the write needing something the read does
+    /// not carry, which is why no such control exists today.
+    /// </remarks>
     private static object Request(LeaveRequest request, IReadOnlyDictionary<Guid, LeaveType> types)
         => new
         {
+            id = request.Id,
+            version = request.Version,
             type = types.TryGetValue(request.LeaveTypeId, out var type) ? type.Name : null,
-            note = string.IsNullOrWhiteSpace(request.Note) ? "—" : request.Note,
+            // **Null, never "—".** A dash is a rendering, and the screen was
+            // reading it back — `row.note !== "—"` — so the service's choice of
+            // punctuation decided what a screen drew. Absent is absent; the
+            // screen draws the dash if it wants one.
+            note = string.IsNullOrWhiteSpace(request.Note) ? null : request.Note,
             dates = Dates(request.From, request.To),
             days = request.Days,
             state = request.State.ToString(),
@@ -295,10 +327,19 @@ public static class LeaveView
         IReadOnlyList<LeaveRequest> leave,
         IReadOnlyList<SwapProposal> swaps,
         IReadOnlyDictionary<Guid, LeaveType> types,
-        IReadOnlyDictionary<Guid, string> names)
+        IReadOnlyDictionary<Guid, string> names,
+        IReadOnlyDictionary<(Guid StaffId, Guid TypeId), decimal> held,
+        IReadOnlyList<LeaveRequest> approved)
     {
         var rows = leave.Select(one => (object)new
         {
+            // **The id and the version.** Approve, decline and withdraw all
+            // name a request and the version they expect, and this read carried
+            // neither — so the approver's queue could show rows and never offer
+            // a decision on one. The owner's ruled panel (`64g` §4, option B)
+            // needs them before it can be built at all.
+            id = one.Id,
+            version = one.Version,
             who = names.TryGetValue(one.StaffId, out var name) ? name : null,
             // **The type and the number, never the sentence** — NUM-Q1, ADR
             // 0174. This composed `type + " · " + days + " days"`: a number, a
@@ -308,10 +349,42 @@ public static class LeaveView
             days = one.Days,
             kind = "Leave",
             dates = Dates(one.From, one.To),
+
+            // **What the decision would leave behind**, and what the person
+            // wrote. Numbers, never a sentence: the screen says "9 of 24 days"
+            // in the property's own number format (NUM-Q1, ADR 0174).
+            //
+            // `balance` is what they hold now and may be negative — an approved
+            // overdraw is a real state under `WF-Q5` — so `after` is stated
+            // rather than clamped. Null when nothing has ever been posted for
+            // that person and type: a zero would claim something was.
+            balance = held.TryGetValue((one.StaffId, one.LeaveTypeId), out var days)
+                ? days
+                : (decimal?)null,
+            after = held.TryGetValue((one.StaffId, one.LeaveTypeId), out var standing)
+                ? standing - one.Days
+                : (decimal?)null,
+            note = string.IsNullOrWhiteSpace(one.Note) ? null : one.Note,
+
+            // Who else is already away across these dates — the fact an
+            // approver is actually weighing. It excludes this request's own
+            // person: "also off" means somebody else.
+            alsoOff = approved
+                .Where(other => other.StaffId != one.StaffId
+                                && other.From <= one.To
+                                && one.From <= other.To)
+                .Select(other => names.TryGetValue(other.StaffId, out var who) ? who : null)
+                .Where(who => who is not null)
+                .Distinct()
+                .ToList(),
         }).ToList();
 
         rows.AddRange(swaps.Select(one => (object)new
         {
+            // The swap's own id and version, for the same reason: `swap.approve`
+            // names a proposal and the version it expects.
+            id = one.Id,
+            version = one.Version,
             who = Pair(one, names),
             what = "Swap — accepted, awaiting you",
             kind = "Swap",

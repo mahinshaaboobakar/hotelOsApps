@@ -27,8 +27,15 @@ export interface CatalogueRow {
   tone: "brand" | "ok" | "warn" | "bad" | "neutral";
   kind: "working" | "off";
 
-  /** How many assignments reference it — the reason a retire is not a delete. */
-  inUse: string;
+  /**
+   * How many assignments reference it — the reason a retire is not a delete.
+   *
+   * A number. It arrived as `"88 assignments"`: an English noun composed in a
+   * service with the figure written in the service's own culture inside it, so
+   * a property that writes `1.234` read `1234`, and the word could not be said
+   * in any other language (NUM-Q1, ADR 0174).
+   */
+  inUse: number;
 }
 
 /** A leave type and how it accrues. */
@@ -76,34 +83,34 @@ export const recordedPolicy: Policy = {
     {
       name: "Morning", code: "M",
       hours: { from: "07:00", to: "15:00" }, second: null,
-      colour: "Cyan", tone: "brand", kind: "working", inUse: "412 assignments"
+      colour: "Cyan", tone: "brand", kind: "working", inUse: 412
     },
     {
       name: "Afternoon", code: "A",
       hours: { from: "15:00", to: "23:00" }, second: null,
-      colour: "Indigo", tone: "brand", kind: "working", inUse: "380 assignments"
+      colour: "Indigo", tone: "brand", kind: "working", inUse: 380
     },
     {
       name: "Night", code: "N",
       hours: { from: "23:00", to: "07:00" }, second: null,
       // Neutral: the service's table has no Violet, and the fixture carries
       // what the wire would, not what the old swatch() drew (brand).
-      colour: "Violet", tone: "neutral", kind: "working", inUse: "196 assignments"
+      colour: "Violet", tone: "neutral", kind: "working", inUse: 196
     },
     {
       name: "Split — Banquet", code: "SB",
       hours: { from: "10:00", to: "14:00" },
       second: { from: "18:00", to: "22:00" },
-      colour: "Amber", tone: "warn", kind: "working", inUse: "44 assignments"
+      colour: "Amber", tone: "warn", kind: "working", inUse: 44
     },
     {
       name: "General", code: "G",
       hours: { from: "09:00", to: "18:00" }, second: null,
-      colour: "Emerald", tone: "ok", kind: "working", inUse: "88 assignments"
+      colour: "Emerald", tone: "ok", kind: "working", inUse: 88
     },
     {
       name: "Week-off", code: "OFF", hours: null, second: null,
-      colour: "None", tone: "neutral", kind: "off", inUse: "203 assignments"
+      colour: "None", tone: "neutral", kind: "off", inUse: 203
     },
   ],
 

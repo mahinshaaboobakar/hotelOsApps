@@ -36,7 +36,7 @@ function leaveHost(): HostApi {
 
 async function leaveForm(): Promise<HTMLElement> {
   const main = document.createElement("main");
-  await leave(leaveHost(), main, "Requests", () => {}, true);
+  await leave(leaveHost(), main, "Requests", () => {}, { dialog: true });
   // A sheet since O1 — the person is composing a request (§9).
   const form = main.querySelector(".sheet");
   if (form === null) throw new Error("the leave form did not open");

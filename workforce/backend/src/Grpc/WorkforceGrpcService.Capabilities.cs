@@ -1,6 +1,7 @@
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using HotelOS.Platform;
+using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Contracts.V1;
@@ -40,7 +41,7 @@ public partial class WorkforceGrpcService
             },
             context.CancellationToken);
 
-        return ToView(capability);
+        return ToView(capability, await TodayAsync(scope, context.CancellationToken));
     }
 
     /// <inheritdoc />
@@ -69,7 +70,7 @@ public partial class WorkforceGrpcService
             },
             context.CancellationToken);
 
-        return ToView(capability);
+        return ToView(capability, await TodayAsync(scope, context.CancellationToken));
     }
 
     /// <inheritdoc />
@@ -101,7 +102,7 @@ public partial class WorkforceGrpcService
             new ListCapabilitiesQuery { StaffId = ParseOptionalId(request.StaffId, "staff_id") },
             context.CancellationToken);
 
-        return Response(found);
+        return Response(found, await TodayAsync(scope, context.CancellationToken));
     }
 
     /// <inheritdoc />
@@ -109,6 +110,11 @@ public partial class WorkforceGrpcService
         ListAttentionRequest request, ServerCallContext context)
     {
         var scope = request.Context.ToScope(CallerContext.Get(context));
+
+        // One day for the whole request: the window this selects on and the band
+        // each row reports are the same question, and reading it twice is how
+        // they disagree across midnight.
+        var today = await TodayAsync(scope, context.CancellationToken);
 
         var found = await capabilities.AttentionAsync(
             scope,
@@ -118,9 +124,10 @@ public partial class WorkforceGrpcService
                     ? null
                     : request.DepartmentCode,
             },
+            today,
             context.CancellationToken);
 
-        return Response(found);
+        return Response(found, today);
     }
 
     /// <inheritdoc />
@@ -130,18 +137,28 @@ public partial class WorkforceGrpcService
         var scope = request.Context.ToScope(CallerContext.Get(context));
         var found = await capabilities.RegisterAsync(scope, context.CancellationToken);
 
-        return Response(found);
+        return Response(found, await TodayAsync(scope, context.CancellationToken));
     }
 
-    private ListCapabilitiesResponse Response(IReadOnlyList<Capability> found)
+    /// <summary>The property's operating day, or a failure — ADR 0211.</summary>
+    /// <remarks>
+    /// Asked once per RPC and passed down, so every row in one answer is judged
+    /// against one day. A band computed per row from a clock could put two
+    /// answers in one response across a midnight.
+    /// </remarks>
+    private async Task<DateOnly> TodayAsync(
+        RequestScope scope, CancellationToken cancellationToken)
+        => OperatingDay.OrUnavailable(await days.TodayAsync(scope, cancellationToken));
+
+    private ListCapabilitiesResponse Response(IReadOnlyList<Capability> found, DateOnly today)
     {
         var response = new ListCapabilitiesResponse();
-        response.Capabilities.AddRange(found.Select(ToView));
+        response.Capabilities.AddRange(found.Select(one => ToView(one, today)));
 
         return response;
     }
 
-    private CapabilityView ToView(Capability capability) => new()
+    private CapabilityView ToView(Capability capability, DateOnly today) => new()
     {
         Id = capability.Id.ToString(),
         PropertyId = capability.PropertyId.ToString(),
@@ -150,10 +167,11 @@ public partial class WorkforceGrpcService
         ValidUntil = capability.ValidUntil?.ToString("O") ?? string.Empty,
         Note = capability.Note,
 
-        // Computed here from the service's clock rather than by the caller, so
-        // two screens reading one row on one day cannot disagree about whether
-        // it has expired.
-        Band = capabilities.BandOf(capability) switch
+        // Judged against the property's operating day, asked once for this
+        // answer (ADR 0211). It was the service's own clock, which made it the
+        // UTC day: a certificate expiring today read as expired from 18:30 the
+        // previous evening at a Kolkata property.
+        Band = capabilities.BandOf(capability, today) switch
         {
             DomainBand.Valid => WireBand.Valid,
             DomainBand.Within60Days => WireBand.Within60Days,

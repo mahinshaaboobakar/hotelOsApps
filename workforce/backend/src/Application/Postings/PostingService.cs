@@ -34,6 +34,7 @@ public class PostingService(
     IStaffDirectory directory,
     PostingAnnouncer announcer,
     Teams.TeamService teams,
+    IOperatingDay days,
     TimeProvider clock)
 {
     /// <summary>Post a person to a department.</summary>
@@ -85,7 +86,7 @@ public class PostingService(
 
         if (command.IsDepartmentHead)
         {
-            await RefuseSecondHeadAsync(scope.PropertyId, code, null, cancellationToken);
+            await RefuseSecondHeadAsync(scope, code, null, cancellationToken);
         }
 
         var now = clock.GetUtcNow();
@@ -145,7 +146,7 @@ public class PostingService(
             if (head)
             {
                 await RefuseSecondHeadAsync(
-                    scope.PropertyId, posting.DepartmentCode, posting.Id, cancellationToken);
+                    scope, posting.DepartmentCode, posting.Id, cancellationToken);
             }
 
             // **The third and fourth triggers.** Headship changes without the
@@ -262,7 +263,13 @@ public class PostingService(
 
         if (!query.IncludeEnded)
         {
-            var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            // Which postings have ended, on the property's own day — ADR 0211.
+            // The UTC day ended a posting early at a positive offset: a person
+            // whose last day is today vanished from the list at 18:30 the
+            // evening before in Kolkata.
+            var today = OperatingDay.OrUnavailable(
+                await days.TodayAsync(scope, cancellationToken));
+
             postings = postings.Where(p => p.EffectiveTo == null || p.EffectiveTo >= today);
         }
 
@@ -396,13 +403,20 @@ public class PostingService(
     /// failed was asking the right question of a model that could not answer it.
     /// </para>
     /// </remarks>
+    /// <remarks>
+    /// <b>It takes the scope rather than a property id</b>, because "is the
+    /// headship taken today" is a question about the property's own day
+    /// (ADR 0211) and the day is asked for with the scope. A property id alone
+    /// could only have been answered from a clock.
+    /// </remarks>
     private async Task RefuseSecondHeadAsync(
-        Guid propertyId, string code, Guid? excluding, CancellationToken cancellationToken)
+        RequestScope scope, string code, Guid? excluding, CancellationToken cancellationToken)
     {
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var today = OperatingDay.OrUnavailable(
+            await days.TodayAsync(scope, cancellationToken));
 
         var taken = await db.Postings.AnyAsync(
-            p => p.PropertyId == propertyId
+            p => p.PropertyId == scope.PropertyId
                  && p.DepartmentCode == code
                  && p.IsDepartmentHead
                  && (p.EffectiveTo == null || p.EffectiveTo >= today)

@@ -34,7 +34,6 @@ public static class PeopleView
         var postings = call.Service<PostingService>();
         var capabilities = call.Service<CapabilityService>();
         var directory = call.Service<IStaffDirectory>();
-        var clock = call.Service<TimeProvider>();
 
         var page = await postings.ListPageAsync(
             call.Scope,
@@ -59,7 +58,9 @@ public static class PeopleView
         var register = await capabilities.ListAsync(
             call.Scope, new ListCapabilitiesQuery(), cancellationToken);
 
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // ADR 0211: the property's operating day, which decides which
+        // certifications read as expiring and which postings read as ended.
+        var today = await PropertyDay.TodayAsync(call, cancellationToken);
         var held = register.ToLookup(one => one.StaffId);
 
         return new

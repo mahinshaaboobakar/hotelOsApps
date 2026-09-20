@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Attendance;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
@@ -422,8 +423,12 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var authorizer = new RecordingAuthorizer();
         var db = fixture.Context();
 
+        // The board reads the property's own wall clock now, so it takes the
+        // directory for the zone. `StaffDirectoryDouble.Zone` is `"UTC"` by
+        // default, which is the face this summary used to read off the instant
+        // — so nothing these tests assert moves.
         return (
-            new ShiftBoardSummary(db, authorizer, clock),
+            new ShiftBoardSummary(db, authorizer, new StaffDirectoryDouble(), clock),
             new RotaService(db, authorizer, clock),
             new ShiftCatalogueService(db, authorizer, clock),
             authorizer);
@@ -437,7 +442,8 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var db = fixture.Context();
 
         return (
-            new AttendanceTodaySummary(new DayComparison(db, authorizer), directory, clock),
+            new AttendanceTodaySummary(
+                new DayComparison(db, authorizer), directory, Days(directory, clock)),
             new RotaService(db, authorizer, clock),
             new ShiftCatalogueService(db, authorizer, clock),
             new AttendanceService(db, authorizer, clock),
@@ -452,11 +458,12 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var directory = new StaffDirectoryDouble();
         var db = fixture.Context();
 
-        var leave = new LeaveService(db, authorizer, new ApproverResolver(db), clock);
-        var swaps = new SwapProposalService(db, authorizer, new ApproverResolver(db), clock);
+        var days = Days(directory, clock);
+        var leave = new LeaveService(db, authorizer, new ApproverResolver(db), days, clock);
+        var swaps = new SwapProposalService(db, authorizer, new ApproverResolver(db), days, clock);
 
         return (
-            new PendingRequestsSummary(db, swaps, leave, directory, clock),
+            new PendingRequestsSummary(db, swaps, leave, directory, days, clock),
             leave,
             new LeaveTypeService(db, authorizer, directory, clock),
             swaps,
@@ -474,8 +481,10 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
 
         return (
             new ComingUpSummary(
-                db, new CapabilityService(db, authorizer, clock), authorizer, directory, clock),
-            new LeaveService(db, authorizer, new ApproverResolver(db), clock),
+                db, new CapabilityService(db, authorizer, clock), authorizer, directory,
+                Days(directory, clock)),
+            new LeaveService(
+                db, authorizer, new ApproverResolver(db), Days(directory, clock), clock),
             new LeaveTypeService(db, authorizer, directory, clock),
             Postings(db, authorizer, directory, clock),
             directory);
@@ -489,12 +498,24 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         var db = fixture.Context();
 
         return (
-            new OnLeaveSummary(db, authorizer, directory, clock),
-            new LeaveService(db, authorizer, new ApproverResolver(db), clock),
+            new OnLeaveSummary(db, authorizer, directory, Days(directory, clock)),
+            new LeaveService(
+                db, authorizer, new ApproverResolver(db), Days(directory, clock), clock),
             new LeaveTypeService(db, authorizer, directory, clock),
             Postings(db, authorizer, directory, clock),
             directory);
     }
+
+    /// <summary>What day it is, as these services now ask rather than work out.</summary>
+    /// <remarks>
+    /// ADR 0211 moved *which day is it* behind <see cref="IOperatingDay"/>, and
+    /// <c>CalendarOperatingDay</c> is what `Program.cs` registers until
+    /// Context's call is proved live. Over a directory whose zone is `"UTC"` it
+    /// answers exactly what each of these services worked out for itself before
+    /// — the calendar day — so no expectation in this file moves.
+    /// </remarks>
+    private static IOperatingDay Days(IStaffDirectory directory, TimeProvider clock)
+        => new CalendarOperatingDay(directory, clock);
 
     private static PostingService Postings(
         Infrastructure.WorkforceDbContext db,
@@ -503,5 +524,7 @@ public class SummaryCharacterisationTests(WorkforceFixture fixture)
         TimeProvider clock) =>
         new(db, authorizer, directory,
             new PostingAnnouncer(new RecordingEventAppender(), directory),
-            new TeamService(db, authorizer, directory, clock), clock);
+            new TeamService(db, authorizer, directory, Days(directory, clock), clock),
+            Days(directory, clock),
+            clock);
 }

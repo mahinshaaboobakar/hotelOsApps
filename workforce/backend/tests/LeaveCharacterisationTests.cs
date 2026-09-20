@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
@@ -456,14 +457,22 @@ public class LeaveCharacterisationTests(WorkforceFixture fixture)
         var directory = new StaffDirectoryDouble();
         var db = fixture.Context();
 
+        // ADR 0211 — the day the approver is resolved on, and the day a ledger
+        // entry is posted against, are asked rather than computed.
+        // `CalendarOperatingDay` over this directory's `"UTC"` default is the
+        // same day `clock.GetUtcNow()` gave before.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
+
         return (
-            new LeaveService(db, authorizer, new ApproverResolver(db), TimeProvider.System),
+            new LeaveService(
+                db, authorizer, new ApproverResolver(db), days, TimeProvider.System),
             new LeaveTypeService(db, authorizer, directory, TimeProvider.System),
             directory,
             new PostingService(
                 db, authorizer, directory,
                 new PostingAnnouncer(new RecordingEventAppender(), directory),
-                new TeamService(db, authorizer, directory, TimeProvider.System),
+                new TeamService(db, authorizer, directory, days, TimeProvider.System),
+                days,
                 TimeProvider.System));
     }
 }

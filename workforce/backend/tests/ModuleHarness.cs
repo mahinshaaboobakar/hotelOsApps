@@ -3,6 +3,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Attendance;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Duties;
 using HotelOS.Workforce.Application.Leave;
@@ -66,6 +67,18 @@ public sealed class ModuleHarness
         // that wrote through one scope and read through another would be
         // exercising two connections and calling it a round trip.
         services.AddSingleton(fixture.Context());
+
+        // **What day it is, from the one place that answers it** — ADR 0211,
+        // and the same registration `Program.cs` makes. `CalendarOperatingDay`
+        // is the held default there until Context's call is proved live in an
+        // installed property, so it is the held default here: a harness whose
+        // container differs from the application's lets a view resolve in
+        // production and throw in a test, or the reverse.
+        //
+        // With `StaffDirectoryDouble.Zone` at its `"UTC"` default this answers
+        // exactly what these services worked out for themselves before — the
+        // calendar day at the property — so no existing expectation moves.
+        services.AddScoped<IOperatingDay, CalendarOperatingDay>();
 
         services.AddScoped<PostingService>();
         services.AddScoped<CapabilityService>();

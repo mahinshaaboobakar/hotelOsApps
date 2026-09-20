@@ -31,11 +31,11 @@ public static class TeamsView
     {
         var teams = call.Service<TeamService>();
         var directory = call.Service<IStaffDirectory>();
-        var clock = call.Service<TimeProvider>();
 
+        // ADR 0211 — the day a team's membership is read on.
         var on = call.Optional("on") is { } day
             ? DateOnly.Parse(day.GetString()!)
-            : DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var all = await teams.ListAsync(
             call.Scope,

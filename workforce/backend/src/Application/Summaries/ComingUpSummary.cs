@@ -69,7 +69,7 @@ public class ComingUpSummary(
     CapabilityService capabilities,
     IKernelAuthorizer authorizer,
     IStaffDirectory directory,
-    TimeProvider clock)
+    IOperatingDay days)
 {
     /// <summary>How far ahead this looks.</summary>
     /// <remarks>
@@ -90,7 +90,10 @@ public class ComingUpSummary(
         await authorizer.RequireAsync(
             scope, Permissions.RosterRead, "property", scope.PropertyId, cancellationToken);
 
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // ADR 0211 — the day the seven-day window starts from.
+        var today = OperatingDay.OrUnavailable(
+            await days.TodayAsync(scope, cancellationToken));
+
         var horizon = today.AddDays(Days);
 
         var overlaps = await OverlapsAsync(scope, today, horizon, cancellationToken);
@@ -180,7 +183,7 @@ public class ComingUpSummary(
         RequestScope scope, DateOnly today, DateOnly horizon, CancellationToken cancellationToken)
     {
         var attention = await capabilities.AttentionAsync(
-            scope, new AttentionQuery(), cancellationToken);
+            scope, new AttentionQuery(), today, cancellationToken);
 
         var lapsing = attention
             .Where(capability => capability.ValidUntil is { } until

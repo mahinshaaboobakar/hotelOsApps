@@ -41,7 +41,6 @@ public static class EndingView
         var postings = call.Service<PostingService>();
         var teams = call.Service<TeamService>();
         var directory = call.Service<IStaffDirectory>();
-        var clock = call.Service<TimeProvider>();
 
         var id = call.Id("posting");
 
@@ -54,7 +53,7 @@ public static class EndingView
         // The last day defaults to the property's today. A posting ended
         // "today" is worked today — the same convention the membership uses,
         // where a last day is a day worked.
-        var lastDay = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        var lastDay = await PropertyDay.TodayAsync(call, cancellationToken);
 
         var names = await directory.FindNamesAsync(
             call.Scope.PropertyId, [posting.StaffId], cancellationToken);

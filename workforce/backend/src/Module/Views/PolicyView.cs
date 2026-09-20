@@ -34,9 +34,10 @@ public static class PolicyView
         var types = call.Service<LeaveTypeService>();
         var policy = call.Service<PolicyService>();
         var db = call.Service<WorkforceDbContext>();
-        var clock = call.Service<TimeProvider>();
 
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // ADR 0211 — the day that decides which shifts and leave types are in
+        // force today.
+        var today = await PropertyDay.TodayAsync(call, cancellationToken);
         var shifts = await catalogue.ListAsync(call.Scope, false, cancellationToken);
 
         var usage = await db.ShiftAssignments
@@ -59,8 +60,26 @@ public static class PolicyView
                 hours = Wire.Span(hours?.StartsAt, hours?.EndsAt),
                 second = Wire.Span(hours?.SecondStartsAt, hours?.SecondEndsAt),
                 colour = string.IsNullOrEmpty(shift.Colour) ? "None" : shift.Colour,
+
+                // **The tone the rota and the schedule already draw this shift
+                // in.** Both screens reading this render `row.tone` and nothing
+                // sent it: against a real property the swatch and the code chip
+                // carried `undefined` as a class, so a shift that is Rose on the
+                // rota was unstyled here. `RotaView` and `ScheduleView` have
+                // called `Wording.Tone` all along — this read is the one that
+                // did not, and only the fixture ever had the field (ledger D3).
+                // An unset colour is the empty string, which `Tone` answers
+                // `neutral` for — the same call `RotaView` and `ScheduleView`
+                // make, with no second reading of "no colour" invented here.
+                tone = Wording.Tone(shift.Colour),
                 kind = hours?.IsWorking == true ? "working" : "off",
-                inUse = (usage.TryGetValue(shift.Id, out var count) ? count : 0) + " assignments",
+
+                // **A count, not "88 assignments".** The word and the way the
+                // number is written are the reader's: this composed an English
+                // noun onto a figure in the service's own culture, so a property
+                // reading Arabic read English and a property in Germany read
+                // `1234` where it writes `1.234` — NUM-Q1, ADR 0174.
+                inUse = usage.TryGetValue(shift.Id, out var count) ? count : 0,
             });
         }
 

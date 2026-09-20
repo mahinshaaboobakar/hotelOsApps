@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Application.Rota;
@@ -285,13 +286,19 @@ public class SwapProposalCharacterisationTests(WorkforceFixture fixture)
         var db = fixture.Context();
         var clock = TimeProvider.System;
 
+        // ADR 0211 — the day a proposal resolves its approver on is asked
+        // rather than computed. Over this directory's `"UTC"` default it is the
+        // day these services took from the clock before.
+        var days = new CalendarOperatingDay(directory, clock);
+
         var shifts = new ShiftCatalogueService(db, authorizer, clock);
         var rota = new RotaService(db, authorizer, clock);
         var postings = new PostingService(
             db, authorizer, directory,
             new PostingAnnouncer(new RecordingEventAppender(), directory),
-            new TeamService(db, authorizer, directory, clock), clock);
-        var swaps = new SwapProposalService(db, authorizer, new ApproverResolver(db), clock);
+            new TeamService(db, authorizer, directory, days, clock), days, clock);
+        var swaps = new SwapProposalService(
+            db, authorizer, new ApproverResolver(db), days, clock);
 
         var scope = fixture.Scope();
         var day = SomeDay();

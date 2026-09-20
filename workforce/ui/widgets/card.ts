@@ -16,8 +16,8 @@
 
 
 import {
-  formatNumber, HostCallError, type FailureDrawing, type HostApi, type PropertyEnvironment,
-  type ReadFailure,
+  formatClock, formatNumber, HostCallError, type FailureDrawing, type HostApi,
+  type PropertyEnvironment, type ReadFailure,
 } from "@hotelos/sdk";
 
 import { APPLICATION } from "../chrome/application";
@@ -209,9 +209,20 @@ export function rows(entries: readonly SummaryRow[], host: HostApi): HTMLElement
     });
 
     const n = (value: number): string => formatNumber(value, host.property, "whole");
-    const meta = entry.context === null
+    const qualifier = entry.context === null
       ? entry.meta
       : `${n(entry.context.count)} ${entry.context.word}`;
+
+    // The one clock a row is about, written here in the property's hour cycle
+    // — `64g` §5. The separator is the screen's, as the words are: the service
+    // sends `07:00` and never `HK · 07:00`.
+    const at = entry.at === undefined || entry.at === null
+      ? null
+      : formatClock(entry.at, host.property);
+
+    const meta = at === null
+      ? qualifier
+      : qualifier === null ? at : `${qualifier} · ${at}`;
 
     fill(
       row,

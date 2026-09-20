@@ -87,6 +87,18 @@
               ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
     <Protobuf Include="$(PlatformProtos)\hotelos\masterdata\v1\service.proto"
               ProtoRoot="$(PlatformProtos)" GrpcServices="Client" />
+
+    <!--
+      The Context Service, **Client only**. This application asks it one
+      question and computes no part of the answer: which operating day it is
+      (ADR 0211, `WF-Q21`). The boundary and the zone Context echoes are read
+      for nothing here — re-deriving the day from them would be the second
+      derivation ADR 0128 §6 refuses.
+    -->
+    <Protobuf Include="$(PlatformProtos)\hotelos\context\v1\dto.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="None" />
+    <Protobuf Include="$(PlatformProtos)\hotelos\context\v1\service.proto"
+              ProtoRoot="$(PlatformProtos)" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>

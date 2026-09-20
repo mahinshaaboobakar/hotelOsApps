@@ -37,6 +37,7 @@ public class TeamService(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
     IStaffDirectory directory,
+    IOperatingDay days,
     TimeProvider clock)
 {
     /// <summary>Form a team.</summary>
@@ -161,7 +162,13 @@ public class TeamService(
         if (!active && !keepMembers)
         {
             var now = clock.GetUtcNow();
-            var on = DateOnly.FromDateTime(now.UtcDateTime);
+
+            // The day a membership closed, at the property — ADR 0211. It is
+            // read back as "who was in this team in March", so the UTC day put
+            // an evening stand-down in Guatemala on the following day. The
+            // instant beside it stays UTC: `UpdatedAt` is when, not which day.
+            var on = OperatingDay.OrUnavailable(
+                await days.TodayAsync(scope, cancellationToken));
 
             foreach (var member in await Live(scope.PropertyId, team.Id)
                          .ToListAsync(cancellationToken))

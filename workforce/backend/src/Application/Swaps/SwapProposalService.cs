@@ -26,6 +26,7 @@ public class SwapProposalService(
     WorkforceDbContext db,
     IKernelAuthorizer authorizer,
     ApproverResolver approvers,
+    IOperatingDay days,
     TimeProvider clock)
 {
     /// <summary>Ask a colleague to exchange shifts.</summary>
@@ -66,8 +67,14 @@ public class SwapProposalService(
             // The proposer's approver, resolved now: a proposal that changed
             // hands because a posting moved while it waited is one nobody is
             // accountable for.
+            // The property's own day — ADR 0211, as leave resolves its own
+            // approver. It was the UTC day, so the two could disagree about
+            // whose decision a swap was, for one person on one night.
             ApproverStaffId = await approvers.ResolveAsync(
-                scope.PropertyId, mine.StaffId, Today(), cancellationToken),
+                scope.PropertyId,
+                mine.StaffId,
+                OperatingDay.OrUnavailable(await days.TodayAsync(scope, cancellationToken)),
+                cancellationToken),
 
             CreatedAt = now,
             UpdatedAt = now,
@@ -266,7 +273,6 @@ public class SwapProposalService(
             .ToListAsync(cancellationToken);
     }
 
-    private DateOnly Today() => DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
 
     private async Task RefuseDuplicateAsync(
         Guid propertyId, Guid mine, Guid theirs, CancellationToken cancellationToken)

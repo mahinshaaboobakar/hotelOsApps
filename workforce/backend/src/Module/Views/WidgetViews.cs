@@ -102,7 +102,16 @@ public static class WidgetViews
                 (int)one.LateBy.TotalMinutes,
                 Form.Minutes,
                 "warn",
-                "attendance?department=" + one.DepartmentCode)).ToList(),
+                "attendance?department=" + one.DepartmentCode,
+
+                // **The shift's start, which this service already knew** —
+                // `64g` §5, ruled sent. The approved frame draws it on every
+                // late row, because *twenty minutes late* is a different fact
+                // for a seven o'clock start than for a three o'clock one, and
+                // `LateArrival.ExpectedAt` has carried it since the summary was
+                // written. A clock, never a rendered time: the hour cycle is
+                // the reader's.
+                at: Wire.Clock(one.ExpectedAt))).ToList(),
         };
     }
 
@@ -246,12 +255,19 @@ public static class WidgetViews
         string opens,
         string? from = null,
         string? to = null,
-        object? context = null)
+        object? context = null,
+        string? at = null)
         => new
         {
             name,
             meta = string.IsNullOrWhiteSpace(meta) ? null : meta,
             context,
+
+            // One clock time the row is about — a shift's start on a late row.
+            // Distinct from `from`/`to`, which are the two ends of a span: a
+            // start with no end sent as half a span would be a span the reader
+            // could not complete.
+            at,
             value,
             form,
             tone,

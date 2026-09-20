@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
 using Xunit;
@@ -217,11 +218,16 @@ public class StaffChangeCharacterisationTests(WorkforceFixture fixture)
         var events = new RecordingEventAppender();
         var announcer = new PostingAnnouncer(events, directory);
 
+        // ADR 0211 — what day it is, asked rather than computed. Over this
+        // directory's `"UTC"` default it is the day the clock used to give.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
+
         return new World(
             new PostingService(
                 db, new RecordingAuthorizer(), directory, announcer,
                 new TeamService(
-                    db, new RecordingAuthorizer(), directory, TimeProvider.System),
+                    db, new RecordingAuthorizer(), directory, days, TimeProvider.System),
+                days,
                 TimeProvider.System),
             new StaffChangeConsumer(db, directory, announcer, TimeProvider.System),
             directory,

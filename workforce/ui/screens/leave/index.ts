@@ -15,6 +15,38 @@ import { noSwap, queue, swapCard } from "./approvals";
 import { decision } from "./decision";
 import { requestForm } from "./form";
 import { balances, requests } from "./requests";
+import { withdrawRequest } from "./withdraw";
+
+/**
+ * What is open over this screen, and which row each thing is open on.
+ *
+ * One object rather than seven trailing parameters. Two of them arrived with
+ * the decision panel and two more with withdrawal, and a positional list that
+ * long is one a caller gets wrong silently — `leave(h, m, tab, go, false, f, g,
+ * null, h)` says nothing about which `null` is which.
+ */
+export interface LeavePlace {
+  /** Whether the request form is open. */
+  dialog?: boolean;
+
+  /** Open it. */
+  open?: () => void;
+
+  /** Close whatever is open. */
+  close?: () => void;
+
+  /** Which waiting row the approver's decision panel is open on. */
+  chosen?: string | null;
+
+  /** Open the panel on one, or close it by choosing it again. */
+  onChoose?: (id: string) => void;
+
+  /** Which of this person's own requests is being withdrawn, when one is. */
+  withdrawing?: string | null;
+
+  /** Open the withdraw dialog on one, or close it with `null`. */
+  onWithdraw?: (id: string | null) => void;
+}
 
 /**
  * Draw the screen.
@@ -23,25 +55,32 @@ import { balances, requests } from "./requests";
  * @param main the container
  * @param tab which tab is open
  * @param go called when the other tab is chosen
+ * @param place what is open over it
  */
 export async function leave(
   host: HostApi,
   main: HTMLElement,
   tab: string,
   go: (tab: string) => void,
-  dialog = false,
-  open: () => void = () => {},
-  close: () => void = () => {},
-  chosen: string | null = null,
-  onChoose: (id: string) => void = () => {},
+  place: LeavePlace = {},
 ): Promise<void> {
+  const {
+    dialog = false,
+    open = () => {},
+    close = () => {},
+    chosen = null,
+    onChoose = () => {},
+    withdrawing = null,
+    onWithdraw = () => {},
+  } = place;
+
   const got = await load<LeaveBoard>(host, ROSTER_READ, "leave");
 
   // No fallback - `APPS-Q26(4)`. A failed read renders the failure,
   // never a recorded list with an apology under it.
   if (!got.ok) {
     failureScreen(main, "Leave & Requests", got.failure, { the: "leave" }, host.property,
-      () => void leave(host, main, tab, go, dialog, open, close, chosen, onChoose));
+      () => void leave(host, main, tab, go, place));
     return;
   }
 
@@ -67,7 +106,12 @@ export async function leave(
         : board.swap === null ? noSwap() : swapCard(board.swap, host.property));
     body.append(split);
   } else {
-    body.append(balances(board.balances, host.property), requests(board.requests, host.property));
+    // **The person's own rows carry a withdraw** — owner, 2026-09-20, `64g`
+    // §4 B. `leave.request · withdraw` has taken an id and a version all
+    // along, and nothing on this screen could reach it.
+    body.append(
+      balances(board.balances, host.property),
+      requests(board.requests, host.property, (row) => { onWithdraw(row.id); }));
   }
 
   main.replaceChildren(header(board, open, host.property),
@@ -83,6 +127,15 @@ export async function leave(
   // It raises now: the types come from the read, whose leave is the caller's
   // (ADR 0172), and closing re-draws this screen, which re-reads the board.
   if (dialog) main.append(requestForm(host, board.balances, close, close));
+
+  // Withdrawing is a second dialog, and `withdrawing` names the row rather
+  // than being a second boolean: two open at once is not expressible.
+  const mine = board.requests.find((row) => row.id === withdrawing);
+
+  if (mine !== undefined) {
+    main.append(withdrawRequest(host, mine, host.property,
+      () => { onWithdraw(null); }, () => { onWithdraw(null); }));
+  }
 }
 
 /** The header, with counts derived from the board. */

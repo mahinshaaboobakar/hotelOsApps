@@ -31,11 +31,13 @@ public static class AttendanceView
         var directory = call.Service<IStaffDirectory>();
         var postings = call.Service<PostingService>();
         var records = call.Service<AttendanceService>();
-        var clock = call.Service<TimeProvider>();
 
+        // The property's operating day, asked of Context — ADR 0211. This was
+        // the UTC calendar day, so between local midnight and 05:30 an Indian
+        // property's attendance screen showed yesterday.
         var on = call.Optional("date") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var department = call.Optional("department")?.GetString();
 
@@ -64,7 +66,12 @@ public static class AttendanceView
 
         return new
         {
-            date = on.ToString("dddd d MMMM") + " · business day",
+            // **The day as a day, and the words are the screen's** — ADR 0175.
+            // This was `ToString("dddd d MMMM")`: the weekday and the month
+            // name in whatever culture the service happens to run under, on
+            // every property's screen, with " · business day" welded on after
+            // it. The screen writes that clause in the property's own language.
+            date = Wire.Day(on),
             department,
             rows = rows.Select(one => Row(one, names, role, byStaff)).ToList(),
         };
@@ -129,7 +136,7 @@ public static class AttendanceView
         IReadOnlyDictionary<Guid, AttendanceRecord> written)
     {
         written.TryGetValue(row.StaffId, out var record);
-        var (against, tone) = Verdict(row);
+        var (state, lateBy, tone) = Verdict(row);
 
         return new
         {
@@ -143,7 +150,16 @@ public static class AttendanceView
             postedAt = row.Rostered ? Wire.Clock(row.ScheduledStart) : null,
             @in = Wire.Clock(row.ActualIn),
             @out = Wire.Clock(record?.OutAt),
-            against,
+
+            // **The state as a word this service owns, and the lateness as a
+            // number** — NUM-Q1, ADR 0174. `against` was a sentence composed
+            // here — "Late 20 min" — so a property in another language read the
+            // server's English, AND the screen counted late people by testing
+            // `against.startsWith("Late")`: the service's own prose, parsed
+            // back as data. The screen writes the sentence; the count reads
+            // `state`.
+            state,
+            lateBy,
             tone,
             // The source is the record's own, and null where no record exists —
             // an absent person has no source, and "manual" on their row would
@@ -152,25 +168,41 @@ public static class AttendanceView
         };
     }
 
-    /// <summary>What the comparison says, in the words the screen draws.</summary>
-    private static (string Reads, string Tone) Verdict(DayRow row)
+    /// <summary>What the comparison found — a state, and the minutes when late.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>A state this service owns, never a sentence.</b> It returned the
+    /// words — <i>"Late 20 min"</i>, <i>"Present, not rostered"</i> — composed
+    /// here in the service's own culture, with the number and its unit inside
+    /// them. Two things followed: a property in another language read English,
+    /// and the screen counted late people with
+    /// <c>against.startsWith("Late")</c>, which is this service's prose being
+    /// parsed back as data (NUM-Q1, ADR 0174).
+    /// </para>
+    /// <para>
+    /// The states are the five the comparison can find. <c>lateBy</c> is null
+    /// on all of them but <c>late</c> — a zero would be a person who arrived
+    /// exactly on time, which is <c>onTime</c>.
+    /// </para>
+    /// </remarks>
+    private static (string State, int? LateBy, string Tone) Verdict(DayRow row)
     {
         if (row.Absent)
         {
-            return ("Absent", "bad");
+            return ("absent", null, "bad");
         }
 
         if (!row.Rostered)
         {
-            return ("Present, not rostered", "warn");
+            return ("unrostered", null, "warn");
         }
 
         if (row.LateBy is { } late && late > TimeSpan.Zero)
         {
-            return ("Late " + (int)late.TotalMinutes + " min", "warn");
+            return ("late", (int)late.TotalMinutes, "warn");
         }
 
-        return row.Worked is null ? ("On shift", "neu") : ("On time", "ok");
+        return row.Worked is null ? ("onShift", null, "neu") : ("onTime", null, "ok");
     }
 
     /// <summary>An optional time on the wire.</summary>

@@ -96,3 +96,52 @@ describe("the New shift palette", () => {
     expect(drift(PALETTE)).toEqual([]);
   });
 });
+
+/** The catalogue row `PolicyView.Read` actually builds, read from its source. */
+function catalogueRow(): string {
+  const source = readFileSync(
+    join(import.meta.dirname, "..", "..", "backend", "src", "Module", "Views", "PolicyView.cs"),
+    "utf8");
+
+  return /rows\.Add\(new[\s\S]*?\}\);/.exec(source)?.[0] ?? "";
+}
+
+/**
+ * What the read sends, checked against the source rather than against a fixture.
+ *
+ * # A fixture cannot see a field the service never sends
+ *
+ * `CatalogueRow` requires `tone`, both screens render `row.tone`, and the
+ * fixture carries it — so every test above passes while **`PolicyView.Read`
+ * never emitted the field at all**. Against a real property the swatch and the
+ * code chip carried `undefined` as a class, and a shift drawn Rose on the rota
+ * was unstyled on the screen that defines it.
+ *
+ * The suite could not have failed on that: it renders the fixture, and the
+ * fixture is a claim about the wire that nothing was checking. So the check is
+ * on the service's own source, where the absence is.
+ */
+describe("what the catalogue read sends", () => {
+  it("reads the row the service builds", () => {
+    // Positive control: a zero from a parser is a claim about the parser first.
+    const row = catalogueRow();
+    expect(row).toContain("colour =");
+    expect(row).toContain("kind =");
+  });
+
+  it("sends the tone, from the service's own table", () => {
+    // Not `tone = "brand"` and not a second mapping: the one table, the one the
+    // rota and the schedule already draw.
+    expect(catalogueRow()).toContain("tone = Wording.Tone(");
+  });
+
+  it("sends the assignment count as a number", () => {
+    const inUse = /inUse = .*/.exec(catalogueRow())?.[0] ?? "";
+
+    expect(inUse).not.toBe("");
+    // It was `count + " assignments"` — an English noun composed in a service,
+    // with the figure in the service's own grouping inside it. A string literal
+    // anywhere on this line is that defect returning (NUM-Q1, ADR 0174).
+    expect(inUse).not.toMatch(/"/);
+  });
+});

@@ -34,7 +34,6 @@ public static class ScheduleView
         var duties = call.Service<DutyService>();
         var leave = call.Service<LeaveService>();
         var directory = call.Service<IStaffDirectory>();
-        var clock = call.Service<TimeProvider>();
 
         var staffId = call.Id("staffId");
 
@@ -42,9 +41,19 @@ public static class ScheduleView
         var calendar = await PropertyCalendar.ForAsync(
             directory, call.Scope.PropertyId, cancellationToken);
 
+        // ADR 0211 — the property's operating day, asked of Context. The month
+        // opened when nobody named one, and the day the grid marks as today,
+        // are both *which day is it at this property*.
+        //
+        // **Nullable here, because this view can still answer without it.** A
+        // caller that named a month gets that month with no cell marked, rather
+        // than a failure — and a caller that named none cannot be given a grid
+        // at all, so that path says what could not be read.
+        var today = await PropertyDay.MaybeTodayAsync(call, cancellationToken);
+
         var anchor = call.Optional("month") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : calendar.DayOf(clock.GetUtcNow());
+            : OperatingDay.OrUnavailable(today);
 
         var first = new DateOnly(anchor.Year, anchor.Month, 1);
         var last = first.AddMonths(1).AddDays(-1);
@@ -84,6 +93,17 @@ public static class ScheduleView
             // 0175. "MMMM yyyy" through the machine's culture put one language's
             // month name on every property's screen.
             month = Wire.Day(first),
+
+            // **Today, so the grid can mark it** — `64g` §5, ruled sent. The
+            // approved frame marks today's cell and nothing on the wire said
+            // which day that was, so the screen either marked nothing or would
+            // have had to ask the machine it is drawn on. It is the property's
+            // operating day, not a browser's idea of one (ADR 0211).
+            //
+            // Null where Context could not answer, and the grid then marks no
+            // day: absent is an answer, and a marked cell nobody established is
+            // one a supervisor would plan from.
+            today = today is { } known ? Wire.Day(known) : null,
             shifts = cells.Count,
             leaveDays = (int)mine.Sum(one => one.Days),
             // The count is a fact; the instant is the screen's to say. A
@@ -119,12 +139,21 @@ public static class ScheduleView
         // column over a Thursday.
         for (var back = lead; back > 0; back -= 1)
         {
+            var padded = first.AddDays(-back);
+
             days.Add(new
             {
-                date = first.AddDays(-back).Day,
+                // **The same fields a real day carries.** A padding cell used
+                // to send `duty` where every other cell sends `dutyFrom` and
+                // `dutyTo`, so the grid's rows were two shapes and only one of
+                // them matched what the screen reads.
+                date = padded.Day,
+                on = Wire.Day(padded),
                 mark = (string?)null,
                 tone = (string?)null,
-                duty = (string?)null,
+                dutyFrom = (string?)null,
+                dutyTo = (string?)null,
+                dutyPart = (string?)null,
             });
         }
 
@@ -132,9 +161,26 @@ public static class ScheduleView
         {
             var assigned = cells.FirstOrDefault(one => one.Date == day);
             var leave = away.FirstOrDefault(one => one.From <= day && day <= one.To);
+
             // The day the duty starts AT THE PROPERTY. This compared UTC dates,
             // so a 02:00 duty at +05:30 sat on the day before.
-            var duty = duties.FirstOrDefault(one => calendar.DayOf(one.StartsAt) == day);
+            var starts = duties.FirstOrDefault(one => calendar.DayOf(one.StartsAt) == day);
+
+            // **And the morning after it** — `64g` §5, ruled sent. A duty that
+            // runs 22:00 → 06:00 was drawn on its start day only, so the
+            // morning the person is still holding it was blank: the frame draws
+            // that tail at reduced weight, because *both dates carry the duty*
+            // (WF-Q8), and the wire had no way to say so.
+            //
+            // A day that starts one is not also a tail: a duty beginning here
+            // is the fact about this day, and drawing both would put two duties
+            // in a cell that holds one.
+            var tail = starts is not null
+                ? null
+                : duties.FirstOrDefault(one =>
+                    calendar.DayOf(one.StartsAt) < day && calendar.DayOf(one.EndsAt) == day);
+
+            var duty = starts ?? tail;
 
             var entry = assigned is not null
                         && shifts.TryGetValue(assigned.CatalogueEntryId, out var found)
@@ -144,12 +190,21 @@ public static class ScheduleView
             days.Add(new
             {
                 date = day.Day,
+
+                // The day itself, so the grid can say which cell is today
+                // without rebuilding a date from a number and a month.
+                on = Wire.Day(day),
                 mark = leave is not null ? "Leave" : entry?.ShortCode,
                 tone = leave is not null
                     ? "leave"
                     : entry is null ? null : Wording.Tone(entry.Colour),
                 dutyFrom = duty?.StartsAt.ToString("O"),
                 dutyTo = duty?.EndsAt.ToString("O"),
+
+                // Which part of the duty this cell carries. The screen draws a
+                // tail at reduced weight and names the hour it ends; the word
+                // for either is the screen's, and this is the fact.
+                dutyPart = duty is null ? null : starts is not null ? "starts" : "tail",
             });
         }
 

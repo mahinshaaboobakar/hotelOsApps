@@ -3,6 +3,7 @@ using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Domain;
 using HotelOS.Workforce.Application.Attendance;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Periods;
 using HotelOS.Workforce.Application.Rota;
@@ -353,7 +354,12 @@ public class PeriodCharacterisationTests(WorkforceFixture fixture)
             new RotaService(db, authorizer, clock),
             new ShiftCatalogueService(db, authorizer, clock),
             new AttendanceService(db, authorizer, clock),
-            new LeaveService(db, authorizer, new ApproverResolver(db), clock),
+            // ADR 0211 — the day is asked of `IOperatingDay` rather than taken
+            // from the clock. `CalendarOperatingDay` over this directory's
+            // `"UTC"` default answers the day this service used to compute.
+            new LeaveService(
+                db, authorizer, new ApproverResolver(db),
+                new CalendarOperatingDay(directory, clock), clock),
             new LeaveTypeService(db, authorizer, directory, clock),
             new PolicyService(db, authorizer, clock));
     }

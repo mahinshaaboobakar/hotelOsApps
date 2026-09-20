@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
 using Microsoft.EntityFrameworkCore;
@@ -578,11 +579,18 @@ public class PostingCharacterisationTests(WorkforceFixture fixture)
 
         var events = new RecordingEventAppender();
 
+        // ADR 0211 — the day a posting ends on, and the day an `IncludeEnded`
+        // filter measures against, are asked rather than computed. Over this
+        // directory's `"UTC"` default it is the day the clock used to give.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
+
         return (
             new PostingService(
                 fixture.Context(), authorizer, directory,
                 new PostingAnnouncer(events, directory),
-                new TeamService(fixture.Context(), authorizer, directory, TimeProvider.System),
+                new TeamService(
+                    fixture.Context(), authorizer, directory, days, TimeProvider.System),
+                days,
                 TimeProvider.System),
             authorizer,
             directory,

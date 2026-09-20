@@ -9,7 +9,7 @@
  * about the day.
  */
 
-import { formatClock, formatNumber, type HostApi, load, type PropertyEnvironment }
+import { formatClock, formatDay, formatNumber, type HostApi, load, type PropertyEnvironment }
   from "@hotelos/sdk";
 
 import { allDepartments } from "../../chrome/department";
@@ -35,14 +35,24 @@ export async function attendance(host: HostApi, main: HTMLElement): Promise<void
   const body = el("div", "body");
 
   body.append(marks(day, host.property), table(day.rows, host));
-  main.replaceChildren(header(day), body);
+  main.replaceChildren(header(day, host.property), body);
 }
 
-function header(day: Day): HTMLElement {
+function header(day: Day, property: PropertyEnvironment): HTMLElement {
   const head = el("div", "tools");
   const title = el("div");
 
-  title.append(el("div", "hsub", day.date));
+  // Composed here, in the property's own language: the service sent
+  // "Friday 28 August · business day" — a weekday and a month name in
+  // whatever culture it runs under, with the clause welded on (ADR 0175).
+  //
+  // `weekday-day-month` is the SDK's, added for this header (`64g` §5, ruled
+  // 2026-09-20): the weekday is what a person reads first on a screen whose
+  // subject is one day, and composing it here from an array of English names
+  // would be the same defect one layer down. The clause after it is this
+  // screen's own sentence, which is why it is written here and not sent.
+  title.append(el("div", "hsub",
+    `${formatDay(day.date, property, "weekday-day-month")} · business day`));
 
   const picker = allDepartments();
 
@@ -56,6 +66,25 @@ function header(day: Day): HTMLElement {
   return head;
 }
 
+/**
+ * What a row's comparison says, in words — the screen's, never the service's.
+ *
+ * The service sends a state and, when late, the minutes. "Late 20 min" used to
+ * arrive whole, in the service's culture, and the number inside it was not in
+ * the property's number format either.
+ */
+function verdict(row: DayRow, property: PropertyEnvironment): string {
+  switch (row.state) {
+    case "absent": return "Absent";
+    case "unrostered": return "Present, not rostered";
+    case "onShift": return "On shift";
+    case "onTime": return "On time";
+    case "late": return row.lateBy === null
+      ? "Late"
+      : `Late ${formatNumber(row.lateBy, property, "whole")} min`;
+  }
+}
+
 /** The four marks, each counted from the rows themselves. */
 function marks(day: Day, property: PropertyEnvironment): HTMLElement {
   const row = el("div", "marks");
@@ -63,8 +92,10 @@ function marks(day: Day, property: PropertyEnvironment): HTMLElement {
 
   const posted = day.rows.filter((r) => r.rostered);
   const present = posted.filter((r) => r.in !== null).length;
-  const late = day.rows.filter((r) => r.against.startsWith("Late")).length;
-  const absent = day.rows.filter((r) => r.against === "Absent").length;
+  // Counted from the state the service sends, never from its prose: this read
+  // `against.startsWith("Late")` and `against === "Absent"`.
+  const late = day.rows.filter((r) => r.state === "late").length;
+  const absent = day.rows.filter((r) => r.state === "absent").length;
   const unplanned = day.rows.filter((r) => !r.rostered && r.in !== null).length;
 
   row.append(
@@ -144,8 +175,10 @@ function table(rows: readonly DayRow[], host: HostApi): HTMLElement {
     const who = el("div");
     who.append(el("b", undefined, row.who), el("s", undefined, row.role));
 
+    // The sentence is written here, in the property's own number format: the
+    // service sends `late` and the minutes, never "Late 20 min".
     const against = el("div", "ag");
-    against.append(el("span", `pill ${row.tone}`, row.against));
+    against.append(el("span", `pill ${row.tone}`, verdict(row, host.property)));
 
     // The source is on the row because it is the difference between evidence
     // and an assertion — and a device record names a reading, never a person.

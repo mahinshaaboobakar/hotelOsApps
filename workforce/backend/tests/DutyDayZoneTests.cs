@@ -46,6 +46,25 @@ public class DutyDayZoneTests(WorkforceFixture fixture)
 
         Assert.True(HasDuty(answer, 1), "the duty is on the 1st, where it happens");
         Assert.False(HasDuty(answer, 2), "and not on the 2nd, which is only its UTC date");
+
+        // It runs to 03:00 the next morning, so the 2nd carries its TAIL —
+        // the morning the person is still holding it (`64g` §5). That is not
+        // the same claim as the duty beginning there, which is what the line
+        // above refuses.
+        Assert.True(HasTail(answer, 2), "and the 2nd carries the morning of it");
+    }
+
+    [Fact]
+    public async Task A_duty_that_ends_on_its_own_day_leaves_no_tail_on_the_next()
+    {
+        // 2 Oct 02:00 → 02:30 in Kochi: begins and ends inside one day, so the
+        // 3rd carries nothing. Without this, `dutyPart` could be "tail" on
+        // every day after a duty and the test above would not notice.
+        var answer = await Schedule("Asia/Kolkata",
+            from: "2026-10-01T20:30:00Z", to: "2026-10-01T21:00:00Z");
+
+        Assert.True(HasDuty(answer, 2), "the duty is on the 2nd");
+        Assert.Null(Part(answer, 3));
     }
 
     [Fact]
@@ -101,16 +120,33 @@ public class DutyDayZoneTests(WorkforceFixture fixture)
             ScheduleView.Month, scope, "schedule", new { staffId = staff, month = "2026-10-01" });
     }
 
-    /// <summary>Whether the month's cell for this date carries a duty.</summary>
+    /// <summary>Whether the month's cell for this date is where a duty STARTS.</summary>
+    /// <remarks>
+    /// <b>The part, not merely the presence.</b> A duty crossing midnight now
+    /// puts its tail on the following day too (<c>64g</c> §5), so
+    /// <c>dutyFrom != null</c> no longer answers <i>which day does this duty
+    /// begin on</i> — which is the question these tests ask. The 21:00
+    /// Guatemala duty ends at 03:00 the next morning, so the 2nd carries its
+    /// tail and must not be read as a second duty.
+    /// </remarks>
     private static bool HasDuty(JsonElement month, int date)
+        => Part(month, date) == "starts";
+
+    /// <summary>Whether that cell carries the tail of a duty begun the day before.</summary>
+    private static bool HasTail(JsonElement month, int date)
+        => Part(month, date) == "tail";
+
+    /// <summary>Which part of a duty a cell carries, or null for none.</summary>
+    private static string? Part(JsonElement month, int date)
     {
         // October 2026 opens on a Thursday, so the padding is 28–30 September:
         // the 1st and 2nd appear once each.
         var cell = month.GetProperty("days").EnumerateArray()
             .Single(one => one.GetProperty("date").GetInt32() == date);
 
-        return cell.TryGetProperty("dutyFrom", out var start)
-               && start.ValueKind == JsonValueKind.String;
+        return cell.GetProperty("dutyPart").ValueKind == JsonValueKind.String
+            ? cell.GetProperty("dutyPart").GetString()
+            : null;
     }
 
     private static async Task<Guid> Post(ModuleHarness harness, RequestScope scope)

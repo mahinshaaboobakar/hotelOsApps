@@ -175,14 +175,31 @@ function calendar(month: Schedule, property: PropertyEnvironment): HTMLElement {
   }
 
   for (const day of month.days) {
-    grid.append(cell(day, property));
+    // Today is the month's, compared to the cell's own day. A boolean per cell
+    // is six weeks of cells able to disagree; one day, matched, cannot.
+    //
+    // **Null marks nothing.** Where Context could not say what day it is, the
+    // grid marks no cell rather than marking one — a missing `on` matching a
+    // missing `today` would otherwise mark every cell (ADR 0211).
+    grid.append(cell(day, property, month.today !== null && day.on === month.today));
   }
 
   return grid;
 }
 
-function cell(day: ScheduleDay, property: PropertyEnvironment): HTMLElement {
-  const box = el("div", day.tone === null ? "cday out" : day.today === true ? "cday today" : "cday");
+/**
+ * One day.
+ *
+ * @param day what the service sent for it
+ * @param property for the clock and the digits
+ * @param today whether this is the property's operating day — ADR 0211, and
+ *   never the day the machine drawing this happens to be on
+ * @returns the cell
+ */
+function cell(
+  day: ScheduleDay, property: PropertyEnvironment, today: boolean,
+): HTMLElement {
+  const box = el("div", day.tone === null ? "cday out" : today ? "cday today" : "cday");
 
   box.append(el("s", undefined,
     day.date === null ? "" : formatNumber(day.date, property, "whole")));
@@ -199,12 +216,17 @@ function cell(day: ScheduleDay, property: PropertyEnvironment): HTMLElement {
   // null reached the formatter as the epoch — "MOD 05:30→05:30" drawn on every
   // day that had no duty at all.
   if (day.dutyFrom != null && day.dutyTo != null) {
-    box.append(el("div", "cduty",
-      `MOD ${formatInstant(day.dutyFrom, property, "time")}`
-      + `→${formatInstant(day.dutyTo, property, "time")}`));
+    // **The tail reads differently from the start, and is drawn quieter** —
+    // `64g` §5. The 29th of a 20:00 → 08:00 duty is not a second duty; it is
+    // the morning the person is still holding the first, so it names only the
+    // hour it ends. Which of the two this is, is the service's answer: only it
+    // knows what day an instant falls on at the property.
+    box.append(day.dutyPart === "tail"
+      ? el("div", "cduty tail", `MOD →${formatInstant(day.dutyTo, property, "time")}`)
+      : el("div", "cduty",
+        `MOD ${formatInstant(day.dutyFrom, property, "time")}`
+        + `→${formatInstant(day.dutyTo, property, "time")}`));
   }
-
-  // No tail on the day a duty ends — nothing sends one (see `ScheduleDay`).
 
   return box;
 }

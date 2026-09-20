@@ -39,9 +39,20 @@ public static class DutyView
             directory, call.Scope.PropertyId, cancellationToken);
 
         var now = clock.GetUtcNow();
+
+        // **Which week opens when nobody names one is *what day is it*, and
+        // that is Context's answer** — ADR 0211. This was `calendar.DayOf(now)`:
+        // the property's own wall clock, which is the right question for *has
+        // 07:00 passed* and the wrong one for *which day are we on*. Left alone,
+        // this view would keep answering from the calendar while every other
+        // one answered from Context, and a property would have had two answers
+        // to one question.
+        //
+        // `now` stays a real instant below: who holds the duty and who is next
+        // are questions about a moment, not about a day.
         var anchor = call.Optional("week") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : calendar.DayOf(now);
+            : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
         var from = calendar.StartOf(monday);

@@ -43,7 +43,7 @@ async function drawn(rows: unknown[], locale?: string | null): Promise<HTMLEleme
 
 const BASE = {
   who: "Anjali Menon", role: "Receptionist", in: null, out: null,
-  against: "Absent", tone: "bad", source: null,
+  state: "absent", lateBy: null, tone: "bad", source: null,
 };
 
 describe("attendance, what the rota planned", () => {
@@ -86,7 +86,7 @@ describe("attendance, what the rota planned", () => {
 
   it("counts against what was rostered, not against what parsed", async () => {
     const main = await drawn([
-      { ...BASE, rostered: true, postedAt: "07:00", in: "07:02", against: "On time" },
+      { ...BASE, rostered: true, postedAt: "07:00", in: "07:02", state: "onTime" },
       { ...BASE, rostered: true, postedAt: null },
       { ...BASE, rostered: false, postedAt: null, in: "09:05" },
     ]);
@@ -100,5 +100,63 @@ describe("attendance, what the rota planned", () => {
     // another part of the page would have moved. It reads `rostered` now, which
     // is the fact rather than a side effect of how the fact was spelled.
     expect(main.textContent).toContain("1 of 2");
+  });
+});
+
+/**
+ * The day, and what the comparison found — both composed here.
+ *
+ * # What the service used to send
+ *
+ * `date` arrived as *"Friday 28 August · business day"* from
+ * `ToString("dddd d MMMM")`, and each row's comparison arrived as
+ * *"Late 20 min"*. Both are the service's culture on every property's screen,
+ * and the second put a number and its unit inside a sentence nobody could
+ * reformat. NUM-Q1 · ADR 0174 · ADR 0175.
+ */
+describe("attendance, the words the screen writes", () => {
+  it("reads the day in the property's own locale", async () => {
+    const british = await drawn([]);
+    const american = await drawn([], "en-US");
+
+    const head = (main: HTMLElement): string => main.querySelector(".hsub")!.textContent!;
+
+    // Chosen so the two candidates disagree: the same ISO day, one locale
+    // putting the date before the month and the other after it. A fixture whose
+    // locales rendered alike would pass with the formatting removed.
+    expect(head(british)).toBe("Friday 28 August · business day");
+    expect(head(american)).toBe("Friday, August 28 · business day");
+  });
+
+  it("says the day plainly where the property has no locale to read it in", async () => {
+    // Absent is an answer, and the SDK returns the ISO day rather than guessing
+    // a culture. The clause is still the screen's, and still in words.
+    const main = await drawn([], null);
+
+    expect(main.querySelector(".hsub")?.textContent).toBe("2026-08-28 · business day");
+  });
+
+  it("composes the lateness sentence from the state and the minutes", async () => {
+    const main = await drawn([
+      { ...BASE, rostered: true, postedAt: "07:00", in: "07:20", state: "late", lateBy: 20 },
+    ]);
+
+    // Nothing on the wire says "Late": the service sends `late` and `20`. This
+    // used to render whatever string the service had composed, which is why an
+    // Arabic-reading property read English here.
+    expect(main.querySelector(".ag")?.textContent).toContain("Late 20 min");
+  });
+
+  it("writes each of the five states in words", async () => {
+    const main = await drawn([
+      { ...BASE, who: "A", rostered: true, postedAt: "07:00", in: "07:00", state: "onTime" },
+      { ...BASE, who: "B", rostered: true, postedAt: "23:00", in: "22:55", state: "onShift" },
+      { ...BASE, who: "C", rostered: true, postedAt: "07:00", state: "absent" },
+      { ...BASE, who: "D", rostered: false, postedAt: null, in: "09:05", state: "unrostered" },
+    ]);
+
+    const said = Array.from(main.querySelectorAll(".ag .pill")).map((one) => one.textContent);
+
+    expect(said).toEqual(["On time", "On shift", "Absent", "Present, not rostered"]);
   });
 });

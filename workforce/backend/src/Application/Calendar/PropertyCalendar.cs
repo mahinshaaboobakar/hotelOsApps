@@ -47,7 +47,26 @@ public sealed class PropertyCalendar
 
     /// <summary>The day at the property that this instant falls on.</summary>
     public DateOnly DayOf(DateTimeOffset instant)
-        => DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, _zone).DateTime);
+        => DateOnly.FromDateTime(LocalAt(instant));
+
+    /// <summary>What the property's own clock reads at this instant.</summary>
+    /// <remarks>
+    /// <para>
+    /// For the one comparison that is neither a day nor an instant: a shift's
+    /// hours are wall-clock times at the property, and asking whether one has
+    /// passed means comparing it against the property's wall clock. Both sides
+    /// have to be the same clock — the shift board compared them against UTC,
+    /// so at +05:30 it answered with the rota of five and a half hours ago.
+    /// </para>
+    /// <para>
+    /// The zone stays private. A caller that took it would convert on its own,
+    /// which is the second derivation this type exists to prevent.
+    /// </para>
+    /// </remarks>
+    /// <param name="instant">The moment.</param>
+    /// <returns>The property's local date and time, with no offset on it.</returns>
+    public DateTime LocalAt(DateTimeOffset instant)
+        => TimeZoneInfo.ConvertTime(instant, _zone).DateTime;
 
     /// <summary>The instant a time of day happens at the property, on that day — in UTC.</summary>
     /// <remarks>

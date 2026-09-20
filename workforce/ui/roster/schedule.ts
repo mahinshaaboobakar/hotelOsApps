@@ -14,6 +14,15 @@ export interface ScheduleDay {
   /** The date, or null for a leading or trailing blank. */
   date: number | null;
 
+  /**
+   * The day itself, ISO.
+   *
+   * Carried so the grid can say which cell is today without rebuilding a date
+   * from a number and the month's name — and because `date` alone is ambiguous:
+   * a leading blank and a real day can both read `28`.
+   */
+  on: string;
+
   /** The shift's short code, the leave type's name, or null. */
   mark: string | null;
 
@@ -34,19 +43,22 @@ export interface ScheduleDay {
   dutyTo?: string | null;
 
   /**
-   * The day the register is being read on, drawn with an emphasised border.
+   * Which part of that duty this cell carries — `64g` §5, ruled sent.
    *
-   * **The service does not send it** (`ScheduleView.Calendar`); only the fixture
-   * did. Owed, recorded in the audit — the screen draws it the day one arrives.
+   * A duty running 22:00 → 06:00 was drawn on its start day only, so the
+   * morning the person was still holding it was blank. The frame draws that
+   * tail at reduced weight, because *both dates carry the duty* (WF-Q8).
+   *
+   * **The service decides which**, because only it knows what day an instant
+   * falls on at the property: the screen has a zone for rendering and no way to
+   * place a day across one. Null where the cell carries no duty.
    */
-  today?: boolean;
+  dutyPart?: "starts" | "tail" | null;
 
-  // **No `tail`.** The second date of a duty crossing midnight carried a
-  // composed clock ("…08:00") that only the fixture ever sent — ScheduleView
-  // has no such field. The value it would say is the previous day's `dutyTo`,
-  // in the property's zone, and nothing here can yet say which calendar day an
-  // instant falls on in a zone: that needs either the service to send the tail
-  // day's end or an SDK helper. Owed, both arms in the audit, neither chosen.
+  // **No `today` on the cell.** It was one, and only the fixture ever set it —
+  // a boolean per cell is six-weeks-of-cells able to disagree with each other.
+  // The month carries the day instead, and the cell whose `on` matches is
+  // today: one fact, from the one place that knows it (ADR 0211).
 }
 
 /** The month. */
@@ -80,6 +92,16 @@ export interface Schedule {
    */
   balance: string | null;
 
+  /**
+   * The property's operating day, ISO — `64g` §5, ruled sent (ADR 0211).
+   *
+   * The frame marks today's cell and nothing on the wire said which day that
+   * was, so the screen either marked nothing or would have had to ask the
+   * machine it happens to be drawn on. Null where Context could not answer:
+   * the grid then marks no day, rather than marking the wrong one.
+   */
+  today: string | null;
+
   /** Six weeks of seven, Monday first, with blanks at both ends. */
   days: readonly ScheduleDay[];
 }
@@ -97,14 +119,19 @@ function at(dayOfAugust: number, localHour: number): string {
   ).toISOString();
 }
 
-/** A working day. */
-function work(date: number, mark: string, tone: ScheduleDay["tone"]): ScheduleDay {
-  return { date, mark, tone };
+/** The ISO day of an August date, which is the month the fixture draws. */
+function august(date: number): string {
+  return `2026-08-${String(date).padStart(2, "0")}`;
 }
 
-/** A blank cell from an adjacent month. */
+/** A working day. */
+function work(date: number, mark: string, tone: ScheduleDay["tone"]): ScheduleDay {
+  return { date, on: august(date), mark, tone };
+}
+
+/** A blank cell from an adjacent month — July here, which is why `on` matters. */
 function blank(date: number): ScheduleDay {
-  return { date, mark: null, tone: null };
+  return { date, on: `2026-07-${String(date).padStart(2, "0")}`, mark: null, tone: null };
 }
 
 export const recordedSchedule: Schedule = {
@@ -120,6 +147,10 @@ export const recordedSchedule: Schedule = {
   // What the service sends. This carried "4 / 8 casual remaining".
   balance: null,
 
+  // The day the frame is drawn on — the 28th, which is the day the duty starts,
+  // so the marked cell and the duty's own cell are the same one.
+  today: "2026-08-28",
+
   days: [
     blank(28), blank(29), blank(30), blank(31),
     work(1, "M", "brand"), work(2, "M", "brand"), work(3, "OFF", "neutral"),
@@ -133,14 +164,18 @@ export const recordedSchedule: Schedule = {
     work(21, "A", "ok"), work(22, "M", "brand"), work(23, "OFF", "neutral"),
     work(24, "M", "brand"),
     work(25, "M", "brand"), work(26, "M", "brand"), work(27, "M", "brand"),
-    // The duty crosses midnight; the badge names its span on the day it starts.
-    // The 29th carried a tail ("…08:00") and the 28th `today: true` — neither
-    // is anything the service sends, so neither is here (see `ScheduleDay`).
+    // The duty crosses midnight, so both dates carry it: the badge names its
+    // span on the 28th and the 29th carries the tail. Both are the service's
+    // now — `ScheduleView` sends `dutyPart`, and the day the grid marks comes
+    // from the month rather than from a boolean on a cell.
     {
-      date: 28, mark: "M", tone: "brand",
-      dutyFrom: at(28, 20), dutyTo: at(29, 8),
+      date: 28, on: august(28), mark: "M", tone: "brand",
+      dutyFrom: at(28, 20), dutyTo: at(29, 8), dutyPart: "starts",
     },
-    work(29, "OFF", "neutral"),
+    {
+      date: 29, on: august(29), mark: "OFF", tone: "neutral",
+      dutyFrom: at(28, 20), dutyTo: at(29, 8), dutyPart: "tail",
+    },
     work(30, "A", "ok"), work(31, "A", "ok"),
   ],
 };

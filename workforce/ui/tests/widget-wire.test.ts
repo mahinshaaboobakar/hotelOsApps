@@ -42,14 +42,42 @@ describe("widget numbers from the wire", () => {
         value: 2, form: "count", tone: "bad", opens: "attendance?department=HK",
       }],
       lateIn: [{
-        name: "S. Kumar", meta: "HK", context: null,
+        name: "S. Kumar", meta: "HK", context: null, at: "07:00",
         value: 22, form: "minutes", tone: "warn", opens: "attendance?department=HK",
       }],
     }));
 
     expect(texts(card, ".wvalue")).toEqual(["34 of 38", "3", "4"]);
-    expect(texts(card, ".wmeta")).toEqual(["9 rostered", "HK"]);
+    // The late row carries the shift's start — `64g` §5, ruled sent — and the
+    // separator is the screen's: the service sends `07:00`, never `HK · 07:00`.
+    expect(texts(card, ".wmeta")).toEqual(["9 rostered", "HK · 07:00"]);
     expect(texts(card, ".wfig")).toEqual(["2", "22 min"]);
+  });
+
+  it("writes the shift's start in the property's own hour cycle", async () => {
+    // The same wire, two readers. A service that had rendered this would have
+    // shipped one property's hour cycle to every property (ADR 0175).
+    const lateIn = [{
+      name: "S. Kumar", meta: "HK", context: null, at: "15:00",
+      value: 22, form: "minutes", tone: "warn", opens: "attendance?department=HK",
+    }];
+
+    const wire = {
+      figures: [{ count: 34, of: 38, label: "present", tone: "ink" }],
+      share: [{ count: 34, tone: "ok" }],
+      byDepartment: [],
+      lateIn,
+    };
+
+    const british = await attendanceToday(host("attendanceToday", wire));
+
+    const american = await attendanceToday({
+      ...host("attendanceToday", wire),
+      property: { timezone: "Asia/Kolkata", locale: "en-US" },
+    });
+
+    expect(texts(british, ".wmeta")).toEqual(["HK · 15:00"]);
+    expect(texts(american, ".wmeta")).toEqual(["HK · 03:00 PM"]);
   });
 
   it("writes days, and a count out of a total", async () => {

@@ -21,6 +21,7 @@ import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { codeChip, colourDot } from "../../chrome/code";
 import { failureScreen } from "../../chrome/failure";
+import { assignments } from "./catalogue";
 import { newShift } from "./dialog";
 import { type CatalogueRow, type LeaveRow, type Policy } from "../../roster/policy";
 
@@ -118,7 +119,11 @@ function shifts(rows: readonly CatalogueRow[], host: HostApi): HTMLElement {
       cell(colourDot(`${row.colour} · ${row.kind}`, row.tone), "quiet"),
       // Why retiring a shift is not deleting it: these assignments still name it,
       // and a rota worked under it has to stay readable.
-      el("div", "quiet", row.inUse),
+      //
+      // The noun and the figure are both written here. It arrived as
+      // `"88 assignments"` from the service, so the word was English on every
+      // property's screen and the number carried the service's own grouping.
+      el("div", "quiet", assignments(row.inUse, host.property)),
     );
     list.append(item);
   }

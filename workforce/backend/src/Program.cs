@@ -1,6 +1,8 @@
+using HotelOS.Contracts.Context.V1;
 using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Assignment;
 using HotelOS.Workforce.Application.Attendance;
 using HotelOS.Workforce.Application.Capabilities;
@@ -242,6 +244,37 @@ builder.Services.AddHotelOsApplication<WorkforceDbContext>(platform);
 // identity to do it with.
 
 builder.Services.AddScoped<IStaffDirectory, MasterDataStaffDirectory>();
+
+// # What day it is at the property — ADR 0211, and the one line the switch moves
+//
+// The operating day is the Context Service's (`WF-Q21`). **Both paths exist
+// and both are tested**, and this registration is the whole of the difference:
+//
+//   CalendarOperatingDay   the calendar day in the property's own zone — what
+//                          this application did before ADR 0211, right about
+//                          the zone and wrong about a 04:00 boundary
+//   ContextOperatingDay    ADR 0211's answer, asked of Context
+//
+// **`CalendarOperatingDay` is registered, and that is deliberate.** The Context
+// client below is composed so the switch costs one line — but an installed
+// application's Context call has never been admitted in a running property, and
+// the client this file removed for Master Data was removed for exactly that
+// reason (see the note above). The switch is the architect's word, given when
+// the live proof lands. Registering Context before then would replace a day
+// that is slightly wrong with no day at all.
+builder.Services.AddScoped<IOperatingDay, CalendarOperatingDay>();
+
+// The Context client, composed but not yet depended on. The name only: the
+// request URI carries it for `Host:` and TLS, and the port belongs to the
+// socket, which the handler dials where the Kernel says.
+builder.Services
+    .AddGrpcClient<ContextService.ContextServiceClient>(
+        client => client.Address = new Uri("https://context"))
+    .ConfigurePrimaryHttpMessageHandler(provider => PlatformTransport.Handler(
+        "context",
+        provider.GetRequiredService<IPlatformDirectory>(),
+        new ServiceCertificate.Source(platform.CertificateDirectory)));
+
 builder.Services.AddScoped<PostingService>();
 builder.Services.AddScoped<CapabilityService>();
 builder.Services.AddScoped<ShiftCatalogueService>();

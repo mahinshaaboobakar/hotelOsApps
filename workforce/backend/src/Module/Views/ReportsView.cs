@@ -32,11 +32,11 @@ public static class ReportsView
         var directory = call.Service<IStaffDirectory>();
         var postings = call.Service<PostingService>();
         var types = call.Service<LeaveTypeService>();
-        var clock = call.Service<TimeProvider>();
 
+        // ADR 0211 — which month "this month" is, at the property.
         var anchor = call.Optional("month") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+            : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var from = new DateOnly(anchor.Year, anchor.Month, 1);
         var to = from.AddMonths(1).AddDays(-1);

@@ -1,6 +1,7 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
 using HotelOS.Workforce.Domain;
@@ -257,7 +258,12 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
         authorizer = new RecordingAuthorizer();
         var directory = new StaffDirectoryDouble();
         var db = fixture.Context();
-        var teams = new TeamService(db, authorizer, directory, TimeProvider.System);
+
+        // ADR 0211 — the day a membership closes on is asked rather than
+        // computed. Over this directory's `"UTC"` default it is the day these
+        // services took from the clock before, so nothing here moves.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
+        var teams = new TeamService(db, authorizer, directory, days, TimeProvider.System);
 
         return (
             teams,
@@ -265,6 +271,7 @@ public class TeamCharacterisationTests(WorkforceFixture fixture)
                 db, authorizer, directory,
                 new PostingAnnouncer(new RecordingEventAppender(), directory),
                 teams,
+                days,
                 TimeProvider.System),
             directory);
     }

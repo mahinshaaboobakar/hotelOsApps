@@ -10,8 +10,9 @@
 import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import { days } from "../../chrome/dates";
-import { el } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
 import type { Balance, LeaveRow } from "../../roster/leave";
+import { withdrawable } from "./withdraw";
 
 /**
  * The four balance cards.
@@ -51,12 +52,23 @@ export function balances(
   return row;
 }
 
-/** The request list. */
+/**
+ * The request list.
+ *
+ * @param rows this person's own requests — ADR 0172, the read is the caller's
+ * @param property for the dates and the day counts
+ * @param onWithdraw called with the row a person asked to withdraw
+ * @returns the list
+ */
 export function requests(rows: readonly LeaveRow[],
   property: PropertyEnvironment,
+  onWithdraw: (row: LeaveRow) => void = () => {},
 ): HTMLElement {
   const list = el("div", "rows");
-  const columns = "1.6fr 120px 60px 110px";
+  // A fifth column for the control — `64g` §4 B. Putting it in the Status cell
+  // would have been two things in one column, and the pill is what that column
+  // is read for.
+  const columns = "1.6fr 120px 60px 110px 96px";
 
   const head = el("div", "row hd");
   head.style.gridTemplateColumns = columns;
@@ -65,6 +77,9 @@ export function requests(rows: readonly LeaveRow[],
     el("div", undefined, "Dates"),
     el("div", undefined, "Days"),
     el("div", undefined, "Status"),
+    // No label: the column holds one control per row and a heading over it
+    // would name the button rather than the column.
+    el("div", undefined, ""),
   );
   list.append(head);
 
@@ -79,11 +94,22 @@ export function requests(rows: readonly LeaveRow[],
       what.append(el("s", undefined, row.note));
     }
 
+    // **Only where the service would accept it.** `withdrawable` reads what
+    // `CancelAsync` refuses — a decided or already-withdrawn request — so a
+    // declined row carries nothing rather than a button that exists to be
+    // refused.
+    const act = el("div");
+
+    if (withdrawable(row)) {
+      act.append(control("btn sm", "Withdraw", () => { onWithdraw(row); }));
+    }
+
     item.append(
       what,
       el("div", undefined, days(row.dates, property)),
       el("div", undefined, formatNumber(row.days, property)),
       el("div", `pill ${tone(row.state)}`, row.state),
+      act,
     );
 
     list.append(item);

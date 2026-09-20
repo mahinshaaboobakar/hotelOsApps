@@ -52,8 +52,23 @@ export interface DayRow {
    * `WF-Q10`: 07:00 posted and 07:20 clocked are the facts; *"Late 20 min"* is
    * arithmetic over them, and a stored late-minutes column is a number that can
    * disagree with the two times beside it.
+   *
+   * **A word this service owns, never the sentence.** This was
+   * `against: string` — *"Late 20 min"*, composed in the service's own culture
+   * with the number and its unit inside it. Two things followed: a property in
+   * another language read the server's English, and this screen counted late
+   * people with `against.startsWith("Late")` — the service's prose parsed back
+   * as data. NUM-Q1, ADR 0174.
    */
-  against: string;
+  state: "absent" | "unrostered" | "late" | "onShift" | "onTime";
+
+  /**
+   * The minutes late, and null on every state but `late`.
+   *
+   * Zero would be somebody who arrived exactly on time, which is `onTime` — so
+   * null here is *not applicable*, never *no minutes*.
+   */
+  lateBy: number | null;
 
   /** How that reads. */
   tone: "ok" | "warn" | "bad" | "neu";
@@ -69,6 +84,14 @@ export interface DayRow {
 
 /** The day, as the screen draws it. */
 export interface Day {
+  /**
+   * The day itself, ISO — `2026-08-28`.
+   *
+   * **Not a sentence.** The service sent *"Friday 28 August · business day"*
+   * from `ToString("dddd d MMMM")`: a weekday and a month name in whatever
+   * culture the service happened to run under, on every property's screen. The
+   * screen writes the words now (ADR 0175).
+   */
   date: string;
   /** The department asked for, echoed by the service — null, since this screen names none. */
   department: string | null;
@@ -76,36 +99,40 @@ export interface Day {
 }
 
 export const recordedDay: Day = {
-  date: "Friday 28 August · business day",
+  date: "2026-08-28",
   department: null,
   rows: [
     {
       who: "Priya Thomas", role: "Supervisor", rostered: true, postedAt: "07:00",
-      in: "06:52", out: "15:04", against: "On time", tone: "ok", source: "manual",
+      in: "06:52", out: "15:04", state: "onTime", lateBy: null, tone: "ok",
+      source: "manual",
     },
     {
       who: "Anjali Menon", role: "Receptionist", rostered: true, postedAt: "07:00",
-      in: "07:20", out: "15:10", against: "Late 20 min", tone: "warn", source: "manual",
+      in: "07:20", out: "15:10", state: "late", lateBy: 20, tone: "warn",
+      source: "manual",
     },
     {
       who: "Vishnu Das", role: "Night auditor", rostered: true, postedAt: "23:00",
-      in: "22:55", out: null, against: "On shift", tone: "neu", source: "manual",
+      in: "22:55", out: null, state: "onShift", lateBy: null, tone: "neu",
+      source: "manual",
     },
     {
       who: "Sneha Iyer", role: "Receptionist", rostered: true, postedAt: "15:00",
-      in: "15:38", out: "23:02", against: "Late 38 min", tone: "warn", source: "manual",
+      in: "15:38", out: "23:02", state: "late", lateBy: 38, tone: "warn",
+      source: "manual",
     },
     // Rostered, and nobody recorded them arriving. A record with no arrival says
     // somebody looked; no record at all would say only that nobody looked.
     {
       who: "Rani Rajan", role: "Guest relations", rostered: true, postedAt: "15:00",
-      in: null, out: null, against: "Absent", tone: "bad", source: null,
+      in: null, out: null, state: "absent", lateBy: null, tone: "bad", source: null,
     },
     // The row that matters most: attendance contradicting the rota. Both facts
     // are kept and the discrepancy is shown, never silently reconciled.
     {
       who: "Joseph Kurian", role: "Bell captain", rostered: false, postedAt: null,
-      in: "09:05", out: "17:30", against: "Present, not rostered",
+      in: "09:05", out: "17:30", state: "unrostered", lateBy: null,
       tone: "warn", source: "manual",
     },
   ],

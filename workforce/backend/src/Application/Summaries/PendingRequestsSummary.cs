@@ -73,6 +73,7 @@ public class PendingRequestsSummary(
     SwapProposalService swaps,
     LeaveService leave,
     IStaffDirectory directory,
+    IOperatingDay days,
     TimeProvider clock)
 {
     /// <summary>Everything waiting, longest first.</summary>
@@ -136,7 +137,11 @@ public class PendingRequestsSummary(
             return [];
         }
 
-        var today = DateOnly.FromDateTime(clock.GetUtcNow().UtcDateTime);
+        // ADR 0211 — which postings are current. The clock above stays: how
+        // long a request has waited is an elapsed time between two instants,
+        // and no day boundary is involved in it.
+        var today = OperatingDay.OrUnavailable(
+            await days.TodayAsync(scope, cancellationToken));
 
         var postings = await db.Postings
             .Where(p => p.PropertyId == scope.PropertyId

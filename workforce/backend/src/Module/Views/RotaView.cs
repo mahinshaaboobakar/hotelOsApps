@@ -39,15 +39,19 @@ public static class RotaView
         var leave = call.Service<LeaveService>();
         var overtime = call.Service<OvertimeCheck>();
         var directory = call.Service<IStaffDirectory>();
-        var clock = call.Service<TimeProvider>();
 
         // Days at the property, never UTC days — see PropertyCalendar.
         var calendar = await PropertyCalendar.ForAsync(
             directory, call.Scope.PropertyId, cancellationToken);
 
+        // Which week opens when nobody names one is *what day is it* — Context's
+        // answer, ADR 0211, and the same correction `DutyView` needed. The
+        // property's wall clock answers *has 07:00 passed*, which is a different
+        // question; two views reading a day from two places is one property with
+        // two answers to it.
         var anchor = call.Optional("week") is { } named
             ? DateOnly.Parse(named.GetString()!)
-            : calendar.DayOf(clock.GetUtcNow());
+            : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
         var sunday = monday.AddDays(6);
@@ -262,7 +266,14 @@ public static class RotaView
             // posting `role` is read from; which is right for such a person is
             // queued for the owner, not decided in this line.
             departmentCode = primary.DepartmentCode,
-            zone = (string?)null,
+
+            // **No zone.** This sent `null` forever while the approved frames
+            // drew "Night auditor · Zone 1" under every name, so the drawing
+            // promised something no property received. The owner dropped the
+            // zone from this screen and from Attendance together
+            // (2026-09-20, `64g` §5), so the field goes rather than staying as
+            // a null nobody can fill: the posting's zone is People's, where
+            // `WF-Q7` put it.
             head = primary.IsDepartmentHead,
             week = Enumerable.Range(0, 7)
                 .Select(offset => Cell(held.Key, monday.AddDays(offset), cells, approved, byId,

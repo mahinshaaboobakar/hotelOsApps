@@ -89,6 +89,20 @@ export interface SummaryRow {
   from?: string;
   to?: string;
 
+  /**
+   * One clock time this row is about — a shift's start on a late row.
+   *
+   * `64g` §5, ruled sent: *twenty minutes late* is a different fact for a seven
+   * o'clock start than for a three o'clock one, and the service knew it all
+   * along (`LateArrival.ExpectedAt`). The frame drew it and the wire did not
+   * carry it.
+   *
+   * Separate from `from`/`to`, which are the two ends of a span: a start sent
+   * as half a span is a span the reader cannot complete. Undefined on every row
+   * that is not about one time.
+   */
+  at?: string;
+
   /** The qualifier beside it, as text, or null when the row has none. */
   meta: string | null;
 

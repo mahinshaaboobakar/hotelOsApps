@@ -2,6 +2,7 @@ using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Assignment;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Capabilities;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Postings;
@@ -351,14 +352,20 @@ public class AssignmentAdviceCharacterisationTests(WorkforceFixture fixture)
         var directory = new StaffDirectoryDouble();
         var clock = TimeProvider.System;
 
+        // What day it is, asked rather than worked out — ADR 0211.
+        // `CalendarOperatingDay` is what `Program.cs` registers until Context's
+        // call is proved live, and over this directory's `"UTC"` zone it
+        // answers what each of these services computed for itself before.
+        var days = new CalendarOperatingDay(directory, clock);
+
         return new World(
             new AssignmentAdvisor(db, authorizer),
             new PostingService(
                 db, authorizer, directory,
                 new PostingAnnouncer(new RecordingEventAppender(), directory),
-                new TeamService(db, authorizer, directory, clock), clock),
+                new TeamService(db, authorizer, directory, days, clock), days, clock),
             new CapabilityService(db, authorizer, clock),
-            new LeaveService(db, authorizer, new ApproverResolver(db), clock),
+            new LeaveService(db, authorizer, new ApproverResolver(db), days, clock),
             new LeaveTypeService(db, authorizer, directory, clock),
             new RotaService(db, authorizer, clock),
             new ShiftCatalogueService(db, authorizer, clock));

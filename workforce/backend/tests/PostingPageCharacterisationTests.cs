@@ -1,5 +1,6 @@
 using HotelOS.Platform;
 using HotelOS.Platform.TestSupport;
+using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Postings;
 using HotelOS.Workforce.Application.Teams;
 using Xunit;
@@ -171,10 +172,15 @@ public class PostingPageCharacterisationTests(WorkforceFixture fixture)
         var authorizer = new RecordingAuthorizer();
         var directory = new StaffDirectoryDouble();
 
+        // ADR 0211 — what day it is, asked rather than computed. Over this
+        // directory's `"UTC"` default it is the day the clock used to give.
+        var days = new CalendarOperatingDay(directory, TimeProvider.System);
+
         return new PostingService(
             fixture.Context(), authorizer, directory,
             new PostingAnnouncer(new RecordingEventAppender(), directory),
-            new TeamService(fixture.Context(), authorizer, directory, TimeProvider.System),
+            new TeamService(fixture.Context(), authorizer, directory, days, TimeProvider.System),
+            days,
             TimeProvider.System);
     }
 }

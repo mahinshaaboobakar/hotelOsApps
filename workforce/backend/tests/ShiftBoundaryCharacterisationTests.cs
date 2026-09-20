@@ -298,8 +298,13 @@ public class ShiftBoundaryCharacterisationTests(WorkforceFixture fixture)
         var events = new RecordingEventAppender();
         var db = fixture.Context();
 
+        // **The announcer compares a shift's hours against the property's own
+        // wall clock now**, so it takes the directory for the zone — both sides
+        // were UTC, so at +05:30 a 07:00 start was announced as due at 12:30
+        // local. `StaffDirectoryDouble.Zone` is `"UTC"` by default, which is
+        // what this test's expectations were written against.
         return (
-            new ShiftBoundaryAnnouncer(db, events, clock),
+            new ShiftBoundaryAnnouncer(db, events, new StaffDirectoryDouble(), clock),
             new RotaService(db, authorizer, clock),
             new ShiftCatalogueService(db, authorizer, clock),
             events);

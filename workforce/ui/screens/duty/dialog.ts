@@ -12,6 +12,7 @@ import { formatDay, type HostApi, type PropertyEnvironment } from "@hotelos/sdk"
 import { foot } from "../../chrome/confirm";
 import { el } from "../../chrome/element";
 import { overlay } from "../../chrome/overlay";
+import { instantAt } from "../../chrome/wall";
 import { UNKNOWN_OUTCOME, write, WriteRefused } from "../../roster";
 import type { DutyCandidate } from "../../roster/duty";
 
@@ -57,12 +58,35 @@ export function assignDuty(
     // Compared as the control writes them - `YYYY-MM-DDTHH:mm`, which sorts
     // lexically in the same order it sorts chronologically.
     if (draft.to <= draft.from) return "A duty has to end after it starts";
+
+    // **The instant cannot be built, so the write is not offered.** What was
+    // typed is wall clock at the property, and the property's zone is what
+    // turns it into an instant; with no zone there is no honest answer, and the
+    // machine's own is a different hour. The button waits, with the reason on
+    // it, rather than sending a moment nobody chose.
+    if (moments() === null) return "This property's timezone has not been read yet";
     return null;
+  }
+
+  /**
+   * The two ends as instants at the property, or null when either cannot be.
+   *
+   * `new Date(draft.from)` read the typed value **in the zone of whatever
+   * machine the desktop happens to run on** — right on a machine set to the
+   * property's own zone, and an hour or twelve out on any other, with nothing
+   * on the screen to say which had happened.
+   */
+  function moments(): { from: string; to: string } | null {
+    const from = instantAt(draft.from, property.timezone);
+    const to = instantAt(draft.to, property.timezone);
+
+    return from === null || to === null ? null : { from, to };
   }
 
   acts.onConfirm(() => {
     void (async () => {
-      if (chosen === null) return;
+      const when = moments();
+      if (chosen === null || when === null) return;
 
       refusal.replaceChildren();
       acts.working(true);
@@ -70,8 +94,8 @@ export function assignDuty(
       try {
         await write(host, "duty.assign", "assign", {
           staffId: chosen.staffId,
-          from: new Date(draft.from).toISOString(),
-          to: new Date(draft.to).toISOString(),
+          from: when.from,
+          to: when.to,
         });
         done();
       } catch (error) {

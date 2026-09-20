@@ -97,6 +97,12 @@ interface Place {
   /** Open the panel on one. */
   onRequest: (id: string) => void;
 
+  /** Which of the person's own requests is being withdrawn, when one is. */
+  withdrawing: string | null;
+
+  /** Open the withdraw dialog on one, or close it with `null`. */
+  onWithdraw: (id: string | null) => void;
+
   /** Open the end-posting dialog on somebody. */
   onWho: (who: string) => void;
 
@@ -167,9 +173,15 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
     label: "Leave & Requests",
     views: [{
       label: "Leave & Requests",
-      draw: (h, m, place) => void leave(
-        h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close,
-        place.request, place.onRequest),
+      draw: (h, m, place) => void leave(h, m, place.tab, place.go, {
+        dialog: place.dialog,
+        open: () => { place.open("leave"); },
+        close: place.close,
+        chosen: place.request,
+        onChoose: place.onRequest,
+        withdrawing: place.withdrawing,
+        onWithdraw: place.onWithdraw,
+      }),
     }],
   },
   { label: "Attendance", views: [{ label: "Attendance", draw: (h, m) => void attendance(h, m) }] },
@@ -261,6 +273,12 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   // Which waiting request the approver has open — `64g` §4 B.
   let request: string | null = null;
 
+  // And which of the person's OWN requests they are withdrawing. A second
+  // field rather than reusing `request`: the two live on different tabs and
+  // mean different things, and one variable holding either is the fold this
+  // repository keeps paying for.
+  let withdrawing: string | null = null;
+
   function show(next: string, chosen: string | null = null): void {
     if (root === null) return;
 
@@ -309,6 +327,7 @@ export const activate: Activate = (host: HostApi): HostedModule => {
         detail = null;
         pick = null;
         who = null;
+        withdrawing = null;
         // The team stays selected. Cancelling *Add a member* returns to the
         // team it was opened from, not to the list — dismissing a dialog is
         // not a decision to leave the page behind it.
@@ -335,6 +354,8 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       // Pressing the open row closes it, as a team's does: the plain queue is
       // reachable again without a second control that exists to undo the first.
       onRequest: (id) => { request = request === id ? null : id; show(current); },
+      withdrawing,
+      onWithdraw: (id) => { withdrawing = id; show(current); },
     });
   }
 
