@@ -36,8 +36,25 @@ import type { Call } from "./host";
  * sees "Record" with no state chosen and "Keep this order" before a reorder. Probed
  * by hand across every place: each sheet opened, each control pressed first, then
  * every other control pressed and compared on screen, field values, focus and host
- * calls. **Nothing dead.** A green run here still says nothing about those armed
- * states; that measurement does, and only for the day it was taken.
+ * calls. **Nothing dead** — but only the third probe was worth believing, and the
+ * first two are why this paragraph names its instrument.
+ *
+ * ```text
+ * probe 1  chose its targets from the controls the sheet held BEFORE arming, so a
+ *          control drawn off until armed ("Keep this order") was never pressed.
+ *          It reported nothing, and could not have reported anything.
+ * probe 2  pressed the armed control, and gave the mount a throwaway call log, so a
+ *          press whose only effect is a request read as dead: "Record" on a room's
+ *          page, four times, all false.
+ * probe 3  targets from what the sheet holds after arming, and the mount's own log.
+ * ```
+ *
+ * Probe 3 was proved before it was believed (HH's rule, c433ae39, after their own
+ * first probe named ~100 pairs that were not inert): in a detached worktree at
+ * `c433ae3`, `actions(overlay, "Keep this order", …)` was rewired to `() => {}`. It
+ * named that control on both Reorder sheets and nothing else; on the real tree it
+ * names nothing. A green run here still says nothing about armed states; that
+ * measurement does, and only for the day it was taken.
  *
  * **Proved against planted empty handlers** (2026-09-20, the architect's ask after
  * HH's Jobs guard passed two tabs wired to `() => {}`): in a detached worktree at
