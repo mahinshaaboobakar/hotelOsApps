@@ -15,19 +15,27 @@ namespace HotelOS.RoomCare.Domain;
 /// only a property's own setting.
 /// </para>
 /// <para>
-/// <b>That reason is under review with the planner (WF-Q21, alongside AUTHZ-Q18b), 2026-09-19</b>: GuestOps now calls
-/// <c>GetOperatingDay</c>, and ADR 0210 fixed that call, so "an installed application cannot call Context" may no
-/// longer hold. Nothing changes until the ruling; do not read this copy as settled.
+/// <b>That reason is now stale, and this derivation is owed for retirement — ADR 0211 (WF-Q21), 2026-09-19.</b> The
+/// day is the property's operating day, as chapter 01 §6.1's R12 says; what changes is who derives it. ADR 0210
+/// makes <c>GetOperatingDay</c> platform/service-scoped with an application as a legitimate caller, so PKG-Q8's
+/// refusal no longer justifies a local copy, and Room Care is to consume Context's value instead of computing it.
+/// </para>
+/// <para>
+/// <b>Kept for 0.1.4, retired in 0.1.5</b>, on the architect's sequencing: nothing is deleted until FF proves the
+/// Context call live. A cut waiting on a live proof is worse than a cut that names the work as owed. When the call
+/// lands it sends <b>no property id</b> — Context binds the property to the caller (AUTHZ-Q18b) — and a day it
+/// cannot read is said as unread, never a fallback day, exactly as <see cref="Zone"/> refuses a property with no
+/// zone today.
 /// </para>
 /// </remarks>
 public static class OperatingDay
 {
     /// <summary>The business date, and the property-local time it was taken at.</summary>
     /// <remarks>
-    /// <b>PENDING WF-Q21</b> (with the planner): calendar day or operating day. This is the one place Room Care
-    /// decides; every "today" and every day an instant fell on comes through here. Until the ruling it is the
-    /// operating day, as Room Care's chapters specify (01 §6.1, R12). If the ruling is the calendar day, the change
-    /// is here: a boundary of 00:00.
+    /// <b>The operating day — ADR 0211 (WF-Q21), ruled 2026-09-19.</b> This is the one place Room Care derives it;
+    /// every "today" and every day an instant fell on comes through here. That is also what makes the retirement
+    /// above one change: Context's value replaces this body in 0.1.5, and every caller already reads the day from
+    /// here.
     /// </remarks>
     public static (DateOnly Date, DateTime Local) At(DateTimeOffset instant, string timezone, TimeOnly boundary)
     {

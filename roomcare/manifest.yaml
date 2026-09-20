@@ -45,10 +45,11 @@
 #     0.1.4, "vacant for N days" counted UTC days and now counts the
 #     property's (a day too many at +05:30, too few at −06:00, which decided
 #     whether a room was refreshed). None of Room Care's own UI code reads the
-#     clock. A source guard refuses the bad shapes. Whether the day is the
-#     calendar day or the hotel's operating day is with the planner (WF-Q21);
-#     until then it is the operating day, as Room Care's chapters specify, in
-#     one function.
+#     clock. A source guard refuses the bad shapes. The day is the property's
+#     operating day (ADR 0211), as Room Care's chapters have it, derived in one
+#     function. **Owed in 0.1.5**: that function is retired and Context's own
+#     value is consumed instead — kept here on purpose, because nothing is
+#     deleted until the Context call is proved live.
 #   * **"Not before" is said in the property's time.** The door's refusal and
 #     the room's history said it in UTC and labelled it so.
 #   * **Every refusal is in a person's words.** No field names, enum words

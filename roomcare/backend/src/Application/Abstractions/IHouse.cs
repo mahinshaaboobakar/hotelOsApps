@@ -33,11 +33,10 @@ public sealed record PropertyDaySettings(string Code, string Name, string Timezo
     /// of days between the two is a count of the property's days. Never the instant's UTC date, which is a day early or
     /// late for part of every day anywhere but UTC (owner instruction, 2026-09-19; Workforce's b5c5ffc).
     /// <para>
-    /// <b>PENDING WF-Q21</b> (with the planner): whether an application's day is the calendar day or the hotel's
-    /// operating day. Room Care's chapters make it the operating day (01 §6.1, R12: "the day rolls on the property's
-    /// operating day"), and "today" (<c>PropertyNow.Day</c>) and this method both come from
-    /// <see cref="Domain.OperatingDay.At"/>. So both sides of every count follow one rule, and a ruling for the
-    /// calendar day changes that one function, not this method.
+    /// <b>The operating day — ADR 0211 (WF-Q21), ruled 2026-09-19</b>, as chapter 01 §6.1's R12 has it. "Today"
+    /// (<c>PropertyNow.Day</c>) and this method both come from <see cref="Domain.OperatingDay.At"/>, so both sides
+    /// of every count follow one rule. Where the day is derived is what changes: Context's value replaces that
+    /// function's body in 0.1.5, and nothing here moves.
     /// </para>
     /// </summary>
     public DateOnly DayOf(DateTimeOffset instant) => Domain.OperatingDay.At(instant, Timezone, Boundary).Date;

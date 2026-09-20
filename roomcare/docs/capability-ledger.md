@@ -214,6 +214,13 @@ the widgets. **Failing first**: at `991b032` it failed on ten screens with every
 5. **"Recorded as source manual…"** on the Room state sheet, and **"whether they are on shift is Workforce's to
    add"** on Reassign. Both are explanations of how the system works rather than something a person acts on.
 
+## Owed after 0.1.4
+
+**The property's day comes from Context, not from Room Care (ADR 0211).** Room Care works out the day itself today,
+from the property's time zone and day boundary. The rule is unchanged and so is what you see; the platform now
+answers the question instead, so every application gives the same answer. It is deliberately still in 0.1.4: nothing
+is removed until that call is proved working on a live platform. Owed in 0.1.5.
+
 ## Also for your next page (from the drawing comparison)
 
 Three drawn-versus-built choices remain undecided:

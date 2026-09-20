@@ -114,11 +114,19 @@ parser's defect is held by behaviour: a bare time is refused, and an offset time
 (+05:30), Guatemala (−06:00) and UTC. That test was red before the fix. The day counts are held by
 `PropertyDayTests`, in Kolkata and Guatemala, which fail in opposite directions on the old code.
 
-## Pending WF-Q21: calendar day or operating day
+## Ruled: the operating day, and this derivation is owed for retirement — ADR 0211
 
-The planner is ruling whether an application's day is the calendar day or the hotel's operating day. Room Care's
-chapters make it the operating day: 01 §6.1, R12, "the day rolls on the property's operating day". Every "today" and
-every "the day an instant fell on" comes from one function, `OperatingDay.At`, labelled pending WF-Q21 at the code,
-as is `PropertyDaySettings.DayOf`. The instruction to build to the calendar day conflicts with those chapters, so it
-is not applied here. Until WF-Q21 is ruled, both sides of every count follow one rule. A ruling for the calendar day
-is a change in that one function.
+**WF-Q21 is ruled (ADR 0211, 2026-09-19): the day is the property's operating day**, as Room Care's chapters have it
+(01 §6.1, R12, "the day rolls on the property's operating day"). The architect's instruction to build to the calendar
+day was withdrawn; refusing it and asking rather than changing the chapter is recorded in the ruling.
+
+**What changes is who derives it.** ADR 0210 makes `GetOperatingDay` platform/service-scoped with an application as a
+legitimate caller, so the premise `OperatingDay.cs` was written on — an installed application cannot call Context
+(PKG-Q8) — is stale. Room Care is to consume Context's value instead of computing it.
+
+**Sequenced, and 0.1.4 is cut with the local derivation still in place**, labelled at `OperatingDay.At` and
+`PropertyDaySettings.DayOf`: nothing is deleted until FF proves the Context call live. A cut waiting on a live proof
+is worse than a cut that names the work as owed. **Owed in 0.1.5**: call Context, sending **no property id** (Context
+binds the property to the caller, AUTHZ-Q18b), and say a day it cannot read as unread — never a fallback day. Every
+"today" and every "the day an instant fell on" already comes from that one function, which is what keeps the
+retirement to one change.
