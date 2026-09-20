@@ -12,6 +12,7 @@ import { failureScreen } from "../../chrome/failure";
 import { ROSTER_READ } from "../../chrome/permissions";
 import { type LeaveBoard } from "../../roster/leave";
 import { noSwap, queue, swapCard } from "./approvals";
+import { decision } from "./decision";
 import { requestForm } from "./form";
 import { balances, requests } from "./requests";
 
@@ -31,6 +32,8 @@ export async function leave(
   dialog = false,
   open: () => void = () => {},
   close: () => void = () => {},
+  chosen: string | null = null,
+  onChoose: (id: string) => void = () => {},
 ): Promise<void> {
   const got = await load<LeaveBoard>(host, ROSTER_READ, "leave");
 
@@ -38,7 +41,7 @@ export async function leave(
   // never a recorded list with an apology under it.
   if (!got.ok) {
     failureScreen(main, "Leave & Requests", got.failure, { the: "leave" }, host.property,
-      () => void leave(host, main, tab, go, dialog, open, close));
+      () => void leave(host, main, tab, go, dialog, open, close, chosen, onChoose));
     return;
   }
 
@@ -51,9 +54,17 @@ export async function leave(
     // table fell past the bottom of the screen — the table was built and
     // simply could not be reached, which is the worst shape a layout
     // divergence takes.
+    // **A row opens a decision panel beside the queue** — owner, 2026-09-20,
+    // `64g` §4 B. The panel replaces the swap card's place when a row is open:
+    // the approver is deciding one thing, and two panes competing for that
+    // column would be two decisions offered at once.
+    const open_ = board.waiting.find((row) => row.id === chosen) ?? null;
+
     const split = el("div", "asplit");
-    split.append(queue(board.waiting, host.property),
-      board.swap === null ? noSwap() : swapCard(board.swap, host.property));
+    split.append(queue(board.waiting, host.property, chosen, onChoose),
+      open_ !== null
+        ? decision(host, open_, host.property, () => { onChoose(open_.id); })
+        : board.swap === null ? noSwap() : swapCard(board.swap, host.property));
     body.append(split);
   } else {
     body.append(balances(board.balances, host.property), requests(board.requests, host.property));

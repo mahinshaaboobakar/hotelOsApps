@@ -13,12 +13,21 @@ import { formatDay, formatNumber, type PropertyEnvironment } from "@hotelos/sdk"
 
 import { codeChip } from "../../chrome/code";
 import { days } from "../../chrome/dates";
-import { el, unavailable } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import type { SwapDetail, Waiting } from "../../roster/leave";
 
-/** The queue. */
+/**
+ * The queue.
+ *
+ * @param items what is waiting
+ * @param property whose locale the dates and numbers are written in
+ * @param chosen which row's decision panel is open, when one is
+ * @param onChoose open the panel on a row — pressing the open one closes it
+ */
 export function queue(items: readonly Waiting[],
   property: PropertyEnvironment,
+  chosen: string | null = null,
+  onChoose: (id: string) => void = () => {},
 ): HTMLElement {
   const list = el("div", "rows");
   const columns = "1.9fr 90px 110px";
@@ -33,8 +42,12 @@ export function queue(items: readonly Waiting[],
   list.append(head);
 
   for (const item of items) {
-    const row = el("div", "row");
+    // A button, because pressing it opens the decision panel — and a row a
+    // mouse can open and a keyboard cannot is the shape `tests/mouse-only`
+    // exists to refuse. `on` marks the open one, and pressing it closes it.
+    const row = control(item.id === chosen ? "row on" : "row", "", () => { onChoose(item.id); });
     row.style.gridTemplateColumns = columns;
+    row.setAttribute("aria-pressed", item.id === chosen ? "true" : "false");
 
     const what = el("div");
     what.append(el("b", undefined, item.who), el("s", undefined, describe(item, property)));

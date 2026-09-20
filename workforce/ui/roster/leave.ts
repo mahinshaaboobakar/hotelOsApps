@@ -45,8 +45,23 @@ export type RequestState = "Requested" | "Approved" | "Declined" | "Cancelled";
 
 /** One leave request, as this person's list shows it. */
 export interface LeaveRow {
+  /** The request, for a write that names it — `leave.request · withdraw`. */
+  id: string;
+
+  /** The version that write expects. */
+  version: number;
+
   type: string;
-  note: string;
+
+  /**
+   * What the person wrote with the request, or null when they wrote nothing.
+   *
+   * **Null, not "—".** The service sent a dash for an empty note and this
+   * screen tested for it — `row.note !== "—"` — so a punctuation choice in the
+   * service decided what was drawn here. An absence is an absence; the dash,
+   * if there is to be one, is the screen's.
+   */
+  note: string | null;
   /**
    * The two ends of the leave, as the wire carries them - ADR 0175.
    *
@@ -62,6 +77,19 @@ export interface LeaveRow {
 
 /** One item waiting on the approver — a leave request or a swap proposal. */
 export interface Waiting {
+  /**
+   * The request or proposal this row is, for a write that names one.
+   *
+   * Approve, decline and withdraw each take an id and the version they expect.
+   * The read carried neither, so the queue could show rows and offer no
+   * decision on any of them — the owner's ruled panel (`64g` §4 B) could not
+   * have been built whatever it drew.
+   */
+  id: string;
+
+  /** The version those writes expect. */
+  version: number;
+
   /** Who it concerns. */
   who: string;
 
@@ -93,6 +121,26 @@ export interface Waiting {
 
   /** When the colleague accepted - a swap row's day. Absent on a leave row. */
   accepted?: string | null;
+
+  /**
+   * What this person holds of that type now, and what approving would leave.
+   *
+   * Both may be negative: an approved overdraw is a real state (`WF-Q5`), and
+   * a number clamped at zero would hide the decision somebody made. **Null
+   * when nothing has ever been posted** for that person and type — a zero
+   * would claim a ledger row exists. Absent on a swap row.
+   */
+  balance?: number | null;
+  after?: number | null;
+
+  /** What the person wrote with the request, or null. Absent on a swap row. */
+  note?: string | null;
+
+  /**
+   * Who else is already away across these dates — the fact an approver is
+   * actually weighing. Never includes this request's own person.
+   */
+  alsoOff?: readonly string[];
 }
 
 /**
@@ -161,15 +209,25 @@ export const recordedLeave: LeaveBoard = {
 
   requests: [
     {
+      id: "2f4c8a61-3d97-4e52-b8a0-6c1f9d3e7b25", version: 1,
       type: "Casual leave", note: "Family function — will be back Monday",
       dates: { from: "2026-09-07", to: "2026-09-08" }, days: 2, state: "Requested",
     },
     {
+      id: "9b3e7d40-5a12-4f86-9c37-1e8b4a2d6f09", version: 2,
       type: "Earned leave", note: "Approved with the balance overdrawn by 1",
       dates: { from: "2026-08-18", to: "2026-08-22" }, days: 5, state: "Approved",
     },
-    { type: "Sick leave", note: "—", dates: { from: "2026-08-03", to: "2026-08-03" }, days: 1, state: "Approved" },
+    // A request with nothing written on it: null, as the wire now carries it.
+    // This was "—", the service's own punctuation, which the screen then
+    // tested for.
     {
+      id: "6d1a9c58-7b24-4e30-85f1-3a7c2e9b4d16", version: 2,
+      type: "Sick leave", note: null,
+      dates: { from: "2026-08-03", to: "2026-08-03" }, days: 1, state: "Approved",
+    },
+    {
+      id: "c47f2b83-8e15-4a69-b3d2-5f0c7a1e9438", version: 3,
       type: "Casual leave",
       note: "Withdrawn before the decision — the balance was credited back",
       dates: { from: "2026-07-11", to: "2026-07-11" }, days: 1, state: "Cancelled",
@@ -182,17 +240,26 @@ export const recordedLeave: LeaveBoard = {
   // balance the queue has never sent.
   waiting: [
     {
+      id: "a15e3c72-4b68-4d91-8f05-2c9a7e1b6d34", version: 2,
       who: "Anjali Menon & Sneha Iyer",
       what: "Swap — accepted, awaiting you",
       kind: "Swap", accepted: "2026-08-27",
     },
     {
+      id: "5c82f4a9-7e31-4b06-9d58-1f3e6c4a8b27", version: 1,
       who: "Joseph Kurian", type: "Casual", days: 2, kind: "Leave",
       dates: { from: "2026-09-07", to: "2026-09-08" },
+      // What the decision would leave behind, and who else is away then.
+      balance: 11, after: 9, note: "Family function",
+      alsoOff: ["Sneha Iyer"],
     },
     {
+      // Nothing posted for this person and type: the panel says so rather
+      // than drawing a zero, which would claim a ledger row exists.
+      id: "e37b6d05-2a94-4f18-b7c3-9d05e2a1c846", version: 1,
       who: "Rani Rajan", type: "Earned", days: 4, kind: "Leave",
       dates: { from: "2026-09-12", to: "2026-09-15" },
+      balance: null, after: null, note: null, alsoOff: [],
     },
   ],
 

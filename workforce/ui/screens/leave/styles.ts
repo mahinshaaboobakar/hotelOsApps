@@ -27,6 +27,15 @@ export const LEAVE_CSS = `
       border:1px solid var(--color-line,rgb(255 255 255/.07));
       border-radius:var(--radius-panel,1rem);padding:16px;display:flex;
       flex-direction:column;gap:12px}
+/* The decision panel's facts — owner, 2026-09-20, 64g section 4 B: the balance
+   a decision would leave, who else is off then, and the person's own note.
+   A label column and a value column, so three facts read as three rather than
+   as a paragraph. */
+.dfacts{display:grid;grid-template-columns:120px minmax(0,1fr);gap:4px 12px;
+        margin:0;font-size:12.5px}
+.dfacts dt{color:var(--color-ink-faint,#5a6172)}
+.dfacts dd{margin:0;color:var(--color-ink,#e8ebf4)}
+
 .steps{display:flex;gap:8px;align-items:center;font-size:11.5px;
        color:var(--color-ink-faint,#5a6172)}
 .steps em{font-style:normal;padding:2px 9px;border-radius:99px;

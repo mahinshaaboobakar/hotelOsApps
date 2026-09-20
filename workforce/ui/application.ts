@@ -91,6 +91,12 @@ interface Place {
   /** Open one. */
   onTeam: (id: string) => void;
 
+  /** Which waiting request the decision panel is open on, when one is. */
+  request: string | null;
+
+  /** Open the panel on one. */
+  onRequest: (id: string) => void;
+
   /** Open the end-posting dialog on somebody. */
   onWho: (who: string) => void;
 
@@ -162,7 +168,8 @@ const SECTIONS: readonly { label: string; views: readonly View[] }[] = [
     views: [{
       label: "Leave & Requests",
       draw: (h, m, place) => void leave(
-        h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close),
+        h, m, place.tab, place.go, place.dialog, () => place.open("leave"), place.close,
+        place.request, place.onRequest),
     }],
   },
   { label: "Attendance", views: [{ label: "Attendance", draw: (h, m) => void attendance(h, m) }] },
@@ -251,6 +258,8 @@ export const activate: Activate = (host: HostApi): HostedModule => {
   let week: string | null = null;
   let page = 0;
   let team: string | null = null;
+  // Which waiting request the approver has open — `64g` §4 B.
+  let request: string | null = null;
 
   function show(next: string, chosen: string | null = null): void {
     if (root === null) return;
@@ -322,6 +331,10 @@ export const activate: Activate = (host: HostApi): HostedModule => {
       // plain list: neither level of navigation reaches a state it has no
       // entry for.
       onTeam: (id) => { team = team === id ? null : id; show(current); },
+      request,
+      // Pressing the open row closes it, as a team's does: the plain queue is
+      // reachable again without a second control that exists to undo the first.
+      onRequest: (id) => { request = request === id ? null : id; show(current); },
     });
   }
 

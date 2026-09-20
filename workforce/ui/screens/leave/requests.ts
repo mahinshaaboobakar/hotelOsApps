@@ -75,7 +75,7 @@ export function requests(rows: readonly LeaveRow[],
     const what = el("div");
     what.append(el("b", undefined, row.type));
 
-    if (row.note !== "—") {
+    if (row.note !== null) {
       what.append(el("s", undefined, row.note));
     }
 
