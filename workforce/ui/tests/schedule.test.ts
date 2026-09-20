@@ -111,16 +111,25 @@ describe("staff schedule", () => {
       },
     });
 
-    // The failure that happened, carried whole — and the facts name `me`
-    // rather than `schedule`. This screen's inability to ask is a consequence
-    // of that refusal, not a separate thing that went wrong.
+    // The failure that happened, carried whole — this screen's inability to
+    // ask is a consequence of that refusal, not a separate thing that went
+    // wrong.
     //
     // Asserted on the VALUE of the "Asked for" row rather than on the body's
     // whole text: a substring search across the block would also match the
     // sentence above it, and would keep passing if the facts stopped rendering.
+    //
+    // **This asserted `roster.read · me`, and the point of naming the method
+    // was that the facts said `me` rather than `schedule`.** The owner's `64g`
+    // §2 B ruling takes the code name off the card, so the facts now carry the
+    // screen's own words and **that distinction is no longer visible to
+    // anybody** — it survives only on `wire`, which a refusal card renders
+    // nowhere and offers no control to copy. Reported as part of the same gap;
+    // recorded here rather than quietly replaced, because the old assertion is
+    // what shows the change was deliberate (ADR 0034).
     const asked_for = Array.from(main.querySelectorAll(".fail-fact"))
       .find((row) => row.querySelector(".fail-fk")?.textContent === "Asked for");
 
-    expect(asked_for?.querySelector(".fail-fv")?.textContent).toBe("roster.read · me");
+    expect(asked_for?.querySelector(".fail-fv")?.textContent).toBe("this person's month");
   });
 });

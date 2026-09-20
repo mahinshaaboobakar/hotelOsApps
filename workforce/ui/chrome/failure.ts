@@ -139,10 +139,17 @@ export function factsEl(drawn: FailureDrawing, property: PropertyEnvironment): H
  *
  * @remarks
  * **The SDK hands over values, not only finished strings.** That lets this
- * screen set the permission apart, as page 64b draws it, and format the instant
- * in the property's locale and timezone (JOBS-Q1(8)) instead of showing ISO. The
- * separator between a permission and its method belongs to this surface
- * (ADR 0175).
+ * screen format the instant in the property's locale and timezone
+ * (JOBS-Q1(8)) instead of showing ISO.
+ *
+ * **`asked` draws the words, never the code name — owner, `64g` §2 B.** This
+ * returned `roster.read · week`: a permission's code name and its method, on a
+ * card a receptionist reads. The SDK moved the plain words onto `Fact.value`
+ * on 2026-09-20 and says of `permission` and `method` that they are *"there
+ * for the clipboard and for diagnostics, and **not for drawing**"* — and this
+ * surface went on drawing them, alone among the four applications. The
+ * separator this comment used to claim belonged here was the separator between
+ * two things that are no longer drawn.
  *
  * **`date-time` is the closest style available, and it is not what 64b
  * draws.** The frame shows the year and the seconds, and no InstantStyle
@@ -152,7 +159,7 @@ export function factsEl(drawn: FailureDrawing, property: PropertyEnvironment): H
 function factValue(fact: Fact, property: PropertyEnvironment): Node[] {
   switch (fact.kind) {
     case "asked":
-      return [el("b", undefined, fact.permission), document.createTextNode(` · ${fact.method}`)];
+      return [document.createTextNode(fact.value)];
     case "at":
       return [document.createTextNode(formatInstant(fact.at, property, "date-time"))];
     case "answer":

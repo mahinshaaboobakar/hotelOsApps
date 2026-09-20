@@ -54,12 +54,22 @@ describe("the failure screen's facts", () => {
     expect(fact(body, "At").textContent).toBe("17 Sept, 11:53");
   });
 
-  it("sets the permission apart in what was asked", () => {
+  it("names what could not be read, in the screen's own words", () => {
+    // **This asserted `roster.read · week`** — the permission's code name and
+    // its method, on a live card — until the owner's `64g` §2 B ruling, and
+    // the SDK stopped sending it as the fact's value on 2026-09-20
+    // (`6751c7de`). The code name stays on `Fact.permission` and on `wire`,
+    // which the SDK documents as *not for drawing*; this surface was reading
+    // it anyway, alone among the four applications.
+    //
+    // Recorded rather than quietly replaced: a test asserting a contract that
+    // has moved is ADR 0034, and the old assertion is what a reader needs in
+    // order to know the change was deliberate.
     const body = failureBody(failure("forbidden"), { the: "the rota" }, QATAR);
     const asked = fact(body, "Asked for");
 
-    expect(asked.querySelector("b")?.textContent).toBe("roster.read");
-    expect(asked.textContent).toBe("roster.read · week");
+    expect(asked.textContent).toBe("the rota");
+    expect(asked.textContent).not.toContain("roster.read");
   });
 
   it("sets the permission apart in the refusal's note", () => {
