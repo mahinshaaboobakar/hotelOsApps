@@ -154,6 +154,20 @@ public sealed class DeskHarness : IAsyncDisposable
         return stay;
     }
 
+    /// <summary>
+    /// Master Data's room types in this database, readable by the application
+    /// role — for the views that read a room type by name.
+    /// </summary>
+    /// <remarks>
+    /// Delegated rather than reimplemented: the database and its roles are
+    /// <see cref="GuestOpsScratch"/>'s, and a second path creating the same
+    /// table would be a second declaration of Master Data's shape.
+    /// </remarks>
+    /// <param name="rows">The room types, by id and name.</param>
+    /// <returns>When the table exists, holds them, and is readable.</returns>
+    public Task MasterDataRoomTypesAsync(IEnumerable<(Guid Id, string Name)> rows)
+        => _scratch.MasterDataRoomTypesAsync(rows);
+
     /// <summary>Close the context, then drop the database.</summary>
     /// <returns>When both are gone.</returns>
     public async ValueTask DisposeAsync()

@@ -171,7 +171,7 @@ public static class ModuleSurface
                 $"'{request.Method}' is not a method this application serves"),
         };
 
-    /// <summary>Taking a booking — the walk-in, for now.</summary>
+    /// <summary>Taking a booking — at the desk, or as a walk-in.</summary>
     private static Task<object?> CreateAsync(
         IServiceProvider services,
         ModuleEnvelope.ModuleRequest request,
@@ -179,6 +179,12 @@ public static class ModuleSurface
         => request.Method switch
         {
             "walkIn" => services.GetRequiredService<WalkInCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            // The 05 flow's confirm step. `BookingService.CreateAsync` was
+            // reachable over gRPC and from the walk-in and had no module door,
+            // so New booking could show what was free and do nothing with it.
+            "book" => services.GetRequiredService<BookCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
             _ => throw new InvalidRequestException(

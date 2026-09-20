@@ -2,6 +2,8 @@ using HotelOS.Applications.TestSupport;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform.TestSupport;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
 
 namespace HotelOS.GuestOps.Tests;
@@ -259,6 +261,49 @@ public sealed class GuestOpsScratch : IAsyncDisposable
                     npgsql => npgsql.MigrationsHistoryTable(
                         "__migrations", GuestOpsDbContext.Schema))
                 .Options);
+
+    /// <summary>
+    /// Master Data's <c>room_types</c> in this scratch database, with these
+    /// rows, readable by the application role.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>For the views that read a room type's name.</b> This database
+    /// provisions the <c>guestops</c> schema and nothing else, so
+    /// <c>BookingView</c> and <c>CancelPlanView</c> threw <c>42P01</c> before
+    /// reaching anything a test was about — <c>RoomStay.RoomTypeId</c> is
+    /// non-nullable, so there is no arrangement in which those views skip the
+    /// read. Room Care's <c>MasterDataStaffAsync</c> is this shape for
+    /// <c>masterdata.staff</c>, and this follows it.
+    /// </para>
+    /// <para>
+    /// <b>Created as the provisioner and read as the application role</b>, which
+    /// is the split an install produces: EF creates the table from
+    /// <see cref="MasterDataRoomTypeSource"/>'s mapping — no hand-written DDL —
+    /// and the grant that follows is the one an installed application gets.
+    /// Without the grant the application role would see a schema and not a
+    /// table, which is a different failure from the one this closes and worth
+    /// keeping distinguishable.
+    /// </para>
+    /// </remarks>
+    /// <param name="rows">The room types, by id and name.</param>
+    /// <returns>When the table exists, holds them, and is readable.</returns>
+    public async Task MasterDataRoomTypesAsync(IEnumerable<(Guid Id, string Name)> rows)
+    {
+        var provisioner = As(ProvisionerRole, ProvisionerPassword, _database.Name);
+
+        await using var source = new MasterDataRoomTypeSource(provisioner);
+        await source.Database.GetService<IRelationalDatabaseCreator>().CreateTablesAsync();
+
+        source.RoomTypes.AddRange(rows.Select(row =>
+            new MasterDataRoomTypeSource.Row { Id = row.Id, Name = row.Name }));
+        await source.SaveChangesAsync();
+
+        await ExecuteAsync(
+            provisioner,
+            $"GRANT USAGE ON SCHEMA masterdata TO {_convention.AppRole}; "
+            + $"GRANT SELECT ON masterdata.room_types TO {_convention.AppRole}");
+    }
 
     private static async Task ExecuteAsync(string connection, string sql)
     {

@@ -256,6 +256,37 @@ short form stays in the drawn page as the record of a rejected option.
 **The fidelity comparison is re-run at 0.3.3**, not before — the frames and the
 build both moved today.
 
+## The failure cards, re-audited against the owner's 2B — 2026-09-20
+
+The shared surface stopped putting a permission's code name on a card
+(HosPilotOS `6751c7de`, `packages/sdk-typescript/src/failure.ts`). **Which of
+GuestOps' cards moved, measured rather than assumed:**
+
+**All seven, and none by this application's hand** — Today, Bookings, a
+booking, New booking, Attention, a stay, Setup. Each builds its card through
+`failureDrawing`, and `chrome/marks.ts:172` draws `drawing.facts` as the
+surface returns them, so `Asked for` reads *today at this property* where it
+read `reservation.read · today`.
+
+**The code name still reaches support**: the copy action writes
+`drawing.wire`, unchanged, and `permission` and `method` stay on the failure
+for diagnostics.
+
+**No test here asserted the old contract** (ADR 0034, checked rather than
+assumed). `tests/failure-surface.test.ts` asserts the mark's tone per cause,
+which button appears per cause, and that a refusal routes nobody to a person —
+no assertion reads the facts' values. Nothing to correct.
+
+**What did NOT move, reported to the architect and with the owner**: a refusal
+card still prints the code name, from the same shared file —
+*"This screen needs `reservation.read`, and no grant at this property names
+this user"* (`failure.ts:564`, and the two beside it). **And that sentence's
+own justification was falsified by the change above it**: `act()`'s doc argues
+the refusal need not name who can grant because *"the four facts carry the
+capability"* — which stopped being true forty minutes earlier. Either the
+sentence keeps the name and the reason is rewritten, or it loses it and the
+copy line carries it alone; both cannot stand as they are.
+
 ## The exponent, measured against its ruling — 2026-09-20
 
 ADR 0175's exponent ruling says the service converts at the boundary where the

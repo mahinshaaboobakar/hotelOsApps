@@ -15,6 +15,13 @@ namespace HotelOS.GuestOps.Application.Bookings;
 /// <param name="Guests">May be empty — <i>"not yet named"</i> is a valid party.</param>
 /// <param name="WalkIn">How the guest arrived. Not the same fact as the channel.</param>
 /// <param name="Terms">What it was sold on, where the desk knows.</param>
+/// <param name="KnowinglyOverbooked">
+/// The desk was told this type had no room free and took the booking anyway —
+/// the owner's option (b), 2026-09-19. Defaulted, so a caller that never
+/// overbooks says nothing. It is the CALLER's word that the warning was shown
+/// and answered: this service does not re-check availability, and a flag set by
+/// a caller that skipped the warning would record a conversation nobody had.
+/// </param>
 public sealed record NewStay(
     Guid RoomTypeId,
     DateOnly ArrivalDate,
@@ -23,7 +30,8 @@ public sealed record NewStay(
     int Children,
     IReadOnlyList<NewGuest> Guests,
     bool WalkIn,
-    CommercialTerms? Terms);
+    CommercialTerms? Terms,
+    bool KnowinglyOverbooked = false);
 
 /// <summary>A person on a stay, as the desk took them.</summary>
 public sealed record NewGuest(
@@ -225,6 +233,13 @@ public sealed class BookingService(
             business_date = businessDate?.ToString("yyyy-MM-dd"),
             walk_in = stay.WalkIn,
             pms_unknown = stay.PmsUnknown,
+
+            // The record of a knowing overbooking — owner (b), 2026-09-19. It
+            // rides on the creation's own event, which already carries who did
+            // it and when, and which the Activity tab reads. Always present, so
+            // `false` and "an older service that did not record it" are not the
+            // same absence.
+            overbooked_knowingly = request.KnowinglyOverbooked,
         });
 
         return stay;

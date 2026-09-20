@@ -17,6 +17,15 @@
  * screen can say a manager held them for a wedding party.
  */
 export interface TypeAvailability {
+  /**
+   * Master Data's id for the type — what creating a booking names.
+   *
+   * The row carried the name alone until 2026-09-20, so a desk could choose a
+   * type the next step could not book. The name is what a person reads; this is
+   * what the write takes.
+   */
+  roomTypeId: string;
+
   roomType: string;
 
   /** `₹ 8 400 · gross` — value, currency and whether tax is included. */

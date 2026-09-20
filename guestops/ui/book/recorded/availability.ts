@@ -24,21 +24,21 @@ export const recordedAvailability: Availability = {
 
   types: [
     {
-      roomType: "Deluxe King", rate: "₹ 8 400 · gross",
+      roomTypeId: "3a5f1c44-0000-4000-8000-000000000001", roomType: "Deluxe King", rate: null,
       total: 24, sold: 19,
-      outOfOrder: 1, outOfOrderBy: "EngineeringOps",
+      outOfOrder: 1, outOfOrderBy: null,
       stopSold: 0, stopSoldWhy: null,
       free: 4,
     },
     {
-      roomType: "Deluxe Twin", rate: "₹ 8 400 · gross",
+      roomTypeId: "3a5f1c44-0000-4000-8000-000000000002", roomType: "Deluxe Twin", rate: null,
       total: 18, sold: 18,
       outOfOrder: 0, outOfOrderBy: null,
       stopSold: 0, stopSoldWhy: null,
       free: 0,
     },
     {
-      roomType: "Executive Suite", rate: "₹ 12 000 · gross",
+      roomTypeId: "3a5f1c44-0000-4000-8000-000000000003", roomType: "Executive Suite", rate: null,
       total: 6, sold: 2,
       outOfOrder: 0, outOfOrderBy: null,
       stopSold: 4, stopSoldWhy: "wedding party",

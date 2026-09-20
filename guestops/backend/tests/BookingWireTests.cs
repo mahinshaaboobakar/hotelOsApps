@@ -27,24 +27,15 @@ namespace HotelOS.GuestOps.Tests;
 /// crosses the module envelope is the serialised form.
 /// </para>
 /// <para>
-/// <b>Only the list's row is asserted here, and the other two views are a
-/// stated gap rather than a silent one.</b> `BookingView` and `CancelPlanView`
-/// both read room-type names, and <c>RoomStay.RoomTypeId</c> is non-nullable —
-/// so every stay sends them to <c>masterdata.room_types</c>, which this scratch
-/// database does not have (it provisions <c>guestops</c> only). They throw
-/// 42P01 before reaching anything this file is about, which is the same gap
-/// <c>LocaleWireTests</c> states for Watchlist.
-/// </para>
-/// <para>
-/// <b>The fix exists next door and is the next piece of work</b>: Room Care's
-/// <c>MasterDataStaffSource</c> creates Master Data's real table in its scratch
-/// database from an EF mapping of Master Data's own shape — no hand-written
-/// DDL — and grants the application role SELECT on it. The same for
-/// <c>room_types</c> lets those two views be asserted here. Until then their
-/// wire shape is covered by two weaker instruments, named so nobody reads this
-/// file as full coverage: <c>RenderedDateGuardTests</c> refuses any rendering
-/// in <c>Module/</c>, and the screens' own tests compose from a fixture whose
-/// shape is what these views send.
+/// <b>All three views are asserted here, and two of them could not be until
+/// the scratch database grew a table.</b> `BookingView` and `CancelPlanView`
+/// read room-type names and <c>RoomStay.RoomTypeId</c> is non-nullable, so
+/// there is no arrangement in which they skip <c>masterdata.room_types</c> —
+/// which this database did not have. They were withdrawn from the commit of
+/// 2026-09-20 with that gap stated rather than hidden, and
+/// <c>GuestOpsScratch.MasterDataRoomTypesAsync</c> closed it the same day,
+/// following Room Care's <c>MasterDataStaffSource</c> rather than inventing a
+/// second shape.
 /// </para>
 /// <para>
 /// <b>The arrangement failed first, twice, wearing the failure of the thing
@@ -97,6 +88,12 @@ public sealed class BookingWireTests
         }
 
         await harness.Db.SaveChangesAsync();
+
+        // The room type the views read by name. Seeded through the harness so
+        // the table is Master Data's shape and the application role can read
+        // it — the split an install produces.
+        await harness.MasterDataRoomTypesAsync([(DeskHarness.RoomType, "Executive Suite")]);
+
         return booking.Id;
     }
 
@@ -123,4 +120,68 @@ public sealed class BookingWireTests
         Assert.Equal(JsonValueKind.Null, row.GetProperty("claimed").ValueKind);
     }
 
+    [Fact]
+    public async Task A_bookings_summary_sends_the_count_and_the_span()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var id = await BookingAsync(harness, Arrive, Arrive);
+
+        var answer = Wire(await new BookingView(harness.Db, Reads(harness))
+            .AnswerAsync(harness.Scope(), id, new Paging.Window(0, 20), CancellationToken.None));
+
+        var summary = answer.GetProperty("summary");
+
+        // The owner's ruling on frame 9, 2026-09-20 (A2): the heading carries
+        // the confirmation number. Null here because this booking has no
+        // `confirmation` external reference — the screen then starts the line
+        // with the count, rather than drawing a gap where a number would be.
+        Assert.Equal(JsonValueKind.Null, summary.GetProperty("confirmation").ValueKind);
+        Assert.Equal(2, summary.GetProperty("stays").GetInt32());
+        Assert.Equal("2026-09-03", summary.GetProperty("arrive").GetString());
+        Assert.Equal("2026-09-07", summary.GetProperty("depart").GetString());
+
+        var stay = answer.GetProperty("stays").EnumerateArray().First();
+        Assert.Equal("2026-09-03", stay.GetProperty("arrive").GetString());
+        Assert.Equal("2026-09-07", stay.GetProperty("depart").GetString());
+
+        // The name, not the id: the room type is the one value here that comes
+        // from Master Data, and reading it is why this test needed a table.
+        Assert.Equal("Executive Suite", stay.GetProperty("roomType").GetString());
+    }
+
+    [Fact]
+    public async Task A_cancel_plan_sends_the_subject_in_parts_and_no_sentence()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var id = await BookingAsync(harness, Arrive, Arrive);
+
+        var answer = Wire(await new CancelPlanView(harness.Db, Reads(harness))
+            .AnswerAsync(harness.Scope(), id, CancellationToken.None));
+
+        var subject = answer.GetProperty("subject");
+
+        // Null, and that is the fact: a booking's reference lives in
+        // `BookingExternalRef` and this one has none. The screen drops the part
+        // rather than drawing a placeholder where a reference would be.
+        Assert.Equal(JsonValueKind.Null, subject.GetProperty("reference").ValueKind);
+        Assert.Equal("2026-09-03", subject.GetProperty("arrive").GetString());
+        Assert.Equal("2026-09-07", subject.GetProperty("depart").GetString());
+        Assert.Equal(2, answer.GetProperty("stays").GetInt32());
+
+        // `consequence` was "This cancels two stays, one at a time." — a
+        // sentence the screen says now. Asserted ABSENT rather than left
+        // untested: a view that kept sending it would leave two wordings of one
+        // sentence, and the screen's would be the one nobody maintained.
+        Assert.False(answer.TryGetProperty("consequence", out _));
+
+        var rows = answer.GetProperty("rows").EnumerateArray().ToList();
+
+        // Every penalty row is about a stay's span; the why is not, and carries
+        // no day at all rather than a null that reads as a missing date.
+        Assert.Equal("2026-09-03", rows[0].GetProperty("arrive").GetString());
+
+        var afterwards = rows.Single(row => row.GetProperty("label").GetString() == "Afterwards");
+        Assert.Equal(string.Empty, afterwards.GetProperty("value").GetString());
+        Assert.Equal("2026-09-03", afterwards.GetProperty("arrive").GetString());
+    }
 }

@@ -108,6 +108,13 @@ public sealed class AvailabilityView(
         TypeAvailability type, IReadOnlyDictionary<Guid, string> names)
         => new
         {
+            // **The id, because a screen that chooses a room type has to name
+            // it to create the booking** — the 05 flow's step 2, approved
+            // 2026-09-19: the row carried the NAME only, and `NewStay` takes a
+            // `RoomTypeId`, so the desk could choose a type it could not then
+            // book. Master Data's id, carried rather than minted here.
+            roomTypeId = type.RoomTypeId.ToString(),
+
             roomType = names.TryGetValue(type.RoomTypeId, out var name) ? name : null,
 
             // **No rate, and it is absent rather than zero** — GUEST-Q7 rules
