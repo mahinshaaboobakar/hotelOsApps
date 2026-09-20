@@ -7,7 +7,39 @@
 > evidence. **At this run, Room Care is not installed on the owner's platform** (`platform.packages` holds guestops,
 > jobs, openai and workforce), so no live comparison exists yet.
 
-## Run from `15e2654` — developer notes removed from the screens
+## Run from `c271375` — inside the 0.1.4 cut, against the bundles the owner installs
+
+Run 2026-09-20 by KK **inside the cut itself**, from detached worktrees of both repositories side by side:
+**HotelOsApps `c271375`** and **HosPilotOS `a786d1a6`**, both clean. So this is not a rehearsal of the cut's source —
+it is the cut. `module.js` measured here is `3f2fa23d…`, 166,303 bytes, and the copy inside
+`roomcare-0.1.4.hopkg` is **byte-for-byte the same**.
+
+```text
+drawn 1,657 · built 1,563 · paired 523 (31.6%) · identical 385 · differing 138
+every one of the 138 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+| Class | n | Moves |
+|---|---|---|
+| sticky-header-ground | 23 | neither |
+| font-shorthand-line-height | 36 | drawing |
+| flex-blockified | 20 | neither |
+| button-type-size | 21 | drawing |
+| selected-row-example | 2 | neither |
+| named, one each | 36 | 27 drawing · 6 neither · 3 adjudicate |
+
+**Paired keeps falling — 542 → 523 — and that is the screens moving away from the frames on purpose.** Every fall
+since 01c is a text the build changed and the drawing has not followed: the dead controls' reasons, the developer
+notes, the refusals in a person's words, "no name on record", "room CLEAN" without its event name. Each shows here as
+unpaired rather than differing. **The drawing owes those changes**, and until it takes them this number is not a
+fidelity result to read on its own.
+
+**And it is still drawing fidelity only, on recorded fixtures** — never sign-off, and never what the owner's installed
+build does with the property's own data. That is the live walk's and Part B's.
+
+## Superseded by `c271375` — the run from `15e2654`
+
+### Run from `15e2654` — developer notes removed from the screens
 
 Run 2026-09-19 by KK, **built by the run from `15e2654`, clean** (`module.js` `5b94be02…`), against the frames as
 re-locked at `fff2d96b`. Drawing fidelity only, as above.

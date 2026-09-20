@@ -1,17 +1,38 @@
 # Room Care Part B — the drive list
 
-Prepared 2026-09-19 by KK, for the run after the owner updates to
-**`roomcare-0.1.3.hopkg`**: 16,729,943 bytes, sha256
-`c3485aa282bbbab409bdb2258b9cc9e3a31a0ea80075b805b496e81e5e54c634`, signed by
-`dev-local`, staged in `%LOCALAPPDATA%\HotelOS\packages\registry` on the
-owner's machine. It was built from clean worktrees of `HotelOsApps` `16bdeed`
-and `HosPilotOS` `ff7926fb`, and its UI bundles are the bytes the page-64 audit
-measured at `020f1eff` (`docs/page64-audit.md`). **Part B certifies 0.1.3, the
-version that carries the audit's fixes.** ~~0.1.2 is installed today and stays in
-the registry as the version 0.1.3 replaces.~~ *Corrected again, 2026-09-19, measured: Room Care is installed on no Kernel. The owner's running platform (`.tmp/devrun`, the dev cluster on 25432) has `platform.packages` = guestops 0.3.2, jobs 0.4.2, openai 1.1.0, workforce 0.3.3. `%LOCALAPPDATA%\HotelOS\packages\installed` holds guestops, jobs and workforce. The `roomcare` schema has 0 tables, and the running Kernel's log (since 2026-09-08) has 0 lines naming `roomcare`. The installed-product Kernel under ProgramData has been stopped since 2026-09-18 and loaded 0 applications. "0.1.2 was already installed" was a relayed premise, and I wrote it in without checking. 0.1.2 and 0.1.3 (digest `c3485aa2…`, matching) are on the shelf, not installed.* **So Part B starts with installing Room Care; it is not an update.** Neither 0.1.0 nor 0.1.1 was ever
-installed, and each was removed, so no version names two builds. **Nothing below has been run yet; every result cell is empty
-on purpose.** The shape is FF's (`guestops/docs/part-b-drive-list.md`), so the
-two certificates read alike.
+Prepared 2026-09-19 by KK, **re-headed 2026-09-20 for the cut Part B now runs on**:
+**`roomcare-0.1.4.hopkg`**, 16,739,263 bytes, sha256
+`6b1395379d9fc36fbef31b2cf705c0344d85a7408fa990814f8d463f2e1d8b6a`, signed by
+`hotelos-packages-2026` (`dev-local`), staged in `%LOCALAPPDATA%\HotelOS\packagesegistry`
+on the owner's machine beside 0.1.2 and 0.1.3.
+
+**Built from detached worktrees of both repositories, side by side, so every relative path resolved inside the cut
+and none reached a shared tree: `HotelOsApps` `c271375` and `HosPilotOS` `a786d1a6`, both clean.** The UI was built
+there with `node_modules` by junction; `dotnet publish -r win-x64 --no-self-contained` compiled `HotelOS.Common` and
+`HotelOS.Platform` from the platform worktree. Both worktrees were removed afterwards, junction first.
+
+```text
+inside the archive   52 entries declared, 52 in the payload, signature present, 0 findings
+                     (checked from the archive's own bytes, independently of hopkg)
+native code          2 files, both x64: the service and Temporal's bridge — no foreign-platform natives
+UI bundles           module.js in the package is byte-for-byte what Part A measured in the cut
+                     (3f2fa23d…, 166,303 bytes; docs/part-a-certificate.md)
+```
+
+**Part B certifies 0.1.4**, the first Room Care the owner installs. 0.1.2 and 0.1.3 were only ever on the shelf:
+measured 2026-09-19, Room Care is installed on no Kernel — the owner's running platform holds guestops, jobs, openai
+and workforce, the `roomcare` schema has no tables, and the running Kernel's log has no line naming `roomcare`. *That
+corrected a relayed premise I had written in without checking: "0.1.2 was already installed".* **So Part B starts
+with an install, not an update.** Neither 0.1.0 nor 0.1.1 was ever installed, and each was removed, so no version
+names two builds.
+
+**A first cut's weight is worth stating**: the first publish of this package put 68 MB on the shelf, because a plain
+`dotnet publish` carries Temporal's Linux and macOS natives — 166 MB of `backend/runtimes` — into a Windows package.
+The size against 0.1.3's is what showed it. Pinning the runtime prunes them, and the check above counts native files
+rather than trusting the number.
+
+**Nothing below has been run yet; every result cell is empty on purpose.** The shape is FF's
+(`guestops/docs/part-b-drive-list.md`), so the two certificates read alike.
 
 ## What the columns mean
 
@@ -60,7 +81,7 @@ assign-gated act is in D and waits on ADR 0193's registration.
 
 ## Preconditions, checked at the start and quoted
 
-1. Software Center lists **Room Care 0.1.3, Running**.
+1. Software Center lists **Room Care 0.1.4, Running**.
 2. The signed-in user is admin on the property: the Board answers rather than
    drawing *Not permitted*. A refusal there ends the run as a precondition
    failure, not twenty failed rows.
