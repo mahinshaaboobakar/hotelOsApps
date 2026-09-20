@@ -204,6 +204,27 @@ Reads: `attendanceToday · comingUp · onLeave · pendingRequests · shiftBoard`
 | D7 | **The service writes the attendance verdict as English** — `"Late 20 min"` — and the screen counts late people by reading that sentence back | `AttendanceView.cs:170`, `screens/attendance/index.ts:66` | a property in another language reads the server's English, and the count breaks the day the sentence changes |
 | D8 | **The service writes "412 assignments"**, unformatted, and "1 assignments" for one | `PolicyView.cs:63` | the number is not in the property's own number format, and the grammar is wrong for one |
 
+## A check this stream owes, and has not run
+
+**The cross-repository consumer check for the SDK's money style is not done.**
+ADR 0168 requires it for a diff touching `packages/sdk-typescript/**`, and the
+SDK gained `formatMoney` in HosPilotOS `6734ab05`.
+
+The figures quoted in that commit — *"17 consumers = 17 built + 0 broken + 0
+unverified"* — **came from a run that could not have seen the change**: it ran
+before `formatMoney` was committed, against a tree without it (CC's run, from a
+worktree of `b880fb40` plus CC's diff, finishing about 10:04; the commit is
+09:59 and was not in that tree). The figures were true about what that run
+built, and they say nothing about the money style. Quoting them as its check
+was reading evidence about a neighbouring thing as evidence about mine.
+
+**Owed, at GG's next .NET slot** (the script runs `dotnet build` for twelve
+consumers, so it cannot run before then): re-run
+`HotelOsApps/scripts/check-platform-consumers.mjs` at a HEAD that contains
+**both** `6734ab05` and `d45f028d` — the larger SDK change that landed at
+10:58 — and quote its output with its uncommitted-files warning. One run at a
+HEAD containing both, or the estate carries two unverified SDK changes stacked.
+
 ## For the owner to decide (queued, not decided)
 
 These are drawn elements where it is unclear whether they are screen content
