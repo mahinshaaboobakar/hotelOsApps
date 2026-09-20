@@ -87,7 +87,7 @@ public sealed class CancelAtomicityTests
         var events = new EventAppender(harness.Db, harness.Clock, new ServiceIdentity("guestops"));
         return new CancelCommand(
             harness.Db,
-            new BookingReadService(harness.Db, kernel),
+            new BookingReadService(harness.Db, kernel, new StubBusinessDay(new DateOnly(2026, 9, 1))),
             new StayLifecycleService(harness.Db, kernel, events, harness.Clock));
     }
 

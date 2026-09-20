@@ -38,7 +38,10 @@ describe("the Activity tab", () => {
     filters: [],
     entries: [{
       at: LATE,
-      who: { mark: "pms", text: "Opera" },
+      // Deliberately not the reference vendor's name. The service sends the
+      // configured integration's display name, so a fixture naming the one
+      // system a screen might have hardcoded could not tell the two apart.
+      who: { mark: "pms", text: "Northwind" },
       what: "Checked in",
       detail: "stay.arrived",
       disagrees: false,

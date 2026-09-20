@@ -82,14 +82,14 @@ function rows(): Today["lists"][number]["rows"] {
       arrive: "2026-08-31", depart: "2026-09-01",
       chips: [
         { kind: "mark", tone: "walkin", text: "walk-in" },
-        { kind: "mark", tone: "unknown", text: "Opera doesn't know" },
+        { kind: "mark", tone: "unknown", text: "The PMS doesn't know" },
       ],
     },
     {
       id: "c4", guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
       booking: "BK-4488", roomType: "Deluxe Twin", room: "309",
       arrive: "2026-08-31", depart: "2026-08-31",
-      chips: [{ kind: "mark", tone: "pms", text: "from Opera" }],
+      chips: [{ kind: "mark", tone: "pms", text: "from the PMS" }],
     },
   ];
 }

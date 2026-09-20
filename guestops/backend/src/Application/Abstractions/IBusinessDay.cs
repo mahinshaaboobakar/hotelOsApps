@@ -31,6 +31,32 @@ namespace HotelOS.GuestOps.Application.Abstractions;
 public interface IBusinessDay
 {
     /// <summary>Which business day it is now, for this property.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>ADR 0211 — one operating day, derived by Context.</b> Ruled
+    /// 2026-09-20, closing <c>WF-Q21</c>: <i>"there is one derivation of the
+    /// operating day, not one per application"</i>, and the source of truth is
+    /// the Context Service. So this asks, and computes nothing. Every caller
+    /// (<c>TodayView</c>, <c>DeskView</c>, <c>WatchlistView</c>,
+    /// <c>StayListService</c>, <c>BookingService</c>) takes that one answer
+    /// through this member.
+    /// </para>
+    /// <para>
+    /// This line carried <i>"pending WF-Q21"</i> between 2026-09-19 and the
+    /// ruling. The reading it recorded — that re-deriving the day from the
+    /// property's calendar would be a second derivation of a value ADR 0128 §6
+    /// gives one owner — is what ADR 0211 adopted, and the calendar-day
+    /// alternative is what it rejected. Kept rather than replaced, so the
+    /// decision does not read as though nobody had considered the other one.
+    /// </para>
+    /// <para>
+    /// <b>The operating day is not the calendar day, and neither substitutes
+    /// for the other.</b> Where a calendar day is genuinely wanted — the day a
+    /// stored instant falls on at the property — it is
+    /// <see cref="Domain.PropertyClock.Day"/> in <see cref="ZoneAsync"/>'s
+    /// zone, and that is ADR 0174's subject, not this one.
+    /// </para>
+    /// </remarks>
     Task<DateOnly?> CurrentAsync(RequestScope scope, CancellationToken cancellationToken);
 
     /// <summary>A date, at the property's check-in hour, in its zone.</summary>
@@ -48,7 +74,7 @@ public interface IBusinessDay
     /// it may be reversed. The departures list selects stays whose departure
     /// falls inside a business day, and a departure is stored <i>only</i> as a
     /// timestamp: there is no departure-date column, and
-    /// <see cref="StayTime.Date"/> is computed in C# so it cannot be translated
+    /// <see cref="StayTime.DateIn"/> is computed in C# so it cannot be translated
     /// to SQL. A half-open instant range is the only shape that query can take.
     /// </para>
     /// <para>
@@ -68,6 +94,13 @@ public interface IBusinessDay
     /// </remarks>
     Task<DayBounds?> BoundsAsync(
         RequestScope scope, DateOnly date, CancellationToken cancellationToken);
+
+    /// <summary>The property's time zone — which calendar day an instant falls on there.</summary>
+    /// <remarks>
+    /// ADR 0174: every application works in the property's zone. <c>null</c> when
+    /// none is configured — never UTC, which would be a default nobody chose.
+    /// </remarks>
+    Task<TimeZoneInfo?> ZoneAsync(RequestScope scope, CancellationToken cancellationToken);
 }
 
 /// <summary>A business day, as a half-open instant range.</summary>

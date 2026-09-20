@@ -165,6 +165,15 @@ export interface TermRow {
   /** True for the two rows the design sets large — the rate and the total. */
   big?: boolean;
 
+  /**
+   * A count, formatted by the screen in the property's locale, with the words
+   * for one and for more — "7 days after booking", "4 nights".
+   */
+  count?: { n: number; one: string; other: string } | null;
+
+  /** An instant the row names — a deadline — drawn in the property's zone. */
+  at?: string | null;
+
   tags: readonly Tag[];
 }
 

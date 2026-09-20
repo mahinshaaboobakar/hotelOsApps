@@ -133,7 +133,7 @@ export const recordedToday: Today = {
           id: "h1", guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
           booking: "BK-4455", roomType: "Deluxe King", room: "318",
           arrive: "2026-08-30", depart: "2026-09-02",
-          chips: [{ kind: "mark", tone: "disagrees", text: "Opera disagrees" }],
+          chips: [{ kind: "mark", tone: "disagrees", text: "PMS disagrees" }],
         },
       ],
     },

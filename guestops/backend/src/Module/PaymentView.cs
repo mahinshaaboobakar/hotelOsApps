@@ -1,3 +1,4 @@
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
@@ -30,7 +31,7 @@ namespace HotelOS.GuestOps.Module;
 /// screen and mean opposite things.
 /// </para>
 /// </remarks>
-public sealed class PaymentView(GuestOpsDbContext db)
+public sealed class PaymentView(GuestOpsDbContext db, IBusinessDay businessDay)
 {
     /// <summary>The terms, and the folio's five refusals.</summary>
     public async Task<object?> AnswerAsync(
@@ -47,7 +48,7 @@ public sealed class PaymentView(GuestOpsDbContext db)
 
         return new
         {
-            terms = Rows(terms, stay.Arrival, stay.Departure),
+            terms = Rows(terms, stay.Arrival, stay.Departure, await businessDay.ZoneAsync(scope, cancellationToken)),
             // Null: it explained how the deadlines are computed and stored — a
             // developer's note, removed under the owner's ruling of 2026-09-19.
             note = (string?)null,
@@ -58,7 +59,7 @@ public sealed class PaymentView(GuestOpsDbContext db)
 
     /// <summary>The terms, as the design's rows.</summary>
     private static object[] Rows(
-        CommercialTerms? terms, DateTimeOffset? arrival, DateTimeOffset? departure)
+        CommercialTerms? terms, DateTimeOffset? arrival, DateTimeOffset? departure, TimeZoneInfo? zone)
     {
         // **No terms is a real state, said as one.** A stay a source sent with
         // no commercial detail is ordinary, and a card of empty rows would read
@@ -82,12 +83,18 @@ public sealed class PaymentView(GuestOpsDbContext db)
             {
                 // Multiplied here rather than stored: a total is a consequence
                 // of the rate and the nights, and a stored one stops matching
-                // the moment a departure moves.
-                rows.Add(Big(
-                    Spell(count),
-                    Money(rate with { MinorUnits = rate.MinorUnits * count }),
-                    string.Empty,
-                    Basis(rate.Basis)));
+                // the moment a departure moves. The nights travel as a count
+                // the screen words and formats — the label was an English word
+                // ("Four nights") until 2026-09-19.
+                rows.Add(new
+                {
+                    label = "For the stay",
+                    value = "",
+                    strong = Money(rate with { MinorUnits = rate.MinorUnits * count }),
+                    count = Count(count, "night", "nights"),
+                    big = true,
+                    tags = new[] { Lock(Basis(rate.Basis)) },
+                });
             }
         }
 
@@ -125,7 +132,7 @@ public sealed class PaymentView(GuestOpsDbContext db)
             {
                 label = "Deposit policy",
                 value = "due ",
-                strong = depositDays == 1 ? "1 day after booking" : $"{depositDays} days after booking",
+                count = Count(depositDays, "day after booking", "days after booking"),
                 // Carried a "COMPUTED FROM OFFSET" tag — how the value is
                 // derived, for the developer.
                 tags = Array.Empty<object>(),
@@ -135,25 +142,36 @@ public sealed class PaymentView(GuestOpsDbContext db)
         // **Computed at the moment it is shown, from the stored offset** (R18).
         // The record holds *48 hours before arrival*; move the arrival and this
         // moves with it. A stored deadline silently stops matching.
-        if (terms.CancellationDeadline(Date(arrival)) is { } deadline)
+        if (terms.CancellationDeadline(Date(arrival, zone), zone) is { } deadline)
         {
             rows.Add(new
             {
                 label = "Cancellation",
-                value = $"{terms.CancelOffsetDaysFromArrival} days before arrival → ",
-                strong = deadline.ToString("ddd d MMM HH:mm"),
+                value = "",
+                // A deadline exists only where the offset does (CancellationDeadline).
+                count = Count(terms.CancelOffsetDaysFromArrival!.Value, "day before arrival", "days before arrival"),
+
+                // The deadline as an instant, drawn by the screen in the
+                // property's zone — "ddd d MMM HH:mm" on the server until
+                // 2026-09-19.
+                at = deadline.ToString("O"),
                 tags = Passed(deadline) ? new[] { PillWarn("deadline passed") } : [],
             });
         }
 
         if (terms.PenaltyAmount is { IsStated: true } penalty)
         {
-            rows.Add(Row(
-                "Penalty if cancelled",
-                Money(penalty),
-                terms.PenaltyNights is { } count
-                    ? [Lock(Basis(penalty.Basis)), Lock(count == 1 ? "1 NIGHT" : $"{count} NIGHTS")]
-                    : [Lock(Basis(penalty.Basis))]));
+            rows.Add(new
+            {
+                label = "Penalty if cancelled",
+                value = "",
+                strong = Money(penalty),
+
+                // The nights it is worth, as a count — a lock reading "1 NIGHT"
+                // until 2026-09-19.
+                count = terms.PenaltyNights is { } penaltyNights ? Count(penaltyNights, "night", "nights") : null,
+                tags = new[] { Lock(Basis(penalty.Basis)) },
+            });
         }
 
         return [.. rows];
@@ -178,8 +196,9 @@ public sealed class PaymentView(GuestOpsDbContext db)
     private static bool Passed(DateTimeOffset deadline)
         => deadline < DateTimeOffset.UtcNow;
 
-    private static DateOnly? Date(DateTimeOffset? at)
-        => at is { } value ? DateOnly.FromDateTime(value.Date) : null;
+    /// <summary>The arrival's day at the property — UTC's until 2026-09-19 (ADR 0174).</summary>
+    private static DateOnly? Date(DateTimeOffset? at, TimeZoneInfo? zone)
+        => new StayTime(at, TimeBasis.Observed).DateIn(zone);
 
     /// <summary>How many nights the stay is, where both ends are known.</summary>
     private static int? Nights(DateTimeOffset? arrival, DateTimeOffset? departure)
@@ -200,6 +219,26 @@ public sealed class PaymentView(GuestOpsDbContext db)
     /// this schema does not carry one; it is named here rather than hidden
     /// inside a division.
     /// </remarks>
+    /// <summary>An amount, as text — the one value this view still formats.</summary>
+    /// <remarks>
+    /// <b>A known ADR 0175 migration site. NUM-Q2 is ruled, so this is owed
+    /// work and no longer a blocked line.</b> ADR 0175 rules that money is not
+    /// an exception: the service sends amount and currency and the screen
+    /// formats them. Its <c>NUM-Q2</c> amendment (2026-09-20) settles the wire
+    /// — <i>"<c>amount</c> is a decimal string and <c>currency</c> is an ISO
+    /// 4217 alphabetic code"</i>, and <i>"no <c>N2</c>-formatted text appears
+    /// on a service contract"</i>. This line is that text, so it is wrong
+    /// under a ruling that exists rather than waiting for one.
+    /// <para>
+    /// It migrates when the SDK's money style lands — the parts here,
+    /// composition there — and not before: a contract that sends the parts to
+    /// a reader that cannot render them makes the screen worse while looking
+    /// like progress. The page-64 audit records U1 and U2 as owed against ADR
+    /// 0175 + NUM-Q2. <b>The exponent above is part of that work</b>: NUM-Q2
+    /// rejects minor units as the canonical wire representation, and the
+    /// division by 100 here is the same assumption this schema cannot state.
+    /// </para>
+    /// </remarks>
     private static string Money(Money amount)
         => $"{amount.Currency} {amount.MinorUnits / 100m:N2}";
 
@@ -211,15 +250,13 @@ public sealed class PaymentView(GuestOpsDbContext db)
             _ => "BASIS NOT STATED",
         };
 
-    private static string Spell(int nights)
-        => nights switch
-        {
-            1 => "One night",
-            2 => "Two nights",
-            3 => "Three nights",
-            4 => "Four nights",
-            _ => $"{nights} nights",
-        };
+    /// <summary>A count with its words, for the screen to format and choose between.</summary>
+    /// <remarks>
+    /// The number travels as a number — the screen formats it in the property's
+    /// locale (page 64 §12). The two English forms travel with it because the
+    /// module's copy is English; which one applies is the screen's to decide.
+    /// </remarks>
+    private static object Count(int n, string one, string other) => new { n, one, other };
 
     private static object Row(string label, string value, object[] tags)
         => new { label, value, tags };

@@ -89,6 +89,17 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
     }
 
     /// <summary>A local date and time, as the instant the property saw.</summary>
+    public async Task<TimeZoneInfo?> ZoneAsync(RequestScope scope, CancellationToken cancellationToken)
+    {
+        var day = await context.GetOperatingDayAsync(
+            new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            cancellationToken: cancellationToken);
+
+        return string.IsNullOrWhiteSpace(day.Timezone)
+            ? null
+            : TimeZoneInfo.FindSystemTimeZoneById(day.Timezone);
+    }
+
     private static DateTimeOffset At(TimeZoneInfo zone, DateOnly date, TimeOnly hour)
     {
         var local = date.ToDateTime(hour);

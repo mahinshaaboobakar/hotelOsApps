@@ -21,7 +21,7 @@ const STATED = {
   P2: ["PASS", "S", "preview/audit/fallbacks.mjs: 176 fallbacks, 0 disagree with styles.css (3 before the fix: two in files of mine)"],
   P3: ["PASS", "S", "washes use --color-*-soft; color-mix edges (45%, 35%, 5%) are not the 12% soft tones"],
   P4: ["PASS", "S", "every hex/rgb in chrome/styles and widgets/card.ts is a var() fallback or a comment"],
-  P5: ["PASS", "C", "captures: In house ok, Opera says cancelled warn (needs a decision), Opera doesn't know bad"],
+  P5: ["PASS", "C", "captures: In house ok, PMS says cancelled warn (needs a decision), The PMS doesn't know bad"],
   P6: ["PASS", "S", "--go-shadow = color-mix of --color-surface (chrome/styles/sheet.ts)"],
   C3: ["PASS", "S", "Setup's unavailable Discard is .btn.off (faint, dashed)"],
   C4: ["OPEN", "S", ".btn.sm geometry per §2; the CARD half is APPS-Q43 — recorded, not failed"],
@@ -55,8 +55,8 @@ const STATED = {
   I4: ["FAIL", "T", "follows I1: with no locale the backend still writes '31 Aug', never the marked ISO form"],
   I5: ["PASS", "S", "elapsed figures ('+3h') come from the service"],
   I6: ["PASS", "S", "no locale-dependent example written without its locale in the UI source"],
-  U1: ["BLOCKED", "S", "money is blocked on NUM-Q2 (the wire type of an amount; ADR 0175 already rules the screen formats it) — the amounts in PaymentView and CancelPlanView stay server-formatted until it is ruled, labelled at CancelPlanView.cs. Counts are a separate half, converting view by view (Today, Payment, Requests done; Booking, Bookings and the cancel plan remaining)"],
-  U2: ["BLOCKED", "T", "follows U1: money on NUM-Q2; counts as U1 says"],
+  U1: ["OWED", "S", "money: NUM-Q2 is RULED (ADR 0175, 2026-09-20) — the amount is a decimal string and the currency an ISO 4217 code, and no N2 text belongs on a contract. PaymentView.Money() and CancelPlanView's penalty line are that N2 text, so they are owed work against a ruling, not blocked on a question: they migrate with the SDK's money style, and the division by 100 goes with them (NUM-Q2 rejects minor units as the canonical wire form). Labelled at both sites. Counts are the separate half, converting view by view (Today, Payment, Requests done; Booking, Bookings and the cancel plan remaining)"],
+  U2: ["OWED", "T", "follows U1: money owed against ADR 0175 + NUM-Q2 until the SDK style lands; counts as U1 says"],
   X1: ["PASS", "M", "72 failure cells: the failure drawn, no list"],
   X9: ["PASS", "T", "tests/failure-surface.test.ts — no refusal routes to a person"],
   X10: ["PASS", "S", "every read failure is failureDrawing's; cannot() draws only states with no read"],
@@ -104,7 +104,10 @@ Verdicts: PASS · FAIL · OPEN (the checklist's nine unsettled lines — recorde
 never failed) · N/A (with why) · NOT REACHED (a state no drive reaches — never a
 pass) · DEVIATION (APPS-Q27: the frame as the owner approved it differs from the
 written standard for this surface; labelled at the site, never an amendment) ·
-BLOCKED (waits on a named open question — neither a pass nor a fail).
+BLOCKED (waits on a named open question — neither a pass nor a fail) · OWED
+(the question is RULED and the code does not yet meet it — a dated debt against
+a named decision, never a pass; where BLOCKED says nobody can act, OWED says
+this stream can, and on what).
 
 **Two deviations, L3 and D2** — APPS-Q27: *"repeated or intentional deviations
 trigger a standards-amendment question rather than a third, fourth and fifth

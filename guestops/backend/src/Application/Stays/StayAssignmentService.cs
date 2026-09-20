@@ -28,6 +28,7 @@ public sealed class StayAssignmentService(
     GuestOpsDbContext db,
     IKernelAuthorizer authorizer,
     IEventAppender events,
+    IBusinessDay businessDay,
     TimeProvider clock)
 {
     /// <summary>Give the stay a room, or move it to another.</summary>
@@ -67,7 +68,8 @@ public sealed class StayAssignmentService(
 
         if (!acceptConflict)
         {
-            var clash = await ConflictingStayAsync(scope.PropertyId, roomId, stay, cancellationToken);
+            var clash = await ConflictingStayAsync(
+                scope.PropertyId, roomId, stay, await businessDay.ZoneAsync(scope, cancellationToken), cancellationToken);
             if (clash is not null)
             {
                 // **Warns; never forbids.** GUEST-Q5 made a double-booked room a
@@ -149,10 +151,12 @@ public sealed class StayAssignmentService(
     /// </para>
     /// </remarks>
     private async Task<Guid?> ConflictingStayAsync(
-        Guid propertyId, Guid roomId, RoomStay stay, CancellationToken cancellationToken)
+        Guid propertyId, Guid roomId, RoomStay stay, TimeZoneInfo? zone, CancellationToken cancellationToken)
     {
-        var arrival = stay.ArrivalAt.Date;
-        var departure = stay.DepartureAt.Date;
+        // Compared on the property's calendar (ADR 0174); with no zone there is
+        // no day to compare, which is no conflict to report — never a UTC guess.
+        var arrival = stay.ArrivalAt.DateIn(zone);
+        var departure = stay.DepartureAt.DateIn(zone);
 
         if (arrival is null || departure is null)
         {
@@ -182,8 +186,8 @@ public sealed class StayAssignmentService(
         // they were.
         foreach (var other in clash)
         {
-            var otherArrival = other.Arrival is { } a ? DateOnly.FromDateTime(a.DateTime) : null as DateOnly?;
-            var otherDeparture = other.Departure is { } d ? DateOnly.FromDateTime(d.DateTime) : null as DateOnly?;
+            var otherArrival = new StayTime(other.Arrival, TimeBasis.Observed).DateIn(zone);
+            var otherDeparture = new StayTime(other.Departure, TimeBasis.Observed).DateIn(zone);
 
             if (otherArrival is null || otherDeparture is null)
             {

@@ -166,7 +166,7 @@ export async function stay(
     fill(
       body,
       ...(folio.ok
-        ? paymentTab(folio.value)
+        ? paymentTab(folio.value, host.property)
         : [failed(
             failureDrawing(folio.failure, { app: APP, the: "this stay's payment" }),
             () => void stay(host, into, stayId, tab, go),

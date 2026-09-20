@@ -177,7 +177,7 @@ public sealed class StayTabViewTests
         await using var harness = await DeskHarness.CreateAsync(withEventStore: true);
         var stayId = await StayAsync(harness);
 
-        var answer = Wire(await new PaymentView(harness.Db)
+        var answer = Wire(await new PaymentView(harness.Db, new StubBusinessDay(new DateOnly(2026, 9, 1)))
             .AnswerAsync(harness.Scope(), stayId, CancellationToken.None));
 
         foreach (var field in PaymentFields)
@@ -190,6 +190,87 @@ public sealed class StayTabViewTests
         }
     }
 
+    /// <summary>
+    /// <b>A characterisation test: it asserts today's WRONG behaviour on
+    /// purpose.</b> The rate line divides minor units by one hundred whatever
+    /// the currency — right for the rupee, wrong for the dinar and the yen — and
+    /// a green here means the defect is still present, never that the amount is
+    /// correct.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>This asserts what the view does today, and it is not what the view
+    /// should do.</b> Found on 2026-09-20 while applying <c>NUM-Q2</c>, and not
+    /// part of that ruling: NUM-Q2 settles the wire (a decimal string and an ISO
+    /// 4217 code, ADR 0175), while the exponent is wrong independently of it —
+    /// <c>PaymentView.Money()</c> has always assumed two decimal places.
+    /// </para>
+    /// <para>
+    /// <b>The three currencies are chosen so the two rules disagree</b>, which
+    /// is the whole reason this test is worth writing: 1&#160;000&#160;000 minor
+    /// units is 10,000.00 under either rule for the rupee, so a fixture in INR
+    /// alone would pass under the defect and under its fix and could tell you
+    /// nothing. The dinar has three decimal places and the yen none, so each
+    /// names a different wrong answer.
+    /// </para>
+    /// <code>
+    /// currency  exponent  minor units  rendered today  correct
+    /// INR       2         999          9.99            9.99     agree
+    /// KWD       3         999          9.99            0.999    differ
+    /// JPY       0         999          9.99          999        differ
+    /// </code>
+    /// <para>
+    /// <b>999, so no case needs a grouping separator.</b> The rendered text is
+    /// <c>N2</c> in the server's culture, so a four-figure fixture would assert
+    /// this machine's grouping and fail on a machine set to another — and the
+    /// decimal separator is culture's too, which is the second half of why this
+    /// line does not belong on a contract at all. The test asserts the value
+    /// the view produces, and the culture-dependence is the defect rather than
+    /// something the test should pin.
+    /// </para>
+    /// <para>
+    /// <b>It is written to fail when the migration lands</b>, which is the point
+    /// of recording a defect rather than describing one: whoever makes the
+    /// amount exponent-aware has to come here and state the new expectation,
+    /// rather than discovering months later that a folio in Kuwait was out by a
+    /// factor of ten. Until then the audit carries it as owed work (U1/U2).
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData("INR", "INR 9.99", "INR 9.99")]
+    [InlineData("KWD", "KWD 9.99", "KWD 0.999")]
+    [InlineData("JPY", "JPY 9.99", "JPY 999")]
+    public async Task Characterisation_the_rate_assumes_two_decimal_places_for_every_currency(
+        string currency, string renderedToday, string correctForThatCurrency)
+    {
+        await using var harness = await DeskHarness.CreateAsync(withEventStore: true);
+        var stayId = await StayAsync(harness);
+
+        harness.Db.Terms.Add(new CommercialTerms
+        {
+            StayId = stayId,
+            Amount = new Money(999, currency, TaxBasis.Gross),
+        });
+        await harness.Db.SaveChangesAsync();
+
+        var answer = Wire(await new PaymentView(harness.Db, new StubBusinessDay(new DateOnly(2026, 9, 1)))
+            .AnswerAsync(harness.Scope(), stayId, CancellationToken.None));
+
+        var rate = answer.GetProperty("terms").EnumerateArray()
+            .First(row => row.GetProperty("label").GetString() == "Rate")
+            .GetProperty("strong").GetString();
+
+        Assert.Equal(renderedToday, rate);
+
+        // The fixture's own proof that it can tell the two rules apart: where
+        // the expectations coincide the case establishes nothing, and this says
+        // so for the two that do not.
+        if (currency != "INR")
+        {
+            Assert.NotEqual(correctForThatCurrency, rate);
+        }
+    }
+
     [Fact]
     public async Task Payment_refuses_a_stay_at_another_property()
     {
@@ -199,7 +280,7 @@ public sealed class StayTabViewTests
         var stayId = await StayAsync(harness);
         var elsewhere = new RequestScope { PropertyId = Guid.NewGuid(), UserId = Guid.NewGuid() };
 
-        await Assert.ThrowsAsync<NotFoundException>(() => new PaymentView(harness.Db)
+        await Assert.ThrowsAsync<NotFoundException>(() => new PaymentView(harness.Db, new StubBusinessDay(new DateOnly(2026, 9, 1)))
             .AnswerAsync(elsewhere, stayId, CancellationToken.None));
     }
 }

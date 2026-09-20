@@ -47,7 +47,11 @@ public static class ReportingRule
     /// <summary>The date the filing is due, from the arrival and the offset.</summary>
     /// <param name="arrival">The stay's arrival, which may be unknown.</param>
     /// <param name="dueHours">The property's configured offset in hours.</param>
-    /// <returns>The due date, or null when there is no arrival to count from.</returns>
+    /// <param name="zone">The property's time zone, or null where none is configured.</param>
+    /// <returns>
+    /// The due date — the property's day — or null when there is no arrival to
+    /// count from, or no zone to say which day it is.
+    /// </returns>
     /// <remarks>
     /// <para>
     /// <b>Computed from the offset every time, never stored and reused</b> —
@@ -60,9 +64,16 @@ public static class ReportingRule
     /// neither dropped nor invented, and a fabricated deadline would put a stay
     /// on the overdue list for a night that has not happened.
     /// </para>
+    /// <para>
+    /// <b>The property's day, never the UTC one — ADR 0174.</b> This took the
+    /// UTC date until 2026-09-19, so a guest arriving in Kolkata between
+    /// midnight and 05:30 was due a day early. The zone is required and not
+    /// defaulted: a property whose zone nobody configured has no answer to
+    /// "which day", and a UTC guess would look like one.
+    /// </para>
     /// </remarks>
-    public static DateOnly? DueBy(StayTime arrival, int dueHours)
-        => arrival.At is { } at
-            ? DateOnly.FromDateTime(at.AddHours(dueHours).UtcDateTime)
+    public static DateOnly? DueBy(StayTime arrival, int dueHours, TimeZoneInfo? zone)
+        => arrival.At is { } at && zone is not null
+            ? DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(at.AddHours(dueHours), zone).DateTime)
             : null;
 }

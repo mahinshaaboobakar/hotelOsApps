@@ -73,7 +73,7 @@ public sealed class WalkInPhasesTests
                 new StubBusinessDay(new DateOnly(2026, 9, 1)),
                 new ContactProtector(new byte[32], new byte[32]),
                 harness.Clock),
-            new StayAssignmentService(harness.Db, kernel, events, harness.Clock),
+            new StayAssignmentService(harness.Db, kernel, events, new StubBusinessDay(new DateOnly(2026, 9, 1)), harness.Clock),
             new StayLifecycleService(harness.Db, kernel, events, harness.Clock));
     }
 

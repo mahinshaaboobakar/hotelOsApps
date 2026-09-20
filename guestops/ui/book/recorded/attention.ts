@@ -8,14 +8,14 @@ const cards: readonly AttentionCard[] = [
   {
     id: "a1",
     kind: "Same stay, or two?",
-    status: { mark: "unknown", text: "Opera doesn't know" },
+    status: { mark: "unknown", text: "The PMS doesn't know" },
     rows: [
       {
         label: "You created", value: "", strong: "Joseph Mathew",
         tail: " · room 308 · 31 Aug → 1 Sep · walk-in at 11:04", tags: [],
       },
       {
-        label: "Opera now sends", value: "", strong: "Joseph K Mathew",
+        label: "The PMS now sends", value: "", strong: "Joseph K Mathew",
         tail: " · room 308 · 31 Aug → 1 Sep · reservation 84119512", tags: [],
       },
       {
@@ -29,17 +29,17 @@ const cards: readonly AttentionCard[] = [
     ],
     note:
       "Same room and overlapping dates is what raised this. The names only ordered the list — they "
-      + "can never join two stays. Until you decide, Opera's version is held and applied to nothing.",
+      + "can never join two stays. Until you decide, the PMS's version is held and applied to nothing.",
     hint: null,
     actions: ["Same stay", "Two different stays"],
   },
   {
     id: "a2",
-    kind: "Opera disagrees · 1 stay",
+    kind: "The PMS disagrees · 1 stay",
     status: "from the outage batch",
     rows: [
       {
-        label: "Rajesh Pillai", value: "room — you: ", strong: "214", tail: " · Opera: 208",
+        label: "Rajesh Pillai", value: "room — you: ", strong: "214", tail: " · PMS: 208",
         tags: [{ kind: "mark", tone: "disagrees", text: "standing" }],
       },
     ],
@@ -51,11 +51,11 @@ const cards: readonly AttentionCard[] = [
   },
   {
     id: "a3",
-    kind: "Opera says cancelled · the guest is in the room",
+    kind: "The PMS says cancelled · the guest is in the room",
     status: null,
     rows: [
       {
-        label: "Anand Varma", value: "in house since 30 Aug · room 411 · Opera sent ",
+        label: "Anand Varma", value: "in house since 30 Aug · room 411 · the PMS sent ",
         strong: "cancelled", tail: " at 03:40", tags: [],
       },
     ],
@@ -75,7 +75,7 @@ const cards: readonly AttentionCard[] = [
     ],
     note: null,
     hint:
-      "Not an error — Opera sends papers one at a time, and two may never come. It sits here so "
+      "Not an error — the PMS sends papers one at a time, and two may never come. It sits here so "
       + "nobody discovers it at the desk on arrival day.",
     actions: [],
   },

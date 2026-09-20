@@ -34,10 +34,27 @@ authenticator did not, so it was an SDK defect, owned by BB (architect,
 **Fixed in the platform: ADR 0210, landed at HosPilotOS `7c00adf9`** —
 `GetOperatingDay` is platform-scoped and an application's certificate is
 accepted. **Live after the owner's next restart**, and not claimed before it is
-proved from `context.log`: `GetOperatingDay` answered, with no
-`AuthenticationFailedException`, after the restart time. Everything below that
-says *fails on the owner's platform (Context)* holds until then. Creating a
-booking asks Context for the business day too, so it is in the same position.
+proved. Everything below that says *fails on the owner's platform (Context)*
+holds until then. Creating a booking asks Context for the business day too, so
+it is in the same position.
+
+**An HTTP 200 is not the proof, and this ledger said it was.** In GuestOps' own
+captured log the three pre-fix calls of 2026-09-19 each read
+`Received HTTP response headers … - 200` and then
+`Call failed with gRPC error status. Status code: 'Unauthenticated', Message:
+'authentication failed'` — gRPC carries its status in the trailers, so the
+refusal *is* a 200 at the HTTP layer (`current.jsonl:91638-91642`,
+`:91560-91564`, `:91454-91462`, each ending
+`POST /module/reservation.read/today - 500`). What is being looked for is the
+**absence** of that `Call failed` line after a `GetOperatingDay` that follows
+the restart, with Today rendering rather than answering 500.
+
+**This proof now gates two other streams — ADR 0211.** Room Care may not retire
+`OperatingDay.cs` and Workforce may not drop its UTC calculation until an
+installed application is seen calling `GetOperatingDay` successfully, because
+ADR 0211's premise is that ADR 0210 made that reachable. GuestOps is the first
+application to call it, so this row is the estate's evidence and not only this
+application's.
 
 What depends on that call (code):
 
@@ -68,7 +85,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 
 | Action | Code | Verdict |
 |---|---|---|
-| The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above**; live after the next restart (ADR 0210), to be proved |
+| The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above**; live after the next restart (ADR 0210), **to be proved, and the proof gates Room Care and Workforce under ADR 0211** |
 | Click a row / guest name | `screens/today/table.ts:75,108` | WORKS — opens the stay |
 | **＋ assign** on a row with no room | `screens/today/table.ts:92` | **LOOKS LIVE, DOES NOTHING.** Nothing assigns a room from this screen (`stay.assign` has no module door) |
 | Walk-in | `screens/today/index.ts:92` | REFUSES, SAYS WHY — opens a sheet saying a walk-in cannot be taken here yet (`application.ts:258-278`) |
@@ -110,7 +127,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | ＋ Raise a job (Jobs not installed) | `screens/stay/index.ts:273` | drawn off, **says no reason** |
 | **＋ Log a request** | `screens/stay/requests-tab.ts:59` | **LOOKS LIVE, DOES NOTHING** (`request.handle` has no module door) |
 | **Ask for service** | `screens/stay/index.ts:278` | **LOOKS LIVE, DOES NOTHING** |
-| **Open in Opera** | `screens/stay/index.ts:284` | **LOOKS LIVE, DOES NOTHING** |
+| **Open in the PMS** | `screens/stay/index.ts:291` | **LOOKS LIVE, DOES NOTHING** |
 | Servicing night links; "＋ add" / "reveal" | `screens/stay/servicing-tab.ts:90`, `chrome/marks.ts:79` | NOT REACHABLE — `ServicingView` sends no nights, and no view sends a link |
 
 ### Setup
@@ -137,7 +154,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 a stay: ＋ assign (1) · Keep ours / Take the PMS value (2) · Check in, Cancel,
 Check out, Move room (4) · the banner's Keep / Take (2) · Full activity (1) ·
 Everything / Ours (2) · Raise a job (1) · Log a request (1) · Ask for service (1)
-· Open in Opera (1). They come first: each is drawn off with its reason until its backend door exists.
+· Open in the PMS (1). They come first: each is drawn off with its reason until its backend door exists.
 **The one write that is wired** (cancel a booking) has never been pressed on the
 platform.
 
@@ -152,6 +169,59 @@ platform.
   no developer panels. It still refuses on a property until the booking flow the
   owner asked for is drawn, approved and built — it cannot take a person's own
   dates yet.
+
+## A vendor's name in the review fixtures — swept 2026-09-20
+
+BB found one sentence while measuring something else
+(`ui/book/recorded/booking.ts:173-175`, *"Opera will not be told… Opera will
+keep showing this booking as live"*). A fixture is not a product path, and it is
+rendered on a screen at every review and capture, so it is fixed.
+
+**Swept as a class, not as the line reported.** `\bOpera\b` across
+`ui/**/*.ts`: **42 rendered strings in 7 files under `book/recorded/`, 21 in
+comments, 1 in a test.** All 42 now read *the PMS* / *PMS*, the wording the
+owner approved in `77f67bf`. **No product path held one** — the earlier finding
+stands, and this sweep is what checked it rather than repeating it.
+
+Two things the sweep itself taught, both worth the next reader's time:
+
+- **`Operator` contains `Opera`.** A first pass without a word boundary
+  reported `application.ts` and `chrome/bar.ts` — two product paths — and they
+  were `Operator` and `Operating`. A search string is a hypothesis about how
+  somebody typed it.
+- **One of 42 survived an exact-string mapping** because the file has an em
+  dash where the mapping had a middle dot. The residue count is what found it;
+  reading the diff would not have.
+
+**The comments are kept.** They record what a mark used to say and why the
+copy moved, and a text guard that forbade the word would forbid keeping that
+record.
+
+**"The PMS" is interim, and it is a limitation rather than a style choice.**
+*Opera is itself a PMS product*, so the generic word is not a correction of the
+vocabulary — it is what is left when a screen must name the system that will not
+be told and **the application holds an integration id and no name.** That is
+`CONN-Q44`. When it is ruled these sentences take the property's own connected
+system's name, and a property running Opera reads *Opera*, because that is what
+that property is running. Naming one vendor in the meantime states, on every
+property's screen, a fact about one property's estate.
+
+**Evidence for `CONN-Q44`, and this is the sharpest form of it**: 42 sentences
+in one application need a name it cannot obtain. The reason is written at the
+code too (`ui/book/recorded/booking.ts`, the site BB reported), so a reader
+meeting the generic word learns it was a limitation. If the ruling lands before
+0.3.3 the fixtures take the display name and this section says so.
+
+## Found while applying NUM-Q2 — the amount's exponent
+
+`PaymentView.Money()` divides minor units by one hundred whatever the currency.
+**Not part of the NUM-Q2 ruling** — that settles the wire (a decimal string and
+an ISO 4217 code) — and wrong independently of it: the Kuwaiti dinar has three
+decimal places and the yen none, so a Kuwaiti folio reads ten times its value.
+Recorded as a test with three currencies chosen so the two rules disagree
+(`StayTabViewTests.Characterisation_the_rate_assumes_two_decimal_places_for_every_currency`),
+green today against what the view actually renders, and written to fail when
+the migration lands. It travels with U1/U2's owed work.
 
 ## Developer notes built as screen — swept 2026-09-19
 

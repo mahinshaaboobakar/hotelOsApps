@@ -10,7 +10,7 @@ export const recordedStay: StayPage = {
   room: "214",
   stayId: "01J9K…7F3A",
   bookingRef: "BK-4471",
-  managedBy: "Opera manages this stay",
+  managedBy: "The PMS manages this stay",
   actions: [
     { label: "Move room", danger: false },
     { label: "Check out", danger: false },
@@ -25,12 +25,12 @@ export const recordedStay: StayPage = {
     { label: "Documents" },
   ],
   banner: {
-    headline: "Opera disagrees about the room.",
-    detail: "You have 214 · Opera says 208 — recorded 15:30, not applied.",
+    headline: "The PMS disagrees about the room.",
+    detail: "You have 214 · the PMS says 208 — recorded 15:30, not applied.",
     attribution:
       "Your entry stands everywhere until someone decides: override by Anitha Menon at 14:10, "
-      + "when Opera said due in, no room.",
-    actions: ["Keep 214", "Take Opera's 208"],
+      + "when the PMS said due in, no room.",
+    actions: ["Keep 214", "Take the PMS's 208"],
   },
   standing: "override standing",
   rows: [
@@ -38,7 +38,7 @@ export const recordedStay: StayPage = {
       label: "Room", value: "", strong: "214", tail: " · Deluxe King",
       tags: [
         { kind: "mark", tone: "override", text: "yours" },
-        { kind: "mark", tone: "disagrees", text: "Opera: 208" },
+        { kind: "mark", tone: "disagrees", text: "PMS: 208" },
       ],
     },
     {
@@ -88,15 +88,15 @@ export const recordedStay: StayPage = {
   ],
   timeline: [
     {
-      time: "28 Aug", tone: "pms", what: "Booked in Opera",
+      time: "28 Aug", tone: "pms", what: "Booked in the PMS",
       detail: "reservation 84119377 · 4 nights · Deluxe King",
     },
     {
       time: "14:10", tone: "override", what: "Assigned 214 · checked in",
-      detail: "by Anitha Menon — override, Opera was unreachable",
+      detail: "by Anitha Menon — override, the PMS was unreachable",
     },
     {
-      time: "15:30", tone: "disagrees", what: "Opera reports room 208",
+      time: "15:30", tone: "disagrees", what: "The PMS reports room 208",
       detail: "differs from yours — recorded, not applied",
     },
     {

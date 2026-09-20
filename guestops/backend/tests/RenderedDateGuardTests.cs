@@ -37,7 +37,6 @@ public sealed class RenderedDateGuardTests
         ["BookingView.cs"] = 7,
         ["BookingsView.cs"] = 2,
         ["CancelPlanView.cs"] = 6,
-        ["PaymentView.cs"] = 1,
     };
 
     private static readonly Regex Rendered = new(

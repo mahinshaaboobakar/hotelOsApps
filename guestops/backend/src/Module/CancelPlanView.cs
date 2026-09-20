@@ -167,13 +167,15 @@ public sealed class CancelPlanView(
             });
         }
 
-        // **THE KNOWN ADR 0175 MIGRATION SITE, WAITING ON NUM-Q2.** ADR 0175 names
-        // this line: money is not an exception — the service sends amount and
-        // currency, and the screen formats them. What TYPE the amount has on the
-        // wire is NUM-Q2, with the planner (2026-09-19); until it is ruled this
-        // stays server-formatted — "N2" in the server's culture, which varies by
-        // grouping and separator — and the SDK has no money style to migrate to.
-        // Not a pass: the page-64 audit records U1 as blocked on NUM-Q2 here.
+        // **THE KNOWN ADR 0175 MIGRATION SITE. NUM-Q2 IS RULED; THIS IS OWED WORK.**
+        // ADR 0175 names this line: money is not an exception — the service sends
+        // amount and currency, and the screen formats them. Its NUM-Q2 amendment
+        // (2026-09-20) settles the wire: the amount is a DECIMAL STRING and the
+        // currency an ISO 4217 alphabetic code, and "no N2-formatted text appears
+        // on a service contract". This line is N2 text in the server's culture, so
+        // it is wrong under a ruling that exists rather than waiting for one.
+        // It migrates with PaymentView's Money() when GG's SDK money style lands;
+        // the page-64 audit records U1/U2 as owed against ADR 0175 + NUM-Q2.
         return Row(
             label,
             dates,

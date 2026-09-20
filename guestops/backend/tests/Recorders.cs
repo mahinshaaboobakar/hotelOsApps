@@ -82,8 +82,13 @@ public sealed class RecordingAuthorizer : IKernelAuthorizer
 /// window, and only a double can produce it on demand.
 /// </para>
 /// </remarks>
-public sealed class StubBusinessDay(DateOnly? today, DayBounds? bounds = null) : IBusinessDay
+public sealed class StubBusinessDay(
+    DateOnly? today, DayBounds? bounds = null, TimeZoneInfo? zone = null) : IBusinessDay
 {
+    /// <summary>A UTC property unless a test names another — explicitly, for the zone tests.</summary>
+    public Task<TimeZoneInfo?> ZoneAsync(RequestScope scope, CancellationToken cancellationToken)
+        => Task.FromResult<TimeZoneInfo?>(zone ?? TimeZoneInfo.Utc);
+
     public Task<DateOnly?> CurrentAsync(RequestScope scope, CancellationToken cancellationToken)
         => Task.FromResult(today);
 

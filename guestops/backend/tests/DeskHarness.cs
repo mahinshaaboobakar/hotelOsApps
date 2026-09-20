@@ -30,7 +30,8 @@ public sealed class DeskHarness : IAsyncDisposable
         Authorizer = new RecordingAuthorizer();
 
         Settings = new SettingsService(db, Authorizer);
-        Registrations = new RegistrationService(db, Authorizer, Settings, clock);
+        Registrations = new RegistrationService(
+            db, Authorizer, Settings, new StubBusinessDay(new DateOnly(2026, 9, 1)), clock);
         Reporting = new ReportingService(db, Authorizer, clock);
         Requests = new StayRequestService(db, Authorizer, Events, clock);
     }

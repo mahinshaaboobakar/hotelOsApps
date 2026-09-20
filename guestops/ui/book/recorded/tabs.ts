@@ -19,21 +19,21 @@ export const recordedActivity: Activity = {
   filters: [
     { label: "Everything", on: true },
     { label: "Ours", on: false },
-    { label: "Opera", on: false },
+    { label: "PMS", on: false },
     { label: "Other apps", on: false },
   ],
 
   entries: [
     {
       at: "2026-08-28T09:14:00+05:30",
-      who: { mark: "pms", text: "Opera" },
+      who: { mark: "pms", text: "PMS" },
       what: "Booked — 4 nights, Deluxe King, ₹ 8 400.00 per night",
       detail: "reservation 84119377 · business day 28 Aug",
       disagrees: false,
     },
     {
       at: "2026-08-29T17:02:00+05:30",
-      who: { mark: "pms", text: "Opera" },
+      who: { mark: "pms", text: "PMS" },
       what: "Amended — departure moved from 2 Sep to 4 Sep",
       detail: null,
       disagrees: false,
@@ -49,7 +49,7 @@ export const recordedActivity: Activity = {
       at: "2026-08-31T14:10:00+05:30",
       who: { mark: "override", text: "Anitha M." },
       what: "Assigned room 214",
-      detail: "override — Opera held no assignment at that moment",
+      detail: "override — the PMS held no assignment at that moment",
       disagrees: false,
     },
     {
@@ -82,7 +82,7 @@ export const recordedActivity: Activity = {
     },
     {
       at: "2026-08-31T15:30:00+05:30",
-      who: { mark: "disagrees", text: "Opera" },
+      who: { mark: "disagrees", text: "PMS" },
       what: "Reported room 208 — differs from ours (214)",
       detail: "recorded as a disagreement · not applied · your entry stands",
       disagrees: true,
@@ -219,47 +219,46 @@ export const recordedServicing: Servicing = {
  * recorded which.
  */
 export const recordedPayment: Payment = {
+  // What PaymentView sends for these terms — until 2026-09-19 this fixture drew
+  // rows the service never produces ("30% · due … → 4 Sep", a "FROM OPERA"
+  // lock, "1 night if within 48 h"), a second contract under the same names.
   terms: [
     {
-      label: "Rate", value: "", strong: "₹ 8 400.00", tail: " INR per night", big: true,
-      tags: [
-        { kind: "lock", tone: "neutral", text: "GROSS — TAX INCLUDED" },
-        { kind: "lock", tone: "neutral", text: "FROM OPERA" },
-      ],
+      label: "Rate", value: "", strong: "INR 8,400.00", tail: " per night", big: true,
+      tags: [{ kind: "lock", tone: "neutral", text: "GROSS — TAX INCLUDED" }],
     },
     {
-      label: "Four nights", value: "", strong: "₹ 33 600.00", tail: " INR", big: true,
-      tags: [{ kind: "lock", tone: "neutral", text: "GROSS" }],
+      label: "For the stay", value: "", strong: "INR 33,600.00", big: true,
+      count: { n: 4, one: "night", other: "nights" },
+      tags: [{ kind: "lock", tone: "neutral", text: "GROSS — TAX INCLUDED" }],
     },
     {
       label: "Rate plan", value: "BAR-FLEX · Best Available, flexible", tags: [],
     },
     {
-      label: "Guarantee", value: "Credit card ",
+      label: "Guarantee", value: "Credit card",
       tags: [
         { kind: "pill", tone: "neutral", text: "holds inventory" },
         { kind: "pill", tone: "neutral", text: "on hold" },
       ],
     },
     {
-      label: "Deposit policy", value: "30% · due ", strong: "7 days after booking",
-      tail: " → 4 Sep",
+      label: "Deposit policy", value: "due ",
+      count: { n: 7, one: "day after booking", other: "days after booking" },
       tags: [],
     },
     {
-      label: "Cancellation", value: "1 night if within ", strong: "48 h of arrival",
-      tail: ", drop 18:00 → Sat 30 Aug 14:00",
+      label: "Cancellation", value: "",
+      count: { n: 2, one: "day before arrival", other: "days before arrival" },
+      at: "2026-08-29T14:00:00+05:30",
       tags: [{ kind: "pill", tone: "warn", text: "deadline passed" }],
     },
     {
-      label: "Penalty if cancelled", value: "", strong: "₹ 8 400.00", tail: " INR",
-      tags: [
-        { kind: "lock", tone: "neutral", text: "GROSS" },
-        { kind: "lock", tone: "neutral", text: "1 NIGHT" },
-      ],
+      label: "Penalty if cancelled", value: "", strong: "INR 8,400.00",
+      count: { n: 1, one: "night", other: "nights" },
+      tags: [{ kind: "lock", tone: "neutral", text: "GROSS — TAX INCLUDED" }],
     },
   ],
-
   note: null,
 
   folio: [

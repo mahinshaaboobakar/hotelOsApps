@@ -11,7 +11,11 @@ Against GG's checklist `docs/app-surface-checklist.md` (HotelOsApps `3d521ce`).
 Verdicts: PASS · FAIL · OPEN (the checklist's nine unsettled lines — recorded,
 never failed) · N/A (with why) · NOT REACHED (a state no drive reaches — never a
 pass) · DEVIATION (APPS-Q27: the frame as the owner approved it differs from the
-written standard for this surface; labelled at the site, never an amendment).
+written standard for this surface; labelled at the site, never an amendment) ·
+BLOCKED (waits on a named open question — neither a pass nor a fail) · OWED
+(the question is RULED and the code does not yet meet it — a dated debt against
+a named decision, never a pass; where BLOCKED says nobody can act, OWED says
+this stream can, and on what).
 
 **Two deviations, L3 and D2** — APPS-Q27: *"repeated or intentional deviations
 trigger a standards-amendment question rather than a third, fourth and fifth
@@ -23,7 +27,7 @@ exception."* The count is the architect's signal to watch.
 | P2 | S | PASS | preview/audit/fallbacks.mjs: 176 fallbacks, 0 disagree with styles.css (3 before the fix: two in files of mine) |
 | P3 | S | PASS | washes use --color-*-soft; color-mix edges (45%, 35%, 5%) are not the 12% soft tones |
 | P4 | S | PASS | every hex/rgb in chrome/styles and widgets/card.ts is a var() fallback or a comment |
-| P5 | C | PASS | captures: In house ok, Opera says cancelled warn (needs a decision), Opera doesn't know bad |
+| P5 | C | PASS | captures: In house ok, PMS says cancelled warn (needs a decision), The PMS doesn't know bad |
 | P6 | S | PASS | --go-shadow = color-mix of --color-surface (chrome/styles/sheet.ts) |
 | C1 | M | PASS | PASS 8 — bookings, newbooking, registration, stay, stay-payment, stay-servicing, today, walkin |
 | C2 | M | PASS | PASS 5 — bookings, registration, stay-requests, today, walkin |
@@ -82,8 +86,8 @@ exception."* The count is the architect's signal to watch.
 | I4 | T | FAIL | follows I1: with no locale the backend still writes '31 Aug', never the marked ISO form |
 | I5 | S | PASS | elapsed figures ('+3h') come from the service |
 | I6 | S | PASS | no locale-dependent example written without its locale in the UI source |
-| U1 | S | FAIL | the pager now uses formatNumber; the strip's and cards' counts still arrive as backend strings |
-| U2 | T | FAIL | follows U1: backend-formatted counts are grouped whatever the property's locale |
+| U1 | S | OWED | money: NUM-Q2 is RULED (ADR 0175, 2026-09-20) — the amount is a decimal string and the currency an ISO 4217 code, and no N2 text belongs on a contract. PaymentView.Money() and CancelPlanView's penalty line are that N2 text, so they are owed work against a ruling, not blocked on a question: they migrate with the SDK's money style, and the division by 100 goes with them (NUM-Q2 rejects minor units as the canonical wire form). Labelled at both sites. Counts are the separate half, converting view by view (Today, Payment, Requests done; Booking, Bookings and the cancel plan remaining) |
+| U2 | T | OWED | follows U1: money owed against ADR 0175 + NUM-Q2 until the SDK style lands; counts as U1 says |
 | X1 | M | PASS | 72 failure cells: the failure drawn, no list |
 | X2 | M | PASS | PASS 72 — attention, booking, bookings, cancel, newbooking, setup, stay, stay-activity, stay-payment, stay-requests, stay-servicing, today |
 | X3 | M | PASS | PASS 72 — attention, booking, bookings, cancel, newbooking, setup, stay, stay-activity, stay-payment, stay-requests, stay-servicing, today |
@@ -104,7 +108,7 @@ exception."* The count is the architect's signal to watch.
 | H3 | C | PASS | frames draw dates as the recorded strings they are |
 | H4 | T | PASS | the drive throws on a step it cannot reach (preview/frame.ts) |
 | H5 | S | PASS | both harnesses refuse an unhandled method |
-| H6 | S | FAIL | all three mockups declare their own :root palette (01-guestops-gold.html line 11) |
+| H6 | S | PASS | the mockups link ui/preview/tokens.css and declare no copy of the published tokens; 02's private palette points at them (2026-09-19). 04-06 were drawn that way |
 
 ## Every failing cell
 
@@ -124,16 +128,4 @@ exception."* The count is the architect's signal to watch.
 ### I4
 
 - follows I1: with no locale the backend still writes '31 Aug', never the marked ISO form
-
-### U1
-
-- the pager now uses formatNumber; the strip's and cards' counts still arrive as backend strings
-
-### U2
-
-- follows U1: backend-formatted counts are grouped whatever the property's locale
-
-### H6
-
-- all three mockups declare their own :root palette (01-guestops-gold.html line 11)
 

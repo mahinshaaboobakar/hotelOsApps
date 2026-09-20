@@ -1,5 +1,7 @@
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
+using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
 
 namespace HotelOS.GuestOps.Application.Inbound;
@@ -16,7 +18,7 @@ namespace HotelOS.GuestOps.Application.Inbound;
 /// never answered here.
 /// </para>
 /// </remarks>
-public sealed class StayMatcher(GuestOpsDbContext db)
+public sealed class StayMatcher(GuestOpsDbContext db, IBusinessDay businessDay)
 {
     /// <summary>The stay this fact names, if this application has seen it.</summary>
     public async Task<RoomStay?> ByReferenceAsync(
@@ -59,11 +61,15 @@ public sealed class StayMatcher(GuestOpsDbContext db)
     /// </para>
     /// </remarks>
     public async Task<IReadOnlyList<RoomStay>> CandidatesAsync(
-        InboundStayFact fact, CancellationToken cancellationToken)
+        RequestScope scope, InboundStayFact fact, CancellationToken cancellationToken)
     {
+        // The days are the property's: a fact's instants and a stored stay's
+        // are compared on the property's calendar, never UTC's (ADR 0174).
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
         if (fact.RoomId is not { } room
-            || fact.Arrival.Date is not { } arrival
-            || fact.Departure.Date is not { } departure)
+            || fact.Arrival.DateIn(zone) is not { } arrival
+            || fact.Departure.DateIn(zone) is not { } departure)
         {
             // No room or no dates is no candidate test. Widening it to *"same
             // guest name"* is precisely the failure above, and widening it to
@@ -79,7 +85,7 @@ public sealed class StayMatcher(GuestOpsDbContext db)
 
         return
         [
-            .. possible.Where(s => Overlaps(s, arrival, departure))
+            .. possible.Where(s => Overlaps(s, arrival, departure, zone))
         ];
     }
 
@@ -123,9 +129,9 @@ public sealed class StayMatcher(GuestOpsDbContext db)
         return words == 0 ? 0 : (double)shared / words;
     }
 
-    private static bool Overlaps(RoomStay stay, DateOnly arrival, DateOnly departure)
+    private static bool Overlaps(RoomStay stay, DateOnly arrival, DateOnly departure, TimeZoneInfo? zone)
     {
-        if (stay.ArrivalAt.Date is not { } from || stay.DepartureAt.Date is not { } to)
+        if (stay.ArrivalAt.DateIn(zone) is not { } from || stay.DepartureAt.DateIn(zone) is not { } to)
         {
             return false;
         }

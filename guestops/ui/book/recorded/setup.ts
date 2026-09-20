@@ -14,9 +14,9 @@ import type { FirstRun, Setup } from "../model";
  * nothing.
  */
 export const recordedFirstRun: FirstRun = {
-  headline: "Bringing in what Opera already sent",
+  headline: "Bringing in what the PMS already sent",
   what: "2 314 reservations and 1 806 guests",
-  since: "have been held since the Opera connector was configured on 12 August. "
+  since: "have been held since the PMS connector was configured on 12 August. "
     + "They are replaying now, in the order they happened — arrivals, moves and "
     + "departures alike.",
   reassurance: "This runs once. You can start working as soon as today's "

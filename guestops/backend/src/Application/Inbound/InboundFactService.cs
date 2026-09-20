@@ -54,7 +54,7 @@ public sealed class InboundFactService(
             return outcome;
         }
 
-        var candidates = await matcher.CandidatesAsync(fact, cancellationToken);
+        var candidates = await matcher.CandidatesAsync(scope, fact, cancellationToken);
 
         if (candidates.Count > 0)
         {

@@ -36,6 +36,7 @@ public sealed class RegistrationService(
     GuestOpsDbContext db,
     IKernelAuthorizer authorizer,
     SettingsService settings,
+    IBusinessDay businessDay,
     TimeProvider clock)
 {
     /// <summary>Write the card, minting its number the first time.</summary>
@@ -85,7 +86,7 @@ public sealed class RegistrationService(
             card.SignedAt = clock.GetUtcNow();
         }
 
-        await SyncReportingAsync(configuration, stay, card, cancellationToken);
+        await SyncReportingAsync(scope, configuration, stay, card, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 
         return new CapturedCard(card, RegistrationRule.Missing(configuration, card));
@@ -127,6 +128,7 @@ public sealed class RegistrationService(
     /// </para>
     /// </remarks>
     private async Task SyncReportingAsync(
+        RequestScope scope,
         GuestOpsSettings configuration,
         RoomStay stay,
         Registration card,
@@ -148,7 +150,10 @@ public sealed class RegistrationService(
         reporting.State = ReportingRule.StateFor(configuration, card.Nationality);
         reporting.Authority = configuration.ReportingAuthority;
         reporting.RequiredBy = reporting.State == ReportingState.Needed
-            ? ReportingRule.DueBy(stay.ArrivalAt, configuration.ReportingDueHours)
+            ? ReportingRule.DueBy(
+                stay.ArrivalAt,
+                configuration.ReportingDueHours,
+                await businessDay.ZoneAsync(scope, cancellationToken))
             : null;
     }
 

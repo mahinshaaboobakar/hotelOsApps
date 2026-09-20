@@ -58,11 +58,18 @@ public sealed record StayTime(DateTimeOffset? At, TimeBasis Basis)
     /// of the instant, computed here.
     /// </para>
     /// <para>
-    /// This is exact rather than approximate <b>because of the condition
-    /// specified back to the Hub</b>: a <see cref="TimeBasis.Derived"/>
-    /// timestamp is constructed in the property's IANA zone, so its own date
-    /// component is the date the source gave.
+    /// <b>The day is the property's, and the zone is required to say it.</b>
+    /// This was a <c>Date</c> property reading the instant's own offset, with the
+    /// remark that it was exact <i>"because … a Derived timestamp is constructed
+    /// in the property's IANA zone, so its own date component is the date the
+    /// source gave."</i> True in memory, false after a round trip: PostgreSQL
+    /// returns the instant at offset zero, so a stored stay's day was UTC's
+    /// (property-clock sweep, 2026-09-19). Taking the zone makes that omission
+    /// impossible to write.
     /// </para>
     /// </remarks>
-    public DateOnly? Date => At is { } at ? DateOnly.FromDateTime(at.DateTime) : null;
+    /// <param name="zone">The property's zone; null gives no day, never UTC's.</param>
+    /// <returns>The day at the property, or null.</returns>
+    public DateOnly? DateIn(TimeZoneInfo? zone)
+        => At is { } at && zone is not null ? PropertyClock.Day(at, zone) : null;
 }

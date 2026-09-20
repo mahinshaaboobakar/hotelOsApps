@@ -27,8 +27,8 @@ public class CommercialTermsTests
             CancelDropTime = new TimeOnly(18, 0),
         };
 
-        var first = terms.CancellationDeadline(new DateOnly(2026, 9, 3));
-        var moved = terms.CancellationDeadline(new DateOnly(2026, 9, 10));
+        var first = terms.CancellationDeadline(new DateOnly(2026, 9, 3), TimeZoneInfo.Utc);
+        var moved = terms.CancellationDeadline(new DateOnly(2026, 9, 10), TimeZoneInfo.Utc);
 
         Assert.Equal(new DateTime(2026, 9, 1, 18, 0, 0), first!.Value.DateTime);
         Assert.Equal(new DateTime(2026, 9, 8, 18, 0, 0), moved!.Value.DateTime);
@@ -40,7 +40,7 @@ public class CommercialTermsTests
     {
         var terms = new CommercialTerms { CancelDropTime = new TimeOnly(18, 0) };
 
-        Assert.Null(terms.CancellationDeadline(new DateOnly(2026, 9, 3)));
+        Assert.Null(terms.CancellationDeadline(new DateOnly(2026, 9, 3), TimeZoneInfo.Utc));
     }
 
     /// <summary>And no arrival, no deadline.</summary>
@@ -53,7 +53,7 @@ public class CommercialTermsTests
     {
         var terms = new CommercialTerms { CancelOffsetDaysFromArrival = 2 };
 
-        Assert.Null(terms.CancellationDeadline(null));
+        Assert.Null(terms.CancellationDeadline(null, TimeZoneInfo.Utc));
     }
 
     /// <summary>Where a source gives whole days, the window closes at midnight.</summary>
@@ -62,9 +62,44 @@ public class CommercialTermsTests
     {
         var terms = new CommercialTerms { CancelOffsetDaysFromArrival = 1 };
 
-        var deadline = terms.CancellationDeadline(new DateOnly(2026, 9, 3));
+        var deadline = terms.CancellationDeadline(new DateOnly(2026, 9, 3), TimeZoneInfo.Utc);
 
         Assert.Equal(new DateTime(2026, 9, 2, 0, 0, 0), deadline!.Value.DateTime);
+    }
+
+    /// <summary>
+    /// The drop time is the property's wall clock, in Kolkata and in Guatemala —
+    /// ADR 0174.
+    /// </summary>
+    /// <remarks>
+    /// Built at UTC until 2026-09-19: an 18:00 drop became 18:00 UTC, which is
+    /// 23:30 in Kolkata and noon in Guatemala. The two zones sit either side of
+    /// UTC, so a fix that happened to work in one direction fails the other.
+    /// </remarks>
+    [Theory]
+    [InlineData("Asia/Kolkata", "2026-09-01T12:30:00Z")]
+    [InlineData("America/Guatemala", "2026-09-02T00:00:00Z")]
+    public void The_drop_time_is_the_propertys_wall_clock(string zone, string expected)
+    {
+        var terms = new CommercialTerms
+        {
+            CancelOffsetDaysFromArrival = 2,
+            CancelDropTime = new TimeOnly(18, 0),
+        };
+
+        var deadline = terms.CancellationDeadline(
+            new DateOnly(2026, 9, 3), TimeZoneInfo.FindSystemTimeZoneById(zone));
+
+        Assert.Equal(DateTimeOffset.Parse(expected, System.Globalization.CultureInfo.InvariantCulture), deadline);
+    }
+
+    /// <summary>A property whose zone nobody configured has no deadline — never a UTC one.</summary>
+    [Fact]
+    public void No_zone_means_no_deadline()
+    {
+        var terms = new CommercialTerms { CancelOffsetDaysFromArrival = 2 };
+
+        Assert.Null(terms.CancellationDeadline(new DateOnly(2026, 9, 3), null));
     }
 
     /// <summary>An amount is three things, and a currency is what makes it one.</summary>

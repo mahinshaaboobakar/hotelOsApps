@@ -2,10 +2,13 @@
  * The Payment tab — the terms, and the folio that is a reported finding. Frame 7.
  */
 
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
 import type { Payment, TermRow } from "../../book";
 import { el, fill } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 import { card } from "../../chrome/panel";
+import { instant } from "../../chrome/when";
 
 /**
  * Draw the tab.
@@ -23,16 +26,17 @@ import { card } from "../../chrome/panel";
  * than proposed as a plan.
  *
  * @param payment the terms, and the folio's refusals
+ * @param property whose locale and zone the counts and the deadline are drawn in
  * @returns the tab's contents
  */
-export function paymentTab(payment: Payment): readonly HTMLElement[] {
+export function paymentTab(payment: Payment, property: PropertyEnvironment): readonly HTMLElement[] {
   const cols = el("div", "cols");
-  cols.append(terms(payment), folio(payment));
+  cols.append(terms(payment, property), folio(payment));
   return [cols];
 }
 
 /** What the stay was sold on. */
-function terms(payment: Payment): HTMLElement {
+function terms(payment: Payment, property: PropertyEnvironment): HTMLElement {
   const { root, body } = card("The terms");
   const heading = root.querySelector(".ch");
 
@@ -41,7 +45,7 @@ function terms(payment: Payment): HTMLElement {
   void heading;
 
   for (const term of payment.terms) {
-    body.append(row(term));
+    body.append(row(term, property));
   }
 
   if (payment.note !== null) {
@@ -60,7 +64,7 @@ function terms(payment: Payment): HTMLElement {
 }
 
 /** One term. */
-function row(term: TermRow): HTMLElement {
+function row(term: TermRow, property: PropertyEnvironment): HTMLElement {
   const element = el("div", term.big === true ? "fr big" : "fr");
   const value = el("div", "v");
 
@@ -70,6 +74,21 @@ function row(term: TermRow): HTMLElement {
 
   if (term.strong !== undefined) {
     value.append(el("b", undefined, term.strong));
+  }
+
+  // A count, formatted for the property and worded here; after an amount it is
+  // a qualifier (" · 4 nights"), alone it is the value itself.
+  if (term.count !== undefined && term.count !== null) {
+    const { n, one, other } = term.count;
+    const said = `${formatNumber(n, property, "whole")} ${n === 1 ? one : other}`;
+    value.append(term.strong !== undefined
+      ? document.createTextNode(` · ${said}`)
+      : el("b", undefined, said));
+  }
+
+  // The instant the row names — the cancellation deadline — after an arrow.
+  if (term.at !== undefined && term.at !== null) {
+    value.append(document.createTextNode(" → "), el("b", undefined, instant(term.at, property, "weekday-time")));
   }
 
   if (term.tail !== undefined) {

@@ -68,7 +68,7 @@ public class ReportingRuleTests
         var arrival = new StayTime(
             new DateTimeOffset(2026, 9, 1, 22, 0, 0, TimeSpan.Zero), TimeBasis.Observed);
 
-        Assert.Equal(new DateOnly(2026, 9, 2), ReportingRule.DueBy(arrival, 24));
+        Assert.Equal(new DateOnly(2026, 9, 2), ReportingRule.DueBy(arrival, 24, TimeZoneInfo.Utc));
     }
 
     /// <summary>
@@ -88,9 +88,36 @@ public class ReportingRuleTests
         var moved = new StayTime(
             new DateTimeOffset(2026, 9, 3, 10, 0, 0, TimeSpan.Zero), TimeBasis.Observed);
 
-        Assert.Equal(new DateOnly(2026, 9, 2), ReportingRule.DueBy(first, 24));
-        Assert.Equal(new DateOnly(2026, 9, 4), ReportingRule.DueBy(moved, 24));
+        Assert.Equal(new DateOnly(2026, 9, 2), ReportingRule.DueBy(first, 24, TimeZoneInfo.Utc));
+        Assert.Equal(new DateOnly(2026, 9, 4), ReportingRule.DueBy(moved, 24, TimeZoneInfo.Utc));
     }
+
+    /// <summary>
+    /// The due day is the property's day, never the UTC one — ADR 0174.
+    /// </summary>
+    /// <remarks>
+    /// Every other case here arrives at a UTC offset, where the UTC day and the
+    /// property's day agree — so none could tell them apart. Kolkata is 05:30
+    /// ahead: a guest arriving at 00:30 on 1 September arrived on 31 August by
+    /// UTC, and "within 24 hours" is due on the 2nd at the property.
+    /// </remarks>
+    [Fact]
+    public void The_due_day_is_the_propertys_day_not_the_utc_one()
+    {
+        var kolkata = new TimeSpan(5, 30, 0);
+        var arrival = new StayTime(
+            new DateTimeOffset(2026, 9, 1, 0, 30, 0, kolkata).ToUniversalTime(), TimeBasis.Observed);
+
+        Assert.Equal(
+            new DateOnly(2026, 9, 2),
+            ReportingRule.DueBy(arrival, 24, TimeZoneInfo.FindSystemTimeZoneById("Asia/Kolkata")));
+    }
+
+    /// <summary>A property whose zone nobody configured has no due day — never a UTC guess.</summary>
+    [Fact]
+    public void No_zone_means_no_due_day()
+        => Assert.Null(ReportingRule.DueBy(
+            new StayTime(new DateTimeOffset(2026, 9, 1, 6, 0, 0, TimeSpan.Zero), TimeBasis.Observed), 24, null));
 
     /// <summary>No arrival means no deadline, and never today's date — R25.</summary>
     /// <remarks>
@@ -99,7 +126,7 @@ public class ReportingRuleTests
     /// </remarks>
     [Fact]
     public void An_unknown_arrival_produces_no_deadline()
-        => Assert.Null(ReportingRule.DueBy(StayTime.None, 24));
+        => Assert.Null(ReportingRule.DueBy(StayTime.None, 24, TimeZoneInfo.Utc));
 
     /// <summary>A property's own offset is used, not a default.</summary>
     [Theory]
@@ -111,7 +138,7 @@ public class ReportingRuleTests
         var arrival = new StayTime(
             new DateTimeOffset(2026, 9, 1, 6, 0, 0, TimeSpan.Zero), TimeBasis.Observed);
 
-        Assert.Equal(DateOnly.Parse(expected), ReportingRule.DueBy(arrival, hours));
+        Assert.Equal(DateOnly.Parse(expected), ReportingRule.DueBy(arrival, hours, TimeZoneInfo.Utc));
     }
 
     private static GuestOpsSettings Settings(bool required = true) => new()

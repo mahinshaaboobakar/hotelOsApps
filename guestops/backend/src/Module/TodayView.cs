@@ -35,6 +35,9 @@ public sealed class TodayView(
         RequestScope scope, Paging.Window page, CancellationToken cancellationToken)
     {
         var date = await businessDay.CurrentAsync(scope, cancellationToken);
+        // Each stay's days are drawn on the property's calendar (ADR 0174).
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
         var bounds = date is { } day
             ? await businessDay.BoundsAsync(scope, day, cancellationToken)
             : null;
@@ -47,7 +50,7 @@ public sealed class TodayView(
             var found = await stays.ListAsync(
                 scope, new StayQuery(view, date, page), cancellationToken);
 
-            var rows = await RowsAsync(scope, found.Rows, cancellationToken);
+            var rows = await RowsAsync(scope, found.Rows, zone, cancellationToken);
 
             lists.Add(new
             {
@@ -110,6 +113,7 @@ public sealed class TodayView(
     private async Task<IReadOnlyList<object>> RowsAsync(
         RequestScope scope,
         IReadOnlyList<RoomStay> page,
+        TimeZoneInfo? zone,
         CancellationToken cancellationToken)
     {
         if (page.Count == 0)
@@ -132,7 +136,7 @@ public sealed class TodayView(
         var names = await NamesAsync(page, cancellationToken);
         var refs = await ReferencesAsync(page, cancellationToken);
 
-        return [.. page.Select(stay => Row(stay, types, rooms, names, refs))];
+        return [.. page.Select(stay => Row(stay, types, rooms, names, refs, zone))];
     }
 
     /// <summary>The named guest on each stay, where the party has one.</summary>
@@ -201,7 +205,8 @@ public sealed class TodayView(
         IReadOnlyDictionary<Guid, string> types,
         IReadOnlyDictionary<Guid, string> rooms,
         IReadOnlyDictionary<Guid, string> names,
-        IReadOnlyDictionary<Guid, string> refs)
+        IReadOnlyDictionary<Guid, string> refs,
+        TimeZoneInfo? zone)
     {
         var named = names.TryGetValue(stay.Id, out var name) && !string.IsNullOrWhiteSpace(name);
 
@@ -244,8 +249,8 @@ public sealed class TodayView(
             // The stay's two days, ISO; the screen composes the range in the
             // property's form. A composed "31 Aug → 2 Sep" until 2026-09-19 —
             // one locale's order and abbreviation, decided on the server.
-            arrive = stay.ArrivalAt.Date?.ToString("yyyy-MM-dd"),
-            depart = stay.DepartureAt.Date?.ToString("yyyy-MM-dd"),
+            arrive = stay.ArrivalAt.DateIn(zone)?.ToString("yyyy-MM-dd"),
+            depart = stay.DepartureAt.DateIn(zone)?.ToString("yyyy-MM-dd"),
             chips = Chips(stay),
         };
     }

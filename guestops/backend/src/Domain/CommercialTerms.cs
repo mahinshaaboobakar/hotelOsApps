@@ -78,9 +78,10 @@ public class CommercialTerms
     /// stored date would silently stop matching the reservation it belongs to.
     /// </remarks>
     /// <param name="arrival">The stay's arrival date.</param>
-    public DateTimeOffset? CancellationDeadline(DateOnly? arrival)
+    /// <param name="zone">The property's zone; null gives no deadline, never a UTC one.</param>
+    public DateTimeOffset? CancellationDeadline(DateOnly? arrival, TimeZoneInfo? zone)
     {
-        if (arrival is not { } date || CancelOffsetDaysFromArrival is not { } days)
+        if (arrival is not { } date || CancelOffsetDaysFromArrival is not { } days || zone is null)
         {
             return null;
         }
@@ -88,11 +89,12 @@ public class CommercialTerms
         var deadline = date.AddDays(-days);
         var dropTime = CancelDropTime ?? new TimeOnly(0, 0);
 
-        // No zone applied here: the caller renders it in the property's, which
-        // is the only clock a hotel's deadlines mean anything in. Returning an
-        // instant built in the server's zone would be R16's failure wearing a
-        // different field.
-        return new DateTimeOffset(deadline.ToDateTime(dropTime), TimeSpan.Zero);
+        // The drop time is the property's wall clock, so the instant is built in
+        // the property's zone. This built it at UTC until 2026-09-19, under a
+        // comment saying "the caller renders it in the property's" zone — but an
+        // 18:00 drop made 18:00 UTC is already the wrong instant, and rendering
+        // it in Kolkata showed 23:30 (property-clock sweep, ADR 0174).
+        return PropertyClock.Instant(zone, deadline, dropTime);
     }
 }
 

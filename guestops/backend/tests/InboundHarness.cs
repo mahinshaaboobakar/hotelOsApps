@@ -36,7 +36,7 @@ public sealed class InboundHarness : IAsyncDisposable
         Events = new RecordingAppender();
         Authorizer = new RecordingAuthorizer();
 
-        var matcher = new StayMatcher(db);
+        var matcher = new StayMatcher(db, new StubBusinessDay(new DateOnly(2026, 9, 1)));
         Inbound = new InboundFactService(db, matcher, Events, clock);
         Reconciliation = new Application.Reconciliation.ReconciliationService(
             db, Authorizer, Events, clock);

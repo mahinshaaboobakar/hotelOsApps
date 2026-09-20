@@ -34,7 +34,8 @@ namespace HotelOS.GuestOps.Application.Bookings;
 /// </remarks>
 public sealed class BookingReadService(
     GuestOpsDbContext db,
-    IKernelAuthorizer authorizer)
+    IKernelAuthorizer authorizer,
+    IBusinessDay businessDay)
 {
     /// <summary>One page of the list, and how many bookings match.</summary>
     public async Task<PagedResult<BookingSummary>> ListAsync(
@@ -44,9 +45,12 @@ public sealed class BookingReadService(
             scope, Permissions.ReservationRead, ResourceTypes.Property, scope.PropertyId,
             cancellationToken);
 
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
         var bookings = Filter(
             db.Bookings.Where(booking => booking.PropertyId == scope.PropertyId),
-            query);
+            query,
+            zone);
 
         // The count comes from the same query the page is taken from. Building
         // the predicate twice is how a pager offers pages the list cannot
@@ -79,7 +83,7 @@ public sealed class BookingReadService(
         var flags = await FlagsAsync(stayIds, cancellationToken);
 
         return new PagedResult<BookingSummary>(
-            [.. page.Select(booking => Summarise(booking, names, flags))],
+            [.. page.Select(booking => Summarise(booking, names, flags, zone))],
             total);
     }
 
@@ -97,6 +101,8 @@ public sealed class BookingReadService(
         await authorizer.RequireAsync(
             scope, Permissions.ReservationRead, ResourceTypes.Property, scope.PropertyId,
             cancellationToken);
+
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
 
         var booking = await db.Bookings
             .Where(one => one.Id == bookingId && one.PropertyId == scope.PropertyId)
@@ -131,8 +137,8 @@ public sealed class BookingReadService(
                 Unnamed: !named,
                 types.TryGetValue(stay.Id, out var type) ? type : null,
                 stay.RoomId,
-                DateOf(stay.Arrival),
-                DateOf(stay.Departure),
+                DateOf(stay.Arrival, zone),
+                DateOf(stay.Departure, zone),
                 stay.Lifecycle,
                 stay.Assigned,
                 stay.PmsUnknown);
@@ -143,8 +149,8 @@ public sealed class BookingReadService(
             stays.FirstOrDefault(stay => !stay.Unnamed)?.Guest,
             Of(booking.Refs, "booking"),
             booking.ExpectedStayCount,
-            DateOf(booking.Stays.Min(stay => stay.Arrival)),
-            DateOf(booking.Stays.Max(stay => stay.Departure)),
+            DateOf(booking.Stays.Min(stay => stay.Arrival), zone),
+            DateOf(booking.Stays.Max(stay => stay.Departure), zone),
             stays);
     }
 
@@ -197,7 +203,8 @@ public sealed class BookingReadService(
     private static BookingSummary Summarise(
         Loaded booking,
         IReadOnlyDictionary<Guid, string> names,
-        Flags flags)
+        Flags flags,
+        TimeZoneInfo? zone)
     {
         var named = booking.Stays
             .Select(stay => names.TryGetValue(stay.Id, out var name) ? name : null)
@@ -211,8 +218,8 @@ public sealed class BookingReadService(
             Confirmation: Of(booking.Refs, "confirmation"),
             StayCount: booking.Stays.Count,
             booking.ExpectedStayCount,
-            Arrival: DateOf(booking.Stays.Min(stay => stay.Arrival)),
-            Departure: DateOf(booking.Stays.Max(stay => stay.Departure)),
+            Arrival: DateOf(booking.Stays.Min(stay => stay.Arrival), zone),
+            Departure: DateOf(booking.Stays.Max(stay => stay.Departure), zone),
             Status: Dominant(booking.Stays.Select(stay => stay.Lifecycle)),
             WalkIn: booking.Stays.Any(stay => stay.WalkIn),
             PmsUnknown: booking.Stays.Any(stay => stay.PmsUnknown),
@@ -222,19 +229,30 @@ public sealed class BookingReadService(
     }
 
     /// <summary>The window, the status and the search, applied in the database.</summary>
-    private static IQueryable<Booking> Filter(IQueryable<Booking> bookings, BookingQuery query)
+    private static IQueryable<Booking> Filter(
+        IQueryable<Booking> bookings, BookingQuery query, TimeZoneInfo? zone)
     {
         if (query.Arriving is { } window)
         {
-            var from = new DateTimeOffset(
-                window.From.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero);
-            var to = new DateTimeOffset(
-                window.To.ToDateTime(TimeOnly.MaxValue), TimeSpan.Zero);
+            // The window's days are the property's, so its bounds are the
+            // property's midnights — from the first day's to the day after the
+            // last, exclusive. They were UTC midnights until 2026-09-19, which
+            // put a Kolkata arrival before 05:30 on the wrong side (ADR 0174).
+            // Without a zone there are no midnights to draw, and the filter
+            // refuses rather than guessing a UTC day.
+            if (zone is null)
+            {
+                throw new UnavailableException(
+                    "the property's time zone is not configured, so the arrival window cannot be applied");
+            }
+
+            var from = PropertyClock.Instant(zone, window.From, TimeOnly.MinValue);
+            var to = PropertyClock.Instant(zone, window.To.AddDays(1), TimeOnly.MinValue);
 
             bookings = bookings.Where(booking => booking.Stays.Any(stay =>
                 stay.ArrivalAt.At != null
                 && stay.ArrivalAt.At.Value >= from
-                && stay.ArrivalAt.At.Value <= to));
+                && stay.ArrivalAt.At.Value < to));
         }
 
         if (query.Status is { } status)
@@ -338,13 +356,13 @@ public sealed class BookingReadService(
 
     /// <summary>The date part of an instant nobody may have recorded.</summary>
     /// <remarks>
-    /// The offset is the property's, baked in when the instant was stored, so
-    /// taking the date off it gives the day the property was on rather than the
-    /// day the server was on — which for a 04:00 roll are different for four
-    /// hours every night.
+    /// The property's day. This said <i>"The offset is the property's, baked in
+    /// when the instant was stored"</i> and read the instant's own date — but
+    /// PostgreSQL returns it at offset zero, so the day was UTC's
+    /// (property-clock sweep, 2026-09-19).
     /// </remarks>
-    private static DateOnly? DateOf(DateTimeOffset? at)
-        => at is { } value ? DateOnly.FromDateTime(value.Date) : null;
+    private static DateOnly? DateOf(DateTimeOffset? at, TimeZoneInfo? zone)
+        => new StayTime(at, TimeBasis.Observed).DateIn(zone);
 
     /// <summary>
     /// The one status that describes the group.

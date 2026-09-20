@@ -221,7 +221,7 @@ public sealed class StayListService(
     /// <para>
     /// <b>Both halves need the operating day's instants, not its date.</b> A
     /// departure is stored only as a timestamp — there is no departure-date
-    /// column, and <see cref="StayTime.Date"/> is computed in C# and cannot be
+    /// column, and <see cref="StayTime.DateIn"/> is computed in C# and cannot be
     /// translated to SQL. So the filter is a half-open instant range, and the
     /// range comes from <see cref="IBusinessDay.BoundsAsync"/> rather than from
     /// arithmetic here.

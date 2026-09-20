@@ -73,7 +73,7 @@ public sealed class SourceNameTests
         await harness.Db.SaveChangesAsync();
 
         var answer = JsonSerializer.Serialize(await new BookingsView(
-                new BookingReadService(harness.Db, harness.Authorizer))
+                new BookingReadService(harness.Db, harness.Authorizer, new StubBusinessDay(new DateOnly(2026, 9, 1))))
             .AnswerAsync(harness.Scope(), new Paging.Window(0, 25), CancellationToken.None));
 
         // The positive control: the booking is on the page, with its reference.

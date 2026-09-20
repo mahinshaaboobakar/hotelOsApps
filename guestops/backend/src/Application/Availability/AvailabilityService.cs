@@ -58,7 +58,8 @@ public sealed record TypeAvailability(
 public sealed class AvailabilityService(
     GuestOpsDbContext db,
     IKernelAuthorizer authorizer,
-    IRoomInventory rooms)
+    IRoomInventory rooms,
+    IBusinessDay businessDay)
 {
     /// <param name="scope">The caller, and the property they are scoped to.</param>
     /// <param name="from">Inclusive.</param>
@@ -102,6 +103,10 @@ public sealed class AvailabilityService(
             .Where(s => s.PropertyId == scope.PropertyId && types.Contains(s.RoomTypeId))
             .ToListAsync(cancellationToken);
 
+        // Which nights a stay holds is read on the property's calendar
+        // (ADR 0174). A stay whose days cannot be established holds none.
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
         var answer = new List<TypeAvailability>();
 
         for (var date = from; date <= to; date = date.AddDays(1))
@@ -112,7 +117,7 @@ public sealed class AvailabilityService(
                     typeId,
                     date,
                     total,
-                    stays.Count(s => s.RoomTypeId == typeId && s.HoldsOn(date)),
+                    stays.Count(s => s.RoomTypeId == typeId && s.HoldsOn(date, zone)),
 
                     // Attributed to the type, never the property. One broken
                     // room reduces one type's availability; subtracting it from
@@ -153,20 +158,21 @@ public sealed class AvailabilityService(
         /// 4th, which is the night somebody else can be sold.
         /// </para>
         /// </remarks>
-        public bool HoldsOn(DateOnly date)
+        public bool HoldsOn(DateOnly date, TimeZoneInfo? zone)
         {
             if (!(ReservesInventory ?? Lifecycle.HoldsInventory(State)))
             {
                 return false;
             }
 
-            if (Arrival is not { } arrival || Departure is not { } departure)
+            if (Arrival is not { } arrival || Departure is not { } departure || zone is null)
             {
                 return false;
             }
 
-            var first = DateOnly.FromDateTime(arrival.DateTime);
-            var last = DateOnly.FromDateTime(departure.DateTime);
+            // The instant's own date was UTC's until 2026-09-19 (ADR 0174).
+            var first = PropertyClock.Day(arrival, zone);
+            var last = PropertyClock.Day(departure, zone);
 
             return date >= first && date < last;
         }
