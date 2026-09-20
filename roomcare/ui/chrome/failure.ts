@@ -124,7 +124,10 @@ function facts(host: HostApi, drawn: FailureDrawing): HTMLElement {
 
 function value(host: HostApi, fact: Fact): Node[] {
   switch (fact.kind) {
-    case "asked": return [el("b", undefined, fact.permission), document.createTextNode(` · ${fact.method}`)];
+    // What could not be read, in the screen's own words — owner, 2026-09-20, 64g §2 B. This drew `permission` and
+    // `method`, the code name, which the SDK now documents as not for drawing; they stay on the fact for the
+    // clipboard and diagnostics, and `wire` still carries them to support (tests/failure-words.test.ts).
+    case "asked": return [el("b", undefined, fact.value)];
     case "at": return [document.createTextNode(when(host, fact.at))];
     case "answer": return [document.createTextNode(fact.value)];
   }

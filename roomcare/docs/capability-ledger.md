@@ -214,6 +214,28 @@ the widgets. **Failing first**: at `991b032` it failed on ten screens with every
 5. **"Recorded as source manual…"** on the Room state sheet, and **"whether they are on shift is Workforce's to
    add"** on Reassign. Both are explanations of how the system works rather than something a person acts on.
 
+## What a screen says when it cannot read (2026-09-20)
+
+The owner ruled that a failure card names **what** could not be read, in plain words, and that the permission's code
+name travels in *Copy these details* instead (64g §2 B, in the shared surface at `6751c7de`).
+
+**The shared change did not reach Room Care on its own, and this is what moved here.** Room Care drew that line from
+the permission and method itself, so after the shared change every card still said *"Asked for roomcare.read ·
+board"*. Measured across all six ways a read can fail, then fixed to draw the words the screen already uses:
+
+| Card | Before | After |
+|---|---|---|
+| The board, a room, Prepare, Room states, Supervision, Deep clean, My rooms, Setup's seven tabs — every screen's failure | "Asked for **roomcare.read** · board" | "Asked for **the board**" (each screen names its own thing) |
+| The five widgets | named no code name already | unchanged |
+| *Copy these details* | carried the code name | unchanged — support still gets it |
+
+**Still naming the code name, and reported rather than changed:** on the three refusals — not permitted, this
+account not granted, this application not granted — the note under the action still reads *"This screen needs
+roomcare.read…"*. That sentence is the shared surface's, handed to every application, so Room Care does not rewrite
+it. A test asserts it as it stands, so the day the surface changes, Room Care's suite says so.
+
+**0.1.4 does not carry this**: it was cut before the ruling landed. It ships in the next cut.
+
 ## Owed after 0.1.4
 
 **The property's day comes from Context, not from Room Care (ADR 0211).** Room Care works out the day itself today,
