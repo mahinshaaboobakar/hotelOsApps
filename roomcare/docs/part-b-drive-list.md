@@ -3,7 +3,7 @@
 Prepared 2026-09-19 by KK, **re-headed 2026-09-20 for the cut Part B now runs on**:
 **`roomcare-0.1.4.hopkg`**, 16,739,263 bytes, sha256
 `6b1395379d9fc36fbef31b2cf705c0344d85a7408fa990814f8d463f2e1d8b6a`, signed by
-`hotelos-packages-2026` (`dev-local`), staged in `%LOCALAPPDATA%\HotelOS\packagesegistry`
+`hotelos-packages-2026` (`dev-local`), staged in `%LOCALAPPDATA%\HotelOS\packages\registry`
 on the owner's machine beside 0.1.2 and 0.1.3.
 
 **Built from detached worktrees of both repositories, side by side, so every relative path resolved inside the cut
