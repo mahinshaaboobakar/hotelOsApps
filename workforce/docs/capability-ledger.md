@@ -199,10 +199,11 @@ Reads: `attendanceToday · comingUp · onLeave · pendingRequests · shiftBoard`
 | D2 | **Attendance's date is written by the server** in the server's own language | `AttendanceView.cs:67` (`ToString("dddd d MMMM")`) | a property whose language differs from the server's reads the date in the server's |
 | D3 | **Shift colour → tone mapped in three places**. **Half fixed after the cut** (`6bc7e7c6`): the screens now draw the tone the service sends, and the service starts sending it in GG's next service round | `screens/shifts/index.ts:36`, `screens/policy/index.ts:36`, `Wording.cs:46` | a Rose shift reads neutral on one screen and red on another |
 | D4 | **Rota cells work with a mouse only**. **Fixed after the cut** (`2904639e`) | `screens/rota/grid.ts:48` (a `div` with a click) | a keyboard cannot reach a cell to assign a shift |
-| D5 | **A manager cannot approve or decline leave from any screen**; a person cannot withdraw a request | `screens/leave/approvals.ts:36` (rows with no action) | an approver meets the queue and has nothing to press |
+| D5 | **A manager cannot approve or decline leave from any screen**; a person cannot withdraw a request. **Fixed after the cut**: the decision panel (`11ca1b67`, `64g` §4 B) and the withdraw on the person's own row — offered only where `CancelAsync` would accept it, so a decided request carries no button | `screens/leave/approvals.ts:36` (rows with no action) | an approver meets the queue and has nothing to press |
 | D6 | **The leave read sends no id or version**, which approve, decline and withdraw all require | `LeaveView.cs` — `Queue` and `Request` | **whichever design is chosen for D5 cannot be built until this lands**, so it is done first |
-| D7 | **The service writes the attendance verdict as English** — `"Late 20 min"` — and the screen counts late people by reading that sentence back | `AttendanceView.cs:170`, `screens/attendance/index.ts:66` | a property in another language reads the server's English, and the count breaks the day the sentence changes |
-| D8 | **The service writes "412 assignments"**, unformatted, and "1 assignments" for one | `PolicyView.cs:63` | the number is not in the property's own number format, and the grammar is wrong for one |
+| D7 | **The service writes the attendance verdict as English** — `"Late 20 min"` — and the screen counts late people by reading that sentence back. **Fixed**: the service sends `state` + `lateBy`, the screen writes the sentence, and the header's day is ISO rather than `"Friday 28 August · business day"` | `AttendanceView.cs:170`, `screens/attendance/index.ts:66` | a property in another language reads the server's English, and the count breaks the day the sentence changes |
+| D8 | **The service writes "412 assignments"**, unformatted, and "1 assignments" for one. **Fixed**: `inUse` is a count and both catalogue tables write the sentence from one place. **And the same read never sent `tone` at all** — both screens render `row.tone`, only the fixture had it, so a real property drew `undefined` as a class | `PolicyView.cs:63` | the number is not in the property's own number format, and the grammar is wrong for one |
+| D9 | **A duty's instants were built in the zone of the machine drawing the form** — `new Date("2026-08-28T20:00")` reads a `datetime-local` value in the browser's own zone, not the property's. **Fixed**: `chrome/wall.ts`, and the confirm waits with a stated reason where the property's zone is unknown | `screens/duty/dialog.ts:73` | a duty typed for 20:00 is stored as a different hour on any machine not set to the property's zone, with nothing on the screen to say so |
 
 ## The drawings against the service — ruled, 2026-09-20 (`64g` §5)
 
@@ -211,8 +212,8 @@ property receives.** Two are sent; four are dropped from the drawings.
 
 | | Ruled |
 |---|---|
-| the shift's start on each late row | **sent** — the service already knows it |
-| a night duty's tail, and today's date | **sent** — a 22:00–06:00 duty drawn only on its start day is absent from the morning the person is still working. Today comes from Context's operating day (ADR 0211) |
+| the shift's start on each late row | **sent** — the service already knows it. **Built**: `WidgetViews.cs` sends `at` from `LateArrival.ExpectedAt`, and the card writes it in the property's hour cycle |
+| a night duty's tail, and today's date | **sent** — a 22:00–06:00 duty drawn only on its start day is absent from the morning the person is still working. Today comes from Context's operating day (ADR 0211). **Built**: `ScheduleView.Month` sends `today` and a `dutyPart` of `starts` or `tail`, and each cell carries its own ISO day |
 | rostered as its own figure | **dropped** — it stays folded into "34 of 38" |
 | the kind word and paired names on a pending row | **dropped** — the row is the name, with what the service sends under it |
 | the zone line on the rota **and** on Attendance | **dropped**, ruled together so nobody is zoned on one screen and unzoned on the next. The posting's zone is still People's (`WF-Q7`) |
@@ -241,6 +242,153 @@ service sends — which is why these differences could be listed at all.
 * **The Approvals queue still draws a zone** under two names in the gold mockup
   (`01-workforce-gold.html:662,664`). The ruling names the rota and Attendance,
   so these were left alone rather than swept in with them.
+
+### What building the two ruled items turned up
+
+**Both were already documented as owed, in the file that would have had to
+change.** `ScheduleDay` carried *"the service does not send it… Owed"* for
+today, and *"No `tail` … Owed, both arms in the audit, neither chosen"*. The
+ruling chose; the type now says which arm and why.
+
+* **`today` was a boolean per cell** and only the fixture ever set one. Six
+  weeks of cells can disagree with each other; one day, matched against each
+  cell's own ISO date, cannot. The month carries the day now.
+* **A cell's `date` is a day NUMBER, and two cells can read `28`** — a leading
+  blank from the previous month and a real day. Every cell carries `on` as well.
+* **The padding cells were a different shape from the real ones** — they sent
+  `duty` where every other cell sends `dutyFrom`/`dutyTo`, so the grid's rows
+  were two shapes and only one matched what the screen reads. Both are the same
+  shape now.
+* **`schedule-wire.test.ts`'s `WIRE` was an untyped object literal**, so when
+  the service grew three fields the fixture kept the old shape and the suite
+  stayed green — *a fixture-versus-wire hole inside the file written to close
+  one*. It is typed `Schedule` now, and the missing `on`/`today` would have
+  marked **every** cell as today, because `undefined === undefined`.
+* **`DutyDayZoneTests` asserted `dutyFrom != null` to mean *the duty starts
+  here***. With a tail that is no longer the same question, so it asks
+  `dutyPart` — ADR 0034, a test encoding a contract that has moved.
+
+## Two shared-surface changes, announced first and then ruled
+
+**The platform SDK's surface is shared, so both were put to the architect
+before either was made** (2026-09-20). They were ruled in opposite directions,
+and the reason is the same rule read from each end.
+
+1. **`weekday-day-month` is in the SDK** — HosPilotOS `ff64d79d`. Attendance's
+   header was `ToString("dddd d MMMM")` in the service; drawing it as
+   `day-month-year` **lost the weekday**, which is a loss rather than a
+   simplification on a header whose job is to say which day you are looking at.
+   It sits beside `month-year`, added under the same argument and on its
+   precedent. Composing an English weekday in the module would have been the
+   defect the change removed, one layer down.
+
+   Measured across the three locales, which disagree about **order and
+   punctuation** — that is why the fixture is those three:
+
+   ```text
+   en-IN   Thursday, 10 September
+   en-US   Thursday, September 10
+   de-DE   Donnerstag, 10. September
+   ```
+
+2. **The write-direction helper stays in `chrome/wall.ts`** — the rule is *two
+   or more consumers → the package*, and Workforce is the first. The trigger is
+   written at the file: **the day a second application needs it, it moves to
+   the SDK and this file loses it** — deleted, not wrapped, because a file left
+   behind re-exporting the SDK's version keeps the old import path working, so
+   nobody ever finds the callers.
+
+**Both are this round's ADR 0168 debt**, alongside `formatMoney` (`6734ab05`)
+and the failure surface (`6751c7de`): one consumer-check run at the .NET slot,
+quoted with its uncommitted-files warning.
+
+## 2B was not finished, and the ruling's own premise is false
+
+**FF found it and reported rather than edited** (2026-09-20): `6751c7de` took
+the code name out of the facts and `act()` went on printing it one line below
+them — *"This screen needs `reservation.read`, and no grant at this property
+names this user."* **The tests that covered 2B could not have failed on it**:
+they read `facts`, and this is the sentence beside them.
+
+**And the justification decayed into an argument for the thing it justified.**
+`act()`'s doc allows the terse refusal because *"the four facts carry the
+capability, so an operator knows what to ask for"* — which **my own change made
+false**. The owner ruled operator-only: the sentence loses the code name, and
+the doc's reasoning is corrected in the same commit, recording what it claimed.
+
+**A fourth instance, in this application, found while checking FF's:**
+`chrome/failure.ts` drew `fact.permission · fact.method` for the *Asked for*
+row — `roster.read · week` on a card a receptionist reads — while the SDK says
+of those fields that they are *"there for the clipboard and for diagnostics,
+and **not for drawing**"*. **Workforce was alone in this**: Jobs and Room Care
+already draw `fact.value`. Fixed, failing-first, with both tests that asserted
+the old contract rewritten to record what they used to say (ADR 0034).
+
+### The conflict, reported and not resolved
+
+> **The ruling says the code name reaches support through *Copy these
+> details*, "which is the operator's path". On a refusal card that path does
+> not exist.**
+
+Measured across all three applications, not inferred:
+
+```text
+workforce/ui/chrome/failure.ts:272   case "grant": break;   // no control
+jobs/ui/chrome/failure.ts:180        case "grant": break;
+roomcare/ui/chrome/failure.ts:109    case "grant": break;
+```
+
+`drawn.wire` is written to the clipboard **only** from the `copy` arm, and is
+rendered nowhere. So once the sentence loses the code name, a refused screen
+carries no identifier at all — not on the card, not behind a control.
+
+**The same gap arrived from a second direction while correcting a test.**
+`schedule.test.ts` asserted `roster.read · me` to show the facts named the
+**`me`** read rather than the `schedule` one. That distinction is now visible
+to nobody.
+
+**Held.** The SDK change is written and not committed; the question is whether
+the `grant` arm gains *Copy these details*. Either answer lands in one commit
+with the doc rewrite.
+
+## Owed by the round, not by this stream — the lock guard
+
+**`uv lock --check` ("Check if the lockfile is up-to-date") exists and is wired
+into nothing.** It is the guard that would have caught `ffcad24d` on
+2026-09-05 instead of costing four streams a round on 2026-09-20.
+
+```text
+make check   ruff · ruff format · mypy · lint-imports · gitleaks    — no lock check
+```
+
+**Candidate owner: DD** — they regenerate the lock at their slot for ADR 0213's
+NATS dependency, so the guard lands in the same commit as the regeneration,
+which is this round's own rule about a generated file. **The assignment is the
+architect's to confirm**; this row records the debt, not the decision.
+
+### And naming a person is not sufficient, which is the part to act on
+
+**`make check` appears ZERO times in CLAUDE.md's phase-close list.** Measured,
+not assumed:
+
+```text
+phase close runs   check_source_standards · check_documentation · clippy ·
+                   cargo test · dotnet build · dotnet test · tsc
+phase close does   make check           ← every Python lint and type check in
+NOT run                                   this repository
+```
+
+So adding the guard to `make check` would put a correct check inside a target
+**no round runs** — silent for the same structural reason, one layer in. That
+is *a check owned by no round is a check nobody reads*, and it would repeat the
+fifteen-day silence rather than end it.
+
+**The placement, not only the owner, is the deliverable.** The repository's own
+remedy names `cargo fmt --check`, `check_source_standards` and
+`check_documentation` as the cheap HEAD checks worth running on a schedule —
+**none of them Python**. `uv lock --check` needs no build, no database and no
+disk, so it belongs in that set, and `make check` belongs in the phase-close
+list or it keeps being a target nobody has an occasion to run.
 
 ## A check this stream owes, and has not run
 
