@@ -28,6 +28,17 @@ import type { Call } from "./host";
  * effect. "The walk itself" below proves it tells a dead handler from a live one.
  * First run: the door's End… sheet drew its chosen ending without `aria-pressed`.
  *
+ * **What two deep does not cover, measured rather than assumed** (2026-09-20, after
+ * HH found three dead buttons by hand in Jobs' unwalked third level). Room Care has
+ * no third level: no sheet opens another sheet, so every sheet's controls are at
+ * this walk's second press. What the walk does miss is a control **armed by another
+ * control in the same sheet** — it always presses from a freshly opened sheet, so it
+ * sees "Record" with no state chosen and "Keep this order" before a reorder. Probed
+ * by hand across every place: each sheet opened, each control pressed first, then
+ * every other control pressed and compared on screen, field values, focus and host
+ * calls. **Nothing dead.** A green run here still says nothing about those armed
+ * states; that measurement does, and only for the day it was taken.
+ *
  * **Proved against planted empty handlers** (2026-09-20, the architect's ask after
  * HH's Jobs guard passed two tabs wired to `() => {}`): in a detached worktree at
  * `863ff6b`, the Board's Wall chip and Property-wide access's "Grant to a person…"
