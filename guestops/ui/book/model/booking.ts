@@ -56,11 +56,24 @@ export interface BookingRow {
    */
   confirmation: string | null;
 
-  /** `1`, or `1 of 3 known` when the source claimed more than it has sent. */
-  rooms: string;
+  /** How many stays the booking holds here. */
+  rooms: number;
 
-  /** `31 Aug → 2 Sep`. */
-  dates: string;
+  /**
+   * What the source SAID it holds, when that is more than has arrived.
+   *
+   * Null otherwise, which is the ordinary case and the one a booking created
+   * here always has. The screen says `1 of 3 known` from the pair; the service
+   * sent that phrase until 2026-09-20, and its digits were the server's
+   * (ADR 0175).
+   */
+  claimed: number | null;
+
+  /** The booking's first arrival, ISO — `2026-08-31`. */
+  arrive: string | null;
+
+  /** Its last departure, ISO. Equal to `arrive` on a day use. */
+  depart: string | null;
 
   /** `In house`, `Booked`, `Cancelled` — the stay lifecycle, aggregated. */
   status: string;
@@ -112,7 +125,10 @@ export interface BookingStay {
    */
   room: string | null;
 
-  dates: string;
+  /** This stay's arrival and departure, ISO — the span is the screen's. */
+  arrive: string | null;
+  depart: string | null;
+
   status: string;
   statusTone: StatusTone;
   chips: readonly Chip[];
@@ -132,8 +148,20 @@ export interface BookingDetail {
   guest: string;
   reference: string;
 
-  /** `Two stays · 3 Sep → 7 Sep`. */
-  summary: string;
+  /**
+   * The parts of `Two stays · 3 Sep → 7 Sep` — said by the screen.
+   *
+   * The count is spelled where the design spells it, and that spelling is a
+   * rule about English rather than a fact about the booking, which is why it
+   * arrives as a number.
+   */
+  summary: {
+    /** The number the guest reads off their email — the owner's A2, 2026-09-20. */
+    confirmation: string | null;
+    stays: number;
+    arrive: string | null;
+    depart: string | null;
+  };
 
   /** `Opera manages this booking`, or null in a standalone property. */
   managedBy: string | null;
@@ -201,12 +229,37 @@ export interface GroupFact {
  * and every one of those three is a fact the server has to supply: the desk
  * cannot be asked to confirm a penalty the screen invented.
  */
-export interface CancelPlan {
-  /** `BK-4506 · Fatima Sheikh · two stays, 3 – 7 September`. */
-  subject: string;
+/**
+ * One row of the plan — and the days it is about, where it is about days.
+ *
+ * `arrive` and `depart` are absent on a row that is not about a span (the why),
+ * and present together or not at all: a penalty row naming one date would read
+ * as the day the penalty falls due, which is a different fact.
+ */
+export interface CancelRow {
+  label: string;
+  value: string;
+  strong?: string;
+  tags: readonly Tag[];
+  arrive?: string | null;
+  depart?: string | null;
+}
 
-  /** `This cancels two stays, one at a time.` */
-  consequence: string;
+export interface CancelPlan {
+  /**
+   * The parts of `BK-4506 · Fatima Sheikh · two stays, 3 – 7 September`.
+   *
+   * Reference and guest are facts and may each be absent; the count is the
+   * plan's `stays`, and the span is drawn from the two days. The service joined
+   * all of it into one string until 2026-09-20 — including a range compressed
+   * the way `en-GB` compresses one (ADR 0175).
+   */
+  subject: {
+    reference: string | null;
+    guest: string | null;
+    arrive: string | null;
+    depart: string | null;
+  };
 
   /**
    * How many stays the button will cancel.
@@ -221,7 +274,7 @@ export interface CancelPlan {
   stays: number;
 
   /** One row per stay, plus the why and the afterwards. */
-  rows: readonly { label: string; value: string; strong?: string; tags: readonly Tag[] }[];
+  rows: readonly CancelRow[];
 
   /**
    * The sentence that must not be omitted — frame 8, `CONN-Q5`.

@@ -21,11 +21,14 @@ import { describe, expect, it } from "vitest";
 
 import type { PropertyEnvironment } from "@hotelos/sdk";
 
-import type { Activity } from "../book";
+import type { Activity, CancelPlan } from "../book";
 import { day, instant } from "../chrome/when";
 import type { DayRow } from "../book/model";
 import { activityTab } from "../screens/stay/activity-tab";
 import { table } from "../screens/today/table";
+import { summary } from "../screens/booking/index";
+import { cancel } from "../screens/booking/cancel";
+import { recordedCancelPlan } from "../book/recorded/booking";
 
 const KOLKATA: PropertyEnvironment = { locale: "en-IN", timezone: "Asia/Kolkata" };
 const UNKNOWN: PropertyEnvironment = { locale: null, timezone: null };
@@ -97,5 +100,76 @@ describe("Today's nights", () => {
 
   it("draws an unrecorded arrival as the dash, never a guessed day", () => {
     expect(drawn(row(null, "2026-09-02"), KOLKATA)).toBe("—");
+  });
+});
+
+describe("a booking's own line", () => {
+  const line = (
+    stays: number,
+    arrive: string | null,
+    depart: string | null,
+    confirmation: string | null = null,
+  ): string => summary({ confirmation, stays, arrive, depart }, KOLKATA);
+
+  it("spells the count and draws the span in the property's form", () => {
+    expect(line(2, "2026-09-03", "2026-09-07")).toMatch(/^Two stays · 03 .+ → 07 /u);
+    expect(line(1, "2026-09-03", "2026-09-03")).toMatch(/^One stay · 03 .+ · day use$/u);
+    expect(line(7, "2026-09-03", null)).toMatch(/^7 stays · 03 /u);
+  });
+
+  it("is the count alone when no arrival is recorded — never a count beside a dash", () => {
+    expect(line(2, null, null)).toBe("Two stays");
+  });
+
+  // The owner's ruling on frame 9, 2026-09-20 (A2). The frame had been drawn
+  // with a line the view has never sent, and this is the line it sends now.
+  it("carries the confirmation number in front, where the source gave one", () => {
+    expect(line(1, "2026-08-31", "2026-09-02", "84119377"))
+      .toMatch(/^84119377 · One stay · 31 Aug → 02 /u);
+  });
+
+  it("starts with the count for a booking created here, which has no number", () => {
+    expect(line(1, "2026-08-31", "2026-09-02")).toMatch(/^One stay · 31 Aug/u);
+  });
+});
+
+describe("the cancel plan", () => {
+  const plan = (over: Partial<CancelPlan>): CancelPlan => ({ ...recordedCancelPlan, ...over });
+
+  const drawn = (over: Partial<CancelPlan>, property: PropertyEnvironment): HTMLElement =>
+    cancel(plan(over), () => {}, () => {}, property);
+
+  const text = (over: Partial<CancelPlan>, selector: string, property = KOLKATA): string =>
+    drawn(over, property).querySelector(selector)?.textContent ?? "";
+
+  it("says what the button does, from the count", () => {
+    expect(text({ stays: 2 }, ".note")).toBe("This cancels two stays. One at a time.");
+    expect(text({ stays: 1 }, ".note")).toBe("This cancels one stay.");
+  });
+
+  it("names the booking, the count and the span", () => {
+    expect(text({}, ".dh span")).toMatch(/^BK-4506 · Fatima Sheikh · two stays, 03 /u);
+  });
+
+  it("drops a part the booking does not have, rather than a placeholder", () => {
+    const subject = { reference: null, guest: null, arrive: null, depart: null };
+    expect(text({ subject }, ".dh span")).toBe("two stays");
+  });
+
+  it("draws each row's span before its value, in the property's form", () => {
+    const rows = [...drawn({}, KOLKATA).querySelectorAll(".fr .v")].map((v) => v.textContent ?? "");
+    expect(rows[0]).toMatch(/^03 .+ → 07 .+penalty/u);
+    expect(rows[2]).toBe("cancelling within 48 h of arrival, per the booking's terms");
+  });
+
+  it("says what returns to inventory, and says why when nothing does", () => {
+    const rows = (over: Partial<CancelPlan>): string[] =>
+      [...drawn(over, KOLKATA).querySelectorAll(".fr .v")].map((v) => v.textContent ?? "");
+
+    expect(rows({}).at(-1)).toMatch(/^both rooms return to inventory for 03 /u);
+    expect(rows({ stays: 1 }).at(-1)).toMatch(/^the room returns to inventory for 03 /u);
+    expect(rows({ stays: 4 }).at(-1)).toMatch(/^all four rooms return to inventory for 03 /u);
+    expect(rows({ stays: 0 }).at(-1))
+      .toBe("nothing returns to inventory — no stay on this booking can be cancelled");
   });
 });

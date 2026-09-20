@@ -75,8 +75,18 @@ public sealed class BookingsView(BookingReadService bookings)
             createdHere = booking.Reference is null,
             confirmation = booking.Confirmation,
 
-            rooms = Rooms(booking),
-            dates = Dates(booking),
+            // Numbers, not a phrase: `1 of 3 known` is English and its digits
+            // are a locale's (ADR 0175). `claimed` is null unless the source
+            // said more than it has sent, so the screen has the same two states
+            // the sentence used to carry and does not have to parse one back
+            // out of prose.
+            rooms = booking.StayCount,
+            claimed = booking.ExpectedStayCount is { } expected && expected > booking.StayCount
+                ? expected
+                : (int?)null,
+
+            arrive = Iso(booking.Arrival),
+            depart = Iso(booking.Departure),
 
             status = Status(booking.Status),
             statusTone = Tone(booking.Status),
@@ -84,36 +94,24 @@ public sealed class BookingsView(BookingReadService bookings)
             chips = Chips(booking),
         };
 
-    /// <summary>`1`, or the incomplete group said out loud.</summary>
+    /// <summary>A day as ISO-8601, or null — never a rendering.</summary>
     /// <remarks>
-    /// The claim is the <i>source's</i>, which is why it is only stated when
-    /// there is one: a booking this desk created has no expected count, and
-    /// printing <i>1 of 1 known</i> over it would attribute a claim to nobody.
+    /// <para>
+    /// <b>A group's dates are its earliest arrival and its latest departure</b>
+    /// — what a receptionist means by *when are they here*, even when two rooms
+    /// of the booking leave on different days. Those two days travel; the span
+    /// between them is drawn by <c>chrome/when.ts</c>'s <c>span()</c> in the
+    /// property's locale.
+    /// </para>
+    /// <para>
+    /// This sent <c>31 Aug → 2 Sep</c> until 2026-09-20 — the server's month
+    /// abbreviation, the server's order, and <i>day use</i> in English. The
+    /// order is the part that looks like a format and is not: a locale that
+    /// writes the month first reads the same two days differently, and no
+    /// server-side string can be right for both.
+    /// </para>
     /// </remarks>
-    private static string Rooms(BookingSummary booking)
-        => booking.ExpectedStayCount is { } expected && expected > booking.StayCount
-            ? $"{booking.StayCount} of {expected} known"
-            : booking.StayCount.ToString();
-
-    /// <summary>`31 Aug → 2 Sep`, over every stay in the booking.</summary>
-    /// <remarks>
-    /// A group's dates are its earliest arrival and its latest departure —
-    /// which is what a receptionist means by *when are they here*, even when
-    /// two rooms of the booking leave on different days.
-    /// </remarks>
-    private static string? Dates(BookingSummary booking)
-    {
-        if (booking.Arrival is not { } from)
-        {
-            return null;
-        }
-
-        var arrival = from.ToString("d MMM");
-
-        return booking.Departure is { } to
-            ? to == from ? $"{arrival} · day use" : $"{arrival} → {to:d MMM}"
-            : arrival;
-    }
+    private static string? Iso(DateOnly? day) => day?.ToString("yyyy-MM-dd");
 
     /// <summary>The design's own word for each lifecycle.</summary>
     private static string Status(StayLifecycle lifecycle)

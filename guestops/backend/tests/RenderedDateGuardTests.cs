@@ -32,12 +32,14 @@ namespace HotelOS.GuestOps.Tests;
 public sealed class RenderedDateGuardTests
 {
     /// <summary>Views still sending a rendering, and how many each holds.</summary>
-    private static readonly Dictionary<string, int> NotYetConverted = new()
-    {
-        ["BookingView.cs"] = 7,
-        ["BookingsView.cs"] = 2,
-        ["CancelPlanView.cs"] = 6,
-    };
+    /// <remarks>
+    /// <b>Empty since 2026-09-20 — every view is converted.</b> Booking (7),
+    /// Bookings (2) and the cancel plan (6) were the last three. The table stays
+    /// rather than being deleted with its last row: it is what makes the walk
+    /// two-way, so a view that starts sending a formatted date again fails here
+    /// instead of quietly earning a row.
+    /// </remarks>
+    private static readonly Dictionary<string, int> NotYetConverted = [];
 
     private static readonly Regex Rendered = new(
         """ToString\("(?!O"|N"|yyyy-MM-dd")[^"]*[dMHhmy][^"]*"|\{[^{}"]*:[dMHhmy][dMHhmy .,/:-]*\}|\{[^{}"]*\.(?:Day|Month|Year|Hour|Minute|DayOfWeek)\}""",

@@ -122,31 +122,43 @@ public sealed class BookingView(
                 },
             ];
 
-    /// <summary>`Two stays · 3 Sep → 7 Sep`.</summary>
+    /// <summary>The parts of `Two stays · 3 Sep → 7 Sep`, for the screen to say.</summary>
     /// <remarks>
-    /// The count is spelled for the small numbers a booking usually has,
-    /// because the design spells it — <i>Two stays</i> reads as a sentence and
-    /// <i>2 stays</i> reads as a field.
+    /// <para>
+    /// <b>A count and two ISO days — ADR 0175.</b> This composed the whole
+    /// sentence until 2026-09-20, and every piece of it was the server's: the
+    /// number spelled in English (<i>One stay</i>, <i>Two stays</i>), the
+    /// singular and plural, the month's abbreviation, and the order of day and
+    /// month.
+    /// </para>
+    /// <para>
+    /// The spelling is the part worth naming, because it did not look like a
+    /// locale problem. The design spells small numbers — <i>Two stays</i> reads
+    /// as a sentence where <i>2 stays</i> reads as a field — and that is a rule
+    /// about <b>how English writes small numbers</b>, which is the reader's to
+    /// apply and is where it now lives.
+    /// </para>
     /// </remarks>
-    private static string Summary(BookingRecord record)
-    {
-        var count = record.Stays.Count switch
+    /// <remarks>
+    /// <b>The confirmation number joined it on 2026-09-20 — the owner's ruling
+    /// on frame 9, option A2.</b> The frame had been drawn with a line this
+    /// view has never sent (<i>Group 84119377 · from the PMS · booked 28 Aug</i>),
+    /// and the owner chose the number in front of the count and the dates. What
+    /// A3 would have needed, so nobody re-raises it as an oversight: the date
+    /// the source booked it, which nothing here reads, and the connected
+    /// system's name, which is `CONN-Q44` and unavailable.
+    /// </remarks>
+    private static object Summary(BookingRecord record)
+        => new
         {
-            1 => "One stay",
-            2 => "Two stays",
-            3 => "Three stays",
-            var many => $"{many} stays",
+            confirmation = record.Confirmation,
+            stays = record.Stays.Count,
+            arrive = Iso(record.Arrival),
+            depart = Iso(record.Departure),
         };
 
-        if (record.Arrival is not { } from)
-        {
-            return count;
-        }
-
-        return record.Departure is { } to
-            ? $"{count} · {from:d MMM} → {to:d MMM}"
-            : $"{count} · {from:d MMM}";
-    }
+    /// <summary>A day as ISO-8601, or null — never a rendering.</summary>
+    private static string? Iso(DateOnly? day) => day?.ToString("yyyy-MM-dd");
 
     /// <summary>One stay, as the design draws it.</summary>
     private static object Stay(
@@ -176,7 +188,8 @@ public sealed class BookingView(
                 ? number
                 : null,
 
-            dates = Dates(stay),
+            arrive = Iso(stay.Arrival),
+            depart = Iso(stay.Departure),
             status = Status(stay.Status),
             statusTone = Tone(stay.Status),
             chips = Chips(stay),
@@ -189,18 +202,6 @@ public sealed class BookingView(
         return $"{text[..5]}…{text[^4..]}";
     }
 
-    /// <summary>`3 Sep → 7 Sep`.</summary>
-    private static string? Dates(BookingStayRow stay)
-    {
-        if (stay.Arrival is not { } from)
-        {
-            return null;
-        }
-
-        return stay.Departure is { } to
-            ? to == from ? $"{from:d MMM} · day use" : $"{from:d MMM} → {to:d MMM}"
-            : $"{from:d MMM}";
-    }
 
     /// <summary>The design's own word for each lifecycle.</summary>
     private static string Status(StayLifecycle lifecycle)

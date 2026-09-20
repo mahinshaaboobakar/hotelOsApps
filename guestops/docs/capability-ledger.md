@@ -212,6 +212,87 @@ code too (`ui/book/recorded/booking.ts`, the site BB reported), so a reader
 meeting the generic word learns it was a limitation. If the ruling lands before
 0.3.3 the fixtures take the display name and this section says so.
 
+## Found while converting the last three views — frame 9's group line
+
+`recordedGroup.summary` was **`Group 84119377 · from the PMS · booked 28 Aug`**
+— a confirmation number, a source and a booking date. **`BookingView` has never
+sent that sentence.** Its `Summary` produces a count and a span
+(`Two stays · 3 Sep → 7 Sep`) and nothing else, so the fixture was a second
+contract wearing the same field name, and every capture of frame 9 drew a line
+the property could not produce.
+
+It now carries the wire's shape. Drawn for the owner as three options
+(`docs/mockups/07-booking-heading-and-dates.html`), and **ruled 2026-09-20**:
+
+> **A2 — the heading carries the confirmation number**, then the count and the
+> days: `84119377 · One stay · 31 Aug → 02 Sept`.
+
+Built the same day. The view already read the number, so this was the small
+work it was priced as, and **the dates stay** — which is what A3 would have
+cost.
+
+**What A3 would have needed, recorded so nobody re-raises it as an oversight**:
+the line as drawn (`Group 84119377 · from the PMS · booked 28 Aug`) needs the
+date the source booked it, which nothing in this application reads, and the
+connected system's own name, which is `CONN-Q44` and unavailable. It also drops
+the dates, which is the trade the owner declined.
+
+### And the dates themselves — ruled the same day
+
+I reported the compressed range (`3 – 7 September`) as lost when the sentences
+moved to the screen, because its word order is one language's. **That was wrong
+and I corrected it**: `Intl`'s `formatRange` produces `3–7 Sept`, `Sep 3 – 7`
+and `31 Aug – 2 Sept` correctly per locale, so it was a live option, measured in
+three cases and drawn as option B.
+
+> **B long — the composed form, `03 Sept → 07 Sept`, per locale. No shared
+> range formatter is to be added.**
+
+**The arrow join is deliberate and says so at the code** (`chrome/when.ts`):
+two separately formatted days joined by an arrow assert nothing about either
+language, which is exactly what the compressed form could not do. The measured
+short form stays in the drawn page as the record of a rejected option.
+
+**The fidelity comparison is re-run at 0.3.3**, not before — the frames and the
+build both moved today.
+
+## The exponent, measured against its ruling — 2026-09-20
+
+ADR 0175's exponent ruling says the service converts at the boundary where the
+money value is created, taking the exponent from **authoritative currency
+metadata — the property's configured currency record**, never process culture;
+and that a service with minor units and a currency but no authoritative
+exponent **has a contract gap rather than permission to assume 2**. Measured
+here, both halves:
+
+**The currency CODE is reachable.** `masterdata.properties.currency` exists
+(`services/masterdata-service/src/Domain/Tenancy.cs:77`, default `INR`), and
+GuestOps already reads master data through keyless read models over that schema
+— `MasterDataRoomTypeName` is the pattern. Context exposes it too, on
+`PropertySummary.currency`. Adding a property read model is a small piece of
+work and needs no ruling.
+
+**The EXPONENT does not exist anywhere in the platform.** Searched
+`services/`, `shared/protos/` and `packages/sdk-dotnet` for an exponent, minor
+units, decimal digits or a currency entity: **there is none** — the only hits
+are an RSA exponent and exponential backoff. The property's currency record
+holds `"INR"` and says nothing about how many minor units that has. **So the
+authoritative metadata the ruling names is not there to be read**, and by the
+ruling's own test this is the gap, reported rather than worked around.
+
+**And a second half the property record cannot close.** An amount's currency is
+not necessarily the property's: `Money.Currency` arrives from the source, so a
+PMS can send a booking priced in `USD` to a property configured in `INR`, and
+the platform can hold it today. A property's own currency record is
+authoritative for amounts in that currency and for nothing else — so even once
+it carries an exponent, a foreign-currency amount still has no authority behind
+its decimals.
+
+**Where it would happen for GuestOps**: `RoomStayFactMapper.Amount()`, which
+builds `Money` from the Hub's `integration/v1.Money` — itself `int64
+minor_units` (`dto.proto:92`). The upstream leg carries the same gap, so the
+connector converting at *its* boundary needs the same metadata.
+
 ## Found while applying NUM-Q2 — the amount's exponent
 
 `PaymentView.Money()` divides minor units by one hundred whatever the currency.

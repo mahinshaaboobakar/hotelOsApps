@@ -79,11 +79,19 @@ public sealed record BookingStayRow(
 /// anything, which is every booking this desk created — and which is a
 /// different state from claiming one. Collapsing the two would lose the
 /// incomplete group frame 9 exists to draw.
+///
+/// <c>Confirmation</c> is the number the guest reads off their email —
+/// <c>84119377</c> — and a different identifier from a different system than
+/// <c>Reference</c>: the reference is what the property calls the booking, the
+/// confirmation is what the source gave the guest. The list has carried it
+/// since it was drawn; the booking's own heading carries it from 2026-09-20,
+/// the owner's ruling on frame 9 (option A2).
 /// </remarks>
 public sealed record BookingRecord(
     Guid Id,
     string? Guest,
     string? Reference,
+    string? Confirmation,
     int? Expected,
     DateOnly? Arrival,
     DateOnly? Departure,

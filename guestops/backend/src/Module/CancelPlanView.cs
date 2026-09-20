@@ -62,12 +62,11 @@ public sealed class CancelPlanView(
             rows.Add(Row("Why a penalty", why, null, []));
         }
 
-        rows.Add(Row("Afterwards", Afterwards(cancellable), null, []));
+        rows.Add(Afterwards(cancellable));
 
         return new
         {
-            subject = Subject(record, cancellable.Count),
-            consequence = Consequence(cancellable.Count),
+            subject = Subject(record),
 
             // Stated, so no reader has to count it off a mixed list of rows.
             stays = cancellable.Count,
@@ -77,41 +76,47 @@ public sealed class CancelPlanView(
         };
     }
 
-    /// <summary>`BK-4506 · Fatima Sheikh · two stays, 3 – 7 September`.</summary>
-    private static string Subject(BookingRecord record, int count)
-    {
-        var parts = new List<string>();
-
-        if (record.Reference is { } reference)
-        {
-            parts.Add(reference);
-        }
-
-        if (record.Guest is { } guest)
-        {
-            parts.Add(guest);
-        }
-
-        var span = record.Arrival is { } from && record.Departure is { } to
-            ? $"{Spell(count)} {(count == 1 ? "stay" : "stays")}, {from.Day} – {to:d MMMM}"
-            : $"{Spell(count)} {(count == 1 ? "stay" : "stays")}";
-
-        parts.Add(span);
-        return string.Join(" · ", parts);
-    }
-
-    /// <summary>The sentence naming what the button does.</summary>
+    /// <summary>The parts of `BK-4506 · Fatima Sheikh · two stays, 3 – 7 September`.</summary>
     /// <remarks>
-    /// It went on to explain that a booking is a group and every operation
-    /// happens to a stay — the model, for the developer — and promised the
-    /// stays "can be reinstated afterwards", which nothing in GuestOps can do.
-    /// Both removed on 2026-09-19 (the owner's ruling on developer notes, and a
-    /// sentence may not promise an outcome the code does not deliver).
+    /// <para>
+    /// <b>ADR 0175, and this line is the clearest case in the application.</b>
+    /// It joined a reference, a name, a spelled count, a singular-or-plural noun
+    /// and a compressed date range into one string. Only the first two are
+    /// facts; the rest is English, and the range is not even a format —
+    /// <c>3 – 7 September</c> puts the month at the second end **because
+    /// `en-GB` puts the month after the day**, and a locale that writes the
+    /// month first cannot be served by moving it.
+    /// </para>
+    /// <para>
+    /// The count is <i>cancellable</i> stays and not every stay on the booking,
+    /// which is why it travels beside the subject rather than being recounted
+    /// from the rows: a booking with three stays where one has already departed
+    /// says <i>two stays</i>, and a screen counting rows would say three.
+    /// </para>
     /// </remarks>
-    private static string Consequence(int count)
-        => count == 1
-            ? "This cancels one stay."
-            : $"This cancels {Spell(count)} stays, one at a time.";
+    private static object Subject(BookingRecord record)
+        => new
+        {
+            reference = record.Reference,
+            guest = record.Guest,
+            arrive = Iso(record.Arrival),
+            depart = Iso(record.Departure),
+        };
+
+    /// <summary>A day as ISO-8601, or null — never a rendering.</summary>
+    private static string? Iso(DateOnly? day) => day?.ToString("yyyy-MM-dd");
+
+    // `Consequence` was the sentence naming what the button does — "This
+    // cancels two stays, one at a time." It is the screen's now (ADR 0175),
+    // composed from the `stays` count this view already sends, because the
+    // spelled number, the plural and the clause order are all English.
+    //
+    // Its own history is worth keeping: it went on to explain that a booking is
+    // a group and every operation happens to a stay — the model, for the
+    // developer — and promised the stays "can be reinstated afterwards", which
+    // nothing in GuestOps can do. Both removed on 2026-09-19 (the owner's
+    // ruling on developer notes, and a sentence may not promise an outcome the
+    // code does not deliver). Neither may come back in the screen's wording.
 
     /// <summary>One stay's penalty, as the dialog states it.</summary>
     /// <remarks>
@@ -129,13 +134,16 @@ public sealed class CancelPlanView(
             ? name
             : "This stay";
 
-        var dates = stay.Arrival is { } from && stay.Departure is { } to
-            ? $"{from.Day} – {to:d MMM} · "
-            : string.Empty;
+        // The two days, not the range: the row's value used to open with
+        // `3 – 7 Sep · ` and the screen now draws that span in the property's
+        // locale. Both ends or neither — a penalty row naming one date would
+        // read as the day the penalty falls due, which is a different fact.
+        var arrive = stay.Departure is null ? null : Iso(stay.Arrival);
+        var depart = stay.Arrival is null ? null : Iso(stay.Departure);
 
         if (!terms.TryGetValue(stay.Id, out var agreed) || agreed.PenaltyAmount is null)
         {
-            return Row(label, $"{dates}no penalty agreed", null, []);
+            return Row(label, "no penalty agreed", null, [], arrive, depart);
         }
 
         var money = agreed.PenaltyAmount;
@@ -146,7 +154,7 @@ public sealed class CancelPlanView(
         // be charged in the wrong denomination.
         if (!money.IsStated)
         {
-            return Row(label, $"{dates}penalty recorded without a currency", null, []);
+            return Row(label, "penalty recorded without a currency", null, [], arrive, depart);
         }
 
         var tags = new List<object>
@@ -178,9 +186,11 @@ public sealed class CancelPlanView(
         // the page-64 audit records U1/U2 as owed against ADR 0175 + NUM-Q2.
         return Row(
             label,
-            dates,
+            string.Empty,
             $"penalty {money.Currency} {Major(money.MinorUnits):N2}",
-            [.. tags]);
+            [.. tags],
+            arrive,
+            depart);
     }
 
     /// <summary>
@@ -232,29 +242,54 @@ public sealed class CancelPlanView(
     }
 
     /// <summary>A label–value row of the dialog.</summary>
-    private static object Row(string label, string value, string? strong, object[] tags)
-        => strong is null
-            ? new { label, value, tags }
-            : (object)new { label, value, strong, tags };
-
-    /// <summary>What happens to the rooms.</summary>
-    private static string Afterwards(IReadOnlyList<BookingStayRow> stays)
-    {
-        if (stays.Count == 0)
+    /// <summary>One row of the plan — and the days it is about, where it has them.</summary>
+    /// <remarks>
+    /// <c>arrive</c> and <c>depart</c> are omitted rather than sent as nulls,
+    /// so a row that is not about a span carries no field for one. The screen
+    /// draws the span before the value, which is where the server used to put
+    /// it as text.
+    /// </remarks>
+    private static object Row(
+        string label,
+        string value,
+        string? strong,
+        object[] tags,
+        string? arrive = null,
+        string? depart = null)
+        => (strong, arrive) switch
         {
-            return "nothing returns to inventory — no stay on this booking can be cancelled";
-        }
+            (null, null) => (object)new { label, value, tags },
+            (null, not null) => new { label, value, tags, arrive, depart },
+            (not null, null) => new { label, value, strong, tags },
+            _ => new { label, value, strong, tags, arrive, depart },
+        };
 
-        var from = stays.Min(stay => stay.Arrival);
-        var to = stays.Max(stay => stay.Departure);
-
-        var rooms = stays.Count == 1 ? "the room returns" : "both rooms return";
-        var many = stays.Count > 2 ? $"all {stays.Count} rooms return" : rooms;
-
-        return from is { } start && to is { } end
-            ? $"{many} to inventory for {start.Day} – {end:d MMMM}"
-            : $"{many} to inventory";
-    }
+    /// <summary>What happens to the rooms — the count and the span, not the sentence.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>ADR 0175.</b> This wrote <i>both rooms return to inventory for
+    /// 3 – 7 September</i>: a spelled quantity (<i>the room</i> · <i>both
+    /// rooms</i> · <i>all 4 rooms</i>), an English clause order, and a
+    /// compressed range whose month sits at the second end because that is what
+    /// `en-GB` does. The screen says it now, from <c>rooms</c> and the two days.
+    /// </para>
+    /// <para>
+    /// <b>The rooms are the plan's own <c>stays</c>, already on the payload</b>
+    /// — one stay is one room here — so this row carries no second count that
+    /// could disagree with it. The empty case needs no token either: a plan
+    /// with no cancellable stay is <c>stays: 0</c>, and the screen says
+    /// <i>nothing returns to inventory</i> from that rather than from a word
+    /// this view invents for it.
+    /// </para>
+    /// </remarks>
+    private static object Afterwards(IReadOnlyList<BookingStayRow> stays)
+        => Row(
+            "Afterwards",
+            string.Empty,
+            null,
+            [],
+            stays.Count == 0 ? null : Iso(stays.Min(stay => stay.Arrival)),
+            stays.Count == 0 ? null : Iso(stays.Max(stay => stay.Departure)));
 
     /// <summary>
     /// The sentence that must not be omitted — CONN-Q5, ADR 0128 §4.
@@ -333,14 +368,8 @@ public sealed class CancelPlanView(
         return types.ToDictionary(type => type.Id.ToString(), type => type.Name);
     }
 
-    /// <summary>Small counts, spelled the way the design spells them.</summary>
-    private static string Spell(int count)
-        => count switch
-        {
-            1 => "one",
-            2 => "two",
-            3 => "three",
-            4 => "four",
-            _ => count.ToString(),
-        };
+    // `Spell` — small counts written as English words, the way the design
+    // spells them — went to the screen with the sentences that used it
+    // (ADR 0175, 2026-09-20). It is not a formatting helper to be reinstated
+    // here: which numbers a language spells, and how, is the reader's.
 }

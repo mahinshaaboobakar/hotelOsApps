@@ -148,6 +148,7 @@ public sealed class BookingReadService(
             booking.Id,
             stays.FirstOrDefault(stay => !stay.Unnamed)?.Guest,
             Of(booking.Refs, "booking"),
+            Of(booking.Refs, "confirmation"),
             booking.ExpectedStayCount,
             DateOf(booking.Stays.Min(stay => stay.Arrival), zone),
             DateOf(booking.Stays.Max(stay => stay.Departure), zone),

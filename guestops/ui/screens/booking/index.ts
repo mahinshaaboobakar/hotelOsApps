@@ -12,7 +12,7 @@
  * heading that repeats a section name the bar already carries.
  */
 
-import type { HostApi } from "@hotelos/sdk";
+import type { HostApi, PropertyEnvironment } from "@hotelos/sdk";
 
 import { pager } from "../../chrome/pager";
 
@@ -27,6 +27,8 @@ import {
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { mark, failed } from "../../chrome/marks";
+import { span } from "../../chrome/when";
+import { capital, many } from "../../chrome/words";
 import { card } from "../../chrome/panel";
 import { cancel } from "./cancel";
 import { table } from "./table";
@@ -81,7 +83,7 @@ export async function booking(
   const heading = el("div");
   const subtitle = el("div", "hsub");
 
-  subtitle.append(document.createTextNode(record.summary));
+  subtitle.append(document.createTextNode(summary(record.summary, host.property)));
 
   if (record.managedBy !== null) {
     subtitle.append(mark({ mark: "pms", text: record.managedBy }));
@@ -106,7 +108,7 @@ export async function booking(
     // booking unless something says otherwise first.
     record.incomplete === null ? null : says(record.incomplete),
 
-    table(record.stays),
+    table(record.stays, host.property),
     pager(record.total, page, PAGE, record.stays.length, turn, host.property),
 
     // The same fact under the table, answering the other question: not *what
@@ -154,6 +156,7 @@ export async function booking(
     plan.value,
     close,
     (reason: string) => confirm(host, id, reason, done, into),
+    host.property,
   ));
 }
 
@@ -274,4 +277,29 @@ export function notCancelled(why: string, unchanged: boolean): HTMLElement {
     el("span", "why", why),
   );
   return banner;
+}
+
+/**
+ * `84119377 · Two stays · 03 Sept → 07 Sept` — the booking's own line, said here.
+ *
+ * The service sent this sentence finished until 2026-09-20, and every part of
+ * it was English or the server's locale: the spelled count, the plural, the
+ * month's abbreviation and the order of day and month (ADR 0175). A booking
+ * with no arrival recorded is the count alone — never a count beside a dash,
+ * which would read as a span nobody has.
+ */
+export function summary(
+  parts: BookingDetail["summary"],
+  property: PropertyEnvironment,
+): string {
+  const stays = capital(many(parts.stays, "stay", "stays"));
+
+  const line = parts.arrive === null
+    ? stays
+    : `${stays} · ${span(parts.arrive, parts.depart, property)}`;
+
+  // The confirmation number in front — the owner's ruling on frame 9, option
+  // A2 (2026-09-20). Absent on a booking created here, which has no source to
+  // have given the guest one, and the line then starts with the count.
+  return parts.confirmation === null ? line : `${parts.confirmation} · ${line}`;
 }

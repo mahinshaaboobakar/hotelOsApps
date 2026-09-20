@@ -2,7 +2,10 @@
  * The bookings list — a booking per row, and its stays as a count.
  */
 
+import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
+
 import type { BookingRow } from "../../book";
+import { span } from "../../chrome/when";
 import { el, fill, opener } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
@@ -20,12 +23,14 @@ const COLUMNS = ["Guest", "Booking", "Rooms", "Dates", "Status", ""] as const;
  * @param total how many the SEARCH matched, which is not how many this page holds
  * @param open what to do when a booking is chosen
  * @param selected the booking a dialog is currently about, if any
+ * @param property the locale and zone every date and count is drawn in
  * @returns the table
  */
 export function table(
   rows: readonly BookingRow[],
   total: number,
   open: (row: BookingRow) => void,
+  property: PropertyEnvironment,
   selected?: string,
 ): HTMLElement {
   const element = el("div", "tbl");
@@ -48,7 +53,7 @@ export function table(
   }
 
   for (const row of rows) {
-    element.append(line(row, open, selected));
+    element.append(line(row, open, property, selected));
   }
 
   return element;
@@ -57,6 +62,7 @@ export function table(
 function line(
   row: BookingRow,
   open: (row: BookingRow) => void,
+  property: PropertyEnvironment,
   selected?: string,
 ): HTMLElement {
   const element = el("div", `tr list act${row.id === selected ? " sel" : ""}`);
@@ -93,12 +99,28 @@ function line(
   element.append(
     name,
     booking,
-    el("div", undefined, row.rooms),
-    el("div", undefined, row.dates),
+    el("div", undefined, rooms(row, property)),
+    el("div", undefined, span(row.arrive, row.depart, property)),
     status,
     chips,
   );
 
   element.addEventListener("click", () => open(row));
   return element;
+}
+
+/**
+ * `1`, or `1 of 3 known` when the source claimed more than it has sent.
+ *
+ * The claim is the SOURCE's, which is why the phrase appears only when there is
+ * one: a booking this desk created has no expected count, and `1 of 1 known`
+ * over it would attribute a claim to nobody. The service composed this sentence
+ * until 2026-09-20, digits and all (ADR 0175).
+ */
+function rooms(row: BookingRow, property: PropertyEnvironment): string {
+  const held = formatNumber(row.rooms, property);
+
+  return row.claimed === null
+    ? held
+    : `${held} of ${formatNumber(row.claimed, property)} known`;
 }

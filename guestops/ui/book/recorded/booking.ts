@@ -32,21 +32,21 @@ export const recordedBookings: Bookings = {
       reference: "BK-4471", createdHere: false, confirmation: "84119377",
       // The group said out loud. Three rooms claimed, one sent — and the two
       // unsent stays are not rows here or anywhere (GUEST-Q2, frame 9).
-      rooms: "1 of 3 known", dates: "31 Aug → 2 Sep",
+      rooms: 1, claimed: 3, arrive: "2026-08-31", depart: "2026-09-02",
       status: "In house", statusTone: "ok",
       chips: [{ mark: "pms", text: "PMS" }, { mark: "disagrees", text: "disagrees" }],
     },
     {
       id: "b2", guest: "Meera Krishnan", contact: null, unnamed: false,
       reference: "BK-4482", createdHere: false, confirmation: null,
-      rooms: "1", dates: "31 Aug → 1 Sep",
+      rooms: 1, claimed: null, arrive: "2026-08-31", depart: "2026-09-01",
       status: "In house", statusTone: "ok",
       chips: [{ mark: "pms", text: "PMS" }, { mark: "override", text: "override" }],
     },
     {
       id: "b3", guest: "Joseph Mathew", contact: null, unnamed: false,
       reference: "created here", createdHere: true, confirmation: null,
-      rooms: "1", dates: "31 Aug → 1 Sep",
+      rooms: 1, claimed: null, arrive: "2026-08-31", depart: "2026-09-01",
       status: "In house", statusTone: "ok",
       chips: [
         { mark: "walkin", text: "walk-in" },
@@ -56,14 +56,14 @@ export const recordedBookings: Bookings = {
     {
       id: "b4", guest: "Anand Varma", contact: null, unnamed: false,
       reference: "BK-4455", createdHere: false, confirmation: null,
-      rooms: "1", dates: "30 Aug → 2 Sep",
+      rooms: 1, claimed: null, arrive: "2026-08-30", depart: "2026-09-02",
       status: "In house", statusTone: "ok",
       chips: [{ mark: "disagrees", text: "PMS says cancelled" }],
     },
     {
       id: "b5", guest: "Fatima Sheikh", contact: null, unnamed: false,
       reference: "BK-4506", createdHere: false, confirmation: null,
-      rooms: "2", dates: "3 Sep → 7 Sep",
+      rooms: 2, claimed: null, arrive: "2026-09-03", depart: "2026-09-07",
       status: "Booked", statusTone: "neutral",
       chips: [
         { mark: "pms", text: "PMS" },
@@ -73,7 +73,7 @@ export const recordedBookings: Bookings = {
     {
       id: "b6", guest: "Aisha Rahman", contact: null, unnamed: false,
       reference: "BK-4511", createdHere: false, confirmation: null,
-      rooms: "1", dates: "24 Dec → 27 Dec",
+      rooms: 1, claimed: null, arrive: "2026-12-24", depart: "2026-12-27",
       // A first-class state, shown as one — GUEST-Q9. It holds no room, so
       // counting it against inventory would make a full hotel look oversold.
       status: "Waitlisted", statusTone: "warn",
@@ -82,21 +82,21 @@ export const recordedBookings: Bookings = {
     {
       id: "b7", guest: "Vikram Nair", contact: null, unnamed: false,
       reference: "BK-4390", createdHere: false, confirmation: null,
-      rooms: "1", dates: "24 Aug → 27 Aug",
+      rooms: 1, claimed: null, arrive: "2026-08-24", depart: "2026-08-27",
       status: "Departed", statusTone: "neutral",
       chips: [{ mark: "pms", text: "PMS" }],
     },
     {
       id: "b8", guest: "Priya Ramesh", contact: null, unnamed: false,
       reference: "BK-4372", createdHere: false, confirmation: null,
-      rooms: "1", dates: "22 Aug → 24 Aug",
+      rooms: 1, claimed: null, arrive: "2026-08-22", depart: "2026-08-24",
       status: "Cancelled", statusTone: "bad",
       chips: [{ mark: "pms", text: "PMS" }, { mark: "note", text: "penalty applied" }],
     },
     {
       id: "b9", guest: "Thomas George", contact: null, unnamed: false,
       reference: "BK-4361", createdHere: false, confirmation: null,
-      rooms: "1", dates: "19 Aug → 20 Aug",
+      rooms: 1, claimed: null, arrive: "2026-08-19", depart: "2026-08-20",
       status: "No-show", statusTone: "bad",
       chips: [{ mark: "pms", text: "PMS" }],
     },
@@ -109,7 +109,7 @@ export const recordedBooking: BookingDetail = {
   id: "b5",
   guest: "Fatima Sheikh",
   reference: "BK-4506",
-  summary: "Two stays · 3 Sep → 7 Sep",
+  summary: { confirmation: null, stays: 2, arrive: "2026-09-03", depart: "2026-09-07" },
   managedBy: "The PMS manages this booking",
   incomplete: null,
   incompleteDetail: null,
@@ -119,12 +119,12 @@ export const recordedBooking: BookingDetail = {
   stays: [
     {
       id: "s1", guest: "Fatima Sheikh", unnamed: false, stayId: "01J9M…22B1",
-      roomType: "Executive Suite", room: null, dates: "3 Sep → 7 Sep",
+      roomType: "Executive Suite", room: null, arrive: "2026-09-03", depart: "2026-09-07",
       status: "Booked", statusTone: "neutral", chips: [],
     },
     {
       id: "s2", guest: "Not yet named", unnamed: true, stayId: "01J9M…22B2",
-      roomType: "Deluxe King", room: null, dates: "3 Sep → 7 Sep",
+      roomType: "Deluxe King", room: null, arrive: "2026-09-03", depart: "2026-09-07",
       status: "Booked", statusTone: "neutral",
       chips: [{ mark: "missing", text: "party unnamed" }],
     },
@@ -140,21 +140,23 @@ export const recordedBooking: BookingDetail = {
  * (CONN-Q5, ADR 0128 §4).
  */
 export const recordedCancelPlan: CancelPlan = {
-  subject: "BK-4506 · Fatima Sheikh · two stays, 3 – 7 September",
+  subject: {
+    reference: "BK-4506",
+    guest: "Fatima Sheikh",
+    arrive: "2026-09-03",
+    depart: "2026-09-07",
+  },
   stays: 2,
-
-  consequence:
-    "This cancels two stays, one at a time. A booking is a group and every "
-    + "operation happens to a stay — so this records two cancellations, and "
-    + "either can be reinstated separately afterwards.",
 
   rows: [
     {
-      label: "Executive Suite", value: "3 – 7 Sep · ", strong: "penalty ₹ 12 000.00",
+      label: "Executive Suite", value: "", strong: "penalty ₹ 12 000.00",
+      arrive: "2026-09-03", depart: "2026-09-07",
       tags: [{ kind: "lock", tone: "neutral", text: "GROSS · 1 NIGHT" }],
     },
     {
-      label: "Deluxe King", value: "3 – 7 Sep · ", strong: "penalty ₹ 8 400.00",
+      label: "Deluxe King", value: "", strong: "penalty ₹ 8 400.00",
+      arrive: "2026-09-03", depart: "2026-09-07",
       tags: [{ kind: "lock", tone: "neutral", text: "GROSS · 1 NIGHT" }],
     },
     {
@@ -164,7 +166,9 @@ export const recordedCancelPlan: CancelPlan = {
     },
     {
       label: "Afterwards",
-      value: "both rooms return to inventory for 3 – 7 September",
+      value: "",
+      arrive: "2026-09-03",
+      depart: "2026-09-07",
       tags: [],
     },
   ],
@@ -199,7 +203,11 @@ export const recordedGroup: BookingDetail = {
   id: "b1",
   guest: "Rajesh Pillai",
   reference: "BK-4471",
-  summary: "Group 84119377 · from the PMS · booked 28 Aug",
+  // The owner's A2 (2026-09-20): the heading carries the confirmation
+  // number, then the count and the days. What A3 would have added — the date
+  // the source booked it, and the connected system's name — is recorded in the
+  // ledger as measured and not built.
+  summary: { confirmation: "84119377", stays: 1, arrive: "2026-08-31", depart: "2026-09-02" },
   managedBy: null,
 
   incomplete:
@@ -246,7 +254,7 @@ export const recordedGroup: BookingDetail = {
   stays: [
     {
       id: "g1", guest: "Rajesh Pillai", unnamed: false, stayId: "01J9K…7F3A",
-      roomType: "Deluxe King", room: "214", dates: "31 Aug → 4 Sep",
+      roomType: "Deluxe King", room: "214", arrive: "2026-08-31", depart: "2026-09-04",
       status: "In house", statusTone: "ok",
       chips: [
         { mark: "override", text: "override" },

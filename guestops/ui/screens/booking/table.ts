@@ -2,7 +2,10 @@
  * The stays inside one booking — frames 8 and 9.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
 import type { BookingStay } from "../../book";
+import { span } from "../../chrome/when";
 import { el, fill } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
@@ -27,11 +30,13 @@ const COLUMNS = ["Guest", "Stay", "Room type", "Room", "Dates", "Status", ""] as
  * rather than two stays nobody made.
  *
  * @param stays the stays this booking holds
+ * @param property the locale and zone the spans are drawn in
  * @param selected which stay a dialog is about, if any
  * @returns the table
  */
 export function table(
   stays: readonly BookingStay[],
+  property: PropertyEnvironment,
   selected?: string,
 ): HTMLElement {
   const element = el("div", "tbl");
@@ -44,13 +49,17 @@ export function table(
   element.append(head);
 
   for (const stay of stays) {
-    element.append(line(stay, selected));
+    element.append(line(stay, property, selected));
   }
 
   return element;
 }
 
-function line(stay: BookingStay, selected?: string): HTMLElement {
+function line(
+  stay: BookingStay,
+  property: PropertyEnvironment,
+  selected?: string,
+): HTMLElement {
   const element = el("div", `tr list stays${stay.id === selected ? " sel" : ""}`);
 
   const name = el("div", "nm");
@@ -72,7 +81,7 @@ function line(stay: BookingStay, selected?: string): HTMLElement {
     // as a room called "—".
     el("div", undefined, stay.room ?? ""),
 
-    el("div", undefined, stay.dates),
+    el("div", undefined, span(stay.arrive, stay.depart, property)),
     status,
     chips,
   );

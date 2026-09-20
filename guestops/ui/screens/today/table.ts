@@ -23,7 +23,7 @@
 import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import type { DayRow } from "../../book/model";
-import { day } from "../../chrome/when";
+import { span } from "../../chrome/when";
 import { el, fill, opener, unavailable } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
@@ -106,7 +106,7 @@ function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnviro
     el("div", undefined, row.booking),
     el("div", undefined, row.roomType),
     room,
-    el("div", undefined, nights(row, property)),
+    el("div", undefined, span(row.arrive, row.depart, property)),
     chips,
   );
 
@@ -114,21 +114,3 @@ function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnviro
   return element;
 }
 
-/**
- * A stay's nights, in the property's form: `03 Sept → 07 Sept`, or the day-use
- * form when the stay arrives and leaves on one day.
- *
- * Composed here, from the two ISO days the service sends — the order and the
- * month's abbreviation are the property's locale's, never the server's. An
- * unrecorded arrival is the dash, never a guessed date.
- */
-function nights(row: DayRow, property: PropertyEnvironment): string {
-  if (row.arrive === null) return day(null, property, "day-month");
-
-  const arrive = day(row.arrive, property, "day-month");
-  if (row.depart === null) return arrive;
-
-  return row.depart === row.arrive
-    ? `${arrive} · day use`
-    : `${arrive} → ${day(row.depart, property, "day-month")}`;
-}

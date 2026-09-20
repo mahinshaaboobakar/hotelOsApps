@@ -2,7 +2,11 @@
  * Cancelling a booking — the dialog. Gold frame 8.
  */
 
+import type { PropertyEnvironment } from "@hotelos/sdk";
+
 import type { CancelPlan } from "../../book";
+import { span } from "../../chrome/when";
+import { many, spell } from "../../chrome/words";
 import { el, fill } from "../../chrome/element";
 import { field } from "../../chrome/field";
 import { dialog } from "../../chrome/overlay";
@@ -34,6 +38,7 @@ export function cancel(
   plan: CancelPlan,
   close: () => void,
   confirm: (reason: string) => void,
+  property: PropertyEnvironment,
 ): HTMLElement {
   // The reason showing, which is the one that would be recorded. Null when the
   // property has configured none — a real state, because nothing in GuestOps's
@@ -41,19 +46,32 @@ export function cancel(
   // inventing a vocabulary (see `CancelPlanView`).
   const reason = plan.reasons[0] ?? null;
 
+  // `This cancels two stays, one at a time.` — the lead bold, the rest after
+  // it. The service sent the finished sentence until 2026-09-20 and the screen
+  // split it back apart on ". " to bold the first half; now it is composed in
+  // the two pieces it is drawn in, and nothing has to survive a round trip
+  // through prose (ADR 0175).
   const consequence = el("div", "note");
-  const [lead, ...rest] = plan.consequence.split(". ");
 
   consequence.append(
-    el("b", undefined, `${lead ?? ""}.`),
-    document.createTextNode(` ${rest.join(". ")}`),
+    el("b", undefined, `This cancels ${many(plan.stays, "stay", "stays")}.`),
+    document.createTextNode(plan.stays === 1 ? "" : " One at a time."),
   );
 
   const rows = plan.rows.map((row) => {
     const element = el("div", "fr");
     const value = el("div", "v");
 
-    value.append(document.createTextNode(row.value));
+    // The span the row is about, where it is about one, ahead of the value —
+    // which is where the service used to put it as text. `Afterwards` is the
+    // row whose whole value is a sentence about the rooms, so it is said here.
+    const dates = row.arrive === undefined || row.arrive === null
+      ? null
+      : span(row.arrive, row.depart ?? null, property);
+
+    value.append(document.createTextNode(
+      row.label === "Afterwards" ? afterwards(plan.stays, dates) : joined(dates, row.value),
+    ));
 
     if (row.strong !== undefined) {
       value.append(el("b", undefined, row.strong));
@@ -66,7 +84,7 @@ export function cancel(
 
   return dialog({
     title: "Cancel this booking?",
-    subtitle: plan.subject,
+    subtitle: subject(plan, property),
 
     body: [
       consequence,
@@ -132,4 +150,51 @@ function refusal(text: string): HTMLElement {
 
   banner.append(body);
   return banner;
+}
+
+/** `3 Sep → 7 Sep · no penalty agreed`, or either half alone. */
+function joined(dates: string | null, value: string): string {
+  if (dates === null) return value;
+  return value === "" ? dates : `${dates} · ${value}`;
+}
+
+/**
+ * What happens to the rooms, once the stays are cancelled.
+ *
+ * **A plan with nothing to cancel says so, and says why** — not *0 rooms
+ * return*, which is arithmetic where the screen owes a reason. The service
+ * wrote this whole sentence until 2026-09-20, including *both* for two rooms
+ * and a date range compressed the way `en-GB` compresses one (ADR 0175).
+ */
+function afterwards(stays: number, dates: string | null): string {
+  if (stays === 0) {
+    return "nothing returns to inventory — no stay on this booking can be cancelled";
+  }
+
+  const rooms = stays === 1 ? "the room returns" : stays === 2 ? "both rooms return" : `all ${spell(stays)} rooms return`;
+
+  return dates === null ? `${rooms} to inventory` : `${rooms} to inventory for ${dates}`;
+}
+
+/**
+ * `BK-4506 · Fatima Sheikh · two stays, 3 – 7 September`.
+ *
+ * Reference and guest are the booking's own and may each be absent; the count
+ * is the plan's, and the span is drawn in the property's locale. The count is
+ * the CANCELLABLE stays rather than every stay on the booking, which is why it
+ * comes from the plan and is not counted off the rows.
+ */
+function subject(plan: CancelPlan, property: PropertyEnvironment): string {
+  const parts: string[] = [];
+
+  if (plan.subject.reference !== null) parts.push(plan.subject.reference);
+  if (plan.subject.guest !== null) parts.push(plan.subject.guest);
+
+  const stays = many(plan.stays, "stay", "stays");
+
+  parts.push(plan.subject.arrive === null
+    ? stays
+    : `${stays}, ${span(plan.subject.arrive, plan.subject.depart, property, "day-month-year")}`);
+
+  return parts.join(" · ");
 }
