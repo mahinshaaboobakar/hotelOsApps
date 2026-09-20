@@ -161,7 +161,7 @@ function ladderStep(): HTMLElement {
     box.append(el("h3", undefined, title));
     for (const [role, trigger] of rungs) box.append(fill(el("div", "wrow"), el("span", undefined, role), el("span", "mono", trigger)));
     box.append(fill(el("div", "row"), fill(el("span", managerAtRisk ? "tog on" : "tog"), el("i")), el("span", "mono", "manager also accountable from at risk")));
-    box.append(fill(el("div", "row"), control("btn sm", "＋ step"), el("span", "mono", "drag to reorder")));
+    box.append(fill(el("div", "row"), off("btn sm", "＋ step", "adding a step isn't available here yet"), el("span", "mono", "drag to reorder")));
     grid.append(box);
   }
   // **Allowed inline by §9 (APPS-Q53), not yet a composer.** Page 64 §9

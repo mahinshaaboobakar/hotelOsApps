@@ -22,9 +22,24 @@ import { host, open, SCREENS, settle } from "./walk";
  * **Red before its green**: at `eab8dd07`, nine buttons with no handler; with
  * the Catalogue's `() => {}` tabs restored in a detached worktree, both tabs
  * (the handler-only version passed them).
+ *
+ * **How deep, stated so a later reader is not misled by a green run.** The walk
+ * itself goes two presses deep: every control on a screen, then every control
+ * inside whatever a press opened. Deeper places are walked only when named in
+ * `PLACES` — the new-policy flow's step 3 is, because a hand probe of that
+ * unwalked place on 2026-09-20 found three inert "＋ step" buttons, drawn off in
+ * the same change. **Anything three deep and unnamed is still unwalked**, in
+ * Jobs and in Room Care alike (KK, same day), so a green run here is not a claim
+ * about those.
  */
 
-const PLACES = [...SCREENS, { name: "Raise", open: ["＋ Raise a job"] }];
+const PLACES = [
+  ...SCREENS,
+  { name: "Raise", open: ["＋ Raise a job"] },
+  // Three deep, and walked by name because the walk itself stops at two: this is
+  // where the probe of 2026-09-20 found three inert "＋ step" buttons.
+  { name: "Settings · New policy · The ladder", open: ["Settings", "All policies", "＋ New policy", "3 · The ladder"] },
+];
 
 interface Watched { root: HTMLElement; calls: () => number }
 
