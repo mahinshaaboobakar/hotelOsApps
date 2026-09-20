@@ -62,6 +62,16 @@ describe("developer content", () => {
     expect(cards.flatMap((card) => read(card))).toEqual([]);
   });
 
+  // The two patterns above are Room Care's own, and both are the shape that fails silently: a lost `\b` leaves a
+  // regex that matches nothing and a walk that passes everything (this file's own code check lost its boundaries
+  // twice while being written, and HH hit the same in Jobs' guards, 2026-09-20). Planted through `read`, so the
+  // reading path is proved too, not only the patterns.
+  it("finds a backend's code and an event name in what a screen renders", () => {
+    const rendered = document.createElement("div");
+    rendered.innerHTML = '<p>state <b>IN_PROGRESS</b></p><p>room CLEAN, announced (room.cleaned)</p><img src="gauge.jpg" alt="gauge.jpg">';
+    expect(read(rendered)).toEqual(["a backend's code: IN_PROGRESS", "an event or capability name: room.cleaned"]);
+  });
+
   it("finds each shape it names — a positive control, so a clean walk is not a blind one", () => {
     const planted = "WF-Q18 · ADR 0044 · design §6 · (S5 c4) · (row 7) · Chapter 21 · roomcare_manager · a correlation id · Master Data · 0192f100-0000-7000-8000-000000000003 · 2026-09-19T08:30";
     expect(developerContent(planted).map((hit) => hit.split(": ")[0])).toEqual([
