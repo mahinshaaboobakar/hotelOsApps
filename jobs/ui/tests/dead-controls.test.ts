@@ -32,6 +32,11 @@ import { host, open, SCREENS, settle } from "./walk";
  * tabs: nothing inert. (The first probe reported 100 pairs; it re-armed on a
  * fresh mount and went on measuring the old one. Each one it named acts when
  * measured properly, so the list was the probe's fault, not the build's.)
+ * KK's other blindness — a probe listing its targets BEFORE arming misses a
+ * control drawn off until armed — cannot apply here twice over: the walk lists
+ * what each state holds when it walks that state, and no Jobs control toggles
+ * `disabled` at runtime (two static disables, `element.ts` `off()` and the
+ * board's My-departments chip; nothing arms on typing).
  *
  * **How deep, stated so a later reader is not misled by a green run.** The walk
  * itself goes two presses deep: every control on a screen, then every control
