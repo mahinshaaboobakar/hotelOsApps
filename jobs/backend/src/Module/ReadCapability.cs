@@ -126,6 +126,15 @@ public static class ReadCapability
     /// can name one because it is one department; Jobs spans them, and which a
     /// person is posted to is the Context change ADR 0203 is to make (CTX-Q9).
     /// </para>
+    /// <para>
+    /// <b>For a person whose only role is organization-wide, null is the ruled
+    /// answer, not a gap waiting to be filled</b> — <c>CTX-Q10</c> WITHDRAWN,
+    /// 2026-09-20 (ADR 0203, <c>463b8df7</c>): ADR 0116 §2 keeps the
+    /// organization administrator in VibeMind Cloud, so "no property-side
+    /// authority from which Context could truthfully resolve it". What Context
+    /// may expose later is property-local: property administrator, general
+    /// manager — and the jobs-manager grant this service already reads.
+    /// </para>
     /// </remarks>
     private static async Task<object?> MeAsync(
         IServiceProvider services, ModuleRequest request, CancellationToken cancellationToken)

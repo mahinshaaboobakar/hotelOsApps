@@ -49,7 +49,10 @@ export function head(
  *
  * Room Care's reading — the parts the service established, joined — with one
  * clause Room Care does not have: Jobs spans departments and has no posting to
- * read until ADR 0203, so the department is said to be **not known yet**, in
+ * read until ADR 0203. For an organisation administrator it stays that way:
+ * `CTX-Q10` was WITHDRAWN on 2026-09-20 (ADR 0203, `463b8df7`) because ADR 0116
+ * §2 keeps that role in the cloud, so **"not known yet" is the ruled answer for
+ * them, not a placeholder**. The department is said to be **not known yet**, in
  * words, rather than dropped (which would read as two clauses by design) or
  * filled with a stand-in (which would read as a fact). A name Master Data does
  * not hold — no staff record for the login, or a blank one — is said in the

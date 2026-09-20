@@ -70,8 +70,10 @@ describe("app surface checklist — automated lines, Jobs", () => {
   });
 
   it("N5 — the bar reads name · department · property, and says the department is not known yet", async () => {
-    // Page 64 §3. The name and property as Room Care reads them; the department
-    // is ADR 0203's, so the clause says it is not known yet — never a stand-in.
+    // Page 64 §3. The name and property as Room Care reads them. The department
+    // is ADR 0203's, and for a person whose only role is organization-wide this
+    // sentence is the RULED answer rather than a gap: CTX-Q10 withdrawn
+    // 2026-09-20 (463b8df7), because ADR 0116 §2 keeps that role in the cloud.
     const root = await mounted(host({ ...ANSWERS, me: { name: "Priya Nair", department: null, property: "Marina" } }));
     const who = root.querySelector(".head .who");
     expect(who?.textContent).toBe("Priya Nair · department not known yet · Marina");

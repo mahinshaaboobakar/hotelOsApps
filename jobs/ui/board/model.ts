@@ -106,7 +106,12 @@ export interface Note {
 export interface Operator {
   /** Master Data's display name for this login, as Room Care reads it; null when no staff row carries it. */
   name: string | null;
-  /** Always null until ADR 0203 gives Jobs a posting to read (CTX-Q9) — drawn as not established. */
+  /**
+   * The department Context establishes, or the role that stands in its place
+   * (a jobs manager's). Null until ADR 0203 gives Jobs a posting to read
+   * (CTX-Q9), and null by ruling for a person whose only role is
+   * organization-wide — `CTX-Q10` withdrawn, 2026-09-20 (`463b8df7`).
+   */
   department: string | null;
   /** The property's name, else its code. */
   property: string | null;
