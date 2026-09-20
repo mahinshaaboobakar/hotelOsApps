@@ -64,11 +64,30 @@ public class ZoneSourceGuardTests
     }
 
     [Fact]
-    public void The_guard_sees_both_shapes()
+    public void Every_shape_names_a_planted_line_and_leaves_an_innocent_one()
     {
-        // A positive control, so a clean run is not a blind one.
-        Assert.Matches(Shapes[0].Shape, "var day = DateOnly.FromDateTime(now.UtcDateTime);");
-        Assert.Matches(Shapes[2].Shape, "new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero)");
+        // A positive control for EACH shape, not for two of four (KK's finding,
+        // 2026-09-20: a pattern with no control is a pattern that can lose its
+        // \b and match nothing for the rest of its life — both of us shipped one).
+        var planted = new[]
+        {
+            "var day = DateOnly.FromDateTime(now.UtcDateTime);",
+            "var since = now.UtcDateTime.Date;",
+            "new DateTimeOffset(day.ToDateTime(TimeOnly.MinValue), TimeSpan.Zero)",
+            "$\"hold date {until:yyyy-MM-dd} passed\"",
+        };
+        Assert.Equal(Shapes.Length, planted.Length);
+        for (var i = 0; i < Shapes.Length; i++)
+        {
+            Assert.True(Shapes[i].Shape.IsMatch(planted[i]), $"{Shapes[i].What} did not name its own planted line");
+        }
+
+        // And an innocent line none of them may name: a stored instant, in UTC by contract.
+        const string innocent = "var now = clock.GetUtcNow();";
+        foreach (var (what, shape) in Shapes)
+        {
+            Assert.False(shape.IsMatch(innocent), $"{what} named a line that is correct as UTC");
+        }
     }
 
     private static string SourceRoot()

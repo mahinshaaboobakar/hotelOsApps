@@ -59,11 +59,35 @@ public class RefusalWordsGuardTests
     }
 
     [Fact]
-    public void The_guard_reads_a_thrown_message()
+    public void The_guard_reads_a_thrown_message_and_every_shape_names_its_own()
     {
         var sample = "throw new InvalidRequestException(\"location_id is not a place at this property\");";
         Assert.Equal("location_id is not a place at this property", Thrown.Match(sample).Groups[1].Value);
-        Assert.Matches(Shapes[0].Shape, "location_id");
+
+        // One planted example per shape (KK, 2026-09-20): five of these six had no
+        // control, and a pattern with no control can lose its boundaries and match
+        // nothing without a single test going red.
+        var planted = new[]
+        {
+            "location_id is not a place at this property",
+            "a step cannot have steps — one level only (S1 D2)",
+            "the property has no code in Master Data",
+            "job MRN-ENG-1 is IN_PROGRESS and cannot be held",
+            "job.read has no method",
+            "{request.Method} is not a method",
+        };
+        Assert.Equal(Shapes.Length, planted.Length);
+        for (var i = 0; i < Shapes.Length; i++)
+        {
+            Assert.True(Shapes[i].Shape.IsMatch(planted[i]), $"{Shapes[i].What} did not name its own planted message");
+        }
+
+        // A sentence every shape must leave alone — plain words, a job number, a hole through Said.
+        const string innocent = "job MRN-ENG-142 is {Said.Status(job.JobStatus)} and can't be held";
+        foreach (var (what, shape) in Shapes)
+        {
+            Assert.False(shape.IsMatch(innocent), $"{what} named a refusal that is already in plain words");
+        }
     }
 
     private static string SourceRoot()

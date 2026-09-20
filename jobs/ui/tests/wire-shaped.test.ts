@@ -114,6 +114,23 @@ function wire(root: HTMLElement): string[] {
 }
 
 describe("the screens say what the backend sends in the property's words", () => {
+  it("each pattern names its own planted value, and leaves what a person reads alone", () => {
+    // A positive control per pattern (KK, 2026-09-20). Without one, a pattern
+    // that loses a word boundary — as two of Jobs' did while being written —
+    // matches nothing and every screen passes it.
+    const planted = ["Due 2026-09-02T11:10:00.0000000+00:00", "Scheduled for 2026-09-20", "by JOBS_MANAGER", "worked 1421s"];
+    expect(WIRE.length).toBe(planted.length);
+    WIRE.forEach(([what, pattern], i) => {
+      expect([...(planted[i] ?? "").matchAll(pattern)].length, `${what} did not name its own planted value`).toBeGreaterThan(0);
+    });
+
+    // What the screens draw instead: none of these may be named.
+    const said = "Due 02 Sept, 14:10 | Scheduled for 20 Sept | by Jobs manager | worked 00:23:41 | IN PROGRESS";
+    for (const [what, pattern] of WIRE) {
+      expect([...said.matchAll(pattern)].map((m) => m[0]), `${what} named the property's own words`).toEqual([]);
+    }
+  });
+
   for (const [name, steps] of [
     ["One job · Overview", ["job"]],
     ["One job · History", ["job", "History"]],

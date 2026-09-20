@@ -72,6 +72,19 @@ const read = (root: Element): string[] => {
 };
 
 describe("developer content", () => {
+  it("the local system-name patterns name a planted system and leave an app's name alone", () => {
+    // The shared list carries its own control; these two are Jobs' own and had
+    // none (KK, 2026-09-20). A pattern with no control can lose its \b and pass
+    // every screen for the rest of its life.
+    const planted = "read through Master Data, announced by the Kernel";
+    expect(SYSTEMS.flatMap((p) => [...planted.matchAll(p)].map((m) => m[0]))).toEqual(["Master Data", "Kernel"]);
+
+    // "Workforce" is an application staff use, and "Follow Workforce shifts"
+    // stays by the owner's ruling — no pattern here may name it.
+    const allowed = "Follow Workforce shifts · postings are set in Workforce";
+    expect(SYSTEMS.flatMap((p) => [...allowed.matchAll(p)].map((m) => m[0]))).toEqual([]);
+  });
+
   for (const screen of SCREENS) {
     it(`none on ${screen.name}, or on anything one press away`, async () => {
       const found = new Set<string>();
