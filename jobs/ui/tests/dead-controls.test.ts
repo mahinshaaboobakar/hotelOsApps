@@ -23,6 +23,16 @@ import { host, open, SCREENS, settle } from "./walk";
  * the Catalogue's `() => {}` tabs restored in a detached worktree, both tabs
  * (the handler-only version passed them).
  *
+ * **An armed control is walked, and that is by construction.** KK asked (Room
+ * Care, 2026-09-20) whether a control that only becomes live after another
+ * control in the same place is seen by a walk that always opens fresh. Here it
+ * is: whenever a press changes the screen, the walk presses every control in
+ * THAT state — the armed one — which is how "Revoke…" pressed twice was found.
+ * Probed by hand across Raise, Catalogue, both policy places and three job
+ * tabs: nothing inert. (The first probe reported 100 pairs; it re-armed on a
+ * fresh mount and went on measuring the old one. Each one it named acts when
+ * measured properly, so the list was the probe's fault, not the build's.)
+ *
  * **How deep, stated so a later reader is not misled by a green run.** The walk
  * itself goes two presses deep: every control on a screen, then every control
  * inside whatever a press opened. Deeper places are walked only when named in
