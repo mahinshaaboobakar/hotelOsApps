@@ -134,6 +134,23 @@ name: "Jobs"
 #     History, Live and holds printed raw ISO times, status tokens and "1421s"
 #     as the wire carried them; the harness hid it. Service hours follow the
 #     property's hour cycle, and no sentence carries a server-formatted date.
+#
+# **What 0.4.3 does NOT carry, recorded 2026-09-20 after it was cut and signed**
+# — so a walk of the installed build does not read the owner's newest rulings as
+# missing work. These lines are in this file and NOT in the signed 0.4.3
+# manifest, which cannot change without a new version.
+#
+# The owner ruled page 64g after the cut. Three items land in 0.4.4:
+#
+#   * **The failure card says the permission in plain words** (64g 2B), with the
+#     code name moving into *Copy these details*. It comes from the SDK's shared
+#     failure surface, which GG is changing; Jobs adopts it, and does not draw
+#     its own.
+#   * **The sixth state is drawn as a fault, with that action** (64g 1A) — the
+#     authorization-unavailable state of ADR 0192 / AUTHZ-Q38, ruled but not yet
+#     drawn when 0.4.3 was built.
+#   * **The print exception does not reach Jobs**: no Jobs surface prints, so
+#     there is nothing here to except. Recorded because the ruling is estate-wide.
 version: 0.4.3
 publisher: hotelos
 category: operations
