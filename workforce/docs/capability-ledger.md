@@ -9,8 +9,15 @@ refuses (with the reason shown) / not built / broken**.
 rendering of fixtures. They never showed whether a button does anything, and
 nothing here is done until it has been walked on the installed platform.
 
-Installed on the owner's platform: **0.3.3** (`sha256:2b6775…a6d0`, cut from
-`f18ce11`). Everything below describes the next cut, not 0.3.3.
+**The walk is on 0.3.4** — staged in the property's registry on 2026-09-19
+(`sha256:d9c46270…81a8`, cut from HotelOsApps `51d3cb6c` and HosPilotOS
+`55397fe2`), for the owner to install after the restart. 0.3.3
+(`sha256:2b6775…a6d0`) is what was installed before it, and this page has never
+described 0.3.3.
+
+**Two defects were fixed after that cut**, so they are marked in the table at
+the end and will not be in the walk: the rota's keyboard-unreachable cells, and
+half of the shift-colour mapping.
 
 ## How to read the Status column
 
@@ -34,11 +41,22 @@ pickers and Leave's two tabs. **What it cannot see:** a real button with no
 listener. That is held by each write's own test, and by this ledger, which
 names the operation behind every live control.
 
+`ui/tests/mouse-only.test.ts` is the same rule keyed on behaviour rather than
+on a class: while each screen draws, it records every click listener and the
+element it was given to, and each must be a control a keyboard reaches. It
+found the rota's cells, which the check above could not see.
+
+**Why its 42 reds are believable.** Its first version watched the wrong place,
+recorded nothing, and passed every screen — a clean run that had measured
+nothing at all. It caught itself, because it also checks that it saw at least
+twenty listeners before judging any of them. **A count a guard relies on needs
+its own guard**, or the guard's silence reads exactly like a pass.
+
 `ui/tests/developer-content.test.ts` walks the same surfaces for developer
 notes: register ids, ADRs, §, design-section and chapter references, code
 identifiers, and the platform systems by name. It reads the estate's shared
-list (`scripts/developer-content.ts`) plus Workforce's own system names, and a
-planted positive control proves it can find each one.
+list (`scripts/developer-content.ts`), and a planted positive control proves it
+can find each one.
 
 ## Rota → Team rota
 
@@ -176,11 +194,15 @@ Reads: `attendanceToday · comingUp · onLeave · pendingRequests · shiftBoard`
 
 | # | What | Where | Effect a person would see |
 |---|---|---|---|
-| D1 | **"Today" is the UTC day** outside the duty/rota/schedule reads fixed in `b5c5ffce` | e.g. `AttendanceView.cs:36-38`, `CapabilityService.cs:235`, `LeaveService.cs:71`, `PostingService.cs:265,402`, all five `Summaries/*` | between local midnight and 05:30 at an Indian property, Attendance and the widgets show yesterday. A negative-offset property is wrong in the evening instead |
+| D1 | **"Today" is the UTC day** outside the duty/rota/schedule reads fixed in `b5c5ffce`. **The day now comes from the platform's Context Service** — the property's operating day, ruled in ADR 0211, not a day Workforce works out for itself. **A day that cannot be read says so**: never a UTC day and never a calendar day standing in for one | 19 day-from-clock lines — e.g. `AttendanceView.cs:36-38`, `CapabilityService.cs:235`, `LeaveService.cs:71`, `PostingService.cs:265,402`, all five `Summaries/*` | between local midnight and 05:30 at an Indian property, Attendance and the widgets show yesterday. A negative-offset property is wrong in the evening instead |
+| D1b | **A shift's own hours are read as if they were UTC**: a 07:00 start is treated as 07:00 UTC | `ShiftBoundaryAnnouncer.cs:147`, `ShiftBoardSummary.cs:203` and the lines that follow them | at +05:30 a 07:00 shift is announced as started at 12:30 local, and the shift board's "now" and "next change" are 5½ hours out |
 | D2 | **Attendance's date is written by the server** in the server's own language | `AttendanceView.cs:67` (`ToString("dddd d MMMM")`) | a property whose language differs from the server's reads the date in the server's |
-| D3 | **Shift colour → tone mapped in three places** | `screens/shifts/index.ts:36`, `screens/policy/index.ts:36`, `Wording.cs:46` | a Rose shift reads neutral on one screen and red on another |
-| D4 | **Rota cells work with a mouse only** | `screens/rota/grid.ts:48` (a `div` with a click) | a keyboard cannot reach a cell to assign a shift |
+| D3 | **Shift colour → tone mapped in three places**. **Half fixed after the cut** (`6bc7e7c6`): the screens now draw the tone the service sends, and the service starts sending it in GG's next service round | `screens/shifts/index.ts:36`, `screens/policy/index.ts:36`, `Wording.cs:46` | a Rose shift reads neutral on one screen and red on another |
+| D4 | **Rota cells work with a mouse only**. **Fixed after the cut** (`2904639e`) | `screens/rota/grid.ts:48` (a `div` with a click) | a keyboard cannot reach a cell to assign a shift |
 | D5 | **A manager cannot approve or decline leave from any screen**; a person cannot withdraw a request | `screens/leave/approvals.ts:36` (rows with no action) | an approver meets the queue and has nothing to press |
+| D6 | **The leave read sends no id or version**, which approve, decline and withdraw all require | `LeaveView.cs` — `Queue` and `Request` | **whichever design is chosen for D5 cannot be built until this lands**, so it is done first |
+| D7 | **The service writes the attendance verdict as English** — `"Late 20 min"` — and the screen counts late people by reading that sentence back | `AttendanceView.cs:170`, `screens/attendance/index.ts:66` | a property in another language reads the server's English, and the count breaks the day the sentence changes |
+| D8 | **The service writes "412 assignments"**, unformatted, and "1 assignments" for one | `PolicyView.cs:63` | the number is not in the property's own number format, and the grammar is wrong for one |
 
 ## For the owner to decide (queued, not decided)
 
