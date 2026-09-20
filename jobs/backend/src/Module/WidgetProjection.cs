@@ -288,7 +288,7 @@ public sealed class WidgetProjection(JobsDbContext db, TimeProvider clock, IProp
             Math.Max(0, grouped.Count - Rows));
     }
 
-    /// <summary>The property's own midnight — the start of the day being counted (calendar day, pending WF-Q21).</summary>
+    /// <summary>The property's own midnight — the start of the day being counted; ADR 0211 makes this Context's operating day once its path is proved live.</summary>
     /// <remarks>
     /// It fell back to UTC midnight when the zone was unknown; the reference refuses
     /// by name instead, because a day in a zone nobody chose is a claim nobody made.

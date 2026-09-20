@@ -23,9 +23,15 @@ namespace HotelOS.Jobs.Application.Calendar;
 /// two such fallbacks.
 /// </para>
 /// <para>
-/// <b>"Today" is the calendar day, pending WF-Q21</b> — the planner is ruling
-/// whether an application's day is the calendar day or the hotel's operating
-/// day. Built to the calendar day, as directed.
+/// <b>The day this computes is OWED TO CONTEXT — ADR 0211, ruled 2026-09-20</b>,
+/// which closed WF-Q21 after this was built: "the day is the property's
+/// OPERATING day … the source of truth is the Context Service", and "a
+/// property-calendar day computed in each application" is what it rejects. The
+/// zone contract is separate and stands: an instant still renders in the
+/// property's timezone (ADR 0174), which is what <see cref="TimeOf"/> serves.
+/// ADR 0211 §1 requires the Context path to be proved live before any
+/// application deletes a local derivation, so this stays until that proof and
+/// then gives up <see cref="DayOf"/> and <see cref="TodayStartedAt"/>.
 /// </para>
 /// </remarks>
 public sealed class PropertyCalendar
@@ -47,7 +53,7 @@ public sealed class PropertyCalendar
             : throw new InvalidOperationException($"the property's time zone \"{id}\" is not one this server knows");
     }
 
-    /// <summary>The day at the property that this instant falls on — "today", for now (calendar day, pending WF-Q21).</summary>
+    /// <summary>The day at the property that this instant falls on — the calendar day, which ADR 0211 replaces with Context's operating day.</summary>
     public DateOnly DayOf(DateTimeOffset instant) =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(instant, _zone).DateTime);
 
