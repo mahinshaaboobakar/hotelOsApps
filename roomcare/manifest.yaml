@@ -61,6 +61,16 @@
 #     ends a clean with the platform event's name.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.
 #
+#   * **The failure cards are the shared surface's**, and page 64 §13's three
+#     owner rulings of 2026-09-20 land in the SDK, not here: the crossed
+#     shield that is not 64e's, the sentence "Authorization request could not
+#     be evaluated", and "Asked for" in plain words with the code name moved
+#     into Copy these details. Re-audited for this cut: the undecidable card is
+#     already drawn red, as §13 asks; the rest arrives with the SDK, and the
+#     card still names the capability until it does. A write refused because
+#     the model could not decide keeps its own sentence (AUTHZ-Q34/35a), which
+#     is a different surface from the read's card.
+#
 # Still true in 0.1.4, and said here so nobody reads the package as more than
 # it is: assigning rooms and changing a room's service are refused for
 # everyone until the platform can register an installed application's own
