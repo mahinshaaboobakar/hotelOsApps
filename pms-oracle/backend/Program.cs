@@ -18,9 +18,14 @@ using PmsOracle.Hosting;
 //
 // `CancellationToken.None` because stopping is the channel closing: the session
 // returns when the Runtime closes it, and no signal is guessed at.
+// The HttpClient the OHIP token attempt dials with. One for the process: it
+// pools connections, and a client per invocation is the socket-exhaustion
+// defect that looks like a slow PMS.
+using var http = new HttpClient();
+
 return await ConnectorEntry.RunAsync(
     ConnectorBootstrap.FromEnvironment(),
     OperatingSystem.IsWindows() ? new NamedPipeConnectorTransport() : null,
-    InvocationRefusal.HandleAsync,
+    new InvocationDispatch(http).HandleAsync,
     Console.Error,
     CancellationToken.None);

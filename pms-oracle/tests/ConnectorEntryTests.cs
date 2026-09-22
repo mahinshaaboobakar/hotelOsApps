@@ -69,8 +69,15 @@ public class ConnectorEntryTests
         Assert.NotEqual(ConnectorEntry.Served, ConnectorEntry.NoTransport);
     }
 
+    /// <summary>
+    /// A kind this connector does not serve is refused by name — and the
+    /// subject changed with the contract: this drove <c>"test"</c> until ADR
+    /// 0194's vocabulary landed and <see cref="InvocationDispatch"/> began
+    /// serving it, so asserting the old blanket refusal here would have pinned
+    /// a contract the package no longer has.
+    /// </summary>
     [Fact]
-    public async Task an_invocation_is_refused_by_name_rather_than_guessed_at()
+    public async Task an_unserved_kind_is_refused_by_name_rather_than_guessed_at()
     {
         var channel = new InMemoryChannel();
         var transport = new InMemoryTransport(channel);
@@ -79,7 +86,7 @@ public class ConnectorEntryTests
         var running = ConnectorEntry.RunAsync(
             bootstrap, transport, InvocationRefusal.HandleAsync, TextWriter.Null, default);
 
-        await channel.Inbound.Writer.WriteAsync(Request("test"));
+        await channel.Inbound.Writer.WriteAsync(Request("reconcile"));
 
         // Read the answer BEFORE closing: the session closes the channel ahead
         // of waiting for its handlers, so an answer racing the close is dropped
@@ -91,8 +98,11 @@ public class ConnectorEntryTests
         Assert.Equal(ConnectorEntry.Served, await running.WaitAsync(Patience));
 
         Assert.Equal(ConnectorFrameRole.Fault, answer.Role);
-        Assert.Equal("test", answer.Kind);
-        Assert.Contains("'test' was refused rather than guessed at", Encoding.UTF8.GetString(answer.Payload.Span), StringComparison.Ordinal);
+        Assert.Equal("reconcile", answer.Kind);
+        Assert.Contains(
+            "does not serve the invocation kind 'reconcile'",
+            Encoding.UTF8.GetString(answer.Payload.Span),
+            StringComparison.Ordinal);
         Assert.Same(bootstrap, transport.AttachedWith);
     }
 
