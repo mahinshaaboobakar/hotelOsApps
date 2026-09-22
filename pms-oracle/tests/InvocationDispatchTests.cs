@@ -99,18 +99,34 @@ public class InvocationDispatchTests
     }
 
     [Fact]
-    public async Task A_drain_is_understood_and_refused_with_both_missing_halves()
+    public async Task A_drain_acquires_a_token_and_answers_what_the_queue_held()
     {
         await using var hub = new Hub(HttpStatusCode.OK);
 
-        var fault = await hub.FaultAsync(
-            ConnectorProtocolKinds.Drain, new DrainInvocation().ToByteArray());
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Drain, Drain(Configured), DrainResult.Parser);
 
-        // Understood, not unrecognised — and the refusal names the transport
-        // and the settings reader separately, because they are different work.
-        Assert.Contains("understands 'drain'", fault);
-        Assert.Contains(nameof(IOhipQueue), fault);
-        Assert.Contains(nameof(PmsOracle.Normalisation.IntegrationSettings), fault);
+        // An empty queue is the ordinary answer, not a failure (ADR 0194) — and
+        // getting here at all means the credentials were requested inside the
+        // invocation and a token was acquired with them.
+        Assert.Empty(result.Payloads);
+        Assert.Equal(OhipCredentials.SecretNames, hub.Asked);
+    }
+
+    /// <summary>
+    /// A drain has nowhere to say "your configuration is incomplete":
+    /// DrainResult carries payloads only, so an empty reply would report a
+    /// healthy poll of a queue that was never asked.
+    /// </summary>
+    [Fact]
+    public async Task An_incomplete_configuration_faults_rather_than_draining_nothing()
+    {
+        await using var hub = new Hub(HttpStatusCode.OK, denies: OhipCredentials.PmsPasswordSecret);
+
+        var fault = await hub.FaultAsync(ConnectorProtocolKinds.Drain, Drain(Configured));
+
+        Assert.Contains(OhipCredentials.PmsPasswordSecret, fault, StringComparison.Ordinal);
+        Assert.Contains("nothing was lost", fault, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -125,6 +141,18 @@ public class InvocationDispatchTests
         Assert.Contains("'reconcile'", fault);
         Assert.Contains(ConnectorProtocolKinds.Test, fault);
         Assert.Contains(ConnectorProtocolKinds.Drain, fault);
+    }
+
+    private static ReadOnlyMemory<byte> Drain(IReadOnlyDictionary<string, string> settings)
+    {
+        var invocation = new DrainInvocation();
+
+        foreach (var (key, value) in settings)
+        {
+            invocation.Settings[key] = value;
+        }
+
+        return invocation.ToByteArray();
     }
 
     private static ReadOnlyMemory<byte> Test(IReadOnlyDictionary<string, string> settings)
@@ -279,6 +307,14 @@ public class InvocationDispatchTests
                 HttpRequestMessage request, CancellationToken cancellationToken)
             {
                 Sent++;
+
+                // The queue is a different endpoint from the token, and OHIP
+                // says "empty" with 204. A double that answered a token body
+                // here would be testing a shape the source never sends.
+                if (request.RequestUri!.AbsolutePath.EndsWith("businessEvents", StringComparison.Ordinal))
+                {
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
+                }
 
                 return status is { } answered
                     ? Task.FromResult(new HttpResponseMessage(answered)

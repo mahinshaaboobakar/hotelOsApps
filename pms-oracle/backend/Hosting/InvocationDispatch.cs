@@ -26,12 +26,13 @@ namespace PmsOracle.Hosting;
 /// reason that reads well.
 /// </para>
 /// <para>
-/// <b>Three answers, and they are three different facts.</b> A kind this
-/// connector serves is served; <c>drain</c> is understood and refused with what
-/// is missing (<see cref="QueueDrainInvocation"/>); anything else is
-/// unrecognised (<see cref="InvocationRefusal"/>). Collapsing the last two
-/// would tell an operator that this connector does not know what <c>drain</c>
-/// means.
+/// <b>Two kinds are served and the rest are refused by name.</b> <c>test</c>
+/// and <c>drain</c> both reach OHIP; anything else is unrecognised
+/// (<see cref="InvocationRefusal"/>), which is a different fact from an
+/// operation that failed. This paragraph read <i>"drain is understood and
+/// refused with what is missing"</i> until the queue transport landed — kept as
+/// the record, because the refusal it describes is what a reader would
+/// otherwise still expect to find.
 /// </para>
 /// <para>
 /// <b>Nothing here is exercised until a Connector Runtime exists.</b> This
@@ -59,7 +60,7 @@ public sealed class InvocationDispatch(HttpClient http)
                 ConnectionTestInvocation.ServeAsync(invocation, http, cancellationToken),
 
             ConnectorProtocolKinds.Drain =>
-                QueueDrainInvocation.ServeAsync(invocation, cancellationToken),
+                QueueDrainInvocation.ServeAsync(invocation, http, cancellationToken),
 
             // `credential.response` is the Hub answering a request this
             // connector made, and the session matches it to the invocation that

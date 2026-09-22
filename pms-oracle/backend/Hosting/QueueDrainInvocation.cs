@@ -1,68 +1,99 @@
+using Google.Protobuf;
 using HotelOS.Connector;
 using HotelOS.Contracts.Integration.V1;
-using PmsOracle.Adapters;
-using PmsOracle.Normalisation;
+using PmsOracle.Authentication;
+using PmsOracle.Integrations.Cloud;
 
 namespace PmsOracle.Hosting;
 
 /// <summary>
-/// Serving <c>drain</c>: take what OHIP's business-event queue is holding —
-/// ADR 0194. <b>Dispatched, and it refuses with what is missing.</b>
+/// Serving <c>drain</c>: take what OHIP's business-event queue is holding — ADR 0194.
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>Why this is a refusal and not an empty drain.</b> OHIP's queue hands a
-/// message over once, so a drain that answered zero payloads would record a
-/// successful pass that took nothing — a measurement nobody made, and one the
-/// Hub would count as a healthy poll. The fault names what is absent instead,
-/// which is the difference between "nothing was waiting" and "nothing could
-/// have been taken".
+/// <b>What this replaces.</b> Until the transport existed, this answered every
+/// drain with a fault naming two absences: no queue client, and no reader
+/// turning a settings map into <c>IntegrationSettings</c>. The first is now
+/// built (<see cref="OhipBusinessEventQueue"/>). The second is still true and
+/// is now known to be unfixable here — four of that type's seven fields are
+/// property facts the protocol deliberately does not carry (<c>CONN-Q49</c>).
+/// It turned out not to block a drain at all: <see cref="DrainedPayload"/>
+/// carries no property, because the Hub attributes payloads to the instance it
+/// dispatched to, so taking bytes and labelling their kind needs credentials
+/// and nothing else. The blocked reader belongs to <i>normalisation</i>, which
+/// is a different seam.
 /// </para>
 /// <para>
-/// <b>Two halves are missing, and they are different work.</b> The transport
-/// is <see cref="IOhipQueue"/> and <see cref="IOhipGuarantees"/>, which this
-/// package declares and does not implement — the only implementations anywhere
-/// are test doubles. The second is quieter: <see cref="IntegrationSettings"/>
-/// carries the property's clock, currency and tax basis, and <b>nothing reads
-/// it from a configuration map</b>; it is constructed in five tests and nowhere
-/// else. So even with a queue, a drain arriving as
-/// <c>map&lt;string, string&gt;</c> has no reader to become what the drain
-/// logic takes.
+/// <b>A token per drain, held by nobody.</b> The credentials are requested
+/// inside this invocation and a token is acquired with them; neither outlives
+/// the call. A connector that kept a token between invocations would be holding
+/// a credential derivative across a boundary the protocol draws deliberately —
+/// and the refresher that would justify holding one belongs to the poll loop,
+/// which is the Runtime's (<c>CONN-Q32a</c>).
 /// </para>
 /// <para>
-/// <b>The kind is dispatched anyway, deliberately.</b> An unrecognised kind and
-/// an unimplemented one are different facts, and folding them together would
-/// tell an operator the connector does not know what <c>drain</c> means. It
-/// knows exactly what it means and cannot do it yet.
+/// <b>An incomplete configuration is a fault, not an empty drain.</b> Unlike a
+/// test, a drain has no vocabulary for "your configuration is missing three
+/// things" — <c>DrainResult</c> carries payloads only. Answering empty would
+/// report a healthy poll of a queue that was never asked, so the fault says
+/// which names are missing and the Hub keeps its own record of the failure.
 /// </para>
 /// </remarks>
 public static class QueueDrainInvocation
 {
-    /// <summary>Refuse one drain, naming what is absent.</summary>
-    /// <param name="invocation">The <c>drain</c> invocation.</param>
-    /// <param name="cancellationToken">Unused: a refusal does no work to cancel.</param>
-    /// <returns>A faulted task, always — the session answers it as a <c>Fault</c>.</returns>
-    /// <remarks>
-    /// The payload is parsed before refusing, so a malformed
-    /// <see cref="DrainInvocation"/> is reported as the protocol error it is
-    /// rather than hidden behind the transport's absence. A refusal that
-    /// reports the wrong reason is the class this package has already paid for
-    /// once, in the sentence this file replaced.
-    /// </remarks>
-    public static ValueTask<ReadOnlyMemory<byte>> ServeAsync(
-        ConnectorInvocation invocation, CancellationToken cancellationToken)
+    /// <summary>Why the Hub is asked for the credentials, for its own record.</summary>
+    private const string Purpose = "drain the OHIP business-event queue";
+
+    /// <summary>Drain once and answer what was taken.</summary>
+    /// <param name="invocation">The <c>drain</c> invocation, carrying the settings.</param>
+    /// <param name="http">The client to dial OHIP with.</param>
+    /// <param name="cancellationToken">The invocation's.</param>
+    /// <returns>A <see cref="DrainResult"/>, serialised.</returns>
+    /// <exception cref="NotSupportedException">The configuration cannot make a call.</exception>
+    public static async ValueTask<ReadOnlyMemory<byte>> ServeAsync(
+        ConnectorInvocation invocation, HttpClient http, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(invocation);
 
-        _ = DrainInvocation.Parser.ParseFrom(invocation.Payload.Span);
+        var asked = DrainInvocation.Parser.ParseFrom(invocation.Payload.Span);
 
-        return ValueTask.FromException<ReadOnlyMemory<byte>>(new NotSupportedException(
-            "pms-oracle understands 'drain' and cannot serve one yet. Two things are absent: "
-            + $"{nameof(IOhipQueue)} and {nameof(IOhipGuarantees)} are ports this package "
-            + "declares and does not implement, so nothing can be taken from OHIP's queue; and "
-            + $"nothing reads {nameof(IntegrationSettings)} from a configuration map, so the "
-            + "settings this invocation carries cannot become what the drain needs. Answering "
-            + "an empty drain instead would record a pass that took nothing from a source that "
-            + "hands each message over once."));
+        var secrets = await InvocationCredentials.GrantedAsync(
+            invocation, OhipCredentials.SecretNames, Purpose, cancellationToken);
+
+        var reading = OhipCredentials.Read(asked.Settings, secrets);
+
+        if (!reading.TryGet(out var credentials))
+        {
+            throw new NotSupportedException(
+                "pms-oracle cannot drain: this integration's configuration is incomplete — "
+                + string.Join(", ", reading.Missing)
+                + ". Nothing was taken from the queue, so nothing was lost.");
+        }
+
+        var acquired = await OhipAccessToken.AcquireAsync(
+            http, credentials, DateTimeOffset.UtcNow, cancellationToken);
+
+        if (acquired.AccessToken is not { } token)
+        {
+            // The same finding a test would report, as a fault: a drain has
+            // nowhere to put REFUSED or UNREACHABLE, and inventing an empty
+            // result would record a poll that never reached OHIP.
+            throw new NotSupportedException(
+                $"pms-oracle cannot drain: {acquired.Finding.Detail} Nothing was taken from "
+                + "the queue, so nothing was lost.");
+        }
+
+        var taken = await OhipBusinessEventQueue.DrainAsync(
+            http, credentials, token, cancellationToken);
+
+        var result = new DrainResult();
+
+        result.Payloads.AddRange(taken.Select(one => new DrainedPayload
+        {
+            Payload = ByteString.CopyFrom(one.Payload),
+            PayloadKind = one.PayloadKind,
+        }));
+
+        return result.ToByteArray();
     }
 }
