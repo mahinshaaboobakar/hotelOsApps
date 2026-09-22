@@ -20,7 +20,7 @@ UI bundles           module.js in the package is byte-for-byte what Part A measu
 ```
 
 **Where it is staged is not where the owner's Kernel looks — EE, 2026-09-22, and checked here.** The archive sits in
-the **user-scope** registry, `%LOCALAPPDATA%\HotelOS\packagesegistry`, which is what the development run reads.
+the **user-scope** registry, `%LOCALAPPDATA%\HotelOS\packages\registry`, which is what the development run reads.
 The installed product resolves the **machine-scope** root, `C:\ProgramData\HotelOS\packages`, **and that directory
 does not exist** (measured: `ProgramData\HotelOS` holds config, logs, nats, pgsql, pki, secrets and services, no
 `packages`). So the installed Kernel answers *"in the package registry not found"* for every archive, Room Care's
