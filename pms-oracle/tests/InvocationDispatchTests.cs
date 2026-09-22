@@ -281,7 +281,17 @@ public class InvocationDispatchTests
                 Sent++;
 
                 return status is { } answered
-                    ? Task.FromResult(new HttpResponseMessage(answered))
+                    ? Task.FromResult(new HttpResponseMessage(answered)
+                {
+                    // OHIP answers a granted password grant with a token and its
+                    // lifetime — `providers/oracle/cloud/dto/jpa/OracleCloudAuthToken.java:20-25`.
+                    // An empty 200 is a shape the source never sends, and a double
+                    // that sent one would be testing a different contract.
+                    Content = new StringContent(
+                        """{"access_token":"ohip-token","expires_in":3600}""",
+                        System.Text.Encoding.UTF8,
+                        "application/json"),
+                })
                     : throw new HttpRequestException("no route to host");
             }
         }

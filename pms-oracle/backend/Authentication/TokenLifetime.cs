@@ -18,15 +18,16 @@ namespace PmsOracle.Authentication;
 /// construct this type without supplying one.
 /// </para>
 /// <para>
-/// <b>Nothing calls this yet, and the reason is one file over.</b>
-/// <c>OhipPasswordGrant</c> states it — <i>"built here, sent nowhere; the
-/// transport that posts them is <c>IOhipQueue</c>'s and remains
-/// unimplemented"</i> — so no poll holds a token to refresh. Said here as well
-/// because a reader arriving at this file alone would take the paragraph above
-/// for a mechanism that runs: it describes the reference's commented-out sweep
-/// as the defect it prevents, and there is no sweep on this side either until
-/// the transport exists. The type is ready for its caller; it is not evidence
-/// of one.
+/// <b>It has a caller now, and the paragraph that said otherwise is replaced
+/// rather than kept.</b> <see cref="OhipAccessToken"/> reads OHIP's
+/// <c>expires_in</c> through <see cref="FromExpiresIn"/>, so a lifetime here is
+/// a statement the source made. What is still absent is a <i>refresher</i>:
+/// nothing holds a token between calls, because a drain takes one per
+/// invocation and the poll loop that would keep one is the Connector Runtime's
+/// (<c>CONN-Q32a</c>). So <see cref="NeedsRefresh"/> answers correctly and
+/// nobody asks it yet — which is a smaller absence than the one this paragraph
+/// used to describe, and worth saying exactly rather than leaving the old
+/// sentence to read as current.
 /// </para>
 /// </remarks>
 public readonly record struct TokenLifetime

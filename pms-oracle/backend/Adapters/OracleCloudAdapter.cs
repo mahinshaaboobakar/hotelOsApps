@@ -22,7 +22,7 @@ namespace PmsOracle.Adapters;
 /// </para>
 /// <para>
 /// <b>One path does dial, and it is real</b> — <see cref="TestAsync"/> reaches
-/// <c>OhipTokenAttempt</c>, which POSTs a password grant to OHIP's token
+/// <c>OhipAccessToken</c>, which POSTs a password grant to OHIP's token
 /// endpoint over a live <see cref="HttpClient"/>. So this adapter is not
 /// entirely unwired: it can prove a credential set against Oracle, and it
 /// cannot yet fetch a reservation.
@@ -239,7 +239,8 @@ public sealed class OracleCloudAdapter(
             return ConnectionTest.Incomplete(reading.Missing);
         }
 
-        return await OhipTokenAttempt.TryAsync(http, credentials, cancellationToken);
+        return (await OhipAccessToken.AcquireAsync(
+            http, credentials, DateTimeOffset.UtcNow, cancellationToken)).Finding;
     }
 
     /// <inheritdoc />

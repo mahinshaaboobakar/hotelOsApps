@@ -114,13 +114,31 @@ public sealed class ConnectionTestTests
     [InlineData(HttpStatusCode.NotFound, ConnectionTestOutcome.Unreachable)]
     [InlineData(HttpStatusCode.TooManyRequests, ConnectionTestOutcome.Unreachable)]
     [InlineData(HttpStatusCode.InternalServerError, ConnectionTestOutcome.Unreachable)]
-    public void What_the_tenancy_answered_decides_which_finding_it_is(
+    public async Task What_the_tenancy_answered_decides_which_finding_it_is(
         HttpStatusCode status, ConnectionTestOutcome expected)
     {
-        Assert.Equal(expected, OhipTokenAttempt.Read(status).Outcome);
+        // Driven through the request rather than through the mapping: the
+        // mapping was `OhipTokenAttempt.Read`, a member this package no longer
+        // has, and asserting a private reading would pin how the answer is
+        // computed rather than what OHIP's status means.
+        var acquired = await OhipAccessToken.AcquireAsync(
+            new HttpClient(new Answers(status)) { Timeout = TimeSpan.FromSeconds(5) },
+            Read(),
+            DateTimeOffset.UnixEpoch,
+            CancellationToken.None);
+
+        Assert.Equal(expected, acquired.Finding.Outcome);
+        Assert.False(acquired.Granted);
     }
 
     /// <summary>A host that does not answer is unreachable, never refused.</summary>
+    /// <summary>The complete set, through the reader the connector uses.</summary>
+    private static OhipCredentials Read()
+    {
+        Assert.True(OhipCredentials.Read(Complete(), AllSecrets()).TryGet(out var credentials));
+        return credentials;
+    }
+
     [Fact]
     public async Task A_host_that_does_not_answer_is_unreachable()
     {
@@ -195,7 +213,17 @@ public sealed class ConnectionTestTests
             Sent++;
 
             return status is { } answered
-                ? Task.FromResult(new HttpResponseMessage(answered))
+                ? Task.FromResult(new HttpResponseMessage(answered)
+                {
+                    // OHIP answers a granted password grant with a token and its
+                    // lifetime — `providers/oracle/cloud/dto/jpa/OracleCloudAuthToken.java:20-25`.
+                    // An empty 200 is a shape the source never sends, and a double
+                    // that sent one would be testing a different contract.
+                    Content = new StringContent(
+                        """{"access_token":"ohip-token","expires_in":3600}""",
+                        System.Text.Encoding.UTF8,
+                        "application/json"),
+                })
                 : throw new HttpRequestException("no route to host");
         }
     }

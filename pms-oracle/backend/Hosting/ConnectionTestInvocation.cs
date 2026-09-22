@@ -28,7 +28,7 @@ namespace PmsOracle.Hosting;
 /// </para>
 /// <para>
 /// <b>The outcome is the connector's own finding, relayed unreworded.</b>
-/// <see cref="OhipTokenAttempt"/> answers REACHED, REFUSED or UNREACHABLE from
+/// <see cref="OhipAccessToken"/> answers REACHED, REFUSED or UNREACHABLE from
 /// what OHIP did, and this maps that record onto the wire message field for
 /// field. It does not decide anything: a Hub that could not get an answer at
 /// all reports that itself (<c>CONN-Q43</c>), and this end never speaks for a
@@ -62,7 +62,13 @@ public static class ConnectionTestInvocation
             return Answer(ConnectionTest.Incomplete(reading.Missing));
         }
 
-        return Answer(await OhipTokenAttempt.TryAsync(http, credentials, cancellationToken));
+        // The acquisition answers the verdict and the token together; a test
+        // reads the verdict and drops the token, which is the one place it is
+        // right to hold nothing.
+        var acquired = await OhipAccessToken.AcquireAsync(
+            http, credentials, DateTimeOffset.UtcNow, cancellationToken);
+
+        return Answer(acquired.Finding);
     }
 
     /// <summary>The connector's finding, on the wire.</summary>
