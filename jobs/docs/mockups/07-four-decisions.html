@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jobs Four Decisions</title>
+<style>
+  /*
+   * The published names at the shell's own dark values (apps/desktop/src/styles.css),
+   * and nothing declared beside them — page 64 §1, §8, as redline 6 put the frames.
+   */
+  :root {
+    --color-surface:#0b0d14; --color-surface-raised:#11141f;
+    --color-line:rgb(255 255 255 / 0.07); --color-line-strong:rgb(255 255 255 / 0.14);
+    --color-ink:#e8ebf4; --color-ink-muted:#8b93a7; --color-ink-faint:#5a6172; --color-ink-on-accent:#0b0d14;
+    --color-brand:#818cf8; --color-ok:#34d399; --color-warn:#fbbf24; --color-bad:#f87171;
+    --color-ok-soft:rgb(52 211 153 / 0.12); --color-warn-soft:rgb(251 191 36 / 0.12); --color-bad-soft:rgb(248 113 113 / 0.12);
+    --radius-panel:1rem; --font-sans:system-ui, -apple-system, "Segoe UI", sans-serif;
+    color-scheme:dark;
+  }
+  body { margin:0; background:var(--color-surface); color:var(--color-ink); font-family:var(--font-sans); font-size:15px; line-height:1.65 }
+  .page { max-width:1100px; margin:0 auto; padding:52px 16px 90px }
+  code, .mono { font-family:ui-monospace, "Cascadia Mono", Menlo, monospace }
+  code { font-size:.86em; background:var(--color-surface-raised); border:1px solid var(--color-line); border-radius:4px; padding:1px 5px }
+  .eyebrow { font-family:ui-monospace, "Cascadia Mono", Menlo, monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--color-ink-faint); margin:0 0 10px }
+  h1 { font-size:30px; line-height:1.25; font-weight:600; letter-spacing:-.015em; margin:0 0 16px; max-width:30ch; text-wrap:balance }
+  h2 { font-size:21px; font-weight:600; letter-spacing:-.01em; margin:0 0 4px; text-wrap:balance }
+  h3 { font-size:14px; font-weight:600; margin:20px 0 6px }
+  p { max-width:74ch; color:var(--color-ink-muted); margin:0 0 10px }
+  p b, li b, td b { color:var(--color-ink); font-weight:600 }
+  section { margin-top:56px; border-top:1px solid var(--color-line); padding-top:24px }
+  ul { max-width:74ch; color:var(--color-ink-muted); padding-left:20px } li { margin:5px 0 }
+
+  .ask { border-left:2px solid var(--color-brand); padding:2px 0 2px 14px; margin:14px 0 18px; color:var(--color-ink) }
+  .tag { display:inline-block; font-family:ui-monospace, Menlo, monospace; font-size:10.5px; letter-spacing:.06em; text-transform:uppercase;
+         padding:1px 7px; border-radius:999px; border:1px solid var(--color-line-strong); color:var(--color-ink-muted); white-space:nowrap }
+  .tag.now { color:var(--color-warn); border-color:color-mix(in srgb,var(--color-warn) 40%,transparent); background:var(--color-warn-soft) }
+  .tag.fact { color:var(--color-ok); border-color:color-mix(in srgb,var(--color-ok) 40%,transparent); background:var(--color-ok-soft) }
+  .tag.against { color:var(--color-bad); border-color:color-mix(in srgb,var(--color-bad) 40%,transparent); background:var(--color-bad-soft) }
+
+  .opts { display:grid; gap:16px; margin-top:16px }
+  .opt { border:1px solid var(--color-line-strong); border-radius:12px; overflow:hidden }
+  .opt > header { display:flex; gap:12px; align-items:baseline; flex-wrap:wrap; padding:10px 14px; background:var(--color-surface-raised); border-bottom:1px solid var(--color-line) }
+  .opt > header b { font-size:14px } .opt > header span { font-size:13px; color:var(--color-ink-muted) }
+  .opt .draw { padding:16px 14px; background:var(--color-surface) }
+  .opt .cost { padding:10px 14px 12px; border-top:1px solid var(--color-line); font-size:13px; color:var(--color-ink-muted) }
+  .opt .cost b { color:var(--color-ink) }
+
+  /* the product's own pieces, as the frames draw them */
+  .card { border:1px solid var(--color-line); border-radius:12px; background:color-mix(in srgb,var(--color-ink) 3%,transparent); padding:14px; max-width:560px }
+  .card h4 { margin:0 0 10px; font-size:13px; font-weight:600 }
+  .kv { display:grid; grid-template-columns:132px 1fr; gap:4px 14px; font-size:13px; color:var(--color-ink-muted) }
+  .kv .k { color:var(--color-ink-faint) } .kv b { color:var(--color-ink); font-weight:500 }
+  .lbl { display:block; font-size:11px; letter-spacing:.07em; text-transform:uppercase; color:var(--color-ink-faint); margin:10px 0 4px }
+  .field { border:1px solid var(--color-line-strong); border-radius:10px; background:color-mix(in srgb,var(--color-ink) 2%,transparent);
+           padding:9px 12px; font-size:13px; color:var(--color-ink); max-width:360px }
+  .field.ghost { color:var(--color-ink-faint) }
+  .btn { display:inline-block; font-size:13px; font-weight:600; padding:7px 14px; border-radius:8px; border:1px solid var(--color-line-strong); color:var(--color-ink) }
+  .btn.pri { border-color:transparent; color:var(--color-ink-on-accent);
+             background:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad))) }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:12px }
+  .said { font-family:ui-monospace, Menlo, monospace; font-size:12px; color:var(--color-bad); margin-top:10px }
+  .bar { display:flex; align-items:center; gap:10px; border:1px solid var(--color-line); border-radius:12px; padding:10px 14px; font-size:13px; font-weight:600; max-width:560px;
+         background:color-mix(in srgb,var(--color-ink) 3%,transparent) }
+  .bar .who { margin-left:auto; font-size:12px; font-weight:400; color:var(--color-ink-muted) }
+  .mk { width:22px; height:22px; border-radius:6px; display:grid; place-items:center; font-size:12px; color:var(--color-ink-on-accent);
+        background:linear-gradient(135deg,var(--color-brand),color-mix(in srgb,var(--color-brand) 62%,var(--color-bad))) }
+  table.rows { border-collapse:collapse; width:100%; max-width:560px; font-size:13px }
+  table.rows th { text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--color-ink-faint); padding:6px 10px; border-bottom:1px solid var(--color-line-strong) }
+  table.rows td { padding:7px 10px; border-bottom:1px solid var(--color-line); color:var(--color-ink-muted) }
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="eyebrow">Jobs · four decisions, drawn · Stream HH · 2026-09-22</p>
+  <h1>Four things the build does that nobody has decided</h1>
+  <p>Each was found by measuring the build against its frames, and each was reported in prose and never ruled. They are drawn here because a drawing moves a decision that an explanation does not. <b>They are four separate decisions</b> — deciding one says nothing about the others, and any of them may be answered with something not drawn.</p>
+  <p>Every option below is drawn in the product's own pieces, on the published colours. <span class="tag now">as built</span> marks what a person meets today. <span class="tag fact">measured</span> marks a fact I checked in the code rather than recalled. <span class="tag against">I argue against</span> marks the arm I would not choose, with its reason — stated so the case against each is in front of you, not only the case for.</p>
+
+  <section>
+    <h2>1 · Granting a jobs manager asks for a user id</h2>
+    <p class="ask">Who may a general manager name as a jobs manager, and how do they name them?</p>
+    <p><span class="tag now">as built</span> The Access tab's grant box has one field, <b>User id</b>, and a person types a raw identifier into it. <span class="tag fact">measured</span> Jobs can turn a login into a name (it does so for the bar), but it has <b>no read that searches people</b> — it can answer "who is this id?" and not "who is called Rohan?".</p>
+
+    <div class="opts">
+      <div class="opt">
+        <header><b>A · A person picker</b><span>type a name, choose from the property's staff</span></header>
+        <div class="draw">
+          <span class="lbl">Who becomes a jobs manager</span>
+          <div class="field">Rohan D<span style="color:var(--color-ink-faint)">…</span></div>
+          <table class="rows" style="margin-top:8px"><tbody>
+            <tr><td><b>Rohan Desai</b> · Front Office</td><td style="text-align:right"><span class="btn">Choose</span></td></tr>
+            <tr><td><b>Rohan Dev</b> · Engineering</td><td style="text-align:right"><span class="btn">Choose</span></td></tr>
+          </tbody></table>
+          <div class="row"><span class="btn pri">Grant</span><span class="btn">Discard</span></div>
+        </div>
+        <div class="cost"><b>Costs a new read.</b> Jobs would ask the platform for the property's staff by name — a capability it does not have today, and one more place that lists people. <b>Gains</b> a grant nobody can mistype: the wrong id grants the wrong person silently.</div>
+      </div>
+
+      <div class="opt">
+        <header><b>B · The id, confirmed by name before it is granted</b><span>paste an id, Jobs says who that is</span></header>
+        <div class="draw">
+          <span class="lbl">User id</span>
+          <div class="field">01a05c39-294b-7c6d-9ca2-6bbbf495106c</div>
+          <p style="margin:10px 0 0"><b>Rohan Desai</b> — grant this person every job at this property?</p>
+          <div class="row"><span class="btn pri">Grant to Rohan Desai</span><span class="btn">Discard</span></div>
+        </div>
+        <div class="cost"><b>Costs nothing new</b> — it uses the name read Jobs already makes. <b>Still asks a person to carry an identifier</b> from somewhere else, which is the part that reads as a developer's screen; it only stops the silent mistake.</div>
+      </div>
+
+      <div class="opt">
+        <header><b>C · Jobs shows who holds it and does not grant</b><span>granting lives where people are managed</span></header>
+        <div class="draw">
+          <table class="rows"><thead><tr><th>Label</th><th>Who</th></tr></thead><tbody>
+            <tr><td>Property jobs manager</td><td><b>Rohan Desai</b></td></tr>
+          </tbody></table>
+          <p class="mono" style="font-size:12px;margin-top:10px;color:var(--color-ink-faint)">Jobs managers are named in Workforce.</p>
+        </div>
+        <div class="cost"><span class="tag against">I argue against</span> <b>The design gives this grant to Jobs on purpose</b> — it is Jobs' own authority, announced by Jobs and written by the Kernel — and moving it would put one property's decision in a second application's screen. It is drawn because "not here" is a real answer and should be refusable on sight.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · The Record tab draws who created and who changed the job</h2>
+    <p class="ask">Does the service send who created and last changed a job, or does the frame stop drawing it?</p>
+    <p><span class="tag now">as built</span> Frame 2g draws <b>Created 02 Sept, 13:31 · guest · stay 7F2A</b> and <b>Updated 02 Sept, 14:07 · Arjun Menon</b>. <span class="tag fact">measured</span> The service sends the two instants and <b>nobody's name</b>: the job row holds <code>CreatedBy</code> and <code>UpdatedBy</code> as user ids, and the Record rows drop them. So the frame draws a fact the wire does not carry — copy ahead of the mechanism. <b>This is either a service change or a frame change, and I am not choosing it.</b></p>
+
+    <div class="opts">
+      <div class="opt">
+        <header><b>A · The service sends the names</b><span>the Record tab draws what 2g draws</span></header>
+        <div class="draw">
+          <div class="card"><h4>Audit</h4><div class="kv">
+            <div class="k">Created</div><div>02 Sept, 13:31 · <b>the guest of stay 7F2A</b></div>
+            <div class="k">Updated</div><div>02 Sept, 14:07 · <b>Arjun Menon</b></div>
+            <div class="k">Deleted</div><div>—</div>
+          </div></div>
+        </div>
+        <div class="cost"><b>Costs two name lookups per job read</b>, through the staff record Jobs already reads for the bar. <b>Where nobody is named</b> — an application raised it, or the login has no staff record — the row says so in words rather than falling back to an id.</div>
+      </div>
+
+      <div class="opt">
+        <header><b>B · The frame stops drawing them</b><span>the tab keeps the times, and says who only where the service knows</span></header>
+        <div class="draw">
+          <div class="card"><h4>Audit</h4><div class="kv">
+            <div class="k">Created</div><div>02 Sept, 13:31</div>
+            <div class="k">Updated</div><div>02 Sept, 14:07</div>
+            <div class="k">Deleted</div><div>—</div>
+          </div></div>
+          <p class="mono" style="font-size:12px;margin-top:10px;color:var(--color-ink-faint)">Who raised it is on the Overview, which the service does send.</p>
+        </div>
+        <div class="cost"><b>Costs nothing</b> and removes a promise. <b>But the Record tab exists to hold what the row holds</b>, and the row does hold both ids — so this answers a question about drawing with a change to what a person may know.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · What the bar says for somebody who is not at one hotel</h2>
+    <p class="ask">The bar reads <b>name · department · property</b>. What is the third clause for an organisation administrator?</p>
+    <p><span class="tag now">as built</span> Redline 6 drew Nadia Rahman as <b>Organisation admin · Marina Hotels</b> — <b>my reading of your "…"</b>, never confirmed. <span class="tag fact">measured</span> Since <code>CTX-Q10</code> was withdrawn on 2026-09-20, Jobs cannot know anybody is an organisation administrator: that role lives in the cloud and no property-side authority holds it. <b>So this decides the drawing only</b>, until something tells a property otherwise.</p>
+
+    <div class="opts">
+      <div class="opt">
+        <header><b>A · The organisation, where a hotel would be</b><span>drawn in redline 6</span></header>
+        <div class="draw"><div class="bar"><span class="mk">J</span>Jobs<span class="who">Nadia Rahman · Organisation admin · <b>Marina Hotels</b></span></div></div>
+        <div class="cost"><b>Says where she actually stands.</b> <b>Costs the clause its single meaning</b>: the third slot is the property for everybody else, and a reader cannot tell from the words whether they are reading a hotel or a group.</div>
+      </div>
+      <div class="opt">
+        <header><b>B · The hotel whose screen this is</b><span>one meaning for the clause, always</span></header>
+        <div class="draw"><div class="bar"><span class="mk">J</span>Jobs<span class="who">Nadia Rahman · Organisation admin · <b>The Marina Bay</b></span></div></div>
+        <div class="cost"><b>The third clause stays one fact</b> — the property you are looking at. <b>Costs precision about the person</b>: she is not posted there, and the bar now reads as though she were.</div>
+      </div>
+      <div class="opt">
+        <header><b>C · Two clauses for her</b><span>no property where there is no property</span></header>
+        <div class="draw"><div class="bar"><span class="mk">J</span>Jobs<span class="who">Nadia Rahman · Organisation admin</span></div></div>
+        <div class="cost"><span class="tag against">I argue against</span> <b>Your §3 ruling is three clauses, not two</b>, and a bar that drops one for some people is the shape that ruling was made against. Drawn because it is the honest answer if neither A nor B is true.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Where a refused write says why</h2>
+    <p class="ask">When a write inside an inline composer is refused, does the reason appear in the composer or on the screen's own line?</p>
+    <p><span class="tag now">as built</span> The Catalogue's <b>New item</b> keeps what was typed and shows the reason <b>on the page's line below</b>. <span class="tag fact">measured</span> §9's amendment (APPS-Q53) requires visible validation, and its gloss reads <i>"a refused write keeps the composer open and shows the reason <b>in it</b>"</i> — which is the half Jobs does not do. Everything else in the seven conditions it meets.</p>
+
+    <div class="opts">
+      <div class="opt">
+        <header><b>A · The reason inside the composer</b><span>beside the control that was pressed</span></header>
+        <div class="draw">
+          <div class="card"><h4>New item</h4>
+            <span class="lbl">Name</span><div class="field">Water dripping from unit</div>
+            <span class="lbl">Code</span><div class="field ghost">—</div>
+            <div class="row"><span class="btn">Cancel</span><span class="btn pri">Create item</span></div>
+            <div class="said">an item needs a name and a code</div>
+          </div>
+        </div>
+        <div class="cost"><b>Meets the ruling as it is written</b>, and the reason cannot be missed under a long form. <b>Costs one screen two places that speak</b> — the composer and the page line — so a person learns which message appears where.</div>
+      </div>
+      <div class="opt">
+        <header><b>B · One line for the whole screen</b><span>as built</span></header>
+        <div class="draw">
+          <div class="card"><h4>New item</h4>
+            <span class="lbl">Name</span><div class="field">Water dripping from unit</div>
+            <span class="lbl">Code</span><div class="field ghost">—</div>
+            <div class="row"><span class="btn">Cancel</span><span class="btn pri">Create item</span></div>
+          </div>
+          <div class="said" style="max-width:560px">an item needs a name and a code</div>
+          <p class="mono" style="font-size:12px;color:var(--color-ink-faint)">— the Catalogue's own line, under the page</p>
+        </div>
+        <div class="cost"><b>Every message on the screen appears in one place</b>, which is what the rest of Jobs does. <b>Costs conformance with the amendment's gloss</b>, and on a tall catalogue the line can sit below the fold while the composer is in view.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What each answer changes</h2>
+    <ul>
+      <li><b>1</b> — a build change, and A additionally needs a platform read Jobs does not have.</li>
+      <li><b>2</b> — either a service change (A) or a frame redline (B). Nothing else in Jobs moves.</li>
+      <li><b>3</b> — a frame redline only, today. If a property is ever told who is an organisation administrator, the build follows this answer.</li>
+      <li><b>4</b> — a build change only; the frames draw neither line.</li>
+    </ul>
+    <p>None of the four is in 0.4.3, which is cut and staged. Each lands in 0.4.4 with the 64g items, in whatever form you choose.</p>
+  </section>
+</main>
+</body>
+</html>
