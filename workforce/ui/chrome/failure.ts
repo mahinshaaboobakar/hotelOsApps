@@ -240,13 +240,19 @@ export function failureBody(
  * passing a `retry` for a refusal gets no button rather than a broken promise.
  *
  * @remarks
- * **Switched on `kind`, never read for a `label`.** `grant` deliberately
- * carries none: a refusal does not name who can grant, so there is nothing to
- * put on a button, and the owner's ruling is expressed as the field's absence
- * rather than as a rule somebody has to remember. Code that reached for
- * `act.label` here would compile against the old shape and fail on this one —
- * so the note is drawn for every kind and the button only where a label exists
- * to sit on it.
+ * **Switched on `kind`.** This said *"never read for a `label`"*, because
+ * `grant` deliberately carried none — the owner's 2026-09-17 ruling expressed
+ * as the field's absence rather than as a rule somebody has to remember.
+ * **That absence ended on 2026-09-22** (page `64h` frame 3): every refusal now
+ * carries `Copy these details`, because taking the capability out of the
+ * sentence left a refused card with no path to the identifier at all.
+ *
+ * The paragraph is corrected rather than deleted, because the reasoning it
+ * records is still live for the part that did not change: **a retry is offered
+ * only where trying again can work**, and a control that cannot change the
+ * outcome is a second lie. What the copy button does is hand the line to
+ * somebody who can act — it grants nothing, which is why it does not reopen
+ * what 2026-09-17 settled.
  */
 function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement {
   const row = el("div", "fail-acts");
@@ -272,12 +278,25 @@ function actions(drawn: FailureDrawing, retry?: () => void): HTMLElement {
       break;
     }
 
-    case "grant":
-      // No control, on purpose. The approved frame offered *Request access* and
-      // *Who can grant this*; a bundle calls only its own backend (design page
-      // 63 §3), so neither could act — and the platform does not know who holds
-      // the grant either, which is why this arm has no label to draw.
+    case "grant": {
+      // **It carries the copy action — owner, 2026-09-22, page `64h` frame 3.**
+      // This arm drew nothing, on purpose: the approved frame had offered
+      // *Request access* and *Who can grant this*, a bundle calls only its own
+      // backend (design page 63 §3), and the platform does not know who holds
+      // the grant — so there was no label to draw.
+      //
+      // What changed is not that argument, which still holds: the button grants
+      // nothing. It is that the sentence stopped naming the capability, and
+      // with the facts already plain and `wire` drawn nowhere, a refused card
+      // had **no path to the identifier at all**. Frame 2 is that state, drawn,
+      // and it is what the owner rejected.
+      const hand = el("button", "btn", act.label);
+      hand.addEventListener("click", () => {
+        void navigator.clipboard?.writeText(drawn.wire);
+      });
+      row.append(hand);
       break;
+    }
   }
 
   // The phrase, not the note: the same words, with the permission kept as a

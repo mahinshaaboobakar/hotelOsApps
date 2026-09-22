@@ -72,14 +72,26 @@ describe("the failure screen's facts", () => {
     expect(asked.textContent).not.toContain("roster.read");
   });
 
-  it("sets the permission apart in the refusal's note", () => {
+  it("names no permission in the refusal's note, and offers the operator's path", () => {
+    // **This asserted the code name in the sentence** — `roster.read`, set
+    // apart in a `<b>`, reading *"This screen needs roster.read, and no grant
+    // at this property names this user."* Owner, 2026-09-22, page `64h` frame
+    // 3: the person reads plain words, and because that leaves the card with no
+    // way to reach the identifier, the refusal gains `Copy these details`.
+    //
+    // Both halves are asserted here, because landing either alone is a defect:
+    // the sentence without the button is frame 2, which the owner rejected.
     const body = failureBody(failure("forbidden"), { the: "the rota" }, QATAR);
     const note = body.querySelector(".fail-note") as HTMLElement;
 
-    expect(note.querySelector("b")?.textContent).toBe("roster.read");
     expect(note.textContent).toBe(
-      "This screen needs roster.read, and no grant at this property names this user.",
+      "This screen needs a permission, and no grant at this property names this user.",
     );
+    expect(note.textContent).not.toContain("roster.read");
+    expect(note.querySelector("b")).toBeNull();
+
+    const act = Array.from(body.querySelectorAll<HTMLButtonElement>(".fail-acts button"));
+    expect(act.map((one) => one.textContent)).toEqual(["Copy these details"]);
   });
 
   it("sets the fault's clause apart, as 64b draws it", () => {
@@ -98,8 +110,13 @@ describe("contract v2's three states, as 64e draws them", () => {
     const body = failureBody(failure("unadmitted"), { the: "the rota" }, QATAR);
     const note = body.querySelector(".fail-note") as HTMLElement;
 
-    expect(note.textContent).toBe("This application was not granted roster.read at this property.");
-    expect(note.querySelector("b")?.textContent).toBe("roster.read");
+    // The code name left this sentence too (`64h` frame 3). What must NOT be
+    // lost is which of the two lacks the grant — the application here, the
+    // account below — because they are two different fixes, and after the
+    // capability went they are the only thing telling the notes apart.
+    expect(note.textContent)
+      .toBe("This application was not granted what this screen needs at this property.");
+    expect(note.textContent).not.toContain("roster.read");
     expect(body.querySelector(".fail-mark.fail-unadmitted")).not.toBeNull();
   });
 
@@ -107,7 +124,9 @@ describe("contract v2's three states, as 64e draws them", () => {
     const body = failureBody(failure("ungranted"), { the: "the rota" }, QATAR);
     const note = body.querySelector(".fail-note") as HTMLElement;
 
-    expect(note.textContent).toBe("This account has not been granted roster.read at this property.");
+    expect(note.textContent)
+      .toBe("This account has not been granted what this screen needs at this property.");
+    expect(note.textContent).not.toContain("roster.read");
     expect(body.querySelector(".fail-mark.fail-ungranted")).not.toBeNull();
   });
 
