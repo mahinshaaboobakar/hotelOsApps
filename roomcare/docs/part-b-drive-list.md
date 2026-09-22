@@ -19,6 +19,17 @@ UI bundles           module.js in the package is byte-for-byte what Part A measu
                      (3f2fa23d…, 166,303 bytes; docs/part-a-certificate.md)
 ```
 
+**Where it is staged is not where the owner's Kernel looks — EE, 2026-09-22, and checked here.** The archive sits in
+the **user-scope** registry, `%LOCALAPPDATA%\HotelOS\packagesegistry`, which is what the development run reads.
+The installed product resolves the **machine-scope** root, `C:\ProgramData\HotelOS\packages`, **and that directory
+does not exist** (measured: `ProgramData\HotelOS` holds config, logs, nats, pgsql, pki, secrets and services, no
+`packages`). So the installed Kernel answers *"in the package registry not found"* for every archive, Room Care's
+included. **Part B cannot begin with "Software Center lists Room Care 0.1.4" until that is resolved**, and the
+resolution is not Room Care's: EE has it with the architect, alongside the property's Kernel binary being dated
+2026-09-02, which predates the fix for the elevation defect `package list` still hits. *Recorded here because the
+last premise I took on trust — "0.1.2 is installed" — was wrong the same way: a staging step that succeeded, in a
+place the reader of it never looks.*
+
 **Part B certifies 0.1.4**, the first Room Care the owner installs. 0.1.2 and 0.1.3 were only ever on the shelf:
 measured 2026-09-19, Room Care is installed on no Kernel — the owner's running platform holds guestops, jobs, openai
 and workforce, the `roomcare` schema has no tables, and the running Kernel's log has no line naming `roomcare`. *That
