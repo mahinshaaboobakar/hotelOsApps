@@ -29,6 +29,9 @@ import { table } from "../screens/today/table";
 import { summary } from "../screens/booking/index";
 import { cancel } from "../screens/booking/cancel";
 import { recordedCancelPlan } from "../book/recorded/booking";
+import { recordedAvailability } from "../book/recorded/availability";
+import { availability } from "../screens/newbooking/availability";
+import type { TypeAvailability } from "../book/model";
 
 const KOLKATA: PropertyEnvironment = { locale: "en-IN", timezone: "Asia/Kolkata" };
 const UNKNOWN: PropertyEnvironment = { locale: null, timezone: null };
@@ -171,5 +174,31 @@ describe("the cancel plan", () => {
     expect(rows({ stays: 4 }).at(-1)).toMatch(/^all four rooms return to inventory for 03 /u);
     expect(rows({ stays: 0 }).at(-1))
       .toBe("nothing returns to inventory — no stay on this booking can be cancelled");
+  });
+});
+
+describe("a room type's capacity", () => {
+  const rowFor = (sleeps: TypeAvailability["sleeps"]): string => {
+    const type: TypeAvailability = {
+      ...recordedAvailability.types[0]!, sleeps,
+    };
+
+    return availability([type]).querySelector(".nm")?.textContent ?? "";
+  };
+
+  it("says what the rate includes, and the ceiling where they differ", () => {
+    expect(rowFor({ included: 2, most: 3, adults: 2, children: 1, extraBed: true, extraBeds: 1 }))
+      .toContain("sleeps 2, up to 3");
+  });
+
+  it("says one number where the type has no extra bed", () => {
+    expect(rowFor({ included: 2, most: 2, adults: 2, children: 0, extraBed: false, extraBeds: 0 }))
+      .toContain("sleeps 2");
+  });
+
+  // ADR 0215: null is Master Data holding no row, never a capacity. A desk is
+  // about to put a family in the room, so nothing is claimed.
+  it("claims nothing where Master Data holds no row", () => {
+    expect(rowFor(null)).not.toMatch(/sleeps/);
   });
 });

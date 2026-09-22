@@ -83,34 +83,49 @@ describe("a screen's failure", () => {
     expect(cannot("No stay was chosen", "Open a stay.").className).toBe("fs");
   });
 
-  // X7: a retry only where waiting could work; copy for a fault and for the
-  // model state, which 64e draws beside the fault.
+  // X7: a retry only where waiting could work. Every other state offers the
+  // line instead — the fault, the model state 64e draws beside it, and, since
+  // 64h frame 3, the refusals.
   it.each([
     ["unanswered", "Try again"],
     ["faulted", "Copy these details"],
     ["undecidable", "Copy these details"],
+    ["forbidden", "Copy these details"],
+    ["unadmitted", "Copy these details"],
+    ["ungranted", "Copy these details"],
   ] as const)("offers a button only where one can work — %s", (cause, label) => {
     const buttons = failed(drawing(cause), () => {}).querySelectorAll(".fd button");
 
     expect([...buttons].map((b) => b.textContent)).toEqual([label]);
   });
 
-  it("offers a refusal no button, and names the grant beside it", () => {
+  // **Corrected 2026-09-22, and it asserted the frame the owner rejected.**
+  // This read: no button, and the sentence naming `reservation.read`. Both
+  // halves were the old contract — 64h frame 3 took the code name out of the
+  // sentence AND gave the card the line to copy, because either alone leaves a
+  // refused card with no path to the identifier (ADR 0034: corrected, not
+  // worked around).
+  it("names no code, and offers the line rather than nothing", () => {
     const stage = failed(drawing("forbidden"), () => {});
 
-    expect(stage.querySelectorAll(".fd button")).toHaveLength(0);
     expect(stage.querySelector(".fn")?.textContent).toBe(
-      "This screen needs reservation.read, and no grant at this property names this user.");
+      "This screen needs a permission, and no grant at this property names this user.");
+
+    // The code name is not lost — it is on the line the button copies.
+    expect(stage.querySelector(".fn")?.textContent).not.toMatch(/reservation\.read/);
   });
 
-  // X9: every refusal names what is missing and stops — no button, and no
-  // sentence that sends the reader to a person, a name or a role.
+  // X9: every refusal names what is missing and routes nobody to a person.
+  //
+  // **The "no button" half moved with 64h frame 3; the rest did not.** A
+  // button that copies a line is not a route to a person — it hands the
+  // identifier to whoever the reader already deals with — so what X9 is about
+  // is unchanged, and this asserts that half alone.
   it.each(["forbidden", "unadmitted", "ungranted"] as const)(
-    "a refusal offers no button and routes nobody to a person — %s",
+    "a refusal routes nobody to a person — %s",
     (cause) => {
       const stage = failed(drawing(cause), () => {});
 
-      expect(stage.querySelectorAll(".fd button")).toHaveLength(0);
       expect(stage.textContent ?? "").not.toMatch(/administrator|\bask\b|manager|contact/i);
     });
 

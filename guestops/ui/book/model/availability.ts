@@ -28,6 +28,28 @@ export interface TypeAvailability {
 
   roomType: string;
 
+  /**
+   * What the TYPE sleeps, as Master Data holds it — null where it holds no row.
+   *
+   * ADR 0215, 2026-09-22: the columns have always existed and this application
+   * did not read them. Null is *Master Data said nothing*, never a capacity of
+   * zero and never a guess — a number invented here is one a desk would book a
+   * family against.
+   *
+   * **A room's effective occupancy can differ**: `masterdata.rooms` carries a
+   * nullable override that Context resolves. This answers which TYPE can take
+   * a party; the number for an assigned room is Context's.
+   */
+  sleeps: {
+    /** Included in the rate. A stored 2 is the domain default, not "unknown". */
+    included: number;
+    most: number;
+    adults: number;
+    children: number;
+    extraBed: boolean;
+    extraBeds: number;
+  } | null;
+
   /** `₹ 8 400 · gross` — value, currency and whether tax is included. */
   rate: string | null;
 

@@ -92,7 +92,19 @@ public sealed class BookingWireTests
         // The room type the views read by name. Seeded through the harness so
         // the table is Master Data's shape and the application role can read
         // it — the split an install produces.
-        await harness.MasterDataRoomTypesAsync([(DeskHarness.RoomType, "Executive Suite")]);
+        await harness.MasterDataRoomTypesAsync([
+            new MasterDataRoomTypeSource.Row
+            {
+                Id = DeskHarness.RoomType,
+                Name = "Executive Suite",
+                BaseOccupancy = 2,
+                MaxOccupancy = 3,
+                MaxAdults = 2,
+                MaxChildren = 1,
+                ExtraBedAllowed = true,
+                MaxExtraBeds = 1,
+            },
+        ]);
 
         return booking.Id;
     }

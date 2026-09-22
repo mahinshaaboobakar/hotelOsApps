@@ -286,17 +286,16 @@ public sealed class GuestOpsScratch : IAsyncDisposable
     /// keeping distinguishable.
     /// </para>
     /// </remarks>
-    /// <param name="rows">The room types, by id and name.</param>
+    /// <param name="rows">The room types, as Master Data holds them.</param>
     /// <returns>When the table exists, holds them, and is readable.</returns>
-    public async Task MasterDataRoomTypesAsync(IEnumerable<(Guid Id, string Name)> rows)
+    public async Task MasterDataRoomTypesAsync(IEnumerable<MasterDataRoomTypeSource.Row> rows)
     {
         var provisioner = As(ProvisionerRole, ProvisionerPassword, _database.Name);
 
         await using var source = new MasterDataRoomTypeSource(provisioner);
         await source.Database.GetService<IRelationalDatabaseCreator>().CreateTablesAsync();
 
-        source.RoomTypes.AddRange(rows.Select(row =>
-            new MasterDataRoomTypeSource.Row { Id = row.Id, Name = row.Name }));
+        source.RoomTypes.AddRange(rows);
         await source.SaveChangesAsync();
 
         await ExecuteAsync(

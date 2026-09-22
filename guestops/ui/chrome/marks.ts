@@ -145,12 +145,20 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   const box = el("div", `fail ${tone(drawing.cause)}`);
   const doing = el("div", "fd");
 
-  // **The affordance is what separates the three states, not the wording.** A
-  // timeout gets a button because waiting can work; a refusal and a fault get a
-  // sentence, because a retry on either is a promise the platform cannot keep.
+  // **Only a retry claims trying again can work.** A refusal and a fault both
+  // offer the same thing — the line somebody can carry to whoever can act —
+  // and neither offers to try again, because that is a promise the platform
+  // cannot keep.
+  //
+  // **The refusal's button is 64h frame 3, the owner's choice of three, and
+  // this application drew frame 2 until 2026-09-22.** A refused card used to
+  // print the permission's code name, so a person could read the identifier
+  // off the screen; when the sentence moved to plain words (`6751c7de`), a
+  // refusal with no button left no path to the identifier at all. The button
+  // grants nothing — it hands the line over.
   if (drawing.act.kind === "retry" && retry !== undefined) {
     doing.append(control("btn pri", drawing.act.label, retry));
-  } else if (drawing.act.kind === "copy") {
+  } else if (drawing.act.kind === "copy" || drawing.act.kind === "grant") {
     doing.append(control("btn", drawing.act.label, () => {
       void navigator.clipboard?.writeText(drawing.wire);
     }));

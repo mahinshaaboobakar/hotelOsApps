@@ -25,6 +25,7 @@ export const recordedAvailability: Availability = {
   types: [
     {
       roomTypeId: "3a5f1c44-0000-4000-8000-000000000001", roomType: "Deluxe King", rate: null,
+      sleeps: { included: 2, most: 3, adults: 2, children: 1, extraBed: true, extraBeds: 1 },
       total: 24, sold: 19,
       outOfOrder: 1, outOfOrderBy: null,
       stopSold: 0, stopSoldWhy: null,
@@ -32,6 +33,7 @@ export const recordedAvailability: Availability = {
     },
     {
       roomTypeId: "3a5f1c44-0000-4000-8000-000000000002", roomType: "Deluxe Twin", rate: null,
+      sleeps: { included: 2, most: 2, adults: 2, children: 0, extraBed: false, extraBeds: 0 },
       total: 18, sold: 18,
       outOfOrder: 0, outOfOrderBy: null,
       stopSold: 0, stopSoldWhy: null,
@@ -39,6 +41,7 @@ export const recordedAvailability: Availability = {
     },
     {
       roomTypeId: "3a5f1c44-0000-4000-8000-000000000003", roomType: "Executive Suite", rate: null,
+      sleeps: { included: 3, most: 5, adults: 4, children: 2, extraBed: true, extraBeds: 1 },
       total: 6, sold: 2,
       outOfOrder: 0, outOfOrderBy: null,
       stopSold: 4, stopSoldWhy: "wedding party",

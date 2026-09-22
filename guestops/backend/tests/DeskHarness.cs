@@ -163,9 +163,9 @@ public sealed class DeskHarness : IAsyncDisposable
     /// <see cref="GuestOpsScratch"/>'s, and a second path creating the same
     /// table would be a second declaration of Master Data's shape.
     /// </remarks>
-    /// <param name="rows">The room types, by id and name.</param>
+    /// <param name="rows">The room types, as Master Data holds them.</param>
     /// <returns>When the table exists, holds them, and is readable.</returns>
-    public Task MasterDataRoomTypesAsync(IEnumerable<(Guid Id, string Name)> rows)
+    public Task MasterDataRoomTypesAsync(IEnumerable<MasterDataRoomTypeSource.Row> rows)
         => _scratch.MasterDataRoomTypesAsync(rows);
 
     /// <summary>Close the context, then drop the database.</summary>

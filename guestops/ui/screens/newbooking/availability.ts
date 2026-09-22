@@ -57,6 +57,20 @@ function line(type: TypeAvailability): HTMLElement {
     name.append(el("span", undefined, type.rate));
   }
 
+  // **What the type sleeps — ADR 0215.** Drawn only where Master Data holds
+  // it: a type it has no row for shows nothing rather than a capacity, because
+  // the desk is about to put a family in the room. `included` is what the rate
+  // covers and `most` is the ceiling with extra beds, so a type that sleeps
+  // more than it includes says both.
+  if (type.sleeps !== null) {
+    const { included, most } = type.sleeps;
+
+    name.append(el(
+      "span",
+      "sleeps",
+      most > included ? `sleeps ${included}, up to ${most}` : `sleeps ${included}`));
+  }
+
   element.append(
     name,
     el("div", undefined, String(type.total)),

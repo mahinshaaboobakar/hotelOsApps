@@ -41,7 +41,7 @@ public sealed class AvailabilityView(
         var byType = days
             .GroupBy(day => day.RoomTypeId)
             .Select(group => Worst(group.Key, [.. group]))
-            .OrderBy(type => names.TryGetValue(type.RoomTypeId, out var name) ? name : "")
+            .OrderBy(type => names.TryGetValue(type.RoomTypeId, out var known) ? known.Name : "")
             .ToList();
 
         return new
@@ -105,7 +105,7 @@ public sealed class AvailabilityView(
 
     /// <summary>One room type's row.</summary>
     private static object Row(
-        TypeAvailability type, IReadOnlyDictionary<Guid, string> names)
+        TypeAvailability type, IReadOnlyDictionary<Guid, MasterDataRoomTypeName> types)
         => new
         {
             // **The id, because a screen that chooses a room type has to name
@@ -115,7 +115,27 @@ public sealed class AvailabilityView(
             // book. Master Data's id, carried rather than minted here.
             roomTypeId = type.RoomTypeId.ToString(),
 
-            roomType = names.TryGetValue(type.RoomTypeId, out var name) ? name : null,
+            roomType = types.TryGetValue(type.RoomTypeId, out var found) ? found.Name : null,
+
+            // **What the type sleeps — ADR 0215, 2026-09-22.** Sent so the
+            // booking flow can tell a desk whether the party fits, which it
+            // could not do while this projection read a name and an id. Absent
+            // where Master Data has no row for the type rather than defaulted:
+            // a guess about how many people a room sleeps is the kind of number
+            // somebody books against.
+            //
+            // **The TYPE's, and a room's may differ.** `masterdata.rooms` holds
+            // a nullable override that Context resolves, so the effective
+            // number for an assigned room is Context's answer and not this one.
+            sleeps = found is null ? null : new
+            {
+                included = found.BaseOccupancy,
+                most = found.MaxOccupancy,
+                adults = found.MaxAdults,
+                children = found.MaxChildren,
+                extraBed = found.ExtraBedAllowed,
+                extraBeds = found.MaxExtraBeds,
+            },
 
             // **No rate, and it is absent rather than zero** — GUEST-Q7 rules
             // pricing out of this round, and nothing in this schema holds a
@@ -144,20 +164,26 @@ public sealed class AvailabilityView(
             free = type.Free,
         };
 
-    /// <summary>The room type names, read from Master Data and never copied.</summary>
-    private async Task<IReadOnlyDictionary<Guid, string>> NamesAsync(
+    /// <summary>The room types this read touches, from Master Data and never copied.</summary>
+    /// <remarks>
+    /// The name was all this took until 2026-09-22. It takes the row now,
+    /// because a desk choosing a type needs to know whether it sleeps the party
+    /// (ADR 0215) — and the occupancy is Master Data's, read here and stored
+    /// nowhere.
+    /// </remarks>
+    private async Task<IReadOnlyDictionary<Guid, MasterDataRoomTypeName>> NamesAsync(
         IReadOnlyList<TypeAvailability> days, CancellationToken cancellationToken)
     {
         var ids = days.Select(day => day.RoomTypeId).Distinct().ToArray();
 
         if (ids.Length == 0)
         {
-            return new Dictionary<Guid, string>();
+            return new Dictionary<Guid, MasterDataRoomTypeName>();
         }
 
         return await db.Set<MasterDataRoomTypeName>()
             .Where(type => ids.Contains(type.Id))
-            .ToDictionaryAsync(type => type.Id, type => type.Name, cancellationToken);
+            .ToDictionaryAsync(type => type.Id, type => type, cancellationToken);
     }
 
     /// <summary>Whether a PMS writes this property's lifecycle.</summary>

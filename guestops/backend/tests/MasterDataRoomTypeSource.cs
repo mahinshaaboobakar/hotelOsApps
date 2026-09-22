@@ -37,11 +37,31 @@ public sealed class MasterDataRoomTypeSource(string connection) : DbContext(
         .UseSnakeCaseNamingConvention().UseNpgsql(connection).Options)
 {
     /// <summary>One room type, as GuestOps reads it.</summary>
+    /// <remarks>
+    /// <b>The occupancy columns joined it on 2026-09-22</b>, when the read
+    /// model widened to project them (ADR 0215). They are Master Data's own
+    /// (<c>Catalogue.cs:93-99</c>) and are here because a table missing a
+    /// column the read model projects fails with <c>42703</c> — the arrangement
+    /// wearing the failure of the thing under test, which this file has already
+    /// produced once.
+    /// </remarks>
     public sealed class Row
     {
         public Guid Id { get; set; }
 
         public string Name { get; set; } = string.Empty;
+
+        public int BaseOccupancy { get; set; }
+
+        public int MaxOccupancy { get; set; }
+
+        public int MaxAdults { get; set; }
+
+        public int MaxChildren { get; set; }
+
+        public bool ExtraBedAllowed { get; set; }
+
+        public int MaxExtraBeds { get; set; }
     }
 
     public DbSet<Row> RoomTypes => Set<Row>();
