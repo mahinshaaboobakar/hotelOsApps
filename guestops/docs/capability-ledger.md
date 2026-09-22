@@ -56,6 +56,19 @@ ADR 0211's premise is that ADR 0210 made that reachable. GuestOps is the first
 application to call it, so this row is the estate's evidence and not only this
 application's.
 
+**And on 2026-09-22 it became unobtainable, which is a status change rather
+than a failure.** The owner uninstalled the product: all four HotelOS services
+removed, every installed-product port closed, and the Kernel now running is a
+development one. **There is no installed application to observe**, so the proof
+this row calls for cannot be made until the product is installed again — and
+until it is, ADR 0211's gate stays shut for a reason that has nothing to do
+with whether ADR 0210 works.
+
+The shape of the proof is unchanged and is recorded above: the **absence** of
+`Call failed with gRPC error status` after a post-restart `GetOperatingDay`,
+with Today finishing 200 rather than 500. Whoever reinstalls should expect to
+be asked for one screen-open.
+
 What depends on that call (code):
 
 | Where the owner sees it | Why |
