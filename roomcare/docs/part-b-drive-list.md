@@ -30,6 +30,15 @@ resolution is not Room Care's: EE has it with the architect, alongside the prope
 last premise I took on trust — "0.1.2 is installed" — was wrong the same way: a staging step that succeeded, in a
 place the reader of it never looks.*
 
+*Corrected 2026-09-23, EE's finding and re-measured here: **that is true of a machine that no longer exists.** The
+owner has uninstalled the product. `C:\Program Files\HotelOS` is gone, no `HotelOS*` service is registered, and
+nothing listens on the installed-product port. `C:\ProgramData\HotelOS` **survives** — config, logs, nats, pgsql,
+pki, secrets, services, `identity-jwks.json` — and still has no `packages` directory, which is ADR 0129 /
+`INSTALL-Q68` as designed: the uninstall leaves the property's data. So a fresh install at HEAD would meet an
+existing data root, which is a different first run from a clean machine, and **whether the machine-scope gap
+reappears is an open question rather than a known blocker**. The fresh install is the owner's to ask for, and is
+unasked. Room Care blocks nothing either way: the package is cut, verified and staged.*
+
 **Part B certifies 0.1.5**, the first Room Care the owner installs — ruled by the owner on 2026-09-22, because it
 carries their own 64g §2 B failure-card change, which 0.1.4 was cut two days too early to have. 0.1.2, 0.1.3 and
 0.1.4 were only ever on the shelf:
