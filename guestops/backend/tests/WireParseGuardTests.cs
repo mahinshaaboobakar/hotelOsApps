@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using HotelOS.GuestOps.Application.Abstractions;
+using HotelOS.Platform;
 using Xunit;
 
 namespace HotelOS.GuestOps.Tests;
@@ -26,8 +26,28 @@ namespace HotelOS.GuestOps.Tests;
 /// <b>By call shape, not by file.</b> A guard naming the nine files that held
 /// the defect would stop checking the tenth somebody writes next week — the
 /// population is *code that parses a day or a time*, and the only way to find
-/// it is the call. <see cref="Iso"/> itself is excluded because it is where the
-/// exact, invariant parse lives.
+/// it is the call.
+/// </para>
+/// <para>
+/// <b>There is no exemption, and there used to be one.</b> While the exact
+/// parse lived in this service, the file implementing it had to be excluded
+/// from its own rule. <see cref="Iso8601"/> is now the platform SDK's, so
+/// nothing in this tree is allowed to parse a day or a time at all, and the
+/// rule is a flat zero with nothing to argue about. *An exemption list is how a
+/// guard dies* — this one lost its only entry by the implementation leaving the
+/// tree, which is the best way for an exemption to go.
+/// </para>
+/// <para>
+/// <b>THIS RULE IS DELIBERATELY STRICTER THAN THE ESTATE-WIDE ONE, AND THE TWO
+/// MUST NOT BE HARMONISED.</b> <c>scripts/check_wire_parsing.py</c> in the
+/// platform repository reports a parse that <i>does not name a culture</i>,
+/// because a component that has not yet been read may hold a parse of something
+/// a person typed, which can legitimately be cultural — that judgement belongs
+/// to whoever owns the component. GuestOps has been read, every site converted,
+/// and every remaining wire value goes through <see cref="Iso8601"/>; so here
+/// the honest rule is *no such call at all*. **Do not relax this to match the
+/// script, and do not tighten the script to match this**: they answer different
+/// questions about differently-audited trees.
 /// </para>
 /// <para>
 /// <b>Comments are not read.</b> The remarks that name these calls are the
@@ -41,14 +61,11 @@ public sealed class WireParseGuardTests
         @"\b(?:DateOnly|TimeOnly|DateTime|DateTimeOffset)\.TryParse\s*\(",
         RegexOptions.Compiled);
 
-    /// <summary>Where the exact parse lives, and the only file allowed the call.</summary>
-    private const string Home = "Iso.cs";
-
+    /// <summary>Nothing in this service parses a day or a time itself.</summary>
     [Fact]
     public void Nothing_parses_a_day_or_a_time_under_the_machines_culture()
     {
         var offenders = Sources()
-            .Where(file => Path.GetFileName(file) != Home)
             .Select(file => (file, hits: Code(File.ReadAllText(file))
                 .Count(line => CultureParse.IsMatch(line))))
             .Where(found => found.hits > 0)
@@ -62,25 +79,22 @@ public sealed class WireParseGuardTests
     /// The guard is looking at something.
     /// </summary>
     /// <remarks>
-    /// <b>A walk that quietly stopped finding files would pass on the shrinking
-    /// set it still had.</b> The count is asserted as a floor rather than a
-    /// number, because a number in a test is a second place the size of this
-    /// application is written down.
+    /// <b>A walk that quietly stopped finding files would pass the check above
+    /// on the shrinking set it still had.</b> The count is asserted as a floor
+    /// rather than a number, because a number in a test is a second place the
+    /// size of this application is written down.
     /// </remarks>
     [Fact]
     public void The_guard_reads_the_whole_service()
-    {
-        Assert.True(Sources().Count() > 50, "the source walk found almost nothing");
-        Assert.Contains(Sources(), file => Path.GetFileName(file) == Home);
-    }
+        => Assert.True(Sources().Count() > 50, "the source walk found almost nothing");
 
     /// <summary>
     /// The exact parse refuses what the culture-dependent one accepted.
     /// </summary>
     /// <remarks>
     /// <b>The positive control.</b> Without it, the guard above is equally
-    /// consistent with a regex that matches nothing — and the value here is the
-    /// one that was silently accepted.
+    /// consistent with a regex that matches nothing — and the first value here
+    /// is the one that was silently accepted.
     /// </remarks>
     [Theory]
     [InlineData("14/03/86")]
@@ -88,27 +102,26 @@ public sealed class WireParseGuardTests
     [InlineData("14 March 1986")]
     [InlineData("1986-3-14")]
     public void A_day_that_is_not_the_wires_form_is_not_a_day(string written)
-        => Assert.Null(Iso.Day(written));
+        => Assert.Null(Iso8601.Day(written));
 
     [Theory]
-    [InlineData("2026-09-23")]
-    [InlineData("1986-03-14")]
-    public void A_day_in_the_wires_form_is_read(string written)
-        => Assert.Equal(DateOnly.Parse(written, System.Globalization.CultureInfo.InvariantCulture),
-            Iso.Day(written));
+    [InlineData("2026-09-23", 2026, 9, 23)]
+    [InlineData("1986-03-14", 1986, 3, 14)]
+    public void A_day_in_the_wires_form_is_read(string written, int year, int month, int day)
+        => Assert.Equal(new DateOnly(year, month, day), Iso8601.Day(written));
 
     [Theory]
     [InlineData("18:00", 18, 0, 0)]
     [InlineData("18:00:30", 18, 0, 30)]
     public void A_time_in_the_wires_form_is_read(string written, int hour, int minute, int second)
-        => Assert.Equal(new TimeOnly(hour, minute, second), Iso.Time(written));
+        => Assert.Equal(new TimeOnly(hour, minute, second), Iso8601.Time(written));
 
     [Theory]
     [InlineData("6 PM")]
     [InlineData("18.00")]
     [InlineData("")]
     public void A_time_that_is_not_the_wires_form_is_not_a_time(string written)
-        => Assert.Null(Iso.Time(written));
+        => Assert.Null(Iso8601.Time(written));
 
     /// <summary>Every source file of the service, wherever it lives.</summary>
     /// <remarks>

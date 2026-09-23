@@ -1,4 +1,3 @@
-using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.Platform;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
@@ -344,7 +343,7 @@ public static class ModuleSurface
     private static DateOnly? Date(JsonElement body, string name)
         => body.TryGetProperty(name, out var value)
             && value.ValueKind == JsonValueKind.String
-            && Iso.Day(value.GetString()) is { } date
+            && Iso8601.Day(value.GetString()) is { } date
                 ? date
                 : null;
 

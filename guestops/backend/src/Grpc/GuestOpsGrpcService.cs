@@ -1,5 +1,4 @@
 using Google.Protobuf.WellKnownTypes;
-using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Registrations;
@@ -82,7 +81,7 @@ public partial class GuestOpsGrpcService(
     /// stay nobody asked for.
     /// </remarks>
     private static DateOnly ParseDate(string value, string field)
-        => Iso.Day(value)
+        => Iso8601.Day(value)
             ?? throw new InvalidRequestException($"{field} must be an ISO-8601 date");
 
     // --- outbound ---------------------------------------------------------
@@ -107,7 +106,7 @@ public partial class GuestOpsGrpcService(
             return null;
         }
 
-        return Iso.Day(value)
+        return Iso8601.Day(value)
             ?? throw new InvalidRequestException($"{field} must be an ISO-8601 date");
     }
 

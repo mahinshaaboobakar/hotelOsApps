@@ -2,9 +2,9 @@
 // concepts here (StayLifecycle, TimeBasis, StayGuest, ContactPoint, Money,
 // CommercialTerms, Absence). The alias makes every line say which side of
 // the boundary it is on, which is this file's whole subject.
-using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Inbound;
 using HotelOS.GuestOps.Domain;
+using HotelOS.Platform;
 using Wire = HotelOS.Contracts.Integration.V1;
 
 namespace HotelOS.GuestOps.Events;
@@ -164,7 +164,7 @@ public static class RoomStayFactMapper
 
     /// <summary>The Hub's business date. Attached there, never computed here.</summary>
     private static DateOnly? Date(string value)
-        => Iso.Day(value);
+        => Iso8601.Day(value);
 
     /// <summary>
     /// A member of the party, as the source reported it.
@@ -245,7 +245,7 @@ public static class RoomStayFactMapper
             IsDefault = terms?.IsDefault ?? false,
             DepositOffsetDaysFromBooking = Offset(terms?.DepositOffsetDaysFromBooking),
             CancelOffsetDaysFromArrival = Offset(terms?.CancelOffsetDaysFromArrival),
-            CancelDropTime = Iso.Time(terms?.CancelDropTime),
+            CancelDropTime = Iso8601.Time(terms?.CancelDropTime),
             PenaltyAmount = Amount(terms?.PenaltyAmount),
         };
     }

@@ -1,4 +1,3 @@
-using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Registrations;
 using HotelOS.Platform;
 using System.Text.Json;
@@ -147,7 +146,7 @@ public sealed class RegistrationCommand(RegistrationService registrations)
     /// says the field is wanted, and the answer reports it missing.
     /// </remarks>
     private static DateOnly? Date(JsonElement body, string name)
-        => Text(body, name) is { } text ? Iso.Day(text) : null;
+        => Text(body, name) is { } text ? Iso8601.Day(text) : null;
 
     /// <summary>The stay this card belongs to.</summary>
     private static Guid? Id(JsonElement body, string name)

@@ -1,4 +1,3 @@
-using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Infrastructure;
@@ -238,7 +237,7 @@ public sealed class WalkInCommand(
             => Text(body, name) is { } text && Guid.TryParse(text, out var id) ? id : null;
 
         private static DateOnly? Date(JsonElement body, string name)
-            => Text(body, name) is { } text && Iso.Day(text) is { } date
+            => Text(body, name) is { } text && Iso8601.Day(text) is { } date
                 ? date
                 : null;
 
