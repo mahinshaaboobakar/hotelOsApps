@@ -3,7 +3,7 @@
  */
 
 import type { TypeAvailability } from "../../book";
-import { el } from "../../chrome/element";
+import { control, el } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
 const COLUMNS = [
@@ -25,10 +25,21 @@ const COLUMNS = [
  * inputs writing into it — four ways to drift, and a second owner of the truth
  * about rooms.
  *
+ * **`choose` is what made this table a screen rather than a picture.** It drew
+ * every type and offered nothing to do with one until 2026-09-23 — the 05
+ * flow's step 2 — so New booking could say what was free and go no further.
+ * A type with no room free offers no control, because there is nothing to
+ * choose; a type the party does not fit is offered like any other, which is
+ * ADR 0223's treatment C and the thing not to "improve" here (`confirm.ts`).
+ *
  * @param types the room types and their counts
+ * @param choose what to do with the type a person picks
  * @returns the table
  */
-export function availability(types: readonly TypeAvailability[]): HTMLElement {
+export function availability(
+  types: readonly TypeAvailability[],
+  choose?: (type: TypeAvailability) => void,
+): HTMLElement {
   const element = el("div", "tbl");
   const head = el("div", "tr list hd");
 
@@ -39,13 +50,16 @@ export function availability(types: readonly TypeAvailability[]): HTMLElement {
   element.append(head);
 
   for (const type of types) {
-    element.append(line(type));
+    element.append(line(type, choose));
   }
 
   return element;
 }
 
-function line(type: TypeAvailability): HTMLElement {
+function line(
+  type: TypeAvailability,
+  choose?: (type: TypeAvailability) => void,
+): HTMLElement {
   const element = el("div", "tr list");
 
   const name = el("div", "nm");
@@ -78,9 +92,31 @@ function line(type: TypeAvailability): HTMLElement {
     attributed(type.outOfOrder, type.outOfOrderBy, "other"),
     attributed(type.stopSold, type.stopSoldWhy, "disagrees"),
     free(type.free),
+    picker(type, choose),
   );
 
   return element;
+}
+
+/**
+ * The control that takes this type into the flow, where there is one.
+ *
+ * **A type with nothing free offers no control** — the count already says why,
+ * and a button that cannot work is the defect this application spent a round
+ * removing. Where no `choose` is given the cell is empty: the same table is
+ * drawn read-only on screens that are not taking a booking.
+ */
+function picker(
+  type: TypeAvailability,
+  choose?: (type: TypeAvailability) => void,
+): HTMLElement {
+  const cell = el("div");
+
+  if (choose !== undefined && type.free > 0) {
+    cell.append(control("btn sm", "Choose", () => choose(type)));
+  }
+
+  return cell;
 }
 
 /**

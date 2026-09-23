@@ -321,8 +321,15 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "NewBooking") {
-      void newBooking(host, main, () => show({ overlay: "walkin" }))
-        .then(overlay);
+      void newBooking(
+        host,
+        main,
+        () => show({ overlay: "walkin" }),
+        // The booking exists because the service said so, and the screen that
+        // reads it is the one that draws it — this does not build a fifth step
+        // of its own out of what the write returned.
+        (bookingId) => show({ screen: "Booking", bookingId, page: 0 }),
+      ).then(overlay);
       return;
     }
 
