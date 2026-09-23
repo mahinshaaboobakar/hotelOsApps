@@ -62,9 +62,11 @@
 #     whether a room was refreshed). None of Room Care's own UI code reads the
 #     clock. A source guard refuses the bad shapes. The day is the property's
 #     operating day (ADR 0211), as Room Care's chapters have it, derived in one
-#     function. **Owed in 0.1.5**: that function is retired and Context's own
-#     value is consumed instead — kept here on purpose, because nothing is
-#     deleted until the Context call is proved live.
+#     function. **Owed in a later cut**: that function is retired and
+#     Context's own value is consumed instead. Still here on purpose — as of
+#     2026-09-22 no application has proved the Context call live (GuestOps
+#     holds it and fails closed: nothing enrols the certificate it needs), and
+#     nothing is deleted until it does.
 #   * **"Not before" is said in the property's time.** The door's refusal and
 #     the room's history said it in UTC and labelled it so.
 #   * **Every refusal is in a person's words.** No field names, enum words
@@ -76,17 +78,15 @@
 #     ends a clean with the platform event's name.
 #   * **Chips are spaced as the owner approved**, 6px beside and below.
 #
-#   * **The failure cards are the shared surface's**, and page 64 §13's three
-#     owner rulings of 2026-09-20 land in the SDK, not here: the crossed
-#     shield that is not 64e's, the sentence "Authorization request could not
-#     be evaluated", and "Asked for" in plain words with the code name moved
-#     into Copy these details. Re-audited for this cut: the undecidable card is
-#     already drawn red, as §13 asks; the rest arrives with the SDK, and the
-#     card still names the capability until it does. A write refused because
-#     the model could not decide keeps its own sentence (AUTHZ-Q34/35a), which
-#     is a different surface from the read's card.
+#   * **The rest of page 64 §13 is still the shared surface's**: the crossed
+#     shield that is not 64e's, and the sentence "Authorization request could
+#     not be evaluated". Those arrive with the SDK. Already right here: the
+#     undecidable card is drawn red, as §13 asks, and "Asked for" now says
+#     what could not be read (above). A write refused because the model could
+#     not decide keeps its own sentence (AUTHZ-Q34/35a), which is a different
+#     surface from the read's card.
 #
-# Still true in 0.1.4, and said here so nobody reads the package as more than
+# Still true in 0.1.5, and said here so nobody reads the package as more than
 # it is: assigning rooms and changing a room's service are refused for
 # everyone until the platform can register an installed application's own
 # object types. Prepare, Room states and Supervision are expected not to
