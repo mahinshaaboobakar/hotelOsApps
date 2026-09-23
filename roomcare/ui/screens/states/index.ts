@@ -20,6 +20,7 @@ import { compact } from "./compact";
 import { Edits } from "./edits";
 import { grid } from "./grid";
 import { forgetSelection, sheetView } from "./sheet";
+import { forgetPaint } from "./grid";
 
 export interface Conflict {
   roomId: string;
@@ -30,6 +31,7 @@ export interface Conflict {
 
 export async function states(host: HostApi, body: HTMLElement, nav: Nav): Promise<void> {
   forgetSelection();
+  forgetPaint();
   const got = await load<RoomStates>(host, READ, "states");
   if (!got.ok) {
     body.append(failed(host, got.failure, "the room states", nav.show));

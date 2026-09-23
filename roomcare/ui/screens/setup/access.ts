@@ -46,17 +46,15 @@ export async function access(host: HostApi, body: HTMLElement, nav: Nav): Promis
 
   const table = el("table");
   const head = el("tr");
-  for (const name of ["Person", "Posting (Workforce)", "Holds", "Since", "Granted by", ""]) head.append(el("th", undefined, name));
+  for (const name of ["Person", "Holds", "Since", "Granted by", ""]) head.append(el("th", undefined, name));
   table.append(head);
   for (const grant of got.value.grants) {
     const tr = el("tr");
-    const posting = el("td", "dim");
-    posting.append(document.createTextNode("—"));
     const holds = el("td");
     holds.append(el("span", "pill ok", "property-wide access"));
     const revoke = el("td");
     revoke.append(control("btn sm danger", "Revoke…", () => confirmRevoke(host, nav, grant.userId, grant.name)));
-    tr.append(el("td", undefined, grant.name), posting, holds, el("td", undefined, day(host, grant.grantedAt.slice(0, 10))), el("td", undefined, grant.grantedBy ?? "—"), revoke);
+    tr.append(el("td", undefined, grant.name), holds, el("td", undefined, day(host, grant.grantedAt.slice(0, 10))), el("td", undefined, grant.grantedBy ?? "—"), revoke);
     table.append(tr);
   }
   const n = got.value.grants.length;

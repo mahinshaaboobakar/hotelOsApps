@@ -13,7 +13,7 @@ import { clock, day, nearDay, when } from "../../chrome/instant";
 import { failed } from "../../chrome/failure";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
-import { conditionClass, lower, source } from "../../chrome/words";
+import { conditionClass, lower, said as inWords, source } from "../../chrome/words";
 import type { BoardRoom } from "../../model";
 import { recordException, reassign, roomState } from "./acts";
 import { cards, history, record } from "./cards";
@@ -49,9 +49,9 @@ export async function room(host: HostApi, body: HTMLElement, nav: Nav, roomId: s
   const heading = el("h2", undefined, `Room ${line.number} · ${page.type} · ${page.zone}`);
   heading.style.cssText = "margin:0;font-size:18px";
   const tone = conditionClass(line.condition) === "dirty" ? "bad" : conditionClass(line.condition) === "clean" ? "ok" : "run";
-  title.append(heading, el("span", `pill ${tone}`, line.condition), el("span", "mono", `set by ${line.setBy ?? source(line.source)} · ${when(host, line.setAt)}`));
+  title.append(heading, el("span", `pill ${tone}`, inWords(line.condition)), el("span", "mono", `set by ${line.setBy ?? source(line.source)} · ${when(host, line.setAt)}`));
   if (line.marks.manual) title.append(el("span", "tag man", "manual"));
-  if (page.disagreement !== null) title.append(el("span", "pill warn", `DISAGREEMENT · ${source(page.disagreement.theirsSource)} says ${page.disagreement.theirs} ${when(host, page.disagreement.theirsAt)}`));
+  if (page.disagreement !== null) title.append(el("span", "pill warn", `Disagreement · ${source(page.disagreement.theirsSource)} says ${lower(page.disagreement.theirs)} ${when(host, page.disagreement.theirsAt)}`));
 
   const f = page.facts;
   const facts = el("div", "mono", [
@@ -82,8 +82,8 @@ function disagreement(host: HostApi, nav: Nav, page: RoomPage): HTMLElement {
   view.classList.add("accent");
   const kv = el("div", "kv");
   kv.append(
-    el("div", "k", "Ours"), el("div", undefined, `${d.ours} · ${d.oursBy ?? source(d.oursSource)} · ${when(host, d.oursAt)} (a deliberate act)`),
-    el("div", "k", `The ${source(d.theirsSource)}`), el("div", undefined, `${d.theirs} · occurred ${when(host, d.theirsAt)} · newer than our act → flagged, not applied`),
+    el("div", "k", "Ours"), el("div", undefined, `${inWords(d.ours)} · ${d.oursBy ?? source(d.oursSource)} · ${when(host, d.oursAt)} (a deliberate act)`),
+    el("div", "k", `The ${source(d.theirsSource)}`), el("div", undefined, `${inWords(d.theirs)} · occurred ${when(host, d.theirsAt)} · newer than our act → flagged, not applied`),
     el("div", "k", "Clear as"),
   );
   const buttons = el("div", "row");

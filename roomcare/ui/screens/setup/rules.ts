@@ -26,7 +26,7 @@ export function rules(host: HostApi, body: HTMLElement, nav: Nav, data: SetupDat
   const linen = card("Linen",
     sentence("radio", radio("linenRuleKind", "EVERY_N_DEFERRABLE", p.linenRuleKind === "EVERY_N_DEFERRABLE", "Every N nights, the guest may defer", "— N =", set("linenRuleKind")), inlineNumber(p.linenEveryDays, set("linenEveryDays"))),
     radio("linenRuleKind", "MUST_BY_N", p.linenRuleKind === "MUST_BY_N", "Must be changed by day N", "— no deferral; the door offers Done or Partial-with-linen only", set("linenRuleKind")),
-    aside("counted on the ROOM — \"linen last changed\", reset by every departure clean; nights empty do not count"));
+    aside("counted on the room — \"linen last changed\", reset by every departure clean; nights empty do not count"));
 
   const towels = card("Towels",
     radio("towels", "DAILY", p.towels === "DAILY", "Replace daily", "", set("towels")),

@@ -14,7 +14,18 @@ import type { Edit, Edits } from "./edits";
 import { CONDITIONS, OCCUPANCIES, STAYS } from "./sheet";
 
 /** What the next tap paints — one fact and its value. */
+/**
+ * What a tap sets. It returns to `dirty` whenever Room states is opened: **a remembered setting is a setting nobody
+ * chose today**, and this one paints on touch, so yesterday's choice is one tap from a wrong state on a real room
+ * (ADR 0229 · 08, the owner, 2026-09-23). Starting the same way every time is also the safe side of the binary —
+ * it matches what the service does when nothing is set.
+ */
 let paint: { fact: keyof Edit; value: string } = { fact: "condition", value: "DIRTY" };
+
+/** Called when Room states is entered, beside the sheet's own forgetting. */
+export function forgetPaint(): void {
+  paint = { fact: "condition", value: "DIRTY" };
+}
 
 export function grid(host: HostApi, data: RoomStates, edits: Edits, conflicts: ReadonlySet<string>, redraw: () => void): HTMLElement[] {
   const palette = el("div", "dock");

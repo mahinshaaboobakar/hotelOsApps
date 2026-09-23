@@ -19,6 +19,13 @@ export const CONDITIONS = ["DIRTY", "CLEAN", "INSPECTED"];
 export const OCCUPANCIES = ["VACANT", "OCCUPIED"];
 export const STAYS: readonly (readonly [string, string])[] = [["DEPARTED", "departed"], ["ARRIVED", "arrived"], ["IN_HOUSE", "in house"], ["NONE", "none"]];
 
+/**
+ * Which rooms the sheet shows, and the selection under it. Both start fresh every time a person opens Room states.
+ *
+ * **A filter that remembers is a filter that hides what arrived** — ADR 0229 · 07, the owner, 2026-09-23, ruling on
+ * what 01d drew: next morning, four rooms had come in overnight and a remembered "Dirty" kept them off the list,
+ * under a count ("13 of 21") that is easy to read past at seven in the morning.
+ */
 let show = "All";
 const selected = new Set<string>();
 
@@ -30,6 +37,7 @@ const selected = new Set<string>();
  */
 export function forgetSelection(): void {
   selected.clear();
+  show = "All";
 }
 
 export function sheetView(host: HostApi, data: RoomStates, edits: Edits, conflicts: ReadonlySet<string>, redraw: () => void, nav: Nav): HTMLElement[] {

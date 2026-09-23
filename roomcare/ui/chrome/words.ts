@@ -50,6 +50,15 @@ export function phase(value: string, serviceName?: string): string {
   return PHASE[value] ?? lower(value);
 }
 
+/**
+ * `IN_PROGRESS` → `In progress` — a state said as a word (ADR 0229 · 06, owner 2026-09-23). The frames drew these in
+ * capitals and the build followed; read on a live screen they look like the service's own codes.
+ */
+export function said(value: string): string {
+  const words = lower(value);
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
 /** `CHECKED_OUT` → `checked out`. */
 export function lower(value: string): string {
   return value.toLowerCase().replaceAll("_", " ");

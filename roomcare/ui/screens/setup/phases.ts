@@ -38,7 +38,7 @@ const MEANS: Record<string, string> = {
   STRIP: "linen and towels out · rubbish · lost property · damage",
   CLEAN: "bathroom · surfaces · floors",
   MAKE_UP: "fresh bed · restock to standard · set-up",
-  DONE: "the attendant's done — the room is CLEAN, announced",
+  DONE: "the attendant's done — the room is clean, announced",
 };
 
 /** The chosen service's phases; reordering changes the row, and the tab's Save keeps it. */

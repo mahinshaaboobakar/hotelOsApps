@@ -104,12 +104,12 @@ function stateCell(host: HostApi, row: MyRoom): HTMLElement {
 export function stateText(host: HostApi, row: MyRoom): string {
   const s = row.state;
   switch (s.kind) {
-    case "IN_PROGRESS": return `IN PROGRESS · since ${clock(host, s.at)}`;
-    case "DONE": return `DONE ${clock(host, s.at)}`;
-    case "INSPECTION_REQUESTED": return `DONE ${clock(host, s.at)} · inspection requested`;
-    case "READY": return `READY ${clock(host, s.at)}`;
-    case "PARTIAL": return `PARTIAL ${clock(host, s.at)} · ${s.detail ?? ""}`;
-    case "DECLINED": return `DECLINED ${clock(host, s.at)}`;
+    case "IN_PROGRESS": return `In progress · since ${clock(host, s.at)}`;
+    case "DONE": return `Done ${clock(host, s.at)}`;
+    case "INSPECTION_REQUESTED": return `Done ${clock(host, s.at)} · inspection requested`;
+    case "READY": return `Ready ${clock(host, s.at)}`;
+    case "PARTIAL": return `Partial ${clock(host, s.at)} · ${s.detail ?? ""}`;
+    case "DECLINED": return `Declined ${clock(host, s.at)}`;
     case "DND": return `DND ${clock(host, s.at)} · re-check due ${clock(host, row.recheckAt)}`;
     case "WAITING": return `waiting for ${clock(host, s.until)}`;
     case "SUPERVISION": return s.days === null || s.days === undefined ? "the supervisor's room" : `the supervisor's room · ${ordinal(s.days)} day`;

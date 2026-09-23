@@ -55,7 +55,7 @@ export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: s
     r.reduction,
   ].filter((x) => x !== null).join(" · "));
   const running = r.state.kind === "IN_PROGRESS";
-  title.append(heading, el("span", `pill p${Math.min(r.priority, 3)}`, whole(host, r.priority)), el("span", running ? "pill run" : "pill", running ? "IN PROGRESS" : stateText(host, r)), facts);
+  title.append(heading, el("span", `pill p${Math.min(r.priority, 3)}`, whole(host, r.priority)), el("span", running ? "pill run" : "pill", running ? "In progress" : stateText(host, r)), facts);
   const phases = el("div", "mono");
   phases.style.margin = "6px 0 0";
   phases.append(document.createTextNode("phases: "));
@@ -68,7 +68,7 @@ export async function door(host: HostApi, body: HTMLElement, nav: Nav, taskId: s
   const buttons = el("div", "row");
   buttons.style.margin = "12px 0";
   buttons.append(v.running ? control("btn", "Pause", () => void run("pause", {})()) : control("btn", v.startedAt === null ? "Start" : "Resume", () => void run("start", {})()));
-  buttons.append(el("span", "btn off", "Photo — the media service's to add"), control("btn", "Ask for extra time…", () => extraTime(host, nav, taskId)),
+  buttons.append(el("span", "btn off", "Photo — not available yet"), control("btn", "Ask for extra time…", () => extraTime(host, nav, taskId)),
     control("btn", "Found an issue…", () => issue(host, nav, taskId)), control("btn pri", "End…", () => end(host, nav, v)));
   body.append(title, phases, buttons, said, el("p", "dim", "A restock line appears here when Inventory is installed at this property."));
   void back;
@@ -108,7 +108,7 @@ function end(host: HostApi, nav: Nav, v: Door): void {
   const kv = el("div", "kv");
   kv.style.marginTop = "12px";
   kv.append(el("div", "k", "Linen"), linenLabel,
-    el("div", "k", "Then"), el("div", undefined, `${v.room.room} becomes CLEAN, announced${v.inspectionRule === "NONE" ? "" : "; inspection requested"}`),
+    el("div", "k", "Then"), el("div", undefined, `${v.room.room} becomes clean, announced${v.inspectionRule === "NONE" ? "" : "; inspection requested"}`),
     el("div", "k", "Otherwise"), el("div", undefined, "a DND keeps the room on your list with its re-check; partial and declined are records too"),
     el("div", "k", "Recorded as"), el("div", undefined, "you, at the moment you confirm, with what you chose"));
   overlay.body.append(choice, partsRow, kv, el("label", "lbl", "Note"), note);

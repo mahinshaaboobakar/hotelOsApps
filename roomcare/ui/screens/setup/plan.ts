@@ -28,7 +28,7 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
 
   const table = el("table");
   const head = el("tr");
-  for (const name of ["Room type", "Every", "Typical length", "Rooms", "Due this quarter"]) head.append(el("th", undefined, name));
+  for (const name of ["Room type", "Every", "Rooms", "Due this quarter"]) head.append(el("th", undefined, name));
   table.append(head);
   const inputs = got.value.rows.map((row) => {
     const months = inlineNumber(row.everyMonths);
@@ -36,9 +36,7 @@ export async function plan(host: HostApi, body: HTMLElement, nav: Nav, data: Set
     const every = el("td");
     every.style.whiteSpace = "nowrap";
     every.append(months, document.createTextNode(" months"));
-    const length = el("td", "dim");
-    length.append(document.createTextNode("—"));
-    tr.append(el("td", undefined, row.roomType), every, length, el("td", "num", whole(host, row.rooms)),
+    tr.append(el("td", undefined, row.roomType), every, el("td", "num", whole(host, row.rooms)),
       el("td", undefined, row.everyMonths === null ? "—" : whole(host, row.dueThisQuarter)));
     table.append(tr);
     return { row, months };

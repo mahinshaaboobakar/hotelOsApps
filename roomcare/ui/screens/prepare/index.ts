@@ -14,7 +14,7 @@ import { clock, minutes, when } from "../../chrome/instant";
 import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
-import { lower } from "../../chrome/words";
+import { lower, said as inWords } from "../../chrome/words";
 import type { Paging } from "../../model";
 import { moveRooms } from "./move";
 
@@ -93,7 +93,7 @@ export async function prepare(host: HostApi, body: HTMLElement, nav: Nav, page: 
   for (const c of v.changes) {
     const row = el("tr", "pick");
     row.addEventListener("click", () => nav.openRoom(c.roomId));
-    const what = c.soldAt === null ? c.what : `${c.what} · sold ${clock(host, c.soldAt)}`;
+    const what = c.soldAt === null ? inWords(c.what) : `${inWords(c.what)} · sold ${clock(host, c.soldAt)}`;
     row.append(el("td", "num", clock(host, c.at)), fill(el("td"), opener(c.room)), el("td", undefined, what), el("td", undefined, c.onNextPress));
     table.append(row);
   }

@@ -17,7 +17,7 @@ import { READ, act, holds, load } from "../../chrome/load";
 import type { Nav } from "../../chrome/nav";
 import { whole } from "../../chrome/number";
 import { actions, dialog, readyWhen, sheet } from "../../chrome/overlay";
-import { lower } from "../../chrome/words";
+import { lower, said } from "../../chrome/words";
 import type { Paging } from "../../model";
 
 interface Row {
@@ -73,7 +73,7 @@ export async function deepClean(host: HostApi, body: HTMLElement, nav: Nav, page
     job.append(document.createTextNode(row.jobId === null ? (row.blockRequestedAt === null ? "—" : "raised with the plan") : row.jobStatus === null ? "job raised — no status heard yet " : `job ${lower(row.jobStatus)} `));
     const state = el("td");
     const tone = row.state === "DUE" ? "warn" : row.state === "IN_PROGRESS" ? "run" : row.state === "DONE" ? "ok" : "";
-    state.append(el("span", `pill ${tone}`, row.state.replaceAll("_", " ")));
+    state.append(el("span", `pill ${tone}`, said(row.state)));
     if (row.state === "DUE" && holds(host, "roomcare.plan")) state.append(document.createTextNode(" "), control("btn sm", "plan a window…", () => plan(host, nav, row)));
     tr.append(el("td", "num", row.room), el("td", undefined, row.type), el("td", undefined, row.lastDone === null ? "never recorded" : day(host, row.lastDone)),
       el("td", undefined, day(host, row.due)), el("td", undefined, row.windowFrom === null ? "—" : `${day(host, row.windowFrom)} – ${day(host, row.windowTo)}`), block, job, state);

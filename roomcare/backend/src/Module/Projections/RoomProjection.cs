@@ -77,7 +77,7 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
         var became = task.Outcome switch
         {
             // The drawing's "announced (room.cleaned)" was a developer's note: the event name is not built as words (owner, 2026-09-19).
-            TaskOutcome.Done => "room CLEAN",
+            TaskOutcome.Done => "room clean",
             TaskOutcome.Partial => $"partial ({string.Join(", ", task.PartialDone.Select(p => p.ToLowerInvariant()))})",
             _ => null,
         };

@@ -9,7 +9,7 @@ import { card } from "../../chrome/card";
 import { el } from "../../chrome/element";
 import { clock, day, when } from "../../chrome/instant";
 import { whole } from "../../chrome/number";
-import { lower, service, source } from "../../chrome/words";
+import { lower, said, service, source } from "../../chrome/words";
 import type { RoomPage } from "./index";
 
 export function cards(host: HostApi, page: RoomPage, disagreement: HTMLElement | null): HTMLElement {
@@ -67,7 +67,7 @@ export function history(host: HostApi, page: RoomPage): HTMLElement {
 
 export function record(host: HostApi, page: RoomPage): HTMLElement {
   const kv = el("div", "kv");
-  kv.append(el("div", "k", "Condition"), el("div", undefined, `${page.line.condition} · ${page.line.setBy ?? source(page.line.source)} · ${when(host, page.line.setAt)}`),
+  kv.append(el("div", "k", "Condition"), el("div", undefined, `${said(page.line.condition)} · ${page.line.setBy ?? source(page.line.source)} · ${when(host, page.line.setAt)}`),
     el("div", "k", "Days without service"), el("div", undefined, whole(host, page.facts.daysWithoutService)),
     el("div", "k", "Supervisor's since"), el("div", undefined, page.facts.supervisedSince === null ? "—" : day(host, page.facts.supervisedSince)));
   const heard = page.today.filter((e) => e.kind === "OBSERVED").map((entry) => el("div", "mono", `${when(host, entry.at)} · ${entry.what} · ${lower(entry.status ?? "")}`));

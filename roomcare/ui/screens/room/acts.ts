@@ -36,7 +36,7 @@ export function roomState(host: HostApi, nav: Nav, room: BoardRoom): void {
     el("label", "lbl", "What happened"), choices,
     el("label", "lbl", "Arrival expected today · sets sold tonight"), arrival,
     el("label", "lbl", "Condition"), condition,
-    el("p", "dim", "Recorded as source manual — a deliberate act. If the PMS later says otherwise: older than this is history; newer and contradicting is a disagreement flag."),
+    el("p", "dim", "Recorded by hand. If the front desk says something different afterwards, a supervisor settles it."),
   );
   actions(overlay, "Record", () => {
     void (async () => {
@@ -84,7 +84,7 @@ export async function reassign(host: HostApi, nav: Nav, room: BoardRoom): Promis
   }
   for (const p of people.value) person.append(option(p.name, p.userId, p.userId === room.attendantId));
   overlay.body.append(
-    el("p", "dim", `Now: ${room.attendant ?? "nobody"}. The people posted to Housekeeping are Workforce's; whether they are on shift is Workforce's to add.`),
+    el("p", "dim", `Now: ${room.attendant ?? "nobody"}. Anyone posted to Housekeeping can take it.`),
     el("label", "lbl", "Person"), person,
   );
   actions(overlay, "Reassign", () => {
