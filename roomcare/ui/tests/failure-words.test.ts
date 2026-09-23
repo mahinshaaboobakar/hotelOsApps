@@ -50,15 +50,27 @@ describe("a failure card", () => {
     expect(written).toContain("roomcare.read");
   });
 
-  // REPORTED, NOT DECIDED. 64g §2 B moved the code name off the facts line. On the three refusal causes the act's
-  // note still carries it — "This screen needs roomcare.read" — and that note is the shared surface's, drawn from
-  // the phrase the SDK hands over. Room Care does not rewrite another application's shared words. Asserted as it
-  // stands so the day the surface changes, this test says so rather than passing quietly.
-  it("still names the permission in the refusal note — the shared surface's, reported", async () => {
+  // THE DAY THE SURFACE CHANGED. This read the other way — "still names the permission in the refusal note" — and
+  // was asserted as it stood so that the day the shared surface moved, it would say so rather than pass quietly.
+  // It went red on 2026-09-23 against HosPilotOS `e330b7ca` (64h frame 3, owner 2026-09-22): the note is now
+  // "This screen needs a permission, and no grant at this property names this user", and `grant()` gained the
+  // `Copy these details` label so the code name still reaches whoever can act on it. Room Care drew no control on
+  // `grant`, so the code name left this application's refusals with nothing put in its place; `chrome/failure.ts`
+  // now draws it, and both halves are asserted together because either alone is the defect the owner named.
+  it("names no code name in a refusal note, and still hands the code name to support", async () => {
     for (const kind of ["forbidden", "user_forbidden", "local_forbidden"] as const) {
       const root = mount(activate, host(SUPERVISOR, { board: new HostCallError({ kind, message: "the test asked" }) }));
       await settle();
-      expect(root.querySelector(".fail-note")?.textContent, kind).toContain("roomcare.read");
+      const note = root.querySelector(".fail-note")?.textContent ?? "";
+      expect(note, kind).not.toContain("roomcare.read");
+      expect([...note.matchAll(CODE_NAME)].map((m) => m[0]), kind).toEqual([]);
+      const copy = [...root.querySelectorAll("button")].find((b) => b.textContent?.trim() === "Copy these details");
+      expect(copy, `${kind}: a refused card offers the path to the identifier`).toBeDefined();
+      let written = "";
+      Object.defineProperty(globalThis.navigator, "clipboard", { value: { writeText: (t: string) => { written = t; return Promise.resolve(); } }, configurable: true });
+      copy!.click();
+      await settle();
+      expect(written, kind).toContain("roomcare.read");
     }
   });
 

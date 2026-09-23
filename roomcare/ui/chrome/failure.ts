@@ -93,8 +93,22 @@ function phrase(runs: Phrase, className: string): HTMLElement {
 
 /**
  * 64b's `.st-do` — the control first where there is one, then the note. The act
- * is exhausted by kind: `grant` carries no label and so no control (owner,
- * 2026-09-17 — a refusal names the grant and stops).
+ * is exhausted by kind.
+ *
+ * **`grant` now draws the copy control too — owner, 2026-09-22, page `64h`
+ * frame 3.** It drew none while the sentence still named the capability (owner,
+ * 2026-09-17: a refusal names the grant and stops), and that was right: nobody
+ * at this terminal can grant anything, so a control was a promise the platform
+ * could not keep. Taking the code name out of the sentence changed what the
+ * absence costs — the facts say plain words, `wire` is drawn nowhere, so a
+ * refused card left an operator with "a permission" and no way to reach the
+ * identifier. The button grants nothing; it hands the line to whoever can.
+ *
+ * **Caught by this application's own test, not by the change arriving.** The
+ * SDK's `grant()` gained its label on 2026-09-22 and Room Care kept `break;`,
+ * so every refusal here lost the code name with nothing put in its place —
+ * the second time a shared failure-card change has not reached this package on
+ * its own (the first: `cffcee1c`).
  */
 function todo(drawn: FailureDrawing, retry?: () => void): HTMLElement {
   const row = el("div", "fail-acts");
@@ -104,9 +118,8 @@ function todo(drawn: FailureDrawing, retry?: () => void): HTMLElement {
       if (retry !== undefined) row.append(control("btn pri", act.label, retry));
       break;
     case "copy":
-      row.append(control("btn", act.label, () => void navigator.clipboard?.writeText(drawn.wire)));
-      break;
     case "grant":
+      row.append(control("btn", act.label, () => void navigator.clipboard?.writeText(drawn.wire)));
       break;
   }
   row.append(phrase(act.phrase, "fail-note"));
