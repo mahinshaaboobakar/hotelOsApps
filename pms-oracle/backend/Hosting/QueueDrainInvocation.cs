@@ -14,14 +14,26 @@ namespace PmsOracle.Hosting;
 /// <b>What this replaces.</b> Until the transport existed, this answered every
 /// drain with a fault naming two absences: no queue client, and no reader
 /// turning a settings map into <c>IntegrationSettings</c>. The first is now
-/// built (<see cref="OhipBusinessEventQueue"/>). The second is still true and
-/// is now known to be unfixable here — four of that type's seven fields are
-/// property facts the protocol deliberately does not carry (<c>CONN-Q49</c>).
-/// It turned out not to block a drain at all: <see cref="DrainedPayload"/>
+/// built (<see cref="OhipBusinessEventQueue"/>).
+/// </para>
+/// <para>
+/// <b>The second is answered by ADR 0220, and this paragraph used to say it
+/// was unfixable here.</b> It read: <i>"four of that type's seven fields are
+/// property facts the protocol deliberately does not carry"</i> — true of the
+/// message set as it stood, and the planner ruled the other way round: the
+/// <b>Hub supplies</b> a property-context snapshot over this same session,
+/// carrying the timezone, the two clock times, the currency, the tax basis and
+/// the guarantee freshness. The connector never queries Core Administration,
+/// Master Data or Context for them. So the facts arrive; they are not fetched,
+/// and they are not this package's to own.
+/// </para>
+/// <para>
+/// <b>It never blocked a drain in any case.</b> <see cref="DrainedPayload"/>
 /// carries no property, because the Hub attributes payloads to the instance it
-/// dispatched to, so taking bytes and labelling their kind needs credentials
-/// and nothing else. The blocked reader belongs to <i>normalisation</i>, which
-/// is a different seam.
+/// dispatched to — so taking bytes and labelling their kind needs credentials
+/// and nothing else. What waits on ADR 0220's message is <i>normalisation</i>,
+/// which is a different seam, and the guarantee enrichment that needs a
+/// freshness the Hub will supply.
 /// </para>
 /// <para>
 /// <b>A token per drain, held by nobody.</b> The credentials are requested
