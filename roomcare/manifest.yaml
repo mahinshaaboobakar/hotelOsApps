@@ -13,9 +13,24 @@
 #
 # `files:` is a placeholder the packager fills after the payload is published.
 #
-# **0.1.4 — the first Room Care the owner installs.** 0.1.2 and 0.1.3 were
-# only ever on the shelf. Everything since 0.1.3 (`16bdeed`) that a person
-# meets, from the owner's rulings of 2026-09-19 and the page-64 audit:
+# **0.1.5 — the first Room Care the owner installs, and it carries their own
+# 64g §2 B ruling.** The owner ruled on 2026-09-22 that the first install
+# carries the failure-card fix, so this version replaces 0.1.4 before anyone
+# runs it. 0.1.2, 0.1.3 and 0.1.4 were only ever on the shelf.
+#
+#   * **A failure card names what could not be read**, in the screen's own
+#     words — "Asked for **the board**" — not the permission's code name.
+#     0.1.4 said "Asked for roomcare.read · board". The code name still
+#     travels in *Copy these details*, so support keeps it. Measured across
+#     all six ways a read can fail; the five widgets already named none.
+#     **Still naming it, and reported rather than changed**: on the three
+#     refusals the note under the action reads "This screen needs
+#     roomcare.read…", which is the shared surface's sentence, handed to
+#     every application.
+#
+# **Everything 0.1.4 already carried**, from the owner's rulings of
+# 2026-09-19 and the page-64 audit — that version was never installed, so
+# this is the first time a person meets any of it:
 #
 #   * **A name the staff record does not hold** reads "no name on record" in
 #     the bar, never a stand-in name, and never the name of a system.
@@ -80,7 +95,7 @@
 manifest_version: 1
 id: roomcare
 name: "Room Care"
-version: 0.1.4
+version: 0.1.5
 publisher: hotelos
 category: operations
 description: >-
