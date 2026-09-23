@@ -261,6 +261,12 @@ export function access(
    * them search), so the grant is drawn off with its reason rather than keeping
    * the field the ruling refused. It comes back as a chooser when the capability
    * lands; `grantJobsManager` is unchanged and waiting for it.
+   *
+   * **The owner weighed the loss and ruled they can wait** (2026-09-23): nobody
+   * new can be made a jobs manager here until the chooser lands, existing grants
+   * and revoking are unaffected, and no id field returns in the meantime —
+   * *a field kept "until the chooser arrives" is the field nobody removes
+   * afterwards.* So this is a decision that was made, not a gap nobody looked at.
    */
   const grant = fill(
     el("div", "row"),

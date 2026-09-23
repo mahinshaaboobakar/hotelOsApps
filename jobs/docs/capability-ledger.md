@@ -91,7 +91,7 @@ application's guess.
 | Service hours → Save the hours | `saveHours` | `tabs.ts:109` |
 | Holds & reminders → Save | `saveHold` | `tabs.ts:168` |
 | Closing & rating → Save | `saveClosing` | `tabs.ts:190` |
-| **Access → Choose a person…** | **drawn off** — "choosing a person isn't available here yet". ADR 0225 §1 (`JOBS-Q4`, owner, 2026-09-22): a person is chosen by name and an identifier is never the selection, so the `User id` field is gone. The chooser is Context's staff search (ADR 0224), which does not exist yet — measured 2026-09-23, Context answers eight RPCs and none searches. `grantJobsManager` is unchanged and waiting. **Granting is unavailable on the property until the chooser lands** | `tabs.ts:267` |
+| **Access → Choose a person…** | **drawn off** — "choosing a person isn't available here yet". ADR 0225 §1 (`JOBS-Q4`, owner, 2026-09-22): a person is chosen by name and an identifier is never the selection, so the `User id` field is gone. The chooser is Context's staff search (ADR 0224), which does not exist yet — measured 2026-09-23, Context answers eight RPCs and none searches. `grantJobsManager` is unchanged and waiting. **Granting is unavailable on the property until the chooser lands** — put to the owner with both costs, and **ruled 2026-09-23: they can wait**, no id field returns | `tabs.ts:267` |
 | Access → Revoke… | `revokeJobsManager`, after a confirmation | `tabs.ts:237` |
 | **A policy row's Edit** | **drawn off** — "editing a policy from this list isn't available yet" | `policies.ts:87` |
 | **＋ step (the ladder)** | **drawn off** — "adding a step isn't available here yet"; no operation exists | `policies.ts:164` |
