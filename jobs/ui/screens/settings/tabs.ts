@@ -5,7 +5,7 @@
 
 import { formatClock, formatNumber, type HostApi } from "@hotelos/sdk";
 
-import { control, el, fill } from "../../chrome/element";
+import { control, el, fill, off } from "../../chrome/element";
 import { when } from "../../chrome/instant";
 import { words } from "../../chrome/wire";
 import { choose, confirming, text, toggle as switchOf, values } from "../../chrome/form";
@@ -204,13 +204,17 @@ export function closing(s: Settings, configure: boolean, save: Saving, discard: 
  * Kernel. Postings and headships are still Workforce's and are still read-only
  * here.
  *
- * **The grant is by id, not by a person picker.** Jobs holds no people, and a
- * picker would need a directory this application has no business keeping — so
- * the field takes the id the shell shows, and the list shows ids back.
+ * **The grant is by person, and was by id.** This file argued that a picker
+ * "would need a directory this application has no business keeping" — true of
+ * Jobs, and the wrong conclusion: the owner ruled on 2026-09-22 that an
+ * identifier is never the human-facing selection (ADR 0225 §1), and the planner
+ * put the directory where it belongs the same day — Context's staff search
+ * (ADR 0224), one capability for every application. Neither existed when the
+ * id field was written.
  */
 export function access(
   host: HostApi,
-  s: Settings, configure: boolean, save: Saving, discard: () => void,
+  s: Settings, configure: boolean, save: Saving,
 ): HTMLElement {
   // **Revoking is destructive and is drawn as destructive** — standard §2's
   // pair. It ended a person's property-wide authority over every job from a
@@ -242,7 +246,27 @@ export function access(
       : el("span", "dim", "—"),
   ]);
 
-  const grant = fill(el("div", "cols"), fill(el("div"), text("User id", "userId", "")));
+  /**
+   * **A person is chosen by name, never by an identifier** — ADR 0225 §1
+   * (`JOBS-Q4`, owner, 2026-09-22): *"the id concept is wrong… the user doesn't
+   * know the id, so chooser always name."* This asked for a `userId` and a
+   * person pasted one in.
+   *
+   * The chooser is **Context's staff search** (ADR 0224, `CORE-Q33`) — Master
+   * Data's identity with Workforce's position and department, returning the id
+   * while the person reads a name and a posting. Jobs consumes that one
+   * capability and builds no search of its own.
+   *
+   * **Measured 2026-09-23: Context has no staff-search RPC yet** (eight, none of
+   * them search), so the grant is drawn off with its reason rather than keeping
+   * the field the ruling refused. It comes back as a chooser when the capability
+   * lands; `grantJobsManager` is unchanged and waiting for it.
+   */
+  const grant = fill(
+    el("div", "row"),
+    off("btn pri", "Choose a person…", "choosing a person isn't available here yet"),
+    el("span", "mono", "granting waits for the platform's staff chooser"),
+  );
 
   return fill(
     el("div"),
@@ -257,7 +281,6 @@ export function access(
       : el("div", "dim", "Nobody at this property holds it."),
     asked,
     configure ? grant : null,
-    saveRow(configure, grant, save, "grantJobsManager", (h) => ({ userId: h.userId }), discard),
     el("div", "mono", "Postings and department heads are set in Workforce and shown here, not edited. The jobs-manager grant is made here."),
   );
 }

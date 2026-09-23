@@ -41,6 +41,16 @@ const job: JobDetail = {
     { k: "Accepted", v: "not yet" },
     { k: "Assignments", v: "1" },
   ],
+  record: [
+    { k: "Number", v: "MRN-ENG-142" },
+    { k: "Property", v: "The Marina Bay" },
+    { k: "Created", v: INSTANT },
+    { k: "Created by", v: "the guest of stay 7F2A" },
+    { k: "Updated", v: "2026-09-02T10:33:00.0000000+00:00" },
+    { k: "Updated by", v: "Arjun Menon" },
+    { k: "Version", v: "9" },
+    { k: "Deleted", v: "—" },
+  ],
   history: [
     { at: INSTANT, kind: "concern", what: "BREACHED", by: "JOBS_MANAGER", detail: "the hold's date has passed" },
     { at: INSTANT, kind: "status", what: "ASSIGNED → IN_PROGRESS", by: "Arjun Menon", detail: "" },
@@ -134,6 +144,7 @@ describe("the screens say what the backend sends in the property's words", () =>
   for (const [name, steps] of [
     ["One job · Overview", ["job"]],
     ["One job · History", ["job", "History"]],
+    ["One job · Record", ["job", "Record"]],
     ["Live", ["Live"]],
     ["Settings · Holds & reminders", ["Settings", "Holds & reminders"]],
   ] as const) {

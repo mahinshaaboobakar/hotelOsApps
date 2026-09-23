@@ -277,8 +277,10 @@ describe("app surface checklist — automated lines, Jobs", () => {
       withoutTheNote.querySelector(".gap-ask")?.remove();
       expect(withoutTheNote.textContent ?? "", "a code name outside the SDK's note").not.toContain("job.read");
 
-      const fromTheSdkNote = cause === "forbidden" || cause === "unadmitted" || cause === "ungranted";
-      expect((note?.textContent ?? "").includes("job.read"), "the SDK's note, unchanged by 6751c7de").toBe(fromTheSdkNote);
+      // The note named the capability for the three refusals until GG finished
+      // 64g §2 B in the shared surface — it now reads "This screen needs a
+      // permission, and no grant…". Nothing on a Jobs card carries the code name.
+      expect((note?.textContent ?? "").includes("job.read"), "the SDK's note, after 64g §2 B").toBe(false);
 
       // And it is not lost: the line a person copies for support still carries it.
       expect(failureDrawing(failing(cause), { app: "Jobs", the: "this board" }).wire).toContain("job.read");

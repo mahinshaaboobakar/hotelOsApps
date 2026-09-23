@@ -13,6 +13,9 @@ import { failure } from "../../chrome/failure";
 import { subnav } from "../../chrome/tabs";
 import { act, may, type Catalogue, type CatalogueItem } from "../../board";
 
+/** A curation, and the composer's own line for what the service says back (ADR 0225 §4). */
+type Curating = (method: string, params: unknown, say: (message: string) => void) => void;
+
 export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () => void): Promise<void> {
   const got = await load<Catalogue>(host, JOB_READ, "catalogue");
 
@@ -25,13 +28,19 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
   }
   const curate = may(host, JOB_CURATE);
   const body = el("div", "body");
-  const said = saying();
-
-  /** One curation, and then the catalogue is read again. */
-  const doing = (method: string, params: unknown): void => {
+  /**
+   * One curation, and then the catalogue is read again.
+   *
+   * **The refusal goes to the composer that caused it** — ADR 0225 §4
+   * (`JOBS-Q4`, owner, 2026-09-22), taking §9's gloss: a refused write keeps the
+   * composer open and shows the reason in it. It spoke on this screen's own line
+   * under the page, which could sit below the fold while the composer was in
+   * view. Each composer passes its own `say`.
+   */
+  const doing = (method: string, params: unknown, say: (message: string) => void): void => {
     void act(host, JOB_CURATE, method, params).then((done) => {
       if (done.ok) onChanged();
-      else said.say(done.refused ?? "the catalogue was not changed");
+      else say(done.refused ?? "the catalogue was not changed");
     });
   };
   // Only the organisation's master catalogue is built; the other two tabs had an
@@ -45,24 +54,24 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
   grid.style.gridTemplateColumns = "260px 1fr";
   const item = got.value.items[0];
   grid.append(
-    categories(got.value, curate, doing, said.say, host.property),
+    categories(got.value, curate, doing, host.property),
     fill(
       el("div", "stack"),
-      item === undefined ? null : detail(item, curate, doing, said.say, host.property),
-      curate ? newItem(got.value, doing, said.say) : null,
+      item === undefined ? null : detail(item, curate, doing, host.property),
+      curate ? newItem(got.value, doing) : null,
     ),
   );
-  body.append(grid, said.line);
+  body.append(grid);
   main.replaceChildren(body);
 }
 
 function categories(
   c: Catalogue,
   curate: boolean,
-  doing: (method: string, params: unknown) => void,
-  say: (message: string) => void,
+  doing: Curating,
   property: PropertyEnvironment,
 ): HTMLElement {
+  const said = saying();
   const box = el("div", "card");
   const title = el("h3", undefined, "Categories");
   const form = el("div");
@@ -74,15 +83,15 @@ function categories(
     fill(el("div", "row"), control("btn pri", "Create category", () => {
       const held = values(form);
       if (String(held.name ?? "").length === 0 || String(held.code ?? "").length === 0) {
-        say("a category needs a name and a code");
+        said.say("a category needs a name and a code");
         return;
       }
 
-      doing("saveCategory", { name: held.name, code: held.code, department: held.department });
+      doing("saveCategory", { name: held.name, code: held.code, department: held.department }, said.say);
     })),
   );
   if (curate) title.append(fill(el("span", "grow"), control("btn sm", "＋ New", () => { form.hidden = !form.hidden; })));
-  box.append(title, form);
+  box.append(title, form, said.line);
   for (const cat of c.categories) {
     const row = el("div", "wrow");
     row.append(el("span", cat.activeHere ? undefined : "dim", cat.name), el("span", "mono", cat.activeHere ? `${cat.department} · ${formatNumber(cat.items, property)} items` : "not active here"));
@@ -95,10 +104,10 @@ function categories(
 function detail(
   item: CatalogueItem,
   curate: boolean,
-  doing: (method: string, params: unknown) => void,
-  say: (message: string) => void,
+  doing: Curating,
   property: PropertyEnvironment,
 ): HTMLElement {
+  const said = saying();
   const box = el("div", "card");
   const title = el("h3", undefined, `Air conditioning › ${item.name}`);
   // `saveItem` exists; the edit form for an existing item is not drawn yet.
@@ -124,13 +133,13 @@ function detail(
     adding.append(fill(el("div", "row"), control("btn", "＋ Add resolution", () => {
       const name = String(values(adding).name ?? "");
       if (name.length === 0) {
-        say("a resolution needs a name");
+        said.say("a resolution needs a name");
         return;
       }
 
-      doing("addResolution", { categoryId: item.categoryId, name });
+      doing("addResolution", { categoryId: item.categoryId, name }, said.say);
     })));
-    box.append(adding);
+    box.append(adding, said.line);
   }
 
   return box;
@@ -138,9 +147,9 @@ function detail(
 
 function newItem(
   c: Catalogue,
-  doing: (method: string, params: unknown) => void,
-  say: (message: string) => void,
+  doing: Curating,
 ): HTMLElement {
+  const said = saying();
   // **Compliant with §9 (APPS-Q53)**: an inline composer under the planner's
   // seven conditions (page 64 §9, 045402b4). It creates an item of the list
   // it sits beside (1, 2); Create item and Cancel are explicit (3 — Cancel
@@ -175,7 +184,7 @@ function newItem(
   dlg.append(grid, fill(el("div", "row"), cancel, control("btn pri", "Create item", () => {
     const held = values(dlg);
     if (String(held.name ?? "").length === 0 || String(held.code ?? "").length === 0) {
-      say("an item needs a name and a code");
+      said.say("an item needs a name and a code");
       return;
     }
 
@@ -189,7 +198,8 @@ function newItem(
         .split(",")
         .map((alias) => alias.trim())
         .filter((alias) => alias.length > 0),
-    });
+    }, said.say);
   }), el("span", "mono", "Created at the organisation; active at every property unless a property turns it off.")));
+  dlg.append(said.line);
   return dlg;
 }

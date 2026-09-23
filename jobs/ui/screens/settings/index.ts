@@ -68,7 +68,7 @@ function tab(
     case "Who is told": return whoIsTold(s, configure);
     case "Holds & reminders": return holds(s, configure, save, discard, host);
     case "Closing & rating": return closing(s, configure, save, discard);
-    case "Access": return access(host, s, configure, save, discard);
+    case "Access": return access(host, s, configure, save);
     default:
       if (place.view === "list") return policies(s, configure, place.onView, property);
       if (place.view === "1" || place.view === "2" || place.view === "3") return policyFlow(s, place.view, place.onView);
