@@ -49,6 +49,7 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.CancelPlanView>();
         services.AddScoped<Module.WalkInCommand>();
         services.AddScoped<Module.BookCommand>();
+        services.AddScoped<Module.RequestCommand>();
         services.AddScoped<Module.CancelCommand>();
         services.AddScoped<Module.ActivityView>();
         services.AddScoped<Module.RequestsView>();

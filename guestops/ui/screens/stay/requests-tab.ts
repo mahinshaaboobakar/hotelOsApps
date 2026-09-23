@@ -5,7 +5,7 @@
 import type { PropertyEnvironment } from "@hotelos/sdk";
 
 import type { Request, Requests } from "../../book";
-import { el, unavailable } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import { card } from "../../chrome/panel";
 import { instant } from "../../chrome/when";
 
@@ -26,9 +26,13 @@ import { instant } from "../../chrome/when";
  * @param property whose zone and locale the times are drawn in
  * @returns the tab's contents
  */
-export function requestsTab(requests: Requests, property: PropertyEnvironment): readonly HTMLElement[] {
+export function requestsTab(
+  requests: Requests,
+  property: PropertyEnvironment,
+  log?: (text: string, handOff: boolean) => void,
+): readonly HTMLElement[] {
   const cols = el("div", "cols even");
-  cols.append(ours(requests, property), neighbour(requests, property));
+  cols.append(ours(requests, property, log), neighbour(requests, property));
 
   return requests.jobsInstalled === false
     ? [cols, renamed()]
@@ -36,7 +40,11 @@ export function requestsTab(requests: Requests, property: PropertyEnvironment): 
 }
 
 /** What the guest asked for — always here, whatever else is installed. */
-function ours(requests: Requests, property: PropertyEnvironment): HTMLElement {
+function ours(
+  requests: Requests,
+  property: PropertyEnvironment,
+  log?: (text: string, handOff: boolean) => void,
+): HTMLElement {
   const { root, body } = card(
     "Guest requests",
     // It carried "GuestOps owns these" beside Jobs' panel — which application
@@ -48,8 +56,37 @@ function ours(requests: Requests, property: PropertyEnvironment): HTMLElement {
     body.append(row(request, property));
   }
 
-  const why = "Logging a request from GuestOps is not available yet.";
-  body.append(unavailable("btn sm", "＋ Log a request", why), el("div", "hint", why));
+  // **The control drew and did nothing until 2026-09-23** — the service has
+  // recorded requests since it was written and the module served no method
+  // that reached it. Gold frame 5.
+  if (log === undefined) {
+    const why = "Logging a request from GuestOps is not available yet.";
+    body.append(unavailable("btn sm", "＋ Log a request", why), el("div", "hint", why));
+    return root;
+  }
+
+  const text = document.createElement("input");
+  text.type = "text";
+  text.placeholder = "What the guest asked for";
+
+  const box = el("div", "inp");
+  box.append(text);
+
+  // **The request is recorded whether or not Jobs is installed** — frame 5b:
+  // "the request is still recorded; what disappears is the raising". So the
+  // hand-off is offered only where there is something to hand off to, and
+  // logging is offered always.
+  const raise = el("div", "row");
+  raise.append(
+    control("btn sm", "Log", () => {
+      if (text.value.trim() !== "") log(text.value.trim(), false);
+    }),
+    ...(requests.jobsInstalled === false ? [] : [control("btn sm pri", "Log and raise a job", () => {
+      if (text.value.trim() !== "") log(text.value.trim(), true);
+    })]),
+  );
+
+  body.append(box, raise);
   return root;
 }
 

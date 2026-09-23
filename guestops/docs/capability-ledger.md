@@ -151,7 +151,8 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Activity: Export | `screens/stay/index.ts:266` | DRAWN OFF, SAYS WHY (needs the shell's file-save) |
 | **＋ Raise a job** (Jobs installed) | `screens/stay/index.ts:274` | **LOOKS LIVE, DOES NOTHING** |
 | ＋ Raise a job (Jobs not installed) | `screens/stay/index.ts:273` | drawn off, **says no reason** |
-| **＋ Log a request** | `screens/stay/requests-tab.ts:59` | **LOOKS LIVE, DOES NOTHING** (`request.handle` has no module door) |
+| **＋ Log a request** | `requests-tab.ts` → `request.handle` · `log` → `RequestCommand` | **BUILT, UNPRESSABLE.** The door exists and the tab calls it (`C7`, 2026-09-23). It cannot be pressed on a property: ADR 0193's registration is in flight, so an object-scoped write authorizes nothing — and nothing is installed to press it on |
+| **Log and raise a job** | the same door, `handOff: true` | **BUILT, UNPRESSABLE** — and offered only where Jobs is installed. Gold frame 5b: the request is recorded either way; what disappears is the raising |
 | **Ask for service** | `screens/stay/index.ts:278` | **LOOKS LIVE, DOES NOTHING** |
 | **Open in the PMS** | `screens/stay/index.ts:291` | **LOOKS LIVE, DOES NOTHING** |
 | Servicing night links; "＋ add" / "reveal" | `screens/stay/servicing-tab.ts:90`, `chrome/marks.ts:79` | NOT REACHABLE — `ServicingView` sends no nights, and no view sends a link |

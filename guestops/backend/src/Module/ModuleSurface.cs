@@ -84,7 +84,35 @@ public static class ModuleSurface
             Application.Abstractions.Permissions.StayOverride,
             (request, cancellationToken) =>
                 OverrideAsync(request.Services, request, cancellationToken));
+
+        // **The fifth capability, and the tab drew its control for four days
+        // without one.** `StayRequestService` has logged requests since it was
+        // written; `＋ Log a request` reached nothing, which the ledger carries
+        // as a defect. Gold frame 5.
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.RequestHandle,
+            (request, cancellationToken) =>
+                HandleAsync(request.Services, request, cancellationToken));
     }
+
+    /// <summary>A guest's request, and a note about the stay — gold frame 5.</summary>
+    /// <remarks>
+    /// Both are recorded whether or not Jobs is installed (frame 5b): the
+    /// request is GuestOps' own record, and only raising work from it is
+    /// conditional on another application being there.
+    /// </remarks>
+    private static Task<object?> HandleAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "log" or "note" => services.GetRequiredService<RequestCommand>()
+                .RunAsync(request.Method, request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
 
     /// <summary>The reads — every list, every page, every plan.</summary>
     /// <remarks>

@@ -38,6 +38,7 @@ import {
   APP,
   failureDrawing,
   load,
+  perform,
   type Activity,
   type Payment,
   type Requests,
@@ -140,7 +141,14 @@ export async function stay(
   if (tab === "Overview") {
     fill(body, page.banner === null ? null : banner(page.banner), overview(page, () => go("Activity")));
   } else if (tab.startsWith("Requests")) {
-    fill(body, ...requestsTab(requests, host.property));
+    fill(body, ...requestsTab(requests, host.property, (text, handOff) => {
+      // **Re-read rather than patched.** What was recorded is the service's
+      // answer, and a tab that appended its own row would be drawing its
+      // intention as a fact — including the "raised as JOB-…" the panel next
+      // to it resolves from Jobs.
+      void perform(host, "request.handle", "log", { stayId, text, handOff })
+        .then(() => void stay(host, into, stayId, tab, go));
+    }));
   } else if (tab === "Activity") {
     // **Read when the tab is shown, not when the page is.** `requests` and
     // `servicing` are eager because the tab *bar* needs them — a count and a
