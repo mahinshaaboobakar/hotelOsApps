@@ -48,7 +48,28 @@ public sealed class FreeRoomsView(AvailabilityService availability)
         var rooms = await availability.FreeRoomsAsync(
             scope, roomTypeId, from, to, cancellationToken);
 
-        return new
+        return Answer(rooms);
+    }
+
+    /// <summary>The rooms free for a stay that already exists.</summary>
+    /// <param name="scope">The caller, and the property they are scoped to.</param>
+    /// <param name="stayId">The stay being given a room.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    /// <returns>The rooms, and how many the stay's type has at all.</returns>
+    /// <remarks>
+    /// <b>The assignment sheet has a stay; the walk-in sheet has neither.</b>
+    /// One is choosing a room for nights already recorded, the other for nights
+    /// being decided as the sheet is filled in — so the same answer is reached
+    /// by two questions, rather than by making the first send back facts the
+    /// service already holds and could be sent wrong.
+    /// </remarks>
+    public async Task<object?> ForStayAsync(
+        RequestScope scope, Guid stayId, CancellationToken cancellationToken)
+        => Answer(await availability.FreeRoomsForStayAsync(scope, stayId, cancellationToken));
+
+    /// <summary>One shape, so two questions cannot answer differently.</summary>
+    private static object Answer(RoomsOfType rooms)
+        => new
         {
             rooms = rooms.Free
                 .Select(room => new { id = room.Id.ToString(), number = room.Number })
@@ -60,5 +81,4 @@ public sealed class FreeRoomsView(AvailabilityService availability)
             // if this were absent.
             ofType = rooms.Total,
         };
-    }
 }

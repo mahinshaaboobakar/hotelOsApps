@@ -10,6 +10,13 @@ export const recordedStay: StayPage = {
   room: "214",
   stayId: "01J9K…7F3A",
   bookingRef: "BK-4471",
+
+  // The three the writes need. The fixture and the service must carry the same
+  // shape or the harness renders a second contract that happens to share field
+  // names — and no capture of it can show a wire defect.
+  version: 7,
+  roomTypeId: "22222222-2222-2222-2222-222222222222",
+  currentRoomId: "33333333-3333-3333-3333-000000000214",
   managedBy: "The PMS manages this stay",
   actions: [
     { label: "Move room", danger: false },

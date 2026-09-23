@@ -65,6 +65,7 @@ import { timeline } from "./activity";
  * @param tab which tab to show
  * @param go what to do when another tab is chosen
  * @param register open the registration card — what *Check in* does, frame 15
+ * @param assign open the assignment sheet — what *Move room* does, frame 3
  */
 export async function stay(
   host: HostApi,
@@ -73,6 +74,7 @@ export async function stay(
   tab: string,
   go: (tab: string) => void,
   register: () => void,
+  assign: () => void,
 ): Promise<void> {
   // **Reached without a stay, which is a defect rather than an empty state.**
   // Every route here comes from a row, and a row has an id; arriving without
@@ -94,7 +96,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(loaded.failure, { app: APP, the: "this stay" }),
-        () => void stay(host, into, stayId, tab, go, register),
+        () => void stay(host, into, stayId, tab, go, register, assign),
       ));
     return;
   }
@@ -116,7 +118,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(asked.failure, { app: APP, the: "this stay's requests" }),
-        () => void stay(host, into, stayId, tab, go, register),
+        () => void stay(host, into, stayId, tab, go, register, assign),
       ));
     return;
   }
@@ -125,7 +127,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(serviced.failure, { app: APP, the: "this stay's servicing" }),
-        () => void stay(host, into, stayId, tab, go, register),
+        () => void stay(host, into, stayId, tab, go, register, assign),
       ));
     return;
   }
@@ -149,7 +151,7 @@ export async function stay(
       // intention as a fact — including the "raised as JOB-…" the panel next
       // to it resolves from Jobs.
       void perform(host, "request.handle", "log", { stayId, text, handOff })
-        .then(() => void stay(host, into, stayId, tab, go, register));
+        .then(() => void stay(host, into, stayId, tab, go, register, assign));
     }));
   } else if (tab === "Activity") {
     // **Read when the tab is shown, not when the page is.** `requests` and
@@ -165,7 +167,7 @@ export async function stay(
         ? activityTab(history.value, host.property)
         : [failed(
             failureDrawing(history.failure, { app: APP, the: "this stay's activity" }),
-            () => void stay(host, into, stayId, tab, go, register),
+            () => void stay(host, into, stayId, tab, go, register, assign),
           )]),
     );
   } else if (tab === "Servicing") {
@@ -179,14 +181,14 @@ export async function stay(
         ? paymentTab(folio.value, host.property)
         : [failed(
             failureDrawing(folio.failure, { app: APP, the: "this stay's payment" }),
-            () => void stay(host, into, stayId, tab, go, register),
+            () => void stay(host, into, stayId, tab, go, register, assign),
           )]),
     );
   } else {
     body.append(awaiting(tab));
   }
 
-  into.replaceChildren(header(page, tab, requests, register), body);
+  into.replaceChildren(header(page, tab, requests, register, assign), body);
 }
 
 /**
@@ -234,7 +236,7 @@ function labelled(
  * the chrome's own selector.
  */
 function header(
-  page: StayPage, tab: string, requests: Requests, register: () => void,
+  page: StayPage, tab: string, requests: Requests, register: () => void, assign: () => void,
 ): HTMLElement {
   const head = el("div", "title");
   const title = el("div");
@@ -253,7 +255,7 @@ function header(
   title.append(el("div", "ht", `${page.guest}${room}`), sub);
 
   const acts = el("div", "grow");
-  fill(acts, ...actions(page, tab, requests, register));
+  fill(acts, ...actions(page, tab, requests, register, assign));
 
   // The reason, in words, beside what cannot be pressed — a tooltip is found
   // only by a pointer that goes looking.
@@ -273,7 +275,7 @@ function header(
  * a screen about cleaning.
  */
 function actions(
-  page: StayPage, tab: string, requests: Requests, register: () => void,
+  page: StayPage, tab: string, requests: Requests, register: () => void, assign: () => void,
 ): readonly HTMLElement[] {
   if (tab === "Activity") {
     // **Dimmed, and it says why.** Handing a file to the user is the half of
@@ -309,10 +311,18 @@ function actions(
   // drawn off where the frame puts them, with one reason for the group. Not
   // "btn danger": a red outline on something that cannot be pressed still reads
   // as a warning about pressing it.
-  return page.actions.map((action) => (action.label === "Check in"
-    ? control("btn", action.label, register)
-    : unavailable("btn", action.label,
-      "Checking out, moving and cancelling a stay are not available from this screen yet.")));
+  return page.actions.map((action) => {
+    // Gold frame 15 is what a check-in IS: the card opens and its own primary
+    // records the arrival.
+    if (action.label === "Check in") return control("btn", action.label, register);
+
+    // Gold frame 3's own action. A move is an assignment with a room already
+    // held — one sheet, and the service derives which it is recording.
+    if (action.label === "Move room") return control("btn", action.label, assign);
+
+    return unavailable("btn", action.label,
+      "Checking out and cancelling a stay are not available from this screen yet.");
+  });
 }
 
 /** The two columns: the stay's own values, and what happened to it. */

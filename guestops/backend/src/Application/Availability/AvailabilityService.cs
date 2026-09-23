@@ -269,6 +269,52 @@ public sealed class AvailabilityService(
             rooms.Count);
     }
 
+    /// <summary>The rooms free for a stay's own type, over its own nights.</summary>
+    /// <param name="scope">The caller, and the property they are scoped to.</param>
+    /// <param name="stayId">The stay being given a room.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    /// <returns>The free rooms, and how many that type has at all.</returns>
+    /// <exception cref="NotFoundException">No such stay at this property.</exception>
+    /// <remarks>
+    /// <para>
+    /// <b>The assignment sheet knows a stay, not a date range.</b> Asking it to
+    /// carry the type and the nights would put the stay's own facts in a
+    /// client's hands to send back — and a screen that sent the wrong range
+    /// would be offered rooms that are free for dates nobody is staying.
+    /// </para>
+    /// <para>
+    /// <b>The zone is applied here, once.</b> A stay's nights are instants, and
+    /// which day they fall on is the property's (ADR 0174) — a caller deriving
+    /// days from the instants would be reading them in the browser's zone.
+    /// </para>
+    /// <para>
+    /// <b>A stay whose nights cannot be established has no free rooms rather
+    /// than every room.</b> Without a business day nothing here can say which
+    /// nights are held, and answering *all of them* would offer an occupied
+    /// room as free.
+    /// </para>
+    /// </remarks>
+    public async Task<RoomsOfType> FreeRoomsForStayAsync(
+        RequestScope scope,
+        Guid stayId,
+        CancellationToken cancellationToken)
+    {
+        var stay = await db.Stays
+            .Where(s => s.Id == stayId && s.PropertyId == scope.PropertyId)
+            .Select(s => new { s.RoomTypeId, Arrival = s.ArrivalAt, Departure = s.DepartureAt })
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new NotFoundException("stay", stayId);
+
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
+        if (stay.Arrival.DateIn(zone) is not { } from || stay.Departure.DateIn(zone) is not { } to)
+        {
+            return new RoomsOfType([], 0);
+        }
+
+        return await FreeRoomsAsync(scope, stay.RoomTypeId, from, to, cancellationToken);
+    }
+
     private static bool Covers(DateOnly from, DateOnly? to, DateOnly date)
         => date >= from && (to is null || date <= to);
 

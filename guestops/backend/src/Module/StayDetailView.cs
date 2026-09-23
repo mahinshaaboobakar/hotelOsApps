@@ -92,6 +92,21 @@ public sealed class StayDetailView(GuestOpsDbContext db)
         return new
         {
             id = stay.Id.ToString(),
+
+            // **The version this page was read at.** Every write the screen
+            // offers — assign, move, check out, cancel — is made against the
+            // version its caller last saw, and this screen had none: the
+            // check-in borrowed one from the registration card because there
+            // was nowhere else to get it. A screen whose actions write and
+            // whose read carries no version cannot make the concurrency check
+            // mean anything.
+            version = stay.Version,
+
+            // The type and the room it has now, for the assignment sheet. The
+            // room is already below as a NUMBER, which is what a person reads;
+            // this is what a write names.
+            roomTypeId = stay.RoomTypeId.ToString(),
+            currentRoomId = stay.CurrentRoomId?.ToString(),
             stayId = Elide(stay.Id),
 
             // "Not yet named" is a state, not a placeholder. A stay a feed sent

@@ -69,6 +69,22 @@ export interface StayPage {
   stayId: string;
   bookingRef: string;
 
+  /**
+   * The version this page was read at.
+   *
+   * **Every write this screen offers is made against it** — assign, move,
+   * check out, cancel. The page carried none until 2026-09-23, so the check-in
+   * borrowed one from the registration card: a screen whose actions write and
+   * whose read has no version cannot make the concurrency check mean anything.
+   */
+  version: number;
+
+  /** The type, for the room chooser. The room NUMBER is what a person reads. */
+  roomTypeId: string;
+
+  /** The room it has now — null is a stay waiting for one. */
+  currentRoomId: string | null;
+
   /** `Opera manages this stay`, or null in a standalone property. */
   managedBy: string | null;
 

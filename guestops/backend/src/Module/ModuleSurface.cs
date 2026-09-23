@@ -96,6 +96,14 @@ public static class ModuleSurface
             (request, cancellationToken) =>
                 HandleAsync(request.Services, request, cancellationToken));
 
+        // **The seventh.** `stay.assign` is declared in the manifest and was
+        // reachable only over the gRPC surface; the day list's `＋ assign` and
+        // the stay screen's `Move room` had no door. Gold frame 3.
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.StayAssign,
+            (request, cancellationToken) =>
+                AssignAsync(request.Services, request, cancellationToken));
+
         // **The sixth, and the card's `Save` was dead for as long as the screen
         // existed.** `RegistrationService` has captured cards since it was
         // written and nothing could reach it. Both methods sit here rather than
@@ -107,6 +115,20 @@ public static class ModuleSurface
             (request, cancellationToken) =>
                 RegistrationAsync(request.Services, request, cancellationToken));
     }
+
+    /// <summary>Giving a stay a room, or moving it — gold frame 3.</summary>
+    private static Task<object?> AssignAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "assign" => services.GetRequiredService<AssignCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
 
     /// <summary>The card the guest signs — gold frame 15.</summary>
     private static Task<object?> RegistrationAsync(
@@ -306,11 +328,22 @@ public static class ModuleSurface
             throw new InvalidRequestException("rooms need a type and the dates");
         }
 
+        // **A stay answers for itself.** The assignment sheet knows which stay
+        // it is giving a room to and nothing else; making it send the type and
+        // the nights back would put the stay's own facts in a caller's hands.
+        if (body.TryGetProperty("stayId", out var of)
+            && of.ValueKind == JsonValueKind.String
+            && Guid.TryParse(of.GetString(), out var stay))
+        {
+            return services.GetRequiredService<FreeRoomsView>()
+                .ForStayAsync(request.Scope, stay, cancellationToken);
+        }
+
         if (!body.TryGetProperty("roomTypeId", out var type)
             || type.ValueKind != JsonValueKind.String
             || !Guid.TryParse(type.GetString(), out var roomTypeId))
         {
-            throw new InvalidRequestException("rooms need a room type");
+            throw new InvalidRequestException("rooms need a room type, or a stay");
         }
 
         var from = Date(body, "arrive")

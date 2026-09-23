@@ -144,8 +144,9 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Action | Code | Verdict |
 |---|---|---|
 | Overview · Activity · Requests · Servicing · Payment tabs | `chrome/panel.ts:82` | WORKS |
-| **Check in** (a booked stay) | `screens/stay/index.ts` → the registration card → `stay.override` · `checkIn` → `CheckInCommand` | **BUILT, UNPRESSABLE.** `C5`, 2026-09-23. Frame 15 is what a check-in *is*: the card opens, the guest signs, and the card's own button records the arrival. Unpressable for the same two reasons as every other write — ADR 0193's registration is in flight, and there is no installed product |
-| **Cancel** (a booked stay) · **Check out · Move room** (in house) | `screens/stay/index.ts:313`; labels sent by `StayDetailView.cs:140-156` | **LOOKS LIVE, DOES NOTHING.** No module door for check-out or move; Cancel's door exists on a booking and not from this screen |
+| **Check in** (a booked stay) | `screens/stay/index.ts` → the registration card → `stay.override` · `checkIn` → `CheckInCommand` | **BUILT, UNPRESSABLE.** `C5`, 2026-09-23. Frame 15 is what a check-in *is*: the card opens, the guest signs, and the card's own button records the arrival |
+| **Move room** (in house) | `screens/stay/index.ts` → `screens/assign/` → `stay.assign` · `assign` → `AssignCommand` | **BUILT, UNPRESSABLE.** `C3`, 2026-09-23. See *Assigning a room* below |
+| **Cancel** (a booked stay) · **Check out** (in house) | `screens/stay/index.ts`; labels sent by `StayDetailView.cs` | **LOOKS LIVE, DOES NOTHING.** No module door for check-out; Cancel's door exists on a booking and not from this screen |
 | **Keep … · Take …** on the disagreement banner | `screens/stay/banner.ts:49`; `StayDetailView.cs:183` | **LOOKS LIVE, DOES NOTHING** |
 | **Full activity →** | `screens/stay/index.ts:304` | **LOOKS LIVE, DOES NOTHING** — should switch to the Activity tab |
 | Activity: **Everything · Ours** filters | `screens/stay/activity-tab.ts:37`; sent by `ActivityView` | **LOOKS LIVE, DOES NOTHING** — no filter is applied |
@@ -233,6 +234,46 @@ A capture screen starts **empty**, because it is a new stay; the frame's state
 is reached by typing. A capture of the built sheet will therefore differ from
 the frame on every field, and that is the drawing showing a moment rather than
 the build being wrong.
+
+### Assigning a room — frame 3
+
+Built `C3`, 2026-09-23. One sheet for both affordances: frame 3's **Move room**,
+and the day list's `＋ assign` for a stay that has no room.
+
+| Action | Code | Verdict |
+|---|---|---|
+| Room chooser | `screens/assign/index.ts` → `reservation.read` · `stay` · `rooms` | **BUILT, UNPRESSABLE** |
+| **Assign · Move** | → `stay.assign` · `assign` → `AssignCommand` | **BUILT, UNPRESSABLE.** Off until a room is chosen, saying so |
+| **Assign anyway** | the same call, with `acceptConflict` | **BUILT, UNPRESSABLE.** Only reachable after the service has reported a conflict |
+
+**The conflict warns and never forbids** — GUEST-Q5 made a double-booked room a
+possible truth, so a hard block would put a ruled outcome out of reach. The
+service refuses the first attempt; the command turns that into part of the
+**answer** rather than an error, and the sheet keeps the room chosen, says what
+holds it, and changes the button to *Assign anyway*. `acceptConflict` is never
+sent on a first attempt: the desk has to have been shown something before it
+can mean it.
+
+**A conflict and a refusal are two states, and they were one until a test said
+so.** Both arrived as a sentence, so a concurrency refusal also turned the
+button into *Assign anyway* — offering to force something that has nothing to
+do with conflicts, against a version that is already stale. They are now a
+discriminated `Told`, and only a conflict is retryable with agreement.
+
+**The reason is derived and the request has nowhere to put one.** A stay with
+no room is being given its first (`Initial`); one that has a room is being moved
+(`Move`). A client able to send a reason could record a move as a first
+assignment, and the assignment history is what a property gets asked about.
+
+**`StayDetailView` now carries the version it was read at.** It did not, which
+is why `C5`'s check-in borrowed one from the registration card: a screen whose
+actions write and whose read has no version cannot make the concurrency check
+mean anything. Check-out and cancel will need the same field.
+
+**`reservation.read/rooms` answers two questions.** The walk-in has dates and a
+type and no stay; the assignment has a stay and neither. Sending the stay's own
+type and nights back from a client would put facts the service holds in a
+caller's hands to get wrong, so a stay answers for itself.
 
 ### Setup
 

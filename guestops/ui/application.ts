@@ -64,6 +64,7 @@ import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
 import { setup } from "./screens/setup";
+import { assignRoom } from "./screens/assign";
 import { registrationCard } from "./screens/registration";
 import { walkIn } from "./screens/walkin";
 import { stay } from "./screens/stay";
@@ -127,7 +128,7 @@ interface Place {
    * 10 draws the day behind the walk-in sheet and frame 8 draws the booking's
    * stays behind the cancellation.
    */
-  overlay: "walkin" | "cancel" | "registration" | null;
+  overlay: "walkin" | "cancel" | "registration" | "assign" | null;
 
   /**
    * Which page of the list, 0-based.
@@ -278,6 +279,22 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
       // The card stands over the day, because that is where a check-in starts:
       // a receptionist opens it from the arrival they are looking at, and the
       // list stays behind it.
+      // Frame 3's *Move room*, and the day list's `＋ assign` — one sheet, and
+      // the service derives which of the two it is recording.
+      if (where.overlay === "assign") {
+        void assignRoom(
+          host,
+          main,
+          where.stayId,
+          () => show({ overlay: null }),
+          // Recorded: the sheet closes and the screen behind redraws from the
+          // service. It does not patch its own rows — the assignment is the
+          // service's, and a client editing its copy would be a second place
+          // it is decided.
+          () => show({ overlay: null }),
+        );
+      }
+
       if (where.overlay === "registration") {
         // **Reached without a stay, which is a defect rather than an empty
         // card.** Every route here comes from a stay, and a card drawn without
@@ -366,6 +383,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         where.tab,
         (tab) => show({ tab }),
         () => show({ overlay: "registration" }),
+        () => show({ overlay: "assign" }),
       ).then(overlay);
       return;
     }
