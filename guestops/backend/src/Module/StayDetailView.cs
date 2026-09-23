@@ -107,6 +107,13 @@ public sealed class StayDetailView(GuestOpsDbContext db)
             // this is what a write names.
             roomTypeId = stay.RoomTypeId.ToString(),
             currentRoomId = stay.CurrentRoomId?.ToString(),
+
+            // **The booking, because cancelling is the BOOKING's operation.**
+            // `bookingRef` beside it is an external reference or "created
+            // here" — what a person reads — and cannot be sent to a service.
+            // Frame 3's `Cancel…` opens frame 8's dialog, which plans over
+            // every stay the booking holds (GUEST-Q2).
+            bookingId = stay.BookingId.ToString(),
             stayId = Elide(stay.Id),
 
             // "Not yet named" is a state, not a placeholder. A stay a feed sent

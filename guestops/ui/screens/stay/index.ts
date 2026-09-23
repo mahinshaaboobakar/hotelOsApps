@@ -57,6 +57,29 @@ import { servicingTab } from "./servicing-tab";
 import { timeline } from "./activity";
 
 /**
+ * What each of the header's actions does.
+ *
+ * **One object rather than four parameters**, because they are all
+ * `() => void`: a type occupying more than one field of a call is bound by
+ * POSITION alone, and the compiler is satisfied by any of them in any order.
+ * Naming them makes a swapped pair a compile error instead of a screen that
+ * checks a guest out when somebody presses *Move room*.
+ */
+export interface Acts {
+  /** Frame 15's registration card — what *Check in* opens. */
+  register: () => void;
+
+  /** Frame 3's assignment sheet — what *Move room* opens. */
+  assign: () => void;
+
+  /** Record the departure. Direct: the frame draws no ellipsis. */
+  checkOut: () => void;
+
+  /** Go to the booking with frame 8's dialog open. */
+  cancel: () => void;
+}
+
+/**
  * Render the stay page.
  *
  * @param host the bridge — the only route out of this realm
@@ -64,8 +87,7 @@ import { timeline } from "./activity";
  * @param stayId which stay — the id the row that opened this screen carried
  * @param tab which tab to show
  * @param go what to do when another tab is chosen
- * @param register open the registration card — what *Check in* does, frame 15
- * @param assign open the assignment sheet — what *Move room* does, frame 3
+ * @param acts what each of the header's actions does
  */
 export async function stay(
   host: HostApi,
@@ -73,8 +95,7 @@ export async function stay(
   stayId: string,
   tab: string,
   go: (tab: string) => void,
-  register: () => void,
-  assign: () => void,
+  acts: Acts,
 ): Promise<void> {
   // **Reached without a stay, which is a defect rather than an empty state.**
   // Every route here comes from a row, and a row has an id; arriving without
@@ -96,7 +117,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(loaded.failure, { app: APP, the: "this stay" }),
-        () => void stay(host, into, stayId, tab, go, register, assign),
+        () => void stay(host, into, stayId, tab, go, acts),
       ));
     return;
   }
@@ -118,7 +139,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(asked.failure, { app: APP, the: "this stay's requests" }),
-        () => void stay(host, into, stayId, tab, go, register, assign),
+        () => void stay(host, into, stayId, tab, go, acts),
       ));
     return;
   }
@@ -127,7 +148,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(serviced.failure, { app: APP, the: "this stay's servicing" }),
-        () => void stay(host, into, stayId, tab, go, register, assign),
+        () => void stay(host, into, stayId, tab, go, acts),
       ));
     return;
   }
@@ -151,7 +172,7 @@ export async function stay(
       // intention as a fact — including the "raised as JOB-…" the panel next
       // to it resolves from Jobs.
       void perform(host, "request.handle", "log", { stayId, text, handOff })
-        .then(() => void stay(host, into, stayId, tab, go, register, assign));
+        .then(() => void stay(host, into, stayId, tab, go, acts));
     }));
   } else if (tab === "Activity") {
     // **Read when the tab is shown, not when the page is.** `requests` and
@@ -167,7 +188,7 @@ export async function stay(
         ? activityTab(history.value, host.property)
         : [failed(
             failureDrawing(history.failure, { app: APP, the: "this stay's activity" }),
-            () => void stay(host, into, stayId, tab, go, register, assign),
+            () => void stay(host, into, stayId, tab, go, acts),
           )]),
     );
   } else if (tab === "Servicing") {
@@ -181,14 +202,14 @@ export async function stay(
         ? paymentTab(folio.value, host.property)
         : [failed(
             failureDrawing(folio.failure, { app: APP, the: "this stay's payment" }),
-            () => void stay(host, into, stayId, tab, go, register, assign),
+            () => void stay(host, into, stayId, tab, go, acts),
           )]),
     );
   } else {
     body.append(awaiting(tab));
   }
 
-  into.replaceChildren(header(page, tab, requests, register, assign), body);
+  into.replaceChildren(header(page, tab, requests, acts), body);
 }
 
 /**
@@ -236,7 +257,7 @@ function labelled(
  * the chrome's own selector.
  */
 function header(
-  page: StayPage, tab: string, requests: Requests, register: () => void, assign: () => void,
+  page: StayPage, tab: string, requests: Requests, acts: Acts,
 ): HTMLElement {
   const head = el("div", "title");
   const title = el("div");
@@ -254,15 +275,15 @@ function header(
 
   title.append(el("div", "ht", `${page.guest}${room}`), sub);
 
-  const acts = el("div", "grow");
-  fill(acts, ...actions(page, tab, requests, register, assign));
+  const controls = el("div", "grow");
+  fill(controls, ...actions(page, tab, requests, acts));
 
   // The reason, in words, beside what cannot be pressed — a tooltip is found
   // only by a pointer that goes looking.
-  const off = acts.querySelector<HTMLButtonElement>("button:disabled");
-  if (off !== null) acts.append(el("div", "hint", off.title));
+  const off = controls.querySelector<HTMLButtonElement>("button:disabled");
+  if (off !== null) controls.append(el("div", "hint", off.title));
 
-  head.append(title, acts);
+  head.append(title, controls);
   return head;
 }
 
@@ -275,7 +296,7 @@ function header(
  * a screen about cleaning.
  */
 function actions(
-  page: StayPage, tab: string, requests: Requests, register: () => void, assign: () => void,
+  page: StayPage, tab: string, requests: Requests, acts: Acts,
 ): readonly HTMLElement[] {
   if (tab === "Activity") {
     // **Dimmed, and it says why.** Handing a file to the user is the half of
@@ -314,14 +335,27 @@ function actions(
   return page.actions.map((action) => {
     // Gold frame 15 is what a check-in IS: the card opens and its own primary
     // records the arrival.
-    if (action.label === "Check in") return control("btn", action.label, register);
+    if (action.label === "Check in") return control("btn", action.label, acts.register);
 
     // Gold frame 3's own action. A move is an assignment with a room already
     // held — one sheet, and the service derives which it is recording.
-    if (action.label === "Move room") return control("btn", action.label, assign);
+    if (action.label === "Move room") return control("btn", action.label, acts.assign);
+
+    // **No ellipsis in the frame, so no dialog here.** Frame 3 draws `Cancel…`
+    // with one and `Check out` without: the ellipsis is the affordance's own
+    // statement that it opens something. A confirmation invented here would be
+    // richer than the approved design, and a departure recorded in error is
+    // what `CorrectAsync` exists for.
+    if (action.label === "Check out") return control("btn", action.label, acts.checkOut);
+
+    // **Cancelling is the BOOKING's operation** (GUEST-Q2): frame 8's dialog
+    // plans over every stay the booking holds and says how many that is. So
+    // this goes to the booking with the dialog open rather than drawing a
+    // second cancellation here — one plan, one confirmation, one place.
+    if (action.label === "Cancel") return control("btn", `${action.label}…`, acts.cancel);
 
     return unavailable("btn", action.label,
-      "Checking out and cancelling a stay are not available from this screen yet.");
+      "This action is not available from this screen yet.");
   });
 }
 

@@ -302,10 +302,23 @@ public static class ModuleSurface
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
             // The registration card's own action — frame 15's *Save and check
-            // in*, whose second half this is. Check-out, no-show and correcting
-            // a recorded arrival map beside it when their frame is built.
+            // in*, whose second half this is.
             "checkIn" => services.GetRequiredService<CheckInCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            // Frame 3's *Check out*, drawn without an ellipsis: it records the
+            // departure directly, and there is no dialog to invent.
+            "checkOut" => services.GetRequiredService<CheckOutCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            // **`noShow` and `correct` are deliberately absent.**
+            // `RecordNoShowAsync` and `CorrectAsync` are built and tested, and
+            // NO APPROVED FRAME DRAWS EITHER: "No-show" appears once in the
+            // gold, as a STATE on a bookings row, and "Correct" appears as no
+            // affordance at all. Mapping them would be the
+            // declared-and-never-used defect `CORE-Q13` is named after — and
+            // building the control would be richer than the design. The
+            // affordance is a question for the owner, drawn.
 
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),

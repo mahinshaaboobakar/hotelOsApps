@@ -17,6 +17,7 @@ export const recordedStay: StayPage = {
   version: 7,
   roomTypeId: "22222222-2222-2222-2222-222222222222",
   currentRoomId: "33333333-3333-3333-3333-000000000214",
+  bookingId: "44444444-4444-4444-4444-000000004471",
   managedBy: "The PMS manages this stay",
   actions: [
     { label: "Move room", danger: false },

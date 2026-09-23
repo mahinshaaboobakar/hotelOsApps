@@ -53,7 +53,7 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 // call and nothing true to draw. The registration card was the third and is
 // no longer one of them: `registration.capture` answers both a card and its
 // save, so it is reached below with the read that feeds it.
-import { load } from "./book";
+import { load, perform, type StayPage } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem, type Operator } from "./chrome/bar";
 import { cannot } from "./chrome/marks";
@@ -375,6 +375,41 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
       return;
     }
 
+    /**
+     * Record the departure, then redraw the stay from the service.
+     *
+     * **The version is read here rather than carried.** The screen has one —
+     * `StayDetailView` sends it — but the press may come minutes after the
+     * read, and a write against a version the desk has been sitting on is
+     * exactly what the concurrency check exists to refuse. Reading it now
+     * makes the refusal mean *somebody else changed this*, which is true.
+     */
+    const depart = async (stayId: string): Promise<void> => {
+      const stay = await load<StayPage>(host, "reservation.read", "stay", { stayId });
+      if (!stay.ok) return;
+
+      const gone = await perform(
+        host, "stay.override", "checkOut",
+        { stayId, version: stay.value.version });
+
+      // A refusal is drawn by the stay screen's own redraw, which re-reads and
+      // shows what the platform now says. Nothing is patched here.
+      if (gone.refused === null) show({ tab: "Overview" });
+    };
+
+    /** Open the booking's cancellation — frame 8, over the booking it plans. */
+    const toBooking = async (stayId: string): Promise<void> => {
+      const stay = await load<StayPage>(host, "reservation.read", "stay", { stayId });
+      if (!stay.ok) return;
+
+      show({
+        screen: "Booking",
+        bookingId: stay.value.bookingId,
+        overlay: "cancel",
+        page: 0,
+      });
+    };
+
     if (where.screen === "Stay") {
       void stay(
         host,
@@ -382,8 +417,15 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         where.stayId,
         where.tab,
         (tab) => show({ tab }),
-        () => show({ overlay: "registration" }),
-        () => show({ overlay: "assign" }),
+        {
+          register: () => show({ overlay: "registration" }),
+          assign: () => show({ overlay: "assign" }),
+          checkOut: () => void depart(where.stayId),
+
+          // Cancelling is the booking's operation, so this goes to the booking
+          // with frame 8's dialog open rather than drawing a second one here.
+          cancel: () => void toBooking(where.stayId),
+        },
       ).then(overlay);
       return;
     }

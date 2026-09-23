@@ -146,7 +146,8 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Overview · Activity · Requests · Servicing · Payment tabs | `chrome/panel.ts:82` | WORKS |
 | **Check in** (a booked stay) | `screens/stay/index.ts` → the registration card → `stay.override` · `checkIn` → `CheckInCommand` | **BUILT, UNPRESSABLE.** `C5`, 2026-09-23. Frame 15 is what a check-in *is*: the card opens, the guest signs, and the card's own button records the arrival |
 | **Move room** (in house) | `screens/stay/index.ts` → `screens/assign/` → `stay.assign` · `assign` → `AssignCommand` | **BUILT, UNPRESSABLE.** `C3`, 2026-09-23. See *Assigning a room* below |
-| **Cancel** (a booked stay) · **Check out** (in house) | `screens/stay/index.ts`; labels sent by `StayDetailView.cs` | **LOOKS LIVE, DOES NOTHING.** No module door for check-out; Cancel's door exists on a booking and not from this screen |
+| **Check out** (in house) | `screens/stay/index.ts` → `stay.override` · `checkOut` → `CheckOutCommand` | **BUILT, UNPRESSABLE.** `C4`, 2026-09-24. Direct, with no dialog: frame 3 gives `Cancel…` an ellipsis and `Check out` none |
+| **Cancel…** (a booked stay) | `screens/stay/index.ts` → the booking, with frame 8's dialog open | **BUILT, UNPRESSABLE.** `C4`. Cancelling is the BOOKING's operation (GUEST-Q2), so this navigates rather than drawing a second cancellation |
 | **Keep … · Take …** on the disagreement banner | `screens/stay/banner.ts:49`; `StayDetailView.cs:183` | **LOOKS LIVE, DOES NOTHING** |
 | **Full activity →** | `screens/stay/index.ts:304` | **LOOKS LIVE, DOES NOTHING** — should switch to the Activity tab |
 | Activity: **Everything · Ours** filters | `screens/stay/activity-tab.ts:37`; sent by `ActivityView` | **LOOKS LIVE, DOES NOTHING** — no filter is applied |
@@ -275,6 +276,38 @@ type and no stay; the assignment has a stay and neither. Sending the stay's own
 type and nights back from a client would put facts the service holds in a
 caller's hands to get wrong, so a stay answers for itself.
 
+### The two the service can do and no frame draws — `C4`, 2026-09-24
+
+`StayLifecycleService` implements five lifecycle writes. Four are now reachable
+from a screen. **Two of the five have no affordance in any approved frame**, and
+the surface deliberately maps neither.
+
+| | |
+|---|---|
+| `RecordNoShowAsync` | **No control.** "No-show" appears **once** in the gold — as a *state* on a bookings row (`BK-4361 · No-show · Opera`), never as an action |
+| `CorrectAsync` | **No control.** "Correct" appears as **no affordance at all**; the word occurs twice in the gold, both times in prose about something else |
+
+Measured across the whole gold rather than assumed from frame 3.
+
+**Mapping them would be the declared-and-never-used defect `CORE-Q13` is named
+after, and drawing the buttons would be richer than the approved design.** So
+`ModuleSurface` maps `checkIn`, `checkOut`, `cancel` and `assign`, and says in
+the code why the other two are absent.
+
+**Both are real capabilities a desk will need.** A no-show is chargeable and
+reportable and must stay distinguishable from a cancellation; a correction
+exists because *"the guest checked out in error at 07:00 and still asleep in
+the room is a real morning"*, and it is the only remedy for a departure
+recorded by mistake — which matters more now that `Check out` is direct. **The
+affordance is a design question for the owner, drawn.**
+
+**And there is no override control, in any of them.** A staff write on a stay
+the PMS owns is applied *and recorded as an override* by the service, with who,
+when, and what the PMS said at that moment (GUEST-Q1's amendment). An override
+is a state that can contradict a PMS, never a button somebody presses to set
+one — a screen offering to "override" would be offering a second answer where
+the platform keeps exactly one (GUEST-Q3).
+
 ### Setup
 
 | Action | Code | Verdict |
@@ -295,17 +328,23 @@ caller's hands to get wrong, so a stay answers for itself.
 
 ## Count
 
-**14 controls look live and do nothing**, on Today, Attention and a stay:
-＋ assign (1) · Keep ours / Take the PMS value (2) · Cancel, Check out, Move
-room (3) · the banner's Keep / Take (2) · Full activity (1) · Everything / Ours
-(2) · Raise a job (1) · Ask for service (1) · Open in the PMS (1). They come
-first: each is drawn off with its reason until its backend door exists.
+**11 controls look live and do nothing**, on Today, Attention and a stay:
+＋ assign (1) · Keep ours / Take the PMS value (2) · the banner's Keep / Take
+(2) · Full activity (1) · Everything / Ours (2) · Raise a job (1) · Ask for
+service (1) · Open in the PMS (1). They come first: each is drawn off with its
+reason until its backend door exists.
 
-**The number has moved twice and the arithmetic is written out rather than
-retyped**: 16 on 2026-09-19, less *Log a request* (`C7`) and less *Check in*
-(`C5`), both of which now have doors — 14, which is also what the list above
-sums to. A count in prose is ambiguous across sets and goes stale silently, so
-the subtraction is shown and the two routes to it are made to agree.
+**The number has moved four times and the arithmetic is written out rather than
+retyped**: 16 on 2026-09-19, less *Log a request* (`C7`), *Check in* (`C5`),
+*Move room* (`C3`), and *Cancel* with *Check out* (`C4`) — 16 − 5 = 11, which
+is also what the list above sums to. A count in prose is ambiguous across sets
+and goes stale silently, so the subtraction is shown and the two routes to it
+are made to agree.
+
+***And it was stale by one before this edit.*** `C3` moved *Move room* out of
+the list and left the number at 14 — the count and the table disagreeing for a
+day, in the file whose whole job is to say what is true. The two routes are
+checked against each other now because only that catches it.
 
 *"in 10 places" is dropped rather than carried down.* It was written on
 2026-09-19 and this edit would have made it load-bearing; the enumeration above

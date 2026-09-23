@@ -85,6 +85,16 @@ export interface StayPage {
   /** The room it has now — null is a stay waiting for one. */
   currentRoomId: string | null;
 
+  /**
+   * The booking this stay belongs to.
+   *
+   * **`bookingRef` beside it is what a PERSON reads** — an external reference,
+   * or `created here` — and cannot be sent to a service. Cancelling is the
+   * booking's operation (GUEST-Q2), so the stay screen's `Cancel…` needs the
+   * id rather than the reference.
+   */
+  bookingId: string;
+
   /** `Opera manages this stay`, or null in a standalone property. */
   managedBy: string | null;
 
