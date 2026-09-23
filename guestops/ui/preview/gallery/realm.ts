@@ -15,6 +15,7 @@ import {
   recordedBooking,
   recordedBookings,
   recordedCancelPlan,
+  recordedFreeRooms,
   recordedGroup,
   recordedPayment,
   recordedRegistration,
@@ -188,6 +189,10 @@ function host(params: URLSearchParams): Parameters<typeof start>[0] {
     booking: group ? recordedGroup : recordedBooking,
     cancelPlan: recordedCancelPlan,
     availability: recordedAvailability,
+
+    // Frame 10's room chooser. Without it the walk-in sheet can be
+    // drawn and not completed, which is the state it was in.
+    rooms: recordedFreeRooms,
     activity: recordedActivity,
     payment: recordedPayment,
 

@@ -1,6 +1,7 @@
 using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
+using HotelOS.GuestOps.Infrastructure.ReadModels;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,6 +31,29 @@ public sealed record TypeAvailability(
     /// </remarks>
     public int Free => Math.Max(0, TotalRooms - HeldByStays - OutOfOrder - StopSold);
 }
+
+/// <summary>One room nobody is holding, over the dates that were asked about.</summary>
+/// <param name="Id">Master Data's room. What a check-in is assigned.</param>
+/// <param name="Number">What the desk calls it — <c>308</c>, <c>PH-2</c>.</param>
+/// <remarks>
+/// <b>Two fields, and no state.</b> Whether the room is clean is Room Care's
+/// and this application does not assert it; whether it is free is established
+/// by the room being in this list at all. A third field saying <i>vacant</i>
+/// would be the list repeating its own definition back to the reader.
+/// </remarks>
+public sealed record FreeRoom(Guid Id, string Number);
+
+/// <summary>The free rooms of one type, and how many that type has at all.</summary>
+/// <param name="Free">Rooms nobody is holding over the dates asked about.</param>
+/// <param name="Total">Rooms of this type the property has, free or not.</param>
+/// <remarks>
+/// <b><c>Total</c> is carried so that an empty list is not one answer to two
+/// questions.</b> *This property has no rooms of that type* and *every room of
+/// that type is taken* are different facts with opposite remedies — configure
+/// the property, or choose another type — and a bare empty list reports them
+/// alike, which is a measurement nobody took.
+/// </remarks>
+public sealed record RoomsOfType(IReadOnlyList<FreeRoom> Free, int Total);
 
 /// <summary>
 /// Availability — an answer computed, never a table someone feeds.
@@ -92,7 +116,11 @@ public sealed class AvailabilityService(
             .Where(s => s.PropertyId == scope.PropertyId && types.Contains(s.RoomTypeId))
             .Select(s => new StayHold(
                 s.RoomTypeId, s.Lifecycle, s.ArrivalAt.At, s.DepartureAt.At,
-                s.Terms != null ? s.Terms.ReservesInventory : (bool?)null))
+                s.Terms != null ? s.Terms.ReservesInventory : (bool?)null,
+
+                // No room: this question is asked per TYPE, and which room a
+                // stay happens to be in cannot change a count of the type.
+                null))
             .ToListAsync(cancellationToken);
 
         var outOfOrder = await db.RoomsOutOfOrder
@@ -132,16 +160,135 @@ public sealed class AvailabilityService(
         return answer;
     }
 
+    /// <summary>Which rooms of one type nobody is holding over these dates.</summary>
+    /// <param name="scope">The caller, and the property they are scoped to.</param>
+    /// <param name="roomTypeId">The type the desk has chosen.</param>
+    /// <param name="from">Inclusive.</param>
+    /// <param name="to">Inclusive.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    /// <returns>The free rooms, by number, in the order a desk reads them.</returns>
+    /// <exception cref="InvalidRequestException">The last date is before the first.</exception>
+    /// <remarks>
+    /// <para>
+    /// <b>Here rather than in a view, because this is the same question
+    /// <see cref="GetAsync"/> answers at a coarser grain.</b> A view that worked
+    /// out for itself which rooms are taken would be a second place availability
+    /// is decided, and the two would disagree the first time either was
+    /// corrected — this one reuses <c>HoldsOn</c>, including its
+    /// arrival-inclusive, departure-exclusive nights and its deference to a
+    /// source's <c>reserves_inventory</c>.
+    /// </para>
+    /// <para>
+    /// <b>Check-in needs a room (S8), and nothing else in this application could
+    /// name one.</b> <c>WalkInCommand</c> has required a <c>roomId</c> since it
+    /// was written and no read listed rooms, so the walk-in sheet could not be
+    /// completed by any caller — an absence no comparison of screens can find,
+    /// because an absent control has no node to compare.
+    /// </para>
+    /// <para>
+    /// <b>It says nothing about whether a room is clean.</b> That is Room Care's
+    /// fact, and an absent neighbour loses its capability and never this flow
+    /// (APPS-Q2). A free room here is one nobody is holding and that is not out
+    /// of order; a property with no Room Care still takes walk-ins.
+    /// </para>
+    /// </remarks>
+    public async Task<RoomsOfType> FreeRoomsAsync(
+        RequestScope scope,
+        Guid roomTypeId,
+        DateOnly from,
+        DateOnly to,
+        CancellationToken cancellationToken)
+    {
+        await authorizer.RequireAsync(
+            scope, Permissions.ReservationRead, ResourceTypes.Property, scope.PropertyId,
+            cancellationToken);
+
+        if (to < from)
+        {
+            throw new InvalidRequestException("the last date is before the first");
+        }
+
+        var rooms = await db.Set<MasterDataRoom>()
+            .Where(r => r.PropertyId == scope.PropertyId
+                && r.RoomTypeId == roomTypeId
+                && r.Active
+                && r.DeletedAt == null)
+            .Select(r => new { r.Id, r.RoomNumber })
+            .ToListAsync(cancellationToken);
+
+        if (rooms.Count == 0)
+        {
+            return new RoomsOfType([], 0);
+        }
+
+        // Only stays that have a room. One without is holding the TYPE's
+        // inventory — which `GetAsync` counts — and is holding no particular
+        // room, so it cannot make one unavailable here.
+        var held = await db.Stays
+            .Where(s => s.PropertyId == scope.PropertyId
+                && s.RoomTypeId == roomTypeId
+                && s.CurrentRoomId != null)
+            .Select(s => new StayHold(
+                s.RoomTypeId, s.Lifecycle, s.ArrivalAt.At, s.DepartureAt.At,
+                s.Terms != null ? s.Terms.ReservesInventory : (bool?)null,
+                s.CurrentRoomId))
+            .ToListAsync(cancellationToken);
+
+        var outOfOrder = await db.RoomsOutOfOrder
+            .Where(r => r.PropertyId == scope.PropertyId && r.RoomTypeId == roomTypeId)
+            .ToListAsync(cancellationToken);
+
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+
+        var taken = new HashSet<Guid>();
+
+        for (var date = from; date <= to; date = date.AddDays(1))
+        {
+            foreach (var stay in held.Where(s => s.HoldsOn(date, zone)))
+            {
+                taken.Add(stay.RoomId!.Value);
+            }
+
+            foreach (var room in outOfOrder.Where(r => Covers(r.FromDate, r.ToDate, date)))
+            {
+                taken.Add(room.RoomId);
+            }
+        }
+
+        // Ordered by what the desk says out loud. `308` before `1204` would be
+        // wrong to a person reading a list, and so would `PH-2` sorted among
+        // digits — so it is the number's own text, which is what is printed on
+        // the door and on the key card.
+        return new RoomsOfType(
+            [
+                .. rooms
+                    .Where(r => !taken.Contains(r.Id))
+                    .OrderBy(r => r.RoomNumber, StringComparer.OrdinalIgnoreCase)
+                    .Select(r => new FreeRoom(r.Id, r.RoomNumber)),
+            ],
+            rooms.Count);
+    }
+
     private static bool Covers(DateOnly from, DateOnly? to, DateOnly date)
         => date >= from && (to is null || date <= to);
 
     /// <summary>One stay's claim on a type, over its nights.</summary>
+    /// <remarks>
+    /// <b><c>RoomId</c> is carried for <see cref="FreeRoomsAsync"/> and ignored
+    /// by <see cref="GetAsync"/>.</b> It is one field on one projection rather
+    /// than a second record, because <see cref="HoldsOn"/> is the rule for
+    /// *whether a stay is holding a room on a night* and two copies of that
+    /// would answer differently the first time either was corrected — and the
+    /// two questions here differ only in whether the answer is counted per type
+    /// or attributed to a room.
+    /// </remarks>
     private sealed record StayHold(
         Guid RoomTypeId,
         StayLifecycle State,
         DateTimeOffset? Arrival,
         DateTimeOffset? Departure,
-        bool? ReservesInventory)
+        bool? ReservesInventory,
+        Guid? RoomId)
     {
         /// <summary>Whether this stay is holding a room on <paramref name="date"/>.</summary>
         /// <remarks>

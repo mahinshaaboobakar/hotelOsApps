@@ -109,7 +109,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above**; live after the next restart (ADR 0210), **to be proved, and the proof gates Room Care and Workforce under ADR 0211** |
 | Click a row / guest name | `screens/today/table.ts:75,108` | WORKS — opens the stay |
 | **＋ assign** on a row with no room | `screens/today/table.ts:92` | **LOOKS LIVE, DOES NOTHING.** Nothing assigns a room from this screen (`stay.assign` has no module door) |
-| Walk-in | `screens/today/index.ts:92` | REFUSES, SAYS WHY — opens a sheet saying a walk-in cannot be taken here yet (`application.ts:258-278`) |
+| Walk-in | `screens/today/index.ts:92` → `screens/walkin/` | **BUILT, UNPRESSABLE.** `C2`, 2026-09-23 — the sheet captures and calls `stay.create/walkIn`. See *The walk-in* below |
 | ＋ New booking | `screens/today/index.ts:93` | WORKS — opens New booking, which **takes a booking** since 2026-09-23 (`9130b94`) |
 
 ### Bookings and a booking
@@ -117,7 +117,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Action | Code | Verdict |
 |---|---|---|
 | Click a row / guest name | `screens/bookings/table.ts:65,102` | WORKS — opens the booking |
-| Walk-in · ＋ New booking | `screens/bookings/filters.ts:61-62` | as on Today |
+| Walk-in · ＋ New booking | `screens/bookings/filters.ts:61-62` | as on Today — the walk-in now opens the built sheet |
 | **Cancel…** on a booking | `screens/booking/index.ts:97` → `cancelPlan`, then `cancel` (`stay.override`) | WORKS in code. **Not yet pressed on the platform:** the owner's store holds no booking to cancel (Part B drive list, C1) |
 
 ### New booking
@@ -185,6 +185,54 @@ required-ness at all, and `CardBox` has no field one could be written into.
 `GuestOpsSettings.RequiredForHomeCountry` / `RequiredForVisitors` answered this
 before the screen existed: **nothing was stubbed and C6 did not have to come
 first.** C6 is the screen that *writes* those two lists; C5 only reads them.
+
+### The walk-in — frame 10
+
+Built `C2`, 2026-09-23. One press, two authorized phases.
+
+| Action | Code | Verdict |
+|---|---|---|
+| Every box | `screens/walkin/index.ts` → `reservation.read` · `today` · `availability` · `rooms` | **BUILT, UNPRESSABLE** |
+| **Create and check in** | → `stay.create` · `walkIn` → `WalkInCommand` | **BUILT, UNPRESSABLE.** Off, and saying what is missing, until the service's required fields are present |
+| Rate | drawn, not captured | DRAWN OFF, SAYS WHY — `WalkInCommand` has no field for it, so the sheet cannot send one. The money sites remain OWED behind the currency authority |
+| Registration | drawn, not captured | DRAWN OFF, SAYS WHY — it is the stay's card (`C5`), after this |
+
+**What actually blocked it was not the write.** `stay.create/walkIn` was
+declared, served and unreachable — and the reason was that **nothing in this
+application could name a ROOM**, while check-in requires one (S8). `roomId` has
+been required since `WalkInCommand` was written. The new read is
+`reservation.read/rooms`, over `AvailabilityService.FreeRoomsAsync`, so that
+*what is free* is decided in one place at both grains.
+
+> **A fidelity sweep could never have found this.** It compares nodes that
+> exist; a control nobody could populate has no node to differ from. It is found
+> by asking what the WRITE needs against what the reads actually send.
+
+**The partial outcome is the behaviour most worth holding.** A refused second
+phase leaves the stay (RC-Q8a), so `checkedIn: false` is a **successful call
+reporting what happened**, not a failure. The sheet says *the stay was created
+and the guest is not yet in house*, names why, and does not close — a desk told
+"nothing happened" creates a second stay for a guest already in the book.
+
+**The arrival comes from the service's business date, never this machine's
+clock.** A browser in another zone disagrees with the desk about what *today*
+is, and the stay is the property's.
+
+**Found while building it — a defect in shared chrome.** `Action.off` added a
+CSS class and nothing else: the button stayed pressable, and an action with no
+`onClick` falls back to `onDismiss`, so an **off primary silently closed the
+overlay**, throwing away whatever had been typed. The one existing caller
+defended itself by hand. `off` is now a second *shape* that carries its reason
+and cannot carry a handler, rendered through `unavailable` — disabled, with the
+reason where a pointer and a screen reader both find it. Held by three tests in
+`tests/overlay.test.ts`, shown failing against the old behaviour.
+
+**One Part A divergence, and it is structural rather than a choice.** Frame 10
+draws the sheet as a desk has filled it — Joseph Mathew, Deluxe Twin, Room 308.
+A capture screen starts **empty**, because it is a new stay; the frame's state
+is reached by typing. A capture of the built sheet will therefore differ from
+the frame on every field, and that is the drawing showing a moment rather than
+the build being wrong.
 
 ### Setup
 

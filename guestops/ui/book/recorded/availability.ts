@@ -2,7 +2,7 @@
  * What is free, and the walk-in sold at the desk — frames 14 and 10.
  */
 
-import type { Availability, RoomConflict, WalkInDraft } from "../model";
+import type { Availability, FreeRooms, RoomConflict } from "../model";
 
 /**
  * Frame 14's answer — and the Suite row is the one that explains the design.
@@ -66,22 +66,19 @@ export const recordedConflict: RoomConflict = {
  * step**, because check-in is the one operation that refuses to proceed without
  * one (S8).
  */
-export const recordedWalkIn: WalkInDraft = {
-  guest: "Joseph Mathew",
-  guestNote: "new guest",
-
-  contact: "+91 98950 44120",
-  contactKind: "phone",
-
-  roomType: "Deluxe Twin",
-  room: "308",
-  roomState: "vacant · clean",
-
-  arrives: "31 Aug · now",
-  departs: "1 Sep · 11:00",
-
-  rate: "₹ 6 200.00 INR",
-  rateBasis: "gross",
-
-  consequence: "Room 308 will be marked occupied.",
+/**
+ * The rooms free for the chosen type — frame 10's room chooser.
+ *
+ * **This replaced `recordedWalkIn`, and the shape change is the point.** That
+ * fixture held rendered strings for a sheet that drew a draft and captured
+ * nothing; the sheet now captures, so what a fixture must supply is what the
+ * SERVICE sends — ids the write can carry, and the count that keeps an empty
+ * list from meaning two things.
+ */
+export const recordedFreeRooms: FreeRooms = {
+  rooms: [
+    { id: "3a1f0c22-0000-4000-8000-000000000308", number: "308" },
+    { id: "3a1f0c22-0000-4000-8000-000000000311", number: "311" },
+  ],
+  ofType: 6,
 };

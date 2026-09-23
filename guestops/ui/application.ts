@@ -65,6 +65,7 @@ import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
 import { setup } from "./screens/setup";
 import { registrationCard } from "./screens/registration";
+import { walkIn } from "./screens/walkin";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
 
@@ -257,26 +258,21 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     // the walk-in on top of it.
     const overlay = (): void => {
       if (where.overlay === "walkin") {
-        // **A door with nothing on the other side of it, and it is reported as
-        // that rather than built.** `stay.create/walkIn` is declared in the
-        // manifest and served by `ModuleSurface` — and this sheet rendered
-        // `recordedWalkIn` and called `perform` nowhere, so no control in this
-        // module could ever reach it. That is not a missing call; it is a
-        // capability with no caller, and adding a submit here would be feature
-        // work wearing a conversion's clothes.
-        main.append(sheet({
-          title: "Walk-in",
-          subtitle: "not available at this desk yet",
-          body: [cannot(
-            "A walk-in cannot be taken here yet",
-            "GuestOps can record one — the platform serves it — but this sheet "
-            + "has nothing to capture a guest with, and it will not show a draft "
-            + "belonging to nobody.",
-          )],
-          foot: null,
-          actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
-          onDismiss: () => show({ overlay: null }),
-        }));
+        // **The sheet captures now.** `stay.create/walkIn` was declared,
+        // served, and unreachable: this drew `recordedWalkIn` and called
+        // `perform` nowhere. What kept it that way was not the write — it was
+        // that nothing in this application could name a ROOM, and check-in
+        // needs one (S8). `reservation.read/rooms` is that read.
+        void walkIn(
+          host,
+          main,
+          () => show({ overlay: null }),
+          // In house: the sheet closes and the stay is opened, because the
+          // service says the guest is there and the stay screen is what shows
+          // it. A partial outcome does NOT come here — the sheet keeps itself
+          // open and says the stay exists.
+          (stayId) => show({ screen: "Stay", tab: "Overview", stayId, overlay: null }),
+        );
       }
 
       // The card stands over the day, because that is where a check-in starts:

@@ -168,6 +168,12 @@ public sealed class DeskHarness : IAsyncDisposable
     public Task MasterDataRoomTypesAsync(IEnumerable<MasterDataRoomTypeSource.Row> rows)
         => _scratch.MasterDataRoomTypesAsync(rows);
 
+    /// <summary>Master Data's rooms, for the reads that name one.</summary>
+    /// <param name="rows">The rooms, as Master Data holds them.</param>
+    /// <returns>When the table exists, holds them, and is readable.</returns>
+    public Task MasterDataRoomsAsync(IEnumerable<MasterDataRoomSource.Row> rows)
+        => _scratch.MasterDataRoomsAsync(rows);
+
     /// <summary>Close the context, then drop the database.</summary>
     /// <returns>When both are gone.</returns>
     public async ValueTask DisposeAsync()

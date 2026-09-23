@@ -46,6 +46,7 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.BookingsView>();
         services.AddScoped<Module.BookingView>();
         services.AddScoped<Module.AvailabilityView>();
+        services.AddScoped<Module.FreeRoomsView>();
         services.AddScoped<Module.CancelPlanView>();
         services.AddScoped<Module.WalkInCommand>();
         services.AddScoped<Module.BookCommand>();

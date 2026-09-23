@@ -304,6 +304,32 @@ public sealed class GuestOpsScratch : IAsyncDisposable
             + $"GRANT SELECT ON masterdata.room_types TO {_convention.AppRole}");
     }
 
+    /// <summary>
+    /// Master Data's rooms in this database, readable by the application role.
+    /// </summary>
+    /// <remarks>
+    /// The sibling of <see cref="MasterDataRoomTypesAsync"/>, and safe to call
+    /// beside it: each source context creates only its own table, so the schema
+    /// is shared and the two tables are not created twice.
+    /// </remarks>
+    /// <param name="rows">The rooms, as Master Data holds them.</param>
+    /// <returns>When the table exists, holds them, and is readable.</returns>
+    public async Task MasterDataRoomsAsync(IEnumerable<MasterDataRoomSource.Row> rows)
+    {
+        var provisioner = As(ProvisionerRole, ProvisionerPassword, _database.Name);
+
+        await using var source = new MasterDataRoomSource(provisioner);
+        await source.Database.GetService<IRelationalDatabaseCreator>().CreateTablesAsync();
+
+        source.Rooms.AddRange(rows);
+        await source.SaveChangesAsync();
+
+        await ExecuteAsync(
+            provisioner,
+            $"GRANT USAGE ON SCHEMA masterdata TO {_convention.AppRole}; "
+            + $"GRANT SELECT ON masterdata.rooms TO {_convention.AppRole}");
+    }
+
     private static async Task ExecuteAsync(string connection, string sql)
     {
         await using var open = new NpgsqlConnection(connection);

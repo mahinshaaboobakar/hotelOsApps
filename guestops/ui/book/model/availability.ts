@@ -110,42 +110,20 @@ export interface RoomConflict {
 }
 
 /**
- * The walk-in sheet's fields — frame 10.
+ * The rooms free for one type over one range — gold frame 10's room chooser.
  *
- * One action, because booking and arrival are one moment (S13): a two-step
- * "create, then check in" produces a stay in `Booked` that nobody ever leaves.
- * The **walk-in flag is set when the stay is created or it is unrecoverable**,
- * which is why it is a property of the draft rather than something recorded
- * afterwards.
+ * **`ofType` exists so an empty list is not one answer to two questions.** *This
+ * property has no rooms of that type* and *every room of that type is taken*
+ * have opposite remedies — configure the property, or choose another type — and
+ * a bare empty list reports them alike, which is a measurement nobody took.
+ *
+ * **Nothing here says whether a room is clean.** That is Room Care's fact, and
+ * an absent neighbour loses its capability and never this flow (APPS-Q2). A
+ * room being in this list is what establishes that it is free.
  */
-export interface WalkInDraft {
-  guest: string;
+export interface FreeRooms {
+  readonly rooms: readonly { readonly id: string; readonly number: string }[];
 
-  /** `new guest`, or the note that this person is already known. */
-  guestNote: string;
-
-  /**
-   * What the desk typed. **A stay with none is valid and says so** — it is
-   * never filled with a placeholder.
-   */
-  contact: string | null;
-  contactKind: string;
-
-  roomType: string;
-
-  /** Check-in requires a room — the one hard gate the assignment ruling makes. */
-  room: string | null;
-
-  /** `vacant · clean`, read from Room Care where it is installed. */
-  roomState: string | null;
-
-  arrives: string;
-  departs: string;
-
-  /** `₹ 6 200.00 INR` — value and currency, with `gross` said separately. */
-  rate: string | null;
-  rateBasis: string;
-
-  /** What marking this stay occupied will do, said before the button. */
-  consequence: string;
+  /** Rooms of this type the property has at all, free or not. */
+  readonly ofType: number;
 }

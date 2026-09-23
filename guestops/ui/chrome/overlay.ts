@@ -2,10 +2,10 @@
  * The scrim, and the two surfaces that sit on it — a sheet and a dialog.
  */
 
-import { control, el, fill } from "./element";
+import { control, el, fill, unavailable } from "./element";
 
-/** A button in an overlay's foot: its words, and what it does. */
-export interface Action {
+/** What every action in a foot carries, live or not. */
+interface Labelled {
   label: string;
 
   /** Drawn as the primary. Exactly one action is, or none is. */
@@ -20,27 +20,55 @@ export interface Action {
    * of the choice. The outline stays for the affordance that *starts* the flow.
    */
   danger?: boolean;
-
-  /**
-   * What it does.
-   *
-   * `undefined` falls back to dismissing the overlay — which is right for a
-   * Cancel button and wrong for a primary one, so a primary action that cannot
-   * yet do its work sets `off` rather than leaving this out.
-   */
-  onClick?: (() => void) | undefined;
-
-  /**
-   * Drawn as unavailable, with the reason beside it.
-   *
-   * A control that cannot do its work is drawn as one — dashed and quiet —
-   * rather than as an ordinary button that refuses when pressed. The frames
-   * draw no such state, and this exists because two of group 1's actions
-   * genuinely have nothing to send: showing them live would be the screen
-   * claiming a capability it does not have.
-   */
-  off?: boolean | undefined;
 }
+
+/**
+ * A button in an overlay's foot: its words, and what it does — or why it cannot.
+ *
+ * # `off` used to be a class, and the caller had to remember the rest
+ *
+ * It added `off` to the class name and **nothing else**: the button stayed
+ * pressable, and an action with no `onClick` falls back to `onDismiss`, so an
+ * *off* primary silently CLOSED the overlay — throwing away whatever the desk
+ * had typed into it. The one existing caller defended itself by hand
+ * (`onClick: reason === null ? () => undefined : …`), which is the tell: a rule
+ * of the form *the caller must also neutralise Y* is a rule that will be
+ * forgotten, and this one had already been forgotten once by a dead primary
+ * action on the registration card.
+ *
+ * **So the two states are two shapes.** An off action cannot be written without
+ * its reason, and cannot carry an `onClick` at all — the mistake is not caught,
+ * it is inexpressible. The reason reaches a person as the control's tooltip and
+ * its accessible description, which is what `unavailable` is for.
+ */
+export type Action =
+  | (Labelled & {
+    off?: false;
+
+    /**
+     * What it does.
+     *
+     * `undefined` falls back to dismissing the overlay — right for a Cancel
+     * button. A primary action that cannot do its work yet is the `off` shape
+     * below rather than this one with the handler left out.
+     */
+    onClick?: (() => void) | undefined;
+  })
+  | (Labelled & {
+    /**
+     * Drawn as unavailable — dashed, quiet, and genuinely disabled.
+     *
+     * A control that cannot do its work is drawn as one rather than as an
+     * ordinary button that refuses when pressed. The frames draw no such state;
+     * it exists because some actions genuinely have nothing to send, and
+     * showing them live would be the screen claiming a capability it has not
+     * got.
+     */
+    off: true;
+
+    /** Why, in words a person at the desk understands — never a code. */
+    why: string;
+  });
 
 /** What an overlay is made of — the same three parts either way. */
 export interface Overlay {
@@ -119,11 +147,19 @@ function foot(overlay: Overlay): HTMLElement {
   element.append(el("div", "grow"));
 
   for (const action of overlay.actions) {
+    // **Genuinely disabled, and carrying its reason.** `unavailable` sets
+    // `disabled` and puts the reason where a pointer and a screen reader both
+    // find it; the old form added a class and left the button live, so an off
+    // primary fell through to `onDismiss` and closed the overlay.
+    if (action.off === true) {
+      element.append(unavailable("btn sm", action.label, action.why));
+      continue;
+    }
+
     element.append(
       control(
-        `btn sm${action.off === true ? " off" : ""}`
-          + `${action.primary === true && action.off !== true ? " pri" : ""}`
-          + `${action.danger === true && action.off !== true ? " danger confirm" : ""}`,
+        `btn sm${action.primary === true ? " pri" : ""}`
+          + `${action.danger === true ? " danger confirm" : ""}`,
         action.label,
         action.onClick ?? overlay.onDismiss,
       ),

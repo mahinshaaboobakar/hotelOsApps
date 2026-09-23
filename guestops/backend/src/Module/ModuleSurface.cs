@@ -199,6 +199,12 @@ public static class ModuleSurface
 
             "availability" => Availability(services, request, cancellationToken),
 
+            // **The read the walk-in sheet could not be completed without.**
+            // Check-in needs a room (S8) and `WalkInCommand` has required
+            // one since it was written, with nothing in this application
+            // able to name a room. Gold frame 10.
+            "rooms" => Rooms(services, request, cancellationToken),
+
             "stay" => services.GetRequiredService<StayDetailView>()
                 .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
 
@@ -282,6 +288,40 @@ public static class ModuleSurface
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };
+
+    /// <summary>Which rooms are free, of the type the desk chose.</summary>
+    /// <remarks>
+    /// <b>Refused rather than defaulted, for the same reason availability is.</b>
+    /// A missing type could be read as *any type* and a missing arrival as
+    /// *today*, and the answer would be a list of rooms the desk never asked
+    /// about — offered as the room a guest is about to be given.
+    /// </remarks>
+    private static Task<object?> Rooms(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Body is not { ValueKind: JsonValueKind.Object } body)
+        {
+            throw new InvalidRequestException("rooms need a type and the dates");
+        }
+
+        if (!body.TryGetProperty("roomTypeId", out var type)
+            || type.ValueKind != JsonValueKind.String
+            || !Guid.TryParse(type.GetString(), out var roomTypeId))
+        {
+            throw new InvalidRequestException("rooms need a room type");
+        }
+
+        var from = Date(body, "arrive")
+            ?? throw new InvalidRequestException("rooms need an arrival date");
+
+        var to = Date(body, "depart")
+            ?? throw new InvalidRequestException("rooms need a departure date");
+
+        return services.GetRequiredService<FreeRoomsView>()
+            .AnswerAsync(request.Scope, roomTypeId, from, to, cancellationToken);
+    }
 
     /// <summary>The dates availability was asked about.</summary>
     /// <remarks>

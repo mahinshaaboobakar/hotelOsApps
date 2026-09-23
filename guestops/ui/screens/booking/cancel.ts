@@ -109,27 +109,48 @@ export function cancel(
 
     actions: [
       { label: "Keep the booking", onClick: close },
-      {
-        // The count is in the label because the dialog's whole argument is that
-        // this is n cancellations rather than one — a button saying "Cancel the
-        // booking" over a two-stay group would undo the sentence above it. It
-        // comes from `plan.stays` and never from `plan.rows.length`, which is a
-        // mixed list and once made this button offer to cancel three stays of a
-        // two-stay booking.
-        label: plan.stays === 1 ? "Cancel this stay" : `Cancel all ${plan.stays} stays`,
-        danger: true,
-
-        // **No reason, no write.** The command refuses a cancellation without
-        // one, and this refuses to send one — so a property that has configured
-        // no reasons gets a button drawn as unavailable with the field above it
-        // saying why, rather than a server refusal after the fact.
-        off: reason === null,
-        onClick: reason === null ? () => undefined : () => confirm(reason),
-      },
+      // **No reason, no write.** The command refuses a cancellation without
+      // one, and this refuses to send one — so a property that has configured
+      // no reasons gets the button drawn as unavailable, saying so, rather than
+      // a server refusal after the fact.
+      //
+      // It used to be `off: reason === null` beside a hand-written
+      // `onClick: reason === null ? () => undefined : …`, because `off` only
+      // added a class and left the button live. The neutralising handler is no
+      // longer the caller's to remember: an off action is a different shape and
+      // cannot carry one.
+      reason === null
+        ? {
+          label: destructive(plan),
+          danger: true,
+          off: true,
+          why: "Choose a reason first — a cancellation is recorded against one.",
+        }
+        : {
+          label: destructive(plan),
+          danger: true,
+          onClick: () => confirm(reason),
+        },
     ],
 
     onDismiss: close,
   });
+}
+
+/**
+ * What the destructive button says.
+ *
+ * **The count is in the label** because the dialog's whole argument is that this
+ * is n cancellations rather than one — a button saying *Cancel the booking* over
+ * a two-stay group would undo the sentence above it. It comes from
+ * `plan.stays` and never from `plan.rows.length`, which is a mixed list and
+ * once made this button offer to cancel three stays of a two-stay booking.
+ *
+ * A function rather than a `const`, so the two shapes of the action below say
+ * it once each rather than drifting apart.
+ */
+function destructive(plan: CancelPlan): string {
+  return plan.stays === 1 ? "Cancel this stay" : `Cancel all ${plan.stays} stays`;
 }
 
 /**
