@@ -1,3 +1,4 @@
+using System.Globalization;
 using PmsOracle.Authentication;
 using PmsOracle.Normalisation;
 using Xunit;
@@ -25,6 +26,43 @@ public sealed class PollingScheduleTests
         ["pollTightFrom"] = "14:00",
         ["pollTightUntil"] = "16:00",
     };
+
+    /// <summary>
+    /// One stored configuration means the same thing on every property's
+    /// server — `NUM-Q4`.
+    /// </summary>
+    /// <remarks>
+    /// The value was typed into a browser once and is read back by a service
+    /// whose culture belongs to the machine it was installed on. Under a
+    /// culture that writes times differently, a culture-sensitive read of
+    /// <c>pollTightFrom</c> parses as nothing and the tighter window silently
+    /// never applies — a hotel polling every three hours through its check-in
+    /// rush, with nothing on any screen to say so.
+    /// </remarks>
+    [Theory]
+    [InlineData("de-DE")]
+    [InlineData("ar-SA")]
+    [InlineData("hi-IN")]
+    public void A_stored_schedule_reads_the_same_under_any_servers_culture(string culture)
+    {
+        var was = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+
+            var schedule = OhipPollingSchedule.Read(Configured());
+
+            Assert.Equal(TimeSpan.FromSeconds(10800), schedule.Normal);
+            Assert.Equal(TimeSpan.FromSeconds(900), schedule.Tight);
+            Assert.Equal(new TimeOnly(14, 0), schedule.From);
+            Assert.Equal(new TimeOnly(16, 0), schedule.Until);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = was;
+        }
+    }
 
     /// <summary>An unconfigured property polls at the drawn defaults.</summary>
     /// <remarks>

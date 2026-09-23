@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text.Json;
 using HotelOS.Connector;
@@ -188,8 +189,21 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings)
     private static string? First(IEnumerable<OnSitePush> pushes, Func<OnSitePush, string?> field) =>
         pushes.Select(field).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
 
+    /// <summary>The arrival date the PMS sent, read as a machine value.</summary>
+    /// <remarks>
+    /// <b>Invariant, because this is the wire</b> — `NUM-Q4`, ADR 0174's
+    /// boundary. The on-site agent posts what OPERA holds, and the reference
+    /// reads Oracle's dates with explicit machine patterns throughout
+    /// (<c>providers/oracle/cloud/services/impl/OracleCloudReservationServiceImpl.java:171</c>
+    /// — <c>yyyy-MM-dd HH:mm:ss.S</c>). A culture-sensitive parse would make
+    /// the same bytes mean two different days on two servers, and the join key
+    /// this feeds would stop matching for a hotel whose server was set up
+    /// differently — silently, and only for some dates.
+    /// </remarks>
     private static DateOnly? ParseDate(string? value) =>
-        DateOnly.TryParse(value, out var date) ? date : null;
+        DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
+            ? date
+            : null;
 
     private static T Read<T>(byte[] payload)
         where T : new() =>

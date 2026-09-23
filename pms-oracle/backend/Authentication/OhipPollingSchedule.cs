@@ -1,3 +1,4 @@
+using System.Globalization;
 using PmsOracle.Normalisation;
 
 namespace PmsOracle.Authentication;
@@ -125,17 +126,31 @@ public sealed record OhipPollingSchedule
             : local >= from || local < until;
     }
 
+    /// <summary>A configured interval, in seconds.</summary>
+    /// <remarks>
+    /// <b>Invariant, and this one is a judgement rather than an obvious wire
+    /// value</b> — `NUM-Q4` leaves a parse of something a person typed to the
+    /// stream, and this began as a person typing into the connector's form.
+    /// What decides it is where the parse happens: the value was typed once
+    /// into a browser, stored as a string, and is read back later by a service
+    /// process whose culture belongs to the machine it was installed on. A
+    /// culture-sensitive read would make one stored configuration mean two
+    /// things on two properties — and `pollTightFrom` is worse than the
+    /// interval, because a time separator this culture does not expect parses
+    /// as nothing and the tighter window silently never applies.
+    /// </remarks>
     private static TimeSpan Seconds(
         IReadOnlyDictionary<string, string> settings, string name, TimeSpan fallback) =>
         settings.TryGetValue(name, out var raw)
-        && int.TryParse(raw, out var seconds)
+        && int.TryParse(raw, NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds)
         && seconds > 0
             ? TimeSpan.FromSeconds(seconds)
             : fallback;
 
     private static TimeOnly? Clock(
         IReadOnlyDictionary<string, string> settings, string name) =>
-        settings.TryGetValue(name, out var raw) && TimeOnly.TryParse(raw, out var at)
+        settings.TryGetValue(name, out var raw)
+        && TimeOnly.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var at)
             ? at
             : null;
 }
