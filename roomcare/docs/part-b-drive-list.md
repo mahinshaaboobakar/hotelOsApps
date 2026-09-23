@@ -39,6 +39,26 @@ existing data root, which is a different first run from a clean machine, and **w
 reappears is an open question rather than a known blocker**. The fresh install is the owner's to ask for, and is
 unasked. Room Care blocks nothing either way: the package is cut, verified and staged.*
 
+**Measured again 2026-09-23, 13:28, because the platform that now holds a hotel is a different platform from the
+one those two paragraphs describe.** The architect reports 50 rooms, 2 buildings, 6 floors, 5 room types, 6
+departments and 17 staff, created through the API. What is running is the **development run**, not an installed
+product: `hotelos-kernel.exe` has no path on disk under `C:\Program Files\HotelOS` — that directory is still gone —
+and `hotelos-desktop.exe` runs from `HosPilotOS\target\debug`. The kernel started 11:51 today with eight module
+processes; the desktop at 12:55.
+
+That matters to Part B in one way, and it is good news: **the development run reads the user-scope registry, which
+is exactly where 0.1.5 is staged**, so the machine-scope gap above is not in the way of walking Room Care against
+this hotel. `roomcare-0.1.5.hopkg`, 16,758,722 bytes, sha256 `2c25a998…070f` — re-hashed on the staged file today,
+and equal to what EE verified.
+
+**One thing does stand between the two, and it is not Room Care's to fix.** The registry's
+`catalogue-index.json` was last written 2026-09-20 20:55 and **does not contain 0.1.5**; the package landed at
+11:56 today, five minutes after the kernel started. `workforce-0.4.0.hopkg` is absent from it the same way, so
+this is the registry's index, not this package. Whether the running registry rebuilds that index on a scan or
+reads it as written is EE's question; if it is rebuilt at startup, a restart of the development run is the whole
+of it. **Not done here: the owner's platform is running with a hotel in it, and restarting it is theirs or EE's
+to decide, not a check I take on myself.**
+
 **Part B certifies 0.1.5**, the first Room Care the owner installs — ruled by the owner on 2026-09-22, because it
 carries their own 64g §2 B failure-card change, which 0.1.4 was cut two days too early to have. 0.1.2, 0.1.3 and
 0.1.4 were only ever on the shelf:
