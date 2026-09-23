@@ -7,7 +7,27 @@
 > evidence. **At this run, Room Care is not installed on the owner's platform** (`platform.packages` holds guestops,
 > jobs, openai and workforce), so no live comparison exists yet.
 
-## Run from `c271375` — inside the 0.1.4 cut, against the bundles the owner installs
+## Run from `4d03931` — inside the 0.1.5 cut, the version the owner installs
+
+Run 2026-09-23 by KK inside the cut: detached worktrees of both repositories side by side, **HotelOsApps `4d03931`**
+and **HosPilotOS `667a93ff`**, both clean. `module.js` measured here is `af082dbc…`, 166,665 bytes, and the copy
+inside `roomcare-0.1.5.hopkg` is **byte-for-byte the same**.
+
+```text
+drawn 1,657 · built 1,563 · paired 523 · identical 385 · differing 138
+every one of the 138 is named; classify.mjs exits 0; 0 frames unreached
+```
+
+The counts are 0.1.4's, class for class. The failure-card change that made this cut does not move them: a card is
+drawn only when a read fails, and Part A sweeps the screens as they read.
+
+**The packaged bundle was read for the change itself**, rather than trusted because the commit is in the tree: the
+`asked` fact draws `fact.value`, and `fact.permission` appears nowhere in it. *An earlier version of this check was
+vacuous — it ended `or True` and could not have failed — and was replaced.*
+
+## Superseded by `4d03931` — the run from `c271375`
+
+### Run from `c271375` — inside the 0.1.4 cut, against the bundles the owner installs
 
 Run 2026-09-20 by KK **inside the cut itself**, from detached worktrees of both repositories side by side:
 **HotelOsApps `c271375`** and **HosPilotOS `a786d1a6`**, both clean. So this is not a rehearsal of the cut's source —

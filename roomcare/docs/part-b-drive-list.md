@@ -1,13 +1,13 @@
 # Room Care Part B — the drive list
 
 Prepared 2026-09-19 by KK, **re-headed 2026-09-20 for the cut Part B now runs on**:
-**`roomcare-0.1.4.hopkg`**, 16,739,263 bytes, sha256
-`6b1395379d9fc36fbef31b2cf705c0344d85a7408fa990814f8d463f2e1d8b6a`, signed by
+**`roomcare-0.1.5.hopkg`**, 16,758,722 bytes, sha256
+`2c25a99875059269b6de2384d154b9fc046bb83f10818247f1914fedab97070f`, signed by
 `hotelos-packages-2026` (`dev-local`), staged in `%LOCALAPPDATA%\HotelOS\packages\registry`
 on the owner's machine beside 0.1.2 and 0.1.3.
 
 **Built from detached worktrees of both repositories, side by side, so every relative path resolved inside the cut
-and none reached a shared tree: `HotelOsApps` `c271375` and `HosPilotOS` `a786d1a6`, both clean.** The UI was built
+and none reached a shared tree: `HotelOsApps` `4d03931` and `HosPilotOS` `667a93ff`, both clean.** The UI was built
 there with `node_modules` by junction; `dotnet publish -r win-x64 --no-self-contained` compiled `HotelOS.Common` and
 `HotelOS.Platform` from the platform worktree. Both worktrees were removed afterwards, junction first.
 
@@ -16,7 +16,7 @@ inside the archive   52 entries declared, 52 in the payload, signature present, 
                      (checked from the archive's own bytes, independently of hopkg)
 native code          2 files, both x64: the service and Temporal's bridge — no foreign-platform natives
 UI bundles           module.js in the package is byte-for-byte what Part A measured in the cut
-                     (3f2fa23d…, 166,303 bytes; docs/part-a-certificate.md)
+                     (af082dbc…, 166,665 bytes; docs/part-a-certificate.md)
 ```
 
 **Where it is staged is not where the owner's Kernel looks — EE, 2026-09-22, and checked here.** The archive sits in
@@ -30,7 +30,9 @@ resolution is not Room Care's: EE has it with the architect, alongside the prope
 last premise I took on trust — "0.1.2 is installed" — was wrong the same way: a staging step that succeeded, in a
 place the reader of it never looks.*
 
-**Part B certifies 0.1.4**, the first Room Care the owner installs. 0.1.2 and 0.1.3 were only ever on the shelf:
+**Part B certifies 0.1.5**, the first Room Care the owner installs — ruled by the owner on 2026-09-22, because it
+carries their own 64g §2 B failure-card change, which 0.1.4 was cut two days too early to have. 0.1.2, 0.1.3 and
+0.1.4 were only ever on the shelf:
 measured 2026-09-19, Room Care is installed on no Kernel — the owner's running platform holds guestops, jobs, openai
 and workforce, the `roomcare` schema has no tables, and the running Kernel's log has no line naming `roomcare`. *That
 corrected a relayed premise I had written in without checking: "0.1.2 was already installed".* **So Part B starts
@@ -92,7 +94,7 @@ assign-gated act is in D and waits on ADR 0193's registration.
 
 ## Preconditions, checked at the start and quoted
 
-1. Software Center lists **Room Care 0.1.4, Running**.
+1. Software Center lists **Room Care 0.1.5, Running**.
 2. The signed-in user is admin on the property: the Board answers rather than
    drawing *Not permitted*. A refusal there ends the run as a precondition
    failure, not twenty failed rows.
