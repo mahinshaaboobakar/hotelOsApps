@@ -78,7 +78,7 @@ application's guess.
 | Scheduled | draws from `scheduled`, paged | `scheduled/index.ts:27` |
 | Catalogue ＋ New · Create category | `saveCategory` | `catalogue/index.ts:81` |
 | ＋ Add resolution | `addResolution` | `catalogue/index.ts:131` |
-| New item · Create item | `saveItem`; **Cancel** clears the form | `catalogue/index.ts:182` |
+| New item · Create item | `saveItem`; **Cancel** clears the form; a refusal speaks **inside the composer** (ADR 0225 §4), as it does for a new category and a new resolution | `catalogue/index.ts:192` |
 | **An item's Edit** | **drawn off** — "editing an item isn't available here yet". `saveItem` exists; the edit form is not drawn | `catalogue/index.ts:105` |
 | **This property · Import / export** | **drawn off** — neither view is built | `catalogue/index.ts:39-43` |
 | An item's resolutions | a list, not controls | `catalogue/index.ts:119` |
@@ -91,7 +91,7 @@ application's guess.
 | Service hours → Save the hours | `saveHours` | `tabs.ts:109` |
 | Holds & reminders → Save | `saveHold` | `tabs.ts:168` |
 | Closing & rating → Save | `saveClosing` | `tabs.ts:190` |
-| Access → Grant | `grantJobsManager` | `tabs.ts:260` |
+| **Access → Choose a person…** | **drawn off** — "choosing a person isn't available here yet". ADR 0225 §1 (`JOBS-Q4`, owner, 2026-09-22): a person is chosen by name and an identifier is never the selection, so the `User id` field is gone. The chooser is Context's staff search (ADR 0224), which does not exist yet — measured 2026-09-23, Context answers eight RPCs and none searches. `grantJobsManager` is unchanged and waiting. **Granting is unavailable on the property until the chooser lands** | `tabs.ts:267` |
 | Access → Revoke… | `revokeJobsManager`, after a confirmation | `tabs.ts:237` |
 | **A policy row's Edit** | **drawn off** — "editing a policy from this list isn't available yet" | `policies.ts:87` |
 | **＋ step (the ladder)** | **drawn off** — "adding a step isn't available here yet"; no operation exists | `policies.ts:164` |
@@ -132,7 +132,7 @@ the owner's walk knows what is absent by design rather than broken.
 
 | Screen | What it draws | What the service sends |
 |---|---|---|
-| One job · Record | who created and who last changed the job (frame 2g) | nothing — the rows are absent |
+| One job · Record | who created and who last changed the job (frame 2g) | **the names, since ADR 0225 §2** — `Created by` and `Updated by` as values, joined to each instant by the screen |
 | One job · Overview | the stay, "departs …" | nothing — no stay line |
 | Settings · Access | the grant list | names and times, since `2d168ab4`; the person to grant is still typed in as an id, for want of a person picker |
 

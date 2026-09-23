@@ -34,8 +34,9 @@ export async function catalogue(host: HostApi, main: HTMLElement, onChanged: () 
    * **The refusal goes to the composer that caused it** — ADR 0225 §4
    * (`JOBS-Q4`, owner, 2026-09-22), taking §9's gloss: a refused write keeps the
    * composer open and shows the reason in it. It spoke on this screen's own line
-   * under the page, which could sit below the fold while the composer was in
-   * view. Each composer passes its own `say`.
+   * under the page: on a tall catalogue that line sat below the fold while the
+   * composer was in view, **so the person never saw the refusal at all** — the
+   * defect is not that a line moved. Each composer passes its own `say`.
    */
   const doing = (method: string, params: unknown, say: (message: string) => void): void => {
     void act(host, JOB_CURATE, method, params).then((done) => {
