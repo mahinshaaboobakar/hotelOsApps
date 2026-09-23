@@ -28,6 +28,32 @@
 #     roomcare.read…", which is the shared surface's sentence, handed to
 #     every application.
 #
+# **WHAT THIS FILE IS, AND THE ONE LINE ABOVE THAT IS NOW HISTORY.** 0.1.5 is
+# cut, signed and staged: `roomcare-0.1.5.hopkg`, 16,758,722 bytes, sha256
+# `2c25a998…070f`, built from `HotelOsApps` `4d03931` and `HosPilotOS`
+# `667a93ff` (docs/part-b-drive-list.md). That artefact's bytes are what EE
+# verified, so the bullets above describe **it** and are not edited to match a
+# tree that has moved on. Anything landing after `4d03931` belongs to the next
+# cut, and is recorded here rather than folded upward:
+#
+#   * **The refusal note no longer names the permission** — and the bullet
+#     above says it does. The shared surface moved on 2026-09-22 (HosPilotOS
+#     `e330b7ca`, the owner's page `64h` frame 3): the code name left the
+#     sentence a person reads, and `grant()` gained *Copy these details* so it
+#     still reaches whoever can act on it. Room Care took the first half for
+#     free and kept `case "grant": break;`, which left every refused card here
+#     saying "a permission" with no way to find out which — the second shared
+#     failure-card change not to reach this package by arriving. Caught by this
+#     package's own test and fixed in `24887895`. **The next cut's note says
+#     this; 0.1.5's says what 0.1.5 does.**
+#   * **ADR 0229 (RC-Q9), the owner's answers to 01d's ten questions**, built
+#     in `5215f2df`: states read as words on every screen and in the backend's
+#     timeline, two columns that never answered dropped, a photo's reason in
+#     plain words, two notes in a supervisor's terms, and — the two that
+#     matter — the Room states filter and the tap grid forgotten when the
+#     person leaves, so nothing that arrived overnight is hidden and nobody
+#     inherits a setting they did not choose today.
+#
 # **Everything 0.1.4 already carried**, from the owner's rulings of
 # 2026-09-19 and the page-64 audit — that version was never installed, so
 # this is the first time a person meets any of it:
