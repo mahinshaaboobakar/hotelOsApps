@@ -250,6 +250,46 @@ public class ModuleReadTests(JobsFixture fixture)
     }
 
     [Fact]
+    public async Task The_record_says_who_created_and_who_last_changed_the_job_by_name()
+    {
+        // ADR 0225 §2 (JOBS-Q4, owner 2026-09-22): the names are the service's to
+        // supply. Frame 2g draws them; the wire carried two instants and no names,
+        // though the row holds CreatedBy and UpdatedBy. Sent as values, never as a
+        // composed sentence — the screen writes the line.
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        var h = module.Data;
+        h.Directory.Staff[module.Caller] = "Arjun Menon";
+        await h.SeedCatalogueAsync();
+        var raised = await h.RaiseNotCoolingAsync(h.Scope(module.Caller));
+
+        var job = await module.CallAsync(Permissions.Read, "job", new { id = raised.Id.ToString() });
+        var record = job.At("record").EnumerateArray()
+            .ToDictionary(r => r.GetProperty("k").GetString()!, r => r.GetProperty("v").GetString()!);
+
+        Assert.Equal("Arjun Menon", record["Created by"]);
+        Assert.Equal("Arjun Menon", record["Updated by"]);
+        Assert.DoesNotContain(record, r => Guid.TryParse(r.Value, out _));
+    }
+
+    [Fact]
+    public async Task The_record_says_in_words_where_no_person_is_named()
+    {
+        // A guest raised it and no staff record carries the login: the row says so
+        // rather than falling back to an id (the gap rule).
+        await using var module = await ModuleHarness.StartAsync(fixture);
+        var h = module.Data;
+        await h.SeedCatalogueAsync();
+        var raised = await h.RaiseNotCoolingAsync(h.Scope(module.Caller));
+
+        var job = await module.CallAsync(Permissions.Read, "job", new { id = raised.Id.ToString() });
+        var record = job.At("record").EnumerateArray()
+            .ToDictionary(r => r.GetProperty("k").GetString()!, r => r.GetProperty("v").GetString()!);
+
+        Assert.Equal("no name on record", record["Created by"]);
+        Assert.DoesNotContain(record, r => Guid.TryParse(r.Value, out _));
+    }
+
+    [Fact]
     public async Task A_method_the_capability_does_not_have_is_refused_by_name()
     {
         await using var module = await ModuleHarness.StartAsync(fixture);

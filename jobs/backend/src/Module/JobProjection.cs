@@ -196,13 +196,39 @@ public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardPro
     /// were sent here; the category, item and place are already named on the
     /// Overview, so nothing a person reads is lost.
     /// </remarks>
+    /// <summary>
+    /// Who a stored user id is, by name — ADR 0225 §2 (<c>JOBS-Q4</c>, owner,
+    /// 2026-09-22): "the names are the service's to supply".
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Frame 2g draws who created and who last changed a job; the wire carried
+    /// the two instants and no names, though the row holds both ids. The id
+    /// itself never travels: the owner's rule of the same day is that an
+    /// identifier belongs to the machine and never to what a person reads.
+    /// </para>
+    /// <para>
+    /// <b>A value, not a sentence.</b> The name is sent on its own row and the
+    /// screen writes the line, as every other instant and token on this wire
+    /// does. Where nobody is named it says so in words: a guest or another
+    /// application by what raised it, a login Master Data has no staff record
+    /// for as "no name on record", the same words the bar uses.
+    /// </para>
+    /// </remarks>
+    private async Task<string> WhoAsync(Guid? userId, Job job, CancellationToken cancellationToken) =>
+        userId is { } user
+            ? await directory.FindStaffNameAsync(user, cancellationToken) ?? "no name on record"
+            : Naming.Raiser(job);
+
     private async Task<IReadOnlyList<DetailView>> RecordAsync(Job job, CancellationToken cancellationToken) =>
     [
         new("Number", job.JobNumber),
         new("Property", await directory.FindPropertyNameAsync(job.PropertyId, cancellationToken)
             ?? (await directory.FindPropertyCodeAsync(job.PropertyId, cancellationToken))?.ToUpperInvariant() ?? "—"),
         new("Created", job.CreatedAt.ToString("o")),
+        new("Created by", await WhoAsync(job.CreatedBy, job, cancellationToken)),
         new("Updated", job.UpdatedAt.ToString("o")),
+        new("Updated by", await WhoAsync(job.UpdatedBy, job, cancellationToken)),
         new("Version", job.Version.ToString()),
         new("Restricted", job.Restricted ? "yes" : "no"),
     ];
