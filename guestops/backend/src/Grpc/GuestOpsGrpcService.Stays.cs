@@ -1,6 +1,7 @@
 using Grpc.Core;
-using HotelOS.GuestOps.Contracts.V1;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Stays;
+using HotelOS.GuestOps.Contracts.V1;
 using HotelOS.GuestOps.Domain;
 using HotelOS.Platform;
 
@@ -70,9 +71,8 @@ public partial class GuestOpsGrpcService
     private static DateOnly? ParseDay(string value)
         => string.IsNullOrWhiteSpace(value)
             ? null
-            : DateOnly.TryParse(value, out var parsed)
-                ? parsed
-                : throw new InvalidRequestException("business_date must be an ISO-8601 date");
+            : Iso.Day(value)
+                ?? throw new InvalidRequestException("business_date must be an ISO-8601 date");
 
     public override async Task<Contracts.V1.RoomStay> CheckIn(
         CheckInRequest request, ServerCallContext context)

@@ -41,7 +41,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
             new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
             cancellationToken: cancellationToken);
 
-        return DateOnly.TryParse(day.BusinessDate, out var parsed) ? parsed : null;
+        return Iso.Day(day.BusinessDate);
     }
 
     public Task<StayTime> AtCheckInAsync(
@@ -77,7 +77,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         // A property that has not configured a boundary is not one that rolls at
         // midnight, and a zone that is absent is not UTC. Both produce "no
         // answer" rather than a default that would be wrong by hours.
-        if (!TimeOnly.TryParse(day.Boundary, out var roll)
+        if (Iso.Time(day.Boundary) is not { } roll
             || string.IsNullOrWhiteSpace(day.Timezone))
         {
             return null;
@@ -118,7 +118,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         // A property that has not configured one is not the same as one that
         // checks in at midnight — Master Data keeps them apart deliberately, so
         // an unset hour produces an unknown time rather than 00:00.
-        if (!TimeOnly.TryParse(clock, out var hour))
+        if (Iso.Time(clock) is not { } hour)
         {
             return StayTime.None;
         }

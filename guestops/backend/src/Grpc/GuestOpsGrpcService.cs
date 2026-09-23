@@ -1,4 +1,5 @@
 using Google.Protobuf.WellKnownTypes;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Registrations;
@@ -81,9 +82,8 @@ public partial class GuestOpsGrpcService(
     /// stay nobody asked for.
     /// </remarks>
     private static DateOnly ParseDate(string value, string field)
-        => DateOnly.TryParse(value, out var parsed)
-            ? parsed
-            : throw new InvalidRequestException($"{field} must be an ISO-8601 date");
+        => Iso.Day(value)
+            ?? throw new InvalidRequestException($"{field} must be an ISO-8601 date");
 
     // --- outbound ---------------------------------------------------------
 
@@ -107,9 +107,8 @@ public partial class GuestOpsGrpcService(
             return null;
         }
 
-        return DateOnly.TryParse(value, out var parsed)
-            ? parsed
-            : throw new InvalidRequestException($"{field} must be an ISO-8601 date");
+        return Iso.Day(value)
+            ?? throw new InvalidRequestException($"{field} must be an ISO-8601 date");
     }
 
     /// <summary>Proto3 has no null: absent is the empty string.</summary>

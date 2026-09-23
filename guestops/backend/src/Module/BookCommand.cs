@@ -1,8 +1,9 @@
-using System.Text.Json;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Availability;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Domain;
 using HotelOS.Platform;
+using System.Text.Json;
 
 namespace HotelOS.GuestOps.Module;
 
@@ -219,7 +220,7 @@ public sealed class BookCommand(BookingService bookings, AvailabilityService ava
             => Text(body, name) is { } text && Guid.TryParse(text, out var id) ? id : null;
 
         private static DateOnly? Date(JsonElement body, string name)
-            => Text(body, name) is { } text && DateOnly.TryParse(text, out var date)
+            => Text(body, name) is { } text && Iso.Day(text) is { } date
                 ? date
                 : null;
 

@@ -144,7 +144,8 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Action | Code | Verdict |
 |---|---|---|
 | Overview · Activity · Requests · Servicing · Payment tabs | `chrome/panel.ts:82` | WORKS |
-| **Check in · Cancel** (a booked stay) · **Check out · Move room** (in house) | `screens/stay/index.ts:288`; labels sent by `StayDetailView.cs:140-156` | **LOOKS LIVE, DOES NOTHING.** No module door for check-in, check-out or move |
+| **Check in** (a booked stay) | `screens/stay/index.ts` → the registration card → `stay.override` · `checkIn` → `CheckInCommand` | **BUILT, UNPRESSABLE.** `C5`, 2026-09-23. Frame 15 is what a check-in *is*: the card opens, the guest signs, and the card's own button records the arrival. Unpressable for the same two reasons as every other write — ADR 0193's registration is in flight, and there is no installed product |
+| **Cancel** (a booked stay) · **Check out · Move room** (in house) | `screens/stay/index.ts:313`; labels sent by `StayDetailView.cs:140-156` | **LOOKS LIVE, DOES NOTHING.** No module door for check-out or move; Cancel's door exists on a booking and not from this screen |
 | **Keep … · Take …** on the disagreement banner | `screens/stay/banner.ts:49`; `StayDetailView.cs:183` | **LOOKS LIVE, DOES NOTHING** |
 | **Full activity →** | `screens/stay/index.ts:304` | **LOOKS LIVE, DOES NOTHING** — should switch to the Activity tab |
 | Activity: **Everything · Ours** filters | `screens/stay/activity-tab.ts:37`; sent by `ActivityView` | **LOOKS LIVE, DOES NOTHING** — no filter is applied |
@@ -156,6 +157,34 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | **Ask for service** | `screens/stay/index.ts:278` | **LOOKS LIVE, DOES NOTHING** |
 | **Open in the PMS** | `screens/stay/index.ts:291` | **LOOKS LIVE, DOES NOTHING** |
 | Servicing night links; "＋ add" / "reveal" | `screens/stay/servicing-tab.ts:90`, `chrome/marks.ts:79` | NOT REACHABLE — `ServicingView` sends no nights, and no view sends a link |
+
+### The registration card — frame 15
+
+Opened from a stay's **Check in**, which is the only route any approved frame
+draws to it. Built `C5`, 2026-09-23.
+
+| Action | Code | Verdict |
+|---|---|---|
+| Every box | `screens/registration/index.ts` → `registration.capture` · `card` → `RegistrationView` | **BUILT, UNPRESSABLE.** The boxes capture; `chrome/field.ts` grew the control its own header said would land with the write path |
+| **Save and check in** | the same screen → `capture`, then `stay.override` · `checkIn` | **BUILT, UNPRESSABLE.** Two calls, so each has its own failure: a check-in that is refused says *the card was saved* rather than implying nothing ran |
+| **Save** (a guest already in house) | the same door, without the second call | **BUILT, UNPRESSABLE.** Nothing claims an arrival that happened hours ago |
+| Documents · Signature | drawn, `kind: "held"` | DRAWN OFF, SAYS WHY — a scan needs the platform's media service and a signature needs a pad. They still travel on the save, because the write is whole-card |
+
+**Three deliberate divergences from frame 15, for the owner to rule on.**
+
+| The frame | What is built | Why |
+|---|---|---|
+| Permanent address, one tall box | five boxes — line, city, state, country, postal code | The record holds them separately and a filing is made on the parts; one box capturing all five would write a street into a column named `city` |
+| `Nationality · United Arab Emirates ▾` | a typed two-letter code | No list of countries exists in this application or on the platform, and writing one here would put a product's opinion of the world's countries into a hotel application. Reported as a gap rather than invented |
+| The long note under the block | removed | It ended *"from the same product with no country written into it"* — a sentence addressed to whoever reviewed the frame. The `because` line tells the person at the desk why the block is there (owner ruling, 2026-09-19) |
+
+**The card carries no required-field rule, and that is the caption enforced.**
+*The fields are the design's proposal; which of them are required is the
+property's setting* — so `RegistrationFields` holds the list and no
+required-ness at all, and `CardBox` has no field one could be written into.
+`GuestOpsSettings.RequiredForHomeCountry` / `RequiredForVisitors` answered this
+before the screen existed: **nothing was stubbed and C6 did not have to come
+first.** C6 is the screen that *writes* those two lists; C5 only reads them.
 
 ### Setup
 
@@ -177,16 +206,32 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 
 ## Count
 
-**16 controls in 10 places look live and do nothing**, on Today, Attention and
-a stay: ＋ assign (1) · Keep ours / Take the PMS value (2) · Check in, Cancel,
-Check out, Move room (4) · the banner's Keep / Take (2) · Full activity (1) ·
-Everything / Ours (2) · Raise a job (1) · Log a request (1) · Ask for service (1)
-· Open in the PMS (1). They come first: each is drawn off with its reason until its backend door exists.
+**14 controls look live and do nothing**, on Today, Attention and a stay:
+＋ assign (1) · Keep ours / Take the PMS value (2) · Cancel, Check out, Move
+room (3) · the banner's Keep / Take (2) · Full activity (1) · Everything / Ours
+(2) · Raise a job (1) · Ask for service (1) · Open in the PMS (1). They come
+first: each is drawn off with its reason until its backend door exists.
 
-**Two writes are wired from a screen**, and the count moved on 2026-09-23:
-cancelling a booking, and **creating one** — New booking now runs dates → types
-→ guest → confirm → the booking, and takes it (`9130b94`). Neither has been
-pressed on a property: there is no installed product to press them on.
+**The number has moved twice and the arithmetic is written out rather than
+retyped**: 16 on 2026-09-19, less *Log a request* (`C7`) and less *Check in*
+(`C5`), both of which now have doors — 14, which is also what the list above
+sums to. A count in prose is ambiguous across sets and goes stale silently, so
+the subtraction is shown and the two routes to it are made to agree.
+
+*"in 10 places" is dropped rather than carried down.* It was written on
+2026-09-19 and this edit would have made it load-bearing; the enumeration above
+groups into nine, and rather than assert either figure the places are left to
+the list, which is the thing anybody would count.
+
+**Six writes are wired from a screen**, all of them on 2026-09-23:
+cancelling a booking · **creating one** — New booking runs dates → types →
+guest → confirm → the booking, and takes it (`9130b94`) · logging a request ·
+logging one and raising a job from it (`C7`, `cb9d67f`) · capturing the
+registration card · and recording the arrival from that card (`C5`). **Not one
+of them has been pressed on a property**: there is no installed product to press
+them on, and ADR 0193's object registration is in flight, so an object-scoped
+write authorizes nothing even where there is. Every row above says which of
+those two it is waiting on.
 
 **What still separates this from sign-off is the writes, not the reads.** Every
 read is drivable; the blocked writes divide into those with no module door — the
@@ -409,3 +454,36 @@ fact", the stop-sell and filing notes, and "…without a country written into it
 | Stay · Overview tags (fixture) | "OBSERVED" · "DERIVED FROM PROPERTY CLOCK" · "FROM OPERA" · "GUEST · CARRIES TO NEXT STAY" | Provenance for staff, or for the developer? |
 | Setup (fixture) | "OR EVERY GUEST" · "DECIDES WHO IS 'FROM OUTSIDE'" · "BY A PERSON, ON THE AUTHORITY'S PORTAL" · "Overdue is shown, never enforced… the platform says what is owed and stops nothing." | Help text for the manager, or notes? |
 | Attention | "The names only ordered the list — they can never join two stays." | Explanation for staff, or a note? |
+
+## Found while building the registration card — every wire date read the machine's locale (2026-09-23)
+
+A test sent `14/03/86` to a card's date of birth, expecting it to be refused as
+a format this application's contract does not have. **The service stored 14
+March 1986.**
+
+`DateOnly.TryParse` and `TimeOnly.TryParse` parse under
+`CultureInfo.CurrentCulture`, and **thirteen call sites used them** — every
+date and time this application reads off a wire:
+
+```text
+Module/       BookCommand · WalkInCommand · RegistrationCommand · ModuleSurface
+Grpc/         GuestOpsGrpcService · .Bookings · .Stays
+Events/       RoomStayFactMapper — the Hub's business date, a vendor's drop time
+Infrastructure/  ContextBusinessDay — the operating day, the roll boundary,
+                 the property's check-in hour
+```
+
+**It is not leniency; it is a silent reinterpretation.** `03/04/2026` is the
+third of April on one server and the fourth of March on another, and nothing
+downstream can say which it was: a stay would simply be on the wrong day.
+
+Closed by `Application/Abstractions/Iso.cs` — `TryParseExact`, invariant, in the
+one form the wire has — and held by `WireParseGuardTests`, which walks the whole
+`src/` tree **by call shape rather than by file**, because a guard naming the
+nine files that held the defect stops checking the tenth. Shown failing by
+reinstating one culture-dependent call.
+
+**This is ADR 0227's rule pointed at the wire instead of at a spreadsheet:**
+decode where the format is known, refuse where it is not, and never default.
+The two differ by months rather than by 1462 days, which is why nothing had
+noticed.

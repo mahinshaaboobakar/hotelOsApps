@@ -64,6 +64,7 @@ import { timeline } from "./activity";
  * @param stayId which stay — the id the row that opened this screen carried
  * @param tab which tab to show
  * @param go what to do when another tab is chosen
+ * @param register open the registration card — what *Check in* does, frame 15
  */
 export async function stay(
   host: HostApi,
@@ -71,6 +72,7 @@ export async function stay(
   stayId: string,
   tab: string,
   go: (tab: string) => void,
+  register: () => void,
 ): Promise<void> {
   // **Reached without a stay, which is a defect rather than an empty state.**
   // Every route here comes from a row, and a row has an id; arriving without
@@ -92,7 +94,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(loaded.failure, { app: APP, the: "this stay" }),
-        () => void stay(host, into, stayId, tab, go),
+        () => void stay(host, into, stayId, tab, go, register),
       ));
     return;
   }
@@ -114,7 +116,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(asked.failure, { app: APP, the: "this stay's requests" }),
-        () => void stay(host, into, stayId, tab, go),
+        () => void stay(host, into, stayId, tab, go, register),
       ));
     return;
   }
@@ -123,7 +125,7 @@ export async function stay(
     into.replaceChildren(
       failed(
         failureDrawing(serviced.failure, { app: APP, the: "this stay's servicing" }),
-        () => void stay(host, into, stayId, tab, go),
+        () => void stay(host, into, stayId, tab, go, register),
       ));
     return;
   }
@@ -147,7 +149,7 @@ export async function stay(
       // intention as a fact — including the "raised as JOB-…" the panel next
       // to it resolves from Jobs.
       void perform(host, "request.handle", "log", { stayId, text, handOff })
-        .then(() => void stay(host, into, stayId, tab, go));
+        .then(() => void stay(host, into, stayId, tab, go, register));
     }));
   } else if (tab === "Activity") {
     // **Read when the tab is shown, not when the page is.** `requests` and
@@ -163,7 +165,7 @@ export async function stay(
         ? activityTab(history.value, host.property)
         : [failed(
             failureDrawing(history.failure, { app: APP, the: "this stay's activity" }),
-            () => void stay(host, into, stayId, tab, go),
+            () => void stay(host, into, stayId, tab, go, register),
           )]),
     );
   } else if (tab === "Servicing") {
@@ -177,14 +179,14 @@ export async function stay(
         ? paymentTab(folio.value, host.property)
         : [failed(
             failureDrawing(folio.failure, { app: APP, the: "this stay's payment" }),
-            () => void stay(host, into, stayId, tab, go),
+            () => void stay(host, into, stayId, tab, go, register),
           )]),
     );
   } else {
     body.append(awaiting(tab));
   }
 
-  into.replaceChildren(header(page, tab, requests), body);
+  into.replaceChildren(header(page, tab, requests, register), body);
 }
 
 /**
@@ -231,7 +233,9 @@ function labelled(
  * was the class: `.head` now means the app bar, so a record title was claiming
  * the chrome's own selector.
  */
-function header(page: StayPage, tab: string, requests: Requests): HTMLElement {
+function header(
+  page: StayPage, tab: string, requests: Requests, register: () => void,
+): HTMLElement {
   const head = el("div", "title");
   const title = el("div");
 
@@ -249,7 +253,7 @@ function header(page: StayPage, tab: string, requests: Requests): HTMLElement {
   title.append(el("div", "ht", `${page.guest}${room}`), sub);
 
   const acts = el("div", "grow");
-  fill(acts, ...actions(page, tab, requests));
+  fill(acts, ...actions(page, tab, requests, register));
 
   // The reason, in words, beside what cannot be pressed — a tooltip is found
   // only by a pointer that goes looking.
@@ -269,7 +273,7 @@ function header(page: StayPage, tab: string, requests: Requests): HTMLElement {
  * a screen about cleaning.
  */
 function actions(
-  page: StayPage, tab: string, requests: Requests,
+  page: StayPage, tab: string, requests: Requests, register: () => void,
 ): readonly HTMLElement[] {
   if (tab === "Activity") {
     // **Dimmed, and it says why.** Handing a file to the user is the half of
@@ -299,12 +303,16 @@ function actions(
     return [unavailable("btn", "Open in the PMS", "Opening the PMS from GuestOps is not available yet.")];
   }
 
-  // Check in, check out, move and cancel have no door in GuestOps' module yet
-  // (capability ledger, 2026-09-19): drawn where the frame puts them, off, with
-  // one reason for the group. Not "btn danger" — a red outline on something
-  // that cannot be pressed still reads as a warning about pressing it.
-  return page.actions.map((action) => unavailable("btn", action.label,
-    "Checking in, checking out, moving and cancelling a stay are not available from this screen yet."));
+  // **Check in now opens the card, because that is where the design puts it.**
+  // Gold frame 15 is what a check-in is: the guest signs, and the card's own
+  // primary action records the arrival. The other three still have no door —
+  // drawn off where the frame puts them, with one reason for the group. Not
+  // "btn danger": a red outline on something that cannot be pressed still reads
+  // as a warning about pressing it.
+  return page.actions.map((action) => (action.label === "Check in"
+    ? control("btn", action.label, register)
+    : unavailable("btn", action.label,
+      "Checking out, moving and cancelling a stay are not available from this screen yet.")));
 }
 
 /** The two columns: the stay's own values, and what happened to it. */

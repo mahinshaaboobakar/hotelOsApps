@@ -1,8 +1,9 @@
-using System.Text.Json;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.Platform;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.Json;
 
 namespace HotelOS.GuestOps.Module;
 
@@ -18,13 +19,15 @@ namespace HotelOS.GuestOps.Module;
 /// onto (ADR 0038, ADR 0042).
 /// </para>
 /// <para>
-/// <b>Three capabilities, because the bundles now ask for three.</b> Reads go
-/// under <c>reservation.read</c>; taking a walk-in is <c>stay.create</c>;
-/// cancelling is <c>stay.override</c>, which is the same permission that makes
-/// an override and clears a disagreement (GUEST-Q3). Each is a permission the
-/// manifest declares and screens actually exercise — a fourth mapped
-/// speculatively would be the declared-and-never-used defect that
-/// <c>CORE-Q13</c> is named after.
+/// <b>One mapping per capability the bundles actually ask for, and the number
+/// is not written down here.</b> A count in prose goes stale the next time a
+/// screen gains a door — this sentence said <i>three</i> through two
+/// additions. Read <see cref="MapGuestOpsModule"/>. Reads go under
+/// <c>reservation.read</c>; taking a walk-in is <c>stay.create</c>; cancelling
+/// is <c>stay.override</c>, the same permission that makes an override and
+/// clears a disagreement (GUEST-Q3). Each is a permission the manifest declares
+/// and screens exercise — one mapped speculatively would be the
+/// declared-and-never-used defect <c>CORE-Q13</c> is named after.
 /// </para>
 /// <para>
 /// <b>The split is by what a caller is allowed to do, not by what the code
@@ -93,7 +96,35 @@ public static class ModuleSurface
             Application.Abstractions.Permissions.RequestHandle,
             (request, cancellationToken) =>
                 HandleAsync(request.Services, request, cancellationToken));
+
+        // **The sixth, and the card's `Save` was dead for as long as the screen
+        // existed.** `RegistrationService` has captured cards since it was
+        // written and nothing could reach it. Both methods sit here rather than
+        // the read going under `reservation.read`: the answer carries a
+        // passport number and a home address whole, and a screen granted the
+        // day's arrivals has not been granted every guest's papers.
+        app.MapModuleCapability(
+            Application.Abstractions.Permissions.RegistrationCapture,
+            (request, cancellationToken) =>
+                RegistrationAsync(request.Services, request, cancellationToken));
     }
+
+    /// <summary>The card the guest signs — gold frame 15.</summary>
+    private static Task<object?> RegistrationAsync(
+        IServiceProvider services,
+        ModuleEnvelope.ModuleRequest request,
+        CancellationToken cancellationToken)
+        => request.Method switch
+        {
+            "card" => services.GetRequiredService<RegistrationView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
+            "capture" => services.GetRequiredService<RegistrationCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            _ => throw new InvalidRequestException(
+                $"'{request.Method}' is not a method this application serves"),
+        };
 
     /// <summary>A guest's request, and a note about the stay — gold frame 5.</summary>
     /// <remarks>
@@ -243,6 +274,12 @@ public static class ModuleSurface
             "cancel" => services.GetRequiredService<CancelCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
+            // The registration card's own action — frame 15's *Save and check
+            // in*, whose second half this is. Check-out, no-show and correcting
+            // a recorded arrival map beside it when their frame is built.
+            "checkIn" => services.GetRequiredService<CheckInCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };
@@ -307,7 +344,7 @@ public static class ModuleSurface
     private static DateOnly? Date(JsonElement body, string name)
         => body.TryGetProperty(name, out var value)
             && value.ValueKind == JsonValueKind.String
-            && DateOnly.TryParse(value.GetString(), out var date)
+            && Iso.Day(value.GetString()) is { } date
                 ? date
                 : null;
 

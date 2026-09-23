@@ -47,12 +47,12 @@
 
 import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 
-// **Three fixtures and the three screens that drew them are not imported.**
-// `firstRun`, `walkIn` and `registration` each took an approved frame's data
-// and put it on the property's screen; none of the three has a method behind
-// it, so there is nothing to call and nothing true to draw. The screens
-// themselves are kept in the tree — they are the drawings Part A audits — and
-// they return here with the reads that feed them.
+// **Two fixtures and the screens that drew them are still not imported.**
+// `firstRun` and `walkIn` each took an approved frame's data and put it on the
+// property's screen; neither has a method behind it, so there is nothing to
+// call and nothing true to draw. The registration card was the third and is
+// no longer one of them: `registration.capture` answers both a card and its
+// save, so it is reached below with the read that feeds it.
 import { load } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem, type Operator } from "./chrome/bar";
@@ -64,6 +64,7 @@ import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
 import { setup } from "./screens/setup";
+import { registrationCard } from "./screens/registration";
 import { stay } from "./screens/stay";
 import { today } from "./screens/today";
 
@@ -282,22 +283,37 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
       // a receptionist opens it from the arrival they are looking at, and the
       // list stays behind it.
       if (where.overlay === "registration") {
-        // Same shape and a worse fixture: a registration card carries a guest's
-        // name, document and signature state. `registration.capture` is
-        // declared and no module method serves it, so there is nothing to call
-        // and nothing true to draw.
-        main.append(sheet({
-          title: "Registration",
-          subtitle: "not available at this desk yet",
-          body: [cannot(
-            "This registration cannot be opened yet",
-            "No method answers a registration card, so GuestOps would be showing "
-            + "a guest's details that belong to nobody.",
-          )],
-          foot: null,
-          actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
-          onDismiss: () => show({ overlay: null }),
-        }));
+        // **Reached without a stay, which is a defect rather than an empty
+        // card.** Every route here comes from a stay, and a card drawn without
+        // one would be somebody's. Nothing was asked of the platform, so there
+        // is no answer to report.
+        if (where.stayId === "") {
+          main.append(sheet({
+            title: "Registration card",
+            subtitle: "no stay was chosen",
+            body: [cannot(
+              "No stay was chosen",
+              "Open a stay and check the guest in from there. Nothing was asked "
+              + "of the platform here, so there is no answer to report.",
+            )],
+            foot: null,
+            actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
+            onDismiss: () => show({ overlay: null }),
+          }));
+          return;
+        }
+
+        void registrationCard(
+          host,
+          main,
+          where.stayId,
+          () => show({ overlay: null }),
+          // Checked in: the card closes and the screen behind redraws from the
+          // service. It does not patch its own rows — the lifecycle is the
+          // service's, and a client editing its copy would be a second place
+          // it is decided.
+          () => show({ overlay: null }),
+        );
       }
     };
 
@@ -347,7 +363,14 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     }
 
     if (where.screen === "Stay") {
-      void stay(host, main, where.stayId, where.tab, (tab) => show({ tab }));
+      void stay(
+        host,
+        main,
+        where.stayId,
+        where.tab,
+        (tab) => show({ tab }),
+        () => show({ overlay: "registration" }),
+      ).then(overlay);
       return;
     }
 

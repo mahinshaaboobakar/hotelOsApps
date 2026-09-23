@@ -50,7 +50,10 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.WalkInCommand>();
         services.AddScoped<Module.BookCommand>();
         services.AddScoped<Module.RequestCommand>();
+        services.AddScoped<Module.RegistrationView>();
+        services.AddScoped<Module.RegistrationCommand>();
         services.AddScoped<Module.CancelCommand>();
+        services.AddScoped<Module.CheckInCommand>();
         services.AddScoped<Module.ActivityView>();
         services.AddScoped<Module.RequestsView>();
         services.AddScoped<Module.ServicingView>();

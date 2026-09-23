@@ -1,4 +1,5 @@
 using Grpc.Core;
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Contracts.V1;
 using HotelOS.GuestOps.Domain;
@@ -77,7 +78,7 @@ public partial class GuestOpsGrpcService
                 ReservesInventory = terms.ReservesInventory,
                 DepositOffsetDaysFromBooking = Zero(terms.DepositOffsetDaysFromBooking),
                 CancelOffsetDaysFromArrival = Zero(terms.CancelOffsetDaysFromArrival),
-                CancelDropTime = TimeOnly.TryParse(terms.CancelDropTime, out var drop) ? drop : null,
+                CancelDropTime = Iso.Time(terms.CancelDropTime),
                 PenaltyAmount = ToMoney(terms.PenaltyAmount),
                 PenaltyNights = Zero(terms.PenaltyNights),
             };

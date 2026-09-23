@@ -17,6 +17,7 @@ import {
   recordedCancelPlan,
   recordedGroup,
   recordedPayment,
+  recordedRegistration,
   recordedRequests,
   recordedRequestsAlone,
   recordedServicing,
@@ -189,6 +190,10 @@ function host(params: URLSearchParams): Parameters<typeof start>[0] {
     availability: recordedAvailability,
     activity: recordedActivity,
     payment: recordedPayment,
+
+    // Frame 15, under `registration.capture`. The card reads through the
+    // capability that writes it, so the harness answers it there.
+    card: recordedRegistration,
     setup: recordedSetup,
     requests: alone ? recordedRequestsAlone : recordedRequests,
     servicing: alone ? recordedServicingAlone : recordedServicing,
