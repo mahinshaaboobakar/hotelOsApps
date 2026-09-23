@@ -1,13 +1,21 @@
 # GuestOps — what each button does, for the owner before testing
 
-**Derived from the code at HotelOsApps `b5a46a0` (2026-09-19), not from memory
-and not from a walk.** Nobody has pressed these on the owner's platform yet: the
-live walk fills in the last column. The Part A pages the owner approved compare
-drawings with a harness rendering of fixtures. **They are not sign-off, and they
-never showed whether a button does anything.**
+**Derived from the code, not from memory and not from a walk** — first at
+HotelOsApps `b5a46a0` (2026-09-19), and the New booking rows re-derived at
+`9130b94` (2026-09-23). **Each section is true at the commit named in it**; a
+single "derived at" line over a document that is edited for a week is a claim
+about work nobody can check.
 
-Installed on the owner's platform: **0.3.2** (updated 0.3.1 → 0.3.2 at
-16:42:02 IST, pid 33228, `kernel.log`).
+Nobody has pressed these on the owner's platform: the live walk fills in the
+last column. The Part A pages the owner approved compare drawings with a
+harness rendering of fixtures. **They are not sign-off, and they never showed
+whether a button does anything.**
+
+**Nothing is installed on the owner's platform as of 2026-09-22** — the owner
+uninstalled the product, all four services removed. This line read *"Installed:
+0.3.2"* until then. Every row below saying *fails on the owner's platform* is
+about a machine that no longer has one, and none of it can be walked until the
+product is installed again.
 
 ## Why screens still say "service fault"
 
@@ -102,7 +110,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 | Click a row / guest name | `screens/today/table.ts:75,108` | WORKS — opens the stay |
 | **＋ assign** on a row with no room | `screens/today/table.ts:92` | **LOOKS LIVE, DOES NOTHING.** Nothing assigns a room from this screen (`stay.assign` has no module door) |
 | Walk-in | `screens/today/index.ts:92` | REFUSES, SAYS WHY — opens a sheet saying a walk-in cannot be taken here yet (`application.ts:258-278`) |
-| ＋ New booking | `screens/today/index.ts:93` | WORKS — opens New booking (availability only; there is no "create booking" step) |
+| ＋ New booking | `screens/today/index.ts:93` | WORKS — opens New booking, which **takes a booking** since 2026-09-23 (`9130b94`) |
 
 ### Bookings and a booking
 
@@ -116,8 +124,13 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 
 | Action | Code | Verdict |
 |---|---|---|
-| The availability list and pager | `availability` read | WORKS |
-| Walk-in | `screens/newbooking/index.ts:82` | REFUSES, SAYS WHY |
+| Dates and party, then **Check availability** | `screens/newbooking/query.ts` | WORKS — the read asked with a person's own dates. It asked with NONE until 2026-09-23, so the service refused and the screen drew the refusal |
+| The room type list | `availability` read | WORKS |
+| **Choose** on a type | `screens/newbooking/availability.ts` | WORKS — the table had no control at all until 2026-09-23; a type with nothing free offers none, because the count says why |
+| Guest name, phone, email → **Review booking** | `screens/newbooking/guest.ts` | WORKS. A second guest in the room is drawn off with its reason — one guest reaches the service |
+| The capacity warning at the confirm | `screens/newbooking/confirm.ts` | WORKS — ADR 0223's treatment C, ruled by the owner 2026-09-23: warned once, at the moment of commitment, and never prevented |
+| **Create booking** | `stay.create` · `book` → `BookCommand` | **WORKS — the first write this application can perform from a screen.** The booking opens by the id the service answers with |
+| Walk-in | `screens/newbooking/index.ts` | REFUSES, SAYS WHY — `RC-Q8b-3` |
 | Pick another · Assign anyway | `screens/newbooking/conflict.ts:40-41` | NOT REACHABLE — nothing calls `conflict()` |
 
 ### Attention
@@ -168,8 +181,16 @@ a stay: ＋ assign (1) · Keep ours / Take the PMS value (2) · Check in, Cancel
 Check out, Move room (4) · the banner's Keep / Take (2) · Full activity (1) ·
 Everything / Ours (2) · Raise a job (1) · Log a request (1) · Ask for service (1)
 · Open in the PMS (1). They come first: each is drawn off with its reason until its backend door exists.
-**The one write that is wired** (cancel a booking) has never been pressed on the
-platform.
+
+**Two writes are wired from a screen**, and the count moved on 2026-09-23:
+cancelling a booking, and **creating one** — New booking now runs dates → types
+→ guest → confirm → the booking, and takes it (`9130b94`). Neither has been
+pressed on a property: there is no installed product to press them on.
+
+**What still separates this from sign-off is the writes, not the reads.** Every
+read is drivable; the blocked writes divide into those with no module door — the
+ADR 0193 group — and those whose door exists and whose screen does not. This
+count is the first, and it is the list above.
 
 ## Since this ledger was written (2026-09-19, same day)
 
