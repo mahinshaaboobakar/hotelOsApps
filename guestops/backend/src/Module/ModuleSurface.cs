@@ -311,14 +311,31 @@ public static class ModuleSurface
             "checkOut" => services.GetRequiredService<CheckOutCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
-            // **`noShow` and `correct` are deliberately absent.**
-            // `RecordNoShowAsync` and `CorrectAsync` are built and tested, and
-            // NO APPROVED FRAME DRAWS EITHER: "No-show" appears once in the
-            // gold, as a STATE on a bookings row, and "Correct" appears as no
-            // affordance at all. Mapping them would be the
-            // declared-and-never-used defect `CORE-Q13` is named after — and
-            // building the control would be richer than the design. The
-            // affordance is a question for the owner, drawn.
+            // **This said `noShow` and `correct` were DELIBERATELY ABSENT**,
+            // on the stated ground that no approved frame drew either: that
+            // "No-show" appeared once in the gold as a STATE on a bookings row,
+            // and "Correct" as no affordance at all, so mapping them would be
+            // the declared-and-never-used defect `CORE-Q13` is named after.
+            //
+            // That was true when written, and the frames arrived. The owner
+            // audited the drawing and ruled both affordances in on 2026-09-24
+            // — a no-show on the stay and on the day's own list, a correction
+            // on the stay and from the Activity entry it corrects.
+            //
+            // Kept as a correction rather than deleted. A reader meeting the
+            // old sentence would conclude the absence is still intended and
+            // remove these two as an over-reach; a silent replacement leaves
+            // nobody able to tell a live constraint from an unexamined one.
+            "noShow" => services.GetRequiredService<NoShowCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
+            // Both drawn affordances reach this one method. Where the action
+            // lives was the owner's question; what it does was never in doubt,
+            // and two doors onto one correction would be two chances to
+            // disagree about what a correction is.
+            "correct" => services.GetRequiredService<CorrectCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
 
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),

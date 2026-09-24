@@ -53,14 +53,14 @@ public sealed class CheckOutCommand(StayLifecycleService lifecycle)
             throw new InvalidRequestException("a check-out needs a stay and its version");
         }
 
-        var stayId = Id(sheet, "stayId")
+        var stayId = Bodies.Id(sheet, "stayId")
             ?? throw new InvalidRequestException("a check-out needs the stay it is about");
 
         // **Refused rather than defaulted to zero.** A missing version read as
         // zero fails the concurrency check with a message about somebody else
         // having changed the stay — a claim about the world, when what happened
         // is that the caller never said which stay it read.
-        var version = Version(sheet)
+        var version = Bodies.Version(sheet)
             ?? throw new InvalidRequestException(
                 "a check-out needs the version the stay was read at");
 
@@ -73,18 +73,4 @@ public sealed class CheckOutCommand(StayLifecycleService lifecycle)
             lifecycle = stay.Lifecycle.ToString(),
         };
     }
-
-    private static Guid? Id(JsonElement body, string name)
-        => body.TryGetProperty(name, out var value)
-            && value.ValueKind == JsonValueKind.String
-            && Guid.TryParse(value.GetString(), out var id)
-                ? id
-                : null;
-
-    private static long? Version(JsonElement body)
-        => body.TryGetProperty("version", out var value)
-            && value.ValueKind == JsonValueKind.Number
-            && value.TryGetInt64(out var version)
-                ? version
-                : null;
 }
