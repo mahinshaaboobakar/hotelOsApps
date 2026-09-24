@@ -191,7 +191,7 @@ export async function stay(
     fill(
       body,
       ...(history.ok
-        ? activityTab(history.value, host.property)
+        ? activityTab(history.value, host.property, acts.correct)
         : [failed(
             failureDrawing(history.failure, { app: APP, the: "this stay's activity" }),
             () => void stay(host, into, stayId, tab, go, acts),

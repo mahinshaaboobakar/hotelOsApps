@@ -5,7 +5,7 @@
 import { formatInstant, type PropertyEnvironment } from "@hotelos/sdk";
 
 import type { Activity, ActivityEntry } from "../../book";
-import { el, unavailable } from "../../chrome/element";
+import { control, el, unavailable } from "../../chrome/element";
 import { mark } from "../../chrome/marks";
 
 const COLUMNS = ["When", "Who", "What"] as const;
@@ -25,11 +25,15 @@ const COLUMNS = ["When", "Who", "What"] as const;
  * @param property whose zone and locale the times are drawn in
  * @returns the tab's contents
  */
-export function activityTab(activity: Activity, property: PropertyEnvironment): readonly HTMLElement[] {
+export function activityTab(
+  activity: Activity,
+  property: PropertyEnvironment,
+  correct: () => void,
+): readonly HTMLElement[] {
   // A note under the list explained where each kind of row comes from — which
   // service reads another application's records, and what happens when one is
   // uninstalled. Removed under the owner's ruling of 2026-09-19: a mock's notes for the developer are never built as screen.
-  return [sources(activity), list(activity.entries, property)];
+  return [sources(activity), list(activity.entries, property, correct)];
 }
 
 /** The four source filters, and the note about ordering. */
@@ -51,7 +55,11 @@ function sources(activity: Activity): HTMLElement {
 }
 
 /** The rows. */
-function list(entries: readonly ActivityEntry[], property: PropertyEnvironment): HTMLElement {
+function list(
+  entries: readonly ActivityEntry[],
+  property: PropertyEnvironment,
+  correct: () => void,
+): HTMLElement {
   const element = el("div", "tbl");
   const head = el("div", "ev hd");
 
@@ -69,13 +77,17 @@ function list(entries: readonly ActivityEntry[], property: PropertyEnvironment):
   }
 
   for (const entry of entries) {
-    element.append(line(entry, property));
+    element.append(line(entry, property, correct));
   }
 
   return element;
 }
 
-function line(entry: ActivityEntry, property: PropertyEnvironment): HTMLElement {
+function line(
+  entry: ActivityEntry,
+  property: PropertyEnvironment,
+  correct: () => void,
+): HTMLElement {
   const element = el("div", `ev${entry.disagrees ? " disagrees" : ""}`);
 
   const when = el("div", "tm");
@@ -87,9 +99,22 @@ function line(entry: ActivityEntry, property: PropertyEnvironment): HTMLElement 
   const who = el("div");
   who.append(mark(entry.who));
 
+  // **C2 — the action sits ON the entry it corrects.** The first line is its
+  // own baseline row so the control sits beside the words rather than under
+  // them: `.w` stacks its children, and an inline control dropped straight
+  // into it becomes a full-width row of its own, centred, pushing the detail
+  // down. That is exactly the fault the drawing's own capture found.
   const what = el("div", "w");
+  const said = el("span", "ttl");
+
+  said.append(document.createTextNode(entry.what));
+
+  if (entry.mayCorrect) {
+    said.append(control("link", "this is wrong", correct));
+  }
+
   what.append(
-    document.createTextNode(entry.what),
+    said,
     ...(entry.detail === null ? [] : [el("span", undefined, entry.detail)]),
   );
 

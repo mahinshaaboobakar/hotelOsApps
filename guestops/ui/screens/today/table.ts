@@ -24,7 +24,7 @@ import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import type { DayRow } from "../../book/model";
 import { span } from "../../chrome/when";
-import { el, fill, opener, unavailable } from "../../chrome/element";
+import { control, el, fill, opener, unavailable } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const;
@@ -41,6 +41,7 @@ export function table(
   rows: readonly DayRow[],
   total: number,
   open: (row: DayRow) => void,
+  noShow: (row: DayRow) => void,
   property: PropertyEnvironment,
 ): HTMLElement {
   const element = el("div", "tbl");
@@ -66,13 +67,18 @@ export function table(
   }
 
   for (const row of rows) {
-    element.append(line(row, open, property));
+    element.append(line(row, open, noShow, property));
   }
 
   return element;
 }
 
-function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnvironment): HTMLElement {
+function line(
+  row: DayRow,
+  open: (row: DayRow) => void,
+  noShow: (row: DayRow) => void,
+  property: PropertyEnvironment,
+): HTMLElement {
   const element = el("div", "tr act");
 
   const name = el("div", "nm");
@@ -101,6 +107,18 @@ function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnviro
   const chips = el("div");
   fill(chips, ...tags(row.chips));
 
+  // **The owner's N2, ruled 2026-09-24.** Closing the day is a list task —
+  // two or three rows, one pass — and opening each stay to record it is the
+  // same number of decisions and four times the clicks. It sits in the column
+  // the build leaves unlabelled, which is where the frame draws it.
+  //
+  // The build's columns are `Guest · Booking · Room type · Room · Nights · ―`
+  // and the frame's are `Guest · Booking · Room · Dates · State · ―`. That
+  // difference is older than this action and is not closed here.
+  if (row.mayRecordNoShow) {
+    chips.append(control("link", "nobody came", () => noShow(row)));
+  }
+
   element.append(
     name,
     el("div", undefined, row.booking),
@@ -110,7 +128,17 @@ function line(row: DayRow, open: (row: DayRow) => void, property: PropertyEnviro
     chips,
   );
 
-  element.addEventListener("click", () => open(row));
+  // **A click on a control is not a click on the row.** Decided once, here,
+  // rather than by every action remembering to stop propagation — the same
+  // reasoning ADR 0111 gives for the context menu, and the same failure it
+  // avoids: the dock tile and the launcher tile had both already forgotten.
+  // Without it, pressing `nobody came` would ALSO open the stay behind the
+  // dialog it opens.
+  element.addEventListener("click", (event) => {
+    if ((event.target as Element).closest("button") !== null) return;
+    open(row);
+  });
+
   return element;
 }
 

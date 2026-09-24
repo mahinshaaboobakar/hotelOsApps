@@ -49,6 +49,17 @@ export interface ActivityEntry {
    * and take the history with it.
    */
   disagrees: boolean;
+
+  /**
+   * Whether a correction can reach this entry — the owner's C2, ruled
+   * 2026-09-24.
+   *
+   * **The service decides it, from what the stay is NOW.** A departure on a
+   * stay that has since been corrected is history rather than a mistake
+   * awaiting repair, and an action offered on an entry no correction can
+   * reach is a refusal after the press instead of before it.
+   */
+  mayCorrect: boolean;
 }
 
 /** Which sources the activity list is showing — frame 4's four buttons. */

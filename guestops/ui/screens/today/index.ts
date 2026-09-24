@@ -54,6 +54,15 @@ export async function today(
   go: (list: string) => void,
   turn: (page: number) => void,
   open: (row: DayRow) => void,
+
+  /**
+   * Record that nobody came — the owner's N2, ruled 2026-09-24.
+   *
+   * Its own parameter rather than a second meaning for `open`: closing the day
+   * is a list task, and routing it through the stay page would be the four
+   * extra clicks the frame exists to remove.
+   */
+  noShow: (row: DayRow) => void,
   walk: () => void,
   book: () => void,
 ): Promise<void> {
@@ -106,7 +115,7 @@ export async function today(
 
     strip(day.stats, showing?.label ?? "", day, host.property),
     views,
-    table(showing?.rows ?? [], showing?.count ?? 0, open, host.property),
+    table(showing?.rows ?? [], showing?.count ?? 0, open, noShow, host.property),
     pager(showing?.count ?? 0, page, PAGE, showing?.rows.length ?? 0, turn, host.property),
   );
 

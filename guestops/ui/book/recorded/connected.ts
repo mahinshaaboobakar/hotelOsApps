@@ -59,7 +59,7 @@ export const recordedTodayConnected: Today = {
 function rows(): Today["lists"][number]["rows"] {
   return [
     {
-      id: "c1", guest: "Rajesh Pillai", contact: null, party: null, unnamed: false,
+      id: "c1", version: 1, mayRecordNoShow: false, guest: "Rajesh Pillai", contact: null, party: null, unnamed: false,
       booking: "BK-4471 · 1 of 3", roomType: "Deluxe King", room: "214",
       arrive: "2026-08-31", depart: "2026-09-04",
       chips: [
@@ -68,7 +68,7 @@ function rows(): Today["lists"][number]["rows"] {
       ],
     },
     {
-      id: "c2", guest: "Meera Krishnan", contact: null, party: null, unnamed: false,
+      id: "c2", version: 1, mayRecordNoShow: false, guest: "Meera Krishnan", contact: null, party: null, unnamed: false,
       booking: "BK-4482", roomType: "Executive Suite", room: "506",
       arrive: "2026-08-31", depart: "2026-09-01",
       chips: [
@@ -77,7 +77,7 @@ function rows(): Today["lists"][number]["rows"] {
       ],
     },
     {
-      id: "c3", guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
+      id: "c3", version: 1, mayRecordNoShow: false, guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
       booking: "created here", roomType: "Deluxe Twin", room: "308",
       arrive: "2026-08-31", depart: "2026-09-01",
       chips: [
@@ -86,7 +86,7 @@ function rows(): Today["lists"][number]["rows"] {
       ],
     },
     {
-      id: "c4", guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
+      id: "c4", version: 1, mayRecordNoShow: false, guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
       booking: "BK-4488", roomType: "Deluxe Twin", room: "309",
       arrive: "2026-08-31", depart: "2026-08-31",
       chips: [{ kind: "mark", tone: "pms", text: "from the PMS" }],

@@ -51,11 +51,12 @@ describe("the Activity tab", () => {
       what: "Checked in",
       detail: "stay.arrived",
       disagrees: false,
+      mayCorrect: false,
     }],
   };
 
   const when = (property: PropertyEnvironment): string[] => {
-    const cell = activityTab(activity, property)
+    const cell = activityTab(activity, property, () => {})
       .map((part) => part.querySelector(".ev:not(.hd) .tm"))
       .find((found) => found !== null);
     return [...(cell?.children ?? [])].map((child) => child.textContent ?? "");
@@ -90,10 +91,11 @@ describe("Today's nights", () => {
   const row = (arrive: string | null, depart: string | null): DayRow => ({
     id: "s1", guest: "Guest", unnamed: false, contact: null, booking: "BK-1",
     roomType: "Deluxe", room: "214", party: null, arrive, depart, chips: [],
+    version: 1, mayRecordNoShow: false,
   });
 
   const drawn = (r: DayRow, property: PropertyEnvironment): string =>
-    table([r], 1, () => {}, property).querySelector(".tr.act > div:nth-child(5)")?.textContent ?? "";
+    table([r], 1, () => {}, () => {}, property).querySelector(".tr.act > div:nth-child(5)")?.textContent ?? "";
 
   it("composes the range from the two days, in the property's form", () => {
     expect(drawn(row("2026-08-31", "2026-09-02"), UNKNOWN)).toBe("2026-08-31 → 2026-09-02");

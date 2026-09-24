@@ -15,6 +15,18 @@ import type { Activity, Payment, Requests, Servicing } from "../model";
  * What makes it safe is that **nothing is copied**: our rows come from our own
  * event stream, and the other applications' rows are resolved live.
  */
+/**
+ * **Every entry here is `mayCorrect: false`, and that is FAITHFUL rather than
+ * a default.** This stay is in house: it has no departure entry, so no entry a
+ * correction can reach, and the service would answer exactly this.
+ *
+ * **It also means C2 cannot be captured from this fixture at all.** A picture
+ * of the Activity tab taken here shows no `this is wrong` — correctly — and a
+ * reader who took that as evidence the affordance is absent would be reading
+ * the fixture's stay, not the build. Driving it needs a departed stay, which
+ * this book does not carry; that is a harness gap, stated here rather than
+ * discovered by somebody quoting a capture.
+ */
 export const recordedActivity: Activity = {
   filters: [
     { label: "Everything", on: true },
@@ -30,6 +42,7 @@ export const recordedActivity: Activity = {
       what: "Booked — 4 nights, Deluxe King, ₹ 8 400.00 per night",
       detail: "reservation 84119377 · business day 28 Aug",
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-29T17:02:00+05:30",
@@ -37,6 +50,7 @@ export const recordedActivity: Activity = {
       what: "Amended — departure moved from 2 Sep to 4 Sep",
       detail: null,
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-30T21:40:00+05:30",
@@ -44,6 +58,7 @@ export const recordedActivity: Activity = {
       what: "Room 214 inspected and released",
       detail: null,
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T14:10:00+05:30",
@@ -51,6 +66,7 @@ export const recordedActivity: Activity = {
       what: "Assigned room 214",
       detail: "override — the PMS held no assignment at that moment",
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T14:10:00+05:30",
@@ -58,6 +74,7 @@ export const recordedActivity: Activity = {
       what: "Checked in",
       detail: "override",
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T14:12:00+05:30",
@@ -65,6 +82,7 @@ export const recordedActivity: Activity = {
       what: "Registration captured — GRC 2026/08/1147",
       detail: "ID scanned · signature on file",
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T14:35:00+05:30",
@@ -72,6 +90,7 @@ export const recordedActivity: Activity = {
       what: 'Request logged — "AC not cooling"',
       detail: "raised as a job in Jobs at 14:40",
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T15:06:00+05:30",
@@ -79,6 +98,7 @@ export const recordedActivity: Activity = {
       what: "JOB-8821 assigned to Engineering — in progress",
       detail: null,
       disagrees: false,
+      mayCorrect: false,
     },
     {
       at: "2026-08-31T15:30:00+05:30",
@@ -86,6 +106,7 @@ export const recordedActivity: Activity = {
       what: "Reported room 208 — differs from ours (214)",
       detail: "recorded as a disagreement · not applied · your entry stands",
       disagrees: true,
+      mayCorrect: false,
     },
     {
       at: "2026-09-01T10:20:00+05:30",
@@ -93,6 +114,7 @@ export const recordedActivity: Activity = {
       what: "Stayover service completed by Suma T.",
       detail: null,
       disagrees: false,
+      mayCorrect: false,
     },
   ],
 };

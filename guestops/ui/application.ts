@@ -494,6 +494,20 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         (list) => show({ list, page: 0 }),
         (page) => show({ page }),
         (row) => show({ screen: "Stay", tab: "Overview", stayId: row.id }),
+
+        // **N2 — the same dialog, opened from the list.** It routes to the
+        // stay and opens the overlay there rather than drawing a second
+        // dialog here: one confirmation, one place, and the stay is what the
+        // desk lands on if they close it. The four clicks the frame removes
+        // are the ones spent OPENING each stay to find the action, and this
+        // removes them.
+        (row) => show({
+          screen: "Stay",
+          tab: "Overview",
+          stayId: row.id,
+          overlay: "nobodyCame",
+        }),
+
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
       ).then(overlay);

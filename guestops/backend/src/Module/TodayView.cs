@@ -50,7 +50,7 @@ public sealed class TodayView(
             var found = await stays.ListAsync(
                 scope, new StayQuery(view, date, page), cancellationToken);
 
-            var rows = await RowsAsync(scope, found.Rows, zone, cancellationToken);
+            var rows = await RowsAsync(scope, found.Rows, zone, date, cancellationToken);
 
             lists.Add(new
             {
@@ -114,6 +114,7 @@ public sealed class TodayView(
         RequestScope scope,
         IReadOnlyList<RoomStay> page,
         TimeZoneInfo? zone,
+        DateOnly? today,
         CancellationToken cancellationToken)
     {
         if (page.Count == 0)
@@ -136,7 +137,7 @@ public sealed class TodayView(
         var names = await NamesAsync(page, cancellationToken);
         var refs = await ReferencesAsync(page, cancellationToken);
 
-        return [.. page.Select(stay => Row(stay, types, rooms, names, refs, zone))];
+        return [.. page.Select(stay => Row(stay, types, rooms, names, refs, zone, today))];
     }
 
     /// <summary>The named guest on each stay, where the party has one.</summary>
@@ -206,7 +207,8 @@ public sealed class TodayView(
         IReadOnlyDictionary<Guid, string> rooms,
         IReadOnlyDictionary<Guid, string> names,
         IReadOnlyDictionary<Guid, string> refs,
-        TimeZoneInfo? zone)
+        TimeZoneInfo? zone,
+        DateOnly? today)
     {
         var named = names.TryGetValue(stay.Id, out var name) && !string.IsNullOrWhiteSpace(name);
 
@@ -252,6 +254,24 @@ public sealed class TodayView(
             arrive = stay.ArrivalAt.DateIn(zone)?.ToString("yyyy-MM-dd"),
             depart = stay.DepartureAt.DateIn(zone)?.ToString("yyyy-MM-dd"),
             chips = Chips(stay),
+
+            // **The owner's N2, ruled 2026-09-24: the action appears only on a
+            // row whose ARRIVAL day has passed.** Decided by `NoShowRule`, the
+            // same one the stay page uses, so the list and the page cannot
+            // offer different things about one stay. It also requires the
+            // lifecycle the service will accept — a row already in house is
+            // not a stay that never arrived, and offering it there would put
+            // the refusal after the press instead of before it.
+            mayRecordNoShow =
+                (stay.Lifecycle == StayLifecycle.Booked
+                    || stay.Lifecycle == StayLifecycle.Pending
+                    || stay.Lifecycle == StayLifecycle.Waitlisted)
+                && NoShowRule.DayHasPassed(stay.ArrivalAt.DateIn(zone), today),
+
+            // The version the row was read at. The action writes, and a write
+            // assembled from a list that has no version is a write that cannot
+            // be refused when somebody else has moved the stay.
+            version = stay.Version,
         };
     }
 

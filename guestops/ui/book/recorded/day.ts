@@ -30,14 +30,28 @@ export const recordedToday: Today = {
       label: "Arrivals",
       count: 14,
       rows: [
+        // **A row whose arrival day has PASSED, so the harness can render
+        // N2 at all.** Every other arrival here lands on the business date
+        // itself, and a fixture that answers `mayRecordNoShow: false`
+        // uniformly teaches every capture of this screen that the action does
+        // not exist — the screen would render faithfully and understate what
+        // is built. The approved N2 frame draws exactly this: late rows
+        // sitting in the arrivals list beside today's.
         {
-          id: "r1", guest: "Rajesh Pillai", contact: null, party: null, unnamed: false,
+          id: "r0", version: 1, mayRecordNoShow: true,
+          guest: "Thomas George", contact: null, party: null, unnamed: false,
+          booking: "BK-4361", roomType: "Deluxe Twin", room: null,
+          arrive: "2026-08-19", depart: "2026-08-20",
+          chips: [{ kind: "mark", tone: "missing", text: "no room" }],
+        },
+        {
+          id: "r1", version: 1, mayRecordNoShow: false, guest: "Rajesh Pillai", contact: null, party: null, unnamed: false,
           booking: "BK-4471 · 1 of 3", roomType: "Deluxe King", room: "214",
           arrive: "2026-08-31", depart: "2026-09-02",
           chips: [{ kind: "mark", tone: "missing", text: "no ID captured" }],
         },
         {
-          id: "r2", guest: "Not yet named", contact: null, party: 2, unnamed: true,
+          id: "r2", version: 1, mayRecordNoShow: false, guest: "Not yet named", contact: null, party: 2, unnamed: true,
           booking: "BK-4471 · 1 of 3", roomType: "Deluxe King", room: null,
           arrive: "2026-08-31", depart: "2026-09-02",
           chips: [
@@ -46,19 +60,19 @@ export const recordedToday: Today = {
           ],
         },
         {
-          id: "r3", guest: "Meera Krishnan", contact: null, party: null, unnamed: false,
+          id: "r3", version: 1, mayRecordNoShow: false, guest: "Meera Krishnan", contact: null, party: null, unnamed: false,
           booking: "BK-4482", roomType: "Executive Suite", room: null,
           arrive: "2026-08-31", depart: "2026-09-01",
           chips: [{ kind: "mark", tone: "missing", text: "no room" }],
         },
         {
-          id: "r4", guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
+          id: "r4", version: 1, mayRecordNoShow: false, guest: "Daniel Fernandes", contact: null, party: null, unnamed: false,
           booking: "BK-4488", roomType: "Deluxe Twin", room: "309",
           arrive: "2026-08-31", depart: "2026-08-31",
           chips: [{ kind: "mark", tone: "dayuse", text: "day use · out 18:00" }],
         },
         {
-          id: "r5", guest: "Sunita & Arvind Rao", contact: null, party: null, unnamed: false,
+          id: "r5", version: 1, mayRecordNoShow: false, guest: "Sunita & Arvind Rao", contact: null, party: null, unnamed: false,
           booking: "BK-4490", roomType: "Deluxe King", room: "402",
           arrive: "2026-08-31", depart: "2026-09-04", chips: [],
         },
@@ -71,41 +85,41 @@ export const recordedToday: Today = {
         // rows and fourteen rows have identical padding. Only the side-by-side
         // showed it, which is the whole argument for the side-by-side.
         {
-          id: "r6", guest: "Not yet named", contact: null, party: 3,
+          id: "r6", version: 1, mayRecordNoShow: false, guest: "Not yet named", contact: null, party: 3,
           unnamed: true,
           booking: "BK-4471 · 3 of 3", roomType: "Deluxe King", room: "216",
           arrive: "2026-08-31", depart: "2026-09-02",
           chips: [{ kind: "mark", tone: "missing", text: "party unnamed" }],
         },
         {
-          id: "r7", guest: "Anjali Nair", contact: null, party: null, unnamed: false,
+          id: "r7", version: 1, mayRecordNoShow: false, guest: "Anjali Nair", contact: null, party: null, unnamed: false,
           booking: "BK-4495", roomType: "Deluxe Twin", room: "118",
           arrive: "2026-08-31", depart: "2026-09-03", chips: [],
         },
         {
-          id: "r8", guest: "Thomas Weber", contact: null, party: null, unnamed: false,
+          id: "r8", version: 1, mayRecordNoShow: false, guest: "Thomas Weber", contact: null, party: null, unnamed: false,
           booking: "BK-4497", roomType: "Executive Suite", room: null,
           arrive: "2026-08-31", depart: "2026-09-05",
           chips: [{ kind: "mark", tone: "missing", text: "no room" }],
         },
         {
-          id: "r9", guest: "Priya Menon", contact: null, party: null, unnamed: false,
+          id: "r9", version: 1, mayRecordNoShow: false, guest: "Priya Menon", contact: null, party: null, unnamed: false,
           booking: "BK-4501", roomType: "Deluxe King", room: "221",
           arrive: "2026-08-31", depart: "2026-09-01", chips: [],
         },
         {
-          id: "r10", guest: "Yusuf Al-Amri", contact: null, party: null, unnamed: false,
+          id: "r10", version: 1, mayRecordNoShow: false, guest: "Yusuf Al-Amri", contact: null, party: null, unnamed: false,
           booking: "BK-4503", roomType: "Deluxe King", room: null,
           arrive: "2026-08-31", depart: "2026-09-06",
           chips: [{ kind: "mark", tone: "missing", text: "no room" }],
         },
         {
-          id: "r11", guest: "Grace Okonkwo", contact: null, party: null, unnamed: false,
+          id: "r11", version: 1, mayRecordNoShow: false, guest: "Grace Okonkwo", contact: null, party: null, unnamed: false,
           booking: "BK-4506", roomType: "Deluxe Twin", room: "305",
           arrive: "2026-08-31", depart: "2026-09-02", chips: [],
         },
         {
-          id: "r12", guest: "Vikram Desai", contact: null, party: null, unnamed: false,
+          id: "r12", version: 1, mayRecordNoShow: false, guest: "Vikram Desai", contact: null, party: null, unnamed: false,
           booking: "BK-4509", roomType: "Deluxe King", room: null,
           arrive: "2026-08-31", depart: "2026-09-04",
           chips: [
@@ -114,12 +128,12 @@ export const recordedToday: Today = {
           ],
         },
         {
-          id: "r13", guest: "Lena Vasquez", contact: null, party: null, unnamed: false,
+          id: "r13", version: 1, mayRecordNoShow: false, guest: "Lena Vasquez", contact: null, party: null, unnamed: false,
           booking: "BK-4512", roomType: "Executive Suite", room: "501",
           arrive: "2026-08-31", depart: "2026-09-03", chips: [],
         },
         {
-          id: "r14", guest: "Hiroshi Tanaka", contact: null, party: null, unnamed: false,
+          id: "r14", version: 1, mayRecordNoShow: false, guest: "Hiroshi Tanaka", contact: null, party: null, unnamed: false,
           booking: "BK-4515", roomType: "Deluxe Twin", room: null,
           arrive: "2026-08-31", depart: "2026-09-02",
           chips: [{ kind: "mark", tone: "missing", text: "no room" }],
@@ -130,7 +144,7 @@ export const recordedToday: Today = {
       key: "inhouse", label: "In house", count: 42,
       rows: [
         {
-          id: "h1", guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
+          id: "h1", version: 1, mayRecordNoShow: false, guest: "Joseph Mathew", contact: null, party: null, unnamed: false,
           booking: "BK-4455", roomType: "Deluxe King", room: "318",
           arrive: "2026-08-30", depart: "2026-09-02",
           chips: [{ kind: "mark", tone: "disagrees", text: "PMS disagrees" }],
@@ -141,7 +155,7 @@ export const recordedToday: Today = {
       key: "departures", label: "Departures", count: 11,
       rows: [
         {
-          id: "d1", guest: "Meera Nair", contact: null, party: null, unnamed: false,
+          id: "d1", version: 1, mayRecordNoShow: false, guest: "Meera Nair", contact: null, party: null, unnamed: false,
           booking: "BK-4440", roomType: "Standard", room: "205",
           arrive: "2026-08-29", depart: "2026-08-31", chips: [],
         },

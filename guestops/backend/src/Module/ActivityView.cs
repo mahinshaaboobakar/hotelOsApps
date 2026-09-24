@@ -1,3 +1,4 @@
+using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,15 @@ public sealed class ActivityView(GuestOpsDbContext db)
     public async Task<object?> AnswerAsync(
         RequestScope scope, Guid stayId, CancellationToken cancellationToken)
     {
+        // **What the stay is NOW decides which entry a correction can reach.**
+        // The departure entry on a stay that has since been corrected is
+        // history, not a mistake awaiting repair, and offering the action
+        // there would invite a second correction of a fact already put right.
+        var lifecycle = await db.Stays
+            .Where(s => s.PropertyId == scope.PropertyId && s.Id == stayId)
+            .Select(s => (StayLifecycle?)s.Lifecycle)
+            .FirstOrDefaultAsync(cancellationToken);
+
         var events = await db.Set<StoredEvent>()
             .Where(stored => stored.PropertyId == scope.PropertyId
                 && stored.AggregateType == "stay"
@@ -78,6 +88,19 @@ public sealed class ActivityView(GuestOpsDbContext db)
                 // 2026-09-19. Null until there is a line a person would read.
                 detail = (string?)null,
                 disagrees = one.EventType.EndsWith(".disagreed", StringComparison.Ordinal),
+
+                // **The owner's C2, ruled 2026-09-24: the action sits on the
+                // entry it corrects, and only on entries a correction can
+                // reach.** A desk looking for the mistake is already reading
+                // this list — that is how it found out the check-out was on
+                // the wrong row.
+                //
+                // One entry type today, because one correction is drawn. When
+                // another is, this grows an arm rather than becoming a
+                // property of every row: an action offered on an entry no
+                // correction can reach is a refusal after the press.
+                mayCorrect = one.EventType == "stay.departed"
+                    && lifecycle == StayLifecycle.Departed,
             }).ToArray(),
         };
     }

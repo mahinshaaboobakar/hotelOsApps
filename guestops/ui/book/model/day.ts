@@ -72,6 +72,21 @@ export interface DayRow {
   id: string;
   guest: string;
 
+  /** The version the row was read at, which the action carries back. */
+  version: number;
+
+  /**
+   * Whether this row may be recorded as one nobody came to — the owner's N2,
+   * ruled 2026-09-24.
+   *
+   * **The service decides it, not the screen.** `NoShowRule` answers for both
+   * this list and the stay page, so the two cannot offer different things
+   * about one stay, and the screen does not re-derive a business day it would
+   * have to guess at. A stay arriving today is not a no-show at four in the
+   * afternoon.
+   */
+  mayRecordNoShow: boolean;
+
   /**
    * Absent, and reported as absent — GUEST-Q12, ruled 2026-09-04.
    *
