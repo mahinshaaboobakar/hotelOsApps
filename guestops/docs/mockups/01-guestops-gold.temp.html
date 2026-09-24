@@ -220,6 +220,11 @@
   /* Added 2026-09-05, APPS-Q4 group 3: the seven-column stays grid the union
      above needs. Matches the module's own `.tr.stays` exactly. */
   .tr.stays{grid-template-columns:1.4fr .9fr 1fr .5fr 1fr .8fr 1.1fr}
+  /* A list whose State carries an elapsed shorthand beside the pill. Same 6.5fr
+     total as .tr.list, so Guest/Booking/Room/Dates land on the same pixels and
+     the two tables still read as one table; the width moves from the action
+     column, which held 155px of slack, to State, which was 39px short. */
+  .tr.late{grid-template-columns:1.5fr 1fr .9fr 1fr 1.2fr .9fr}
   .un{color:var(--faint);font-style:italic}
   /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
      No page numbers and no total: PageResponse carries next_cursor and
@@ -294,6 +299,11 @@
   .te.oth .g i{background:var(--other)}
   .te .d{padding:7px 0 7px 12px;display:flex;flex-direction:column;gap:3px}
   .te .d span{color:var(--faint);font-size:11.5px}
+  /* An entry carrying an action. `.te .d` is a COLUMN flex, so an inline
+     control placed straight into it becomes a full-width row of its own —
+     centred, and pushing the byline down. The entry's first line is its own
+     baseline row so the action sits ON the entry, which is what it corrects. */
+  .te .d .ttl{display:flex;align-items:baseline;gap:8px}
   /* activity rows */
   .act{display:grid;grid-template-columns:118px 118px 1fr;border-bottom:1px solid var(--line);font-size:12.5px}
   .act:last-child{border-bottom:none}
@@ -722,6 +732,29 @@
         <button class="tab" type="button">Payment</button>
         <button class="tab" type="button">Documents</button>
       </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay</div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Booked</span> <span class="sh miss">arrival twelve days past</span></div></div>
+            <div class="fr"><div class="k">Room</div><div class="v"><span class="sh miss">never assigned</span></div></div>
+            <div class="fr"><div class="k">Arrival</div><div class="v">19 Aug <span class="sh miss">nothing recorded</span></div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">20 Aug <span class="sh miss">nothing recorded</span></div></div>
+            <div class="fr"><div class="k">Terms</div><div class="v">one night forfeited on a no-show <span class="lock">GROSS · ₹ 4 800.00</span></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 94470 •••• 31 <button class="link" type="button">reveal</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">14 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked at the desk<span>by Anitha Menon · 1 night · Deluxe Twin</span></div></div>
+              <div class="te"><div class="t">19 Aug</div><div class="g"><i></i><u></u></div><div class="d">Arrival day<span>nobody arrived, and nothing was recorded</span></div></div>
+              <div class="te"><div class="t">now</div><div class="g"><i></i></div><div class="d">Still <b style="color:var(--dim)">Booked</b><span>twelve days after the night it was for</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="scrim mid">
         <div class="dlg">
           <div class="sh_h"><b>Record that nobody came?</b><span>Thomas George · BK-4361 · 19 – 20 Aug</span></div>
@@ -816,18 +849,18 @@
         <button class="tab" type="button">The honest list<span class="n att">2</span></button>
       </div>
       <div class="tbl">
-        <div class="tr list hd"><div>Guest</div><div>Booking</div><div>Room</div><div>Dates</div><div>State</div><div></div></div>
-        <div class="tr list">
+        <div class="tr list late hd"><div>Guest</div><div>Booking</div><div>Room</div><div>Dates</div><div>State</div><div></div></div>
+        <div class="tr list late">
           <div class="nm"><b>Priya Nair</b><span>+91 98450 •••• 09</span></div>
           <div>BK-4502</div><div>—</div><div>1 Sep → 3 Sep</div><div><span class="pill neu">Booked</span></div>
           <div><button class="link" type="button">＋ assign</button></div>
         </div>
-        <div class="tr list">
+        <div class="tr list late">
           <div class="nm"><b>Thomas George</b><span>+91 94470 •••• 31</span></div>
-          <div>BK-4361</div><div>—</div><div>19 Aug → 20 Aug</div><div><span class="pill neu">Booked</span> <span class="sh miss">twelve days past</span></div>
+          <div>BK-4361</div><div>—</div><div>19 Aug → 20 Aug</div><div><span class="pill neu">Booked</span> <span class="sh miss">thirteen days past</span></div>
           <div><button class="link" type="button">nobody came</button></div>
         </div>
-        <div class="tr list">
+        <div class="tr list late">
           <div class="nm"><b>Joseph Mathew</b><span>+91 99460 •••• 77</span></div>
           <div>BK-4498</div><div>—</div><div>31 Aug → 2 Sep</div><div><span class="pill neu">Booked</span> <span class="sh miss">yesterday</span></div>
           <div><button class="link" type="button">nobody came</button></div>
@@ -918,6 +951,30 @@
         <button class="tab" type="button">Payment</button>
         <button class="tab" type="button">Documents</button>
       </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay</div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Departed</span></div></div>
+            <div class="fr"><div class="k">Room</div><div class="v"><b>214</b> · Deluxe King <span class="pill neu">released</span></div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">24 Sep <b>07:02</b> <span class="lock">OBSERVED</span></div></div>
+            <div class="fr"><div class="k">Booked until</div><div class="v">26 Sep <span class="sh miss">two nights unsold and unoccupied</span></div></div>
+            <div class="fr"><div class="k">Guest</div><div class="v">still in the room <span class="sh miss">nothing in the record says so</span></div></div>
+            <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/09/1188 · ID captured <span class="pill ok">complete</span></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <button class="link" type="button">reveal</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">22 Sep</div><div class="g"><i></i><u></u></div><div class="d">Assigned 214 · checked in<span>by Anitha Menon</span></div></div>
+              <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d">Checked out<span>by Anitha Menon — the wrong row</span></div></div>
+              <div class="te oth"><div class="t">07:02</div><div class="g"><i></i></div><div class="d">Room Care was told 214 is vacated<span>and has planned a departure clean</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="scrim mid">
         <div class="dlg">
           <div class="sh_h"><b>Put this stay back in house?</b><span>Rajesh Pillai · 214 · checked out 07:02 today</span></div>
@@ -935,7 +992,7 @@
     </div>
   </div>
 </div>
-<div class="cap"><b>Worded as the outcome, not as the verb.</b> <i>Put this stay back in house</i> says what will be true afterwards; <i>correct the lifecycle</i> describes the model. The room is checked before the dialog offers the move — a correction into a room somebody else now holds is a different conversation, and drawn as one below.</div>
+<div class="cap"><b>Worded as the outcome, not as the verb.</b> <i>Put this stay back in house</i> says what will be true afterwards; <i>correct the lifecycle</i> describes the model. The room is checked before the dialog offers the move, which is why it can say <i>no conflict</i>. <b>What happens when 214 has been given to somebody else in those seven minutes is not drawn here</b>, and is the one case this pair leaves open.</div>
 
 <h1 style="margin-top:26px">C1 · <b>the end state</b> — in house again, with both facts kept</h1>
 <div id="fC1b" class="win">
@@ -1022,7 +1079,7 @@
         <div class="cb">
           <div class="tl">
             <div class="te"><div class="t">22 Sep</div><div class="g"><i></i><u></u></div><div class="d">Assigned 214 · checked in<span>by Anitha Menon</span></div></div>
-            <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d">Checked out <button class="link" type="button">this is wrong</button><span>by Anitha Menon</span></div></div>
+            <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d"><span class="ttl">Checked out <button class="link" type="button">this is wrong</button></span><span>by Anitha Menon</span></div></div>
             <div class="te oth"><div class="t">07:02</div><div class="g"><i></i></div><div class="d">Room Care was told 214 is vacated<span>and has planned a departure clean</span></div></div>
           </div>
           <div class="note" style="margin-top:2px">The action sits on the entry it corrects, and only on entries a correction can reach. <b>A desk looking for the mistake is already reading this list</b> — that is how it found out the check-out was on the wrong row.</div>
