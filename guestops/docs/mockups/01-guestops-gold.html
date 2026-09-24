@@ -220,6 +220,11 @@
   /* Added 2026-09-05, APPS-Q4 group 3: the seven-column stays grid the union
      above needs. Matches the module's own `.tr.stays` exactly. */
   .tr.stays{grid-template-columns:1.4fr .9fr 1fr .5fr 1fr .8fr 1.1fr}
+  /* A list whose State carries an elapsed shorthand beside the pill. Same 6.5fr
+     total as .tr.list, so Guest/Booking/Room/Dates land on the same pixels and
+     the two tables still read as one table; the width moves from the action
+     column, which held 155px of slack, to State, which was 39px short. */
+  .tr.late{grid-template-columns:1.5fr 1fr .9fr 1fr 1.2fr .9fr}
   .un{color:var(--faint);font-style:italic}
   /* The cursor's honest pager - CORE/GUEST pagination, 2026-09-04.
      No page numbers and no total: PageResponse carries next_cursor and
@@ -294,6 +299,11 @@
   .te.oth .g i{background:var(--other)}
   .te .d{padding:7px 0 7px 12px;display:flex;flex-direction:column;gap:3px}
   .te .d span{color:var(--faint);font-size:11.5px}
+  /* An entry carrying an action. `.te .d` is a COLUMN flex, so an inline
+     control placed straight into it becomes a full-width row of its own —
+     centred, and pushing the byline down. The entry's first line is its own
+     baseline row so the action sits ON the entry, which is what it corrects. */
+  .te .d .ttl{display:flex;align-items:baseline;gap:8px}
   /* activity rows */
   .act{display:grid;grid-template-columns:118px 118px 1fr;border-bottom:1px solid var(--line);font-size:12.5px}
   .act:last-child{border-bottom:none}
@@ -634,6 +644,345 @@
   </div>
 </div>
 <div class="cap"><b>S33 and S35, drawn as one screen.</b> The rule the whole PMS mode rests on: <b>one truth leaves the application</b> — the standing override is what the board shows, what Room Care hears and what Context resolves; the disagreement is a flag on that answer, never a second answer (GUEST-Q3). <b>Clearing is the stay's write permission</b> — the same permission that made the override — with two named values and both kept in history; no separate permission, no supervisor escalation. <b>Read-from-PMS versus staff-editable is a mark, not a lock</b>: <span class="lock">FROM OPERA</span> says who established the value, and staff may still write it — PMS-connected has never meant read-only (GUEST-Q1, amended). Every timestamp carries its basis (R12, R13, S22). <b>A preference carries to the next stay; a note dies with this one</b> (S19) — the same distinction the schema draws, made visible where it is entered. <b>Contacts are masked and <i>reveal</i> is one click</b> for anyone holding the stay's write permission — and <b>the reveal is recorded</b>, which is the half that matters: masking alone is a speed bump a busy desk works around within a week, while a recorded reveal is what separates a late-arrival phone call from a thousand-row harvest.</div>
+
+<div class="sub">Two actions the desk needs, and no frame draws</div>
+
+<div class="lead"><b>Two decisions, and they are not the same decision.</b> <b>A no-show</b> is already drawn once — as a state, on a bookings row, sent by <span class="sh pms"><i></i>Opera</span>. So the PMS-connected property is answered: the fact arrives. <b>What is not answered is the property with no PMS</b>, which frame 1 draws and which has nobody to send it. <b>A correction</b> has no such explanation: a departure recorded by mistake is a real morning, and nothing on any frame offers a way back. Each option below is drawn to the state the person is actually left in — including doing nothing, so the cost of that is on the page too.</div>
+
+<!-- N · the no-show -->
+<h1 style="margin-top:26px">N1 · <b>On the stay</b> — a third action beside the two, for a stay that never arrived</h1>
+<div id="fN1" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">1 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Thomas George · no room</div><div class="hsub">Stay 01J8F…22B1 · booking BK-4361 · created here</div></div>
+      <div class="grow"></div>
+      <button class="btn" type="button">Check in</button>
+      <button class="btn" type="button">Nobody came…</button>
+      <button class="btn danger" type="button">Cancel…</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab on" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">2</span></button>
+        <button class="tab" type="button">Requests &amp; jobs</button>
+        <button class="tab" type="button">Servicing<span class="n">1 night</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay</div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Booked</span> <span class="sh miss">arrival twelve days past</span></div></div>
+            <div class="fr"><div class="k">Room</div><div class="v"><span class="sh miss">never assigned</span></div></div>
+            <div class="fr"><div class="k">Arrival</div><div class="v">19 Aug <span class="sh miss">nothing recorded</span></div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">20 Aug <span class="sh miss">nothing recorded</span></div></div>
+            <div class="fr"><div class="k">Terms</div><div class="v">one night forfeited on a no-show <span class="lock">GROSS · ₹ 4 800.00</span></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 94470 •••• 31 <button class="link" type="button">reveal</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">14 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked at the desk<span>by Anitha Menon · 1 night · Deluxe Twin</span></div></div>
+              <div class="te"><div class="t">19 Aug</div><div class="g"><i></i><u></u></div><div class="d">Arrival day<span>nobody arrived, and nothing was recorded</span></div></div>
+              <div class="te"><div class="t">now</div><div class="g"><i></i></div><div class="d">Still <b style="color:var(--dim)">Booked</b><span>twelve days after the night it was for</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scrim mid">
+        <div class="dlg">
+          <div class="sh_h"><b>Record that nobody came?</b><span>Thomas George · BK-4361 · 19 – 20 Aug</span></div>
+          <div class="sh_b">
+            <div class="note" style="padding:11px 13px"><b>This is not a cancellation.</b> A no-show forfeits the night the terms name and is counted in the property's own reporting; a cancellation is a different fact with a different penalty. Both stay in the list, and the two are told apart afterwards by this.</div>
+            <div class="fr"><div class="k">Forfeited</div><div class="v"><b>₹ 4 800.00</b> <span class="lock">GROSS · ONE NIGHT · PER THE BOOKING'S TERMS</span></div></div>
+            <div class="fr"><div class="k">Afterwards</div><div class="v">the stay leaves Arrivals and stays in the list, as a no-show</div></div>
+            <div class="ban gone" style="margin-top:2px"><div><b>The night is recorded, not charged.</b> What is owed is written against this stay; taking payment is not something this screen does.</div></div>
+          </div>
+          <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Not yet</button><button class="btn sm pri" type="button">Nobody came</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Worded as the desk speaks, not as the model names it.</b> <i>Nobody came</i> is what a receptionist says at eleven at night; <i>no-show</i> is the state it produces and the word the row then carries. The dialog exists because the fact costs the guest a night — the platform's confirmation rule asks for the object, the consequence and the limit, and the limit here is that recording is not charging.</div>
+
+<h1 style="margin-top:26px">N1 · <b>the end state</b> — recorded, distinguishable from a cancellation, and sourced to a person rather than to a PMS</h1>
+<div id="fN1b" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">1 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Thomas George · no room</div><div class="hsub">Stay 01J8F…22B1 · booking BK-4361 · created here</div></div>
+      <div class="grow"></div>
+      <button class="btn" type="button">Reinstate…</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab on" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">3</span></button>
+        <button class="tab" type="button">Requests &amp; jobs</button>
+        <button class="tab" type="button">Servicing<span class="n">1 night</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay</div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill bad2">No-show</span> <span class="sh ovr"><i></i>yours</span></div></div>
+            <div class="fr"><div class="k">Recorded</div><div class="v">1 Sep <b>23:14</b> <span class="lock">OBSERVED</span> · by Anitha Menon</div></div>
+            <div class="fr"><div class="k">Forfeited</div><div class="v"><b>₹ 4 800.00</b> <span class="lock">GROSS · ONE NIGHT</span> <span class="pill neu">recorded, not charged</span></div></div>
+            <div class="fr"><div class="k">Arrival</div><div class="v">19 Aug <span class="sh miss">never happened</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">14 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked at the desk<span>by Anitha Menon · 1 night · Deluxe Twin</span></div></div>
+              <div class="te"><div class="t">19 Aug</div><div class="g"><i></i><u></u></div><div class="d">Arrival day<span>nobody arrived</span></div></div>
+              <div class="te ovr"><div class="t">23:14</div><div class="g"><i></i></div><div class="d">Recorded as a no-show<span>by Anitha Menon · one night forfeited</span></div></div>
+            </div>
+            <div class="note" style="margin-top:2px">The row carries <span class="sh ovr"><i></i>yours</span> where a PMS-sent one carries <span class="sh pms"><i></i>Opera</span>. <b>Who established the fact stays visible</b>, which is what lets a standalone property and a connected one sit in the same list without either pretending to be the other.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The ordinary success, drawn — the state nobody argues about and everybody assumes.</b> The stay stays in the list, the forfeit is written against it, and the source mark says a person recorded it. <b>Reinstate…</b> is the one action left, because a guest who turns up at midnight after all is a real night too.</div>
+
+<h1 style="margin-top:26px">N2 · <b>On the day's own list</b> — where the desk is standing at eleven at night, rather than inside one stay</h1>
+<div id="fN2" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab on" type="button">Today<span class="n">1 Sep</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Today</div><div class="hsub">Business day <b>Tue 1 Sep</b> · standalone</div></div>
+      <div class="grow"></div>
+      <button class="btn" type="button">Walk-in</button>
+      <button class="btn pri" type="button">＋ New booking</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab on" type="button">Arrivals<span class="n">3</span></button>
+        <button class="tab" type="button">In house<span class="n">42</span></button>
+        <button class="tab" type="button">Departures<span class="n">11</span></button>
+        <button class="tab" type="button">The honest list<span class="n att">2</span></button>
+      </div>
+      <div class="tbl">
+        <div class="tr list late hd"><div>Guest</div><div>Booking</div><div>Room</div><div>Dates</div><div>State</div><div></div></div>
+        <div class="tr list late">
+          <div class="nm"><b>Priya Nair</b><span>+91 98450 •••• 09</span></div>
+          <div>BK-4502</div><div>—</div><div>1 Sep → 3 Sep</div><div><span class="pill neu">Booked</span></div>
+          <div><button class="link" type="button">＋ assign</button></div>
+        </div>
+        <div class="tr list late">
+          <div class="nm"><b>Thomas George</b><span>+91 94470 •••• 31</span></div>
+          <div>BK-4361</div><div>—</div><div>19 Aug → 20 Aug</div><div><span class="pill neu">Booked</span> <span class="sh miss">thirteen days past</span></div>
+          <div><button class="link" type="button">nobody came</button></div>
+        </div>
+        <div class="tr list late">
+          <div class="nm"><b>Joseph Mathew</b><span>+91 99460 •••• 77</span></div>
+          <div>BK-4498</div><div>—</div><div>31 Aug → 2 Sep</div><div><span class="pill neu">Booked</span> <span class="sh miss">yesterday</span></div>
+          <div><button class="link" type="button">nobody came</button></div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:8px">The action appears only on a row whose arrival day has passed. <b>A stay arriving today is not a no-show at four in the afternoon</b>, and an action offered there would be pressed by mistake.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The same fact, reached where the work actually happens.</b> Closing the day is a list task: two or three rows, one pass. Opening each stay to record it is the same number of decisions and four times the clicks. <b>Drawn against N1 rather than instead of it</b> — they are not exclusive, and the question for the owner is whether the list action alone is enough, or whether a stay opened directly also needs one.</div>
+
+<!-- C · the correction -->
+<h1 style="margin-top:26px">C1 · <b>Correct…, on the stay</b> — a reason is required, and the departure is not erased</h1>
+<div id="fC1" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">24 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · created here</div></div>
+      <div class="grow"></div>
+      <button class="btn" type="button">Correct…</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab on" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">15</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay</div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Departed</span></div></div>
+            <div class="fr"><div class="k">Room</div><div class="v"><b>214</b> · Deluxe King <span class="pill neu">released</span></div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">24 Sep <b>07:02</b> <span class="lock">OBSERVED</span></div></div>
+            <div class="fr"><div class="k">Booked until</div><div class="v">26 Sep <span class="sh miss">two nights unsold and unoccupied</span></div></div>
+            <div class="fr"><div class="k">Guest</div><div class="v">still in the room <span class="sh miss">nothing in the record says so</span></div></div>
+            <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/09/1188 · ID captured <span class="pill ok">complete</span></div></div>
+            <div class="fr"><div class="k">Contact</div><div class="v">+91 98470 •••• 12 <button class="link" type="button">reveal</button></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">22 Sep</div><div class="g"><i></i><u></u></div><div class="d">Assigned 214 · checked in<span>by Anitha Menon</span></div></div>
+              <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d">Checked out<span>by Anitha Menon — the wrong row</span></div></div>
+              <div class="te oth"><div class="t">07:02</div><div class="g"><i></i></div><div class="d">Room Care was told 214 is vacated<span>and has planned a departure clean</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="scrim mid">
+        <div class="dlg">
+          <div class="sh_h"><b>Put this stay back in house?</b><span>Rajesh Pillai · 214 · checked out 07:02 today</span></div>
+          <div class="sh_b">
+            <div class="note" style="padding:11px 13px"><b>The departure is not erased.</b> It happened, it was announced, and consumers acted on it — so this is recorded as a correction beside it, and both stay in the stay's history.</div>
+            <div class="fr"><div class="k">Back to</div><div class="v"><b>In house</b> · 214 · booked until 26 Sep</div></div>
+            <div class="fr"><div class="k">Room</div><div class="v">214 is still free, so it returns to this stay <span class="pill ok">no conflict</span></div></div>
+            <div class="fr"><div class="k">Room Care</div><div class="v">hears the correction and re-plans <span class="sh oth"><i></i>another app</span></div></div>
+            <div class="fld"><label>Why</label><div class="inp">Checked out in error — guest is still in the room <span class="grow">▾</span></div></div>
+            <div class="hint"><b>A reason is required.</b> Without one a correction is indistinguishable from a mistake, and this is the record somebody reads months later.</div>
+          </div>
+          <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Leave it</button><button class="btn sm pri" type="button">Put back in house</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Worded as the outcome, not as the verb.</b> <i>Put this stay back in house</i> says what will be true afterwards; <i>correct the lifecycle</i> describes the model. The room is checked before the dialog offers the move, which is why it can say <i>no conflict</i>. <b>What happens when 214 has been given to somebody else in those seven minutes is not drawn here</b>, and is the one case this pair leaves open.</div>
+
+<h1 style="margin-top:26px">C1 · <b>the end state</b> — in house again, with both facts kept</h1>
+<div id="fC1b" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">24 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · created here</div></div>
+      <div class="grow"></div>
+      <button class="btn" type="button">Move room</button>
+      <button class="btn" type="button">Check out</button>
+      <button class="btn danger" type="button">Cancel…</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab on" type="button">Overview</button>
+        <button class="tab" type="button">Activity<span class="n">17</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
+      </div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay <div class="grow"><span class="sh ovr"><i></i>corrected today</span></div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill ok">In house</span> <span class="sh ovr"><i></i>corrected</span></div></div>
+            <div class="fr"><div class="k">Room</div><div class="v"><b>214</b> · Deluxe King</div></div>
+            <div class="fr"><div class="k">Departure</div><div class="v">26 Sep <b>11:00</b> <span class="lock">DERIVED FROM PROPERTY CLOCK</span></div></div>
+            <div class="fr"><div class="k">Earlier departure</div><div class="v">24 Sep 07:02 <span class="lock">RECORDED IN ERROR · KEPT</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d">Checked out<span>by Anitha Menon — the wrong row</span></div></div>
+              <div class="te oth"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d">Room Care was told 214 is vacated<span>and planned a departure clean</span></div></div>
+              <div class="te ovr"><div class="t">07:09</div><div class="g"><i></i><u></u></div><div class="d">Corrected back to in house<span>by Anitha Menon — <i>checked out in error, guest is still in the room</i></span></div></div>
+              <div class="te oth"><div class="t">07:09</div><div class="g"><i></i></div><div class="d">Room Care heard the correction<span>and dropped the departure clean</span></div></div>
+            </div>
+            <div class="note" style="margin-top:2px"><b>Four entries, not two edited into one.</b> The mistake, what it caused, the correction, and what the correction caused. Somebody asked in November why 214 shows a departure clean on the 24th has the answer in the list.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The ordinary success — the arm most often left undrawn.</b> Seven minutes, two facts kept, and the stay's own actions back. The earlier departure stays on the record marked as an error rather than vanishing, which is the difference between a correction and a rewrite.</div>
+
+<h1 style="margin-top:26px">C2 · <b>From Activity</b> — corrected where the mistake is visible, rather than from a header that says nothing about it</h1>
+<div id="fC2" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">24 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title">
+      <div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · created here</div></div>
+      <div class="grow"></div>
+      <button class="btn off" type="button" disabled>Export</button>
+    </div>
+    <div class="body">
+      <div class="tabs">
+        <button class="tab" type="button">Overview</button>
+        <button class="tab on" type="button">Activity<span class="n">15</span></button>
+        <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+        <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+        <button class="tab" type="button">Payment</button>
+        <button class="tab" type="button">Documents</button>
+      </div>
+      <div class="card">
+        <div class="ch">Everything that has happened to this stay</div>
+        <div class="cb">
+          <div class="tl">
+            <div class="te"><div class="t">22 Sep</div><div class="g"><i></i><u></u></div><div class="d">Assigned 214 · checked in<span>by Anitha Menon</span></div></div>
+            <div class="te"><div class="t">07:02</div><div class="g"><i></i><u></u></div><div class="d"><span class="ttl">Checked out <button class="link" type="button">this is wrong</button></span><span>by Anitha Menon</span></div></div>
+            <div class="te oth"><div class="t">07:02</div><div class="g"><i></i></div><div class="d">Room Care was told 214 is vacated<span>and has planned a departure clean</span></div></div>
+          </div>
+          <div class="note" style="margin-top:2px">The action sits on the entry it corrects, and only on entries a correction can reach. <b>A desk looking for the mistake is already reading this list</b> — that is how it found out the check-out was on the wrong row.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The same dialog and the same end state as C1</b> — this is a question about where the action lives, not about what it does. <b>Against C1 rather than instead of it:</b> the header is where somebody who already knows goes, and the timeline is where somebody who is working it out is standing. The owner's choice is one of them, or both.</div>
+
+<div class="cap" style="border-color:var(--ovr)"><b>Ruled by the owner on 24 September 2026 — <i>audited, approved</i>.</b> Both arms of each, so a no-show can be recorded on the stay <b>and</b> from the day's own list, and a correction made on the stay <b>and</b> from the Activity entry it corrects. <b>Two treatments were drawn and rejected</b> and are no longer on this page: <i>N0</i> and <i>C0</i>, each showing what the desk can do with nothing added — the no-show arm because a standalone property has no PMS to send the fact to, and the correction arm because its cost was the point of drawing it. They are in this page's history (<code>git log --follow</code>), which is where a superseded drawing belongs: one beside a current one is a drawing somebody eventually builds from.</div>
 
 <!-- 4 · Activity -->
 <h1>4 · <b>The stay · Activity</b> — everything that has happened to this booking, with who said it. The desk's answer to "why does it say that?"</h1>
