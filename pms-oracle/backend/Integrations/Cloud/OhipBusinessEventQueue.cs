@@ -164,7 +164,50 @@ public static class OhipBusinessEventQueue
         // OHIP's own field names throughout: this is the vendor's schema, and
         // renaming it here would make a rejection quote a spelling nobody sent.
         return [.. events.Select(one => new DrainedEvent(
-            JsonSerializer.SerializeToUtf8Bytes(one, Json), EventPayload))];
+            JsonSerializer.SerializeToUtf8Bytes(one, Json), EventPayload, KeyOf(one)))];
+    }
+
+    /// <summary>What one queue item is, across redeliveries — ADR 0246.</summary>
+    /// <param name="item">The item as OHIP sent it, before re-serialising.</param>
+    /// <returns>A key that is never empty.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>OHIP's own event id, read from the shape OHIP actually sends</b> —
+    /// <c>businessEventId.id</c>, per
+    /// <c>providers/oracle/cloud/services/impl/OracleCloudEventServiceImpl.java:61</c>,
+    /// which reads exactly that out of the response it is given. The key is
+    /// the source's identity rather than a digest of the bytes, so a
+    /// redelivery of one change is one fact however the payload is spelled the
+    /// second time.
+    /// </para>
+    /// <para>
+    /// <b>A fresh v7 where the id is absent</b>, keeping the reasoning already
+    /// written for this case: an item with no id cannot be recognised at all,
+    /// and a key that collides with nothing is better than one key shared by
+    /// every malformed item, which would deduplicate unrelated changes into
+    /// each other. It means such an item is stored on every delivery — the
+    /// safe direction for a destructive queue, where the alternative is losing
+    /// it.
+    /// </para>
+    /// <para>
+    /// <b>Read from the element rather than from the bytes</b>, because it is
+    /// the same data one parse earlier; and prefixed with the kind, which is
+    /// the convention <c>IConnectorAdapter.DedupeKey</c> already uses, so two
+    /// keys for one change could never differ only in shape.
+    /// </para>
+    /// </remarks>
+    private static string KeyOf(JsonElement item)
+    {
+        var id = item.TryGetProperty("businessEventId", out var identifier)
+            && identifier.ValueKind is JsonValueKind.Object
+            && identifier.TryGetProperty("id", out var value)
+            && value.ValueKind is JsonValueKind.String
+                ? value.GetString()
+                : null;
+
+        return string.IsNullOrWhiteSpace(id)
+            ? $"{EventPayload}:{Guid.CreateVersion7()}"
+            : $"{EventPayload}:{id}";
     }
 
     /// <summary>The queue's address for this hotel.</summary>
@@ -178,10 +221,16 @@ public static class OhipBusinessEventQueue
         IReadOnlyList<JsonElement>? BusinessEventData);
 }
 
-/// <summary>One item taken from the queue, and what shape it is.</summary>
+/// <summary>One item taken from the queue, what shape it is, and its key.</summary>
 /// <param name="Payload">The bytes as OHIP gave them.</param>
 /// <param name="PayloadKind">
 /// The connector's own name for the shape — declared rather than sniffed,
 /// because this end knows which endpoint produced it.
 /// </param>
-public sealed record DrainedEvent(byte[] Payload, string PayloadKind);
+/// <param name="DedupeKey">
+/// What this item is, across redeliveries — ADR 0246, <c>CONN-Q51</c> A1.
+/// <see cref="OhipBusinessEventQueue.KeyOf"/> decides it, and it is never
+/// empty: an empty key is the connector not having said, which the Hub is
+/// required to treat as no key at all.
+/// </param>
+public sealed record DrainedEvent(byte[] Payload, string PayloadKind, string DedupeKey);

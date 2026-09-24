@@ -100,10 +100,16 @@ public static class QueueDrainInvocation
 
         var result = new DrainResult();
 
+        // The key is the connector's and travels with the payload — ADR 0246.
+        // The Hub never reconstructs it (`CONN-Q42`: choosing it is the
+        // provider-specific identity decision), so a payload that left here
+        // without one would be a change the Hub cannot recognise on its next
+        // delivery, and nothing downstream could repair that.
         result.Payloads.AddRange(taken.Select(one => new DrainedPayload
         {
             Payload = ByteString.CopyFrom(one.Payload),
             PayloadKind = one.PayloadKind,
+            DedupeKey = one.DedupeKey,
         }));
 
         return result.ToByteArray();

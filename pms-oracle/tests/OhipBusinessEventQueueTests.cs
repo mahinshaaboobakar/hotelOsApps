@@ -132,6 +132,58 @@ public class OhipBusinessEventQueueTests
         Assert.Equal(2, ohip.Calls);
     }
 
+    [Fact]
+    public async Task Each_item_is_keyed_by_the_event_id_ohip_gave_it()
+    {
+        var taken = await DrainAsync(new Ohip(Page.Of("first", "second")));
+
+        // OHIP's own identity, not a digest: `OracleCloudEventServiceImpl.java:61`
+        // reads `businessEventId.id` out of this same response.
+        Assert.Equal(
+            ["ohip-business-event:first", "ohip-business-event:second"],
+            taken.Select(one => one.DedupeKey));
+    }
+
+    [Fact]
+    public async Task The_same_event_delivered_twice_carries_the_same_key()
+    {
+        var first = await DrainAsync(new Ohip(Page.Of("evt-1")));
+        var again = await DrainAsync(new Ohip(Page.Of("evt-1")));
+
+        // The whole point of the field — ADR 0246. Two drains are two separate
+        // reads of a destructive queue, so the only thing that can recognise a
+        // redelivery is a key the source's own identity produced.
+        Assert.Equal(first[0].DedupeKey, again[0].DedupeKey);
+    }
+
+    [Fact]
+    public async Task An_item_with_no_event_id_is_keyed_uniquely_rather_than_identically()
+    {
+        var taken = await DrainAsync(new Ohip(Page.Unidentified(2)));
+
+        // Two malformed items are two facts, not one. A shared key — or an
+        // empty one — would deduplicate unrelated changes into each other,
+        // which for a queue that cannot be re-read destroys them.
+        Assert.Equal(2, taken.Count);
+        Assert.NotEqual(taken[0].DedupeKey, taken[1].DedupeKey);
+        Assert.All(taken, one => Assert.StartsWith(
+            "ohip-business-event:", one.DedupeKey, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task No_drained_item_ever_carries_an_empty_key()
+    {
+        var full = Enumerable.Range(1, OhipBusinessEventQueue.PageSize).Select(n => $"e{n}").ToArray();
+        var taken = await DrainAsync(new Ohip(Page.Of(full), Page.Unidentified(1)));
+
+        // An empty string is the connector not having said, and the Hub is
+        // required to treat it as no key at all rather than as a key that
+        // happens to be blank — so there is no payload this connector may emit
+        // without one.
+        Assert.NotEmpty(taken);
+        Assert.All(taken, one => Assert.False(string.IsNullOrWhiteSpace(one.DedupeKey)));
+    }
+
     private static async Task<IReadOnlyList<DrainedEvent>> DrainAsync(Ohip ohip)
     {
         using var http = new HttpClient(ohip) { Timeout = TimeSpan.FromSeconds(5) };
@@ -164,6 +216,22 @@ public class OhipBusinessEventQueueTests
         public static Page Empty() => new(HttpStatusCode.NoContent, null, false);
 
         public static Page Failing() => new(HttpStatusCode.OK, null, true);
+
+        /// <summary>A page whose items carry no <c>businessEventId</c> at all.</summary>
+        /// <remarks>
+        /// Not a hypothetical: the reference reads that id without checking it
+        /// is there (<c>OracleCloudEventServiceImpl.java:61</c>), so an item
+        /// shaped this way is one the source can send and nothing upstream
+        /// refuses.
+        /// </remarks>
+        public static Page Unidentified(int count) => new(
+            HttpStatusCode.OK,
+            "{\"businessEventData\":["
+            + string.Join(",", Enumerable.Range(1, count).Select(n =>
+                "{\"businessEvent\":{\"header\":{\"moduleName\":\"Reservation\","
+                + "\"primaryKey\":\"pk-" + n + "\"}}}"))
+            + "]}",
+            false);
 
         /// <summary>A page in OHIP's own shape, ids only — the rest is opaque here.</summary>
         public static Page Of(params string[] ids) => new(

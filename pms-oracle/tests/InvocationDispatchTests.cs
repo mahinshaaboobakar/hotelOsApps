@@ -114,6 +114,30 @@ public class InvocationDispatchTests
     }
 
     /// <summary>
+    /// The key crosses the wire — ADR 0246, <c>CONN-Q51</c> A1.
+    /// </summary>
+    /// <remarks>
+    /// The queue's own tests prove <c>DrainedEvent.DedupeKey</c>. Only this one
+    /// proves the mapping onto <see cref="DrainedPayload"/>, which is a single
+    /// line that nothing else would fail on: a drain that dropped the key would
+    /// still answer payloads, and the Hub would store changes it can never
+    /// recognise again.
+    /// </remarks>
+    [Fact]
+    public async Task A_drained_payload_carries_the_key_the_connector_chose()
+    {
+        await using var hub = new Hub(
+            HttpStatusCode.OK,
+            holding: """{"businessEventData":[{"businessEventId":{"id":"evt-9"}}]}""");
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Drain, Drain(Configured), DrainResult.Parser);
+
+        var payload = Assert.Single(result.Payloads);
+        Assert.Equal("ohip-business-event:evt-9", payload.DedupeKey);
+    }
+
+    /// <summary>
     /// A drain has nowhere to say "your configuration is incomplete":
     /// DrainResult carries payloads only, so an empty reply would report a
     /// healthy poll of a queue that was never asked.
@@ -177,9 +201,9 @@ public class InvocationDispatchTests
         private readonly Task _serving;
         private readonly HttpClient _http;
 
-        public Hub(HttpStatusCode? status, string? denies = null)
+        public Hub(HttpStatusCode? status, string? denies = null, string? holding = null)
         {
-            _answers = new Answers(status);
+            _answers = new Answers(status, holding);
             _denies = denies;
             _http = new HttpClient(_answers) { Timeout = TimeSpan.FromSeconds(5) };
 
@@ -299,7 +323,15 @@ public class InvocationDispatchTests
         }
 
         /// <summary>OHIP, as a status code or a refusal to connect at all.</summary>
-        private sealed class Answers(HttpStatusCode? status) : HttpMessageHandler
+        /// <param name="status">What the token endpoint answers.</param>
+        /// <param name="holding">
+        /// What the queue is holding, in OHIP's own shape; <c>null</c> for an
+        /// empty queue. Spelled here rather than built from a helper because a
+        /// double that sent a shape of its own invention would prove the wire
+        /// carries whatever this file imagines — which is the whole failure
+        /// this connector already found once.
+        /// </param>
+        private sealed class Answers(HttpStatusCode? status, string? holding = null) : HttpMessageHandler
         {
             public int Sent { get; private set; }
 
@@ -313,7 +345,13 @@ public class InvocationDispatchTests
                 // here would be testing a shape the source never sends.
                 if (request.RequestUri!.AbsolutePath.EndsWith("businessEvents", StringComparison.Ordinal))
                 {
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NoContent));
+                    return Task.FromResult(holding is { } page
+                        ? new HttpResponseMessage(HttpStatusCode.OK)
+                        {
+                            Content = new StringContent(
+                                page, System.Text.Encoding.UTF8, "application/json"),
+                        }
+                        : new HttpResponseMessage(HttpStatusCode.NoContent));
                 }
 
                 return status is { } answered
