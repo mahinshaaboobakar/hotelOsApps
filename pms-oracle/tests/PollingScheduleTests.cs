@@ -83,6 +83,51 @@ public sealed class PollingScheduleTests
         Assert.False(schedule.Covers(new TimeOnly(14, 30)));
     }
 
+    /// <summary>
+    /// Whether the wait can be decided without the property's zone —
+    /// <c>CONN-Q51</c> A2, and what lets a drain state an interval at all.
+    /// </summary>
+    /// <remarks>
+    /// The drain path has no <see cref="PropertyClock"/>: the zone is a
+    /// property fact ADR 0220 gives the Hub to supply, in a message that is
+    /// not built. So it may state an interval exactly when the answer cannot
+    /// depend on a zone, and this is that question.
+    /// </remarks>
+    [Theory]
+    [InlineData(null, null, false)]
+    [InlineData("14:00", null, false)]
+    [InlineData(null, "18:00", false)]
+    [InlineData("14:00", "14:00", false)]
+    [InlineData("14:00", "18:00", true)]
+    [InlineData("22:00", "02:00", true)]
+    public void The_clock_is_needed_only_where_a_real_window_is_configured(
+        string? from, string? until, bool needed)
+    {
+        var settings = new Dictionary<string, string>();
+
+        if (from is not null)
+        {
+            settings[OhipPollingSchedule.TightFromSetting] = from;
+        }
+
+        if (until is not null)
+        {
+            settings[OhipPollingSchedule.TightUntilSetting] = until;
+        }
+
+        var schedule = OhipPollingSchedule.Read(settings);
+
+        Assert.Equal(needed, schedule.NeedsTheClock);
+
+        // The two must agree by construction: where no clock is needed, no
+        // time of day is covered, so `Wait` answers `Normal` for any zone.
+        if (!needed)
+        {
+            Assert.False(schedule.Covers(new TimeOnly(15, 0)));
+            Assert.Equal(schedule.Normal, schedule.Wait(Kochi(), DateTimeOffset.UtcNow));
+        }
+    }
+
     [Theory]
     [InlineData(13, 59, false)]
     [InlineData(14, 0, true)]

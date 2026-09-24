@@ -138,6 +138,53 @@ public class InvocationDispatchTests
     }
 
     /// <summary>
+    /// The Hub is told when to ask again — <c>CONN-Q51</c> A2 — where this end
+    /// can say it without the property's zone.
+    /// </summary>
+    [Fact]
+    public async Task A_drain_states_the_interval_when_no_tight_window_is_configured()
+    {
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Drain, Drain(Configured), DrainResult.Parser);
+
+        // `Configured` sets no tight window, so no zone can change the answer
+        // and three hours is exact rather than a guess. Absent, the Hub would
+        // wait its recovery ceiling — a wait for a source that failed, applied
+        // to one that is working.
+        Assert.True(result.HasNextPollAfterSeconds);
+        Assert.Equal(
+            (uint)OhipPollingSchedule.DefaultNormal.TotalSeconds,
+            result.NextPollAfterSeconds);
+    }
+
+    /// <summary>
+    /// And says nothing where it would have to guess — ADR 0220's missing
+    /// property context, stated as an absence rather than as a number.
+    /// </summary>
+    [Fact]
+    public async Task A_drain_states_no_interval_when_the_answer_depends_on_the_propertys_zone()
+    {
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        var settings = new Dictionary<string, string>(Configured, StringComparer.Ordinal)
+        {
+            [OhipPollingSchedule.TightFromSetting] = "14:00",
+            [OhipPollingSchedule.TightUntilSetting] = "18:00",
+        };
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Drain, Drain(settings), DrainResult.Parser);
+
+        // Sending `Normal` here would state an interval this connector knows
+        // to be wrong for four hours of every day, and would poll slowly
+        // through exactly the window the property asked to be watched. The
+        // field is optional so that absent can mean the connector did not say.
+        Assert.False(result.HasNextPollAfterSeconds);
+    }
+
+    /// <summary>
     /// A drain has nowhere to say "your configuration is incomplete":
     /// DrainResult carries payloads only, so an empty reply would report a
     /// healthy poll of a queue that was never asked.

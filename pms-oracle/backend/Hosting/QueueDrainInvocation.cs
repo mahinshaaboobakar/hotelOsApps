@@ -100,6 +100,32 @@ public static class QueueDrainInvocation
 
         var result = new DrainResult();
 
+        // When the Hub should ask again — `CONN-Q51` A2. Only this end knows
+        // what OHIP tolerates, so a Hub left to guess waits its recovery
+        // ceiling, which is a wait for a source that failed and not a rate for
+        // one that is working.
+        //
+        // **Sent only where it can be computed, and absent otherwise.** The
+        // two-tier schedule is three hours ordinarily and fifteen minutes
+        // around check-in (`CONN-Q12`), and deciding which applies means
+        // converting now into the PROPERTY'S zone — a fact this invocation
+        // does not carry and ADR 0220 rules the Hub will supply, in a message
+        // that is not built. With no tight window configured the zone cannot
+        // change the answer, so the interval is exact and is stated.
+        //
+        // Where a tight window IS configured, nothing is sent. The field is
+        // optional precisely so that absent means the connector did not say —
+        // and sending `Normal` here would be stating an interval this
+        // connector knows to be wrong for part of every day, which is worse
+        // than the ceiling: it would silently poll slowly through exactly the
+        // hours the property asked to be watched.
+        var schedule = OhipPollingSchedule.Read(asked.Settings);
+
+        if (!schedule.NeedsTheClock)
+        {
+            result.NextPollAfterSeconds = (uint)schedule.Normal.TotalSeconds;
+        }
+
         // The key is the connector's and travels with the payload — ADR 0246.
         // The Hub never reconstructs it (`CONN-Q42`: choosing it is the
         // provider-specific identity decision), so a payload that left here

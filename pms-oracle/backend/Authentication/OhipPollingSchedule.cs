@@ -91,6 +91,24 @@ public sealed record OhipPollingSchedule
             Clock(settings, TightUntilSetting));
     }
 
+    /// <summary>Whether deciding the wait needs the property's zone at all.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The question a caller without a clock has to ask.</b> With no tight
+    /// window configured — or one whose ends are equal, which covers nothing —
+    /// <see cref="Covers"/> is false for every time of day, so
+    /// <see cref="Wait"/> answers <see cref="Normal"/> whatever zone it is
+    /// given. The interval is then decidable from the settings alone.
+    /// </para>
+    /// <para>
+    /// <b>It is the same condition <see cref="Covers"/> guards on, written
+    /// once.</b> Two spellings of *is there a window* would eventually
+    /// disagree, and the half that disagreed silently would be a connector
+    /// reporting an interval it does not actually keep.
+    /// </para>
+    /// </remarks>
+    public bool NeedsTheClock => From is { } from && Until is { } until && from != until;
+
     /// <summary>How long to wait, from a moment.</summary>
     /// <param name="clock">The property's zone.</param>
     /// <param name="now">The moment being scheduled from.</param>
@@ -116,7 +134,7 @@ public sealed record OhipPollingSchedule
     /// </remarks>
     public bool Covers(TimeOnly local)
     {
-        if (From is not { } from || Until is not { } until || from == until)
+        if (!NeedsTheClock || From is not { } from || Until is not { } until)
         {
             return false;
         }
