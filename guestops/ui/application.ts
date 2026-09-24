@@ -57,19 +57,14 @@ import { load, perform, type StayPage } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem, type Operator } from "./chrome/bar";
 import { cannot } from "./chrome/marks";
-import { sheet } from "./chrome/overlay";
 import { stylesheet } from "./chrome/styles";
 import { attention } from "./screens/attention";
 import { booking } from "./screens/booking";
 import { bookings } from "./screens/bookings";
 import { newBooking } from "./screens/newbooking";
 import { setup } from "./screens/setup";
-import { assignRoom } from "./screens/assign";
-import { registrationCard } from "./screens/registration";
-import { walkIn } from "./screens/walkin";
+import { overlay } from "./overlays";
 import { stay } from "./screens/stay";
-import { correctDialog } from "./screens/stay/correct";
-import { nobodyCameDialog } from "./screens/stay/nobody-came";
 import { today } from "./screens/today";
 
 /**
@@ -80,7 +75,7 @@ import { today } from "./screens/today";
  * That is how the approved design navigates and it is why there is no back
  * button.
  */
-interface Place {
+export interface Place {
   screen:
     | "Today"
     | "Bookings"
@@ -260,118 +255,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     // The sheet stands over whatever screen is drawn, so it is appended after
     // the screen rather than instead of it — frame 10 is the day, dimmed, with
     // the walk-in on top of it.
-    const overlay = (): void => {
-      if (where.overlay === "walkin") {
-        // **The sheet captures now.** `stay.create/walkIn` was declared,
-        // served, and unreachable: this drew `recordedWalkIn` and called
-        // `perform` nowhere. What kept it that way was not the write — it was
-        // that nothing in this application could name a ROOM, and check-in
-        // needs one (S8). `reservation.read/rooms` is that read.
-        void walkIn(
-          host,
-          main,
-          () => show({ overlay: null }),
-          // In house: the sheet closes and the stay is opened, because the
-          // service says the guest is there and the stay screen is what shows
-          // it. A partial outcome does NOT come here — the sheet keeps itself
-          // open and says the stay exists.
-          (stayId) => show({ screen: "Stay", tab: "Overview", stayId, overlay: null }),
-        );
-      }
-
-      // The card stands over the day, because that is where a check-in starts:
-      // a receptionist opens it from the arrival they are looking at, and the
-      // list stays behind it.
-      // Frame 3's *Move room*, and the day list's `＋ assign` — one sheet, and
-      // the service derives which of the two it is recording.
-      if (where.overlay === "assign") {
-        void assignRoom(
-          host,
-          main,
-          where.stayId,
-          () => show({ overlay: null }),
-          // Recorded: the sheet closes and the screen behind redraws from the
-          // service. It does not patch its own rows — the assignment is the
-          // service's, and a client editing its copy would be a second place
-          // it is decided.
-          () => show({ overlay: null }),
-        );
-      }
-
-      if (where.overlay === "nobodyCame" || where.overlay === "correct") {
-        // Reached without a stay is a defect rather than an empty dialog —
-        // every route here comes from one. Nothing was asked of the platform,
-        // so there is no answer to report.
-        if (where.stayId === "") {
-          main.append(sheet({
-            title: where.overlay === "correct" ? "Correct this stay" : "Record a no-show",
-            subtitle: "no stay was chosen",
-            body: [cannot(
-              "No stay was chosen",
-              "Open a stay and act from there. Nothing was asked of the "
-              + "platform here, so there is no answer to report.",
-            )],
-            foot: null,
-            actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
-            onDismiss: () => show({ overlay: null }),
-          }));
-          return;
-        }
-
-        const open = where.overlay === "correct"
-          ? correctDialog(
-            host, main, where.stayId, host.property,
-            () => show({ overlay: null }),
-            // Recorded: the overlay closes and the screen behind redraws from
-            // the service. It does not patch its own copy — the lifecycle is
-            // the service's, and a client editing its own would be a second
-            // place it is decided.
-            () => show({ overlay: null }),
-          )
-          : nobodyCameDialog(
-            host, main, where.stayId, host.property,
-            () => show({ overlay: null }),
-            () => show({ overlay: null }),
-          );
-
-        void open;
-        return;
-      }
-
-      if (where.overlay === "registration") {
-        // **Reached without a stay, which is a defect rather than an empty
-        // card.** Every route here comes from a stay, and a card drawn without
-        // one would be somebody's. Nothing was asked of the platform, so there
-        // is no answer to report.
-        if (where.stayId === "") {
-          main.append(sheet({
-            title: "Registration card",
-            subtitle: "no stay was chosen",
-            body: [cannot(
-              "No stay was chosen",
-              "Open a stay and check the guest in from there. Nothing was asked "
-              + "of the platform here, so there is no answer to report.",
-            )],
-            foot: null,
-            actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
-            onDismiss: () => show({ overlay: null }),
-          }));
-          return;
-        }
-
-        void registrationCard(
-          host,
-          main,
-          where.stayId,
-          () => show({ overlay: null }),
-          // Checked in: the card closes and the screen behind redraws from the
-          // service. It does not patch its own rows — the lifecycle is the
-          // service's, and a client editing its copy would be a second place
-          // it is decided.
-          () => show({ overlay: null }),
-        );
-      }
-    };
+    const drawOverlay = (): void => overlay(host, main, where, show);
 
     if (where.screen === "Booking") {
       void booking(
@@ -401,7 +285,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         // reads it is the one that draws it — this does not build a fifth step
         // of its own out of what the write returned.
         (bookingId) => show({ screen: "Booking", bookingId, page: 0 }),
-      ).then(overlay);
+      ).then(drawOverlay);
       return;
     }
 
@@ -414,7 +298,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         (row) => show({ screen: "Booking", bookingId: row.id, overlay: null }),
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
-      ).then(overlay);
+      ).then(drawOverlay);
       return;
     }
 
@@ -475,7 +359,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
           noShow: () => show({ overlay: "nobodyCame" }),
           correct: () => show({ overlay: "correct" }),
         },
-      ).then(overlay);
+      ).then(drawOverlay);
       return;
     }
 
@@ -510,7 +394,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
 
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
-      ).then(overlay);
+      ).then(drawOverlay);
       return;
     }
 

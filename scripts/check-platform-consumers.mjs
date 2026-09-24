@@ -335,7 +335,18 @@ const here = consumerTree();
 
 process.stdout.write(
   `in this tree ${here.head ?? "(git could not answer)"}`
-  + `${here.dirty.length === 0 ? " (clean)" : ` + ${here.dirty.length} uncommitted`}\n`);
+  // **The verdict names what it MEASURED.** It read `(clean)`, and the set it
+  // walks is sources only — the narrowness is deliberate and right, because a
+  // dirty design page says nothing about whether these build. But a bare
+  // `(clean)` is heard as *nothing is modified*, and it printed exactly that
+  // while `pms-oracle/manifest.yaml` was modified (II, 2026-09-24). Same class
+  // as a bare standards PASS heard as *every file is within 300 lines* rather
+  // than *or holds an approved exception*.
+  //
+  // The population is named from the filter above rather than described, so a
+  // suffix added there and not here reads as a lie the next person can see.
+  + `${here.dirty.length === 0 ? " (clean: no .cs/.csproj/.ts/.tsx/.json/.proto modified)"
+    : ` + ${here.dirty.length} uncommitted`}\n`);
 
 for (const path of here.dirty) process.stdout.write(`    uncommitted  ${path}\n`);
 
