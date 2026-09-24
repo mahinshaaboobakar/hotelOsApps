@@ -243,11 +243,27 @@ dependencies: []
 #
 # Declared per integration rather than per package, because they differ: only
 # `oracle-cloud` dials OHIP.
+#
+# `delivery:` is required of every integration — ADR 0248 (d). It says how this
+# integration's changes reach the platform, and the Hub drains only what
+# declares `polling`. It is not derived from `accepts_push`: the two answer
+# different questions, and polling beside an ingress is explicitly not refused,
+# because no ruling says an integration cannot do both. Spelled `polling` and
+# `push` — the wire carries `INTEGRATION_DELIVERY_POLLING`, and a manifest is
+# read by an administrator before they approve it.
+#
+# **Not cosmetic.** An integration declaring no delivery is refused at
+# admission (`DeliveryUndeclared`, `validate/integrations.rs:121`), and one
+# already installed reads as undeclared and is never drained. `delivery: push`
+# beside `accepts_push: false` is the one pair refused as a contradiction
+# inside a single declaration (`PushWithoutIngress`) — both push flavours here
+# declare the ingress and its `shared-secret`, so they satisfy it.
 integrations:
   # we pull from OHIP’s business-event queue
   - id: oracle-cloud
     name: "Oracle OPERA Cloud"
     capabilities: [bookings, room_state]
+    delivery: polling
     accepts_push: false
     ingress_authentication: []
     # Exactly the set `OhipCredentials` needs for a password grant, and no more.
@@ -260,6 +276,7 @@ integrations:
   - id: oracle-onpremise
     name: "Oracle OPERA on-premise"
     capabilities: [bookings, room_state]
+    delivery: push
     accepts_push: true
     ingress_authentication: [shared-secret]
 
@@ -267,6 +284,7 @@ integrations:
   - id: oracle-web
     name: "Oracle OPERA web"
     capabilities: [bookings, room_state]
+    delivery: push
     accepts_push: true
     ingress_authentication: [shared-secret]
 
