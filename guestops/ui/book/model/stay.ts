@@ -112,3 +112,103 @@ export interface StayPage {
   /** The sentence under the timeline explaining what taking Opera's value does. */
   consequence: string;
 }
+
+/**
+ * What recording a no-show would do — the owner's N1 dialog, ruled 2026-09-24.
+ *
+ * **A read.** It names a forfeit and a consequence and writes nothing, so a
+ * person who may look at a stay may see what the action would do; only the
+ * button needs `stay.override`.
+ */
+export interface NoShowPlan {
+  stayId: string;
+
+  /** The version the dialog was read at, which the confirm carries back. */
+  version: number;
+
+  /** The primary guest, or `Not yet named` — a state, not a placeholder. */
+  guest: string;
+
+  /** The booking reference, where a source manages this stay. */
+  reference: string | null;
+
+  /** ISO instants. The screen compresses the range in the reader's grammar. */
+  arrive: string | null;
+  depart: string | null;
+
+  /**
+   * What the terms say is forfeited.
+   *
+   * **Three states, and each is a different fact.** `null` is *no terms are
+   * stored*, `{ unstated }` is *terms with no currency* — a number a guest
+   * could be charged in the wrong denomination — and the third is an amount.
+   * A zero would be a forfeit of nothing, which none of them means.
+   */
+  forfeit: null | { unstated: string } | Forfeit;
+
+  /** What becomes of the stay, in the service's own words. */
+  afterwards: string;
+}
+
+/** A forfeit, in the parts the screen composes — ADR 0175 §NUM-Q2. */
+export interface Forfeit {
+  /** A decimal string, invariant. Never pre-formatted. */
+  amount: string;
+
+  /** ISO 4217 alphabetic. The screen decides the symbol and where it goes. */
+  currency: string;
+
+  /** `Gross` or `Net` — whether the amount includes tax. */
+  basis: string;
+
+  /** Null where the terms named none; the screen then omits the count. */
+  nights: number | null;
+}
+
+/**
+ * What correcting a lifecycle fact would do — the owner's C1 dialog.
+ *
+ * **The words are the screen's.** ADR 0175: this carries where the stay would
+ * go and what stands in the way, and the title, the button and the prose are
+ * composed where they are rendered.
+ */
+export interface CorrectPlan {
+  stayId: string;
+
+  /** The version the dialog was read at, which the confirm carries back. */
+  version: number;
+
+  /** The state the confirm sends. Null where no correction is defined. */
+  to: string | null;
+
+  /** Where the stay is now. */
+  from: string;
+
+  /** The number the desk knows the room by, where one is recorded. */
+  room: string | null;
+
+  /** The primary guest, or `Not yet named` — a state, not a placeholder. */
+  guest: string;
+
+  /** When the departure was recorded, as an ISO instant. */
+  departedAt: string | null;
+
+  /**
+   * Whether the room is still nobody else's.
+   *
+   * **Null is not a missing boolean** — it means no room is in the question,
+   * which is what reinstating a no-show is. Reading it as *taken* would tell
+   * the desk a room was held when there is no room.
+   */
+  roomStillFree: boolean | null;
+
+  /**
+   * The reasons the property configured — **and nothing configures them**.
+   *
+   * Empty, exactly as `CancelPlan.reasons` is empty and for the same recorded
+   * reason: `GuestOpsSettings` carries no reason vocabulary and frame 16
+   * configures none. The screen draws the field with nothing in it and the
+   * button unavailable, rather than a hardcoded list nobody chose.
+   */
+  reasons: readonly string[];
+}

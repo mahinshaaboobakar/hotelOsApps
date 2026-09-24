@@ -77,6 +77,12 @@ export interface Acts {
 
   /** Go to the booking with frame 8's dialog open. */
   cancel: () => void;
+
+  /** Open N1's dialog — record that the guest never arrived. */
+  noShow: () => void;
+
+  /** Open C1's dialog — put right a lifecycle fact recorded in error. */
+  correct: () => void;
 }
 
 /**
@@ -353,6 +359,27 @@ function actions(
     // this goes to the booking with the dialog open rather than drawing a
     // second cancellation here — one plan, one confirmation, one place.
     if (action.label === "Cancel") return control("btn", `${action.label}…`, acts.cancel);
+
+    // **The owner's N1, ruled 2026-09-24.** An ellipsis, because it opens a
+    // dialog: a no-show forfeits a night and is not a cancellation, and the
+    // desk sees the forfeit before it is recorded. The service offers this
+    // only once the arrival day has passed (`NoShowRule`) — a stay arriving
+    // today is not a no-show at four in the afternoon.
+    if (action.label === "Nobody came") {
+      return control("btn", `${action.label}…`, acts.noShow);
+    }
+
+    // **The owner's C1.** A departure recorded in error, put right — the
+    // departure is kept and the correction recorded beside it.
+    if (action.label === "Correct") return control("btn", `${action.label}…`, acts.correct);
+
+    // **`Reinstate` is NOT wired, and this is a reported divergence rather
+    // than an oversight.** N1's end state draws `Reinstate…` as a live button
+    // and NO FRAME DRAWS THE DIALOG BEHIND IT. `CorrectAsync` and the plan
+    // read both handle it; what is missing is the design. Composing a title
+    // and a confirm label here would ship an application design the owner has
+    // not seen, and it would read as approved to whoever found it next — so
+    // it falls through to the unavailable form below, which says so.
 
     return unavailable("btn", action.label,
       "This action is not available from this screen yet.");

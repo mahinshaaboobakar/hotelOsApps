@@ -68,6 +68,8 @@ import { assignRoom } from "./screens/assign";
 import { registrationCard } from "./screens/registration";
 import { walkIn } from "./screens/walkin";
 import { stay } from "./screens/stay";
+import { correctDialog } from "./screens/stay/correct";
+import { nobodyCameDialog } from "./screens/stay/nobody-came";
 import { today } from "./screens/today";
 
 /**
@@ -128,7 +130,8 @@ interface Place {
    * 10 draws the day behind the walk-in sheet and frame 8 draws the booking's
    * stays behind the cancellation.
    */
-  overlay: "walkin" | "cancel" | "registration" | "assign" | null;
+  overlay: "walkin" | "cancel" | "registration" | "assign"
+    | "nobodyCame" | "correct" | null;
 
   /**
    * Which page of the list, 0-based.
@@ -295,6 +298,46 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         );
       }
 
+      if (where.overlay === "nobodyCame" || where.overlay === "correct") {
+        // Reached without a stay is a defect rather than an empty dialog —
+        // every route here comes from one. Nothing was asked of the platform,
+        // so there is no answer to report.
+        if (where.stayId === "") {
+          main.append(sheet({
+            title: where.overlay === "correct" ? "Correct this stay" : "Record a no-show",
+            subtitle: "no stay was chosen",
+            body: [cannot(
+              "No stay was chosen",
+              "Open a stay and act from there. Nothing was asked of the "
+              + "platform here, so there is no answer to report.",
+            )],
+            foot: null,
+            actions: [{ label: "Close", onClick: () => show({ overlay: null }) }],
+            onDismiss: () => show({ overlay: null }),
+          }));
+          return;
+        }
+
+        const open = where.overlay === "correct"
+          ? correctDialog(
+            host, main, where.stayId, host.property,
+            () => show({ overlay: null }),
+            // Recorded: the overlay closes and the screen behind redraws from
+            // the service. It does not patch its own copy — the lifecycle is
+            // the service's, and a client editing its own would be a second
+            // place it is decided.
+            () => show({ overlay: null }),
+          )
+          : nobodyCameDialog(
+            host, main, where.stayId, host.property,
+            () => show({ overlay: null }),
+            () => show({ overlay: null }),
+          );
+
+        void open;
+        return;
+      }
+
       if (where.overlay === "registration") {
         // **Reached without a stay, which is a defect rather than an empty
         // card.** Every route here comes from a stay, and a card drawn without
@@ -425,6 +468,12 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
           // Cancelling is the booking's operation, so this goes to the booking
           // with frame 8's dialog open rather than drawing a second one here.
           cancel: () => void toBooking(where.stayId),
+
+          // The owner's N1 and C1, ruled 2026-09-24. Both open here rather
+          // than elsewhere: the stay is what they are about, and the dialog
+          // reads its own plan so the figure it shows was fetched for it.
+          noShow: () => show({ overlay: "nobodyCame" }),
+          correct: () => show({ overlay: "correct" }),
         },
       ).then(overlay);
       return;

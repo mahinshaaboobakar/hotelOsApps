@@ -1,3 +1,4 @@
+using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.GuestOps.Infrastructure.ReadModels;
@@ -42,7 +43,7 @@ namespace HotelOS.GuestOps.Module;
 /// suite checks, and the reason the predicate names both.
 /// </para>
 /// </remarks>
-public sealed class StayDetailView(GuestOpsDbContext db)
+public sealed class StayDetailView(GuestOpsDbContext db, IBusinessDay businessDay)
 {
     /// <summary>The stay the bundle asked for.</summary>
     public async Task<object?> AnswerAsync(
@@ -89,6 +90,16 @@ public sealed class StayDetailView(GuestOpsDbContext db)
             .OrderByDescending(d => d.RaisedAt)
             .FirstOrDefaultAsync(cancellationToken);
 
+        // **Which day it is at the property, and which day this stay was due.**
+        // Both may be absent and the two absences are different: an arrival
+        // with no established date is a stay nobody can call late, and an
+        // absent operating day is a property whose day the Context Service
+        // could not derive. `NoShowRule` refuses on either, and neither is
+        // defaulted to today.
+        var zone = await businessDay.ZoneAsync(scope, cancellationToken);
+        var today = await businessDay.CurrentAsync(scope, cancellationToken);
+        var arrivedOn = stay.ArrivalAt.DateIn(zone);
+
         return new
         {
             id = stay.Id.ToString(),
@@ -132,7 +143,7 @@ public sealed class StayDetailView(GuestOpsDbContext db)
             // yet (SourceNameTests' remarks), so it says the function instead.
             managedBy = reference is null ? null : "The PMS manages this stay",
 
-            actions = Actions(stay),
+            actions = Actions(stay, arrivedOn, today),
             tabs = Tabs(),
 
             banner = disagreement is null ? null : Banner(disagreement),
@@ -162,9 +173,19 @@ public sealed class StayDetailView(GuestOpsDbContext db)
     /// on a departed stay is a screen that has to be corrected by whoever
     /// presses it.
     /// </remarks>
-    private static object[] Actions(RoomStay stay)
+    private static object[] Actions(RoomStay stay, DateOnly? arrivedOn, DateOnly? today)
         => stay.Lifecycle switch
         {
+            // **`Nobody came` only once the arrival day is over** — the owner's
+            // N2 caption, and `NoShowRule` is the one place that decides it so
+            // this page and the day's list cannot answer differently.
+            StayLifecycle.Booked when NoShowRule.DayHasPassed(arrivedOn, today) =>
+            [
+                new { label = "Check in", danger = false },
+                new { label = "Nobody came", danger = false },
+                new { label = "Cancel", danger = true },
+            ],
+
             StayLifecycle.Booked =>
             [
                 new { label = "Check in", danger = false },
@@ -175,6 +196,21 @@ public sealed class StayDetailView(GuestOpsDbContext db)
             [
                 new { label = "Check out", danger = false },
                 new { label = "Move room", danger = false },
+            ],
+
+            // A departure recorded in error — the owner's C1. The stay is put
+            // back in house and the departure is kept beside the correction.
+            StayLifecycle.Departed =>
+            [
+                new { label = "Correct", danger = false },
+            ],
+
+            // N1's end state. A no-show reinstated is the same operation as a
+            // correction and is labelled for what it does to THIS stay: the
+            // guest did arrive after all.
+            StayLifecycle.NoShow =>
+            [
+                new { label = "Reinstate", danger = false },
             ],
 
             _ => [],

@@ -31,6 +31,8 @@ const acts: Acts = {
   assign: () => pressed.push("assign"),
   checkOut: () => pressed.push("checkOut"),
   cancel: () => pressed.push("cancel"),
+  noShow: () => pressed.push("noShow"),
+  correct: () => pressed.push("correct"),
 };
 
 function host(page: StayPage): HostApi {
@@ -122,16 +124,72 @@ describe("frame 3's header actions", () => {
     expect(pressed).toEqual(["register", "assign"]);
   });
 
-  it("offers no No-show and no Correct, because no frame draws them", async () => {
+  it("offers Nobody came… once the arrival day has passed", async () => {
+    // The SERVICE decides whether to offer it — `NoShowRule`, so this page and
+    // the day's list cannot answer differently. The screen's job is to draw
+    // what arrives, with the ellipsis that says it opens something.
+    const late: StayPage = {
+      ...recordedStay,
+      actions: [
+        { label: "Check in", danger: false },
+        { label: "Nobody came", danger: false },
+        { label: "Cancel", danger: true },
+      ],
+    };
+
+    const into = await drawn(late);
+    expect(labels(into)).toContain("Nobody came…");
+
+    button(into, "Nobody came…").click();
+    expect(pressed).toEqual(["noShow"]);
+  });
+
+  it("does not offer it on a stay whose day has not passed", async () => {
+    // The same screen, the same code, and the action absent — because the
+    // service did not send it. A stay arriving today is not a no-show at four
+    // in the afternoon, and a screen that added the button from the lifecycle
+    // alone would be a second opinion about the business day.
     const into = await drawn(booked);
     const offered = labels(into);
 
-    // The service can do both — `RecordNoShowAsync` and `CorrectAsync` — and
-    // inventing the control would be richer than the approved design. The
-    // affordance is a question for the owner, drawn.
-    expect(offered).not.toContain("No-show");
-    expect(offered).not.toContain("Correct");
-    expect(offered).not.toContain("Mark as no-show");
+    expect(offered).not.toContain("Nobody came…");
+    expect(offered).not.toContain("Nobody came");
+  });
+
+  it("opens the correction from a departed stay", async () => {
+    const departed: StayPage = {
+      ...recordedStay,
+      actions: [{ label: "Correct", danger: false }],
+    };
+
+    const into = await drawn(departed);
+    expect(labels(into)).toContain("Correct…");
+
+    button(into, "Correct…").click();
+    expect(pressed).toEqual(["correct"]);
+  });
+
+  it("draws Reinstate OFF, because no frame draws the dialog behind it", async () => {
+    // **A reported divergence from an approved frame, asserted so it cannot be
+    // quietly closed either way.** N1's end state draws `Reinstate…` live;
+    // `CorrectAsync` and the plan read both handle it. What is missing is the
+    // DESIGN — no frame draws what the dialog asks — and composing a title
+    // here would ship an application design the owner has not seen, which
+    // would read as approved to whoever found it next.
+    //
+    // So it falls through to the unavailable form, which says so. When the
+    // owner rules on the dialog, this test is what has to be argued with.
+    const noShow: StayPage = {
+      ...recordedStay,
+      actions: [{ label: "Reinstate", danger: false }],
+    };
+
+    const into = await drawn(noShow);
+    const control = button(into, "Reinstate");
+
+    expect(control.disabled).toBe(true);
+    expect(control.title).not.toBe("");
+    expect(pressed).toEqual([]);
   });
 
   it("still draws an unmapped action off, with a reason", async () => {

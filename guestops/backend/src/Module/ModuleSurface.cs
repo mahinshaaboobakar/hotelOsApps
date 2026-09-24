@@ -219,6 +219,16 @@ public static class ModuleSurface
             "cancelPlan" => services.GetRequiredService<CancelPlanView>()
                 .AnswerAsync(request.Scope, Booking(request.Body), cancellationToken),
 
+            // **A plan is a read, and these two are for the same reason
+            // `cancelPlan` is.** They name a forfeit and a consequence and
+            // write nothing, so a person who may look at a stay may see what
+            // the action would do. Only the buttons need `stay.override`.
+            "noShowPlan" => services.GetRequiredService<NoShowPlanView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
+            "correctPlan" => services.GetRequiredService<CorrectPlanView>()
+                .AnswerAsync(request.Scope, Stay(request.Body), cancellationToken),
+
             "availability" => Availability(services, request, cancellationToken),
 
             // **The read the walk-in sheet could not be completed without.**
