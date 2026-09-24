@@ -230,7 +230,39 @@ public static class OhipBusinessEventQueue
 /// <param name="DedupeKey">
 /// What this item is, across redeliveries — ADR 0246, <c>CONN-Q51</c> A1.
 /// <see cref="OhipBusinessEventQueue.KeyOf"/> decides it, and it is never
-/// empty: an empty key is the connector not having said, which the Hub is
-/// required to treat as no key at all.
+/// empty: an empty key is a Connector Protocol contract failure, and ADR 0248
+/// quarantines the payload rather than storing it with a sentinel or a
+/// Hub-built hash.
 /// </param>
+/// <remarks>
+/// <para>
+/// <b>There is deliberately no guard refusing an empty key here, and the
+/// absence is the decision</b> — recorded at <c>93a67aae</c> so it is not read
+/// as an oversight. The house pattern would make the bad state inexpressible:
+/// validate in this constructor, and an unkeyed event cannot be built.
+/// </para>
+/// <para>
+/// <b>It is the wrong instrument on this path.</b> A <c>DrainedEvent</c> is
+/// constructed <i>after</i> its bytes have left OHIP's queue, and reading that
+/// queue deletes them — so a guard that threw here would discard a page the
+/// source no longer holds, to refuse a state this code cannot currently
+/// reach. That trades an irreversible loss for an impossible one, against a
+/// file whose whole argument is that nothing taken may be dropped.
+/// </para>
+/// <para>
+/// <b>The rule it is an instance of:</b> where a guard would sit downstream of
+/// an irreversible read, it belongs upstream of the read or nowhere. ADR 0248
+/// is the same reasoning one layer up — an unkeyable payload is quarantined,
+/// never discarded.
+/// </para>
+/// <para>
+/// <b>What holds the property instead</b> is that there is one construction
+/// site, <see cref="OhipBusinessEventQueue.KeyOf"/> returns a non-empty string
+/// on both of its branches, and two tests cover it: one that no drained item
+/// carries an empty key, and one that the key survives onto
+/// <c>DrainedPayload</c>. A second construction site added later would be
+/// covered by neither, which is the exposure this note leaves open rather than
+/// closes.
+/// </para>
+/// </remarks>
 public sealed record DrainedEvent(byte[] Payload, string PayloadKind, string DedupeKey);
