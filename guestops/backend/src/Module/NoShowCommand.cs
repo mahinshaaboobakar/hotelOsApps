@@ -13,9 +13,26 @@ namespace HotelOS.GuestOps.Module;
 /// The guest did not arrive and did not cancel, and the two have different
 /// commercial consequences — which is why this is its own transition rather
 /// than <c>CancelCommand</c> with a different reason. The drawn end state
-/// keeps both readable: the state reads <i>No-show</i>, the source reads
-/// <i>yours</i> rather than the PMS's, and the forfeited night is recorded
-/// without being charged.
+/// keeps both readable: the state reads <i>No-show</i> and the source reads
+/// <i>yours</i> rather than the PMS's.
+/// </para>
+/// <para>
+/// <b>NOTHING HERE FORFEITS ANYTHING, and this paragraph said it did.</b> It
+/// read <i>"the forfeited night is recorded without being charged"</i>.
+/// <c>RecordNoShowAsync</c> moves the lifecycle, records the override and
+/// publishes <c>stay.no_show</c> carrying the two ids and the business date —
+/// no amount, no forfeit row, nothing a later reader could total. The figure
+/// the dialog shows is read from the booking's own
+/// <c>CommercialTerms.PenaltyAmount</c>: it is <b>what the terms SAY is
+/// forfeited</b>, not something this transition applies.
+/// </para>
+/// <para>
+/// Kept as a correction rather than deleted, because the false version is the
+/// reading a person arrives at from the screen: the dialog says
+/// <i>Forfeited</i> over an amount, and nothing on it says the platform does
+/// not charge — the clause frame 8's cancellation carries and this one does
+/// not. That is a finding against the approved copy rather than something to
+/// fix here.
 /// </para>
 /// <para>
 /// <b>The service decides whether the stay could have been one.</b>
