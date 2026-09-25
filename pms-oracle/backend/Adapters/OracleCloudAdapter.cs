@@ -79,7 +79,8 @@ public sealed class OracleCloudAdapter(
     IntegrationSettings settings,
     IOhipQueue queue,
     IOhipGuarantees guarantees,
-    HttpClient http)
+    HttpClient http,
+    int minorUnitDigits)
     : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
     /// <summary>A reservation as OHIP returns it.</summary>
@@ -99,12 +100,45 @@ public sealed class OracleCloudAdapter(
 
     /// <summary>A business-event notification, stored before anything is fetched.</summary>
     /// <remarks>
+    /// <para>
     /// Stored in its own right rather than consumed in passing. The reference
     /// dropped every notification whose module it did not read, which is why
     /// nobody can now say what else OHIP emits; storing first keeps the
     /// question answerable.
+    /// </para>
+    /// <para>
+    /// <b>The identifier is not spelled here.</b> It read
+    /// <c>"ohip-business-event"</c> until ADR 0272, which is the same string
+    /// <see cref="OhipBusinessEventQueue.EventPayload"/> declares — one kind
+    /// with two homes, and a payload kind is the connector's, with code free
+    /// to consume the identifier and forbidden to <i>"establish a competing
+    /// authoritative list"</i>. The queue is the home because it is the only
+    /// thing that produces a payload of this kind; this is the retired seam
+    /// (<c>CONN-Q42</c>).
+    /// </para>
+    /// <para>
+    /// <b>The final home is the signed declaration, and it now exists.</b>
+    /// This said the field did not — true when written, and false since
+    /// <c>1bcf873b</c> added <c>implements</c> and <c>payload_kinds</c> to
+    /// <c>manifest/integrations.rs</c>. <c>manifest.yaml</c> declares this kind
+    /// under <c>oracle-cloud</c>, validation refuses an integration that
+    /// declares none, and
+    /// <c>the_manifest_and_the_code_declare_the_same_payload_kinds</c> asserts
+    /// these constants against it. So the constant is a reference to a declared
+    /// identifier rather than a vocabulary of its own, which is what ADR 0272
+    /// asks of connector code.
+    /// </para>
+    /// <para>
+    /// <b>Cited to ADR 0272, not ADR 0264.</b> 0264 ruled one vocabulary on a
+    /// reading that collapsed the platform's capability kinds (<c>drain</c>,
+    /// <c>dedupe_key</c>) into the connector's payload kinds; ADR 0271
+    /// established three vocabularies with three owners — those two and the
+    /// manifest's existing <c>capabilities</c>, which are the Hub's — and 0272
+    /// supersedes 0264 as the single current statement. The change here is the
+    /// half that holds under all three: one producer, one home.
+    /// </para>
     /// </remarks>
-    public const string NotificationPayload = "ohip-business-event";
+    public const string NotificationPayload = OhipBusinessEventQueue.EventPayload;
 
     private static readonly JsonSerializerOptions Json =
         new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
@@ -290,6 +324,20 @@ public sealed class OracleCloudAdapter(
 
         if (payloadKind == NotificationPayload)
         {
+            // **This branch reads a shape no producer emits, and sharing the
+            // identifier above does not make it agree with one.**
+            // `BusinessEventNotification` is flat — `EventId`, `ModuleName` —
+            // and the only thing that produces a payload of this kind is
+            // `OhipBusinessEventQueue`, which emits OHIP's nested item
+            // (`businessEventId.id`). On real bytes every field here reads
+            // null, so the malformed arm below returns a fresh v7 per
+            // delivery: a key stable across nothing.
+            //
+            // Not repaired here. `IOhipQueue` has no implementation and
+            // `ConnectorHost` composes no adapters, so this cannot run; and
+            // `CONN-Q42` retires this seam rather than mending it. The drain
+            // path keys its own payloads from the wire shape
+            // (`OhipBusinessEventQueue.KeyOf`), which is what the Hub receives.
             var notification = Read<BusinessEventNotification>(payload);
             return string.IsNullOrWhiteSpace(notification?.EventId)
                 // A notification with no id is malformed and `Validate` will
@@ -312,7 +360,7 @@ public sealed class OracleCloudAdapter(
                 .Normalise(Read<OhipHousekeepingRoom>(payload)!)),
 
         ReservationPayload => OutcomeMapping.ToPayload(
-            new CloudNormaliser(settings).Normalise(Read<OhipReservation>(payload)!)),
+            new CloudNormaliser(settings, minorUnitDigits).Normalise(Read<OhipReservation>(payload)!)),
 
         // **A guarantee produces no fact here, and this is not the
         // notification's reason.** A notification is provenance; a guarantee is

@@ -3,6 +3,7 @@ using PmsOracle.Integrations.OnSite;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
 using Xunit;
+using static PmsOracle.Tests.TestExponent;
 
 namespace PmsOracle.Tests;
 
@@ -24,7 +25,8 @@ public sealed class OnSiteNormaliserTests
             // Nobody has declared a maximum — ADR 0150. On-site produces no
             // retirable fact at all, so the value is beside the point here and
             // stating `null` is still the honest answer.
-            GuaranteeMaximumFreshness: null));
+            GuaranteeMaximumFreshness: null),
+            MinorUnits);
 
     private static OnSitePush Booking() => new()
     {

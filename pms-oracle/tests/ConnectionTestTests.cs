@@ -9,6 +9,7 @@ using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
 using Xunit;
+using static PmsOracle.Tests.TestExponent;
 
 namespace PmsOracle.Tests;
 
@@ -36,7 +37,8 @@ public sealed class ConnectionTestTests
                 GuaranteeMaximumFreshness: null),
             new NeverDrains(),
             new NeverFetches(),
-            new HttpClient(new Answers(answers)) { Timeout = TimeSpan.FromSeconds(5) });
+            new HttpClient(new Answers(answers)) { Timeout = TimeSpan.FromSeconds(5) },
+            MinorUnits);
 
     private static Dictionary<string, string> Complete() => new()
     {
@@ -165,7 +167,7 @@ public sealed class ConnectionTestTests
         var handler = new Answers(HttpStatusCode.OK);
 
         var adapter = new OracleCloudAdapter(
-            Settings(), new NeverDrains(), new NeverFetches(), new HttpClient(handler));
+            Settings(), new NeverDrains(), new NeverFetches(), new HttpClient(handler), MinorUnits);
 
         var found = await adapter.TestAsync(Complete(), Only("application-key"), default);
 

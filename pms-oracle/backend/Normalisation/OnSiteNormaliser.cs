@@ -44,9 +44,27 @@ public sealed class OnSiteNormaliser
 
     private readonly IntegrationSettings _settings;
 
+    private readonly int _minorUnitDigits;
+
     /// <summary>Construct for one configured integration.</summary>
     /// <param name="settings">That integration's identity and property configuration.</param>
-    public OnSiteNormaliser(IntegrationSettings settings) => _settings = settings;
+    /// <param name="minorUnitDigits">
+    /// The exponent for <see cref="IntegrationSettings.Currency"/>, resolved by
+    /// the caller from the platform's currency authority — ADR 0217.
+    /// </param>
+    /// <remarks>
+    /// <b>This is the constructor the joined path builds too</b>
+    /// (<c>OracleOnSiteAdapter.NormaliseJoined</c>), which is why the exponent
+    /// is required here rather than defaulted in the reader: a threading that
+    /// reached only the dispatch table would leave a two-part stay scaling by a
+    /// stale exponent while every other path resolved — silent, and only on the
+    /// joined path.
+    /// </remarks>
+    public OnSiteNormaliser(IntegrationSettings settings, int minorUnitDigits)
+    {
+        _settings = settings;
+        _minorUnitDigits = minorUnitDigits;
+    }
 
     /// <summary>Normalise one message.</summary>
     /// <param name="push">The message as it arrived.</param>
@@ -159,7 +177,8 @@ public sealed class OnSiteNormaliser
         // defect with one — and on a screen they are the same silence. Nothing
         // in this connector could tell them apart afterwards, so the one that
         // is permanent is written down where the mapping happens.
-        var amount = AmountReading.Read(push.Amount, _settings.Currency, _settings.AmountTaxBasis);
+        var amount = AmountReading.Read(
+            push.Amount, _settings.Currency, _settings.AmountTaxBasis, _minorUnitDigits);
         if (amount is not null)
         {
             fact.TotalAmount = amount;

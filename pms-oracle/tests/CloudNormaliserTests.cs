@@ -2,6 +2,7 @@ using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
 using Xunit;
+using static PmsOracle.Tests.TestExponent;
 
 namespace PmsOracle.Tests;
 
@@ -25,7 +26,8 @@ public sealed class CloudNormaliserTests
             // value, because a fixture that supplied one would make every test
             // in this file a test of the declared case, and the undeclared one
             // is what a property has before anybody configures it.
-            GuaranteeMaximumFreshness: null));
+            GuaranteeMaximumFreshness: null),
+            MinorUnits);
 
     private static OhipReservation Reservation(string status) => new(
         ReservationIdList: [new OhipIdentifier("R-88214", "Reservation")],

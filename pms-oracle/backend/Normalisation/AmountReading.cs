@@ -36,18 +36,38 @@ public static class AmountReading
     /// <param name="sourceValue">The amount as the source sent it, e.g. <c>"18400.00"</c>.</param>
     /// <param name="currency">The property's ISO 4217 currency.</param>
     /// <param name="basis">What this integration's source means by the number.</param>
-    /// <param name="minorUnitDigits">Digits after the point in <paramref name="currency"/> — 2 for most.</param>
+    /// <param name="minorUnitDigits">
+    /// Digits after the point in <paramref name="currency"/>, from the
+    /// platform's currency authority — never chosen here.
+    /// </param>
     /// <returns>The money, or <c>null</c> when the value or its configuration cannot support one.</returns>
     /// <remarks>
+    /// <para>
     /// Invariant culture, deliberately: the wire is not a person's locale, and
     /// a decimal read under a comma-separator culture is a value silently
     /// multiplied or divided by a thousand.
+    /// </para>
+    /// <para>
+    /// <b>No default, and the default is what this replaces.</b> The parameter
+    /// read <c>= 2</c> with its own documentation saying <i>"2 for most"</i>,
+    /// and both callers omitted it — so every amount in a currency with a
+    /// different exponent was silently scaled by 100, in the direction nobody
+    /// would notice until a reconciliation. ADR 0217 rules the exponent is
+    /// Reference Data, <i>not inferred from the property's configured</i>
+    /// anything, and a default is the strongest form of inferring it: a value
+    /// somebody set, for every currency at once, invisibly.
+    /// </para>
+    /// <para>
+    /// Required rather than validated, so a caller cannot express the omission
+    /// and the compiler names every site instead of the author remembering
+    /// them.
+    /// </para>
     /// </remarks>
     public static Money? Read(
         string? sourceValue,
         string currency,
         TaxBasis basis,
-        int minorUnitDigits = 2)
+        int minorUnitDigits)
     {
         if (string.IsNullOrWhiteSpace(sourceValue) || string.IsNullOrWhiteSpace(currency))
         {

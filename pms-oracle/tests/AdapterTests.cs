@@ -5,6 +5,7 @@ using PmsOracle.Adapters;
 using PmsOracle.Integrations.Cloud;
 using PmsOracle.Normalisation;
 using Xunit;
+using static PmsOracle.Tests.TestExponent;
 
 namespace PmsOracle.Tests;
 
@@ -37,9 +38,9 @@ public sealed class AdapterTests
             ["oracle-cloud", "oracle-onpremise", "oracle-web"],
             new string[]
             {
-                new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient()).IntegrationId,
-                new OracleOnSiteAdapter(OnPremise).IntegrationId,
-                new OracleOnSiteAdapter(Web).IntegrationId,
+                new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits).IntegrationId,
+                new OracleOnSiteAdapter(OnPremise, MinorUnits).IntegrationId,
+                new OracleOnSiteAdapter(Web, MinorUnits).IntegrationId,
             });
     }
 
@@ -49,11 +50,11 @@ public sealed class AdapterTests
         // A type test, which is what makes "does this poll?" answerable without
         // calling it — the reason the seams are three interfaces rather than
         // one with methods most implementers throw from.
-        Assert.IsAssignableFrom<IPollingConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient()));
-        Assert.IsNotAssignableFrom<IJoiningConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient()));
+        Assert.IsAssignableFrom<IPollingConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits));
+        Assert.IsNotAssignableFrom<IJoiningConnector>(new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits));
 
-        Assert.IsAssignableFrom<IJoiningConnector>(new OracleOnSiteAdapter(OnPremise));
-        Assert.IsNotAssignableFrom<IPollingConnector>(new OracleOnSiteAdapter(OnPremise));
+        Assert.IsAssignableFrom<IJoiningConnector>(new OracleOnSiteAdapter(OnPremise, MinorUnits));
+        Assert.IsNotAssignableFrom<IPollingConnector>(new OracleOnSiteAdapter(OnPremise, MinorUnits));
     }
 
     // -------------------------------------------------------------------------
@@ -63,7 +64,7 @@ public sealed class AdapterTests
     [Fact]
     public void An_unparseable_body_is_rejected_with_what_the_parser_said()
     {
-        var result = new OracleOnSiteAdapter(OnPremise)
+        var result = new OracleOnSiteAdapter(OnPremise, MinorUnits)
             .Validate(Bytes("<html>not json</html>"), OracleOnSiteAdapter.StayPayload);
 
         Assert.Equal(InboxOutcome.Rejected, result.Outcome);
@@ -77,7 +78,7 @@ public sealed class AdapterTests
     [Fact]
     public void A_message_kind_this_connector_does_not_serve_is_rejected()
     {
-        var result = new OracleOnSiteAdapter(Web).Validate(Bytes("{}"), "something-else");
+        var result = new OracleOnSiteAdapter(Web, MinorUnits).Validate(Bytes("{}"), "something-else");
 
         Assert.Equal(InboxOutcome.Rejected, result.Outcome);
         Assert.Equal("payload_kind", result.Field);
@@ -91,7 +92,7 @@ public sealed class AdapterTests
     [Fact]
     public void The_cloud_flavour_keys_a_notification_on_its_own_event_id()
     {
-        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient());
+        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits);
         var body = Bytes("""{"eventId":"evt-1","moduleName":"Reservation"}""");
 
         Assert.Equal(
@@ -102,7 +103,7 @@ public sealed class AdapterTests
     [Fact]
     public void A_notification_with_no_id_gets_a_key_that_cannot_collide()
     {
-        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient());
+        var adapter = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits);
         var body = Bytes("""{"moduleName":"Reservation"}""");
 
         var first = adapter.DedupeKey(body, OracleCloudAdapter.NotificationPayload);
@@ -117,7 +118,7 @@ public sealed class AdapterTests
     [Fact]
     public void The_on_site_flavours_key_on_the_bytes_because_that_is_all_they_promise()
     {
-        var adapter = new OracleOnSiteAdapter(OnPremise);
+        var adapter = new OracleOnSiteAdapter(OnPremise, MinorUnits);
         var body = Bytes("""{"status":"CHECKEDIN"}""");
 
         // Stable across redeliveries of the same bytes, and different for
@@ -136,7 +137,7 @@ public sealed class AdapterTests
     [Fact]
     public void The_message_kind_is_part_of_the_key()
     {
-        var adapter = new OracleOnSiteAdapter(OnPremise);
+        var adapter = new OracleOnSiteAdapter(OnPremise, MinorUnits);
         var body = Bytes("{}");
 
         // Two different messages that happen to be byte-identical are two
@@ -154,7 +155,7 @@ public sealed class AdapterTests
     [Fact]
     public void A_business_event_notification_produces_no_fact_and_is_not_a_failure()
     {
-        var result = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient())
+        var result = new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits)
             .Normalise(
                 Bytes("""{"eventId":"evt-1","moduleName":"Reservation"}"""),
                 OracleCloudAdapter.NotificationPayload);

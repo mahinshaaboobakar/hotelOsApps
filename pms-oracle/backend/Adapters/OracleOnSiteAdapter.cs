@@ -33,7 +33,7 @@ namespace PmsOracle.Adapters;
 /// is defined; the window is declared here and enforced by the Hub.
 /// </para>
 /// </remarks>
-public sealed class OracleOnSiteAdapter(IntegrationSettings settings)
+public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int minorUnitDigits)
     : IConnectorAdapter, IJoiningConnector
 {
     /// <summary>A stay message from the agent.</summary>
@@ -101,7 +101,7 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings)
             ? OutcomeMapping.ToPayload(
                 new RoomStateNormaliser(settings).Normalise(Read<OnSiteRoomStatusPush>(payload)))
             : OutcomeMapping.ToPayload(
-                new OnSiteNormaliser(settings).Normalise(Read<OnSitePush>(payload)));
+                new OnSiteNormaliser(settings, minorUnitDigits).Normalise(Read<OnSitePush>(payload)));
 
     /// <inheritdoc />
     /// <remarks>
@@ -153,7 +153,7 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings)
     /// </remarks>
     public NormalisedPayload NormaliseJoined(IReadOnlyList<JoinedPart> parts)
     {
-        var normaliser = new OnSiteNormaliser(settings);
+        var normaliser = new OnSiteNormaliser(settings, minorUnitDigits);
         var outcome = normaliser.Normalise(Merge(parts));
 
         return OutcomeMapping.ToPayload(outcome);

@@ -35,9 +35,28 @@ public sealed class CloudNormaliser
 
     private readonly IntegrationSettings _settings;
 
+    private readonly int _minorUnitDigits;
+
     /// <summary>Construct for one configured integration.</summary>
     /// <param name="settings">That integration's identity and property configuration.</param>
-    public CloudNormaliser(IntegrationSettings settings) => _settings = settings;
+    /// <param name="minorUnitDigits">
+    /// The exponent for <see cref="IntegrationSettings.Currency"/>, resolved by
+    /// the caller from the platform's currency authority — ADR 0217.
+    /// </param>
+    /// <remarks>
+    /// <b>Required here rather than defaulted in the reader.</b> A normaliser
+    /// is built per message, so requiring the exponent at construction makes an
+    /// unresolved one unbuildable: the compiler names every construction
+    /// instead of the author threading to the ones they remember. That is what
+    /// reaches <c>OracleOnSiteAdapter.NormaliseJoined</c>, which builds its own
+    /// — a dispatch-table-only threading would miss it, and a two-part stay
+    /// would scale by a stale exponent while every other path resolved.
+    /// </remarks>
+    public CloudNormaliser(IntegrationSettings settings, int minorUnitDigits)
+    {
+        _settings = settings;
+        _minorUnitDigits = minorUnitDigits;
+    }
 
     /// <summary>Normalise one fetched reservation.</summary>
     /// <param name="reservation">The document OHIP returned.</param>
@@ -311,7 +330,8 @@ public sealed class CloudNormaliser
             : AmountReading.Read(
                 total.AmountBeforeTax.ToString(CultureInfo.InvariantCulture),
                 _settings.Currency,
-                _settings.AmountTaxBasis);
+                _settings.AmountTaxBasis,
+                _minorUnitDigits);
 
     private static NormalisationOutcome Reject(RejectionReason reason, string field, string? raw) =>
         new NormalisationOutcome.Rejected(reason, field, raw);

@@ -6,6 +6,7 @@ using PmsOracle.Integrations.Cloud;
 using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Normalisation;
 using Xunit;
+using static PmsOracle.Tests.TestExponent;
 
 namespace PmsOracle.Tests;
 
@@ -52,7 +53,7 @@ public sealed class GuaranteeFetchTests
             """);
 
     private static OracleCloudAdapter Adapter(Queue queue, IOhipGuarantees guarantees) =>
-        new(Settings(), queue, guarantees, new HttpClient());
+        new(Settings(), queue, guarantees, new HttpClient(), MinorUnits);
 
     [Fact]
     public async Task the_arrival_date_it_queried_by_is_part_of_the_key()
