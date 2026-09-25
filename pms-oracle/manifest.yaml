@@ -213,10 +213,63 @@ dependencies: []
 # them; the Hub's closed set is keyed on them and it "may only materialize
 # registrations for ids present in the verified signed manifest".
 #
-# **Derived from `backend/Capabilities/PmsOracleCapabilities.cs`, not typed.**
-# The ids, the delivery and the fact kinds are declared once in code, and a
-# fourth place they live is the duplication rule's own target. `accepts_push`
-# follows `ChangeDelivery`; the capability strings are the HUB's --
+# **THIS BLOCK IS HAND-KEPT, AND NOTHING COMPARES IT WITH THE CODE.** That is
+# a measurement, not a design: which side is authoritative is open, below.
+#
+# **This paragraph used to claim the opposite, and claimed a mechanism that did
+# not exist.** It read:
+#
+#     **Derived from `backend/Capabilities/PmsOracleCapabilities.cs`, not
+#     typed.** The ids, the delivery and the fact kinds are declared once in
+#     code, and a fourth place they live is the duplication rule's own target.
+#
+# and the `CONN-Q19` register row recorded the same: *"a script parses them and
+# emits the block, with assertions that fail rather than guess if that file
+# moves."* **No such script has ever existed in either repository** — every
+# reference to `PmsOracleCapabilities` is two adapters, the file itself, this
+# claim, and `CapabilityTests.cs`. The only guard covered `required_secrets`,
+# against a different type. So the ids, `accepts_push` and `delivery` were
+# hand-kept copies with nothing comparing them, under a comment saying they
+# were derived — while the guard's own documentation said, correctly, *"the
+# declaration and the reader are now hand-kept copies."* **Two files in this
+# package disagreeing, and the one a reader arrives at first was the wrong
+# one.**
+#
+# Kept rather than deleted so a live claim can be told from a withdrawn one.
+#
+# **THE GUARD THAT CLOSES THIS IS WRITTEN AND DELIBERATELY NOT LANDED**, on the
+# planner's instruction: it should *"wait for the consolidated vocabulary
+# decision rather than implementing against 0264's old single-vocabulary
+# rule."*
+#
+# ADR 0264 had ruled one vocabulary — *"the signed manifest is the
+# authoritative declaration of integration kinds"* — on a reading that
+# collapsed three lists with three owners:
+#
+#     capability kinds   drain · dedupe_key         the PLATFORM's
+#     payload kinds      ohip-business-event        this CONNECTOR's
+#     capabilities:      bookings · room_state      the HUB's, above
+#
+# ADR 0271 established the three and ADR 0272 supersedes 0264 as the single
+# current statement. A guard asserting the wrong direction would let a rename
+# drag this signed file after it, so it waits rather than guessing which list
+# this block belongs to.
+#
+# **The payload kinds ARE declared here now**, in `payload_kinds:` below, and
+# this paragraph said the opposite until the field landed. It read: *"the
+# payload kinds are NOT declared here, and their absence is not an oversight …
+# but the field does not exist."* True when written — `manifest/integrations.rs`
+# carried seven fields and `deny_unknown_fields` would have refused an eighth —
+# and false since `1bcf873b`, *"ADR 0272 §1–2 / ADR 0274: an integration
+# declares the capability kinds it implements and its own payload kinds"*.
+# `manifest/integrations.rs` accepts `id`, `name`, `capabilities`,
+# `required_secrets`, `accepts_push`, `ingress_authentication` and `delivery`,
+# and nothing else, so declaring a kind set today would be refused by
+# `deny_unknown_fields`. Until it lands the payload kinds have one home in
+# code, `OhipBusinessEventQueue.EventPayload`, which the adapter references
+# rather than restates.
+#
+# `accepts_push` follows `ChangeDelivery`; the capability strings are the HUB's --
 # `InboundPipeline.CapabilityOf` maps room stays to `bookings` and room states
 # to `room_state`, and groups inbox records by exactly that column to compute
 # per-capability health. A connector declaring anything else would declare
@@ -264,6 +317,8 @@ integrations:
     name: "Oracle OPERA Cloud"
     capabilities: [bookings, room_state]
     delivery: polling
+    implements: [test, drain, dedupe_key]
+    payload_kinds: [ohip-business-event, ohip-reservation, ohip-housekeeping-room, ohip-guarantee]
     accepts_push: false
     ingress_authentication: []
     # Exactly the set `OhipCredentials` needs for a password grant, and no more.
@@ -277,6 +332,8 @@ integrations:
     name: "Oracle OPERA on-premise"
     capabilities: [bookings, room_state]
     delivery: push
+    implements: [dedupe_key]
+    payload_kinds: [onsite-stay, onsite-room-status]
     accepts_push: true
     ingress_authentication: [shared-secret]
 
@@ -285,6 +342,8 @@ integrations:
     name: "Oracle OPERA web"
     capabilities: [bookings, room_state]
     delivery: push
+    implements: [dedupe_key]
+    payload_kinds: [onsite-stay, onsite-room-status]
     accepts_push: true
     ingress_authentication: [shared-secret]
 

@@ -1,4 +1,6 @@
+using PmsOracle.Adapters;
 using PmsOracle.Authentication;
+using PmsOracle.Capabilities;
 using Xunit;
 
 namespace PmsOracle.Tests;
@@ -78,6 +80,126 @@ public class ManifestDeclarationTests
     }
 
     /// <summary>
+    /// The manifest is the authority for these three, and the code agrees with
+    /// it — ADR 0248 (d) for <c>delivery</c>, and the id closed set.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The direction was settled before the vocabulary question arose.</b>
+    /// <c>delivery</c> is a manifest field refused at admission when absent
+    /// (<c>DeliveryUndeclared</c>), and the Hub <i>"may only materialize
+    /// registrations for ids present in the verified signed manifest"</i>. So
+    /// this asserts the code against the manifest, never the reverse — a guard
+    /// written the other way round would let a renamed declaration drag the
+    /// signed file after it.
+    /// </para>
+    /// <para>
+    /// <b>This was held back for a reason that did not apply to it.</b> It
+    /// waited on the payload-kind vocabulary question, and it asserts no
+    /// payload kinds — ids, <c>accepts_push</c> and <c>delivery</c> only, all
+    /// manifest-owned by prior ruling. The neighbouring question was open; this
+    /// one never was.
+    /// </para>
+    /// <para>
+    /// <b>What it replaces is a sentence.</b> The manifest said the block was
+    /// <i>"derived from `PmsOracleCapabilities.cs`, not typed"</i> and that
+    /// <i>"a script parses them and emits the block, with assertions that fail
+    /// rather than guess if that file moves."</i> No such script existed in
+    /// either repository, and the only guard here covered `required_secrets`
+    /// against a different type — so the ids, `accepts_push` and `delivery`
+    /// were hand-kept copies with nothing comparing them. This is the
+    /// assertion that sentence promised.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void the_manifest_and_the_code_declare_the_same_three_integrations()
+    {
+        IntegrationCapability[] declared =
+            [PmsOracleCapabilities.Cloud, PmsOracleCapabilities.OnPremise, PmsOracleCapabilities.Web];
+
+        foreach (var capability in declared)
+        {
+            var id = capability.IntegrationId;
+            var push = capability.Delivery is ChangeDelivery.Push;
+
+            Assert.Equal(push, AcceptsPushOf(id));
+
+            // `polling` and `push` are the manifest's spellings of what
+            // `ChangeDelivery` calls `PolledQueue` and `Push` — the wire says
+            // INTEGRATION_DELIVERY_POLLING and a manifest is read by an
+            // administrator. Two vocabularies for one fact is the thing ADR
+            // 0264 forbids, so the mapping is asserted rather than assumed.
+            Assert.Equal(push ? "push" : "polling", DeliveryOf(id));
+        }
+    }
+
+    /// <summary>
+    /// The payload kinds the code uses are the ones the manifest declares —
+    /// ADR 0272 §1, narrowed by ADR 0274.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>This direction, and only this one.</b> A payload kind is the
+    /// connector's, declared in the signed declaration, and code <i>"may
+    /// consume the identifiers and must not establish a competing
+    /// authoritative list"</i>. So the constants are checked against the
+    /// manifest; a guard written the other way round would let a renamed
+    /// constant drag the signed file after it.
+    /// </para>
+    /// <para>
+    /// <b>Not every vocabulary, and that is the narrowing.</b> ADR 0274 counts
+    /// five with three owners: the platform's capability kinds, these payload
+    /// kinds, the Hub's <c>capabilities</c>, and <c>StatusVocabulary</c> and
+    /// <c>IdentifierKinds</c>, which are the external source's and
+    /// observational. The last two are deliberately not asserted here — a list
+    /// recording what a source has been seen to emit cannot live in a signed
+    /// artefact without freezing it or invalidating the signature.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void the_manifest_and_the_code_declare_the_same_payload_kinds()
+    {
+        // Compared as sets, ordered the same way on both sides: the manifest's
+        // order is the author's and carries no meaning, so asserting it would
+        // pin a fact nobody decided.
+        string[] cloud =
+        [
+            OracleCloudAdapter.NotificationPayload,
+            OracleCloudAdapter.ReservationPayload,
+            OracleCloudAdapter.HousekeepingPayload,
+            OracleCloudAdapter.GuaranteePayload,
+        ];
+
+        Assert.Equal(
+            cloud.Order(StringComparer.Ordinal),
+            PayloadKindsOf("oracle-cloud").Order(StringComparer.Ordinal));
+
+        string[] onSite = [OracleOnSiteAdapter.StayPayload, OracleOnSiteAdapter.RoomStatusPayload];
+
+        foreach (var pushed in new[] { "oracle-onpremise", "oracle-web" })
+        {
+            Assert.Equal(
+                onSite.Order(StringComparer.Ordinal),
+                PayloadKindsOf(pushed).Order(StringComparer.Ordinal));
+        }
+    }
+
+    /// <summary>The payload kinds one integration declares.</summary>
+    /// <param name="integrationId">Which integration to read.</param>
+    /// <returns>Its declared kinds, in declaration order.</returns>
+    private static IReadOnlyList<string> PayloadKindsOf(string integrationId)
+    {
+        var value = ScalarOf(integrationId, "payload_kinds");
+
+        Assert.True(
+            value.StartsWith('[') && value.EndsWith(']'),
+            $"`{integrationId}` declares payload_kinds in a form this guard cannot read: {value}");
+
+        return [.. value[1..^1]
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];
+    }
+
+    /// <summary>
     /// The declared secret names for one integration, read from the manifest.
     /// </summary>
     /// <param name="integrationId">Which integration to read.</param>
@@ -124,6 +246,58 @@ public class ManifestDeclarationTests
         }
 
         return [];
+    }
+
+    /// <summary>Whether the manifest says this integration is posted to.</summary>
+    /// <param name="integrationId">Which integration to read.</param>
+    /// <returns>Its declared <c>accepts_push</c>.</returns>
+    private static bool AcceptsPushOf(string integrationId) =>
+        ScalarOf(integrationId, "accepts_push") == "true";
+
+    /// <summary>How the manifest says this integration's changes arrive.</summary>
+    /// <param name="integrationId">Which integration to read.</param>
+    /// <returns>Its declared <c>delivery</c>, verbatim.</returns>
+    private static string DeliveryOf(string integrationId) =>
+        ScalarOf(integrationId, "delivery");
+
+    /// <summary>One scalar key inside one integration's block.</summary>
+    /// <param name="integrationId">Which integration to read.</param>
+    /// <param name="key">The key, without its colon.</param>
+    /// <returns>The value, trimmed.</returns>
+    /// <remarks>
+    /// <b>An absent key throws rather than answering.</b> Returning a default
+    /// would make every assertion above pass the day somebody deleted the line
+    /// — which is the shape this file exists to refuse, and the shape that let
+    /// a claimed derivation go years without one.
+    /// </remarks>
+    private static string ScalarOf(string integrationId, string key)
+    {
+        var lines = File.ReadAllLines(ManifestPath());
+
+        var start = Array.FindIndex(
+            lines, line => line.TrimStart().StartsWith($"- id: {integrationId}", StringComparison.Ordinal));
+
+        Assert.True(start >= 0, $"the manifest declares no integration `{integrationId}`");
+
+        for (var i = start + 1; i < lines.Length; i++)
+        {
+            var line = lines[i].TrimStart();
+
+            if (line.StartsWith("- id:", StringComparison.Ordinal)
+                || (lines[i].Length > 0 && !char.IsWhiteSpace(lines[i][0])))
+            {
+                break;
+            }
+
+            if (line.StartsWith($"{key}:", StringComparison.Ordinal))
+            {
+                return line[(key.Length + 1)..].Trim();
+            }
+        }
+
+        Assert.Fail($"`{integrationId}` declares no `{key}` — ADR 0264 makes the manifest the authority, "
+            + "so a missing declaration is a refusal and not a default");
+        return string.Empty;
     }
 
     /// <summary>The package manifest, found by walking up from the test assembly.</summary>
