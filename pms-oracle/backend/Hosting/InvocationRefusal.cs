@@ -49,11 +49,19 @@ public static class InvocationRefusal
     {
         ArgumentNullException.ThrowIfNull(invocation);
 
-        return ValueTask.FromException<ReadOnlyMemory<byte>>(new NotSupportedException(
+        // **Coded, not prose** — ADR 0272 §2. A `NotSupportedException` reaches
+        // the Hub as `ConnectorFaultCode.Failed`, because
+        // `ConnectorSession.cs:189` maps anything that is not a
+        // `ConnectorFaultException` to it. So a kind this package has never
+        // heard of arrived indistinguishable from a drain that dialled OHIP and
+        // broke: one is the Hub asking for something that does not exist here,
+        // the other is this connector failing at something it does. Opposite
+        // remedies, one code, and nothing on the Hub's side could separate them.
+        return ValueTask.FromException<ReadOnlyMemory<byte>>(new ConnectorFaultException(
+            ConnectorFaultCode.UnsupportedKind,
             $"pms-oracle does not serve the invocation kind '{invocation.Kind}'. It serves " +
-            $"'{HotelOS.Connector.ConnectorProtocolKinds.Test}' and understands " +
-            $"'{HotelOS.Connector.ConnectorProtocolKinds.Drain}'. A kind this package does " +
-            "not know is usually a newer Hub talking to an older connector, so it is refused " +
-            "by name rather than guessed at."));
+            $"'{ConnectorProtocolKinds.Test}' and '{ConnectorProtocolKinds.Drain}'. A kind " +
+            "this package does not know is usually a newer Hub talking to an older connector, " +
+            "so it is refused by name rather than guessed at."));
     }
 }

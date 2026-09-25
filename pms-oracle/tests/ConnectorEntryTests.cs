@@ -99,6 +99,15 @@ public class ConnectorEntryTests
 
         Assert.Equal(ConnectorFrameRole.Fault, answer.Role);
         Assert.Equal("reconcile", answer.Kind);
+
+        // **The code, not only the sentence.** The message was already right
+        // and reached the Hub as `Failed`, because `ConnectorSession` maps
+        // anything that is not a `ConnectorFaultException` to it — so an
+        // unknown kind was indistinguishable from a drain that dialled OHIP
+        // and broke. Asserting the text alone could not have failed on that,
+        // which is why it did not.
+        Assert.Equal(ConnectorFaultCode.UnsupportedKind, answer.FaultCode);
+
         Assert.Contains(
             "does not serve the invocation kind 'reconcile'",
             Encoding.UTF8.GetString(answer.Payload.Span),
