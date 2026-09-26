@@ -2,7 +2,8 @@
  * The two conformance tables, drawn.
  */
 
-import { DRIVE, PART_A, PAGINATION, WIDGETS, WIDGET_CANVAS, WIDGET_FINDING } from "./conformance";
+import { PAGINATION, WIDGETS } from "./conformance";
+import { DRIVE, PART_A, WIDGET_CANVAS, WIDGET_FINDING } from "./measured";
 
 /** Attribute- and text-safe. */
 function escaped(text: string): string {
