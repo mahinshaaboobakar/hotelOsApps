@@ -37,7 +37,12 @@ public sealed class InboundHarness : IAsyncDisposable
         Authorizer = new RecordingAuthorizer();
 
         var matcher = new StayMatcher(db, new StubBusinessDay(new DateOnly(2026, 9, 1)));
-        Inbound = new InboundFactService(db, matcher, Events, clock);
+        // The creation half is its own type since 2026-09-26 (ADR 0036): a fact
+        // about a stay we do NOT hold is a different question from one about a
+        // stay we do, and the harness composes both halves exactly as the
+        // container does.
+        var creator = new InboundStayCreator(db, Events, clock);
+        Inbound = new InboundFactService(db, matcher, creator, Events, clock);
         Reconciliation = new Application.Reconciliation.ReconciliationService(
             db, Authorizer, Events, clock);
     }

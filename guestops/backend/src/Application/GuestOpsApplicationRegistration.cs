@@ -72,6 +72,7 @@ public static class GuestOpsApplicationRegistration
         // .NET subscription surface exists yet, so these are driven by a
         // recorded fact until that lands.
         services.AddScoped<StayMatcher>();
+        services.AddScoped<InboundStayCreator>();
         services.AddScoped<InboundFactService>();
 
         // The event handlers — `EVT-Q4`. Scoped, because each resolves its own

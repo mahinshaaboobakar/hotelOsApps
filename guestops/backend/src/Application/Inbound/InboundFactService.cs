@@ -29,6 +29,7 @@ namespace HotelOS.GuestOps.Application.Inbound;
 public sealed class InboundFactService(
     GuestOpsDbContext db,
     StayMatcher matcher,
+    InboundStayCreator creator,
     IEventAppender events,
     TimeProvider clock)
 {
@@ -63,7 +64,7 @@ public sealed class InboundFactService(
             return InboundOutcome.Held;
         }
 
-        await CreateAsync(scope, fact, cancellationToken);
+        await creator.CreateAsync(scope, fact, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return InboundOutcome.Created;
     }
@@ -173,215 +174,6 @@ public sealed class InboundFactService(
         return InboundOutcome.Disagreed;
     }
 
-    /// <summary>A stay nobody here has seen — created from the fact itself.</summary>
-    /// <remarks>
-    /// <para>
-    /// <b>The stay and its references are minted in one transaction</b> —
-    /// GUEST-Q8. A crash between them would leave a stay nothing could ever
-    /// match again, and the next fact would create a duplicate.
-    /// </para>
-    /// <para>
-    /// <b>A check-out for a stay never seen creates it in <c>Departed</c></b>
-    /// with its arrival absent and an absence recording that nobody observed
-    /// one — R7, and the intermediate states are never invented.
-    /// </para>
-    /// </remarks>
-    private async Task CreateAsync(
-        RequestScope scope, InboundStayFact fact, CancellationToken cancellationToken)
-    {
-        var now = clock.GetUtcNow();
-        var booking = await EnsureBookingAsync(fact, now, cancellationToken);
-
-        var stay = new RoomStay
-        {
-            Id = Guid.CreateVersion7(),
-            BookingId = booking.Id,
-            PropertyId = fact.PropertyId,
-            RoomTypeId = fact.RoomTypeId,
-            CurrentRoomId = fact.RoomId,
-            Lifecycle = fact.Lifecycle,
-            ArrivalAt = fact.Arrival,
-            DepartureAt = fact.Departure,
-            BusinessDate = fact.BusinessDate,
-            WalkIn = fact.WalkIn,
-
-            // The PMS sent it, so the PMS knows it. The flag says who knows,
-            // never how the guest arrived — those are two facts.
-            PmsUnknown = false,
-
-            Origin = RecordOrigin.Pms,
-            CreatedAt = now,
-            Version = 1,
-            Terms = fact.Terms,
-        };
-
-        foreach (var reference in fact.StayRefs)
-        {
-            stay.ExternalRefs.Add(new StayExternalRef
-            {
-                Id = Guid.CreateVersion7(),
-                StayId = stay.Id,
-                IntegrationId = reference.IntegrationId,
-                IdentifierKind = reference.IdentifierKind,
-                ExternalId = reference.ExternalId,
-            });
-        }
-
-        foreach (var absence in fact.Absences)
-        {
-            absence.Id = Guid.CreateVersion7();
-            absence.StayId = stay.Id;
-            absence.RecordedAt = now;
-            stay.Absences.Add(absence);
-        }
-
-        if (fact.RoomId is null)
-        {
-            stay.Absences.Add(Absent(stay.Id, AbsentFields.Assignment, now));
-        }
-
-        if (!fact.Arrival.IsKnown && fact.Lifecycle is StayLifecycle.InHouse or StayLifecycle.Departed)
-        {
-            stay.Absences.Add(Absent(stay.Id, AbsentFields.ArrivalTime, now));
-        }
-
-        // Where the business came from, kept the moment it arrives.
-        //
-        // **A fact not recorded when it arrives is unrecoverable** — the same
-        // argument the walk-in flag makes, applied to the rest of the row. A
-        // channel, an agent reference, a market code and a meal plan are what
-        // every hotel reports on, and no later call can reconstruct what the
-        // PMS said on the night it said it.
-        //
-        // Written even when the source sent no segment, because the party count
-        // is on the same record and a stay always has one.
-        db.Sources.Add(new StaySource
-        {
-            StayId = stay.Id,
-            Channel = fact.Segment.Channel,
-            TravelAgent = fact.Segment.TravelAgent,
-            MarketCode = fact.Segment.MarketCode,
-            MealPlan = fact.Segment.MealPlan,
-            Adults = fact.Segment.Adults,
-            Children = fact.Segment.Children,
-        });
-
-        db.Stays.Add(stay);
-
-        events.Append(scope, "stay.created", "stay", stay.Id, stay.Version, new
-        {
-            stay_id = stay.Id,
-            booking_id = booking.Id,
-            property_id = stay.PropertyId,
-            room_type_id = stay.RoomTypeId,
-            lifecycle = stay.Lifecycle.ToString(),
-            business_date = stay.BusinessDate?.ToString("yyyy-MM-dd"),
-            walk_in = stay.WalkIn,
-            pms_unknown = stay.PmsUnknown,
-        });
-    }
-
-    /// <summary>The group this stay belongs to, found or created.</summary>
-    /// <remarks>
-    /// <b>The expectation is the source's and so is the completeness.</b> A
-    /// source that says three rooms and sends one is telling us the group is
-    /// incomplete, which is a fact about the booking rather than arithmetic we
-    /// can do (R9).
-    /// </remarks>
-    private async Task<Booking> EnsureBookingAsync(
-        InboundStayFact fact, DateTimeOffset now, CancellationToken cancellationToken)
-    {
-        foreach (var reference in fact.BookingRefs)
-        {
-            var existing = await db.BookingExternalRefs
-                .Where(r => r.IntegrationId == reference.IntegrationId
-                            && r.IdentifierKind == reference.IdentifierKind
-                            && r.ExternalId == reference.ExternalId)
-                .Select(r => r.Booking!)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (existing is not null)
-            {
-                // A later sibling arriving tells us more about the group than
-                // the first one did — R9's "three expected" becoming known.
-                existing.ExpectedStayCount ??= fact.ExpectedStayCount;
-                existing.IsComplete ??= fact.IsComplete;
-                return existing;
-            }
-        }
-
-        var booking = new Booking
-        {
-            Id = Guid.CreateVersion7(),
-            PropertyId = fact.PropertyId,
-            ExpectedStayCount = fact.ExpectedStayCount,
-            IsComplete = fact.IsComplete,
-            Origin = RecordOrigin.Pms,
-            CreatedAt = now,
-            Version = 1,
-        };
-
-        foreach (var reference in fact.BookingRefs)
-        {
-            booking.ExternalRefs.Add(new BookingExternalRef
-            {
-                Id = Guid.CreateVersion7(),
-                BookingId = booking.Id,
-                IntegrationId = reference.IntegrationId,
-                IdentifierKind = reference.IdentifierKind,
-                ExternalId = reference.ExternalId,
-            });
-        }
-
-        db.Bookings.Add(booking);
-        return booking;
-    }
-
-    /// <summary>Hold the fact and propose the join — never decide it.</summary>
-    private async Task HoldAsync(
-        InboundStayFact fact,
-        IReadOnlyList<RoomStay> candidates,
-        CancellationToken cancellationToken)
-    {
-        var now = clock.GetUtcNow();
-
-        var held = new HeldFact
-        {
-            Id = Guid.CreateVersion7(),
-            PropertyId = fact.PropertyId,
-            IntegrationId = fact.IntegrationId,
-            Payload = JsonSerializer.Serialize(fact),
-            Lifecycle = fact.Lifecycle,
-            Reason = HeldReason.CandidateLink,
-            ReceivedAt = now,
-        };
-
-        db.HeldFacts.Add(held);
-
-        var incoming = fact.Guests.FirstOrDefault()?.NameAsGiven;
-
-        foreach (var candidate in candidates)
-        {
-            var name = await db.Party
-                .Where(p => p.StayId == candidate.Id)
-                .Select(p => p.Guest!.NameAsGiven)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            db.LinkCandidates.Add(new StayLinkCandidate
-            {
-                Id = Guid.CreateVersion7(),
-                LocalStayId = candidate.Id,
-                HeldFactId = held.Id,
-
-                // Ranks the list a person reads. It joins nothing, and no
-                // threshold anywhere turns it into a decision.
-                RankScore = StayMatcher.Similarity(name, incoming),
-                State = CandidateState.Proposed,
-                RaisedAt = now,
-            });
-        }
-    }
-
     private void Move(RequestScope scope, RoomStay stay, InboundStayFact fact)
     {
         stay.Lifecycle = fact.Lifecycle;
@@ -444,13 +236,43 @@ public sealed class InboundFactService(
         });
     }
 
-    private static StayAbsence Absent(Guid stayId, string field, DateTimeOffset now)
-        => new()
+
+    /// <summary>Hold the fact and propose the join — never decide it.</summary>
+    private async Task HoldAsync(
+        InboundStayFact fact,
+        IReadOnlyList<RoomStay> candidates,
+        CancellationToken cancellationToken)
+    {
+        var now = clock.GetUtcNow();
+        var held = new HeldFact
         {
             Id = Guid.CreateVersion7(),
-            StayId = stayId,
-            Field = field,
-            Reason = AbsenceReason.NotSupplied,
-            RecordedAt = now,
+            PropertyId = fact.PropertyId,
+            IntegrationId = fact.IntegrationId,
+            Payload = JsonSerializer.Serialize(fact),
+            Lifecycle = fact.Lifecycle,
+            Reason = HeldReason.CandidateLink,
+            ReceivedAt = now,
         };
+        db.HeldFacts.Add(held);
+        var incoming = fact.Guests.FirstOrDefault()?.NameAsGiven;
+        foreach (var candidate in candidates)
+        {
+            var name = await db.Party
+                .Where(p => p.StayId == candidate.Id)
+                .Select(p => p.Guest!.NameAsGiven)
+                .FirstOrDefaultAsync(cancellationToken);
+            db.LinkCandidates.Add(new StayLinkCandidate
+            {
+                Id = Guid.CreateVersion7(),
+                LocalStayId = candidate.Id,
+                HeldFactId = held.Id,
+                // Ranks the list a person reads. It joins nothing, and no
+                // threshold anywhere turns it into a decision.
+                RankScore = StayMatcher.Similarity(name, incoming),
+                State = CandidateState.Proposed,
+                RaisedAt = now,
+            });
+        }
+    }
 }
