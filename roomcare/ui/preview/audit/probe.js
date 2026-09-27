@@ -7,54 +7,27 @@
 // is absent, never PASS — the checklist's own rule ("a line with no entry for a
 // state is not a pass in that state").
 //
+// **Three files, composed by `run.mjs`, none of them a module** — all three are
+// evaluated in the page, so each is a bare function expression:
+//
+//   measure.js     how a rendered page is measured, and how a finding is recorded
+//   probe.js       this file — §2 controls · §3 navigation · §4 · §6 the list and
+//                  the pager · §5 density · §9 overlays · §10 fields
+//   cannotread.js  §13, a screen that cannot read — X1–X14
+//
 // Roles are Room Care's, stated once here and in the report, because D2–D4 name
 // ROLES (§5: "found by the rule that governs them — never by replacing a figure
 // wherever it occurs"):
 //
 //   table header   th                                   .08em      L2 · D2
 //   field label    label.lbl                            .07em      F2 · D2
-//   section label  .sect · .card.accent > h3             .04em      D2
+//   section label  .sect · .card.accent > h3            .04em      D2
 //   note text      .note · .legend · .tl .ev span       12px/19.8  D3
 //   quiet text     .tl .ev span (the timeline's date     ink-muted  D4
 //                  and basis line — the ruled case)
-//
-// 64b's own classes (.fail-*) are governed by §13's lines, not by §5's.
-(ctx) => {
-  const lines = {};
-  const record = {};
-  const add = (id, v, why) => (lines[id] ??= []).push({ v, why });
-  const cs = (e) => getComputedStyle(e);
-  const px = (s) => parseFloat(s);
-  const text = (e) => (e.textContent || "").trim().replace(/\s+/g, " ");
-  const name = (e) => {
-    const cls = typeof e.className === "string" && e.className.trim() !== "" ? `.${e.className.trim().split(/\s+/).join(".")}` : "";
-    return `${e.tagName.toLowerCase()}${cls} "${text(e).slice(0, 36)}"`;
-  };
-  const shown = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && cs(e).visibility !== "hidden"; };
-  const all = (sel, root = document) => [...root.querySelectorAll(sel)].filter(shown);
-  const C = {
-    ink: "rgb(232, 235, 244)", muted: "rgb(139, 147, 167)", faint: "rgb(90, 97, 114)", onAccent: "rgb(11, 13, 20)",
-    bad: "rgb(248, 113, 113)", brand: "rgb(129, 140, 248)", warn: "rgb(251, 191, 36)",
-    lineStrong: "rgba(255, 255, 255, 0.14)", line: "rgba(255, 255, 255, 0.07)", none: "rgba(0, 0, 0, 0)",
-  };
-  /** Each failing node once, by what it is — a list of forty identical buttons is one finding with a count. */
-  const judge = (id, nodes, test) => {
-    if (nodes.length === 0) return;
-    const bad = new Map();
-    for (const n of nodes) {
-      const why = test(n);
-      if (why) { const key = `${name(n).replace(/ ".*/, "")}: ${why}`; bad.set(key, (bad.get(key) ?? 0) + 1); }
-    }
-    if (bad.size === 0) add(id, "PASS", `${nodes.length} measured`);
-    for (const [why, n] of bad) add(id, "FAIL", n > 1 ? `${why} (×${n})` : why);
-  };
-  const box = (e, side) => px(cs(e)[`padding${side}`]);
-  const pad = (e) => `${cs(e).paddingTop} ${cs(e).paddingRight} ${cs(e).paddingBottom} ${cs(e).paddingLeft}`;
-  const em = (e) => Math.round((px(cs(e).letterSpacing) / px(cs(e).fontSize)) * 1000) / 1000;
-
-  const body = document.querySelector(".rc .body");
-  const failing = document.querySelector(".fail-body") !== null && !ctx.widgets;
-  record.state = ctx.state;
+(ctx, measure, cannotRead) => {
+  const measured = measure(ctx);
+  const { lines, record, add, cs, px, text, name, shown, all, C, judge, box, pad, em, body, failing } = measured;
 
   // ---------------------------------------------------------------- §2 controls
   const plain = all(".btn").filter((b) => !/\b(pri|sm|chip|pg|danger|off|on)\b/.test(b.className) && b.tagName === "BUTTON");
@@ -370,66 +343,6 @@
     return out.join("; ");
   });
 
-  // ---------------------------------------------------------------- §13 a screen that cannot read
-  if (failing) {
-    const fb = document.querySelector(".fail-body"); const st = fb.querySelector(".fail");
-    const rows = [...document.querySelectorAll(".body td")].filter(shown).length;
-    add("X1", rows === 0 ? "PASS" : "FAIL", rows === 0 ? "the failure is drawn and no row is" : `${rows} cells drawn beside the failure`);
-    const fr = fb.getBoundingClientRect(); const sr = st.getBoundingClientRect();
-    const centred = Math.abs((sr.left + sr.right) / 2 - (fr.left + fr.right) / 2) <= 2 && Math.abs((sr.top + sr.bottom) / 2 - (fr.top + fr.bottom) / 2) <= 2;
-    const wanted = Math.min(560, fr.width * 0.92);
-    add("X2", centred && Math.abs(sr.width - wanted) <= 1 ? "PASS" : "FAIL", `state ${Math.round(sr.width)}px (want ${Math.round(wanted)}), ${centred ? "centred" : "off centre"}`);
-  }
-  const want = { unanswered: C.warn, forbidden: C.muted, unadmitted: C.muted, ungranted: C.muted, undecidable: C.bad, faulted: C.bad };
-  for (const m of all(".fail-mark, .wf-mark")) {
-    const cause = [...m.classList].find((c) => c.startsWith("fail-") && c !== "fail-mark")?.slice(5);
-    const svg = m.querySelector("svg");
-    const out = [];
-    if (svg === null || svg.getAttribute("stroke") !== "currentColor") out.push("no svg stroked currentColor");
-    if (cs(m).color !== want[cause]) out.push(`${cause} drawn ${cs(m).color}`);
-    add("X3", out.length === 0 ? "PASS" : "FAIL", `${m.classList.contains("wf-mark") ? "widget" : "screen"} ${cause}: ${out.length === 0 ? "line glyph, its colour" : out.join("; ")}`);
-  }
-  for (const l of all(".fail-label")) {
-    const s = cs(l); const out = [];
-    if (s.fontSize !== "11px") out.push(s.fontSize);
-    if (Math.abs(em(l) - 0.1) > 0.003) out.push(`${em(l)}em`);
-    if (s.textTransform !== "uppercase") out.push(s.textTransform);
-    if (s.color !== C.faint) out.push(`color ${s.color}`);
-    add("X4", out.length === 0 ? "PASS" : "FAIL", out.length === 0 ? "11px .1em uppercase faint" : out.join("; "));
-    add("X4", "OPEN", `mono stack built as ${s.fontFamily.slice(0, 40)} (64d item 4)`);
-  }
-  for (const n of all(".fail-said")) add("X5", cs(n).fontSize === "19px" && cs(n).fontWeight === "600" ? "PASS" : "FAIL", `${cs(n).fontSize} ${cs(n).fontWeight}`);
-  for (const n of all(".fail-why")) add("X6", cs(n).fontSize === "14px" && cs(n).color === C.muted ? "PASS" : "FAIL", `${cs(n).fontSize} ${cs(n).color === C.muted ? "muted" : cs(n).color}; ${n.querySelectorAll("b").length} emphasised run(s)`);
-  if (failing && ctx.cause) {
-    const acts = [...document.querySelectorAll(".fail-acts button")].map(text);
-    const expect = ctx.cause === "unanswered" ? "retry" : ["faulted", "undecidable"].includes(ctx.cause) ? "copy" : "none";
-    const got = acts.length === 0 ? "none" : acts.some((a) => /try again/i.test(a)) ? "retry" : acts.some((a) => /copy/i.test(a)) ? "copy" : acts.join("/");
-    add("X7", got === expect ? "PASS" : "FAIL", `${ctx.cause}: ${got}${acts.length ? ` ("${acts.join('", "')}")` : ""}`);
-    const btn = document.querySelector(".fail-acts button");
-    if (btn) add("X7", "OPEN", `button fill built as ${btn.className} (64d item 1)`);
-    const dts = [...document.querySelectorAll(".fail-facts dt")].map(text);
-    const permission = document.querySelector(".fail-facts dd b");
-    add("X8", dts.length > 0 && document.querySelector(".fail-facts").tagName === "DL" && permission !== null ? "PASS" : "FAIL", `dl: ${dts.join(" · ")}; permission ${permission ? `set apart "${text(permission)}"` : "not set apart"}`);
-    const at = [...document.querySelectorAll(".fail-facts dt")].find((d) => /at/i.test(text(d)));
-    if (at) add("X8", "OPEN", `the moment built as "${text(at.nextElementSibling)}" (64d item 8)`);
-    const said = text(document.querySelector(".fail") ?? document.body);
-    if (["forbidden", "unadmitted", "ungranted"].includes(ctx.cause)) {
-      const routes = /administrator|ask (your|a|the)|contact|manager|supervisor/i.exec(said);
-      add("X9", routes === null ? "PASS" : "FAIL", routes === null ? `${ctx.cause}: names the grant and stops` : `routes to a person: "${routes[0]}"`);
-    }
-    const namesApp = /Room Care/.test(text(document.querySelector(".fail-said")));
-    const out11 = ctx.cause === "unadmitted" ? (namesApp ? "" : "does not name the application")
-      : ctx.cause === "ungranted" ? (/account/i.test(said) ? "" : "does not name the account")
-      : ctx.cause === "undecidable" ? (/\byou\b|account/i.test(text(document.querySelector(".fail-said"))) ? "names the person" : "") : null;
-    if (out11 !== null) add("X11", out11 === "" ? "PASS" : "FAIL", `${ctx.cause}: "${text(document.querySelector(".fail-said"))}"${out11 ? ` — ${out11}` : ""}`);
-  }
-  if (ctx.widgets) {
-    for (const card of all(".wcard")) {
-      if (card.querySelector("dl") !== null) add("X12", "FAIL", `${name(card)} carries the facts on the card`);
-    }
-    record.X13 = [...new Set(all(".wcard").map((c) => Math.round(c.getBoundingClientRect().height)))];
-    record.X14 = [...new Set(all(".wf-open").map(text))];
-  }
-  record.partial = !failing && document.querySelector(".body .fail-body, .body .fail") !== null;
+  cannotRead(measured);
   return { lines, record };
 }

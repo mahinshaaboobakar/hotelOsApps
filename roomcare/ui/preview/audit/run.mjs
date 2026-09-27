@@ -29,7 +29,13 @@ import { CASES, EXCLUDED } from "./cases.mjs";
 
 const UI = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const OUT = resolve(UI, ".audit");
-const PROBE = readFileSync(join(UI, "preview", "audit", "probe.js"), "utf8");
+// The probe is three files evaluated in the page, none of them a module — `measure.js` holds the
+// vocabulary, `cannotread.js` §13's lines, and `probe.js` the rest. They are composed here rather
+// than imported because a CDP `evaluate` has no module loader.
+const inPage = (file) => readFileSync(join(UI, "preview", "audit", file), "utf8");
+const PROBE = inPage("probe.js");
+const MEASURE = inPage("measure.js");
+const CANNOT_READ = inPage("cannotread.js");
 const UNDRIVEN = "This capture was not driven to its screen";
 
 const only = process.argv[2];
@@ -126,7 +132,7 @@ try {
     if (c.fill) await evaluate(`(() => { for (const f of document.querySelectorAll(".sheet input, .sheet textarea, .dlg input, .dlg textarea")) {
       if (f.type === "checkbox" || f.type === "radio") continue; if (f.value === "") { f.value = "12"; f.dispatchEvent(new Event("input", { bubbles: true })); } } })()`);
     const derived = await evaluate("document.documentElement.getAttribute('data-derived')");
-    const probed = await evaluate(`(${PROBE})(${JSON.stringify({ state: c.state, cause: c.cause ?? null, at: /&at=(\w+)/.exec(c.url)?.[1] ?? null, write: c.write === true, writes: c.writes ?? 0, empty: c.empty ? { primary: c.primary, writes: c.writes, ...c.after } : null, widgets: c.widgets === true })})`);
+    const probed = await evaluate(`(${PROBE})(${JSON.stringify({ state: c.state, cause: c.cause ?? null, at: /&at=(\w+)/.exec(c.url)?.[1] ?? null, write: c.write === true, writes: c.writes ?? 0, empty: c.empty ? { primary: c.primary, writes: c.writes, ...c.after } : null, widgets: c.widgets === true })}, ${MEASURE}, ${CANNOT_READ})`);
     const shot = await send("Page.captureScreenshot", { format: "png" });
     writeFileSync(join(OUT, "shots", `${c.id}.png`), Buffer.from(shot.result.data, "base64"));
     results.push({ id: c.id, surface: c.surface, state: c.state, cause: c.cause ?? null, url: c.url, derived, ...probed });

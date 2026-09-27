@@ -20,9 +20,13 @@ host's own six error kinds, so the SDK's `load` classifies them.
 
 ## How each line was checked
 
-- **Measured** (`preview/audit/probe.js`): computed styles and boxes on the
-  rendered page in headless Edge, one screenshot per case. Placement (§6) is
-  measured, never inferred from CSS text.
+- **Measured** (`preview/audit/probe.js`, with `measure.js` and `cannotread.js`):
+  computed styles and boxes on the rendered page in headless Edge, one
+  screenshot per case. Placement (§6) is measured, never inferred from CSS text.
+  *The probe was three files from 2026-09-27 (ADR 0027 §6) — the vocabulary, the
+  sections, and §13's own lines — composed by `run.mjs` because a page has no
+  module loader. It measures what it measured before, proved by running the whole
+  audit either side of the split and comparing all 249 cases.*
 - **Source walk** (`preview/audit/source.mjs`): the `S` lines, over every
   shipped `.ts` and the backend's projections. It reads the token set and the
   shell's values from HosPilotOS at HEAD. Each detector was run against
