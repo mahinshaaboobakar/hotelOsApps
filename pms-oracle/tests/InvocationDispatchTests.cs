@@ -314,7 +314,7 @@ public class InvocationDispatchTests
             .ToList();
 
         Assert.NotEmpty(kinds);
-        Assert.Superset(InvocationDispatch.Served.ToHashSet(), kinds.ToHashSet());
+        Assert.Superset(InvocationDispatch.ServedKinds.ToHashSet(), kinds.ToHashSet());
 
         // **Three buckets, not two.** `cancel` is a control frame the session
         // consumes, so it never reaches the dispatch as a request and is
@@ -329,7 +329,7 @@ public class InvocationDispatchTests
         {
             var control = await hub.ExchangeAsync(kind, ReadOnlyMemory<byte>.Empty);
 
-            Assert.False(InvocationDispatch.Served.Contains(kind), kind);
+            Assert.False(InvocationDispatch.ServedKinds.Contains(kind), kind);
             Assert.DoesNotContain("does not serve the invocation kind",
                 Encoding.UTF8.GetString(control.Payload.Span), StringComparison.Ordinal);
         }
@@ -348,8 +348,8 @@ public class InvocationDispatchTests
             // The message names the kind: a walk that fails without saying
             // WHICH member disagreed sends the reader back to run it by hand.
             Assert.True(
-                !InvocationDispatch.Served.Contains(kind) == refused,
-                $"'{kind}' — served: {InvocationDispatch.Served.Contains(kind)}, "
+                !InvocationDispatch.ServedKinds.Contains(kind) == refused,
+                $"'{kind}' — served: {InvocationDispatch.ServedKinds.Contains(kind)}, "
                 + $"refused: {refused}");
         }
     }

@@ -55,7 +55,7 @@ public sealed class InvocationDispatch(HttpClient http)
     /// kind absent from here is refused, so the list cannot drift from the
     /// switch in either direction.
     /// </remarks>
-    public static readonly IReadOnlyList<string> Served =
+    public static readonly IReadOnlyList<string> ServedKinds =
     [
         ConnectorProtocolKinds.Test,
         ConnectorProtocolKinds.Drain,
