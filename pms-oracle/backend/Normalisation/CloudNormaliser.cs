@@ -145,6 +145,23 @@ public sealed class CloudNormaliser
                 "minor_unit_digits", "roomStay.total.amountBeforeTax");
         }
 
+        // **The second prerequisite, and it is the same class.** ADR 0266 puts
+        // the tax basis in invocation settings; `AmountReading` refuses an
+        // unspecified one rather than passing it through, so without this the
+        // amount would vanish and the fact would read as a source that sent no
+        // figure. That is the collapse CONN-Q75 was ruled to prevent, arriving
+        // through a different cause.
+        //
+        // Checked after the exponent, so when BOTH are missing the operator is
+        // told about one, fixes it, and is then told about the other. Two
+        // absences, two values, revealed in sequence rather than merged into a
+        // prerequisite nobody could act on.
+        if (stay.Total is not null && _settings.AmountTaxBasis is TaxBasis.Unspecified)
+        {
+            return new NormalisationOutcome.Unresolved(
+                IntegrationSettings.TaxBasisSetting, "roomStay.total.amountBeforeTax");
+        }
+
         var amount = _minorUnitDigits is { } digits ? ReadAmount(stay.Total, digits) : null;
         if (amount is not null)
         {

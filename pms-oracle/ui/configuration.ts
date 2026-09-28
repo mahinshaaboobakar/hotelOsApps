@@ -202,6 +202,17 @@ export const SETTINGS: readonly Setting[] = [
     hint: "900",
     section: "polling",
   },
+  {
+    // ADR 0266: the tax basis is integration-owned and arrives through
+    // invocation settings, not through the property context — the Hub resolves
+    // four property facts and this is not one of them. Free text because a
+    // setting is a string: the Hub's map is opaque to the connector and a typed
+    // choice would need the per-connector schema `CONN-Q9` refused.
+    name: "amountTaxBasis",
+    label: "Amounts include tax",
+    hint: "net or gross",
+    section: "connection",
+  },
   { name: "pollTightFrom", label: "Tighter window from", hint: "14:00", section: "polling" },
   { name: "pollTightUntil", label: "Tighter window until", hint: "16:00", section: "polling" },
 ];

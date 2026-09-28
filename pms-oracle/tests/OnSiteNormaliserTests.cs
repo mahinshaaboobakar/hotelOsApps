@@ -405,6 +405,33 @@ public sealed class OnSiteNormaliserTests
         Assert.Equal("ReservationId", rejected.Field);
     }
 
+    [Fact]
+    public void An_amount_with_no_configured_tax_basis_is_unresolved_and_not_absent()
+    {
+        // ADR 0266's prerequisite, and the same class as the exponent's:
+        // `AmountReading` refuses an unspecified basis rather than passing it
+        // through, so without the guard the total would vanish and the fact
+        // would read as a source that sent no figure.
+        var unresolved = Assert.IsType<NormalisationOutcome.Unresolved>(
+            Kochi(TaxBasis.Unspecified).Normalise(Booking()));
+
+        Assert.Equal(IntegrationSettings.TaxBasisSetting, unresolved.Prerequisite);
+        Assert.Equal("Amount", unresolved.Field);
+    }
+
+    [Fact]
+    public void A_source_that_sent_no_amount_normalises_whatever_the_basis_is()
+    {
+        // **The discriminating half.** These two differ ONLY in whether the
+        // source sent a figure, with the basis unspecified in both — so the
+        // guard cannot be passing by over-reaching into the valid absence it
+        // was written to leave alone.
+        var fact = Assert.IsType<NormalisationOutcome.StayNormalised>(
+            Kochi(TaxBasis.Unspecified).Normalise(Booking() with { Amount = null }));
+
+        Assert.Null(fact.Fact.TotalAmount);
+    }
+
     /// <summary>
     /// A date the normaliser cannot read is never declared half of a check-in.
     /// </summary>

@@ -79,4 +79,53 @@ public sealed record IntegrationSettings(
     PropertyClock Clock,
     string Currency,
     TaxBasis AmountTaxBasis,
-    TimeSpan? GuaranteeMaximumFreshness);
+    TimeSpan? GuaranteeMaximumFreshness)
+{
+    /// <summary>The setting the tax basis arrives in — ADR 0266.</summary>
+    /// <remarks>
+    /// <b>Declared in <c>ui/configuration.ts</c> under the same name</b>, which
+    /// is the duplication this package accepts deliberately: the Hub's settings
+    /// map is opaque to it, so the vocabulary lives on both halves of the
+    /// connector rather than coupling the platform to it (ADR 0128 §7).
+    /// </remarks>
+    public const string TaxBasisSetting = "amountTaxBasis";
+
+    /// <summary>What the property configured, or <c>Unspecified</c>.</summary>
+    /// <param name="settings">This instance's configuration, as the Hub holds it.</param>
+    /// <returns>The basis, or <see cref="TaxBasis.Unspecified"/>.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>Unrecognised reads as unspecified rather than as a guess.</b> An
+    /// amount's basis decides whether a total already includes tax, so reading
+    /// <c>"nett"</c> as net would be a guess about money — and
+    /// <c>AmountReading</c> refuses an unspecified basis rather than passing it
+    /// through, which is where that is enforced.
+    /// </para>
+    /// <para>
+    /// <b>Case-insensitive and ordinal.</b> This is a keyword an operator
+    /// types, not a number or a date, so `NUM-Q4`'s culture question does not
+    /// arise — but a culture-aware comparison would still be wrong here, since
+    /// two properties must read one stored word the same way.
+    /// </para>
+    /// </remarks>
+    public static TaxBasis ReadTaxBasis(IReadOnlyDictionary<string, string> settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        if (!settings.TryGetValue(TaxBasisSetting, out var raw) || raw is null)
+        {
+            return TaxBasis.Unspecified;
+        }
+
+        var stated = raw.Trim();
+
+        if (string.Equals(stated, "net", StringComparison.OrdinalIgnoreCase))
+        {
+            return TaxBasis.Net;
+        }
+
+        return string.Equals(stated, "gross", StringComparison.OrdinalIgnoreCase)
+            ? TaxBasis.Gross
+            : TaxBasis.Unspecified;
+    }
+}
