@@ -1,6 +1,7 @@
 using System.Globalization;
 using Google.Protobuf.WellKnownTypes;
 using HotelOS.Contracts.Integration.V1;
+using HotelOS.Formats;
 using PmsOracle.Integrations.Cloud;
 using PmsOracle.Vocabularies;
 
@@ -31,7 +32,6 @@ public sealed class CloudNormaliser
     private const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.F";
 
     /// <summary>OHIP's date format.</summary>
-    private const string DateFormat = "yyyy-MM-dd";
 
     private readonly IntegrationSettings _settings;
 
@@ -373,12 +373,15 @@ public sealed class CloudNormaliser
         Basis = TimeBasis.Expected,
     };
 
-    private static DateOnly? ReadDate(string? value) =>
-        !string.IsNullOrWhiteSpace(value)
-        && DateOnly.TryParseExact(
-            value, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-            ? parsed
-            : null;
+    /// <summary>The arrival or departure day OHIP sent — <c>2026-09-23</c>.</summary>
+    /// <remarks>
+    /// <b>The platform's reader, not a local one</b> — ADR 0238. OHIP states
+    /// these two as a bare ISO day (R12), which is the platform's own spelling,
+    /// so this is the one place in the connector where the vendor and the
+    /// platform agree about a format and nothing needs mapping. Its timestamps
+    /// do not agree and keep <see cref="ReadTimestamp"/>.
+    /// </remarks>
+    private static DateOnly? ReadDate(string? value) => Iso8601.Day(value);
 
     /// <summary>
     /// Read an OHIP timestamp into the property's zone.
