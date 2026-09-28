@@ -28,7 +28,6 @@ namespace PmsOracle.Normalisation;
 public sealed class OnSiteNormaliser
 {
     /// <summary>The on-site wire format for dates — study §5.3(d).</summary>
-    private const string DateFormat = "yyyy-MM-dd'T'HH:mm:ss";
 
     /// <summary>
     /// The identifier kind for an on-site reservation number.
@@ -340,12 +339,7 @@ public sealed class OnSiteNormaliser
         Basis = TimeBasis.Derived,
     };
 
-    private static DateOnly? ReadDate(string? value) =>
-        !string.IsNullOrWhiteSpace(value)
-        && DateTime.TryParseExact(
-            value, DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-            ? DateOnly.FromDateTime(parsed)
-            : null;
+    private static DateOnly? ReadDate(string? value) => OnSiteDateReading.Read(value);
 
     private static int ReadCount(string? value) =>
         int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var count)

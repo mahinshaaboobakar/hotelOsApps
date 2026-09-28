@@ -258,9 +258,17 @@ public class InvocationDispatchTests
         AmountTaxBasis: TaxBasis.Net,
         GuaranteeMaximumFreshness: null);
     /// <summary>One on-site message, as the agent sends it.</summary>
+    /// <remarks>
+    /// <b>The arrival date carries a time because the agent's does</b> —
+    /// <c>OnSiteDateReading.Format</c>. It read <c>2026-09-28</c> until
+    /// 2026-09-28, a bare ISO day the normaliser REFUSES; these tests were
+    /// green on a payload the connector cannot normalise, because the join key
+    /// then parsed loosely and nothing compared the two readers. A fixture is
+    /// a claim about what the source sends, and this one was not true.
+    /// </remarks>
     private static string Push(string status) =>
         $$"""
-        {"Status":"{{status}}","Surname":"Menon","FirstName":"Asha","ArrivalDate":"2026-09-28"}
+        {"Status":"{{status}}","Surname":"Menon","FirstName":"Asha","ArrivalDate":"2026-09-28T00:00:00"}
         """;
 
     /// <summary>A <c>join</c> invocation carrying one payload.</summary>

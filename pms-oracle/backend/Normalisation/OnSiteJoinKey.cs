@@ -1,4 +1,3 @@
-using System.Globalization;
 using PmsOracle.Integrations.OnSite;
 using PmsOracle.Vocabularies;
 
@@ -115,17 +114,13 @@ public readonly record struct OnSiteJoinKey(
             return null;
         }
 
-        // Invariant — NUM-Q4, ADR 0174's boundary. The agent posts what OPERA
-        // holds, and the reference reads Oracle's dates with explicit machine
-        // patterns throughout (`providers/oracle/cloud/services/impl/
-        // OracleCloudReservationServiceImpl.java:171` — `yyyy-MM-dd HH:mm:ss.S`).
-        // A culture-sensitive parse would make the same bytes mean two different
-        // days on two servers, so this key would stop matching for a hotel whose
-        // server was set up differently — silently, and only for some dates.
-        var arrival = DateOnly.TryParse(
-            push.ArrivalDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-            ? parsed
-            : (DateOnly?)null;
+        // The normaliser's reader, not a second one. Whether this message is
+        // half of a check-in and whether it can be normalised are different
+        // questions about the same field, and a date only one of them accepts
+        // is a half the Hub holds for thirty minutes and nothing can finish.
+        // `OnSiteDateReading` carries the invariance argument and the defect
+        // that produced it.
+        var arrival = OnSiteDateReading.Read(push.ArrivalDate);
 
         return For(push.Surname, push.FirstName, arrival) is { } key
             ? ($"{key.Surname}|{key.FirstName}|{key.ArrivalDate:yyyy-MM-dd}", status.Part.ToString())

@@ -406,6 +406,36 @@ public sealed class OnSiteNormaliserTests
     }
 
     /// <summary>
+    /// A date the normaliser cannot read is never declared half of a check-in.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The Hub holds a <c>member</c> for thirty minutes waiting for its
+    /// partner, so declaring one is a claim. A push whose arrival date the
+    /// normaliser would refuse must be <c>whole</c> — then the refusal reaches
+    /// the operator naming the field, instead of expiring as
+    /// <c>join_window_expired</c>, which says a partner never came when in
+    /// fact this half was never readable.
+    /// </para>
+    /// <para>
+    /// <b>The value is chosen so the two readers can disagree.</b>
+    /// <c>an_unreadable_arrival_date_is_rejected_carrying_the_value</c> uses
+    /// <c>31/08/2026</c>, which BOTH refuse — so it passes whether the join
+    /// key reads dates exactly or loosely, and could never have found this.
+    /// <c>2026-08-31</c> is an ISO day with no time: the agent's format
+    /// carries one, so the normaliser refuses it and a loose reader does not.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void a_date_the_normaliser_cannot_read_is_never_half_of_a_check_in()
+    {
+        var push = Booking() with { Status = "Checked In", ArrivalDate = "2026-08-31" };
+
+        Assert.IsType<NormalisationOutcome.Rejected>(Kochi().Normalise(push));
+        Assert.Null(OnSiteJoinKey.Candidate(push));
+    }
+
+    /// <summary>
     /// A join key with a blank name would match every other blank-named
     /// message, joining unrelated guests — so it is refused rather than built.
     /// </summary>
