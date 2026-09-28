@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using Xunit;
 

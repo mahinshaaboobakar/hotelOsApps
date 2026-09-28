@@ -4,6 +4,7 @@
 // the boundary it is on, which is this file's whole subject.
 using HotelOS.GuestOps.Application.Inbound;
 using HotelOS.GuestOps.Domain;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using Wire = HotelOS.Contracts.Integration.V1;
 

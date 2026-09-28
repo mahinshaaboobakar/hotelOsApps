@@ -1,6 +1,7 @@
 using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Infrastructure;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using System.Text.Json;
 

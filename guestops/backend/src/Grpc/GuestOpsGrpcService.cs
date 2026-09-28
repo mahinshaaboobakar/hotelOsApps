@@ -7,6 +7,7 @@ using HotelOS.GuestOps.Application.Requests;
 using HotelOS.GuestOps.Application.Settings;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Contracts.V1;
+using HotelOS.Formats;
 using HotelOS.Platform;
 
 namespace HotelOS.GuestOps.Grpc;

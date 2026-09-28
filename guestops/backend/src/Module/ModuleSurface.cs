@@ -1,3 +1,4 @@
+using HotelOS.Formats;
 using HotelOS.Platform;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;

@@ -1,4 +1,5 @@
 using HotelOS.GuestOps.Application.Registrations;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using System.Text.Json;
 

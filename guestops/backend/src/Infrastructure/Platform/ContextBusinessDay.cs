@@ -1,6 +1,7 @@
 using HotelOS.Contracts.Context.V1;
 using HotelOS.GuestOps.Application.Abstractions;
 using HotelOS.GuestOps.Domain;
+using HotelOS.Formats;
 using HotelOS.Platform;
 
 namespace HotelOS.GuestOps.Infrastructure.Platform;

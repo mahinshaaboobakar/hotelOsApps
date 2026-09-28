@@ -2,6 +2,7 @@ using Grpc.Core;
 using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Contracts.V1;
 using HotelOS.GuestOps.Domain;
+using HotelOS.Formats;
 using HotelOS.Platform;
 
 namespace HotelOS.GuestOps.Grpc;
