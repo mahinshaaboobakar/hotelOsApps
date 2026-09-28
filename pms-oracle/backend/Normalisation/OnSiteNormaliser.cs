@@ -44,7 +44,7 @@ public sealed class OnSiteNormaliser
 
     private readonly IntegrationSettings _settings;
 
-    private readonly int _minorUnitDigits;
+    private readonly int? _minorUnitDigits;
 
     /// <summary>Construct for one configured integration.</summary>
     /// <param name="settings">That integration's identity and property configuration.</param>
@@ -60,7 +60,7 @@ public sealed class OnSiteNormaliser
     /// stale exponent while every other path resolved — silent, and only on the
     /// joined path.
     /// </remarks>
-    public OnSiteNormaliser(IntegrationSettings settings, int minorUnitDigits)
+    public OnSiteNormaliser(IntegrationSettings settings, int? minorUnitDigits)
     {
         _settings = settings;
         _minorUnitDigits = minorUnitDigits;
@@ -117,6 +117,21 @@ public sealed class OnSiteNormaliser
         if (departure is null)
         {
             return Reject(RejectionReason.UnreadableValue, "DepartureDate", push.DepartureDate);
+        }
+
+        // **An amount we cannot scale is not an amount we did not get** —
+        // CONN-Q75. The source sent a figure and the Hub could not supply
+        // `currency`'s exponent, so the payload stays valid and this
+        // computation waits: it is re-normalised when the catalogue publishes
+        // (ARCH-Q38b). Proceeding would need a guessed exponent, which is
+        // wrong by a factor of ten and looks exactly like a right one.
+        //
+        // The other direction is a VALID absence and falls through: a source
+        // that sent no figure yields a fact with no amount, which is not a
+        // normalisation failure and must not be overloaded to mean one.
+        if (!string.IsNullOrWhiteSpace(push.Amount) && _minorUnitDigits is null)
+        {
+            return new NormalisationOutcome.Unresolved("minor_unit_digits", "Amount");
         }
 
         return new NormalisationOutcome.StayNormalised(
@@ -177,8 +192,10 @@ public sealed class OnSiteNormaliser
         // defect with one — and on a screen they are the same silence. Nothing
         // in this connector could tell them apart afterwards, so the one that
         // is permanent is written down where the mapping happens.
-        var amount = AmountReading.Read(
-            push.Amount, _settings.Currency, _settings.AmountTaxBasis, _minorUnitDigits);
+        var amount = _minorUnitDigits is { } digits
+            ? AmountReading.Read(
+                push.Amount, _settings.Currency, _settings.AmountTaxBasis, digits)
+            : null;
         if (amount is not null)
         {
             fact.TotalAmount = amount;

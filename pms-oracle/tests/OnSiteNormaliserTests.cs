@@ -28,6 +28,54 @@ public sealed class OnSiteNormaliserTests
             GuaranteeMaximumFreshness: null),
             MinorUnits);
 
+    /// <summary>
+    /// An amount we cannot scale and an amount nobody sent are two states —
+    /// <c>CONN-Q75</c>, ruled (b).
+    /// </summary>
+    /// <remarks>
+    /// <b>These two differ only in whether the source sent a figure</b>, and
+    /// the exponent is absent in both. That is what makes them able to tell the
+    /// ruling's two cases apart: a fixture that varied the exponent instead
+    /// would pass whether or not the distinction existed. The remedies differ —
+    /// one waits on the currency catalogue (ARCH-Q38b) and the other has
+    /// nothing to wait for — so collapsing them would hide the one that can be
+    /// fixed.
+    /// </remarks>
+    [Fact]
+    public void An_amount_that_cannot_be_scaled_leaves_the_payload_unresolved()
+    {
+        var push = Booking();   // "DUE IN" — whole, recognised, and carries 18400.00
+
+        var outcome = new OnSiteNormaliser(Settings(), minorUnitDigits: null).Normalise(push);
+
+        var unresolved = Assert.IsType<NormalisationOutcome.Unresolved>(outcome);
+        Assert.Equal("minor_unit_digits", unresolved.Prerequisite);
+        Assert.Equal("Amount", unresolved.Field);
+    }
+
+    [Fact]
+    public void An_amount_the_source_never_sent_is_a_fact_without_one()
+    {
+        var push = Booking() with { Amount = null };
+
+        var outcome = new OnSiteNormaliser(Settings(), minorUnitDigits: null).Normalise(push);
+
+        // Valid, and NOT blocked: the source sent no figure, so there is
+        // nothing to scale and nothing to wait for.
+        var stay = Assert.IsType<NormalisationOutcome.StayNormalised>(outcome);
+        Assert.Null(stay.Fact.TotalAmount);
+    }
+
+    /// <summary>The same property, with the exponent the Hub could not supply.</summary>
+    private static IntegrationSettings Settings() => new(
+        IntegrationId: "oracle-onpremise",
+        PropertyId: "prop-kochi",
+        PropertyCode: "KOCHI01",
+        Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
+        Currency: "INR",
+        AmountTaxBasis: TaxBasis.Net,
+        GuaranteeMaximumFreshness: null);
+
     private static OnSitePush Booking() => new()
     {
         ReservationId = "R-88214",

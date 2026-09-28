@@ -80,7 +80,7 @@ public sealed class OracleCloudAdapter(
     IOhipQueue queue,
     IOhipGuarantees guarantees,
     HttpClient http,
-    int minorUnitDigits)
+    int? minorUnitDigits)
     : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
     /// <summary>A reservation as OHIP returns it.</summary>

@@ -33,7 +33,7 @@ namespace PmsOracle.Adapters;
 /// is defined; the window is declared here and enforced by the Hub.
 /// </para>
 /// </remarks>
-public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int minorUnitDigits)
+public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int? minorUnitDigits)
     : IConnectorAdapter, IJoiningConnector
 {
     /// <summary>A stay message from the agent.</summary>

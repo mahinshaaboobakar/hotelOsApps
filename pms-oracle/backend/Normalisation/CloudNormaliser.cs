@@ -35,7 +35,7 @@ public sealed class CloudNormaliser
 
     private readonly IntegrationSettings _settings;
 
-    private readonly int _minorUnitDigits;
+    private readonly int? _minorUnitDigits;
 
     /// <summary>Construct for one configured integration.</summary>
     /// <param name="settings">That integration's identity and property configuration.</param>
@@ -52,7 +52,7 @@ public sealed class CloudNormaliser
     /// — a dispatch-table-only threading would miss it, and a two-part stay
     /// would scale by a stale exponent while every other path resolved.
     /// </remarks>
-    public CloudNormaliser(IntegrationSettings settings, int minorUnitDigits)
+    public CloudNormaliser(IntegrationSettings settings, int? minorUnitDigits)
     {
         _settings = settings;
         _minorUnitDigits = minorUnitDigits;
@@ -129,7 +129,23 @@ public sealed class CloudNormaliser
         // wire and have opposite remedies: on-site is permanent (see
         // `OnSiteNormaliser`), and this one ends when the Hub-side keyed store
         // exists. `CommercialTermsReading` is the reader that will fill it.
-        var amount = ReadAmount(stay.Total);
+        // **An amount we cannot scale is not an amount we did not get** —
+        // CONN-Q75. The source sent a figure and the Hub could not supply
+        // `currency`'s exponent, so the payload stays valid and this
+        // computation waits: it is re-normalised when the catalogue publishes
+        // (ARCH-Q38b). Proceeding would need a guessed exponent, which is
+        // wrong by a factor of ten and looks exactly like a right one.
+        //
+        // The other direction is a VALID absence and falls through: a source
+        // that sent no figure yields a fact with no amount, which is not a
+        // normalisation failure and must not be overloaded to mean one.
+        if (stay.Total is not null && _minorUnitDigits is null)
+        {
+            return new NormalisationOutcome.Unresolved(
+                "minor_unit_digits", "roomStay.total.amountBeforeTax");
+        }
+
+        var amount = _minorUnitDigits is { } digits ? ReadAmount(stay.Total, digits) : null;
         if (amount is not null)
         {
             fact.TotalAmount = amount;
@@ -324,14 +340,23 @@ public sealed class CloudNormaliser
             })
             .ToList();
 
-    private Money? ReadAmount(OhipTotal? total) =>
+    /// <summary>The amount, where there is one and it can be scaled.</summary>
+    /// <param name="total">The source total, or <c>null</c> when none was sent.</param>
+    /// <param name="minorUnitDigits">The exponent, narrowed by the caller.</param>
+    /// <returns>The money, or <c>null</c> when the source sent none.</returns>
+    /// <remarks>
+    /// The exponent arrives already narrowed rather than as a nullable this
+    /// unwraps: the blocked case returns <c>Unresolved</c> before here, and a
+    /// <c>.Value</c> at this point would be a comment asserting that guard ran.
+    /// </remarks>
+    private Money? ReadAmount(OhipTotal? total, int minorUnitDigits) =>
         total is null
             ? null
             : AmountReading.Read(
                 total.AmountBeforeTax.ToString(CultureInfo.InvariantCulture),
                 _settings.Currency,
                 _settings.AmountTaxBasis,
-                _minorUnitDigits);
+                minorUnitDigits);
 
     private static NormalisationOutcome Reject(RejectionReason reason, string field, string? raw) =>
         new NormalisationOutcome.Rejected(reason, field, raw);

@@ -101,6 +101,40 @@ public abstract record NormalisationOutcome
         Vocabularies.OnSiteMessagePart Part,
         OnSiteJoinKey JoinKey) : NormalisationOutcome;
 
+    /// <summary>
+    /// The payload is valid and one computation on it could not be made —
+    /// <c>CONN-Q75</c>, ruled (b).
+    /// </summary>
+    /// <param name="Prerequisite">
+    /// The platform fact that was not supplied, by the name the wire gives it.
+    /// </param>
+    /// <param name="Field">The source field whose value could not be read.</param>
+    /// <remarks>
+    /// <para>
+    /// <b>Not a rejection, and not an absent value.</b> A rejection means the
+    /// payload itself was refused; here it remains valid and is re-normalised
+    /// once the prerequisite lands. And an absent amount is a different, valid
+    /// state — the source sent none — which is why the two cannot share one
+    /// answer: *"the absence of an amount must NOT be overloaded to mean
+    /// normalization is blocked."*
+    /// </para>
+    /// <para>
+    /// <b>The remedies differ, which is the whole reason for the distinction.</b>
+    /// A source that sent no amount has none — nothing to do. An amount we
+    /// could not scale is waiting on the currency catalogue (<c>ARCH-Q38b</c>),
+    /// and it becomes a fact the moment that publishes. On any surface the two
+    /// would look like the same silence.
+    /// </para>
+    /// <para>
+    /// <b>How this reaches the Hub is deliberately not decided here.</b> The
+    /// ruling established the mechanism and its purpose and left the field or
+    /// message that exposes an amount-level prerequisite as a follow-on
+    /// contract decision. So this is the state, and nothing in this package
+    /// invents a wire for it.
+    /// </para>
+    /// </remarks>
+    public sealed record Unresolved(string Prerequisite, string Field) : NormalisationOutcome;
+
     /// <summary>The message could not become a fact.</summary>
     /// <param name="Reason">What kind of failure.</param>
     /// <param name="Field">The field at fault, in this connector's terms.</param>
