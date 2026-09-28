@@ -1,3 +1,7 @@
+using System.Globalization;
+using PmsOracle.Integrations.OnSite;
+using PmsOracle.Vocabularies;
+
 namespace PmsOracle.Normalisation;
 
 /// <summary>
@@ -77,5 +81,54 @@ public readonly record struct OnSiteJoinKey(
         }
 
         return new OnSiteJoinKey(surname.Trim(), firstName.Trim(), arrivalDate.Value);
+    }
+
+    /// <summary>Whether one on-site message is half of a check-in, and which half.</summary>
+    /// <param name="push">The message as it arrived.</param>
+    /// <returns>Its key and part, or <c>null</c> when it is whole.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>One home, two callers.</b> This decision was
+    /// <c>OracleOnSiteAdapter.JoinFor</c> alone, and the Connector Protocol's
+    /// <c>join</c> needs the same answer from a path that does not construct
+    /// that adapter — which now requires settings and an exponent. A second
+    /// copy would be two answers to *is this a part*, and the two halves of a
+    /// check-in would stop pairing the day they disagreed.
+    /// </para>
+    /// <para>
+    /// <b>Every <c>null</c> here means whole, never rejected.</b> A blank
+    /// status, an unrecognised one, or a name the key cannot be built from all
+    /// return whole, because deciding a message is half of something is a
+    /// claim, and the normaliser is what refuses a message with the field
+    /// named. Guessing a part here would decide before anything read what the
+    /// message says.
+    /// </para>
+    /// </remarks>
+    public static (string Key, string Part)? Candidate(OnSitePush push)
+    {
+        ArgumentNullException.ThrowIfNull(push);
+
+        if (string.IsNullOrWhiteSpace(push.Status)
+            || !OnSiteStayStatus.Read(push.Status).TryGet(out var status)
+            || status.Part == OnSiteMessagePart.Whole)
+        {
+            return null;
+        }
+
+        // Invariant — NUM-Q4, ADR 0174's boundary. The agent posts what OPERA
+        // holds, and the reference reads Oracle's dates with explicit machine
+        // patterns throughout (`providers/oracle/cloud/services/impl/
+        // OracleCloudReservationServiceImpl.java:171` — `yyyy-MM-dd HH:mm:ss.S`).
+        // A culture-sensitive parse would make the same bytes mean two different
+        // days on two servers, so this key would stop matching for a hotel whose
+        // server was set up differently — silently, and only for some dates.
+        var arrival = DateOnly.TryParse(
+            push.ArrivalDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
+            ? parsed
+            : (DateOnly?)null;
+
+        return For(push.Surname, push.FirstName, arrival) is { } key
+            ? ($"{key.Surname}|{key.FirstName}|{key.ArrivalDate:yyyy-MM-dd}", status.Part.ToString())
+            : null;
     }
 }

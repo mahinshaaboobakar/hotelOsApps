@@ -332,7 +332,7 @@ integrations:
     name: "Oracle OPERA on-premise"
     capabilities: [bookings, room_state]
     delivery: push
-    implements: [dedupe_key]
+    implements: [dedupe_key, join]
     payload_kinds: [onsite-stay, onsite-room-status]
     accepts_push: true
     ingress_authentication: [shared-secret]
@@ -342,7 +342,7 @@ integrations:
     name: "Oracle OPERA web"
     capabilities: [bookings, room_state]
     delivery: push
-    implements: [dedupe_key]
+    implements: [dedupe_key, join]
     payload_kinds: [onsite-stay, onsite-room-status]
     accepts_push: true
     ingress_authentication: [shared-secret]

@@ -111,38 +111,18 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int minorU
     /// </remarks>
     public JoinCandidate? JoinFor(byte[] payload, string payloadKind)
     {
+        // Delegated, so there is ONE answer to *is this a part*. The
+        // Connector Protocol's `join` asks the same question from a path that
+        // cannot construct this adapter, and two copies would stop pairing the
+        // day they disagreed — `PartJoinInvocation`.
         if (payloadKind != StayPayload)
         {
             return null;
         }
 
-        var push = Read<OnSitePush>(payload);
-
-        if (string.IsNullOrWhiteSpace(push.Status))
-        {
-            return null;
-        }
-
-        // An unrecognised status is the normaliser's rejection to make, with
-        // the value carried. Guessing a part here would decide the message is
-        // half of something before anything has read what it says.
-        if (!OnSiteStayStatus.Read(push.Status).TryGet(out var status)
-            || status.Part == OnSiteMessagePart.Whole)
-        {
-            return null;
-        }
-
-        var key = OnSiteJoinKey.For(push.Surname, push.FirstName, ParseDate(push.ArrivalDate));
-
-        // A key that could not be built matches nothing rather than matching
-        // everything — `OnSiteJoinKey.For` refuses a blank name for exactly
-        // that reason, and null here means the normaliser rejects it with the
-        // field named instead.
-        return key is null
-            ? null
-            : new JoinCandidate(
-                $"{key.Value.Surname}|{key.Value.FirstName}|{key.Value.ArrivalDate:yyyy-MM-dd}",
-                status.Part.ToString());
+        return OnSiteJoinKey.Candidate(Read<OnSitePush>(payload)) is { } candidate
+            ? new JoinCandidate(candidate.Key, candidate.Part)
+            : null;
     }
 
     /// <inheritdoc />
@@ -188,22 +168,6 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int minorU
 
     private static string? First(IEnumerable<OnSitePush> pushes, Func<OnSitePush, string?> field) =>
         pushes.Select(field).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
-
-    /// <summary>The arrival date the PMS sent, read as a machine value.</summary>
-    /// <remarks>
-    /// <b>Invariant, because this is the wire</b> — `NUM-Q4`, ADR 0174's
-    /// boundary. The on-site agent posts what OPERA holds, and the reference
-    /// reads Oracle's dates with explicit machine patterns throughout
-    /// (<c>providers/oracle/cloud/services/impl/OracleCloudReservationServiceImpl.java:171</c>
-    /// — <c>yyyy-MM-dd HH:mm:ss.S</c>). A culture-sensitive parse would make
-    /// the same bytes mean two different days on two servers, and the join key
-    /// this feeds would stop matching for a hotel whose server was set up
-    /// differently — silently, and only for some dates.
-    /// </remarks>
-    private static DateOnly? ParseDate(string? value) =>
-        DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out var date)
-            ? date
-            : null;
 
     private static T Read<T>(byte[] payload)
         where T : new() =>

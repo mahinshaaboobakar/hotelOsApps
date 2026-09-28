@@ -62,6 +62,11 @@ public sealed class InvocationDispatch(HttpClient http)
             ConnectorProtocolKinds.Drain =>
                 QueueDrainInvocation.ServeAsync(invocation, http, cancellationToken),
 
+            // `join` needs neither credentials nor the network: it reads one
+            // payload and says whether it is half of a check-in.
+            ConnectorProtocolKinds.Join =>
+                PartJoinInvocation.ServeAsync(invocation, cancellationToken),
+
             // `credential.response` is the Hub answering a request this
             // connector made, and the session matches it to the invocation that
             // asked. It never arrives here as a request, and a handler that

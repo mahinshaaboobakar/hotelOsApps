@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 using System.Threading.Channels;
 using Google.Protobuf;
 using HotelOS.Connector;
@@ -6,6 +7,9 @@ using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Adapters;
 using PmsOracle.Authentication;
 using PmsOracle.Hosting;
+using PmsOracle.Normalisation;
+using PmsOracle.Vocabularies;
+using static PmsOracle.Tests.TestExponent;
 using Xunit;
 
 namespace PmsOracle.Tests;
@@ -158,6 +162,114 @@ public class InvocationDispatchTests
             (uint)OhipPollingSchedule.DefaultNormal.TotalSeconds,
             result.NextPollAfterSeconds);
     }
+
+    /// <summary>
+    /// A half of a check-in is answered as a member, with the key both halves
+    /// share — ADR 0272's <c>join</c>.
+    /// </summary>
+    /// <remarks>
+    /// <b>The two halves differ only by the case of one status</b> — `"Checked
+    /// In"` is the contact half and `"CHECKED IN"` the room half (R6). That is
+    /// why <c>OnSiteJoinKey</c>'s vocabulary is compared ordinally, and it is
+    /// the fixture that can tell a case-folding implementation from this one:
+    /// under <c>OrdinalIgnoreCase</c> both messages would claim the same part
+    /// and the pair would never complete.
+    /// </remarks>
+    [Theory]
+    [InlineData("Checked In", "ContactHalf")]
+    [InlineData("CHECKED IN", "RoomHalf")]
+    public async Task A_half_of_a_check_in_is_a_member_carrying_the_key_and_which_half(
+        string status, string part)
+    {
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Join,
+            Join(OracleOnSiteAdapter.StayPayload, Push(status)),
+            JoinResult.Parser);
+
+        Assert.Equal(JoinResult.OutcomeOneofCase.Member, result.OutcomeCase);
+        Assert.Equal("Menon|Asha|2026-09-28", result.Member.Key);
+        Assert.Equal(part, result.Member.Part);
+
+        // The window is the connector's to state — only this end knows what its
+        // source does — which is the same reason the drain states its interval.
+        Assert.Equal(
+            (uint)PartJoinInvocation.HoldWindow.TotalSeconds, result.Member.HoldSeconds);
+    }
+
+    /// <summary>
+    /// Everything that is not a recognised half is whole, and that is not a
+    /// refusal.
+    /// </summary>
+    /// <remarks>
+    /// A message declared whole goes to normalisation, which refuses it naming
+    /// the field. Answering <c>member</c> on a doubtful one would hold a
+    /// payload for a partner that never arrives, so a rejection an operator can
+    /// act on would expire as <c>join_window_expired</c> instead.
+    /// </remarks>
+    [Theory]
+    [InlineData(OracleOnSiteAdapter.RoomStatusPayload, """{"Status":"Checked In"}""")]
+    [InlineData(OracleCloudAdapter.ReservationPayload, """{"Status":"Checked In"}""")]
+    [InlineData(OracleOnSiteAdapter.StayPayload, """{"Status":"Due In"}""")]
+    [InlineData(OracleOnSiteAdapter.StayPayload, """{"Status":"Nonsense"}""")]
+    [InlineData(OracleOnSiteAdapter.StayPayload, """{"Status":"Checked In"}""")]
+    [InlineData(OracleOnSiteAdapter.StayPayload, "not json at all")]
+    public async Task Anything_that_is_not_a_recognised_half_is_whole(string kind, string body)
+    {
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Join, Join(kind, body), JoinResult.Parser);
+
+        Assert.Equal(JoinResult.OutcomeOneofCase.Whole, result.OutcomeCase);
+    }
+
+    /// <summary>
+    /// The protocol and the retired seam give one answer — they share the
+    /// decision rather than each holding a copy.
+    /// </summary>
+    [Fact]
+    public async Task The_adapter_and_the_invocation_agree_about_which_half_a_message_is()
+    {
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        var overWire = await hub.InvokeAsync(
+            ConnectorProtocolKinds.Join,
+            Join(OracleOnSiteAdapter.StayPayload, Push("Checked In")),
+            JoinResult.Parser);
+
+        var inProcess = new OracleOnSiteAdapter(OnSiteSettings(), MinorUnits)
+            .JoinFor(Encoding.UTF8.GetBytes(Push("Checked In")), OracleOnSiteAdapter.StayPayload);
+
+        Assert.NotNull(inProcess);
+        Assert.Equal(inProcess.Key, overWire.Member.Key);
+        Assert.Equal(inProcess.Part, overWire.Member.Part);
+    }
+
+
+    /// <summary>One configured on-site integration, for the agreement test.</summary>
+    private static IntegrationSettings OnSiteSettings() => new(
+        IntegrationId: "oracle-onpremise",
+        PropertyId: "prop-kochi",
+        PropertyCode: "KOCHI01",
+        Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
+        Currency: "INR",
+        AmountTaxBasis: TaxBasis.Net,
+        GuaranteeMaximumFreshness: null);
+    /// <summary>One on-site message, as the agent sends it.</summary>
+    private static string Push(string status) =>
+        $$"""
+        {"Status":"{{status}}","Surname":"Menon","FirstName":"Asha","ArrivalDate":"2026-09-28"}
+        """;
+
+    /// <summary>A <c>join</c> invocation carrying one payload.</summary>
+    private static ReadOnlyMemory<byte> Join(string payloadKind, string body) =>
+        new JoinInvocation
+        {
+            PayloadKind = payloadKind,
+            Payload = ByteString.CopyFromUtf8(body),
+        }.ToByteArray();
 
     /// <summary>
     /// And says nothing where it would have to guess — ADR 0220's missing
