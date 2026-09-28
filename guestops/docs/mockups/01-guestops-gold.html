@@ -1746,4 +1746,203 @@
 
 <div class="cap" style="margin-top:34px;padding-top:18px;border-top:1px solid var(--line)"><b>What this mockup does not draw, and why.</b> <b>No folio posting, payment or invoice</b> — GUEST-Q6 puts them in Finance's later round; frame 7's second band shows exactly where the line falls and is reported as a finding rather than proposed. <b>No guest merge, no person-graph, no "same guest, third stay" panel</b> — that sentence is Guest360's answer surfaced here, and Guest360 does not exist yet (G360-Q1). <b>No write-back to Opera anywhere</b>: nothing on any screen reaches the PMS in v1 (<code>CONN-Q5</code>), and frame 8's cancellation dialog says so out loud rather than leaving it to be discovered. <b>No room state and no cleaning decisions</b> — Room Care owns clean, ready and who cleans; frame 6 reports its record and asserts nothing (APPS-Q1, S21). <b>No job assignment</b> — Jobs owns work; frame 5 hands over a request and stops. <b>No mode switch</b>, because there is no second mode (GUEST-Q4). <b>Every frame traces to a scenario</b>; the two cross-application tabs (5, 6) and frame 7's second band are the only places drawing something the platform cannot do today, and each is marked where it is drawn.</div>
 
+
+<!-- C6 · the reason vocabulary, and what Reinstate opens -->
+<h1 style="margin-top:26px">C6 · <b>Reasons are configuration</b> — the owner ruled a reason is <i>picked from a configured list</i>, because a hotel will want to count cancellations and mistaken check-outs, and free text can never be counted</h1>
+
+<div class="cap" style="border-color:var(--ovr)"><b>What is being asked, in one place.</b> The vocabulary lives in Setup — that is ruled. <b>The shape is ruled too: three lists, one per operation</b> (owner, 2026-09-28). <i>Guest cancelled — flight changed</i> is meaningless for a correction, so the sets plainly differ — and that difference is a property of the LIST rather than of each entry. <b>The one-list alternative was drawn beside this for the decision and is not kept here:</b> it is one <code>git log --follow</code> away, because a superseded drawing beside a current one is a drawing somebody eventually builds from. <b>Reinstate's own flow is drawn after them</b>, because the owner ruled its press opens a confirmation that asks why, and its why comes from this same list.</div>
+
+<h1 style="margin-top:22px">Setup · <b>Three reason lists, one per operation</b> — the operation is the list, and a reason belongs to exactly one</h1>
+<div id="fV2" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">31 Aug</span></button>
+    <button class="tab" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab on" type="button">Setup</button>
+    <div class="who">Rakesh Varma · General Manager · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="body">
+      <div class="tabs"><button class="tab" type="button">Registration</button><button class="tab" type="button">Guest reporting</button><button class="tab" type="button">Stop-sell</button><button class="tab on" type="button">Reasons</button><button class="tab" type="button">Stay defaults</button><div class="grow"></div><button class="btn" type="button">Discard</button><button class="btn pri" type="button">Save</button></div>
+      <div class="cols">
+        <div class="card">
+          <div class="ch">Cancellation <div class="grow">4 reasons</div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">Guest cancelled</div><div class="v">flight changed <span class="hint">41 this year</span></div></div>
+            <div class="fr"><div class="k">Guest cancelled</div><div class="v">no penalty agreed <span class="hint">18</span></div></div>
+            <div class="fr"><div class="k">Property cancelled</div><div class="v">overbooked <span class="hint">2</span></div></div>
+            <div class="fr"><div class="k">Recorded against the wrong stay</div><div class="v"><span class="hint">5</span></div></div>
+            <button class="btn sm" type="button">＋ Add</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">Correction <div class="grow">2 reasons</div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">Checked out in error</div><div class="v">guest still in the room <span class="hint">3 this year</span></div></div>
+            <div class="fr"><div class="k">Recorded against the wrong stay</div><div class="v"><span class="hint">2</span></div></div>
+            <div class="note no" style="padding:9px 11px"><b>The same words, entered twice.</b> This entry and Cancellation's fourth are two rows with one meaning, and <b>5 + 2 is a sum nothing on this screen will make</b>.</div>
+            <button class="btn sm" type="button">＋ Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ch">Reinstatement <div class="grow">1 reason</div></div>
+        <div class="cb">
+          <div class="fr"><div class="k">Guest did arrive</div><div class="v">the night desk missed them <span class="hint">1 this year</span></div></div>
+          <button class="btn sm" type="button">＋ Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Each list reads as what it is, and a shared meaning is entered as many times as it applies.</b> Adding a reason needs no decision about scope — you are already in the list you meant. <b>The cost is recorded rather than hidden:</b> a meaning that spans two operations is entered twice, so no single count answers <i>how often did we record something against the wrong stay?</i> across all three. That was known when this shape was chosen.</div>
+
+<h1 style="margin-top:22px">The desk · <b>the end state</b> — correcting a check-out, with the reason picked from that operation's list</h1>
+<div id="fV2b" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">24 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">Rajesh Pillai · Room 214</div><div class="hsub">Stay 01J9K…7F3A · booking BK-4471 · created here</div></div><div class="grow"></div></div>
+          <div class="body">
+        <div class="tabs">
+          <button class="tab on" type="button">Overview</button>
+          <button class="tab" type="button">Activity<span class="n">15</span></button>
+          <button class="tab" type="button">Requests &amp; jobs<span class="n">2</span></button>
+          <button class="tab" type="button">Servicing<span class="n">4 nights</span></button>
+          <button class="tab" type="button">Payment</button>
+          <button class="tab" type="button">Documents</button>
+        </div>
+        <div class="cols">
+          <div class="card">
+            <div class="ch">The stay</div>
+            <div class="cb">
+              <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Departed</span></div></div>
+              <div class="fr"><div class="k">Room</div><div class="v"><b>214</b> · Deluxe King <span class="pill neu">released</span></div></div>
+              <div class="fr"><div class="k">Departure</div><div class="v">24 Sep <b>07:02</b> <span class="lock">OBSERVED</span></div></div>
+              <div class="fr"><div class="k">Booked until</div><div class="v">26 Sep <span class="sh miss">two nights unsold and unoccupied</span></div></div>
+              <div class="fr"><div class="k">Guest</div><div class="v">still in the room <span class="sh miss">nothing in the record says so</span></div></div>
+              <div class="fr"><div class="k">Registration</div><div class="v">GRC 2026/09/1188 · ID captured <span class="pill ok">complete</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+<div class="scrim mid">
+      <div class="dlg">
+        <div class="sh_h"><b>Put this stay back in house?</b><span>Rajesh Pillai · 214 · checked out 07:02</span></div>
+        <div class="sh_b">
+          <div class="note" style="padding:11px 13px"><b>The departure is not erased.</b> It happened, it was announced, and consumers acted on it — so this is recorded as a correction beside it, and both stay in the stay's history.</div>
+          <div class="fr"><div class="k">Back to</div><div class="v"><b>In house</b> · 214 · booked until 26 Sep</div></div>
+          <div class="fr"><div class="k">Room</div><div class="v">214 is still free, so it returns to this stay <span class="pill ok">no conflict</span></div></div>
+          <div class="fld"><label>Why</label><div class="inp">Checked out in error — guest still in the room <span class="grow">▾</span></div></div>
+          <div class="hint"><b>The same two entries.</b> They come from the Correction list rather than from a filter, and this screen is identical either way.</div>
+        </div>
+        <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Leave it</button><button class="btn sm pri" type="button">Put back in house</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The desk never learns there are three lists.</b> It sees the reasons that can apply to the operation in front of it, which is what this shape buys: the configuration screen carries the structure and the working screen carries none of it. <b>Part A only</b> — drawing fidelity, not sign-off; nothing here has been walked live with the actions pressed.</div>
+
+<h1 style="margin-top:26px">RI · <b>Reinstate, drawn to its end</b> — the owner ruled the press asks <i>are you sure</i> with a why, and the why comes from the same configured list</h1>
+<div id="fRI1" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">1 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">2</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">Thomas George · no room</div><div class="hsub">Stay 01J8F…22B1 · booking BK-4361 · created here</div></div><div class="grow"></div><button class="btn" type="button">Reinstate…</button></div>
+          <div class="body">
+        <div class="tabs">
+          <button class="tab on" type="button">Overview</button>
+          <button class="tab" type="button">Activity<span class="n">3</span></button>
+          <button class="tab" type="button">Requests &amp; jobs</button>
+          <button class="tab" type="button">Servicing<span class="n">1 night</span></button>
+          <button class="tab" type="button">Payment</button>
+          <button class="tab" type="button">Documents</button>
+        </div>
+        <div class="cols">
+          <div class="card">
+            <div class="ch">The stay</div>
+            <div class="cb">
+              <div class="fr"><div class="k">State</div><div class="v"><span class="pill warn">No-show</span> <span class="sh ovr"><i></i>yours</span></div></div>
+              <div class="fr"><div class="k">Recorded</div><div class="v">1 Sep <b>23:14</b> <span class="lock">OBSERVED</span> · by Anitha Menon</div></div>
+              <div class="fr"><div class="k">Arrival</div><div class="v"><b>19 Aug</b> <span class="sh miss">never happened</span></div></div>
+              <div class="fr"><div class="k">Room</div><div class="v">none was ever assigned</div></div>
+              <div class="fr"><div class="k">Booking</div><div class="v">BK-4361 · 1 of 1 <span class="hint">taken at the desk, 14 Aug</span></div></div>
+              <div class="fr"><div class="k">Contact</div><div class="v">+91 94470 •••• 31 <button class="link" type="button">reveal</button></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+<div class="scrim mid">
+      <div class="dlg">
+        <div class="sh_h"><b>Put this stay back on the arrivals list?</b><span>Thomas George · BK-4361 · 19 – 20 Aug · recorded as a no-show 1 Sep 23:14</span></div>
+        <div class="sh_b">
+          <div class="note" style="padding:11px 13px"><b>The no-show is not erased.</b> It was recorded, it was announced, and it stays in the stay's history — this is a correction beside it, exactly as a mistaken check-out is.</div>
+          <div class="fr"><div class="k">Back to</div><div class="v"><b>Booked</b> · no room · 19 – 20 Aug <span class="sh miss">the dates have passed</span></div></div>
+          <div class="fr"><div class="k">Nothing comes off</div><div class="v">no charge was ever applied <span class="pill ok">nothing to reverse</span></div></div>
+          <div class="fld"><label>Why</label><div class="inp">Guest did arrive — the night desk missed them <span class="grow">▾</span></div></div>
+          <div class="hint"><b>A reason is required</b>, from the property's configured list — the same list the cancellation and the correction draw from.</div>
+        </div>
+        <div class="sh_f"><div class="hint">Recorded against your name.</div><div class="grow"></div><button class="btn sm" type="button">Leave it</button><button class="btn sm pri" type="button">Put back on the list</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>The second row is the finding, and it is drawn because it was asked for.</b> A no-show <b>applies no charge and records no forfeit</b> — <code>RecordNoShowAsync</code> moves the lifecycle, records the override and publishes <code>stay.no_show</code> carrying two ids and the business date. Nothing else. <b>So there is nothing to take off on the way back</b>, and the dialog says so rather than leaving the desk to wonder.</div>
+
+<h1 style="margin-top:22px">RI · <b>the end state</b> — booked again, with both facts kept, and the dates already behind it</h1>
+<div id="fRI2" class="win">
+  <div class="head">
+    <div class="app"><div class="mark">GO</div>GuestOps</div>
+    <button class="tab" type="button">Today<span class="n">1 Sep</span></button>
+    <button class="tab on" type="button">Bookings<span class="n">218</span></button>
+    <button class="tab" type="button">Guests<span class="n">1 904</span></button>
+    <button class="tab" type="button">Attention<span class="n att">3</span></button>
+    <div class="who">Anitha Menon · Front Office · Avenue Regent</div>
+  </div>
+  <div class="main">
+    <div class="title"><div><div class="ht">Thomas George · no room</div><div class="hsub">Stay 01J8F…22B1 · booking BK-4361 · created here</div></div><div class="grow"></div><button class="btn" type="button">Check in</button><button class="btn" type="button">Nobody came…</button><button class="btn danger" type="button">Cancel…</button></div>
+    <div class="tabs"><button class="tab on" type="button">Overview</button><button class="tab" type="button">Activity<span class="n">5</span></button><button class="tab" type="button">Requests &amp; jobs</button><button class="tab" type="button">Servicing<span class="n">1 night</span></button><button class="tab" type="button">Payment</button><button class="tab" type="button">Documents</button></div>
+    <div class="body">
+      <div class="cols">
+        <div class="card">
+          <div class="ch">The stay <div class="grow"><span class="sh ovr"><i></i>corrected today</span></div></div>
+          <div class="cb">
+            <div class="fr"><div class="k">State</div><div class="v"><span class="pill neu">Booked</span> <span class="sh ovr"><i></i>corrected</span></div></div>
+            <div class="fr"><div class="k">Arrival</div><div class="v"><b>19 Aug</b> <span class="sh miss">the day has passed</span></div></div>
+            <div class="fr"><div class="k">Earlier</div><div class="v">recorded as a no-show 1 Sep 23:14 <span class="lock">KEPT</span></div></div>
+            <div class="fr"><div class="k">Forfeit</div><div class="v">none was applied, so none was reversed <span class="hint">the terms still name one</span></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch">What happened, in order</div>
+          <div class="cb">
+            <div class="tl">
+              <div class="te"><div class="t">14 Aug</div><div class="g"><i></i><u></u></div><div class="d">Booked at the desk<span>by Anitha Menon · 1 night · Deluxe Twin</span></div></div>
+              <div class="te"><div class="t">19 Aug</div><div class="g"><i></i><u></u></div><div class="d">Arrival day<span>nobody arrived</span></div></div>
+              <div class="te ovr"><div class="t">23:14</div><div class="g"><i></i><u></u></div><div class="d">Recorded as a no-show<span>by Anitha Menon</span></div></div>
+              <div class="te ovr"><div class="t">23:41</div><div class="g"><i></i></div><div class="d"><span class="ttl">Put back on the arrivals list</span><span>by Anitha Menon — <i>guest did arrive, the night desk missed them</i></span></div></div>
+            </div>
+            <div class="note" style="margin-top:2px"><b>Four entries, not two edited into one.</b> The booking, the day nobody came, the no-show, and the correction that followed it. Somebody asking in November why this stay shows a no-show AND an arrival has the answer in the list.</div>
+          </div>
+        </div>
+      </div>
+      <div class="note no" style="margin-top:8px"><b>The one thing this leaves open, drawn rather than hidden.</b> The stay is back on the arrivals list for a day that has already passed, so it is late from the moment it returns — and <i>Nobody came…</i> is offered again in the header above. <b>That is the correct state and it reads oddly</b>: a desk reinstating a stay on the 1st for the 19th is saying <i>the guest did arrive</i>, and the next thing they will do is check them in against past dates. Whether that check-in is allowed, and against which dates, is not drawn here and is the question this arm leaves open.</div>
+    </div>
+  </div>
+</div>
+<div class="cap"><b>Both facts kept, and the forfeit answered plainly.</b> Nothing was charged and nothing was recorded as a charge, so the reinstate takes nothing off — the booking's terms still say what they always said. <b>A finding against copy that is already approved:</b> N1's dialog says <i>Forfeited</i> over an amount and carries no clause saying the platform does not charge, which frame 8's cancellation does carry — <i>"The penalty is recorded, not charged."</i> Two dialogs about the same class of money, and one of them says so.</div>
+
 </body></html>
