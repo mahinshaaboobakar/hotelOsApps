@@ -10,6 +10,8 @@ using PmsOracle.Hosting;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
 using static PmsOracle.Tests.TestExponent;
+using System.Reflection;
+using PmsOracle.Integrations;
 using Xunit;
 
 namespace PmsOracle.Tests;
@@ -270,6 +272,87 @@ public class InvocationDispatchTests
         $$"""
         {"Status":"{{status}}","Surname":"Menon","FirstName":"Asha","ArrivalDate":"2026-09-28T00:00:00"}
         """;
+
+    [Fact]
+    public async Task A_pushed_payload_is_keyed_over_the_protocol()
+    {
+        // For a `delivery: push` integration this is the ONLY way a payload is
+        // ever keyed: there is no drain to carry a key and the Hub never
+        // computes one (ADR 0255 §2). Both on-site integrations declared
+        // `dedupe_key` while nothing served it, so every pushed payload was
+        // unkeyable and the declaration faulted with UnsupportedKind.
+        await using var hub = new Hub(HttpStatusCode.OK);
+        var body = Push("Due In");
+
+        var result = await hub.InvokeAsync(
+            ConnectorProtocolKinds.DedupeKey,
+            new DedupeKeyInvocation
+            {
+                PayloadKind = OracleOnSiteAdapter.StayPayload,
+                Payload = ByteString.CopyFromUtf8(body),
+            }.ToByteArray(),
+            DedupeKeyResult.Parser);
+
+        Assert.Equal(
+            PayloadIdentity.For(
+                OracleOnSiteAdapter.StayPayload, Encoding.UTF8.GetBytes(body)),
+            result.DedupeKey);
+    }
+
+    [Fact]
+    public async Task Every_kind_the_dispatch_serves_is_dispatched_and_every_other_is_refused()
+    {
+        // **The two-way walk that keeps `Served` honest.** It used to be typed
+        // out in the refusal's message, which told an operator the connector
+        // served `test` and `drain` for days after `join` was added. The
+        // population is read off the protocol rather than listed here, so a
+        // frame added to the SDK is covered the day it lands.
+        var kinds = typeof(ConnectorProtocolKinds)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(field => field.IsLiteral && field.FieldType == typeof(string))
+            .Select(field => (string)field.GetRawConstantValue()!)
+            .ToList();
+
+        Assert.NotEmpty(kinds);
+        Assert.Superset(InvocationDispatch.Served.ToHashSet(), kinds.ToHashSet());
+
+        // **Three buckets, not two.** `cancel` is a control frame the session
+        // consumes, so it never reaches the dispatch as a request and is
+        // neither served nor refused by it. Excluding it silently would leave a
+        // hole in the walk, so it is asserted below in its own right — the
+        // deliberate divergence stated where it diverges.
+        var consumedBySession = new[] { ConnectorProtocolKinds.Cancel };
+
+        await using var hub = new Hub(HttpStatusCode.OK);
+
+        foreach (var kind in consumedBySession)
+        {
+            var control = await hub.ExchangeAsync(kind, ReadOnlyMemory<byte>.Empty);
+
+            Assert.False(InvocationDispatch.Served.Contains(kind), kind);
+            Assert.DoesNotContain("does not serve the invocation kind",
+                Encoding.UTF8.GetString(control.Payload.Span), StringComparison.Ordinal);
+        }
+
+        foreach (var kind in kinds.Except(consumedBySession))
+        {
+            // The ROLE cannot be asserted either way: a served kind given an
+            // empty payload may answer a Reply (`join` reads it as whole) or a
+            // Fault (`drain` has no credentials). Only the refusal's own
+            // sentence separates "not served" from "served and unhappy".
+            var reply = await hub.ExchangeAsync(kind, ReadOnlyMemory<byte>.Empty);
+            var refused = reply.Role == ConnectorFrameRole.Fault
+                && Encoding.UTF8.GetString(reply.Payload.Span)
+                    .Contains("does not serve the invocation kind", StringComparison.Ordinal);
+
+            // The message names the kind: a walk that fails without saying
+            // WHICH member disagreed sends the reader back to run it by hand.
+            Assert.True(
+                !InvocationDispatch.Served.Contains(kind) == refused,
+                $"'{kind}' — served: {InvocationDispatch.Served.Contains(kind)}, "
+                + $"refused: {refused}");
+        }
+    }
 
     /// <summary>A <c>join</c> invocation carrying one payload.</summary>
     private static ReadOnlyMemory<byte> Join(string payloadKind, string body) =>

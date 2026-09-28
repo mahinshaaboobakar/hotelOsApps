@@ -163,51 +163,16 @@ public static class OhipBusinessEventQueue
         // record rather than a page it would have to split later. The bytes are
         // OHIP's own field names throughout: this is the vendor's schema, and
         // renaming it here would make a rejection quote a spelling nobody sent.
-        return [.. events.Select(one => new DrainedEvent(
-            JsonSerializer.SerializeToUtf8Bytes(one, Json), EventPayload, KeyOf(one)))];
-    }
-
-    /// <summary>What one queue item is, across redeliveries — ADR 0246.</summary>
-    /// <param name="item">The item as OHIP sent it, before re-serialising.</param>
-    /// <returns>A key that is never empty.</returns>
-    /// <remarks>
-    /// <para>
-    /// <b>OHIP's own event id, read from the shape OHIP actually sends</b> —
-    /// <c>businessEventId.id</c>, per
-    /// <c>providers/oracle/cloud/services/impl/OracleCloudEventServiceImpl.java:61</c>,
-    /// which reads exactly that out of the response it is given. The key is
-    /// the source's identity rather than a digest of the bytes, so a
-    /// redelivery of one change is one fact however the payload is spelled the
-    /// second time.
-    /// </para>
-    /// <para>
-    /// <b>A fresh v7 where the id is absent</b>, keeping the reasoning already
-    /// written for this case: an item with no id cannot be recognised at all,
-    /// and a key that collides with nothing is better than one key shared by
-    /// every malformed item, which would deduplicate unrelated changes into
-    /// each other. It means such an item is stored on every delivery — the
-    /// safe direction for a destructive queue, where the alternative is losing
-    /// it.
-    /// </para>
-    /// <para>
-    /// <b>Read from the element rather than from the bytes</b>, because it is
-    /// the same data one parse earlier; and prefixed with the kind, which is
-    /// the convention <c>IConnectorAdapter.DedupeKey</c> already uses, so two
-    /// keys for one change could never differ only in shape.
-    /// </para>
-    /// </remarks>
-    private static string KeyOf(JsonElement item)
-    {
-        var id = item.TryGetProperty("businessEventId", out var identifier)
-            && identifier.ValueKind is JsonValueKind.Object
-            && identifier.TryGetProperty("id", out var value)
-            && value.ValueKind is JsonValueKind.String
-                ? value.GetString()
-                : null;
-
-        return string.IsNullOrWhiteSpace(id)
-            ? $"{EventPayload}:{Guid.CreateVersion7()}"
-            : $"{EventPayload}:{id}";
+        // **Keyed from the bytes the Hub will hold, not from the element.**
+        // Those are the same bytes a quarantined payload is re-submitted with,
+        // and `PayloadIdentity` is what keys that one too — so a record drained
+        // and later re-submitted cannot become two facts. Keying the element
+        // here and the bytes there would have been two keyers for one payload.
+        return [.. events.Select(one =>
+        {
+            var bytes = JsonSerializer.SerializeToUtf8Bytes(one, Json);
+            return new DrainedEvent(bytes, EventPayload, PayloadIdentity.For(EventPayload, bytes));
+        })];
     }
 
     /// <summary>The queue's address for this hotel.</summary>
@@ -229,7 +194,7 @@ public static class OhipBusinessEventQueue
 /// </param>
 /// <param name="DedupeKey">
 /// What this item is, across redeliveries — ADR 0246, <c>CONN-Q51</c> A1.
-/// <see cref="OhipBusinessEventQueue.KeyOf"/> decides it, and it is never
+/// <see cref="PayloadIdentity.For"/> decides it, and it is never
 /// empty: an empty key is a Connector Protocol contract failure, and ADR 0248
 /// quarantines the payload rather than storing it with a sentinel or a
 /// Hub-built hash.
@@ -257,12 +222,14 @@ public static class OhipBusinessEventQueue
 /// </para>
 /// <para>
 /// <b>What holds the property instead</b> is that there is one construction
-/// site, <see cref="OhipBusinessEventQueue.KeyOf"/> returns a non-empty string
-/// on both of its branches, and two tests cover it: one that no drained item
-/// carries an empty key, and one that the key survives onto
-/// <c>DrainedPayload</c>. A second construction site added later would be
-/// covered by neither, which is the exposure this note leaves open rather than
-/// closes.
+/// site, <see cref="PayloadIdentity.For"/> returns a non-empty string on both
+/// of its branches, and two tests cover it: one that no drained item carries
+/// an empty key, and one that the key survives onto <c>DrainedPayload</c>.
+/// <b>This note used to end by naming a second construction site as the
+/// exposure it left open.</b> That site arrived — the <c>dedupe_key</c>
+/// capability keys the bytes the Hub already holds — and it is the SAME site
+/// rather than a second one, which is what closes the exposure instead of
+/// realising it.
 /// </para>
 /// </remarks>
 public sealed record DrainedEvent(byte[] Payload, string PayloadKind, string DedupeKey);

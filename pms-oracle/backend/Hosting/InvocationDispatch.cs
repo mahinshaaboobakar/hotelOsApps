@@ -45,6 +45,24 @@ namespace PmsOracle.Hosting;
 /// <param name="http">The client the OHIP token attempt dials with.</param>
 public sealed class InvocationDispatch(HttpClient http)
 {
+    /// <summary>The invocation kinds this connector answers.</summary>
+    /// <remarks>
+    /// <b>One source, walked both ways by a test.</b> This used to be typed
+    /// out in the refusal's message, which then told an operator the connector
+    /// served <c>test</c> and <c>drain</c> for days after <c>join</c> was
+    /// added — a hand-kept list in the one sentence a confused operator reads.
+    /// The test asserts every kind here is dispatched AND that every protocol
+    /// kind absent from here is refused, so the list cannot drift from the
+    /// switch in either direction.
+    /// </remarks>
+    public static readonly IReadOnlyList<string> Served =
+    [
+        ConnectorProtocolKinds.Test,
+        ConnectorProtocolKinds.Drain,
+        ConnectorProtocolKinds.Join,
+        ConnectorProtocolKinds.DedupeKey,
+    ];
+
     /// <summary>Serve one invocation.</summary>
     /// <param name="invocation">What the Hub asked for.</param>
     /// <param name="cancellationToken">The invocation's.</param>
@@ -66,6 +84,15 @@ public sealed class InvocationDispatch(HttpClient http)
             // payload and says whether it is half of a check-in.
             ConnectorProtocolKinds.Join =>
                 PartJoinInvocation.ServeAsync(invocation, cancellationToken),
+
+            // `dedupe_key` needs neither credentials nor the network either: it
+            // keys bytes the Hub already holds. For a `delivery: push`
+            // integration it is the ONLY way a payload is ever keyed, because
+            // there is no drain to carry one and the Hub never computes one
+            // (ADR 0255 §2) — which is why both on-site integrations declaring
+            // it and nothing serving it made every pushed payload unkeyable.
+            ConnectorProtocolKinds.DedupeKey =>
+                PayloadKeyInvocation.ServeAsync(invocation, cancellationToken),
 
             // `credential.response` is the Hub answering a request this
             // connector made, and the session matches it to the invocation that

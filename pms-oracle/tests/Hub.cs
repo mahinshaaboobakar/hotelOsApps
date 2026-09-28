@@ -68,7 +68,11 @@ internal sealed class Hub : IAsyncDisposable
         return System.Text.Encoding.UTF8.GetString(reply.Payload.Span);
     }
 
-    private async Task<ConnectorFrame> ExchangeAsync(string kind, ReadOnlyMemory<byte> payload)
+    /// <summary>One exchange, with the frame's role left for the caller to read.
+    /// <see cref="InvokeAsync{T}"/> and <see cref="FaultAsync"/> each assert a role;
+    /// a walk over every protocol kind cannot, because a served kind may legitimately
+    /// answer either.</summary>
+    public async Task<ConnectorFrame> ExchangeAsync(string kind, ReadOnlyMemory<byte> payload)
     {
         var asked = Guid.NewGuid();
 

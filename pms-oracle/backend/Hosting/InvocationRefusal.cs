@@ -60,7 +60,7 @@ public static class InvocationRefusal
         return ValueTask.FromException<ReadOnlyMemory<byte>>(new ConnectorFaultException(
             ConnectorFaultCode.UnsupportedKind,
             $"pms-oracle does not serve the invocation kind '{invocation.Kind}'. It serves " +
-            $"'{ConnectorProtocolKinds.Test}' and '{ConnectorProtocolKinds.Drain}'. A kind " +
+            $"{string.Join(", ", InvocationDispatch.Served.Select(kind => $"'{kind}'"))}. A kind " +
             "this package does not know is usually a newer Hub talking to an older connector, " +
             "so it is refused by name rather than guessed at."));
     }
