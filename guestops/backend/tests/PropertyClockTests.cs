@@ -33,8 +33,15 @@ public sealed class PropertyClockTests
         var stored = DateTimeOffset.Parse(storedUtc, System.Globalization.CultureInfo.InvariantCulture);
         Assert.Equal(TimeSpan.Zero, stored.Offset);
 
-        Assert.Equal(DateOnly.Parse(day), new StayTime(stored, TimeBasis.Observed).DateIn(Zone(zone)));
-        Assert.Equal(DateOnly.Parse(day), PropertyClock.Day(stored, Zone(zone)));
+        // ParseExact, invariant, because the `day` above is an ISO literal from
+        // this test's own InlineData and `DateOnly.Parse` would read it under the
+        // machine's culture — green here and failing on a machine whose date order
+        // differs. Parsed once: two assertions compared the same string twice.
+        var expected = DateOnly.ParseExact(
+            day, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture);
+
+        Assert.Equal(expected, new StayTime(stored, TimeBasis.Observed).DateIn(Zone(zone)));
+        Assert.Equal(expected, PropertyClock.Day(stored, Zone(zone)));
     }
 
     [Theory]

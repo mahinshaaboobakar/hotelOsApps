@@ -138,7 +138,12 @@ public class ReportingRuleTests
         var arrival = new StayTime(
             new DateTimeOffset(2026, 9, 1, 6, 0, 0, TimeSpan.Zero), TimeBasis.Observed);
 
-        Assert.Equal(DateOnly.Parse(expected), ReportingRule.DueBy(arrival, hours, TimeZoneInfo.Utc));
+        // ParseExact, invariant: `expected` is an ISO literal from this test's own
+        // InlineData, and a bare Parse would read it under the machine's culture.
+        Assert.Equal(
+            DateOnly.ParseExact(
+                expected, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+            ReportingRule.DueBy(arrival, hours, TimeZoneInfo.Utc));
     }
 
     private static GuestOpsSettings Settings(bool required = true) => new()
