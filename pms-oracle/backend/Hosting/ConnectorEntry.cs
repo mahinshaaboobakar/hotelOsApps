@@ -79,6 +79,9 @@ public static class ConnectorEntry
         {
             await diagnostics.WriteLineAsync(
                 $"pms-oracle was not launched by the Connector Runtime: {ConnectorBootstrap.ChannelVariable} " +
+                $"and {ConnectorBootstrap.IntegrationVariable} are BOTH the bootstrap contract " +
+                "(ADR 0330), so this names two variables rather than one: either being unset " +
+                "lands here, and an operator cannot tell which from a message that names one. " +
                 "is not set. It serves only a channel the Runtime provides, so it has nothing to do " +
                 "and has done nothing.");
             return NotLaunchedByRuntime;

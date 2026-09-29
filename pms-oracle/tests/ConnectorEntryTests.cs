@@ -53,7 +53,7 @@ public class ConnectorEntryTests
         var diagnostics = new StringWriter();
 
         var code = await ConnectorEntry.RunAsync(
-            new ConnectorBootstrap(channel), transport: null, InvocationRefusal.HandleAsync, diagnostics, default);
+            new ConnectorBootstrap(channel, "oracle-cloud"), transport: null, InvocationRefusal.HandleAsync, diagnostics, default);
 
         Assert.Equal(ConnectorEntry.NoTransport, code);
         Assert.DoesNotContain(channel, diagnostics.ToString(), StringComparison.Ordinal);
@@ -81,7 +81,7 @@ public class ConnectorEntryTests
     {
         var channel = new InMemoryChannel();
         var transport = new InMemoryTransport(channel);
-        var bootstrap = new ConnectorBootstrap("the-runtime's-channel");
+        var bootstrap = new ConnectorBootstrap("the-runtime's-channel", "oracle-cloud");
 
         var running = ConnectorEntry.RunAsync(
             bootstrap, transport, InvocationRefusal.HandleAsync, TextWriter.Null, default);
@@ -125,7 +125,7 @@ public class ConnectorEntryTests
         var reply = "served"u8.ToArray();
 
         var running = ConnectorEntry.RunAsync(
-            new ConnectorBootstrap("the-runtime's-channel"),
+            new ConnectorBootstrap("the-runtime's-channel", "oracle-cloud"),
             new InMemoryTransport(channel),
             (_, _) => ValueTask.FromResult<ReadOnlyMemory<byte>>(reply),
             TextWriter.Null,
