@@ -152,9 +152,27 @@ public sealed class OnSiteNormaliser
         // that sent no figure — and the gap is BEHAVIOURAL, so no build goes
         // red across it.
         //
-        // **It goes when either lands**: the Hub can withhold the dispatch, or
-        // the planner rules to remove now and accept the window. Sequencing
-        // held by the architect, 2026-09-29; the ruling itself is not in doubt.
+        // **RELEASE — after prerequisite declaration AND Hub-side withholding
+        // are implemented AND TESTED.** Both, not either. ADR 0321 rules the
+        // mechanism this waits on: a connector declares its invocation
+        // prerequisites in its manifest and the Hub evaluates them before
+        // dispatching. Neither half exists yet, and the manifest schema has no
+        // field for the declaration — whose spelling ADR 0321 deferred rather
+        // than inventing.
+        //
+        // **This comment is not that declaration, and cannot become one.**
+        // ADR 0321: *"The Hub must not infer prerequisites from connector code,
+        // proto comments, or the presence of a setting."* The settings map is
+        // opaque to the Hub by design, so the fact that this file reads
+        // `amountTaxBasis` says nothing to it about whether the setting is
+        // mandatory.
+        //
+        // Planner-ruled 2026-09-29, upholding the sequencing: *"Removing it now
+        // changes observable semantics before the replacement enforcement
+        // exists."* ADR 0316's own consequence — "BB removes the tax-basis
+        // `Unresolved` arm" — is marked ⚠ SEQUENCED, NOT YET IN FORCE there
+        // rather than edited away, so a reader arriving at 0316 alone does not
+        // act on a withdrawn instruction.
         //
         // Checked after the exponent, so while both can occur the operator is
         // told about one, fixes it, and is then told the other.
