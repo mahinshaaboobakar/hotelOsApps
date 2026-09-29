@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -179,9 +180,9 @@ public sealed class DeepCleanService(
             DeepCleanId = project.Id,
             RoomId = project.RoomId,
             PropertyId = project.PropertyId,
-            DueOn = project.DueOn.ToString("yyyy-MM-dd"),
-            From = project.WindowFrom?.ToString("yyyy-MM-dd"),
-            To = project.WindowTo?.ToString("yyyy-MM-dd"),
+            DueOn = project.DueOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            From = project.WindowFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            To = project.WindowTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Reason = "deep clean",
             CorrelationId = correlationId,
             OccurredAt = at,

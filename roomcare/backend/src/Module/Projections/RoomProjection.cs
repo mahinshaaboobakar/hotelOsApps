@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Days;
@@ -62,11 +63,11 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
             state?.Occupancy ?? Occupancy.Unknown,
             state?.StayStatuses ?? [],
             At(state?.NextSoldAt),
-            state?.LinenLastChangedOn?.ToString("yyyy-MM-dd"),
-            state?.LinenLastChangedOn?.AddDays(day.Policy.LinenEveryDays).ToString("yyyy-MM-dd"),
-            plan is null ? null : (lastDeep?.AddMonths(plan.EveryMonths) ?? day.Date).ToString("yyyy-MM-dd"),
+            state?.LinenLastChangedOn?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            state?.LinenLastChangedOn?.AddDays(day.Policy.LinenEveryDays).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+            plan is null ? null : (lastDeep?.AddMonths(plan.EveryMonths) ?? day.Date).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             state?.DaysWithoutService ?? 0,
-            state?.SupervisedSince?.ToString("yyyy-MM-dd"));
+            state?.SupervisedSince?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
     }
 
     /// <summary>What an ending did — the linen, the minutes worked, and what the room became.</summary>
@@ -144,7 +145,7 @@ public sealed class RoomProjection(RoomCareDbContext db, IHouse house, PropertyC
         var tasks = await db.Tasks.Where(t => t.PropertyId == propertyId && t.RoomId == roomId && t.OperatingDay >= from && t.OperatingDay < today)
             .ToListAsync(cancellationToken);
         return tasks.GroupBy(t => t.OperatingDay).OrderByDescending(g => g.Key)
-            .Select(g => new HistoryDayView(g.Key.ToString("yyyy-MM-dd"), g.Select(t => t.Service).ToList(), g.Select(t => t.Outcome).ToList()))
+            .Select(g => new HistoryDayView(g.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), g.Select(t => t.Service).ToList(), g.Select(t => t.Outcome).ToList()))
             .ToList();
     }
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
@@ -66,13 +67,13 @@ public sealed class LaneProjection(RoomCareDbContext db, IHouse house, PropertyC
             {
                 var outcomes = past.Select(p => p.Outcome).Distinct().ToList();
                 var words = outcomes.Count == 1 && past.Count() > 1 ? $"{Word(outcomes[0])} both windows" : string.Join(", ", outcomes.Select(Word));
-                known.Add(new KnownView(words, null, past.Key.ToString("yyyy-MM-dd")));
+                known.Add(new KnownView(words, null, past.Key.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)));
             }
         }
 
         known.AddRange(Known(day, lane, state, task));
         var sinceDay = lane.Reason == SupervisionReason.DaysWithoutService && state is not null
-            ? day.Date.AddDays(-state.DaysWithoutService).ToString("yyyy-MM-dd")
+            ? day.Date.AddDays(-state.DaysWithoutService).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
             : null;
         return new LaneRowView(
             lane.Id.ToString(), lane.RoomId.ToString(), snapshot.Number(lane.RoomId), state?.Version ?? 0,

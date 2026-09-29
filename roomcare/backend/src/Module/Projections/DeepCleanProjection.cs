@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
@@ -34,8 +35,8 @@ public sealed class DeepCleanProjection(RoomCareDbContext db, IHouse house, Prop
         {
             rows.Add((project.DueOn, new DeepCleanRowView(
                 project.Id.ToString(), project.Version, project.RoomId.ToString(), snapshot.Number(project.RoomId), snapshot.TypeName(project.RoomId),
-                lastDone.TryGetValue(project.RoomId, out var done) ? done.ToString("yyyy-MM-dd") : null,
-                project.DueOn.ToString("yyyy-MM-dd"), project.WindowFrom?.ToString("yyyy-MM-dd"), project.WindowTo?.ToString("yyyy-MM-dd"),
+                lastDone.TryGetValue(project.RoomId, out var done) ? done.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null,
+                project.DueOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), project.WindowFrom?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), project.WindowTo?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 At(project.BlockRequestedAt), At(project.BlockAppliedAt), project.JobId?.ToString(), project.JobStatusSeen, project.Status)));
         }
 
@@ -51,7 +52,7 @@ public sealed class DeepCleanProjection(RoomCareDbContext db, IHouse house, Prop
             }
 
             rows.Add((due, new DeepCleanRowView(null, null, room.Id.ToString(), room.Number, snapshot.TypeName(room.Id),
-                last?.ToString("yyyy-MM-dd"), due.ToString("yyyy-MM-dd"), null, null, null, null, null, null, "DUE")));
+                last?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), due.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture), null, null, null, null, null, null, "DUE")));
         }
 
         var ordered = rows.OrderBy(r => r.Row.State == "DUE" ? 1 : 0).ThenBy(r => r.Due).Select(r => r.Row).ToList();

@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -136,7 +137,7 @@ public sealed class PrepareService(
         {
             RunId = run.Id,
             PropertyId = run.PropertyId,
-            OperatingDay = day.ToString("yyyy-MM-dd"),
+            OperatingDay = day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Window = run.Window,
             Kind = run.Kind,
             RoomsConsidered = run.RoomsConsidered,

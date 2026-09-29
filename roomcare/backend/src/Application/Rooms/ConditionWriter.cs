@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -97,7 +98,7 @@ public sealed class ConditionWriter(RoomCareDbContext db, IEventAppender events)
             ById = change.Actor.Id,
             Via = change.Actor.Via,
             TaskId = change.TaskId,
-            OperatingDay = change.Day?.ToString("yyyy-MM-dd"),
+            OperatingDay = change.Day?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             InspectionRef = change.InspectionRef,
             Reason = change.Reason,
             OccurredAt = change.At,

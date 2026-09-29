@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Announcing;
 using HotelOS.RoomCare.Domain;
@@ -40,7 +41,7 @@ public sealed class SupervisionLane(RoomCareDbContext db, IEventAppender events,
             SupervisionId = opened.Id,
             RoomId = roomId,
             PropertyId = scope.PropertyId,
-            OperatingDay = day.ToString("yyyy-MM-dd"),
+            OperatingDay = day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Reason = reason,
             Days = days,
             OccurredAt = now,

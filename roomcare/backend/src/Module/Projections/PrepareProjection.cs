@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
@@ -49,7 +50,7 @@ public sealed class PrepareProjection(RoomCareDbContext db, IHouse house, Proper
         return new PrepareView(
             window.Window, now.InstantOf(day, window.Starts).ToString("o"), closes.ToString("o"),
             now.Instant >= opens && now.Instant < closes,
-            day.ToString("yyyy-MM-dd"),
+            day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             At(firstRun?.At),
             byName,
             tasks.Count,

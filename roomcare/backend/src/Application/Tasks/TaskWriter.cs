@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -76,7 +77,7 @@ public sealed class TaskWriter(RoomCareDbContext db, IEventAppender events, Time
             PropertyId = task.PropertyId,
             RoomId = task.RoomId,
             LocationId = task.LocationId,
-            OperatingDay = task.OperatingDay.ToString("yyyy-MM-dd"),
+            OperatingDay = task.OperatingDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Window = task.Window,
             Service = task.Service,
             Priority = task.Priority,

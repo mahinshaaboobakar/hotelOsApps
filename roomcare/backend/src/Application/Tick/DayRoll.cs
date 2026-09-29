@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -72,7 +73,7 @@ public sealed class DayRoll(
                 SupervisionId = Guid.Empty,
                 RoomId = room.RoomId,
                 PropertyId = room.PropertyId,
-                OperatingDay = now.Day.ToString("yyyy-MM-dd"),
+                OperatingDay = now.Day.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                 Reason = SupervisionReason.DaysWithoutService,
                 Days = room.DaysWithoutService,
                 OccurredAt = now.Instant,

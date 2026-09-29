@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
 using HotelOS.RoomCare.Application.Announcing;
@@ -72,7 +73,7 @@ public sealed class SupervisionService(RoomCareDbContext db, Gate gate, TaskWrit
             SupervisionId = lane.Id,
             RoomId = lane.RoomId,
             PropertyId = lane.PropertyId,
-            OperatingDay = lane.OperatingDay.ToString("yyyy-MM-dd"),
+            OperatingDay = lane.OperatingDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
             Reason = lane.Reason,
             Decision = decision,
             ById = person,

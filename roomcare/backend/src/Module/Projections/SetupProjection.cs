@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Contracts.Common.V1;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Abstractions;
@@ -27,7 +28,7 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
             new PolicyView(p.TriggerMode, p.WhoLeads, p.StaySource, p.BoardDefaultView, p.StatesDefaultView, p.OnDepartureCondition, p.LinenRuleKind,
                 p.LinenEveryDays, p.Towels, p.TurndownEnabled, p.RefreshAfterDays, p.DndRecheckMinutes, p.SupervisorAfterDays, p.PriorityLadder,
                 p.AssignmentStrategy, p.UnsoldDeparture, p.Version, p.Version == 0 ? null : p.ChangedAt.ToString("o")),
-            windows.Select(w => new WindowView(w.Window, w.Enabled, w.Starts.ToString("HH:mm"), w.Ends.ToString("HH:mm"), w.AllowAssignmentOutside, w.Version)).ToList(),
+            windows.Select(w => new WindowView(w.Window, w.Enabled, w.Starts.ToString("HH:mm", CultureInfo.InvariantCulture), w.Ends.ToString("HH:mm", CultureInfo.InvariantCulture), w.AllowAssignmentOutside, w.Version)).ToList(),
             by);
     }
 
@@ -60,7 +61,7 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
         {
             var inZone = rooms.Where(r => members.Any(m => m.RoomId == r.Id && m.ZoneId == z.Id)).ToList();
             var since = members.Where(m => m.ZoneId == z.Id).Select(m => (DateOnly?)m.EffectiveFrom).Max();
-            return new ZoneRowView(z.Id.ToString(), z.Code, z.Name, inZone.Count, inZone.FirstOrDefault()?.Number, inZone.LastOrDefault()?.Number, since?.ToString("yyyy-MM-dd"));
+            return new ZoneRowView(z.Id.ToString(), z.Code, z.Name, inZone.Count, inZone.FirstOrDefault()?.Number, inZone.LastOrDefault()?.Number, since?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
         }).ToList();
         var zoned = members.Select(m => m.RoomId).ToHashSet();
         return new ZonesView(policy.AssignmentStrategy, rows, rooms.Count, rooms.Count(r => !zoned.Contains(r.Id)),
@@ -73,7 +74,7 @@ public sealed class SetupProjection(RoomCareDbContext db, IHouse house, Standard
         var areas = await house.AreasAsync(scope.PropertyId, cancellationToken);
         var schedules = await db.AreaSchedules.Where(a => a.PropertyId == scope.PropertyId).ToDictionaryAsync(a => a.LocationId, cancellationToken);
         var rows = areas.Select(a => schedules.TryGetValue(a.Id, out var s)
-                ? new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, s.Times.Select(t => t.ToString("HH:mm")).ToList(), s.Minutes, s.Enabled, s.Version)
+                ? new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, s.Times.Select(t => t.ToString("HH:mm", CultureInfo.InvariantCulture)).ToList(), s.Minutes, s.Enabled, s.Version)
                 : new AreaRowView(a.Id.ToString(), a.Name, a.LocationType, [], null, false, 0))
             .ToList();
         var shown = withoutRoutine ? rows.Where(r => !r.Enabled || r.Times.Count == 0).ToList() : rows;
