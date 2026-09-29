@@ -15,6 +15,7 @@ public sealed class OnSiteNormaliserTests
 {
     private static OnSiteNormaliser Kochi(TaxBasis basis = TaxBasis.Net) =>
         new(new IntegrationSettings(
+            IntegrationId: "oracle-onpremise",
             PropertyId: "prop-kochi",
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
@@ -67,6 +68,7 @@ public sealed class OnSiteNormaliserTests
 
     /// <summary>The same property, with the exponent the Hub could not supply.</summary>
     private static IntegrationSettings Settings() => new(
+        IntegrationId: "oracle-onpremise",
         PropertyId: "prop-kochi",
         PropertyCode: "KOCHI01",
         Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

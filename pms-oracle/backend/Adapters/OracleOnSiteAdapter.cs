@@ -46,21 +46,7 @@ public sealed class OracleOnSiteAdapter(IntegrationSettings settings, int? minor
         new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
 
     /// <inheritdoc />
-    /// <remarks>
-    /// <b>Empty, because a connector does not know its integration</b> — ADR
-    /// 0324 and ADR 0326. The Hub carries the identity internally and stamps
-    /// <c>ExternalRef.integration_id</c>; ADR 0326 rules that a process is
-    /// given its identity at bootstrap and <b>no mechanism for that is
-    /// specified yet</b>, so there is nothing here to return.
-    /// </remarks>
-    /// <remarks>
-    /// <b>The member itself has no consumer anywhere</b> — not in this package
-    /// and not in the Hub, whose pipeline takes an <c>IConnectorAdapter</c> and
-    /// never reads this. Returning empty satisfies the seam <c>CONN-Q42</c>
-    /// retires; removing it from the interface would be the stronger fix, and
-    /// that is a platform contract change rather than this package's.
-    /// </remarks>
-    public string IntegrationId => string.Empty;
+    public string IntegrationId => settings.IntegrationId;
 
     /// <inheritdoc />
     /// <remarks>

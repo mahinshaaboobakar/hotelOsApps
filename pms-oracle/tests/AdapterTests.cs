@@ -19,12 +19,9 @@ namespace PmsOracle.Tests;
 /// </remarks>
 public sealed class AdapterTests
 {
-    // Three distinct settings that no longer differ by identity: ADR 0324
-    // took it off the record, so what separates the three adapters is the
-    // adapter type and its configuration, never a name they carry.
-    private static readonly IntegrationSettings Cloud = Settings();
-    private static readonly IntegrationSettings OnPremise = Settings();
-    private static readonly IntegrationSettings Web = Settings();
+    private static readonly IntegrationSettings Cloud = Settings("oracle-cloud");
+    private static readonly IntegrationSettings OnPremise = Settings("oracle-onpremise");
+    private static readonly IntegrationSettings Web = Settings("oracle-web");
 
     // -------------------------------------------------------------------------
     // Three identifiers, never one — R28
@@ -37,20 +34,14 @@ public sealed class AdapterTests
         // differing in transport, credential model and vocabulary — collapsing
         // them would make every Oracle fact's provenance say which company
         // wrote the PMS rather than which system it came out of.
-        // **Inverted by ADR 0324 and ADR 0326, not deleted.** This asserted
-        // that three adapters report three identities — R28's property, and
-        // the connector's to state until the Hub took it. It now asserts the
-        // connector knows NONE of them, which is the same rule held from the
-        // other side: a connector naming its own integration would be
-        // selecting what its output is attributed to.
-        Assert.All(
+        Assert.Equal(
+            ["oracle-cloud", "oracle-onpremise", "oracle-web"],
             new string[]
             {
                 new OracleCloudAdapter(Cloud, new NoQueue(), new NoGuarantees(), new HttpClient(), MinorUnits).IntegrationId,
                 new OracleOnSiteAdapter(OnPremise, MinorUnits).IntegrationId,
                 new OracleOnSiteAdapter(Web, MinorUnits).IntegrationId,
-            },
-            Assert.Empty);
+            });
     }
 
     [Fact]
@@ -178,7 +169,8 @@ public sealed class AdapterTests
         Assert.Empty(result.RoomStates);
     }
 
-    private static IntegrationSettings Settings() => new(
+    private static IntegrationSettings Settings(string integrationId) => new(
+        IntegrationId: integrationId,
         PropertyId: Guid.CreateVersion7().ToString(),
         PropertyCode: "KOCHI",
         Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

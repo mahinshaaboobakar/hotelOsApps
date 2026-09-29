@@ -28,6 +28,7 @@ public sealed class ConnectionTestTests
     private static OracleCloudAdapter Adapter(HttpStatusCode? answers = null) =>
         new(
             new IntegrationSettings(
+                IntegrationId: "oracle-cloud",
                 PropertyId: "prop-kochi",
                 PropertyCode: "KOCHI01",
                 Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
@@ -189,6 +190,7 @@ public sealed class ConnectionTestTests
 
     private static IntegrationSettings Settings() =>
         new(
+            IntegrationId: "oracle-cloud",
             PropertyId: "prop-kochi",
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

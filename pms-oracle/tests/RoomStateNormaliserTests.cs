@@ -14,6 +14,7 @@ public sealed class RoomStateNormaliserTests
 {
     private static RoomStateNormaliser Kochi() =>
         new(new IntegrationSettings(
+            IntegrationId: "oracle-web",
             PropertyId: "prop-kochi",
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

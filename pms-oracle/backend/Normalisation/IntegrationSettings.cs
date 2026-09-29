@@ -6,14 +6,11 @@ namespace PmsOracle.Normalisation;
 /// What one configured integration needs to know before it can normalise
 /// anything, beyond the message itself.
 /// </summary>
-/// <remarks>
-/// <b>It does NOT need its own identity</b> — ADR 0324 and ADR 0326. This
-/// record carried <c>IntegrationId</c> so the normalisers could stamp
-/// <c>ExternalRef.integration_id</c>; the Hub stamps that now, and a connector
-/// naming its own integration would be selecting what its output is
-/// attributed to. The five reads were REMOVED rather than re-sourced, which is
-/// why the field is gone rather than fed from somewhere else.
-/// </remarks>
+/// <param name="IntegrationId">
+/// The registered connector identifier — <c>oracle-onpremise</c>, never
+/// <c>oracle</c>. ADR 0020 validates it against the closed set the Hub
+/// registers, so three flavours of one PMS stay three identities.
+/// </param>
 /// <param name="PropertyId">The property this integration is configured for.</param>
 /// <param name="PropertyCode">
 /// What the PMS calls that property. Incoming messages claim one, and it is
@@ -76,6 +73,7 @@ namespace PmsOracle.Normalisation;
 /// </para>
 /// </remarks>
 public sealed record IntegrationSettings(
+    string IntegrationId,
     string PropertyId,
     string PropertyCode,
     PropertyClock Clock,
