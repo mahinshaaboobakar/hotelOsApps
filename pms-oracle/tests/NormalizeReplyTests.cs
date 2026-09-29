@@ -53,23 +53,36 @@ public sealed class NormalizeReplyTests
             }
             catch (NotSupportedException refusal)
             {
-                Assert.Contains("no ruled spelling", refusal.Message, StringComparison.Ordinal);
+                // **The walk asserts SPELLED-OR-REFUSED and not the ground.**
+                // It pinned "no ruled spelling" until `CONN-Q84(b)` gave the
+                // configuration state a spelling and ADR 0316 gave its refusal
+                // a different reason — so the walk started failing on a member
+                // it was never about. Which ground governs is the two dedicated
+                // tests' subject; a walk that also asserts the reason fails
+                // whenever a reason legitimately changes.
+                Assert.False(
+                    string.IsNullOrWhiteSpace(refusal.Message),
+                    $"{reason} refused without saying why");
             }
         }
     }
 
     [Fact]
-    public void A_reason_with_no_ruled_spelling_refuses_rather_than_inventing_one()
+    public void The_configuration_state_is_spelled_and_is_still_not_a_connectors_to_send()
     {
-        // `IntegrationNotConfigured` is in the connector's enum and is produced
-        // by nothing. ADR 0288 makes the vocabulary platform-defined and
-        // extensible only by a ruling, so translating it would be a connector
-        // minting a platform category.
+        // **The refusal survived its own justification.** It used to read "no
+        // ruled spelling", which `CONN-Q84(b)` made false by spelling it
+        // INTEGRATION_NOT_CONFIGURED. It still refuses, on ADR 0316's ground:
+        // the Hub reports WAITING and does not invoke the connector, so this
+        // end sending it would be answering for a decision nobody asked it to
+        // make. Two tests rather than one, because a single assertion would
+        // pass under either reason and say nothing about which governs.
         var refusal = Assert.Throws<NotSupportedException>(() => NormalizeReply.From(
             new NormalisationOutcome.Rejected(
-                RejectionReason.IntegrationNotConfigured, "taxBasis", null)));
+                RejectionReason.IntegrationNotConfigured, "amountTaxBasis", null)));
 
-        Assert.Contains("no ruled spelling", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("ADR 0316", refusal.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain("no ruled spelling", refusal.Message, StringComparison.Ordinal);
     }
 
     [Fact]

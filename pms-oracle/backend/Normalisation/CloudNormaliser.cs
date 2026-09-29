@@ -145,17 +145,31 @@ public sealed class CloudNormaliser
                 "minor_unit_digits", "roomStay.total.amountBeforeTax");
         }
 
-        // **The second prerequisite, and it is the same class.** ADR 0266 puts
-        // the tax basis in invocation settings; `AmountReading` refuses an
-        // unspecified one rather than passing it through, so without this the
-        // amount would vanish and the fact would read as a source that sent no
-        // figure. That is the collapse CONN-Q75 was ruled to prevent, arriving
-        // through a different cause.
+        // **HELD, AND RULED OUT — ADR 0316. This arm is to be removed and is
+        // not removed yet.** The axis is ownership: `minor_unit_digits` is
+        // PLATFORM reference data a property cannot configure, so its absence
+        // is `UNRESOLVED`; the tax basis is CONFIGURATION THE PROPERTY OWES,
+        // so its absence is `INTEGRATION_NOT_CONFIGURED`, the work reports
+        // WAITING, and **the connector is not invoked at all**. Under that
+        // ruling this arm has no valid caller, which its own author said in
+        // as many words when retracting their first-pass example.
         //
-        // Checked after the exponent, so when BOTH are missing the operator is
-        // told about one, fixes it, and is then told about the other. Two
-        // absences, two values, revealed in sequence rather than merged into a
-        // prerequisite nobody could act on.
+        // **Why it is still here.** The Hub can only withhold the invocation
+        // for a DECLARED configuration prerequisite, and nothing can declare
+        // one: the manifest's `configuration:` is empty by design (ADR 0092's
+        // flat list "cannot express per integration"), `Setting` carries no
+        // required flag, and the platform schema has no such field. Removing
+        // this today therefore restores the exact collapse CONN-Q75 was ruled
+        // to prevent — an amount that vanishes into a fact reading as a source
+        // that sent no figure — and the gap is BEHAVIOURAL, so no build goes
+        // red across it.
+        //
+        // **It goes when either lands**: the Hub can withhold the dispatch, or
+        // the planner rules to remove now and accept the window. Sequencing
+        // held by the architect, 2026-09-29; the ruling itself is not in doubt.
+        //
+        // Checked after the exponent, so while both can occur the operator is
+        // told about one, fixes it, and is then told the other.
         if (stay.Total is not null && _settings.AmountTaxBasis is TaxBasis.Unspecified)
         {
             return new NormalisationOutcome.Unresolved(

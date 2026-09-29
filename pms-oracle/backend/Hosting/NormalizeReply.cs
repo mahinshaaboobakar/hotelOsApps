@@ -114,6 +114,21 @@ public static class NormalizeReply
     /// </remarks>
     private static Rejection Refuse(NormalisationOutcome.Rejected rejected)
     {
+        // **Two refusals, for two different reasons.** They were one until
+        // `CONN-Q84(b)` ruled the configuration state's spelling, and the
+        // justification I wrote then — "no ruled spelling" — is now false for
+        // one of them while the refusal itself still stands. A reader meeting
+        // an expired reason concludes the constraint has expired with it.
+        if (rejected.Reason is RejectionReason.IntegrationNotConfigured)
+        {
+            throw new NotSupportedException(
+                "INTEGRATION_NOT_CONFIGURED is spelled and is not a connector's to send. "
+                + "ADR 0316 puts it in the configuration/waiting classification, never "
+                + "connector validation: the Hub reports WAITING and does not invoke the "
+                + "connector at all, so a rejection carrying it would be this end answering "
+                + "for a decision it was never asked to make.");
+        }
+
         if (!Spellings.TryGetValue(rejected.Reason, out var reason))
         {
             throw new NotSupportedException(
