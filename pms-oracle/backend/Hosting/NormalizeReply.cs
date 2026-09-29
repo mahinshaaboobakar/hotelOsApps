@@ -1,4 +1,5 @@
 using HotelOS.Contracts.Integration.V1;
+using PmsOracle.Authentication;
 using PmsOracle.Normalisation;
 
 namespace PmsOracle.Hosting;
@@ -48,6 +49,34 @@ public static class NormalizeReply
             [RejectionReason.UnreadableValue] = "UNREADABLE_VALUE",
             [RejectionReason.UnknownStatus] = "UNKNOWN_STATUS",
             [RejectionReason.PropertyMismatch] = "PROPERTY_MISMATCH",
+        };
+
+    /// <summary>
+    /// The invocation prerequisites this package declares — ADR 0321, ADR 0322.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The manifest is the authority and this is a copy of it</b>, held
+    /// honest in both directions by
+    /// <c>ManifestDeclarationTests.Every_prerequisite_the_manifest_declares_is_refused_on_the_unresolved_arm</c>.
+    /// The same shape as this package's secrets and payload kinds: the compiler
+    /// cannot read a signed YAML file, so the agreement is a test rather than a
+    /// derivation.
+    /// </para>
+    /// <para>
+    /// <b>The union of three integrations' declarations, because this method
+    /// has no integration context.</b> ADR 0322 declares them per integration —
+    /// <c>hotelCode</c> is the two pushed ones' and not Cloud's — and refusing
+    /// the union is the conservative direction: the cost is a refusal for a
+    /// combination that cannot occur, and the cost of the other direction is
+    /// the escape hatch the contract forbids.
+    /// </para>
+    /// </remarks>
+    private static readonly IReadOnlySet<string> DeclaredPrerequisites =
+        new HashSet<string>(StringComparer.Ordinal)
+        {
+            IntegrationSettings.TaxBasisSetting,
+            OhipCredentials.HotelCodeSetting,
         };
 
     /// <summary>Turn what the normaliser decided into what the Hub is told.</summary>
@@ -122,18 +151,31 @@ public static class NormalizeReply
     /// gate"</i>, which the ruling forbids by name.
     /// </para>
     /// <para>
-    /// <b>Paired with a held arm, and it goes when that does.</b> The
-    /// normalisers still answer <c>Unresolved(amountTaxBasis)</c> because
-    /// ADR 0316's removal is sequenced behind the Hub's withholding being
-    /// live. Until then this is what stops that outcome reaching the wire —
-    /// and the platform vocabulary stays OPEN, because the test is what the
-    /// connector DECLARES as configuration, not a hardcoded list of the one
-    /// platform fact that exists today.
+    /// <b>The refusal is the CONTRACT's and outlives the arm below it.</b> This
+    /// paragraph said <i>"paired with a held arm, and it goes when that
+    /// does"</i>, which was wrong in the direction that invites deletion:
+    /// <c>NormalizationUnresolved</c> states the rule in its own comment —
+    /// <i>"Not an escape hatch. A prerequisite an integration DECLARES is gated
+    /// by the Hub before dispatch (ADR 0321, ADR 0327), so it never arrives
+    /// here"</i> — so a declared name reaching this method is a contract
+    /// violation whenever it happens, not only while something is held. What is
+    /// temporary is that the normalisers still <i>produce</i>
+    /// <c>Unresolved(amountTaxBasis)</c>, sequenced behind the Hub's
+    /// withholding going live; this guard is what keeps that off the wire in
+    /// the meantime and stays afterwards.
+    /// </para>
+    /// <para>
+    /// <b>Keyed on what the connector DECLARES, not on a list of platform
+    /// facts.</b> <c>prerequisite</c> is OPEN — <i>"that is the currently
+    /// required member, not the universe of platform facts … a new one is named
+    /// here as it arrives"</i> — so an allow-list of the one platform fact that
+    /// exists today would close an open vocabulary to solve a scoping problem,
+    /// and would refuse the next platform fact on the day it is ruled.
     /// </para>
     /// </remarks>
     private static NormalizeResult Unresolvable(NormalisationOutcome.Unresolved unresolved)
     {
-        if (unresolved.Prerequisite == IntegrationSettings.TaxBasisSetting)
+        if (DeclaredPrerequisites.Contains(unresolved.Prerequisite))
         {
             throw new NotSupportedException(
                 $"'{unresolved.Prerequisite}' is configuration a property owes, not a platform "

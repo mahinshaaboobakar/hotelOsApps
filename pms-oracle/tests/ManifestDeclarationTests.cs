@@ -1,6 +1,9 @@
+using HotelOS.Contracts.Integration.V1;
 using PmsOracle.Adapters;
 using PmsOracle.Authentication;
 using PmsOracle.Capabilities;
+using PmsOracle.Hosting;
+using PmsOracle.Normalisation;
 using Xunit;
 
 namespace PmsOracle.Tests;
@@ -172,7 +175,7 @@ public class ManifestDeclarationTests
 
         Assert.Equal(
             cloud.Order(StringComparer.Ordinal),
-            PayloadKindsOf("oracle-cloud").Order(StringComparer.Ordinal));
+            ListOf("oracle-cloud", "payload_kinds").Order(StringComparer.Ordinal));
 
         string[] onSite = [OracleOnSiteAdapter.StayPayload, OracleOnSiteAdapter.RoomStatusPayload];
 
@@ -180,20 +183,78 @@ public class ManifestDeclarationTests
         {
             Assert.Equal(
                 onSite.Order(StringComparer.Ordinal),
-                PayloadKindsOf(pushed).Order(StringComparer.Ordinal));
+                ListOf(pushed, "payload_kinds").Order(StringComparer.Ordinal));
         }
     }
 
-    /// <summary>The payload kinds one integration declares.</summary>
-    /// <param name="integrationId">Which integration to read.</param>
-    /// <returns>Its declared kinds, in declaration order.</returns>
-    private static IReadOnlyList<string> PayloadKindsOf(string integrationId)
+    /// <summary>
+    /// Every prerequisite the manifest declares is refused on the
+    /// <c>unresolved</c> arm — ADR 0321, ADR 0327, <c>CONN-Q84</c>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Both directions, and the second is the one that catches drift.</b>
+    /// Declared-and-not-refused would let a connector rediscover a prerequisite
+    /// the Hub was required to gate — <i>"a generic escape hatch"</i>, which
+    /// <c>NormalizationUnresolved</c>'s own comment forbids by name.
+    /// Refused-and-not-declared is the opposite failure: the guard would swallow
+    /// a genuine platform fact, and <c>prerequisite</c> is OPEN, so the next one
+    /// ruled must reach the wire rather than meet a stale refusal here.
+    /// </para>
+    /// <para>
+    /// <b>The declaration is the manifest's, not the code's.</b> The set in
+    /// <c>NormalizeReply</c> is a copy — the compiler cannot read a signed YAML
+    /// file — so this is the only thing that compares them, exactly as
+    /// <see cref="the_manifest_declares_exactly_the_secrets_the_credentials_read"/>
+    /// is for secrets.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void Every_prerequisite_the_manifest_declares_is_refused_on_the_unresolved_arm()
     {
-        var value = ScalarOf(integrationId, "payload_kinds");
+        string[] integrations = [DiallingIntegration, .. PushIntegrations];
+
+        var declared = integrations
+            .SelectMany(id => ListOf(id, "prerequisites"))
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.NotEmpty(declared);
+
+        foreach (var prerequisite in declared)
+        {
+            var refusal = Assert.Throws<NotSupportedException>(() => NormalizeReply.From(
+                new NormalisationOutcome.Unresolved(prerequisite, "Amount")));
+
+            Assert.Contains("ADR 0316", refusal.Message, StringComparison.Ordinal);
+        }
+
+        // The other direction: a platform fact the manifest does NOT declare
+        // travels, so the guard cannot quietly grow into the allow-list this
+        // arm was ruled not to be.
+        var platformFact = NormalizeReply.From(
+            new NormalisationOutcome.Unresolved("minor_unit_digits", "Amount"));
+
+        Assert.Equal(NormalizeResult.OutcomeOneofCase.Unresolved, platformFact.OutcomeCase);
+        Assert.DoesNotContain("minor_unit_digits", declared, StringComparer.Ordinal);
+    }
+
+    /// <summary>One inline-list key inside one integration's block.</summary>
+    /// <param name="integrationId">Which integration to read.</param>
+    /// <param name="key">The key, without its colon.</param>
+    /// <returns>Its declared members, in declaration order.</returns>
+    /// <remarks>
+    /// <b>One reader for both lists.</b> This was <c>PayloadKindsOf</c> with the
+    /// key written into it; a second inline list in the same block would have
+    /// arrived as a second copy of the bracket parsing, which is the shape where
+    /// two readers of one file drift in the half nobody reads.
+    /// </remarks>
+    private static IReadOnlyList<string> ListOf(string integrationId, string key)
+    {
+        var value = ScalarOf(integrationId, key);
 
         Assert.True(
             value.StartsWith('[') && value.EndsWith(']'),
-            $"`{integrationId}` declares payload_kinds in a form this guard cannot read: {value}");
+            $"`{integrationId}` declares {key} in a form this guard cannot read: {value}");
 
         return [.. value[1..^1]
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)];

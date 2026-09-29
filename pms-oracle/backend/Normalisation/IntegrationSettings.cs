@@ -56,23 +56,35 @@ namespace PmsOracle.Normalisation;
 /// <i>key</i> as the defect, so the hour is not evidence for a value.
 /// </para>
 /// <para>
-/// <b><see cref="AmountTaxBasis"/> has no home yet, and this is the flag.</b>
-/// It is per-integration configuration — whether a source means net or gross is
-/// a fact about that source, and Oracle's flavours differ from other vendors'.
-/// It belongs with the Integration Hub's per-integration configuration, which
-/// the connector's <c>ui.module</c> submits (<c>CONN-Q9</c>, ruled (b)).
+/// <b><see cref="AmountTaxBasis"/> HAS a home, and these two paragraphs said it
+/// did not.</b> They read <i>"has no home yet, and this is the flag"</i> and
+/// <i>"the Hub does not exist"</i>, written when both were true. It is
+/// per-integration configuration — whether a source means net or gross is a
+/// fact about that source, and Oracle's flavours differ from other vendors' —
+/// and it now lives where <c>CONN-Q9</c>(b) said it would: the Integration
+/// Hub's per-integration settings map, offered by <c>ui/configuration.ts</c>
+/// under <see cref="TaxBasisSetting"/> and read back by
+/// <see cref="ReadTaxBasis"/>.
 /// </para>
 /// <para>
-/// That configuration surface is unbuilt: the Hub does not exist, and the
-/// manifest deliberately carries <c>configuration: []</c> because ADR 0092's
-/// flat <c>key / type / default / scope</c> list cannot express a setting that
-/// is per integration rather than per package. So it arrives here as an input
-/// and is named as pending, which is honest where inventing a home would not
-/// be. Nothing else about this type changes when the home exists.
+/// <b>It is also a declared invocation prerequisite</b> — ADR 0321, per
+/// integration by ADR 0322, gating every normal dispatch by ADR 0327 — so a
+/// property that has not configured it does not reach this connector at all.
+/// The old sentence is worth keeping because a reader meeting it would conclude
+/// the gate cannot be relied upon, which is the opposite of what is true.
 /// </para>
 /// <para>
-/// The freshness maximum shares that home and that pending state, which is why
-/// it arrives the same way.
+/// The manifest still carries <c>configuration: []</c>, and that is unchanged
+/// and deliberate: ADR 0092's flat <c>key / type / default / scope</c> list
+/// cannot express a setting that is per integration rather than per package, so
+/// the vocabulary lives on the connector's two halves rather than in the
+/// package manifest (ADR 0128 §7).
+/// </para>
+/// <para>
+/// <b><see cref="GuaranteeMaximumFreshness"/> does NOT share that state any
+/// more, and the difference matters.</b> It shares the home — the same settings
+/// map — and it is declared as a prerequisite by nothing, so its absence is
+/// still an absence this connector must report rather than one the Hub gates.
 /// </para>
 /// </remarks>
 public sealed record IntegrationSettings(

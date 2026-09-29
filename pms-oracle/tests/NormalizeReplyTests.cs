@@ -1,4 +1,5 @@
 using HotelOS.Contracts.Integration.V1;
+using PmsOracle.Authentication;
 using PmsOracle.Hosting;
 using PmsOracle.Normalisation;
 using PmsOracle.Vocabularies;
@@ -136,21 +137,25 @@ public sealed class NormalizeReplyTests
         Assert.DoesNotContain("Amount", reply.Unresolved.ToString(), StringComparison.Ordinal);
     }
 
-    [Fact]
-    public void A_configuration_prerequisite_has_no_place_on_that_arm()
+    [Theory]
+    [InlineData(IntegrationSettings.TaxBasisSetting)]
+    [InlineData(OhipCredentials.HotelCodeSetting)]
+    public void A_configuration_prerequisite_has_no_place_on_that_arm(string prerequisite)
     {
         // **The arm must not become a generic escape hatch.** ADR 0316 splits
         // by OWNERSHIP: a platform fact the Hub cannot resolve travels on the
         // arm above; configuration a property owes makes the Hub withhold the
-        // dispatch (ADR 0321). A connector answering here would be
-        // rediscovering a prerequisite the Hub was required to gate.
+        // dispatch (ADR 0321, widened by ADR 0327 to every normal dispatch). A
+        // connector answering here would be rediscovering a prerequisite the
+        // Hub was required to gate.
         //
-        // Reachable today only because the arm that produces this is HELD
-        // behind the Hub's withholding going live — so this is what stops it
-        // reaching the wire in the meantime.
+        // **Both declared names, not only the one a normaliser produces today.**
+        // `amountTaxBasis` has a producer that is HELD; `hotelCode` has none,
+        // and guarding only the name in front of me is the rule applied to the
+        // list somebody happened to write down. Which names are declared is
+        // `ManifestDeclarationTests`' subject, in both directions.
         var refusal = Assert.Throws<NotSupportedException>(() => NormalizeReply.From(
-            new NormalisationOutcome.Unresolved(
-                IntegrationSettings.TaxBasisSetting, "Amount")));
+            new NormalisationOutcome.Unresolved(prerequisite, "Amount")));
 
         Assert.Contains("ADR 0316", refusal.Message, StringComparison.Ordinal);
         Assert.Contains("withholds", refusal.Message, StringComparison.Ordinal);
