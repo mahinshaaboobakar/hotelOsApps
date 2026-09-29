@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Rooms;
 using HotelOS.RoomCare.Application.Standard;
@@ -28,7 +29,12 @@ public sealed class StayArrivedHandler(RoomCareDbContext db, ObservationService 
         await db.SaveChangesAsync(cancellationToken);
     }
 
-    internal static DateOnly? Day(string? text) => DateOnly.TryParse(text, out var day) ? day : null;
+    // ADR 0174 §NUM-Q4: a business date arriving on an event is a wire value and is
+    // parsed invariantly. `DateOnly.TryParse` read it under the machine's culture,
+    // which is not merely lenient - under th-TH a format-pinned "2026-09-23" parses
+    // TRUE and answers 1483 CE. `Iso8601.Day` is exact and invariant and returns
+    // null on anything else, which is what this already did.
+    internal static DateOnly? Day(string? text) => Iso8601.Day(text);
 }
 
 /// <summary><c>stay.departed</c> — vacant, and the property's on-departure condition (S4: "a line on the setup, not a constant").</summary>

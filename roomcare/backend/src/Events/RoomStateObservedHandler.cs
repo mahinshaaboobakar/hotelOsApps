@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using HotelOS.Formats;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Rooms;
 using HotelOS.RoomCare.Domain;
@@ -38,7 +39,9 @@ public sealed class RoomStateObservedHandler(RoomCareDbContext db, ObservationSe
         await observations.ObserveAsync(scope, new ObservedFact(roomId, ObservationSource.Pms, occurred, clock.GetUtcNow())
         {
             EventId = envelope.EventId,
-            OperatingDay = DateOnly.TryParse(payload.Header?.BusinessDate, out var day) ? day : null,
+            // ADR 0174 §NUM-Q4 — a wire business date, parsed invariantly. Same
+            // null-on-anything-else behaviour as the TryParse this replaces.
+            OperatingDay = Iso8601.Day(payload.Header?.BusinessDate),
             Occupancy = Wire.Occupancy(state.Occupancy),
             Condition = condition,
             StayStatuses = state.StayStatuses?.Select(Wire.Stay).OfType<string>().ToList() ?? [],

@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Attendance;
 using HotelOS.Workforce.Application.Leave;
@@ -35,7 +36,7 @@ public static class ReportsView
 
         // ADR 0211 — which month "this month" is, at the property.
         var anchor = call.Optional("month") is { } named
-            ? DateOnly.Parse(named.GetString()!)
+            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
             : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var from = new DateOnly(anchor.Year, anchor.Month, 1);

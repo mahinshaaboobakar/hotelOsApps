@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Cancellation;
 using HotelOS.Jobs.Application.Completion;
@@ -186,7 +187,7 @@ public static class WriteCapabilities
                         JobId = id,
                         ExpectedVersion = body.Version(),
                         Reason = body.Text("reason"),
-                        Until = body.OptionalText("until") is { } until ? DateTimeOffset.Parse(until) : null,
+                        Until = body.OptionalText("until") is { } until ? DateTimeOffset.Parse(until, CultureInfo.InvariantCulture) : null,
                     },
                     cancellationToken));
 
@@ -203,7 +204,7 @@ public static class WriteCapabilities
                         ExpectedVersion = body.Version(),
                         Priority = body.OptionalText("priority"),
                         ScheduledFor = body.OptionalText("scheduledFor") is { } day
-                            ? Optional<DateOnly?>.Of(DateOnly.Parse(day))
+                            ? Optional<DateOnly?>.Of(DateOnly.Parse(day, CultureInfo.InvariantCulture))
                             : Optional<DateOnly?>.Absent,
                         Restricted = body.Flag("restricted", false) ? true : null,
                         LinkJobId = body.OptionalId("linkJobId"),
@@ -217,7 +218,7 @@ public static class WriteCapabilities
 
             case "remind":
                 var reminder = await notes.RemindMeAsync(
-                    request.Scope, id, DateTimeOffset.Parse(body.Text("at")), body.OptionalText("note") ?? string.Empty, cancellationToken);
+                    request.Scope, id, DateTimeOffset.Parse(body.Text("at"), CultureInfo.InvariantCulture), body.OptionalText("note") ?? string.Empty, cancellationToken);
                 return new { id = reminder.Id.ToString() };
 
             case "readNudges":
@@ -254,5 +255,5 @@ public static class WriteCapabilities
     };
 
     private static DateOnly? Day(string? value) =>
-        value is null ? null : DateOnly.Parse(value);
+        value is null ? null : DateOnly.Parse(value, CultureInfo.InvariantCulture);
 }

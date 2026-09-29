@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Postings;
@@ -34,7 +35,7 @@ public static class TeamsView
 
         // ADR 0211 — the day a team's membership is read on.
         var on = call.Optional("on") is { } day
-            ? DateOnly.Parse(day.GetString()!)
+            ? DateOnly.Parse(day.GetString()!, CultureInfo.InvariantCulture)
             : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var all = await teams.ListAsync(

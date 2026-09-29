@@ -1,4 +1,5 @@
 using Google.Protobuf.WellKnownTypes;
+using HotelOS.Formats;
 using Grpc.Core;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
@@ -200,7 +201,10 @@ public partial class WorkforceGrpcService
             return null;
         }
 
-        return DateOnly.TryParse(value, out var date)
+        // ADR 0174 NUM-Q4 - invariant, and exactly what the message below
+        // already promises. TryParse read a wire date under the machine's
+        // culture, which under th-TH returns TRUE and a date 543 years out.
+        return Iso8601.Day(value) is { } date
             ? date
             : throw new InvalidRequestException($"{field} must be an ISO date (YYYY-MM-DD)");
     }

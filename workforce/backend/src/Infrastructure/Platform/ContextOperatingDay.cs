@@ -1,4 +1,5 @@
 using Grpc.Core;
+using HotelOS.Formats;
 using HotelOS.Contracts.Context.V1;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
@@ -60,7 +61,9 @@ public sealed class ContextOperatingDay(ContextService.ContextServiceClient cont
                 },
                 cancellationToken: cancellationToken);
 
-            return DateOnly.TryParse(day.BusinessDate, out var parsed) ? parsed : null;
+            // ADR 0174 NUM-Q4 - the Context Service's business date is a wire
+        // value. Same null-on-anything-else behaviour, invariantly decided.
+        return Iso8601.Day(day.BusinessDate);
         }
         catch (RpcException)
         {

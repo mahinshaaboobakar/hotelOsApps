@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Catalogue;
@@ -81,8 +82,13 @@ public static class ConfigureCapabilities
                     scope,
                     new ServiceHoursCommand(
                         body.OptionalText("department"),
-                        TimeOnly.Parse(body.Text("from")),
-                        TimeOnly.Parse(body.Text("to"))),
+                        // ADR 0174 §NUM-Q4 — a wire time, parsed invariantly. The
+                        // culture is named and the FormatException on anything
+                        // unparseable is unchanged: what a bad value DOES here is
+                        // this application's contract, and this fixes only which
+                        // culture decides whether it is bad.
+                        TimeOnly.Parse(body.Text("from"), CultureInfo.InvariantCulture),
+                        TimeOnly.Parse(body.Text("to"), CultureInfo.InvariantCulture)),
                     cancellationToken);
                 return new { id = hours.Id.ToString() };
 

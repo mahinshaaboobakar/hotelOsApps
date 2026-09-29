@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Calendar;
@@ -51,7 +52,7 @@ public static class DutyView
         // `now` stays a real instant below: who holds the duty and who is next
         // are questions about a moment, not about a day.
         var anchor = call.Optional("week") is { } named
-            ? DateOnly.Parse(named.GetString()!)
+            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
             : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
@@ -271,5 +272,6 @@ public static class DutyView
 
     /// <summary>An instant on the wire, in the form the SDK's formatter reads.</summary>
     private static DateTimeOffset Instant(ModuleCall call, string field)
-        => DateTimeOffset.Parse(call.Text(field)).ToUniversalTime();
+        => DateTimeOffset.Parse(call.Text(field), CultureInfo.InvariantCulture)
+            .ToUniversalTime();
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Calendar;
@@ -50,7 +51,7 @@ public static class RotaView
         // question; two views reading a day from two places is one property with
         // two answers to it.
         var anchor = call.Optional("week") is { } named
-            ? DateOnly.Parse(named.GetString()!)
+            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
             : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
@@ -363,5 +364,5 @@ public static class RotaView
 
     /// <summary>An optional time on the wire.</summary>
     private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!) : null;
+        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }

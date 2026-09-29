@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Duties;
@@ -52,7 +53,7 @@ public static class ScheduleView
         var today = await PropertyDay.MaybeTodayAsync(call, cancellationToken);
 
         var anchor = call.Optional("month") is { } named
-            ? DateOnly.Parse(named.GetString()!)
+            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
             : OperatingDay.OrUnavailable(today);
 
         var first = new DateOnly(anchor.Year, anchor.Month, 1);

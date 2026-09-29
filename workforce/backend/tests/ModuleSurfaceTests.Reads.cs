@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Leave;
@@ -623,7 +624,8 @@ public partial class ModuleSurfaceTests
         // The covered band carries instants, never hours: a duty is stored as a
         // DateTimeOffset and rendering it here would publish this server's
         // offset as the property's clock.
-        Assert.True(DateTimeOffset.TryParse(bands[0].GetProperty("from").GetString(), out _));
+        Assert.True(DateTimeOffset.TryParse(bands[0].GetProperty("from").GetString(),
+            CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _));
     }
 
     [Fact]
@@ -833,7 +835,8 @@ public partial class ModuleSurfaceTests
         if (change.ValueKind != JsonValueKind.Null)
         {
             Assert.True(DateTimeOffset.TryParse(
-                change.GetProperty("at").GetString(), out _));
+                change.GetProperty("at").GetString(),
+                CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out _));
         }
     }
 }

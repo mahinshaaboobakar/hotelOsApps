@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Attendance;
@@ -36,7 +37,7 @@ public static class AttendanceView
         // the UTC calendar day, so between local midnight and 05:30 an Indian
         // property's attendance screen showed yesterday.
         var on = call.Optional("date") is { } named
-            ? DateOnly.Parse(named.GetString()!)
+            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
             : await PropertyDay.TodayAsync(call, cancellationToken);
 
         var department = call.Optional("department")?.GetString();
@@ -207,5 +208,5 @@ public static class AttendanceView
 
     /// <summary>An optional time on the wire.</summary>
     private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!) : null;
+        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }

@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.RoomCare.Application.Supervision;
 using HotelOS.RoomCare.Application.Tick;
@@ -20,9 +21,10 @@ public sealed class WindowAndSupervisionTests(RoomCareFixture fixture)
     [InlineData("08:00", "15:00", "07:59", false)]
     public void A_window_may_cross_midnight(string starts, string ends, string at, bool inside)
     {
-        var window = new ServiceWindow { Starts = TimeOnly.Parse(starts), Ends = TimeOnly.Parse(ends) };
+        var window = new ServiceWindow { Starts = TimeOnly.Parse(starts, CultureInfo.InvariantCulture),
+            Ends = TimeOnly.Parse(ends, CultureInfo.InvariantCulture) };
 
-        Assert.Equal(inside, window.Contains(TimeOnly.Parse(at)));
+        Assert.Equal(inside, window.Contains(TimeOnly.Parse(at, CultureInfo.InvariantCulture)));
     }
 
     [Fact]

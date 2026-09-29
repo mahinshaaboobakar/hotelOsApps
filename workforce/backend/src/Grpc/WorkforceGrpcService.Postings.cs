@@ -1,4 +1,5 @@
 using Google.Protobuf.WellKnownTypes;
+using HotelOS.Formats;
 using Grpc.Core;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Postings;
@@ -170,7 +171,8 @@ public partial class WorkforceGrpcService
     /// standing.
     /// </remarks>
     private static DateOnly ParseDate(string value, string field) =>
-        DateOnly.TryParse(value, out var date)
+        // ADR 0174 NUM-Q4 - invariant; the refusal below is unchanged.
+        Iso8601.Day(value) is { } date
             ? date
             : throw new InvalidRequestException($"{field} must be an ISO date (YYYY-MM-DD)");
 }

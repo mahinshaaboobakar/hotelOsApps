@@ -1,3 +1,4 @@
+using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Rota;
@@ -260,5 +261,5 @@ public static class PolicyView
 
     /// <summary>An optional time on the wire.</summary>
     private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!) : null;
+        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }

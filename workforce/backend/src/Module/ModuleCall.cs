@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 using HotelOS.Platform;
@@ -61,7 +62,11 @@ public sealed record ModuleCall(
     public Guid Id(string field) => Required(field).GetGuid();
 
     /// <summary>A required date, in the wire's own form.</summary>
-    public DateOnly Date(string field) => DateOnly.Parse(Required(field).GetString()!);
+    // ADR 0174 NUM-Q4 - a module call's field is a wire value. The culture
+    // is named; the FormatException on a bad value is workforce's own
+    // contract and is left exactly as it was.
+    public DateOnly Date(string field) =>
+        DateOnly.Parse(Required(field).GetString()!, CultureInfo.InvariantCulture);
 
     /// <summary>A required string.</summary>
     public string Text(string field) => Required(field).GetString()!;

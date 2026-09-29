@@ -1,4 +1,5 @@
 using Google.Protobuf.WellKnownTypes;
+using HotelOS.Formats;
 using HotelOS.Jobs.Application.Assignment;
 using HotelOS.Jobs.Application.Cancellation;
 using HotelOS.Jobs.Application.Catalogue;
@@ -45,7 +46,11 @@ public partial class JobsGrpcService(
 
     private static DateOnly? ParseOptionalDate(string raw, string field) =>
         string.IsNullOrWhiteSpace(raw) ? null
-        : DateOnly.TryParseExact(raw, "yyyy-MM-dd", out var day) ? day
+        // ADR 0174 §NUM-Q4 — invariant, and `Iso8601.Day` is what the message
+        // already promised. A pinned format does NOT pin the calendar: the old
+        // TryParseExact answered TRUE and 1483 CE for "2026-09-23" under th-TH,
+        // so this refused nothing and quietly returned a date 543 years out.
+        : Iso8601.Day(raw) is { } day ? day
         : throw new InvalidRequestException($"{field} must be an ISO date");
 
     private static string? Blank(string raw) => string.IsNullOrWhiteSpace(raw) ? null : raw;
