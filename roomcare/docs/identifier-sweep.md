@@ -108,7 +108,23 @@ half since the refusal-words round.
 because **a corrected label over an uncorrected mechanism removes the only true thing on the screen.**
 No guard is added here for that reason: a guard would have to be suppressed for this dialog until the
 chooser exists, and a suppressed guard on the one site it was written for is worth less than this
-paragraph.
+paragraph. **An exemption list is how a guard dies** — each entry individually reasonable, nobody ever
+removes one, and within a month it covers only the cases nobody was going to get wrong. A guard born
+suppressed is that end state on day one.
+
+**WHEN THE GUARD IS WRITTEN, AND IT IS NOT NOW** (architect, 2026-09-29):
+
+```text
+now                      the three strings are CORRECT — they honestly say the
+                         screen needs a login id, because it does
+                         → a guard would refuse the only true sentence on the dialog
+when the chooser lands   the labels change, and a guard then prevents a REGRESSION
+and the labels change     rather than forbidding a truth
+```
+
+**So it goes in the same commit that changes the labels** — the one commit where it is born green
+rather than born suppressed. Whoever lands `SearchStaff` in Room Care lands all three together: the
+mechanism, the words, and the guard that keeps the words.
 
 ---
 
