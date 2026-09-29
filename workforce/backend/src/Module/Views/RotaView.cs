@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Calendar;
@@ -50,9 +49,8 @@ public static class RotaView
         // property's wall clock answers *has 07:00 passed*, which is a different
         // question; two views reading a day from two places is one property with
         // two answers to it.
-        var anchor = call.Optional("week") is { } named
-            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
-            : await PropertyDay.TodayAsync(call, cancellationToken);
+        var anchor = call.OptionalDate("week")
+            ?? await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
         var sunday = monday.AddDays(6);
@@ -185,8 +183,8 @@ public static class RotaView
                 Date = call.Date("date"),
                 CatalogueEntryId = call.Id("shiftId"),
                 DepartmentCode = call.Text("department"),
-                OverrideStartsAt = Time(call, "startsAt"),
-                OverrideEndsAt = Time(call, "endsAt"),
+                OverrideStartsAt = call.OptionalTime("startsAt"),
+                OverrideEndsAt = call.OptionalTime("endsAt"),
             },
             cancellationToken);
 
@@ -361,8 +359,4 @@ public static class RotaView
             overnight = end > start,
         };
     }
-
-    /// <summary>An optional time on the wire.</summary>
-    private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }

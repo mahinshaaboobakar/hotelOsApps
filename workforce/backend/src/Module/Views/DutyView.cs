@@ -51,9 +51,8 @@ public static class DutyView
         //
         // `now` stays a real instant below: who holds the duty and who is next
         // are questions about a moment, not about a day.
-        var anchor = call.Optional("week") is { } named
-            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
-            : await PropertyDay.TodayAsync(call, cancellationToken);
+        var anchor = call.OptionalDate("week")
+            ?? await PropertyDay.TodayAsync(call, cancellationToken);
 
         var monday = anchor.AddDays(-(((int)anchor.DayOfWeek + 6) % 7));
         var from = calendar.StartOf(monday);

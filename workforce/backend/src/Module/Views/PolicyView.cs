@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Leave;
 using HotelOS.Workforce.Application.Rota;
@@ -253,13 +252,9 @@ public static class PolicyView
     /// </remarks>
     private static ShiftHoursCommand Hours(ModuleCall call) => new()
     {
-        StartsAt = Time(call, "startsAt"),
-        EndsAt = Time(call, "endsAt"),
-        SecondStartsAt = Time(call, "secondStartsAt"),
-        SecondEndsAt = Time(call, "secondEndsAt"),
+        StartsAt = call.OptionalTime("startsAt"),
+        EndsAt = call.OptionalTime("endsAt"),
+        SecondStartsAt = call.OptionalTime("secondStartsAt"),
+        SecondEndsAt = call.OptionalTime("secondEndsAt"),
     };
-
-    /// <summary>An optional time on the wire.</summary>
-    private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }

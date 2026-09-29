@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Calendar;
 using HotelOS.Workforce.Application.Duties;
@@ -52,9 +51,8 @@ public static class ScheduleView
         // at all, so that path says what could not be read.
         var today = await PropertyDay.MaybeTodayAsync(call, cancellationToken);
 
-        var anchor = call.Optional("month") is { } named
-            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
-            : OperatingDay.OrUnavailable(today);
+        var anchor = call.OptionalDate("month")
+            ?? OperatingDay.OrUnavailable(today);
 
         var first = new DateOnly(anchor.Year, anchor.Month, 1);
         var last = first.AddMonths(1).AddDays(-1);

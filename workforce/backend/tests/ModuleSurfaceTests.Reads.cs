@@ -29,9 +29,19 @@ namespace HotelOS.Workforce.Tests;
 /// by what they assert.
 /// </para>
 /// <para>
-/// <b>The writes were not left here.</b> They are 234 code lines under their own
-/// banner in <c>.Writes.cs</c> and land inside the ceiling cleanly, so the
+/// <b>The writes were not left here.</b> They are <c>.Writes.cs</c>, under the
+/// source file's own banner, and land inside the ceiling cleanly — so the
 /// exception covers the reads alone rather than the file as it stood.
+/// </para>
+/// <para>
+/// <b>This said "234 code lines" and 234 described nothing on disk.</b> It was
+/// the banner REGION's count, taken before the file existed; the file measures
+/// <b>243</b>, the nine-line difference being its own <c>using</c>s, namespace
+/// and class declaration. ADR 0304 quotes the reason — <i>a region cannot be
+/// compiled</i> — and records both figures. The number is gone from this sentence
+/// rather than corrected, because the count that matters is the one
+/// <c>check_source_standards.py</c> measures, and a second copy here would drift
+/// from it exactly as this one did.
 /// </para>
 /// </remarks>
 public partial class ModuleSurfaceTests

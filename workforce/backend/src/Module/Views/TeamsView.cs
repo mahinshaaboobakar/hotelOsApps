@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Postings;
@@ -34,9 +33,8 @@ public static class TeamsView
         var directory = call.Service<IStaffDirectory>();
 
         // ADR 0211 — the day a team's membership is read on.
-        var on = call.Optional("on") is { } day
-            ? DateOnly.Parse(day.GetString()!, CultureInfo.InvariantCulture)
-            : await PropertyDay.TodayAsync(call, cancellationToken);
+        var on = call.OptionalDate("on")
+            ?? await PropertyDay.TodayAsync(call, cancellationToken);
 
         var all = await teams.ListAsync(
             call.Scope,

@@ -1,4 +1,3 @@
-using System.Globalization;
 using HotelOS.Platform;
 using HotelOS.Workforce.Application.Abstractions;
 using HotelOS.Workforce.Application.Attendance;
@@ -36,9 +35,8 @@ public static class AttendanceView
         // The property's operating day, asked of Context — ADR 0211. This was
         // the UTC calendar day, so between local midnight and 05:30 an Indian
         // property's attendance screen showed yesterday.
-        var on = call.Optional("date") is { } named
-            ? DateOnly.Parse(named.GetString()!, CultureInfo.InvariantCulture)
-            : await PropertyDay.TodayAsync(call, cancellationToken);
+        var on = call.OptionalDate("date")
+            ?? await PropertyDay.TodayAsync(call, cancellationToken);
 
         var department = call.Optional("department")?.GetString();
 
@@ -93,8 +91,8 @@ public static class AttendanceView
             {
                 StaffId = call.Id("staffId"),
                 BusinessDate = call.Date("on"),
-                InAt = Time(call, "in"),
-                OutAt = Time(call, "out"),
+                InAt = call.OptionalTime("in"),
+                OutAt = call.OptionalTime("out"),
                 // Stamped by this handler, never read from the body: a UI can
                 // write any source into its own JSON, and a record claiming a
                 // device wrote it would be attributing a measurement to a
@@ -120,8 +118,8 @@ public static class AttendanceView
             {
                 Id = call.Id("id"),
                 ExpectedVersion = call.Required("version").GetInt64(),
-                InAt = Time(call, "in"),
-                OutAt = Time(call, "out"),
+                InAt = call.OptionalTime("in"),
+                OutAt = call.OptionalTime("out"),
                 ClearIn = call.Optional("clearIn")?.GetBoolean() ?? false,
             },
             cancellationToken);
@@ -205,8 +203,4 @@ public static class AttendanceView
 
         return row.Worked is null ? ("onShift", null, "neu") : ("onTime", null, "ok");
     }
-
-    /// <summary>An optional time on the wire.</summary>
-    private static TimeOnly? Time(ModuleCall call, string field)
-        => call.Optional(field) is { } value ? TimeOnly.Parse(value.GetString()!, CultureInfo.InvariantCulture) : null;
 }
