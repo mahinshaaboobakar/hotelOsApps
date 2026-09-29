@@ -179,7 +179,11 @@ public sealed class CloudNormaliserTests
         Assert.Equal(2, fact.ExternalRefs.Count);
         Assert.Contains(fact.ExternalRefs, r => r.IdentifierKind == "Reservation" && r.ExternalId == "R-88214");
         Assert.Contains(fact.ExternalRefs, r => r.IdentifierKind == "Confirmation" && r.ExternalId == "CNF-771");
-        Assert.All(fact.ExternalRefs, r => Assert.Equal("oracle-cloud", r.IntegrationId));
+        // ADR 0324: the connector leaves this empty and the Hub stamps it when
+        // producing the externally visible record. Asserted EMPTY rather than
+        // deleted — dropping it would stop holding the rule at the one place
+        // a connector could start selecting its own attribution again.
+        Assert.All(fact.ExternalRefs, r => Assert.Empty(r.IntegrationId));
     }
 
     /// <summary>

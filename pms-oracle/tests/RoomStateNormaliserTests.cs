@@ -159,7 +159,11 @@ public sealed class RoomStateNormaliserTests
     {
         var reference = Assert.Single(StateFrom(Push()).ExternalRefs);
 
-        Assert.Equal("oracle-web", reference.IntegrationId);
+        // ADR 0324: the connector leaves this empty and the Hub stamps it when
+        // producing the externally visible record. Asserted EMPTY rather than
+        // deleted — dropping it would stop holding the rule at the one place
+        // a connector could start selecting its own attribution again.
+        Assert.Empty(reference.IntegrationId);
         Assert.Equal(RoomStateNormaliser.RoomNumberKind, reference.IdentifierKind);
         Assert.Equal("205", reference.ExternalId);
     }

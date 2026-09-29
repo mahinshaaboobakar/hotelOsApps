@@ -57,7 +57,10 @@ public sealed class RoomStateNormaliser
 
         state.ExternalRefs.Add(new ExternalRef
         {
-            IntegrationId = _settings.IntegrationId,
+            // Left empty: the Hub stamps it when producing the externally
+            // visible record (ADR 0324). A connector naming its own integration
+            // would be selecting what its output is attributed to, and the Hub
+            // carries the identity internally — it is never on the invocation.
             IdentifierKind = RoomNumberKind,
             ExternalId = push.RoomNo,
         });

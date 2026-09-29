@@ -157,7 +157,11 @@ public sealed class OnSiteNormaliserTests
         var fact = FactFrom(Kochi(), Booking());
 
         var reference = Assert.Single(fact.ExternalRefs);
-        Assert.Equal("oracle-onpremise", reference.IntegrationId);
+        // ADR 0324: the connector leaves this empty and the Hub stamps it when
+        // producing the externally visible record. Asserted EMPTY rather than
+        // deleted — dropping it would stop holding the rule at the one place
+        // a connector could start selecting its own attribution again.
+        Assert.Empty(reference.IntegrationId);
         Assert.Equal(OnSiteNormaliser.ReservationNumberKind, reference.IdentifierKind);
         Assert.Equal("R-88214", reference.ExternalId);
     }

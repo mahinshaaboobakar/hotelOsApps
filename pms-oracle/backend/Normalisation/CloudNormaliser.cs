@@ -383,7 +383,10 @@ public sealed class CloudNormaliser
             .Where(i => !string.IsNullOrWhiteSpace(i.Id) && !string.IsNullOrWhiteSpace(i.Type))
             .Select(i => new ExternalRef
             {
-                IntegrationId = _settings.IntegrationId,
+                // Left empty: the Hub stamps it when producing the externally
+                // visible record (ADR 0324). A connector naming its own integration
+                // would be selecting what its output is attributed to, and the Hub
+                // carries the identity internally — it is never on the invocation.
                 IdentifierKind = i.Type,
                 ExternalId = i.Id,
             })
