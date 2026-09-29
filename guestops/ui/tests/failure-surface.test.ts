@@ -51,6 +51,64 @@ function drawing(cause: Cause) {
   return failureDrawing(failure, { app: "GuestOps", the: "today at this property" });
 }
 
+/**
+ * What "Copy these details" actually does — the owner's report of 2026-09-29.
+ *
+ * **The button's existing test asserts its LABEL and can never see this.** It
+ * reads `textContent` and never clicks, so a button wired to nothing passes it
+ * exactly as well as a working one.
+ *
+ * The three outcomes had one rendering — none — because the call was
+ * `void navigator.clipboard?.writeText(wire)`: `?.` swallows an absent
+ * clipboard, `void` swallows a rejected promise, and success drew nothing. Two
+ * outcomes with opposite remedies must not look identical, so each is asserted
+ * here by the sentence it now produces.
+ */
+describe("the line is handed over, and the card says which happened", () => {
+  const note = (stage: HTMLElement) => stage.querySelector(".fd .fn")?.textContent;
+
+  function press(clipboard: unknown): HTMLElement {
+    Object.defineProperty(globalThis.navigator, "clipboard", {
+      value: clipboard, configurable: true, writable: true,
+    });
+    const stage = failed(drawing("faulted"), () => {});
+    stage.querySelector<HTMLButtonElement>(".fd button")?.click();
+    return stage;
+  }
+
+  it("says so when the browser offers no clipboard at all", () => {
+    expect(note(press(undefined))).toBe(
+      "No clipboard here — the labelled details above are what to carry.");
+  });
+
+  it("says so when the clipboard is refused, rather than nothing", async () => {
+    const stage = press({ writeText: () => Promise.reject(new Error("denied")) });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(note(stage)).toBe(
+      "The clipboard was refused — the labelled details above are what to carry.");
+  });
+
+  it("confirms a copy that worked, and hands over the WIRE line", async () => {
+    const written: string[] = [];
+    const stage = press({
+      writeText: (text: string) => { written.push(text); return Promise.resolve(); },
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(note(stage)).toBe("Copied.");
+    expect(written).toEqual([drawing("faulted").wire]);
+  });
+
+  it("announces the answer, because a person is not watching that line", () => {
+    const stage = failed(drawing("faulted"), () => {});
+
+    expect(stage.querySelector(".fd .fn")?.getAttribute("aria-live")).toBe("polite");
+  });
+});
+
 describe("the mark's colour, per cause", () => {
   it.each(CAUSES)("on a screen — %s", (cause) => {
     const state = failed(drawing(cause), () => {}).querySelector(".fail");

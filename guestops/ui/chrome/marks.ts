@@ -156,15 +156,22 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   // off the screen; when the sentence moved to plain words (`6751c7de`), a
   // refusal with no button left no path to the identifier at all. The button
   // grants nothing — it hands the line over.
+  // **The note is made FIRST, because the copy speaks through it.** It is the
+  // card's own furniture — one line under the button — so saying what happened
+  // needs no new element and no visual decision.
+  const note = el("div", "fn", drawing.act.note);
+
+  // Announced, so a person not watching this line is still told. A region that
+  // never changes on the other branches costs nothing.
+  note.setAttribute("aria-live", "polite");
+
   if (drawing.act.kind === "retry" && retry !== undefined) {
     doing.append(control("btn pri", drawing.act.label, retry));
   } else if (drawing.act.kind === "copy" || drawing.act.kind === "grant") {
-    doing.append(control("btn", drawing.act.label, () => {
-      void navigator.clipboard?.writeText(drawing.wire);
-    }));
+    doing.append(control("btn", drawing.act.label, () => handOver(drawing.wire, note)));
   }
 
-  doing.append(el("div", "fn", drawing.act.note));
+  doing.append(note);
 
   box.append(
     stateMark(drawing.glyph, "fg"),
@@ -181,6 +188,52 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   );
 
   return staged(box);
+}
+
+/**
+ * Hand the wire line over, and SAY which of the three happened.
+ *
+ * **It did nothing, visibly, in every case — including when it worked.** The
+ * call was `void navigator.clipboard?.writeText(wire)`, which is two silent
+ * failures and a silent success:
+ *
+ * ```text
+ * no clipboard      `?.` short-circuits          nothing happens, no error
+ * write REJECTED    `void` discards the promise  nothing happens, no error
+ * write SUCCEEDED   nothing is drawn             nothing happens
+ * ```
+ *
+ * `navigator.clipboard` is undefined outside a secure context, and `writeText`
+ * rejects on a denied permission or an unfocused document — both ordinary. So a
+ * person pressing this saw the same nothing whether it had worked or not, which
+ * is why it was reported as doing nothing and why nobody could tell which.
+ *
+ * **Two outcomes with opposite remedies must not render identically.** Copied
+ * means carry it; refused means the clipboard is not available here and the
+ * labelled facts on this card are what to carry instead — which this card
+ * already says of them, in as many words.
+ *
+ * The failure sentence names what happened and never apologises: a browser that
+ * offers no clipboard and one that refused are different sentences, because
+ * they are different things.
+ *
+ * @param wire the line to hand over
+ * @param note the card's own note line, which becomes the answer
+ */
+function handOver(wire: string, note: HTMLElement): void {
+  const say = (text: string): void => {
+    note.textContent = text;
+  };
+
+  if (navigator.clipboard === undefined) {
+    say("No clipboard here — the labelled details above are what to carry.");
+    return;
+  }
+
+  void navigator.clipboard.writeText(wire).then(
+    () => say("Copied."),
+    () => say("The clipboard was refused — the labelled details above are what to carry."),
+  );
 }
 
 /** What was asked, what came back, and when — as a grid, not a line. */
