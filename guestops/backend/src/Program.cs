@@ -7,6 +7,7 @@ using Wire = HotelOS.Contracts.Integration.V1;
 using HotelOS.GuestOps.Events;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 // GuestOps — the reservation book, as an installable application.
 //
@@ -22,6 +23,38 @@ using Microsoft.EntityFrameworkCore;
 const string PlatformConnection = "HotelOS";
 
 var builder = WebApplication.CreateBuilder(args);
+
+// # Nothing this application logged has ever reached anybody
+//
+// `DomainExceptionInterceptor` — registered below, and the platform's — calls
+// `log.LogError(e, "unhandled error in {Method}", …)` on every unhandled fault.
+// **No provider was ever configured, so every one of those lines was written
+// and dropped.** `logspps\guestops\current.jsonl` held nothing since
+// 20 September while the application ran, answered on its port, and drew
+// "Service fault — GuestOps could not build today" on a desk.
+//
+// The Kernel's capture was not at fault and must not be sent for: it reads this
+// child's stdout, and there was nothing on it. The same interceptor in
+// `integration-service` produced `unhandled error in /IntegrationService/…`
+// that same morning, because that service wires a provider. Same code, two
+// services, one visible — three lines apart.
+//
+// **The console sink comes FIRST, then configuration**, which is Workforce's
+// finding and not a style: `appsettings.json` here declares no `Serilog`
+// section at all, so `ReadFrom.Configuration` contributes no sink. Read
+// configuration alone and Serilog finds none, and the application logs nothing
+// — which is the state this is fixing, arrived at by a different route.
+//
+// **It covers what happens after `Build()`, and that is not everything.**
+// `UseSerilog` registers with the host, and the host does not exist yet — so
+// the `PlatformEnvironment.Read()` below and the refusal beneath it, which are
+// the likeliest reasons an INSTALLED application stops, still bypass it.
+// Workforce recorded that at its own `Program.cs:57`; this sink is necessary
+// and is not sufficient, and a startup failure here is still silent. That gap
+// is named rather than left for somebody to discover as a second silence.
+builder.Host.UseSerilog((context, configuration) => configuration
+    .WriteTo.Console()
+    .ReadFrom.Configuration(context.Configuration));
 
 // # `migrate` runs before the host exists
 //
