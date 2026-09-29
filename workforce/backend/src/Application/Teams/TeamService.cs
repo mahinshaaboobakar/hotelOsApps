@@ -70,9 +70,13 @@ public partial class TeamService(
         var code = Normalise(command.DepartmentCode);
         var name = command.Name?.Trim() ?? string.Empty;
 
+        // The thing, not the wire field — owner's rule, 2026-09-29. The sentence
+        // below was already the house form and this one was not, five lines apart
+        // in one method.
         if (code.Length == 0)
         {
-            throw new InvalidRequestException("department_code is required");
+            throw new InvalidRequestException(
+                "a department is required — a team belongs to one");
         }
 
         if (name.Length == 0)

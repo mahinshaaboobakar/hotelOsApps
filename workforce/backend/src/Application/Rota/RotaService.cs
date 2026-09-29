@@ -37,9 +37,13 @@ public class RotaService(
 
         var code = Normalise(command.DepartmentCode);
 
+        // The thing, not the wire field — owner's rule, 2026-09-29. A supervisor
+        // assigning a shift chose a DEPARTMENT and has never seen the spelling
+        // `department_code`, which `failure.ts` handed them verbatim.
         if (code.Length == 0)
         {
-            throw new InvalidRequestException("department_code is required");
+            throw new InvalidRequestException(
+                "a department is required — an assignment is made under one");
         }
 
         ValidateOverride(command);

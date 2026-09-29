@@ -17,6 +17,14 @@ namespace HotelOS.Workforce.Tests;
 /// <i>"department_code is required"</i>. The harness fixture carries
 /// <c>"FO"</c>, which is why no rendering ever showed it (found building the
 /// capability ledger, 2026-09-19).
+/// <para>
+/// <b>That sentence is the one thrown then, and is kept as the record.</b> It no
+/// longer exists in <c>src/</c>: the owner's rule of 2026-09-29 forbids an error
+/// message naming a wire field to a person, so it now reads <i>"a department is
+/// required — an assignment is made under one"</i>. Said here because a reader
+/// grepping the quoted string would find nothing and conclude the record was
+/// wrong.
+/// </para>
 /// </remarks>
 [Collection(WorkforceCollection.Name)]
 public class RotaAssignWireTests(WorkforceFixture fixture)

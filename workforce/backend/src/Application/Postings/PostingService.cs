@@ -47,14 +47,23 @@ public class PostingService(
         var code = Normalise(command.DepartmentCode);
         var role = command.JobRole?.Trim() ?? string.Empty;
 
+        // **Named as the thing, not as the wire field** — owner's rule,
+        // 2026-09-29: no label, placeholder, heading, helper text or error
+        // message names an identifier. `failure.ts` returns a service's words
+        // verbatim to the operator (`said`), so `department_code is required`
+        // reached a person who chose a DEPARTMENT and has never seen that
+        // spelling. `name is required — a team is known by it` below was already
+        // the house form; these now match it.
         if (code.Length == 0)
         {
-            throw new InvalidRequestException("department_code is required");
+            throw new InvalidRequestException(
+                "a department is required — a posting is held in one");
         }
 
         if (role.Length == 0)
         {
-            throw new InvalidRequestException("job_role is required");
+            throw new InvalidRequestException(
+                "a job role is required — it is what this posting says the person does");
         }
 
         // The staff member must be one this property can see — ruled
