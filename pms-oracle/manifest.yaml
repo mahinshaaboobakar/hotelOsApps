@@ -319,6 +319,23 @@ integrations:
     delivery: polling
     implements: [test, drain, dedupe_key]
     payload_kinds: [ohip-business-event, ohip-reservation, ohip-housekeeping-room, ohip-guarantee]
+    # `prerequisites` and `implements` NAME DIFFERENT POPULATIONS AND MUST NOT
+    # BE MADE TO MATCH. `implements` is what this integration serves;
+    # `prerequisites` is what a property must have configured before the Hub
+    # will dispatch to it at all (ADR 0321, ADR 0322). Two lists of the same
+    # shape answering different questions, and restoring symmetry between them
+    # is the failure ADR 0322 was ruled to prevent.
+    #
+    # The names are this connector's own setting names, declared in
+    # `ui/configuration.ts` — which is what makes them configurable at all. A
+    # prerequisite no form offers is unconfigurable, so the Hub would withhold
+    # every dispatch forever.
+    #
+    # Cloud needs the tax basis and NOT `hotelCode`: `CloudNormaliser` reads an
+    # amount, and no cloud normaliser reads `_settings.PropertyCode`. That is
+    # the divergence — a package-wide list would falsely apply `hotelCode`
+    # here, which is ADR 0322's reason made real rather than illustrative.
+    prerequisites: [amountTaxBasis]
     accepts_push: false
     ingress_authentication: []
     # Exactly the set `OhipCredentials` needs for a password grant, and no more.
@@ -334,6 +351,13 @@ integrations:
     delivery: push
     implements: [dedupe_key, join]
     payload_kinds: [onsite-stay, onsite-room-status]
+    # See `oracle-cloud` above for why this list and `implements` are not the
+    # same question. `hotelCode` as well as the basis here: `OnSiteNormaliser:74` and `RoomStateNormaliser:44`
+    # compare the pushed property code against it, and unconfigured it reads
+    # as empty — so the agent's correct code fails the comparison and the
+    # connector rejects PROPERTY_MISMATCH, quoting the hotel's own right value
+    # back as the offender.
+    prerequisites: [amountTaxBasis, hotelCode]
     accepts_push: true
     ingress_authentication: [shared-secret]
 
@@ -344,6 +368,11 @@ integrations:
     delivery: push
     implements: [dedupe_key, join]
     payload_kinds: [onsite-stay, onsite-room-status]
+    # The web variant normalises through the same two on-site normalisers, so
+    # it needs the same two. Declared per integration rather than inherited:
+    # sharing a normaliser is not sharing a configuration, and the next
+    # integration added here may share one and not the other.
+    prerequisites: [amountTaxBasis, hotelCode]
     accepts_push: true
     ingress_authentication: [shared-secret]
 
