@@ -6,11 +6,14 @@ namespace PmsOracle.Normalisation;
 /// What one configured integration needs to know before it can normalise
 /// anything, beyond the message itself.
 /// </summary>
-/// <param name="IntegrationId">
-/// The registered connector identifier — <c>oracle-onpremise</c>, never
-/// <c>oracle</c>. ADR 0020 validates it against the closed set the Hub
-/// registers, so three flavours of one PMS stay three identities.
-/// </param>
+/// <remarks>
+/// <b>The identity is NOT here</b> — ADR 0324 and ADR 0330. It was a field on
+/// this record so the normalisers could stamp <c>ExternalRef</c>; the Hub
+/// stamps that now, and the adapters' own identity arrives at bootstrap in
+/// <c>HOTELOS_CONNECTOR_INTEGRATION_ID</c>. Configuration is what a property
+/// sets; identity is what the Supervisor states, and a record of the first is
+/// the wrong home for the second.
+/// </remarks>
 /// <param name="PropertyId">The property this integration is configured for.</param>
 /// <param name="PropertyCode">
 /// What the PMS calls that property. Incoming messages claim one, and it is
@@ -73,7 +76,6 @@ namespace PmsOracle.Normalisation;
 /// </para>
 /// </remarks>
 public sealed record IntegrationSettings(
-    string IntegrationId,
     string PropertyId,
     string PropertyCode,
     PropertyClock Clock,

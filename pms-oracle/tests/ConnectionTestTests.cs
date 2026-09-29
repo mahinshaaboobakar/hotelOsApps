@@ -28,7 +28,6 @@ public sealed class ConnectionTestTests
     private static OracleCloudAdapter Adapter(HttpStatusCode? answers = null) =>
         new(
             new IntegrationSettings(
-                IntegrationId: "oracle-cloud",
                 PropertyId: "prop-kochi",
                 PropertyCode: "KOCHI01",
                 Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
@@ -38,7 +37,8 @@ public sealed class ConnectionTestTests
             new NeverDrains(),
             new NeverFetches(),
             new HttpClient(new Answers(answers)) { Timeout = TimeSpan.FromSeconds(5) },
-            MinorUnits);
+            MinorUnits,
+            "oracle-cloud");
 
     private static Dictionary<string, string> Complete() => new()
     {
@@ -167,7 +167,7 @@ public sealed class ConnectionTestTests
         var handler = new Answers(HttpStatusCode.OK);
 
         var adapter = new OracleCloudAdapter(
-            Settings(), new NeverDrains(), new NeverFetches(), new HttpClient(handler), MinorUnits);
+            Settings(), new NeverDrains(), new NeverFetches(), new HttpClient(handler), MinorUnits, "oracle-cloud");
 
         var found = await adapter.TestAsync(Complete(), Only("application-key"), default);
 
@@ -190,7 +190,6 @@ public sealed class ConnectionTestTests
 
     private static IntegrationSettings Settings() =>
         new(
-            IntegrationId: "oracle-cloud",
             PropertyId: "prop-kochi",
             PropertyCode: "KOCHI01",
             Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

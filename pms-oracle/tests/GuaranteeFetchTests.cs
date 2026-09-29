@@ -34,7 +34,6 @@ public sealed class GuaranteeFetchTests
     private static readonly Guid Property = Guid.Parse("0192f100-0000-7000-8000-000000000002");
 
     private static IntegrationSettings Settings() => new(
-        IntegrationId: "oracle-cloud",
         PropertyId: Property.ToString(),
         PropertyCode: "KOCHI01",
         Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
@@ -53,7 +52,7 @@ public sealed class GuaranteeFetchTests
             """);
 
     private static OracleCloudAdapter Adapter(Queue queue, IOhipGuarantees guarantees) =>
-        new(Settings(), queue, guarantees, new HttpClient(), MinorUnits);
+        new(Settings(), queue, guarantees, new HttpClient(), MinorUnits, "oracle-cloud");
 
     [Fact]
     public async Task the_arrival_date_it_queried_by_is_part_of_the_key()
@@ -203,7 +202,10 @@ public sealed class GuaranteeFetchTests
 
             IReadOnlyList<GuaranteeRecord> records = [.. arrivalDates.Select(date =>
                 new GuaranteeRecord(
-                    settings.IntegrationId,
+                    // The RECORD's own provenance, feeding its dedupe key (ADR 0147)
+                    // -- not the connector's identity, which ADR 0330 now puts at
+                    // bootstrap. A literal is what a source would have supplied.
+                    "oracle-cloud",
                     settings.PropertyCode,
                     date,
                     DateTimeOffset.UnixEpoch,

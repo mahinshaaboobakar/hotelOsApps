@@ -80,7 +80,8 @@ public sealed class OracleCloudAdapter(
     IOhipQueue queue,
     IOhipGuarantees guarantees,
     HttpClient http,
-    int? minorUnitDigits)
+    int? minorUnitDigits,
+    string integrationId)
     : IConnectorAdapter, IPollingConnector, ITestableConnection
 {
     /// <summary>A reservation as OHIP returns it.</summary>
@@ -144,7 +145,20 @@ public sealed class OracleCloudAdapter(
         new(JsonSerializerDefaults.Web) { PropertyNameCaseInsensitive = true };
 
     /// <inheritdoc />
-    public string IntegrationId => settings.IntegrationId;
+    /// <remarks>
+    /// <b>The Supervisor's, arrived at bootstrap</b> —
+    /// <c>HOTELOS_CONNECTOR_INTEGRATION_ID</c>, ADR 0330. It is not read from
+    /// configuration: a property sets configuration, and a connector choosing
+    /// its own identity would be selecting what its output is attributed to.
+    /// </remarks>
+    /// <remarks>
+    /// <b>A real value, and that is load-bearing.</b> <c>ConnectorHost</c> keys
+    /// its adapter dictionary on this (<c>ConnectorHost.cs:71</c>) and refuses
+    /// two adapters claiming one identifier. Answering <c>string.Empty</c>
+    /// would make that guard fire as a FALSE collision between adapters that
+    /// share no identity — which is what <c>65538468</c> reverted.
+    /// </remarks>
+    public string IntegrationId { get; } = integrationId;
 
     /// <inheritdoc />
     /// <remarks>
