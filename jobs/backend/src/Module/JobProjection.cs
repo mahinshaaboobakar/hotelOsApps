@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Queries;
 using HotelOS.Jobs.Domain;
@@ -71,7 +73,10 @@ public sealed class JobProjection(JobsDbContext db, JobQueries queries, BoardPro
         new("Priority", job.Priority),
         new("Decided by", job.PriorityDecidedBy),
         new("Due", job.DueAt?.ToString("o") ?? "no clock"),
-        new("Scheduled for", job.ScheduledFor?.ToString("yyyy-MM-dd") ?? "—"),
+        // Invariant, as the "o" above already is — ADR 0174 §NUM-Q4. A custom
+        // pattern takes the server's CALENDAR, so this row read 2569-09-20 under
+        // th-TH while the instant beside it stayed 2026 (measured 2026-09-29).
+        new("Scheduled for", job.ScheduledFor?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? "—"),
     ];
 
     private static IReadOnlyList<DetailView> Assignment(JobDetailRows rows)

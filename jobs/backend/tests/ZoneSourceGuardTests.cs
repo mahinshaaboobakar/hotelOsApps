@@ -39,16 +39,8 @@ public class ZoneSourceGuardTests
     public void No_day_or_wall_clock_time_is_computed_in_UTC()
     {
         var found = new List<string>();
-        foreach (var file in Directory.EnumerateFiles(SourceRoot(), "*.cs", SearchOption.AllDirectories))
+        foreach (var (file, lines) in SourceUnderTest.Files())
         {
-            if (file.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}")
-                || file.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}")
-                || file.Contains($"{Path.DirectorySeparatorChar}Migrations{Path.DirectorySeparatorChar}"))
-            {
-                continue;
-            }
-
-            var lines = File.ReadAllLines(file);
             for (var i = 0; i < lines.Length; i++)
             {
                 var code = lines[i].TrimStart();
@@ -88,16 +80,5 @@ public class ZoneSourceGuardTests
         {
             Assert.False(shape.IsMatch(innocent), $"{what} named a line that is correct as UTC");
         }
-    }
-
-    private static string SourceRoot()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir is not null; dir = dir.Parent)
-        {
-            var src = Path.Combine(dir.FullName, "src");
-            if (File.Exists(Path.Combine(src, "HotelOS.Jobs.csproj"))) return src;
-        }
-
-        throw new InvalidOperationException("jobs/backend/src was not found above the test binaries");
     }
 }

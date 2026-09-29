@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using HotelOS.Jobs.Application.Abstractions;
 using HotelOS.Jobs.Application.Calendar;
 using HotelOS.Jobs.Application.Queries;
@@ -111,7 +113,10 @@ public sealed class BoardProjection(JobsDbContext db, JobQueries queries, Naming
             .ToDictionaryAsync(j => j.Id.ToString(), j => j.ScheduledFor, cancellationToken);
 
         return new ScheduledPageView(rows.Rows.Select(row => new ScheduledRowView(
-            jobs.GetValueOrDefault(row.Id)?.ToString("yyyy-MM-dd") ?? string.Empty,
+            // The day as data, invariant — ADR 0174 §NUM-Q4; the screen draws it in
+            // the property's words. A custom pattern takes the server's CALENDAR:
+            // measured 2026-09-29, this column read 2569-09-20 under th-TH.
+            jobs.GetValueOrDefault(row.Id)?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty,
             row.Number,
             row.Where,
             row.What,

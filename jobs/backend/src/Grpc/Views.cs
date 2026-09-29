@@ -1,3 +1,5 @@
+using System.Globalization;
+
 using Google.Protobuf.WellKnownTypes;
 using HotelOS.Jobs.Application.Queries;
 using HotelOS.Jobs.Contracts.V1;
@@ -14,6 +16,19 @@ public static class Views
 
     private static Timestamp? T(DateTimeOffset? at) => at is { } a ? Timestamp.FromDateTimeOffset(a) : null;
 
+    /// <summary>A day in the wire's own form, which carries no culture.</summary>
+    /// <remarks>
+    /// ADR 0174 §<c>NUM-Q4</c>: a value crossing a wire boundary is not the
+    /// reader-facing boundary, so it is written invariant and the screen draws
+    /// it in the property's words. A custom pattern takes
+    /// <see cref="CultureInfo.CurrentCulture"/>'s <b>calendar</b>, not just its
+    /// separators — measured 2026-09-29, the unpinned form wrote a September
+    /// 2026 day as <c>2569-09-20</c> under <c>th-TH</c> and <c>1448-04-09</c>
+    /// under <c>ar-SA</c>, and a consumer reading ISO gets a plausible date
+    /// five centuries out rather than an error.
+    /// </remarks>
+    private static string D(DateOnly? day) => day?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? string.Empty;
+
     /// <param name="row">The job and what its row derives.</param>
     /// <param name="viewer">The caller, so the view can say whether they hold the job.</param>
     /// <param name="runningSeconds">Worked seconds on the open session as of now, or zero.</param>
@@ -27,7 +42,7 @@ public static class Views
             AssetId = S(j.AssetId), DepartmentCode = j.DepartmentCode, Summary = j.Summary, Details = j.Details ?? string.Empty,
             Priority = j.Priority, PriorityDecidedBy = j.PriorityDecidedBy, RaisedVia = j.RaisedVia, RaisedKind = j.RaisedKind,
             RaisedById = S(j.RaisedById), StayId = S(j.StayId),
-            ScheduledFor = j.ScheduledFor?.ToString("yyyy-MM-dd") ?? string.Empty, DueAt = T(j.DueAt),
+            ScheduledFor = D(j.ScheduledFor), DueAt = T(j.DueAt),
             JobStatus = j.JobStatus, Cycle = j.Cycle ?? string.Empty, Restricted = j.Restricted,
             HoldReason = j.HoldReason ?? string.Empty, HoldUntil = T(j.HoldUntil),
             ParentJobId = S(j.ParentJobId), StepNo = j.StepNo ?? 0, ConcernPolicyId = S(j.ConcernPolicyId),

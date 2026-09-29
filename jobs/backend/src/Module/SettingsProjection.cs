@@ -245,7 +245,12 @@ public sealed class SettingsProjection(JobsDbContext db, JobQueries queries, Tim
         [
             new ModuleViews.DetailView("Ask on close", policy?.RatingOnClose ?? true ? "yes" : "no"),
             new ModuleViews.DetailView("Ratings", rated.ToString()),
-            new ModuleViews.DetailView("Average", rated == 0 ? "—" : average.ToString("0.0")),
+            // The number as data — ADR 0174 §NUM-Q4. Unpinned it took the SERVER's
+            // decimal mark: measured 2026-09-29, four and a half stars read "4٫5"
+            // under ar-SA and "4,5" under de-DE, on every property that server
+            // hosts. The PROPERTY's own mark is the screen's half of ADR 0174 and
+            // is not yet drawn — the screen prints this value as it arrives.
+            new ModuleViews.DetailView("Average", rated == 0 ? "—" : average.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)),
             new ModuleViews.DetailView("Window", "24 hours after closing"),
         ];
     }
