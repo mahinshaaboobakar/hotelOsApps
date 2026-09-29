@@ -87,8 +87,16 @@ public class LeaveTypeService(
         await authorizer.RequireAsync(
             scope, Permissions.RosterConfigure, "property", scope.PropertyId, cancellationToken);
 
-        var code = Require(command.Code, "code").ToUpperInvariant();
-        var name = Require(command.Name, "name");
+        // **The words on the form, not the field names.** `Require` interpolates
+        // whatever it is handed into "<x> is required", and `failure.ts` returns a
+        // service's words verbatim to the operator — so these two strings are read
+        // by somebody looking at a form whose fields are labelled "Short code" and
+        // "Name" (`screens/policy/dialog.ts:120`). Neither is an identifier, so
+        // the owner's rule of 2026-09-29 was not breached here; what was wrong is
+        // smaller and still worth fixing — a person told "code is required" looks
+        // for a field called Code and the form does not have one.
+        var code = Require(command.Code, "a short code").ToUpperInvariant();
+        var name = Require(command.Name, "a name");
 
         if (command.AccrualPerMonth is { } rate && rate < 0m)
         {
