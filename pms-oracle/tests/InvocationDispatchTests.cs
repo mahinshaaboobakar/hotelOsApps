@@ -252,7 +252,6 @@ public class InvocationDispatchTests
 
     /// <summary>One configured on-site integration, for the agreement test.</summary>
     private static IntegrationSettings OnSiteSettings() => new(
-        IntegrationId: "oracle-onpremise",
         PropertyId: "prop-kochi",
         PropertyCode: "KOCHI01",
         Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,

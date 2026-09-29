@@ -34,7 +34,6 @@ public sealed class GuaranteeFetchTests
     private static readonly Guid Property = Guid.Parse("0192f100-0000-7000-8000-000000000002");
 
     private static IntegrationSettings Settings() => new(
-        IntegrationId: "oracle-cloud",
         PropertyId: Property.ToString(),
         PropertyCode: "KOCHI01",
         Clock: PropertyClock.For("Asia/Kolkata", new TimeOnly(14, 0), new TimeOnly(12, 0))!,
@@ -203,7 +202,12 @@ public sealed class GuaranteeFetchTests
 
             IReadOnlyList<GuaranteeRecord> records = [.. arrivalDates.Select(date =>
                 new GuaranteeRecord(
-                    settings.IntegrationId,
+                    // The RECORD's own provenance, which feeds its dedupe key
+                    // (ADR 0147) — not the connector's identity. ADR 0324 took
+                    // the latter off `IntegrationSettings`; this one is a
+                    // fetched fact and a literal here is what a source would
+                    // have supplied.
+                    "oracle-cloud",
                     settings.PropertyCode,
                     date,
                     DateTimeOffset.UnixEpoch,
