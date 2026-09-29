@@ -79,17 +79,12 @@ public static class NormalizeReply
                 Rejection = Refuse(rejected),
             },
 
-            // **CONN-Q84, open.** An amount the source sent that nothing can
-            // scale is neither facts nor a rejection: the source is fine and
-            // our reference data is empty, so a rejection would send the
-            // operator to the hotel's PMS for a gap of ours. `NormalizeResult`
-            // carries two arms and the proto instructs this state at :169
-            // without giving it one. Refused rather than mapped to either,
-            // because picking would be a contract decision made by a connector.
-            NormalisationOutcome.Unresolved unresolved => throw new NotSupportedException(
-                $"'{unresolved.Prerequisite}' is unavailable, so '{unresolved.Field}' could not "
-                + "be normalised. CONN-Q84 is open on how an unresolved outcome travels; "
-                + "NormalizeResult carries facts or a rejection and this is neither."),
+            // **CONN-Q84 is RULED and the arm exists** — ADR 0332, ADR 0333. A
+            // platform fact the Hub could not supply is neither facts nor a
+            // rejection: the source is fine and our reference data is empty, so
+            // a rejection would send the operator to the hotel's PMS for a gap
+            // of ours.
+            NormalisationOutcome.Unresolved unresolved => Unresolvable(unresolved),
 
             // The Hub assembles the parts and sends them together — "assembling
             // the parts is normalising them" — so waiting for a partner is the
@@ -99,6 +94,57 @@ public static class NormalizeReply
                 + "so waiting for a partner is its inbox state and has no arm on this reply."),
 
             _ => throw new NotSupportedException($"no wire arm for {outcome.GetType().Name}."),
+        };
+    }
+
+    /// <summary>A platform prerequisite the Hub could not supply.</summary>
+    /// <param name="unresolved">What could not be resolved, and for which field.</param>
+    /// <returns>The reply's third arm.</returns>
+    /// <exception cref="NotSupportedException">
+    /// The prerequisite is CONFIGURATION rather than a platform fact. See below.
+    /// </exception>
+    /// <remarks>
+    /// <para>
+    /// <b>The source FIELD is deliberately not sent.</b> <c>prerequisite</c> is
+    /// the whole message, and the proto says why: it names a platform
+    /// prerequisite, never a source field, <i>"and must not be carried in
+    /// `Rejection.field` or `raw_value`"</i>. <c>Unresolved.Field</c> stays
+    /// connector-local, for the diagnostic and the test.
+    /// </para>
+    /// <para>
+    /// <b>A CONFIGURATION prerequisite is refused here, and that is the whole
+    /// point of the check.</b> ADR 0316 splits them by ownership: a platform
+    /// fact the Hub cannot resolve travels on this arm, while configuration a
+    /// property owes makes the Hub withhold the dispatch entirely
+    /// (ADR 0321). Putting <c>amountTaxBasis</c> on this wire would be
+    /// <c>CONN-Q84</c> becoming <i>"a generic escape hatch allowing connectors
+    /// to rediscover configuration prerequisites that the Hub was required to
+    /// gate"</i>, which the ruling forbids by name.
+    /// </para>
+    /// <para>
+    /// <b>Paired with a held arm, and it goes when that does.</b> The
+    /// normalisers still answer <c>Unresolved(amountTaxBasis)</c> because
+    /// ADR 0316's removal is sequenced behind the Hub's withholding being
+    /// live. Until then this is what stops that outcome reaching the wire —
+    /// and the platform vocabulary stays OPEN, because the test is what the
+    /// connector DECLARES as configuration, not a hardcoded list of the one
+    /// platform fact that exists today.
+    /// </para>
+    /// </remarks>
+    private static NormalizeResult Unresolvable(NormalisationOutcome.Unresolved unresolved)
+    {
+        if (unresolved.Prerequisite == IntegrationSettings.TaxBasisSetting)
+        {
+            throw new NotSupportedException(
+                $"'{unresolved.Prerequisite}' is configuration a property owes, not a platform "
+                + "fact, so it has no place on `NormalizeResult.unresolved` (ADR 0316, "
+                + "ADR 0321). The Hub withholds the dispatch instead; a connector answering "
+                + "here would be rediscovering a prerequisite the Hub was required to gate.");
+        }
+
+        return new NormalizeResult
+        {
+            Unresolved = new NormalizationUnresolved { Prerequisite = unresolved.Prerequisite },
         };
     }
 

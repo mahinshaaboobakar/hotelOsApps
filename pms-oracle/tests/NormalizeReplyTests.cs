@@ -108,17 +108,52 @@ public sealed class NormalizeReplyTests
     }
 
     [Fact]
-    public void An_unresolved_prerequisite_refuses_because_it_has_no_arm()
+    public void A_platform_prerequisite_travels_on_its_own_arm()
     {
-        // CONN-Q84, open. The source is fine and our reference data is empty,
-        // so a rejection would blame the hotel's PMS for a gap of ours — and
-        // facts-with-no-amount is the collapse CONN-Q75 was ruled to prevent.
-        // Picking either would be a contract decision made by a connector.
-        var refusal = Assert.Throws<NotSupportedException>(() => NormalizeReply.From(
-            new NormalisationOutcome.Unresolved("minor_unit_digits", "Amount")));
+        // CONN-Q84 ruled, ADR 0332/0333. This used to throw, because
+        // `NormalizeResult` had two arms and this outcome is neither: the
+        // source is fine and our reference data is empty, so a rejection would
+        // blame the hotel's PMS for a gap of ours, and facts-with-no-amount is
+        // the collapse CONN-Q75 was ruled to prevent.
+        var reply = NormalizeReply.From(
+            new NormalisationOutcome.Unresolved("minor_unit_digits", "Amount"));
 
-        Assert.Contains("CONN-Q84", refusal.Message, StringComparison.Ordinal);
-        Assert.Contains("minor_unit_digits", refusal.Message, StringComparison.Ordinal);
+        Assert.Equal(NormalizeResult.OutcomeOneofCase.Unresolved, reply.OutcomeCase);
+        Assert.Equal("minor_unit_digits", reply.Unresolved.Prerequisite);
+    }
+
+    [Fact]
+    public void The_source_field_is_not_put_on_that_arm()
+    {
+        // `prerequisite` is the WHOLE message by design: it names a platform
+        // prerequisite, never a source field, "and must not be carried in
+        // `Rejection.field` or `raw_value`". So `Unresolved.Field` — "Amount"
+        // — stays connector-local, and a later author adding it to the wire
+        // has to argue with this.
+        var reply = NormalizeReply.From(
+            new NormalisationOutcome.Unresolved("minor_unit_digits", "Amount"));
+
+        Assert.DoesNotContain("Amount", reply.Unresolved.ToString(), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_configuration_prerequisite_has_no_place_on_that_arm()
+    {
+        // **The arm must not become a generic escape hatch.** ADR 0316 splits
+        // by OWNERSHIP: a platform fact the Hub cannot resolve travels on the
+        // arm above; configuration a property owes makes the Hub withhold the
+        // dispatch (ADR 0321). A connector answering here would be
+        // rediscovering a prerequisite the Hub was required to gate.
+        //
+        // Reachable today only because the arm that produces this is HELD
+        // behind the Hub's withholding going live — so this is what stops it
+        // reaching the wire in the meantime.
+        var refusal = Assert.Throws<NotSupportedException>(() => NormalizeReply.From(
+            new NormalisationOutcome.Unresolved(
+                IntegrationSettings.TaxBasisSetting, "Amount")));
+
+        Assert.Contains("ADR 0316", refusal.Message, StringComparison.Ordinal);
+        Assert.Contains("withholds", refusal.Message, StringComparison.Ordinal);
     }
 
     [Fact]
