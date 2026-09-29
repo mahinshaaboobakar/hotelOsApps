@@ -46,6 +46,23 @@ public sealed record OhipExpectedTimes(string? ExpectedArrival, string? Expected
 /// The total, <b>net of tax</b> — the name is the tax basis, and it is why the
 /// integration's declared basis for <c>oracle-cloud</c> is net (R19).
 /// </param>
+/// <remarks>
+/// <para>
+/// <b>⚠ The field name states the TAX BASIS and says nothing about the UNIT.</b>
+/// ADR 0335 makes those two separate axes and only the first is established
+/// here: <c>amountBeforeTax</c> tells us tax is excluded, and tells us nothing
+/// about whether the number is in the currency's major unit or its minor one.
+/// <c>decimal</c> is this record's choice of C# type rather than a statement
+/// about OHIP — a source sending integer minor units deserialises into a
+/// <c>decimal</c> just as happily, and reads 100× high.
+/// </para>
+/// <para>
+/// The gap is recorded where it bites, in <c>AmountReading.Read</c>'s remarks,
+/// with the measurement and the bound. It is named here as well because this is
+/// the type a reader arrives at when asking what OHIP actually sends, and a
+/// record that documents one axis carefully reads as documenting the amount.
+/// </para>
+/// </remarks>
 public sealed record OhipTotal(decimal AmountBeforeTax);
 
 /// <summary>The room-stay portion of an OHIP reservation.</summary>

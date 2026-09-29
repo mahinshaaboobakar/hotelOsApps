@@ -29,6 +29,15 @@ namespace PmsOracle.Normalisation;
 /// silent net/gross corruption back one level below the wire, where the
 /// contract's own <c>TAX_BASIS_UNSPECIFIED</c> was designed to keep it out.
 /// </para>
+/// <para>
+/// <b>⚠ AND "A BARE DECIMAL STRING" IS SYNTAX, WHICH THIS FILE READ AS
+/// SEMANTICS — ADR 0335 names that phrase, in this file, as the defect.</b> A
+/// decimal says how the vendor serialised a number and nothing about the unit
+/// it is in. <see cref="Read"/> multiplies by <c>10^minorUnitDigits</c>, which
+/// <i>asserts the source value is in MAJOR units</i>, and no document
+/// establishes that for OHIP. The measurement, the bound and what closes it are
+/// in <c>Read</c>'s own remarks, where the multiply is.
+/// </para>
 /// </remarks>
 public static class AmountReading
 {
@@ -62,6 +71,44 @@ public static class AmountReading
     /// and the compiler names every site instead of the author remembering
     /// them.
     /// </para>
+    /// <para>
+    /// <b>⚠ RECORDED SOURCE-CONTRACT DEFECT — ADR 0335, measured 2026-09-29.</b>
+    /// The scaling below multiplies by <c>10^minorUnitDigits</c>, so it holds
+    /// that <paramref name="sourceValue"/> is in the currency's MAJOR unit.
+    /// <b>Nothing establishes that.</b> The contract's own rule is that
+    /// <i>"an unknown source convention is a CONNECTOR defect against its own
+    /// source contract — it is not `minor_unit_digits` being unavailable"</i>,
+    /// so this is recorded here rather than reported as a missing exponent.
+    /// </para>
+    /// <para>
+    /// <b>What was measured, so the next reader can check it rather than take
+    /// it.</b> The Oracle reference's transcription of the OHIP guarantee block
+    /// carries <i>no amount field at all</i>
+    /// (<c>cloud/models/OracleCloudReservationGuarantees.java:85-92</c> —
+    /// <c>basisType</c>, <c>nights</c>, <c>currencyCode</c>); its
+    /// <c>int amountBeforeTax</c> (<c>cloud/dto/mongo/Reservation.java:102</c>)
+    /// is the reference's own storage type, which this file already names as a
+    /// truncation defect; and <b>no sample payload carrying that field exists
+    /// anywhere in the reference</b> — searched <c>*.json</c>, <c>*.md</c>,
+    /// <c>*.txt</c> and <c>*.log</c> across the whole tree, with the same
+    /// literal matching in <c>*.java</c> as the control that the search works.
+    /// </para>
+    /// <para>
+    /// <b>This is latent rather than live, and the bound is worth stating.</b>
+    /// <c>CloudNormaliser</c> returns <c>Unresolved("minor_unit_digits")</c>
+    /// before reaching here whenever the exponent is absent, and the Reference
+    /// Data catalogue publishes nothing (<c>CONN-Q83</c>, open), so the multiply
+    /// cannot execute against a real exponent today. Ruled, unreachable, and
+    /// wrong the day it becomes reachable.
+    /// </para>
+    /// <para>
+    /// <b>What closes it, and it is not a better comment.</b> An OHIP
+    /// specification stating the unit convention, cited here, plus a test
+    /// asserting the scaling against that stated convention rather than against
+    /// a worked example. Until then nobody writes the sentence: inferring it
+    /// from <c>"18400.00"</c> is precisely what ADR 0335 forbids, quoting that
+    /// value.
+    /// </para>
     /// </remarks>
     public static Money? Read(
         string? sourceValue,
@@ -90,11 +137,23 @@ public static class AmountReading
             return null;
         }
 
+        // ⚠ THE MULTIPLY IS THE UNESTABLISHED ASSUMPTION — ADR 0335. Scaling UP
+        // by the exponent holds that `value` is in major units. See the recorded
+        // defect in this method's remarks; do not remove this label without a
+        // cited OHIP convention, because removing it is what makes the
+        // assumption invisible again.
         var scale = (decimal)Math.Pow(10, minorUnitDigits);
 
         // Rounded half away from zero — the rule a hotel invoice uses. The
-        // reference truncated its amounts to `int` on one flavour, discarding
-        // the minor units it had been given.
+        // reference truncated its amounts to `int` on one flavour.
+        //
+        // This sentence used to end "discarding the minor units it had been
+        // given" — carried here from chapter 02's R19, where it is written about
+        // APALEO. It is kept as a correction rather than deleted because it was
+        // my own uncited claim about OHIP's convention, one layer up from the
+        // defect recorded above: "the minor units it had been given" presumes
+        // the source sent a major-unit decimal with fractional precision, which
+        // is the very thing nothing establishes.
         var minorUnits = decimal.Round(value * scale, 0, MidpointRounding.AwayFromZero);
 
         return new Money

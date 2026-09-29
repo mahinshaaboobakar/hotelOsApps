@@ -493,6 +493,54 @@ one level less obvious.
 (Apaleo also truncates with `.intValue()` at `:289`, discarding the minor units
 it had been given — a fourth way to lose the meaning of a number.)
 
+**AND THE ENUMERATION IS THREE WHERE THE AXES ARE FOUR — amended 2026-09-29
+from the owner's finding, ADR 0335.** *"An amount carries three things"* above
+is kept: it is right about what a **model** must carry, and it is the rule the
+reference's defects produced. The fourth is a property of the **source** rather
+than of the amount, so it never appears in any field and is therefore the one an
+enumeration of fields cannot reach:
+
+```text
+the value                       in the model
+its currency                    in the model
+whether tax is included         in the model
+the SOURCE's unit convention    nowhere — consumed at the boundary, then gone
+```
+
+**Measured 2026-09-29: nothing establishes OHIP's.** The transcribed guarantee
+block carries no amount field at all (`cloud/models/OracleCloudReservationGuarantees.java:85-92`
+— `basisType`, `nights`, `currencyCode`); `int amountBeforeTax`
+(`cloud/dto/mongo/Reservation.java:102`) is the reference's own storage type,
+which is the truncation defect this section already names rather than a wire
+fact; and **no sample payload carrying that field exists anywhere in the
+reference** — searched `*.json`, `*.md`, `*.txt`, `*.log` across the whole tree,
+with the same literal matching in `*.java` as the control that the search works.
+
+**So this is a recorded SOURCE-CONTRACT DEFECT and not a gap in reference data**
+— ADR 0335's own words: *"an unknown source convention is a CONNECTOR defect
+against its own source contract — it is not `minor_unit_digits` being
+unavailable, and it must not be reported as one."* `AmountReading.Read`
+multiplies by the exponent, which asserts major units; the assertion is labelled
+at that line and in that method's remarks.
+
+**Latent, not live.** `CloudNormaliser` answers `Unresolved("minor_unit_digits")`
+before reaching the multiply whenever the exponent is absent, and the catalogue
+publishes nothing (`CONN-Q83`, open) — so it cannot execute against a real
+exponent today. Ruled, unreachable, and wrong the day it becomes reachable.
+
+**And the phrase above travelled.** *"Discarding the minor units it had been
+given"* is written here about **Apaleo**, and was carried into
+`AmountReading`'s own comment about **Oracle**, where it became an uncited claim
+that OHIP sends a major-unit decimal with fractional precision — the defect
+recorded above, one layer up, in the file measuring it. Corrected there, and
+recorded here rather than silently dropped.
+
+**What closes it is not a better sentence**: an OHIP specification stating the
+convention, cited, plus a test asserting the scaling against that stated
+convention rather than against a worked example. Formatting never supplies it —
+*"`"18400"` versus `"18400.00"` does not establish the source unit convention"*,
+and `18400.00m` is this package's own fixture value.
+
 ---
 
 ## 6 · How change arrives

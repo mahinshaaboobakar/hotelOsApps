@@ -130,4 +130,46 @@ public sealed class AmountReadingTests
         Assert.NotNull(money);
         Assert.Equal(1001, money.MinorUnits);
     }
+
+    /// <summary>
+    /// The recorded source-contract defect survives — ADR 0335.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>This asserts the RECORD rather than the violation, and that is the
+    /// only instrument available.</b> The defect has no runtime symptom: if
+    /// OHIP does send major units — very likely, and not established — every
+    /// value is correct, every suite is green, and nothing anywhere fails.
+    /// Where nothing can fail there is no behaviour to aim a test at, and the
+    /// defence is what the file says about itself.
+    /// </para>
+    /// <para>
+    /// <b>What it buys is that the undo is noisy.</b> Converting this to a
+    /// stated, cited convention is the right ending and must be a decision
+    /// somebody makes, rather than a tidy-up that deletes an awkward paragraph.
+    /// Anyone removing the record has to remove this too and say why.
+    /// </para>
+    /// <para>
+    /// Keyed on the ADR number and on the label at the multiply, because the
+    /// prose around them will legitimately be reworded and those two carry the
+    /// claim. Read from the file as it ships rather than from a constant, so it
+    /// cannot pass by agreeing with itself.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public void the_recorded_source_contract_defect_survives_in_the_source()
+    {
+        var source = File.ReadAllText(
+            Path.Combine(
+                Path.GetDirectoryName(TestFile())!,
+                "..", "backend", "Normalisation", "AmountReading.cs"));
+
+        Assert.Contains("ADR 0335", source, StringComparison.Ordinal);
+        Assert.Contains("RECORDED SOURCE-CONTRACT DEFECT", source, StringComparison.Ordinal);
+        Assert.Contains(
+            "THE MULTIPLY IS THE UNESTABLISHED ASSUMPTION", source, StringComparison.Ordinal);
+    }
+
+    private static string TestFile(
+        [System.Runtime.CompilerServices.CallerFilePath] string path = "") => path;
 }
