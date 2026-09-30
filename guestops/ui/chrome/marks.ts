@@ -156,19 +156,45 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   // off the screen; when the sentence moved to plain words (`6751c7de`), a
   // refusal with no button left no path to the identifier at all. The button
   // grants nothing — it hands the line over.
-  // **The note is made FIRST, because the copy speaks through it.** It is the
-  // card's own furniture — one line under the button — so saying what happened
-  // needs no new element and no visual decision.
+  // The card's own furniture — one line under the retry, carrying the failure's
+  // own phrase. It is `drawing.act.note`, not a button instruction, which is why
+  // it still reads correctly with no button beside it.
   const note = el("div", "fn", drawing.act.note);
 
   // Announced, so a person not watching this line is still told. A region that
   // never changes on the other branches costs nothing.
   note.setAttribute("aria-live", "polite");
 
+  // **There is no copy button, and this is a decision rather than an omission**
+  // — architect, 2026-09-30, on a measurement of the realm a module runs in.
+  //
+  // ```text
+  // MODULE_SANDBOX = "allow-scripts"   realm.ts:53-62, every other token
+  //                                    refused with a written reason
+  // no allow= on the iframe            so no clipboard-write permission
+  // no allow-same-origin               → an OPAQUE origin
+  // ```
+  //
+  // `clipboard-write` is default-deny for an opaque-origin frame unless the
+  // parent grants it, and the shell grants nothing. So `writeText` **cannot
+  // succeed here**, and the owner's walk proved it rather than the reasoning:
+  // pressing it produced *"The clipboard was refused"* — the rejection branch,
+  // so `navigator.clipboard` exists and the write was denied.
+  //
+  // **Opening a sandbox token for a copy affordance is the wrong trade**, and
+  // the note already carries every fact the button was handing over. A control
+  // that cannot do what its label says is the *looks live, does nothing* class
+  // this application has spent a round removing — and it was the worse kind,
+  // because it looked like the way to report a failure.
+  //
+  // `drawing.act.kind` is the SDK's vocabulary and still carries `copy` and
+  // `grant`; nothing here consumes them, and the `wire` line stays on the card
+  // as labelled facts a person reads. **The other three applications still wire
+  // this to a button** — jobs `failure.ts:185`, roomcare `:122`, workforce
+  // `:275,295`, each `void navigator.clipboard?.writeText(…)` with no result
+  // handling at all, so theirs fail silently. Reported, not changed here.
   if (drawing.act.kind === "retry" && retry !== undefined) {
     doing.append(control("btn pri", drawing.act.label, retry));
-  } else if (drawing.act.kind === "copy" || drawing.act.kind === "grant") {
-    doing.append(control("btn", drawing.act.label, () => handOver(drawing.wire, note)));
   }
 
   doing.append(note);
@@ -190,12 +216,12 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
   return staged(box);
 }
 
-/**
- * Hand the wire line over, and SAY which of the three happened.
+/*
+ * `handOver` stood here and is gone — architect decision, 2026-09-30.
  *
- * **It did nothing, visibly, in every case — including when it worked.** The
- * call was `void navigator.clipboard?.writeText(wire)`, which is two silent
- * failures and a silent success:
+ * It handed the wire line to the clipboard and said which of three things
+ * happened, because the call before it — `void navigator.clipboard?.writeText(
+ * wire)` — was two silent failures and a silent success:
  *
  * ```text
  * no clipboard      `?.` short-circuits          nothing happens, no error
@@ -203,38 +229,18 @@ export function failed(drawing: FailureDrawing, retry?: () => void): HTMLElement
  * write SUCCEEDED   nothing is drawn             nothing happens
  * ```
  *
- * `navigator.clipboard` is undefined outside a secure context, and `writeText`
- * rejects on a denied permission or an unfocused document — both ordinary. So a
- * person pressing this saw the same nothing whether it had worked or not, which
- * is why it was reported as doing nothing and why nobody could tell which.
+ * **That reasoning was right and the affordance was impossible.** A module runs
+ * in a sandbox of `allow-scripts` alone with no `allow=` and no
+ * `allow-same-origin`, so its origin is opaque and `clipboard-write` is
+ * default-deny; the write can only ever reject. The owner's walk produced
+ * *"The clipboard was refused"* — this function's own rejection branch — which
+ * is how the impossibility was proved rather than argued.
  *
- * **Two outcomes with opposite remedies must not render identically.** Copied
- * means carry it; refused means the clipboard is not available here and the
- * labelled facts on this card are what to carry instead — which this card
- * already says of them, in as many words.
- *
- * The failure sentence names what happened and never apologises: a browser that
- * offers no clipboard and one that refused are different sentences, because
- * they are different things.
- *
- * @param wire the line to hand over
- * @param note the card's own note line, which becomes the answer
+ * Kept as a record rather than deleted, because the next author to want a copy
+ * button will reach for exactly the call this replaced, and the reason it
+ * cannot work is not visible from here: it is in the shell's `realm.ts:53-62`,
+ * in another repository, where every sandbox token was refused deliberately.
  */
-function handOver(wire: string, note: HTMLElement): void {
-  const say = (text: string): void => {
-    note.textContent = text;
-  };
-
-  if (navigator.clipboard === undefined) {
-    say("No clipboard here — the labelled details above are what to carry.");
-    return;
-  }
-
-  void navigator.clipboard.writeText(wire).then(
-    () => say("Copied."),
-    () => say("The clipboard was refused — the labelled details above are what to carry."),
-  );
-}
 
 /** What was asked, what came back, and when — as a grid, not a line. */
 function facts(list: readonly Fact[]): HTMLElement {

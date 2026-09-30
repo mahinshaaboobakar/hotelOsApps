@@ -64,42 +64,57 @@ function drawing(cause: Cause) {
  * outcomes with opposite remedies must not look identical, so each is asserted
  * here by the sentence it now produces.
  */
-describe("the line is handed over, and the card says which happened", () => {
-  const note = (stage: HTMLElement) => stage.querySelector(".fd .fn")?.textContent;
-
-  function press(clipboard: unknown): HTMLElement {
+describe("nothing on a failure card reaches for the clipboard", () => {
+  /**
+   * **This block asserted three clipboard outcomes until 2026-09-30.** It tested
+   * that an absent clipboard, a refused write and a successful one each produced
+   * their own sentence, because the call before them — `void
+   * navigator.clipboard?.writeText(wire)` — rendered all three as nothing.
+   *
+   * The reasoning was right and the affordance was impossible. A module's realm
+   * is `sandbox="allow-scripts"` with no `allow=` and no `allow-same-origin`, so
+   * its origin is opaque and `clipboard-write` is default-deny: the write could
+   * only reject. **The owner's walk produced the refusal sentence**, which is how
+   * that was established rather than argued.
+   *
+   * So the three sentences are gone with the button, and what stands in their
+   * place is the stronger claim: the card touches the clipboard API **not at
+   * all**. Asserted by making any access throw, because a test that merely
+   * checked for no button would pass against a card that wrote silently on
+   * render.
+   */
+  it("does not touch navigator.clipboard, on any cause", () => {
+    const reached: string[] = [];
     Object.defineProperty(globalThis.navigator, "clipboard", {
-      value: clipboard, configurable: true, writable: true,
+      configurable: true,
+      get() { reached.push("clipboard"); throw new Error("the card must not reach for this"); },
     });
+
+    try {
+      for (const cause of ["unanswered", "faulted", "undecidable", "forbidden",
+        "unadmitted", "ungranted"] as const) {
+        const stage = failed(drawing(cause), () => {});
+        stage.querySelectorAll<HTMLButtonElement>(".fd button").forEach((b) => b.click());
+      }
+    } finally {
+      Object.defineProperty(globalThis.navigator, "clipboard", {
+        value: undefined, configurable: true, writable: true,
+      });
+    }
+
+    expect(reached).toEqual([]);
+  });
+
+  /**
+   * The note carries the failure's own phrase, so removing the button removed a
+   * control and no information. It is `drawing.act.note` — never a sentence about
+   * a button — which is why it still reads correctly with nothing beside it.
+   */
+  it("still carries the failure's own phrase with no button beside it", () => {
     const stage = failed(drawing("faulted"), () => {});
-    stage.querySelector<HTMLButtonElement>(".fd button")?.click();
-    return stage;
-  }
 
-  it("says so when the browser offers no clipboard at all", () => {
-    expect(note(press(undefined))).toBe(
-      "No clipboard here — the labelled details above are what to carry.");
-  });
-
-  it("says so when the clipboard is refused, rather than nothing", async () => {
-    const stage = press({ writeText: () => Promise.reject(new Error("denied")) });
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(note(stage)).toBe(
-      "The clipboard was refused — the labelled details above are what to carry.");
-  });
-
-  it("confirms a copy that worked, and hands over the WIRE line", async () => {
-    const written: string[] = [];
-    const stage = press({
-      writeText: (text: string) => { written.push(text); return Promise.resolve(); },
-    });
-    await Promise.resolve();
-    await Promise.resolve();
-
-    expect(note(stage)).toBe("Copied.");
-    expect(written).toEqual([drawing("faulted").wire]);
+    expect(stage.querySelectorAll(".fd button")).toHaveLength(0);
+    expect(stage.querySelector(".fd .fn")?.textContent).toBe(drawing("faulted").act.note);
   });
 
   it("announces the answer, because a person is not watching that line", () => {
@@ -142,20 +157,28 @@ describe("a screen's failure", () => {
   });
 
   // X7: a retry only where waiting could work. Every other state offers the
-  // line instead — the fault, the model state 64e draws beside it, and, since
-  // 64h frame 3, the refusals.
-  it.each([
-    ["unanswered", "Try again"],
-    ["faulted", "Copy these details"],
-    ["undecidable", "Copy these details"],
-    ["forbidden", "Copy these details"],
-    ["unadmitted", "Copy these details"],
-    ["ungranted", "Copy these details"],
-  ] as const)("offers a button only where one can work — %s", (cause, label) => {
-    const buttons = failed(drawing(cause), () => {}).querySelectorAll(".fd button");
+  // labelled facts instead.
+  //
+  // **This asserted `"Copy these details"` on the five non-retry causes until
+  // 2026-09-30, and the contract changed rather than the test drifting.** 64h
+  // frame 3 gave a refused card a button so a person could reach the identifier;
+  // the realm a module runs in cannot write to a clipboard at all — sandbox
+  // `allow-scripts` alone, no `allow=`, opaque origin — so the button could only
+  // ever refuse, and the owner's walk proved it. The card's labelled facts are
+  // the path to the identifier now, which is what frame 3 was reaching for.
+  // ADR 0034: corrected, not worked around.
+  it("offers a retry where waiting could work", () => {
+    const buttons = failed(drawing("unanswered"), () => {}).querySelectorAll(".fd button");
 
-    expect([...buttons].map((b) => b.textContent)).toEqual([label]);
+    expect([...buttons].map((b) => b.textContent)).toEqual(["Try again"]);
   });
+
+  it.each(["faulted", "undecidable", "forbidden", "unadmitted", "ungranted"] as const)(
+    "offers NO button where none can work — %s", (cause) => {
+      const buttons = failed(drawing(cause), () => {}).querySelectorAll(".fd button");
+
+      expect([...buttons].map((b) => b.textContent)).toEqual([]);
+    });
 
   // **Corrected 2026-09-22, and it asserted the frame the owner rejected.**
   // This read: no button, and the sentence naming `reservation.read`. Both
