@@ -6,16 +6,43 @@ HotelOsApps `b5a46a0` (2026-09-19), and the New booking rows re-derived at
 single "derived at" line over a document that is edited for a week is a claim
 about work nobody can check.
 
-Nobody has pressed these on the owner's platform: the live walk fills in the
-last column. The Part A pages the owner approved compare drawings with a
-harness rendering of fixtures. **They are not sign-off, and they never showed
-whether a button does anything.**
+The Part A pages the owner approved compare drawings with a harness rendering of
+fixtures. **They are not sign-off, and they never showed whether a button does
+anything** — which is why ADR 0358 added Part C, and why the sentence that stood
+here (*"nobody has pressed these on the owner's platform: the live walk fills in
+the last column"*) is corrected rather than kept: on 2026-09-30 the owner walked
+three tabs, and the column began to fill.
 
-**Nothing is installed on the owner's platform as of 2026-09-22** — the owner
-uninstalled the product, all four services removed. This line read *"Installed:
-0.3.2"* until then. Every row below saying *fails on the owner's platform* is
-about a machine that no longer has one, and none of it can be walked until the
-product is installed again.
+**Installed: 0.3.4, and the owner has walked three tabs — corrected 2026-09-30.**
+
+From 2026-09-22 until today this paragraph read:
+
+> *"**Nothing is installed on the owner's platform as of 2026-09-22** — the owner
+> uninstalled the product, all four services removed. This line read `Installed:
+> 0.3.2` until then. Every row below saying* fails on the owner's platform *is
+> about a machine that no longer has one, and none of it can be walked until the
+> product is installed again."*
+
+**It was true when written and became false without anything contradicting it** —
+the gate-held-shut-by-an-expired-reason class, in the file whose whole job is to
+say what is true. A reader meeting it concluded nothing could be walked, which is
+the opposite of the case. **The old words are kept rather than replaced, because a
+reader needs to see which sentence rotted.**
+
+`guestops-0.3.4.hopkg` is installed — 16,375,968 bytes,
+`sha256:ca35f385662794e5257c73f92ffb3055ef4336fc6da011e1edf96b3a14835eee`,
+unpacked at `%LOCALAPPDATA%\HotelOS\packages\installed\guestops`. The owner has
+pressed Today, Guests and Setup, and the three answers are three different facts:
+
+```text
+Today    BUILT AND FAULTING   TypeError: undefined.headline — and the MESSAGE is
+                              the render-fault guard working. The fault is the
+                              defect; the sentence is the fix succeeding
+Guests   HONESTLY ABSENT      "Drawn in the approved design; not built in this
+                              slice." Design-known, not a defect
+Setup    404, and a second    the settings deadlock below, plus a clipboard
+         fault beside it      refusal the realm can never satisfy
+```
 
 ## Why screens still say "service fault"
 
@@ -64,13 +91,18 @@ ADR 0211's premise is that ADR 0210 made that reachable. GuestOps is the first
 application to call it, so this row is the estate's evidence and not only this
 application's.
 
-**And on 2026-09-22 it became unobtainable, which is a status change rather
-than a failure.** The owner uninstalled the product: all four HotelOS services
-removed, every installed-product port closed, and the Kernel now running is a
-development one. **There is no installed application to observe**, so the proof
-this row calls for cannot be made until the product is installed again — and
-until it is, ADR 0211's gate stays shut for a reason that has nothing to do
-with whether ADR 0210 works.
+**OBTAINED 2026-09-30, and it opens ADR 0211's gate.** This paragraph said the
+proof was unobtainable because the owner had uninstalled the product on
+2026-09-22 — true then, and superseded. With 0.3.4 installed, GuestOps' own log
+shows `POST /module/reservation.read/today` answering **200 five times** on the
+0.3.4 process (port 51283, first line 11:28:54.518Z, after the install wrote the
+payload at 11:28:52.455Z), with no `Call failed with gRPC error status` after a
+`GetOperatingDay`. **An installed application calls Context successfully.**
+
+So ADR 0211's premise holds and its gate is open: **Room Care may retire
+`OperatingDay.cs` and Workforce may drop its UTC calculation.** That is this
+row's cross-stream obligation discharged, and it is stated here because neither
+stream can see this log.
 
 The shape of the proof is unchanged and is recorded above: the **absence** of
 `Call failed with gRPC error status` after a post-restart `GetOperatingDay`,
@@ -106,7 +138,7 @@ fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
 
 | Action | Code | Verdict |
 |---|---|---|
-| The screen itself | `TodayView` | **fails on the owner's platform — the Context refusal above**; live after the next restart (ADR 0210), **to be proved, and the proof gates Room Care and Workforce under ADR 0211** |
+| The screen itself | `TodayView` | **SERVED, DOES NOT RENDER — re-derived 2026-09-30.** The Context refusal is gone: the read answers 200 (ADR 0210 + `541856cf`), so ADR 0211's gate is open. The screen then throws `TypeError: undefined.headline` — `day.stale` is typed `Staleness \| null`, the guard tests `=== null`, and `TodayView` never sends the field, so `undefined` reaches `stale()`. **Two facts, two owners, two fixes**; the read is served and the render is GuestOps' defect |
 | Click a row / guest name | `screens/today/table.ts:75,108` | WORKS — opens the stay |
 | **＋ assign** on a row with no room | `screens/today/table.ts:92` | **LOOKS LIVE, DOES NOTHING.** Nothing assigns a room from this screen (`stay.assign` has no module door) |
 | Walk-in | `screens/today/index.ts:92` → `screens/walkin/` | **BUILT, UNPRESSABLE.** `C2`, 2026-09-23 — the sheet captures and calls `stay.create/walkIn`. See *The walk-in* below |
@@ -328,11 +360,42 @@ the platform keeps exactly one (GUEST-Q3).
 
 ## Count
 
-**11 controls look live and do nothing**, on Today, Attention and a stay:
-＋ assign (1) · Keep ours / Take the PMS value (2) · the banner's Keep / Take
-(2) · Full activity (1) · Everything / Ours (2) · Raise a job (1) · Ask for
-service (1) · Open in the PMS (1). They come first: each is drawn off with its
-reason until its backend door exists.
+**8 controls look live and do nothing — corrected 2026-09-30, from 11.**
+
+**This paragraph said 11 and the tables say 8**, and the correction runs in the
+direction nobody expects: it **overstated** the defect. Derived at `e0361fbf` by
+reading the verdict cell of all 55 rows in the eleven `Action | Code | Verdict`
+tables, rather than from this paragraph:
+
+```text
+15  WORKS
+15  BUILT, UNPRESSABLE
+ 9  DRAWN OFF / SAYS WHY
+ 8  LOOKS LIVE, DOES NOTHING        ← this figure
+ 3  FAILS ON THE OWNER'S PLATFORM
+ 3  NOT REACHABLE
+ 2  cross-references ("as on Today", "reads that do not need Context")
+---
+55  total, and it closes
+```
+
+*The first derivation reported 65 rows and included tables with no Verdict column
+at all — the "Developer notes" audit is `Where | What it says | The question`. A
+denominator can be present, correct, and describe the wrong population; keying on
+the table header rather than on "starts with a pipe" is what fixed it.*
+
+**And the contradiction was visible from the commit title all along.** `991b032`
+is *"GuestOps: no control looks live and does nothing — 16 drawn off with their
+reasons"* — the round that produced this section. Those two sentences cannot both
+describe HEAD, and reading the tables rather than the paragraph is the only thing
+that settles which.
+
+**`BUILT, UNPRESSABLE` at 15 is the largest bucket after `WORKS`, and no
+four-state scheme has a name for it.** Built, correct, and blocked by a
+precondition outside the screen — ADR 0193's object registration, or no booking
+existing to act on. Calling them *working* would be false and calling them
+*absent* would be false. They are the rows a walk cannot clear and Part A cannot
+either.
 
 **The number has moved four times and the arithmetic is written out rather than
 retyped**: 16 on 2026-09-19, less *Log a request* (`C7`), *Check in* (`C5`),
@@ -615,3 +678,84 @@ reinstating one culture-dependent call.
 decode where the format is known, refuse where it is not, and never default.
 The two differ by months rather than by 1462 days, which is why nothing had
 noticed.
+
+## A precondition failure cascaded across four capabilities, and the only remedy screen was inside the blast radius — 2026-09-30
+
+**Kept as a row after the fix, because the shape will recur in another
+application and this is where the next author meets it.**
+
+`SettingsService.LoadAsync` threw `NotFoundException` when a property had no
+`guestops.settings` row. The module envelope answers a domain not-found with 404,
+and the method had **five call sites**:
+
+```text
+desk.configure/setup        the Setup screen                404
+registration.capture/card   the registration card           404
+the capture write           RegistrationService.cs:62       404
+the card read-back          RegistrationService.cs:110      404
+GetAsync                    the Setup screen's read
+```
+
+**One absent row 404'd four surfaces, and the Setup screen is the only surface
+that can create the row.** A fresh property could therefore never be configured
+through GuestOps at all.
+
+**It also explains a third thing the owner pressed.** The ID-type dropdown has no
+options because its `choices` are `AcceptedIdTypes` — and the card never rendered,
+so the dropdown was never populated by anything. *Three reported symptoms, one
+defect.*
+
+**The save was an upsert throughout** (`SettingsService.cs:85-88` creates the row
+when absent), so **only the read blocked**: the door was unlocked and the handle
+was on the inside. That is why the remedy is a factory rather than a migration —
+`GuestOpsSettings.DefaultsFor(propertyId)`, landed at `7ba3d74d`.
+
+**The generalisable part is not the settings table.** It is that a read used by a
+write path, a screen and that screen's own remedy will take all of them down
+together — and the cheapest tell is the call-site count, which nobody looks at
+before changing what a read does on absence.
+
+## Wired, or drawn — the second axis, measured 2026-09-30 at `e0361fbf`
+
+**A screen that renders perfectly from a fixture is not built; it is drawn, and it
+is indistinguishable from a working one until somebody walks it.** So every row
+above carries an implicit second question, and the answer splits by layer.
+
+**UI → backend: WIRED. No shipped surface renders a fixture.**
+
+```text
+book/recorded/          10 files (9 fixtures + an index.ts barrel), and the
+                        barrel does NOT re-export them
+importers               2 harness files · 13 test files
+                        widgets/recorded.ts — imported by preview/widget-host.ts
+                        and two tests, NOT by any widget
+recorded* identifiers
+  in shipped code       application.ts:304 · overlays.ts:51 — both COMMENTS,
+                        recording what was REMOVED
+```
+
+*The `stale` TypeError is the proof rather than the counter-example: it fired
+because the live wire disagreed with a fixture-shaped type. A screen drawing mock
+data could not have produced it.*
+
+**backend → data: four cross-schema reads, which `ARCH-RULE-APPLICATION-DATA-ACCESS`
+governs.** Confirmed from the EF mapping, not from prose — a first grep found only
+doc comments:
+
+| mapping | table | Context RPC that serves it | verdict |
+|---|---|---|---|
+| `MasterDataOperator.cs:63` | `staff` | `GetStaffContext` · `SearchStaff` | servable now |
+| `MasterDataOperator.cs:82` | `properties` | `GetPropertySummary` | servable now |
+| `MasterDataRooms.cs:61` | `rooms` | `GetRoomContext` · `ListRoomContexts` · `ResolveRoomByNumber` | servable now |
+| `MasterDataNames.cs:86` | `room_types` | **none** | **gap, six fields** |
+
+Already Context and unchanged: `ContextBusinessDay`, `ContextNeighbours`.
+
+**The room_types gap is not "partly servable".** `RoomTypeRef` carries
+`id · code · name`; `MasterDataRoomTypeName` needs `BaseOccupancy`,
+`MaxOccupancy`, `MaxAdults`, `MaxChildren`, `ExtraBedAllowed`, `MaxExtraBeds` —
+**none of the six is on the wire.** A Context/Master Data contract gap, not
+GuestOps' to close.
+
+*`Module/AvailabilityView.cs:127` was reported as a fourth reader and is not: that
+line is a comment with no mapping of its own. Three files, four mappings.*
