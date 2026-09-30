@@ -53,7 +53,7 @@ import type { Activate, HostApi, HostedModule } from "@hotelos/sdk";
 // call and nothing true to draw. The registration card was the third and is
 // no longer one of them: `registration.capture` answers both a card and its
 // save, so it is reached below with the read that feeds it.
-import { load, perform, type StayPage } from "./book";
+import { APP, load, perform, type StayPage } from "./book";
 import { el } from "./chrome/element";
 import { bar, type BarItem, type Operator } from "./chrome/bar";
 import { cannot } from "./chrome/marks";
@@ -223,10 +223,79 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     );
 
     root.replaceChildren(style, frame);
-    draw(main);
+    drawn(main, draw(main));
   }
 
-  function draw(main: HTMLElement): void {
+  /**
+   * Draw the screen, or say that drawing it failed.
+   *
+   * **This is the one place a render fault is caught, and there is one because
+   * there is one place `draw` is called.** Nine branches launched their screens
+   * with a bare `void` and nothing in this realm reported a rejection: the
+   * backend's log is the service's, the desktop's stops at the host, and a
+   * module's console reaches nobody. So a throw while drawing produced a blank
+   * pane and no record anywhere — the one failure this application could not
+   * see and could not tell anyone about.
+   *
+   * **It is deliberately not the read-failure card.** `failed()` draws the
+   * SDK's `ReadFailure`, and constructing one here would assert that a read
+   * failed when it returned. The nearest `Cause` is `faulted`, which the SDK
+   * defines as *the service's own fault* and points at support — so drawing it
+   * would send a person after a service that answered correctly. The card is
+   * the same `cannot()` box on the same stage; only the sentence differs,
+   * because only the sentence is a claim.
+   */
+  function drawn(main: HTMLElement, drawing: Promise<void>): void {
+    void drawing.catch((error: unknown) => {
+      main.replaceChildren(cannot(
+        `${APP} could not draw this screen`,
+        `The platform answered and ${APP} failed while drawing what it sent — `
+        + `${reason(error)}. No data is missing: this is a fault in ${APP}, so `
+        + "trying again will do the same thing. Carry this sentence to whoever "
+        + "maintains it.",
+      ));
+    });
+  }
+
+  /**
+   * What was thrown, in the words it carries.
+   *
+   * A thrown value with no message is reported as having none rather than given
+   * a plausible one: a sentence nobody wrote, standing where a reason should be,
+   * is the fault this whole change exists to stop producing.
+   */
+  function reason(error: unknown): string {
+    if (!(error instanceof Error)) {
+      return "the value thrown was not an error, so it carries no message";
+    }
+
+    return error.message === ""
+      ? `a ${error.name} with no message`
+      : `${error.name}: ${error.message}`;
+  }
+
+  /**
+   * Draw the screen this place names.
+   *
+   * **It returns the drawing rather than discarding it, and that is the whole
+   * point of the signature.** Every branch below used to launch its screen with
+   * a bare `void`, so a throw anywhere inside a render became an unhandled
+   * rejection: `main` kept the empty children it was created with two lines
+   * above, and the pane was blank. A blank pane is indistinguishable from an
+   * empty list and from a failed read — the two states this module draws
+   * carefully — so it was the one outcome that told a person at a desk nothing.
+   *
+   * Declared `Promise<void>` and **deliberately not `async`**: a bare `return;`
+   * and a dropped `void f()` are then both type errors, so the guard cannot be
+   * omitted by a screen added after this one. That is the same move as
+   * `Read<T>`'s union — the omission is unwriteable rather than forbidden in a
+   * comment — and it is why there is one `.catch` at `show`'s single call site
+   * instead of nine `.catch`es somebody has to remember.
+   *
+   * The two synchronous branches hand back a settled promise for the same
+   * reason: an exception in either is a fault this application can still name.
+   */
+  function draw(main: HTMLElement): Promise<void> {
     // Before anything else: until the book is in, every screen would be a
     // truthful drawing of an empty hotel, which is the one wrong thing to show
     // a property with two thousand reservations waiting.
@@ -244,12 +313,11 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         "GuestOps cannot yet report how far along this is. Nothing here is "
         + "measured, so nothing is shown.",
       ));
-      return;
+      return Promise.resolve();
     }
 
     if (where.screen === "Setup") {
-      void setup(host, main, where.section, (section) => show({ section }));
-      return;
+      return setup(host, main, where.section, (section) => show({ section }));
     }
 
     // The sheet stands over whatever screen is drawn, so it is appended after
@@ -258,7 +326,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     const drawOverlay = (): void => overlay(host, main, where, show);
 
     if (where.screen === "Booking") {
-      void booking(
+      return booking(
         host,
         main,
         where.bookingId,
@@ -273,11 +341,10 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         // is decided.
         () => show({ overlay: null }),
       );
-      return;
     }
 
     if (where.screen === "NewBooking") {
-      void newBooking(
+      return newBooking(
         host,
         main,
         () => show({ overlay: "walkin" }),
@@ -286,11 +353,10 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         // of its own out of what the write returned.
         (bookingId) => show({ screen: "Booking", bookingId, page: 0 }),
       ).then(drawOverlay);
-      return;
     }
 
     if (where.screen === "Bookings") {
-      void bookings(
+      return bookings(
         host,
         main,
         where.page,
@@ -299,7 +365,6 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
       ).then(drawOverlay);
-      return;
     }
 
     /**
@@ -338,7 +403,7 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
     };
 
     if (where.screen === "Stay") {
-      void stay(
+      return stay(
         host,
         main,
         where.stayId,
@@ -360,16 +425,14 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
           correct: () => show({ overlay: "correct" }),
         },
       ).then(drawOverlay);
-      return;
     }
 
     if (where.screen === "Attention") {
-      void attention(host, main, where.page, (page) => show({ page }));
-      return;
+      return attention(host, main, where.page, (page) => show({ page }));
     }
 
     if (where.screen === "Today") {
-      void today(
+      return today(
         host,
         main,
         where.list,
@@ -395,10 +458,10 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),
       ).then(drawOverlay);
-      return;
     }
 
     main.replaceChildren(unbuilt(where.screen));
+    return Promise.resolve();
   }
 
   return {
