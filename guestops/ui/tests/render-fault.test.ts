@@ -129,11 +129,20 @@ describe("a screen that throws while drawing", () => {
    * No retry. A fault in this application does the same thing next time, and a
    * button promising otherwise is a promise the platform cannot keep — the same
    * reasoning `failed()` gives for withholding it from a refusal.
+   *
+   * **The card's presence is asserted FIRST, and that is not ceremony.** Written
+   * as the absence alone, this test passed under the mutation probe that removed
+   * the `.catch` — a blank pane has no buttons either, so "no button says Try
+   * again" was equally true of the defect and of the fix. It could not have
+   * failed on the thing it sits beside. The presence assertion is what makes the
+   * absence mean anything.
    */
-  it("offers no retry", async () => {
+  it("offers no retry, on a card that is actually there", async () => {
     const root = await mount({});
-    const labels = [...pane(root).querySelectorAll("button")].map((button) => button.textContent);
 
+    expect(pane(root).querySelector(".fail")).not.toBeNull();
+
+    const labels = [...pane(root).querySelectorAll("button")].map((button) => button.textContent);
     expect(labels).not.toContain("Try again");
   });
 
