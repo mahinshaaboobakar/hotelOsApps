@@ -78,13 +78,29 @@ public class GuestOpsSettings
     /// </remarks>
     public List<string> AcceptedIdTypes { get; set; } = [];
 
-    public bool SignatureRequired { get; set; }
+    /// <summary>Whether the card must be signed.</summary>
+    /// <remarks>
+    /// <b>`true`, because that is the value the manifest declared and an
+    /// administrator approved</b> — GUEST-Q15, 2026-09-30. It read `false` (the
+    /// C# default) while `manifest.yaml` declared `default: true`, so the two
+    /// homes for one value disagreed; when the eight declarations left the
+    /// manifest as application state, taking the C# default would have silently
+    /// changed the approved answer. The declared value moved here rather than
+    /// being lost with its declaration.
+    /// </remarks>
+    public bool SignatureRequired { get; set; } = true;
 
     /// <summary>Whether the card prints as part of check-in.</summary>
     public bool PrintOnCheckIn { get; set; }
 
     /// <summary>The registration series' prefix — the hotelier reference's <c>grcNo</c>.</summary>
-    public string CardNumberPrefix { get; set; } = string.Empty;
+    /// <remarks>
+    /// <b>`"GRC-"` for the same reason as <see cref="SignatureRequired"/>:</b>
+    /// the manifest declared it and this held `string.Empty`. The second of the
+    /// two that disagreed, and the pair is why the defaults were migrated
+    /// deliberately rather than inherited.
+    /// </remarks>
+    public string CardNumberPrefix { get; set; } = "GRC-";
 
     /// <summary>The next number in the property's own series.</summary>
     /// <remarks>
@@ -118,4 +134,53 @@ public class GuestOpsSettings
     public int ReportingDueHours { get; set; } = 24;
 
     public long Version { get; set; }
+
+    /// <summary>Whether this came from a row, or is the defaults standing in for one.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Not a column — EF ignores it</b> (<c>SettingsConfiguration</c>). It is
+    /// the difference between *this property configured itself this way* and
+    /// *nobody has configured it and these are the declared defaults*, and those
+    /// are two facts with different remedies: one is settled, the other is
+    /// waiting for somebody.
+    /// </para>
+    /// <para>
+    /// <b>It exists because the alternative was inferring it from
+    /// <c>Version == 0</c>.</b> That invariant is real — only <c>SaveAsync</c>
+    /// creates a row and it increments on every save — but a reader meeting
+    /// `Version == 0` has to reconstruct the argument, and a later change to how
+    /// the version is minted would break the inference silently. Stated instead.
+    /// </para>
+    /// </remarks>
+    public bool Stored { get; set; }
+
+    /// <summary>The declared defaults for a property that has not configured itself.</summary>
+    /// <param name="propertyId">The property they stand for.</param>
+    /// <returns>An untracked instance carrying every default above, with <see cref="Stored"/> false.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>This closes a deadlock, and the deadlock is why it exists</b> —
+    /// GUEST-Q15 and ADR 0356. Reading an unconfigured property used to throw
+    /// <c>NotFound</c>, which the module envelope answers 404. Five call sites
+    /// read it, so ONE absent row 404'd the Setup screen, the registration card,
+    /// the capture write and the card read-back — and the Setup screen is the
+    /// only surface that can create the row. The one remedy was inside the blast
+    /// radius.
+    /// </para>
+    /// <para>
+    /// <b>The save was always an upsert</b> (<c>SettingsService</c> creates the
+    /// row when absent), so only the read blocked: the door was unlocked and the
+    /// handle was on the inside. That is why the remedy is a factory and not a
+    /// migration.
+    /// </para>
+    /// <para>
+    /// <b>These are defaults, not an invention.</b> Every value here was declared
+    /// in <c>manifest.yaml</c> and approved at install; GUEST-Q15 ruled them
+    /// application state, so they live here now. A screen that draws them says
+    /// they are defaults — <i>rendering them as this property's settings would be
+    /// the stand-in a failed read must never produce.</i>
+    /// </para>
+    /// </remarks>
+    public static GuestOpsSettings DefaultsFor(Guid propertyId)
+        => new() { PropertyId = propertyId, Stored = false };
 }

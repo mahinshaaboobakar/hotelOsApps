@@ -25,6 +25,11 @@ public class GuestOpsSettingsConfiguration : IEntityTypeConfiguration<GuestOpsSe
         // vocabulary, stored as text arrays rather than joined tables: nothing
         // references them, they are read whole on every check-in, and a lookup
         // table would add a join to serve an ordering nobody queries.
+        // Not a column: it says whether this instance came from a row or is
+        // `GuestOpsSettings.DefaultsFor` standing in for one, which is a fact
+        // about the READ rather than about the property.
+        builder.Ignore(s => s.Stored);
+
         builder.Property(s => s.RequiredForHomeCountry).HasColumnType("text[]");
         builder.Property(s => s.RequiredForVisitors).HasColumnType("text[]");
         builder.Property(s => s.AcceptedIdTypes).HasColumnType("text[]");
