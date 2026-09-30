@@ -39,7 +39,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         RequestScope scope, CancellationToken cancellationToken)
     {
         var day = await context.GetOperatingDayAsync(
-            new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            new GetOperatingDayRequest { Context = ApplicationContext.AsItself(scope) },
             cancellationToken: cancellationToken);
 
         return Iso8601.Day(day.BusinessDate);
@@ -72,7 +72,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         RequestScope scope, DateOnly date, CancellationToken cancellationToken)
     {
         var day = await context.GetOperatingDayAsync(
-            new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            new GetOperatingDayRequest { Context = ApplicationContext.AsItself(scope) },
             cancellationToken: cancellationToken);
 
         // A property that has not configured a boundary is not one that rolls at
@@ -93,7 +93,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
     public async Task<TimeZoneInfo?> ZoneAsync(RequestScope scope, CancellationToken cancellationToken)
     {
         var day = await context.GetOperatingDayAsync(
-            new GetOperatingDayRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            new GetOperatingDayRequest { Context = ApplicationContext.AsItself(scope) },
             cancellationToken: cancellationToken);
 
         return string.IsNullOrWhiteSpace(day.Timezone)
@@ -111,7 +111,7 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         RequestScope scope, DateOnly date, bool checkIn, CancellationToken cancellationToken)
     {
         var summary = await context.GetPropertySummaryAsync(
-            new GetPropertySummaryRequest { Context = RequestContextFactory.ToRequestContext(scope) },
+            new GetPropertySummaryRequest { Context = ApplicationContext.AsItself(scope) },
             cancellationToken: cancellationToken);
 
         var clock = checkIn ? summary.CheckInTime : summary.CheckOutTime;

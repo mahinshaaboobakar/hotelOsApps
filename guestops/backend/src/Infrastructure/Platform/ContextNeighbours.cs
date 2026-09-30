@@ -60,7 +60,7 @@ public sealed class ContextNeighbours(ContextService.ContextServiceClient contex
             summary = await context.GetPropertySummaryAsync(
                 new GetPropertySummaryRequest
                 {
-                    Context = RequestContextFactory.ToRequestContext(scope),
+                    Context = ApplicationContext.AsItself(scope),
                 },
                 cancellationToken: cancellationToken);
         }
