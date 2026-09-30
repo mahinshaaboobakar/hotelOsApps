@@ -270,3 +270,75 @@ three tabs the owner has since walked, and that is the failure to avoid here.
   two are not summed and neither stands in for the other.
 * **Nothing that has not been run.** Every row below is empty until a run fills
   it, and an empty row is not a pass.
+
+---
+
+## The 13 control sites, and what each is driven with
+
+**Derived: each site's data requirement comes from population 1, so the two
+populations meet here rather than being summed.** The page sizes are read from the
+screens rather than assumed — they are not all 25.
+
+### Pagers — 4 sites, and each needs MORE ROWS THAN ITS OWN PAGE
+
+| Site | `PAGE` | Driven with | Passes when |
+|---|---|---|---|
+| `attention:98` | **10** | ≥ 11 stays in an attention state | page 2 reached, and page 2 holds stays page 1 did not |
+| `booking:112` | **12** | one `CreateBooking` with ≥ 13 `stays` | the booking's own stay list pages |
+| `bookings:78` | **25** | ≥ 26 `CreateBooking` calls | page 2 reached, ordering stable across the turn |
+| `today:119` | **25** | ≥ 26 stays arriving on ONE business day | page 2 reached, and the strip's count is not the page's length |
+
+**The last column is the point.** A pager that renders and does not page satisfies
+Part A completely, and *a total taken from a capped read stops growing at the cap*
+— so the count beside the pager is asserted against the rows, not against what one
+page returned.
+
+### Tabs — 2 `tabs()` callers plus the bar
+
+| Site | Driven with | Passes when |
+|---|---|---|
+| `stay:169` | one stay with activity, requests, servicing and payment data; **one with none of them**; one with more than fits | renders in all three, and an empty tab says *nothing here yet* rather than drawing blank |
+| `today:91` | stays in each lifecycle — `CorrectStay.to` across **StayLifecycle's 8 members** | every view switches, counts agree with the list below, and `UNSPECIFIED` is **refused** |
+| the top bar | no data | five tabs change screen |
+
+### Dropdowns — 4 sites, one shared control
+
+| Site | Choices come from | Driven with |
+|---|---|---|
+| `registration:242` | `AcceptedIdTypes` | `SaveSettings` with **0, 1 and many** accepted types — this is the empty·single·many axis landing on a control |
+| `assign:226` | `free.rooms` | Master Data rooms through **its own API** (ADR 0166), with 0, 1 and many free |
+| `walkin:397` | room-type options | the same, via room types |
+| `bookings/filters:49` | a static filter set | no data — asserts every member listed and the chosen one applied |
+
+**`registration:242` is the one the owner met.** Its choices were empty because
+the card never rendered — the settings deadlock — so this row is driven *after*
+`7ba3d74d` and proves both halves: the list is populated, **and the chosen value is
+what is written**.
+
+### Date fields — 3 sites, one shared control
+
+| Site | Driven with | Passes when |
+|---|---|---|
+| `newbooking/query:88` | arrival/departure at each boundary, **and a rejection either side** — departure before arrival, a same-day pair | takes a valid date, refuses an invalid one **with a reason**, round-trips |
+| `walkin:377` | the same on the walk-in sheet | as above |
+| `field.ts:173` | the **7** date-kind card boxes — `date_of_birth`, `id_expiry`, `passport_issue`, `passport_expiry`, `visa_issue`, `visa_expiry`, `arrived_in_country_on` | each opens, takes a date, and the value survives `CaptureRegistration` → `GetRegistration` unchanged |
+
+**`chrome/field.ts` serves both the dropdowns and the date fields**, so a defect
+there shows on both — which is why the owner reported them together. Measured at
+`e0361fbf` the control is sound: it builds the `<select>`, a blank option carrying
+the placeholder, one option per choice, sets `.value` and wires `change`. **So an
+empty `choices` is the failure mode, not a broken control.**
+
+### What a result cell may say, and what it may not
+
+```text
+PASSED          the control did the thing, against data Part C created
+FAILED          it did not, and the row names what happened
+NOT DRIVEN      no attempt — never a pass, and it is not an empty cell
+BLOCKED         a named precondition outside this control
+                (e.g. Master Data rooms, which need their own API first)
+```
+
+**An empty cell is `NOT DRIVEN` and is written out**, because this application's
+own drive list carried *"nothing below has been run yet"* over three walked tabs,
+and an unlabelled blank is how that happened.

@@ -91,18 +91,28 @@ ADR 0211's premise is that ADR 0210 made that reachable. GuestOps is the first
 application to call it, so this row is the estate's evidence and not only this
 application's.
 
-**OBTAINED 2026-09-30, and it opens ADR 0211's gate.** This paragraph said the
-proof was unobtainable because the owner had uninstalled the product on
-2026-09-22 — true then, and superseded. With 0.3.4 installed, GuestOps' own log
+**OBTAINED 2026-09-30 — and it CONFIRMS ADR 0211 rather than opening a gate.**
+This paragraph said the proof was unobtainable because the owner had uninstalled
+the product on 2026-09-22 — true then, and superseded.
+
+*The framing above was corrected the same day: ADR 0211 §Consequences, 2026-09-20,
+states that Room Care's `OperatingDay.cs` **is retired** and Workforce's UTC
+calculation **is wrong for this contract** — written as consequences, not as
+conditions. So nothing here was gating them. What this log establishes is that two
+streams have an **outstanding assignment**, and empirical confirmation that the
+mechanism works is worth having because neither stream can read this log.* With 0.3.4 installed, GuestOps' own log
 shows `POST /module/reservation.read/today` answering **200 five times** on the
 0.3.4 process (port 51283, first line 11:28:54.518Z, after the install wrote the
 payload at 11:28:52.455Z), with no `Call failed with gRPC error status` after a
 `GetOperatingDay`. **An installed application calls Context successfully.**
 
-So ADR 0211's premise holds and its gate is open: **Room Care may retire
-`OperatingDay.cs` and Workforce may drop its UTC calculation.** That is this
-row's cross-stream obligation discharged, and it is stated here because neither
-stream can see this log.
+So ADR 0211's premise is confirmed in the field: **Room Care's `OperatingDay.cs`
+is retired and Workforce's UTC calculation is wrong for this contract — already,
+since 2026-09-20, as consequences rather than conditions.** This log does not
+grant that; it shows the mechanism those consequences rest on actually working on
+a property. What the two streams have is an **outstanding assignment**, not a
+blocker — and the confirmation is stated here because neither of them can read
+this log.
 
 The shape of the proof is unchanged and is recorded above: the **absence** of
 `Call failed with gRPC error status` after a post-restart `GetOperatingDay`,
@@ -124,7 +134,37 @@ recovered by 11:24:04Z.)
 
 Verdicts: **WORKS** (wired to a backend operation that exists) · **REFUSES,
 SAYS WHY** · **DRAWN OFF, SAYS WHY** · **LOOKS LIVE, DOES NOTHING** (a defect,
-fixed first) · **NOT REACHABLE** (only a fixture ever draws it).
+fixed first) · **NOT REACHABLE** (only a fixture ever draws it) · **BUILT,
+UNPRESSABLE**.
+
+**The last was in use and had no definition until 2026-09-30, and it is the
+largest bucket after WORKS — 15 of 55 rows.**
+
+> **BUILT, UNPRESSABLE — built and correct, and blocked by a precondition
+> OUTSIDE the screen.** Not *working*: nobody can reach the behaviour. Not
+> *absent*: the code is there and would run. **A walk cannot clear it and Part A
+> cannot either** — the owner presses the control and something outside it
+> refuses, while a fidelity sweep sees a control that renders exactly as drawn.
+
+**A bucket with no name gets sorted into the two nearest ones, and those read as
+*works* and *broken*.** Which is why it is named: fifteen rows were being counted
+as neither, in a document whose whole job is to say what each button does.
+
+**What clears it splits, and the split decides who is waiting:**
+
+```text
+Part C can clear it        where the precondition is DATA — no booking exists to
+                          cancel, no stay in that lifecycle, no free room to
+                          assign. Part C creates that data through GuestOps' own
+                          API, so these become WORKS or a real defect
+Part C CANNOT clear it     where the precondition is somebody else's wire —
+                          ADR 0193's object registration, which authorizes
+                          nothing about an installable package's objects today.
+                          No amount of data reaches these
+```
+
+*Each of the 15 rows says which of the two it is waiting on; that was already
+true and is now the reason the distinction has a name.*
 
 ### Top bar and every list
 

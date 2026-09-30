@@ -8,11 +8,50 @@
 > soon as 0.3.1 is installed, and certify exactly that. The data-bearing run is a
 > second, separate certificate, not a blocker for this one.*
 
-Prepared 2026-09-18 by FF against `HotelOsApps` at `a4b6723` and platform
-`HosPilotOS` at `885677ec`. **To run once the owner has installed 0.3.1**
-(`guestops-0.3.1.hopkg`, 16,278,129 bytes, sha256 `4248ecf5…fd1ca8`) on the
-fixed desktop. Nothing below has been run yet; every result cell is empty on
-purpose.
+## RE-ANCHORED to `e0361fbf` / 0.3.4 — 2026-09-30
+
+**Prepared 2026-09-18 against `a4b6723` for 0.3.1, and that anchor is superseded.**
+What this list drives now:
+
+```text
+HotelOsApps      e0361fbf
+package          guestops-0.3.4.hopkg  ·  16,375,968 bytes
+                 sha256:ca35f385662794e5257c73f92ffb3055ef4336fc6da011e1edf96b3a14835eee
+installed at     %LOCALAPPDATA%\HotelOS\packages\installed\guestops
+                 51 archive entries, written 2026-09-30T11:28:52.455Z
+process          a NEW one — the old served to 11:28:46.391Z on port 54319;
+                 51283 first answered 11:28:54.518Z, two seconds after the install
+```
+
+### The preamble that stood here was false by the time anyone read it
+
+> *"Prepared 2026-09-18 by FF against `HotelOsApps` at `a4b6723` and platform
+> `HosPilotOS` at `885677ec`. **To run once the owner has installed 0.3.1**
+> (`guestops-0.3.1.hopkg`, 16,278,129 bytes, sha256 `4248ecf5…fd1ca8`) on the
+> fixed desktop. **Nothing below has been run yet; every result cell is empty on
+> purpose.**"*
+
+**The last sentence is the one that matters.** The owner walked three tabs on
+2026-09-30 while this document said nothing had been run — *a document's claim
+about its own state, checked by nobody*, which is the certificate-methodology
+class. Kept above rather than replaced, because a reader needs to see which
+sentence rotted.
+
+### What the owner's walk of 0.3.4 established — three tabs, three different facts
+
+| Pressed | Platform-served | Reachable by a person | What it says |
+|---|---|---|---|
+| **Today** | **YES** — `reservation.read/today` answered **200 five times** on the 0.3.4 process, no `Call failed` after `GetOperatingDay` | **NO** — the screen throws | `TypeError: undefined.headline`. The read is served; the render is GuestOps' defect. **And the message the owner read is the render-fault guard working**: it named the fault, said no data is missing, said a retry will not help, and said what to carry |
+| **Guests** | n/a | **DECLARED ABSENT** | *"Drawn in the approved design; not built in this slice."* Design-known, **not a defect**, and it cost nothing to say |
+| **Setup** | **NO** — 404 | **NO** | The settings deadlock: one absent row 404'd four surfaces including the only screen that could create it. Closed at `7ba3d74d`; **this row is re-driven after the fix, not marked from it** |
+
+**Plus a third fault on Setup the walk found and no drive row predicted:** the copy
+button answered *"The clipboard was refused"*. The realm is
+`sandbox="allow-scripts"` with no `allow=` and an opaque origin, so
+`clipboard-write` is default-deny and the write could only ever reject. **Removed
+at `27c878b7`** rather than granted a sandbox token.
+
+**Every other row below is still unrun, and an empty cell is not a pass.**
 
 ## What the two columns mean
 
@@ -110,8 +149,10 @@ the difference from Jobs, whose Part B stood blocked on a grant nobody issued
 
 ## Preconditions, each checked at the start of the run and quoted
 
-1. **The package**: Software Center lists GuestOps **0.3.1, Running**. If it
-   shows 0.1.0 or Stopped, stop — nothing below is about 0.3.1.
+1. **The package**: Software Center lists GuestOps **0.3.4, Running**. If it
+   shows any earlier version or Stopped, stop — nothing below is about it.
+   *This read `0.3.1` until 2026-09-30; a precondition naming the wrong version
+   is one the owner can satisfy while driving a different build.*
 2. **The identity**: the signed-in user is admin on the property. Evidence: the
    Today screen answers rather than drawing *Not permitted*; a refusal there
    ends the run as a precondition failure, not 16 failed rows.
@@ -169,9 +210,10 @@ not blocked by ADR 0193 — but it has no screen, and a booking made on the
 owner's live property is a write this list does not propose without the
 owner's yes.
 
-`guest.amend` is **not a row**: 0.3.1 no longer declares it (0.1.0 did), and
-nothing in the backend calls it — `Permissions.GuestAmend` is an unused
-constant.
+`guest.amend` is **not a row**: no version since 0.1.0 declares it — checked at
+0.3.4 — and nothing in the backend calls it; `Permissions.GuestAmend` is an unused
+constant. *Stated by what the manifest does rather than by a version number, so it
+does not go stale on the next cut.*
 
 ## D · The consumer
 
@@ -218,7 +260,7 @@ That is the installation the architect described (*"the installed GuestOps is
 0.1.0 (stopped)"*), so **the owner's property is on the development cluster and
 the instrument reads the database the drive will write.** The 15432 Kernel is a
 separate installed product that does not host GuestOps. Re-checked at the start
-of the run: after the install this row must read **0.3.1 · running**.
+of the run: after the install this row must read **0.3.4 · running**.
 
 ## Precondition 3, measured before the run — the store is empty
 
