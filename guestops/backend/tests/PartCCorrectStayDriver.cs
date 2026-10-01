@@ -182,14 +182,25 @@ public sealed class PartCCorrectStayDriver
     /// <c>ReservationStatus</c> in nine files and declares it in none.</i>
     /// </para>
     /// <para>
-    /// <b>Asserted as the CURRENT behaviour, labelled, so the fix is a failing
-    /// test and not an archaeology exercise.</b> Whether the remedy is a refusal at
-    /// the door, at the service, or a mapping that cannot express zero is a ruling
-    /// nobody has made — reported with this measurement rather than chosen here.
+    /// <b>⚠ THE DOOR IS NOW CLOSED, AND THIS TEST IS KEPT AS THE RECORD OF WHAT IT
+    /// USED TO ADMIT.</b> <c>GuestOpsGrpcService.FromProto(StayLifecycle)</c> refuses
+    /// an unspecified or undeclared value by name —
+    /// <see cref="LifecycleWireTests"/> — so <b>nothing can send the service a zero
+    /// any more</b>. The architect assigned that as a repair on this measurement;
+    /// CLAUDE.md's gap rule and the same file's own <c>StayView</c> refusal ruled it,
+    /// so no ADR was owed.
+    /// </para>
+    /// <para>
+    /// <b>The service's own behaviour is unchanged, and the test name says so.</b>
+    /// <c>CorrectAsync</c> still accepts a <c>(StayLifecycle)0</c> handed to it
+    /// directly, because the guard went where the untrusted value enters rather than
+    /// being duplicated inland. <i>That is a decision, not an oversight</i>: a second
+    /// check in the service would be a second place for the rule to drift, and the
+    /// correction's whole contract is that it may reach any real state.
     /// </para>
     /// </remarks>
     [Fact]
-    public async Task An_unspecified_lifecycle_is_accepted_today_and_stored_as_a_nameless_state()
+    public async Task The_service_still_accepts_a_zero_the_door_no_longer_lets_through()
     {
         await using var harness = await DeskHarness.CreateAsync();
         var stay = await harness.SeedStayAsync(Arrival);
