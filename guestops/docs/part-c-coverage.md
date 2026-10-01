@@ -50,21 +50,70 @@ owner had already walked, and an unlabelled blank is how that happened.
 
 ---
 
-## Progress — 1 of 12 writes driven, 2026-10-01
+## Progress — 3 of 12 writes driven, 2026-10-01
 
 ```text
-SaveSettings          DRIVEN   20 combinations · 20 CREATED-or-REFUSED as expected
-the other 11 writes   NOT DRIVEN
+SaveSettings          DRIVEN   20 combinations · PartCSettingsDriver
+CreateBooking         DRIVEN   23 combinations · PartCBookingDriver
+CaptureRegistration   DRIVEN   by RegistrationCardTests — cited, not duplicated
+the other 9 writes    NOT DRIVEN
 ```
 
-`backend/tests/PartCSettingsDriver.cs`, run 2026-10-01 at Debug on the dev
-cluster: **Failed 0, Passed 20, Total 20.** It is a `dotnet test` run and not a
-`--no-build` one, so the figure describes the tree rather than a filesystem.
+Run 2026-10-01 at Debug on the dev cluster, `dotnet test` and not `--no-build`, so
+the figures describe the tree rather than a filesystem.
 
-**One of the 12 is not 1/12 of the input space**, and the table below is what says
-so: `SaveSettings` carries three of the five repeated fields and two of the 18
-refusals, and **none of the eight presence positions**. So this slice drives
-empty·single·many and the boundaries hard, and the two-absences axis not at all.
+**`CaptureRegistration` is driven by a suite that already existed, and writing a
+driver for it would have been a second characterisation suite** — ADR 0054, and the
+no-duplication rule. `A_body_with_no_values_is_refused` **is** presence position 8,
+with the reason stated at the test (*"an absent `values` and a card whose every box
+is blank are different things"*); `Every_box_the_card_draws_survives_the_save`
+drives all 28 fields including the seven date boxes, each on a different day 37
+apart, so a command writing the passport's expiry into the visa's is caught. **And
+`RegistrationEdit` has no repeated field at all** — `document_refs` is a `string` —
+so the empty·single·many axis does not apply to it. *Part C's job here was to find
+that out, not to re-assert it.*
+
+**Three of 12 is not a quarter of the input space**, and the table below is what
+says so.
+
+### ⚠ The eight presence positions are SEVEN inputs and one response-only field
+
+**This document said eight, and driving them is what corrected it.**
+`stays.terms.cancellation_deadline` is reachable from `CreateBookingRequest`, which
+is why it was counted — **and it is not an input.**
+
+```text
+CommercialTerms.CancellationDeadline(arrival, zone)   COMPUTES it, from
+                                                     CancelOffsetDaysFromArrival
+                                                     and CancelDropTime
+PaymentView.cs:145                                   reads it — a RESPONSE
+GuestOpsGrpcService.Bookings.cs:66  ToCommand         maps twelve fields and
+                                                     NOT this one
+```
+
+> **One `CommercialTerms` message serves request and response, so a caller can set
+> a derived field and the service silently ignores it.** The derived-projection
+> rule's own case — *"the API has nowhere to put them, which is stronger than
+> validating and rejecting, because a client cannot express the mistake"* — and
+> here it has somewhere.
+
+**Recorded as a contract finding, not fixed.** Removing a field from a message
+shared by both directions is a proto change: `buf breaking`, ADR 0168's
+cross-repository consumer check, and a decision about whether the write gets its
+own message. *The driver asserts the derivation instead, so the day anybody wires
+the sent value through, a test fails.*
+
+### And the amount-presence fold is at a layer this driver does not reach
+
+`ToMoney` collapses *absent* and *present-without-currency* to the same answer —
+R19, deliberate and labelled: *"storing zero would make a free stay and an unstated
+rate the same row."* **It is a `private static` of the gRPC service.** This driver
+calls `BookingService` in-process and hands it a `Money` directly, so **those two
+positions are expressible and the fold is not exercised here.** What is driven is
+the service's half: an unstated amount reaches storage *present and unstated*,
+asserted in two parts because `IsStated ?? false` is false both when the amount is
+stored unstated and when it was dropped — *the first version of that test could not
+tell the two outcomes apart.*
 
 ---
 
@@ -82,9 +131,9 @@ empty·single·many and the boundaries hard, and the two-absences axis not at al
 
 | Write | Driven | Its densest axis |
 |---|---|---|
-| `SaveSettings` | **20 combinations, 2026-10-01** | 3 repeated fields · 2 refusals · 2 booleans |
-| `CreateBooking` | NOT DRIVEN | **all 8 presence positions** · 2 repeated · the nested 30 |
-| `CaptureRegistration` | NOT DRIVEN | the nested 29 · 7 date boxes · `card` presence |
+| `SaveSettings` | **20 combinations** | 3 repeated fields · 2 refusals · 2 booleans |
+| `CreateBooking` | **23 combinations** | **7 of the 7 input presence positions** · 2 repeated · the nested 30 |
+| `CaptureRegistration` | **by `RegistrationCardTests`** | the nested 29 · 7 date boxes · `card` presence |
 | `CorrectStay` | NOT DRIVEN | **the only write enum** — `StayLifecycle`'s 8 members |
 | `CheckIn` · `CheckOut` · `AssignRoom` · `CancelStay` · `RecordNoShow` · `RecordFiling` · `LogRequest` · `AddNote` | NOT DRIVEN | scalars and their refusals |
 
@@ -95,7 +144,8 @@ qualifier is load-bearing. A coverage document that claimed an axis this wire
 cannot express would be a claim about its own method, checked by nobody** — so
 each limit is stated with the number behind it.
 
-**The two absences are drivable at 8 of 114 positions, and in exactly one
+**The two absences are expressible at 8 of 114 positions — of which 7 are INPUTS —
+and in exactly one
 scalar.** ADR 0358 asks for *"the two absences where they differ (never sent ·
 sent empty)"*. proto3 gives a plain scalar **implicit presence**, so for 106
 positions *never sent* and *sent empty* are **the same bytes** and no driver can
@@ -116,10 +166,34 @@ CaptureRegistration.card                         message
 which is a property of protobuf rather than a decision anybody made about
 GuestOps. Only `is_primary` was declared `optional` deliberately.*
 
-**All eight are on two RPCs, and neither is driven yet.** Seven are
-`CreateBooking`'s and one is `CaptureRegistration`'s — so this axis is **0 of 8**,
-and the slice that exists cannot contribute to it. *Said here rather than left to
-be inferred from a table of `NOT DRIVEN`.*
+**This axis is now DRIVEN, and the count it was reported under was wrong.** It read
+*0 of 8* until 2026-10-01. Driving it corrected both halves:
+
+```text
+stays · guests · is_primary · terms          DRIVEN   PartCBookingDriver
+amount · penalty_amount                      expressible here; the FOLD is at
+                                             the gRPC ToMoney, not reached
+cancellation_deadline                        NOT AN INPUT — see the correction
+                                             above. A response-only field the
+                                             request can express
+CaptureRegistration.card                     DRIVEN   RegistrationCardTests
+```
+
+**The arithmetic, closed:**
+
+```text
+8   expressible on the wire
+−1  cancellation_deadline — a response-only field, not an input
+ 7  INPUT positions
+     5  driven to their full distinction   stays · guests · is_primary · terms · card
+     2  driven to the SERVICE's half only  amount · penalty_amount
+ 7  ✓
+```
+
+**A count is not a coverage claim**, and the two rows of five and two are why this
+section names each position instead of totalling them. *The first draft of this
+paragraph said "six of them, and two of those six", which adds up to nothing —
+caught by making the column close.*
 
 **The enum axis is 11 member cases, not 24.** GuestOps declares five enums with
 24 members between them, and **one appears on a write request**:
@@ -255,13 +329,19 @@ reference to cite. *Named here so the empty cell is not read as unfinished work.
 * **Nothing about the owner's installed build.** This slice ran against the dev
   cluster; ADR 0143 — *"a certificate establishes reproducible platform
   capability, not historical behaviour"*.
-* **Nothing about the 8 presence positions.** They are on `CreateBooking` and
-  `CaptureRegistration`, both `NOT DRIVEN`, so that axis is 0 of 8.
+* **Nothing about the amount-presence FOLD.** `ToMoney` is the gRPC service's
+  private static; the driver calls `BookingService` in-process and never passes
+  through it. Two of the seven input positions are therefore driven to the
+  service's half only, which the arithmetic above states.
 * **Nothing about the 106 positions where the wire cannot distinguish the two
   absences.** Stated with the number, because a silent omission reads as coverage.
-* **Nothing about 16 of the 18 refusals**, or about the single write enum's 8
-  members.
+* **Nothing about 14 of the 18 refusals** — `CreateBooking`'s two are now driven
+  with their counterparts — or about the single write enum's 8 members.
 * **Nothing about the gRPC wire.** The driver calls the service in-process. The
-  envelope, the token and the JSON a screen receives are the module-surface tier's.
-* **Nothing that has not been run.** 1 of 12 writes is driven and the other 11 say
+  envelope, the token and the JSON a screen receives are the module-surface tier's,
+  and that is also why the amount fold is out of reach here.
+* **Nothing about `cancellation_deadline` as an input**, because it is not one. The
+  driver asserts the derivation; whether the request should carry the field at all
+  is an open contract finding above.
+* **Nothing that has not been run.** 3 of 12 writes are driven and the other 9 say
   so by name.
