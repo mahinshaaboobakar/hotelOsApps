@@ -323,6 +323,14 @@ public sealed class RegistrationCardTests
     /// This drives <see cref="RegistrationView"/> rather than the command,
     /// because the series is a read.
     /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>8e7de314</c>:</b> with the <c>unconfigured</c>
+    /// arm removed from <c>Series</c> — a removal, so it compiles and runs — the
+    /// run was <b>1 failed, 13 passed</b>, and the one failure is this test. <i>A
+    /// split rather than a wipeout is the right signature here</i>, because the arm
+    /// is a behaviour and not a precondition for the view working at all. That
+    /// proof belongs to that commit; a later pass is a pass and not a second one.
+    /// </para>
     /// </remarks>
     [Fact]
     public async Task An_unconfigured_property_draws_no_card_number()

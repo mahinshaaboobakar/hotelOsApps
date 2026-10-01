@@ -106,6 +106,12 @@ export interface ForeignBlock {
  * Minting advances the series, so a read never takes a number: a number taken
  * and not used is a gap in the series, and a gap is a question a property gets
  * asked at an inspection.
+ *
+ * **Proven load-bearing rather than asserted, at `8e7de314`.** Changing the
+ * screen's `unconfigured` arm to `return card.series.number` does not compile:
+ * `TS2339: Property 'number' does not exist on type '{ readonly state:
+ * "unconfigured"; }'`. So the omission is INEXPRESSIBLE, which is a stronger
+ * result than a test that would have caught it.
  */
 export type CardSeries =
   /** The card exists and holds this number. `GRC-2026/08/1152`. */

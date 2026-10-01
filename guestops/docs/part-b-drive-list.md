@@ -470,11 +470,19 @@ it against each of the three combinations: **0 accepted types is the interesting
 one**, because an empty dropdown is indistinguishable from a broken one on screen
 and only the zero case says which.
 
-**⚠ And `registration:242` has a precondition the owner will hit first.** On a
-property with no settings row the card screen now renders (GUEST-Q15) and
-**capture is refused 409** — *"a registration card cannot be numbered until this
-property's GuestOps settings have been saved"* (`SettingsService.cs`, 2026-10-01).
-So **save Setup before driving any registration row**, and B1 comes before E3.
+**⚠ And `registration:242` has a precondition — now stated ON THE SCREEN.** On a
+property with no settings row the card screen renders (GUEST-Q15) and **capture is
+refused 409** — *"a registration card cannot be numbered until this property's
+GuestOps settings have been saved"* (`SettingsService.cs`, 2026-10-01). So **save
+Setup before driving any registration row**, and B1 comes before E3.
+
+*This paragraph said only that the owner would hit the refusal, which was true and
+is no longer the whole of it.* **Owner decision B, 2026-10-01**: the card-number
+field now reads **"Set up GuestOps first"** and draws no number, where it used to
+draw a prospective `GRC-1` the capture would refuse. **So E3 has a drive row of
+its own**: open the card on an unconfigured property and the field says what to
+do — *the screen prevents the 409, the boundary still refuses it, and neither
+stands in for the other.* Both are worth pressing, in that order.
 
 ### E4 · Date fields — 3 sites, one shared control
 
