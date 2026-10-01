@@ -214,11 +214,20 @@ public sealed class PartCCorrectStayDriver
 
     /// <summary>A correction with no reason is refused — the one check it makes.</summary>
     /// <remarks>
+    /// <para>
     /// <b>Three blank forms, because "empty" is not one value.</b> A validator
     /// written <c>== ""</c> would admit a single space, and a reason of whitespace
     /// is the same defect as none: <i>"without one it is indistinguishable from a
     /// mistake."</i> The accepting counterpart is every row of the theory above, so
     /// a validator refusing everything cannot hide here.
+    /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>a375699a</c>:</b> removing the service's reason
+    /// guard gives <b>4 failed, 11 passed</b> — all three blank forms <i>and</i>
+    /// <c>And_a_refused_correction_writes_nothing</c>. <b>That all three fail is what
+    /// proves the guard is <c>IsNullOrWhiteSpace</c> rather than <c>== ""</c></b>; a
+    /// theory with only the empty string would pass against the weaker check.
+    /// </para>
     /// </remarks>
     [Theory]
     [InlineData("")]
@@ -299,10 +308,17 @@ public sealed class PartCCorrectStayDriver
 
     /// <summary>A correction of a stay at another property is NOT FOUND, never forbidden.</summary>
     /// <remarks>
+    /// <para>
     /// ADR 0054's boundary: the query is scoped by property before id, so another
     /// property's stay does not exist as far as this caller is concerned. A
     /// <c>PermissionDenied</c> would confirm the stay is real, which is the
     /// cross-property leak the scoping exists to prevent.
+    /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>a375699a</c>:</b> dropping
+    /// <c>s.PropertyId == scope.PropertyId</c> from <c>RequireWritableAsync</c>'s
+    /// lookup gives <b>1 failed, 14 passed</b>, and the failure is this test alone.
+    /// </para>
     /// </remarks>
     [Fact]
     public async Task A_stay_at_another_property_is_not_found()
