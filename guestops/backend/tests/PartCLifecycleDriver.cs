@@ -158,9 +158,18 @@ public sealed class PartCLifecycleDriver
                 continue;
             }
 
-            var refused = await Assert.ThrowsAsync<InvalidRequestException>(cancel);
+            // Record.ExceptionAsync rather than Assert.ThrowsAsync, because the
+            // latter takes no message: its failure reads "No exception was thrown"
+            // and names no state, which is the row a reader most needs identified.
+            var refused = await Record.ExceptionAsync(cancel);
+
             Assert.True(
-                refused.Message.Contains("already arrived", StringComparison.Ordinal),
+                refused is InvalidRequestException,
+                $"from {from}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("already arrived", StringComparison.Ordinal),
                 $"from {from}: refused for the wrong reason — {refused.Message}");
         }
     }
@@ -194,9 +203,15 @@ public sealed class PartCLifecycleDriver
                 continue;
             }
 
-            var refused = await Assert.ThrowsAsync<InvalidRequestException>(noShow);
+            var refused = await Record.ExceptionAsync(noShow);
+
             Assert.True(
-                refused.Message.Contains("never arrived", StringComparison.Ordinal),
+                refused is InvalidRequestException,
+                $"from {from}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("never arrived", StringComparison.Ordinal),
                 $"from {from}: refused for the wrong reason — {refused.Message}");
         }
     }

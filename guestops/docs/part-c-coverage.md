@@ -50,15 +50,60 @@ owner had already walked, and an unlabelled blank is how that happened.
 
 ---
 
-## Progress — 4 of 12 writes driven, 2026-10-01
+## Progress — 12 of 12 writes driven, 2026-10-01
 
 ```text
 SaveSettings          DRIVEN   20 combinations · PartCSettingsDriver
 CreateBooking         DRIVEN   23 combinations · PartCBookingDriver
 CorrectStay           DRIVEN   15 combinations · PartCCorrectStayDriver
+CheckIn · CheckOut    DRIVEN   a 7-state SOURCE MATRIX each · PartCLifecycleDriver
+CancelStay            DRIVEN   7 states, 5 accepted · PartCLifecycleDriver
+RecordNoShow          DRIVEN   7 states, 3 accepted · PartCLifecycleDriver
+RecordFiling          DRIVEN   the authority guard nothing drove · PartCTextWriteDriver
+LogRequest · AddNote  DRIVEN   three blank forms each · PartCTextWriteDriver
 CaptureRegistration   DRIVEN   by RegistrationCardTests — cited, not duplicated
-the other 8 writes    NOT DRIVEN
+AssignRoom            DRIVEN   by AssignCommandTests, both accept_conflict values
 ```
+
+### The last eight, and two findings neither door guards
+
+**`CheckOut` validates NO source state** — not in the service, not in
+`CheckOutCommand`, which checks only that a stay id and a version are present. So a
+`Waitlisted`, `Cancelled` or `NoShow` stay can be marked departed, and a `Departed`
+one again with its `DepartureAt` overwritten, each announcing `stay.departed`. **Its
+two siblings guard their source and say why**, both directing the caller to the
+correction, and *nothing in either file explains why check-out is the exception.*
+
+**`CheckIn` guards only the ROOM**, and nothing releases `CurrentRoomId` on cancel,
+no-show or departure — that assignment appears **once** in the application, at
+`BookingService.cs:162`. `ConflictingStayAsync` counts only `Pending · Booked ·
+InHouse` as holding, so a cancelled stay does not block its room, correctly — **and
+checking it in makes it `InHouse`, which does.** If the room was reassigned in
+between, two stays are in house on one room with no `accept_conflict` in the path.
+
+*Both recorded in labelled tests and neither repaired: what they are is a measured
+ambiguity about which lifecycles an operational event may act on, not a ruled rule.*
+
+### ⚠ And this block crossed the suite's connection ceiling
+
+As xUnit theories the two matrices were 34 separate invocations, each creating a
+scratch database — **~167 became ~232, and 18 tests failed**, every one
+`Npgsql … Exception while reading from stream` or EF's transient wrapper, scattered
+across four suites this block never touched, with **zero logic failures**.
+`DeskHarness` documents the mechanism in its own words: provisioning on every harness
+*"exhausted `hotelos_migrator`'s connection limit."*
+
+**Re-running until green would have shipped an intermittent cluster-exhauster.** Each
+matrix is now one test over one database with a fresh stay per row. **337/337 in
+1m54s**, against 1m50s for 317 before the block.
+
+> **The test count fell from 364 to 337 and no coverage was lost** — 34 theory rows
+> became six looping tests over the same combinations. Said plainly, because the two
+> numbers invite the opposite conclusion.
+
+**Measured and not acted on:** the three largest scratch-database consumers are all
+Part C drivers. The per-combination-harness pattern has a ceiling, and this is where
+it was found.
 
 ### `CorrectStay` closes the enum axis, and found one thing
 
@@ -68,16 +113,24 @@ declared. **`CorrectCommandTests` already covered three transitions by name** an
 cited rather than re-written — what this adds is *every* member, the accepting
 counterpart to its refusal-only version test, and the eighth value.
 
-> **⚠ THE EIGHTH VALUE IS ACCEPTED BY ONE DOOR OF TWO.** A connector sending
-> `STAY_LIFECYCLE_UNSPECIFIED = 0` reaches a stored lifecycle that no name in the
-> domain describes. **The desk cannot do this** — and naming the door is the finding.
+> **⚠ THE EIGHTH VALUE WAS ACCEPTED BY ONE DOOR OF TWO — AND THAT DOOR IS NOW
+> CLOSED.** A connector sending `STAY_LIFECYCLE_UNSPECIFIED = 0` reached a stored
+> lifecycle that no name in the domain describes. **The desk never could** — and
+> naming the door was the finding. *Repaired 2026-10-01 as an architect assignment on
+> this measurement; no ADR was owed, because the gap rule and this file's own
+> `StayView` refusal already ruled it. The labelled test is kept, renamed to say
+> which layer it describes: the service still accepts a zero the door no longer lets
+> through, because the guard went where the untrusted value enters rather than being
+> duplicated inland.*
 
 ```text
 the MODULE door   takes the lifecycle as a STRING, refuses anything that is
                   not an exact member name. CorrectCommandTests:116 drives
                   "Levitating", :133 drives "inhouse". A desk CANNOT express zero.
-the gRPC door     (Domain.StayLifecycle)(int)request.To  —  Stays.cs:134, a bare
-                  cast. Unchecked.
+the gRPC door     WAS (Domain.StayLifecycle)(int)request.To, a bare cast. REPAIRED
+                  2026-10-01: FromProto refuses by name, DERIVED from Enum.IsDefined
+                  so a member added tomorrow is accepted and an unknown number from
+                  a newer client stays refused. LifecycleWireTests.
 the service       CorrectAsync validates the REASON, not the target — which is
                   RIGHT for the seven real states, because a correction exists to
                   undo a wrong transition and must reach any of them.
@@ -447,5 +500,8 @@ reference to cite. *Named here so the empty cell is not read as unfinished work.
 * **Nothing about the gRPC door's own refusals.** `CorrectStay`'s eighth value is
   accepted there and refused at the module door; the driver records the current
   behaviour and endorses nothing. No connector has been driven against that door.
-* **Nothing that has not been run.** 4 of 12 writes are driven and the other 8 say
-  so by name.
+* **Nothing that has not been run.** All 12 writes are driven, two of them by suites
+  that already existed and are cited rather than duplicated.
+* **Nothing about which lifecycles an operational event SHOULD accept.** `CheckOut`
+  and `CheckIn` guard no source state; both are recorded in labelled tests and
+  neither is repaired, because that is a measured ambiguity and not a ruled rule.

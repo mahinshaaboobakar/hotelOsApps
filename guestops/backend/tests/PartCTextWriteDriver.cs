@@ -80,12 +80,17 @@ public sealed class PartCTextWriteDriver
 
         foreach (var authority in Blank)
         {
-            var refused = await Assert.ThrowsAsync<InvalidRequestException>(
+            var refused = await Record.ExceptionAsync(
                 () => harness.Reporting.RecordFilingAsync(
                     harness.Scope(), stay.Id, authority!, "REF-1", default));
 
             Assert.True(
-                refused.Message.Contains("authority", StringComparison.OrdinalIgnoreCase),
+                refused is InvalidRequestException,
+                $"authority {Show(authority)}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("authority", StringComparison.OrdinalIgnoreCase),
                 $"authority {Show(authority)}: refused without naming the field — "
                 + refused.Message);
         }
@@ -126,12 +131,17 @@ public sealed class PartCTextWriteDriver
 
         foreach (var text in Blank)
         {
-            var refused = await Assert.ThrowsAsync<InvalidRequestException>(
+            var refused = await Record.ExceptionAsync(
                 () => harness.Requests.LogAsync(
                     harness.Scope(), stay.Id, text!, handOff: false, default));
 
             Assert.True(
-                refused.Message.Contains("text is required", StringComparison.Ordinal),
+                refused is InvalidRequestException,
+                $"text {Show(text)}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("text is required", StringComparison.Ordinal),
                 $"text {Show(text)}: refused for the wrong reason — {refused.Message}");
         }
     }
@@ -187,11 +197,16 @@ public sealed class PartCTextWriteDriver
 
         foreach (var text in Blank)
         {
-            var refused = await Assert.ThrowsAsync<InvalidRequestException>(
+            var refused = await Record.ExceptionAsync(
                 () => harness.Requests.AddNoteAsync(harness.Scope(), stay.Id, text!, default));
 
             Assert.True(
-                refused.Message.Contains("text is required", StringComparison.Ordinal),
+                refused is InvalidRequestException,
+                $"text {Show(text)}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("text is required", StringComparison.Ordinal),
                 $"text {Show(text)}: refused for the wrong reason — {refused.Message}");
         }
     }
