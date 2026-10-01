@@ -33,10 +33,20 @@ namespace HotelOS.GuestOps.Tests;
 /// <c>CommercialTerms.CancellationDeadline(arrival, zone)</c> <i>computes</i> it
 /// from the offset and the drop time, and
 /// <c>GuestOpsGrpcService.Bookings.cs:66</c>'s <c>ToCommand</c> never reads the
-/// field. <b>One <c>CommercialTerms</c> message serves both directions</b>, so the
-/// request can express a value the service ignores — which is the
+/// field. So the request can express a value the service ignores — which is the
 /// derived-projection rule's own case (<i>"the API has nowhere to put them"</i>),
 /// and it has somewhere. Asserted below as a finding rather than left as a count.
+/// </para>
+/// <para>
+/// <b>This said "one <c>CommercialTerms</c> message serves both directions", and
+/// that is not the shape</b> (corrected 2026-10-01). It is <b>two enclosing
+/// messages sharing one nested type</b> — <c>NewStay.terms</c> at
+/// <c>service.proto:139</c> is the request, <c>RoomStay.terms</c> at
+/// <c>dto.proto:238</c> is the response and legitimately needs the field. The old
+/// sentence made the remedy read as a deletion from <c>CommercialTerms</c>, which
+/// would break the response; <i>it is a request-side terms message that omits the
+/// derived field, leaving the response untouched.</i> Recorded because a wrong
+/// shape is what makes a cheap repair look expensive.
 /// </para>
 /// <para>
 /// <b>Two of the seven are a LABELLED fold, not a distinction.</b> R19 is
@@ -295,11 +305,19 @@ public sealed class PartCBookingDriver
     /// <para>
     /// <b>Asserted as the derived-projection rule, not as arithmetic.</b> The rule
     /// says a create message <i>has nowhere to put</i> a projection, because a
-    /// client that cannot express the mistake cannot make it — and here one
-    /// <c>CommercialTerms</c> message serves request and response, so it has
-    /// somewhere. The deadline a stay reports therefore comes from the offsets the
-    /// caller set, and this test fails if anybody ever wires the sent field
-    /// through.
+    /// client that cannot express the mistake cannot make it — and
+    /// <c>NewStay.terms</c> reuses the response's nested type, so it has somewhere.
+    /// The deadline a stay reports therefore comes from the offsets the caller set,
+    /// and this test fails if anybody ever wires the sent field through.
+    /// </para>
+    /// <para>
+    /// <b>The repair is assigned as <c>f4584d3c</c>, sequenced after Part C's
+    /// remaining nine writes</b> — a request-side terms message omitting this
+    /// field, leaving <c>RoomStay.terms</c> untouched. <i>No ADR is owed</i>:
+    /// CLAUDE.md already rules both halves. And the cost is small — there is no
+    /// <c>buf.yaml</c> in this repository, ADR 0168's trigger paths do not reach an
+    /// application's own protos, and every consumer of <c>guestops/v1/dto</c> is
+    /// inside this bundle.
     /// </para>
     /// </remarks>
     [Fact]

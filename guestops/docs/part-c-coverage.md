@@ -91,17 +91,61 @@ GuestOpsGrpcService.Bookings.cs:66  ToCommand         maps twelve fields and
                                                      NOT this one
 ```
 
-> **One `CommercialTerms` message serves request and response, so a caller can set
-> a derived field and the service silently ignores it.** The derived-projection
-> rule's own case — *"the API has nowhere to put them, which is stronger than
-> validating and rejecting, because a client cannot express the mistake"* — and
-> here it has somewhere.
+> **A caller can set a derived field and the service silently ignores it.** The
+> derived-projection rule's own case — *"the API has nowhere to put them, which is
+> stronger than validating and rejecting, because a client cannot express the
+> mistake"* — and here it has somewhere.
 
-**Recorded as a contract finding, not fixed.** Removing a field from a message
-shared by both directions is a proto change: `buf breaking`, ADR 0168's
-cross-repository consumer check, and a decision about whether the write gets its
-own message. *The driver asserts the derivation instead, so the day anybody wires
-the sent value through, a test fails.*
+#### ⚠ THE COST THIS SECTION GAVE WAS WRONG IN ALL THREE PARTS — corrected 2026-10-01
+
+**It said:** *"Removing a field from a message shared by both directions is a proto
+change: `buf breaking`, ADR 0168's cross-repository consumer check, and a decision
+about whether the write gets its own message."* **Kept, because a wrong cost in a
+document is what stops the next person doing the work** — and because only one
+third of it survived.
+
+```text
+"buf breaking"            NO. There is no buf.yaml anywhere in HotelOsApps.
+                          buf lives only at HosPilotOS/shared/protos/, so
+                          nothing lints or gates these protos at all.
+"ADR 0168's consumer      NO. 0168:32-33 is owed by packages/sdk-dotnet/**,
+ check"                   packages/sdk-typescript/** or shared/protos/**.
+                          guestops' protos are at guestops/backend/src/protos/,
+                          and there is no guestops directory under
+                          HosPilotOS/shared/protos/hotelos/.
+"whether the write gets   REAL — and it is the whole remedy.
+ its own message"
+```
+
+**Every consumer of `guestops/v1/dto` is inside `guestops/`** — measured unscoped
+across both repositories: `events.proto`, `service.proto`, and one register row,
+which is prose and not a consumer. *One bundle, one build.*
+
+**And the SHAPE was off, which is what made the remedy look expensive.** This
+section said *"one `CommercialTerms` message serves request and response"*. It is
+**two enclosing messages sharing one nested type**:
+
+```text
+service.proto:139   NewStay.terms  = 20     the REQUEST
+dto.proto:238       RoomStay.terms = 30     the RESPONSE — legitimately needs it
+```
+
+> **So the remedy was never a deletion from `CommercialTerms`** — that would break
+> the response, which is exactly why it costed badly. **It is a request-side terms
+> message that does not carry the derived field, leaving the response untouched**:
+> an addition in shape, inside one bundle, with nothing external resolving against
+> it.
+
+**Assigned, not asked.** CLAUDE.md rules both halves — *"a create or update message
+simply does not carry the field"* — so no ADR is owed and nothing goes to the
+planner. Registered **`f4584d3c`**, with **no question number**: an architect
+assignment from a stream's measurement has none, and the nearest plausible number
+is always the wrong one.
+
+**Sequenced after Part C's remaining nine writes** (architect's decision, not
+mine): the axis the owner is tracking is at zero on nine of twelve, and a contract
+change competes with it. *The driver asserts the derivation meanwhile, so the day
+anybody wires the sent value through, a test fails.*
 
 ### And the amount-presence fold is at a layer this driver does not reach
 
