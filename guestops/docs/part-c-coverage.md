@@ -50,14 +50,70 @@ owner had already walked, and an unlabelled blank is how that happened.
 
 ---
 
-## Progress — 3 of 12 writes driven, 2026-10-01
+## Progress — 4 of 12 writes driven, 2026-10-01
 
 ```text
 SaveSettings          DRIVEN   20 combinations · PartCSettingsDriver
 CreateBooking         DRIVEN   23 combinations · PartCBookingDriver
+CorrectStay           DRIVEN   15 combinations · PartCCorrectStayDriver
 CaptureRegistration   DRIVEN   by RegistrationCardTests — cited, not duplicated
-the other 9 writes    NOT DRIVEN
+the other 8 writes    NOT DRIVEN
 ```
+
+### `CorrectStay` closes the enum axis, and found one thing
+
+**All 7 named `StayLifecycle` members are reachable targets**, enumerated from the
+enum rather than listed, so a member added tomorrow is driven the day it is
+declared. **`CorrectCommandTests` already covered three transitions by name** and is
+cited rather than re-written — what this adds is *every* member, the accepting
+counterpart to its refusal-only version test, and the eighth value.
+
+> **⚠ THE EIGHTH VALUE IS ACCEPTED BY ONE DOOR OF TWO.** A connector sending
+> `STAY_LIFECYCLE_UNSPECIFIED = 0` reaches a stored lifecycle that no name in the
+> domain describes. **The desk cannot do this** — and naming the door is the finding.
+
+```text
+the MODULE door   takes the lifecycle as a STRING, refuses anything that is
+                  not an exact member name. CorrectCommandTests:116 drives
+                  "Levitating", :133 drives "inhouse". A desk CANNOT express zero.
+the gRPC door     (Domain.StayLifecycle)(int)request.To  —  Stays.cs:134, a bare
+                  cast. Unchecked.
+the service       CorrectAsync validates the REASON, not the target — which is
+                  RIGHT for the seven real states, because a correction exists to
+                  undo a wrong transition and must reach any of them.
+the C# enum       starts at Waitlisted = 1. NO member 0, deliberately.
+the column        HasIndex only — no conversion, no check constraint, so 0 lands.
+```
+
+**The same file refuses one zero by name and casts the other.**
+`GuestOpsGrpcService.Stays.cs:29` records that `STAY_VIEW_UNSPECIFIED` *"is refused
+by name rather than defaulted to arrivals: a caller that forgot the field would
+otherwise get a plausible list for a question it never asked."* That is the pattern,
+on the read path, in the same class as the cast.
+
+**The reference has no unnamed status at all** —
+`pms-integrations/.../common/misc/ReservationStatus.java:3-4` declares `BOOKING,
+CHECKIN, CHECKOUT, CANCELLED, WAITING, NO_SHOW`, and a Java enum has no zero
+sentinel. *Cited as the connectors' reference, which is where that file lives:
+`guest-management-server` mentions `ReservationStatus` in nine files and declares it
+in none.* So the concept carries six named states and no *did not say*; our domain
+enum agrees by starting at 1; **the zero exists only because proto3 demands one**,
+which makes it a wire artefact rather than a state.
+
+**Recorded as current behaviour in a labelled test, not endorsed.** The remedy —
+refuse at the door, at the service, or make zero inexpressible in the mapping — is a
+ruling nobody has made, and it is reported with this measurement rather than chosen
+by a stream.
+
+**The sweep behind that:** register and ADR index read for `UNSPECIFIED` (35 hits),
+`unmapped` (8), `refused by name` (27), `StayLifecycle` (6), `enum default` (0),
+`lifecycle correction` (0), `correct a stay` (0), with `GUEST-Q` (28) as the positive
+control; the six `StayLifecycle` rows read in full; **ADR 0310 read in full** as the
+nearest ruling — it governs `RecordNoShow` and reinstatement, and its own measurement
+shows `RecordNoShowAsync` refuses an illegal *source* where `CorrectAsync` validates
+no *target*. **NOT REACHED:** the 35 `UNSPECIFIED` hits were not each read in full,
+only those naming a lifecycle or a GuestOps question; and no connector has been
+driven against this door.
 
 Run 2026-10-01 at Debug on the dev cluster, `dotnet test` and not `--no-build`, so
 the figures describe the tree rather than a filesystem.
@@ -239,8 +295,9 @@ section names each position instead of totalling them. *The first draft of this
 paragraph said "six of them, and two of those six", which adds up to nothing —
 caught by making the column close.*
 
-**The enum axis is 11 member cases, not 24.** GuestOps declares five enums with
-24 members between them, and **one appears on a write request**:
+**The enum axis is 11 member cases, not 24 — and it is now DRIVEN**
+(`PartCCorrectStayDriver`, 2026-10-01). GuestOps declares five enums with 24 members
+between them, and **one appears on a write request**:
 
 ```text
 StayLifecycle   8 members incl. UNSPECIFIED   CorrectStayRequest.to   ← the only one
@@ -387,5 +444,8 @@ reference to cite. *Named here so the empty cell is not read as unfinished work.
 * **Nothing about `cancellation_deadline` as an input**, because it is not one. The
   driver asserts the derivation; whether the request should carry the field at all
   is an open contract finding above.
-* **Nothing that has not been run.** 3 of 12 writes are driven and the other 9 say
+* **Nothing about the gRPC door's own refusals.** `CorrectStay`'s eighth value is
+  accepted there and refused at the module door; the driver records the current
+  behaviour and endorses nothing. No connector has been driven against that door.
+* **Nothing that has not been run.** 4 of 12 writes are driven and the other 8 say
   so by name.
