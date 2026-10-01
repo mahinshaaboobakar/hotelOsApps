@@ -17,6 +17,70 @@
 
 ---
 
+## Run from `2026-10-01` at `e0361fbf` — 17 frames, and the build has drifted
+
+```text
+frames                    17        arithmetic closes on 17/17, both columns
+drawn nodes              892        unchanged from the prior run
+built nodes              713
+paired                   445        of which 48 by position
+identical                389
+differing                 56        across 14 properties
+unpaired · drawn         419
+unpaired · built         236
+refused groups             9
+collapsed                  0        emitted at zero
+```
+
+```text
+drawn   892 = 445 + 419 + 28   ✓
+built   713 = 445 + 236 + 32   ✓
+paired  445 = 389 +  56        ✓
+```
+
+**The finding is that the build has drifted from the drawing: 7 differing became
+56**, and `paired` fell from 607 to 445 while `unpaired drawn` rose from 277 to
+419 — the key is tag + normalised text, so that is copy changing across 42
+commits, not styling.
+
+### ⚠ These two runs are NOT comparable, and the reason is in the drawing
+
+**`eb92943` (2026-09-19, H6) moved the mockups' palette out of the page** — *"the
+mockups declare no palette of their own; they link the published tokens"*. So the
+09-17 run measured a mock carrying its own inline palette and this one measures a
+mock linking `tokens.css`. Both runs are valid about the document they swept; a
+cell-by-cell comparison between them is not.
+
+### And the first attempt at this re-sweep was DISCARDED — the cause is recorded
+
+The first run reported **`identical 0 · differing 445`** with its columns closing
+perfectly on 17/17. **It was a measurement fault, not a fidelity collapse.**
+
+```text
+caught by MAGNITUDE        892/726/607 was the prior; 892/713/445 with ZERO
+                           identical is not a plausible movement
+then by the PROPERTY       one property — `color` — differing on ALL 445, drawn
+  DISTRIBUTION             `rgb(0, 0, 0)`. Default black is a page with no
+                           stylesheet, not 445 regressions
+```
+
+**Cause:** `run.mjs` served the drawing from `docs/mockups`, and the mock's
+`../../ui/preview/tokens.css` escapes that root, so `serve.mjs`'s traversal guard
+— **correctly** — refused it. The stylesheet 404'd and every colour fell back.
+
+**A two-part change that broke in the gap, and the gap was 12 days.** `a824599`
+set the root on 2026-09-16; `eb92943` moved the palette out on 2026-09-19; nobody
+ran the sweep in between, so nothing ever went red. *The guard is right and the
+link is right — the root was the thing that had to move*, and it did
+(`run.mjs`, 2026-10-01, with the reason written at the site).
+
+**The tag census is what a total cannot do**, and it is unchanged across both
+valid runs — `div 202 · span 99 · button 71 · b 64 · label 9`. A sweep pointed at
+the wrong document answers with the wrong *kinds* of node, which is checkable on a
+first run where magnitude is not.
+
+---
+
 ## ⚠ The run below is from `2026-09-17` and does NOT describe HEAD
 
 **42 commits have touched `guestops/ui` since it was taken.** Among them, and each

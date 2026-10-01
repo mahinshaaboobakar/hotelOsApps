@@ -96,9 +96,27 @@ mkdirSync(OUT, { recursive: true });
 /** Frames whose screen the harness could not reach — stated, never silent. */
 const unreached = [];
 
+// **Rooted at the APP, not at `docs/mockups`, and the reason is a 12-day silent
+// defect.** `eb92943` (2026-09-19, H6) moved the mockups' palette out of the page
+// — *"the mockups declare no palette of their own; they link the published
+// tokens"* — so `01-guestops-gold.html` now carries
+// `<link href="../../ui/preview/tokens.css">`. That path ESCAPES a root at
+// `docs/mockups`, and `serve.mjs`'s traversal guard correctly refuses it. The
+// stylesheet 404'd, the drawing rendered unstyled, and every node's `color` read
+// `rgb(0, 0, 0)`.
+//
+// **Nothing failed.** The sweep ran, its columns closed, and it reported
+// `identical 0 · differing 445` — a catastrophic-looking fidelity result that was
+// a measurement fault. It was caught by the MAGNITUDE against the prior run
+// (892/726/607 on 2026-09-17) and then by the property distribution: one property,
+// `color`, differing on all 445 is a page-wide cause, not 445 regressions.
+//
+// The guard is right and the link is right; the ROOT was the thing that had to
+// move. Two artefacts that must agree, changed two days apart, with no run in
+// between to notice.
 const drawing = await serve({
-  root: join(APP, "docs", "mockups"),
-  path: "/01-guestops-gold.html",
+  root: APP,
+  path: "/docs/mockups/01-guestops-gold.html",
   title: "GuestOps Gold Mockup",
 });
 
@@ -118,7 +136,7 @@ try {
     const drawn = join(OUT, `${frame.id}-drawn.json`);
     const shot = join(OUT, `${frame.id}-built.json`);
 
-    await sweep(`${drawing.origin}/01-guestops-gold.html`, drawn, `#${frame.id}`);
+    await sweep(`${drawing.origin}/docs/mockups/01-guestops-gold.html`, drawn, `#${frame.id}`);
     await sweep(`${built.origin}/frame.html?${frame.url}`, shot, frame.root);
 
     // **The harness photographs a failed drive rather than failing**, so a
