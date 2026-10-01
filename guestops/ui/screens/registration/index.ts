@@ -205,16 +205,33 @@ function who(card: RegistrationCard, host: HostApi): HTMLElement {
 }
 
 /**
- * The card's number, and whether the series has spent it yet.
+ * The card's number, in whichever of its three states this property is in.
  *
- * **A card that has never been saved shows the number the property *would*
- * mint** — the read does not take one, because a number taken and not used is a
+ * **`unconfigured` says to set GuestOps up and shows no number** — owner
+ * decision B, 2026-10-01, and the sentence is the owner's own words rather than
+ * a phrasing of ours. It replaces a prospective `GRC-1` that the capture would
+ * have refused with 409, so the desk is told what to do instead of being shown a
+ * number and stopped later.
+ *
+ * **The switch is exhaustive by type, not by care.** `CardSeries` keeps `number`
+ * only on the arms that have one, so a fourth state or a careless `.number`
+ * stops the build rather than reaching a screen.
+ *
+ * A card that has never been saved still shows the number the property *would*
+ * mint — the read does not take one, because a number taken and not used is a
  * gap in a series a property gets asked about.
  */
 function series(card: RegistrationCard): string {
-  return card.series.taken
-    ? card.series.number
-    : `${card.series.number} · the property's series, next number taken on save`;
+  switch (card.series.state) {
+    case "taken":
+      return card.series.number;
+
+    case "next":
+      return `${card.series.number} · the property's series, next number taken on save`;
+
+    case "unconfigured":
+      return "Set up GuestOps first";
+  }
 }
 
 /** One box: a control where it can be captured, a value where it cannot. */

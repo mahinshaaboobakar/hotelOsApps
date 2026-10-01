@@ -219,6 +219,58 @@ describe("the registration card", () => {
     expect(marked).toEqual(["Number ·"]);
   });
 
+  /**
+   * Owner decision B, 2026-10-01 — on an unconfigured property the card-number
+   * field says to set GuestOps up, and shows no number.
+   *
+   * **The prospective number was a promise the capture refuses.** GUEST-Q15 made
+   * the card render on a property with no settings row, and the series then drew
+   * `GRC-1` while `MintCardNumber` refuses and the save answers 409 — so the desk
+   * was shown a number and stopped afterwards.
+   */
+  it("tells the desk to set GuestOps up rather than showing a number it cannot have", async () => {
+    const into = stage();
+
+    await registrationCard(
+      host({ ...recordedRegistration, series: { state: "unconfigured" } }),
+      into, "s1", () => {}, () => {});
+
+    expect(into.textContent).toContain("Set up GuestOps first");
+  });
+
+  /**
+   * And NO number is drawn, which is the half the sentence above cannot prove.
+   *
+   * A card reading *Set up GuestOps first* beside `GRC 2026/08/1152` would
+   * satisfy the test above completely, and would be exactly the defect this
+   * ruling removed. Searching for the fixture's own prefix catches both a screen
+   * that kept the prospective number and one that fell back to the recorded card.
+   */
+  it("and draws no card number at all in that state", async () => {
+    const into = stage();
+
+    await registrationCard(
+      host({ ...recordedRegistration, series: { state: "unconfigured" } }),
+      into, "s1", () => {}, () => {});
+
+    expect(into.textContent).not.toContain("GRC");
+  });
+
+  /**
+   * The positive control: a configured property still shows its next number.
+   *
+   * Without it, a `series()` returning the setup sentence for every state would
+   * pass both tests above — the guard-that-refuses-everything failure, arriving
+   * in a renderer.
+   */
+  it("still shows the next number where the property IS configured", async () => {
+    const into = stage();
+    await registrationCard(host(), into, "s1", () => {}, () => {});
+
+    expect(into.textContent).toContain("GRC 2026/08/1152");
+    expect(into.textContent).not.toContain("Set up GuestOps first");
+  });
+
   it("offers only the documents this property accepts", async () => {
     const into = stage();
     await registrationCard(host(), into, "s1", () => {}, () => {});

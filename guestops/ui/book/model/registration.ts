@@ -91,21 +91,37 @@ export interface ForeignBlock {
   rows: readonly CardRow[];
 }
 
-/** The card's number, and whether the series has already spent it. */
-export interface CardSeries {
-  /** `GRC-2026/08/1152`. */
-  number: string;
+/**
+ * The card's number — taken, the next one, or none because this property has no
+ * GuestOps settings row.
+ *
+ * **A union rather than a flag, so the third state cannot render a number.**
+ * This was `{ number, taken }`, and a caller could take `.number` without
+ * looking at `.taken` — which is how the card came to draw `GRC-1` on a property
+ * where the capture answers 409 (owner decision B, 2026-10-01). With the number
+ * living only on the two arms that have one, *rendering a number for an
+ * unconfigured property is a compile error* instead of a rule somebody has to
+ * remember.
+ *
+ * Minting advances the series, so a read never takes a number: a number taken
+ * and not used is a gap in the series, and a gap is a question a property gets
+ * asked at an inspection.
+ */
+export type CardSeries =
+  /** The card exists and holds this number. `GRC-2026/08/1152`. */
+  | { readonly state: "taken"; readonly number: string }
+
+  /** No card yet; this is what the property would mint on save. */
+  | { readonly state: "next"; readonly number: string }
 
   /**
-   * True once the card exists.
+   * No number, because nobody has set GuestOps up on this property.
    *
-   * **A card that has never been saved shows what the property *would* mint.**
-   * Minting advances the series, so a read that took a number would leave a gap
-   * every time somebody opened a card and closed it — and a gap in the series
-   * is a question a property gets asked.
+   * **Carries no `number` deliberately.** The series lives in the settings row,
+   * so there is nothing to predict — and `MintCardNumber` refuses, which means a
+   * desk shown a number here would be told 409 on save.
    */
-  taken: boolean;
-}
+  | { readonly state: "unconfigured" };
 
 /** When a filing is owed, where this property owes one. */
 export interface Obligation {

@@ -82,6 +82,20 @@ public sealed class SetupView(SettingsService settings)
         };
 
     /// <summary>The card series, shown as the next card the desk will print.</summary>
+    /// <remarks>
+    /// <b>This KEEPS the prospective number that the registration card lost, and
+    /// the asymmetry is deliberate</b> — owner decision B, 2026-10-01. On an
+    /// unconfigured property <c>RegistrationView.Series</c> now draws no number,
+    /// because capture would be refused. <b>Here the number is true</b>: Setup is
+    /// the screen that creates the settings row, the values shown are the declared
+    /// defaults <c>Save</c> will store, and <c>{prefix}{NextCardNumber}</c> is
+    /// exactly what the first card will carry once it is saved.
+    /// <para>
+    /// So <i>do not restore symmetry between these two surfaces.</i> One predicts
+    /// what its own button is about to make true; the other predicted what a
+    /// different screen's button would refuse.
+    /// </para>
+    /// </remarks>
     private static object Series(GuestOpsSettings it)
         => new
         {

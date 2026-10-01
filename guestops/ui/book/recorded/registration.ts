@@ -45,7 +45,11 @@ export const recordedRegistration: RegistrationCard = {
   depart: "2026-09-04",
   homeCountry: "IN",
 
-  series: { number: "GRC 2026/08/1152", taken: false },
+  // `next`, not `unconfigured`: frame 15 draws a configured property, which is
+  // the state the design is about. The unconfigured arm is driven by the suite
+  // rather than recorded here — one fixture per screen, and this screen's is the
+  // configured one.
+  series: { state: "next", number: "GRC 2026/08/1152" },
 
   rows: [
     {

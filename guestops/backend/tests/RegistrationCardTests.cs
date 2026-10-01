@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using HotelOS.GuestOps.Application.Registrations;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Module;
 using Xunit;
@@ -304,6 +305,117 @@ public sealed class RegistrationCardTests
         await Assert.ThrowsAsync<HotelOS.Platform.InvalidRequestException>(
             () => command.RunAsync(harness.Scope(), body, CancellationToken.None));
     }
+
+    /// <summary>
+    /// On an unconfigured property the series carries no number — owner decision
+    /// B, 2026-10-01.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The state is asserted AND the absence of a number is asserted.</b> A
+    /// `state` of `unconfigured` beside a `number` field would satisfy the first
+    /// half while leaving the screen free to draw it, and the whole ruling is
+    /// that there is no number to draw. <i>The wire is where that has to be
+    /// true</i>; the TypeScript union is what stops a screen ignoring it, and
+    /// neither stands in for the other.
+    /// </para>
+    /// <para>
+    /// This drives <see cref="RegistrationView"/> rather than the command,
+    /// because the series is a read.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task An_unconfigured_property_draws_no_card_number()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var stay = await harness.SeedStayAsync();
+
+        var series = await Series(harness, stay.Id);
+
+        Assert.Equal("unconfigured", series.GetProperty("state").GetString());
+        Assert.False(series.TryGetProperty("number", out _));
+    }
+
+    /// <summary>
+    /// And a configured one still shows the next number — the positive control.
+    /// </summary>
+    /// <remarks>
+    /// Without this, a <c>Series</c> that answered <c>unconfigured</c> for every
+    /// property would pass the test above and take the number off every card on
+    /// the estate. <c>GRC-</c> is the prefix <c>ConfigureAsync</c> stores, so the
+    /// value asserted is the property's own rather than a constant this test and
+    /// the code both import.
+    /// </remarks>
+    [Fact]
+    public async Task And_a_configured_one_shows_the_number_it_would_mint()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        await harness.ConfigureAsync();
+        var stay = await harness.SeedStayAsync();
+
+        var series = await Series(harness, stay.Id);
+
+        Assert.Equal("next", series.GetProperty("state").GetString());
+        Assert.Equal("GRC-1", series.GetProperty("number").GetString());
+    }
+
+    /// <summary>
+    /// A card that HOLDS a number reports it, whatever the settings row says.
+    /// </summary>
+    /// <remarks>
+    /// <b>The order inside <c>Series</c> is the decision this asserts.</b> A
+    /// numbered card on a property whose settings row has gone is a card the
+    /// property printed, so <c>taken</c> is the honest answer and
+    /// <c>unconfigured</c> would deny it. The row is removed after the capture to
+    /// reach a state no supported path produces in one step — stated, because it
+    /// is the one arrangement here that is not a product flow.
+    /// </remarks>
+    [Fact]
+    public async Task A_numbered_card_reports_its_number_even_if_the_settings_row_goes()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        await harness.ConfigureAsync();
+        var stay = await harness.SeedStayAsync();
+
+        await harness.Registrations.CaptureAsync(
+            harness.Scope(), stay.Id, new RegistrationEdit(NameAsOnId: "A"), CancellationToken.None);
+
+        harness.Db.Settings.RemoveRange(harness.Db.Settings);
+        await harness.Db.SaveChangesAsync();
+        harness.Db.ChangeTracker.Clear();
+
+        var series = await Series(harness, stay.Id);
+
+        Assert.Equal("taken", series.GetProperty("state").GetString());
+        Assert.StartsWith("GRC-", series.GetProperty("number").GetString(), StringComparison.Ordinal);
+    }
+
+    /// <summary>The card's series block, as the wire carries it.</summary>
+    /// <remarks>
+    /// <b><c>masterdata.rooms</c> is created empty because the view reads it.</b>
+    /// The card names the guest's room, so <c>AnswerAsync</c> joins Master Data's
+    /// table and a scratch database without it fails with <c>42P01</c> — which
+    /// reads exactly like the thing under test failing. Seeded with no rows: the
+    /// stay here has no room, so a row would be a fact this test does not need and
+    /// would have to keep true.
+    /// </remarks>
+    private static async Task<JsonElement> Series(DeskHarness harness, Guid stayId)
+    {
+        await harness.MasterDataRoomsAsync([]);
+
+        var view = new RegistrationView(
+            harness.Db, harness.Settings, new StubBusinessDay(new DateOnly(2026, 9, 1)));
+
+        var card = await view.AnswerAsync(harness.Scope(), stayId, CancellationToken.None);
+
+        // Through JSON rather than reflection: what a screen receives is the
+        // serialised shape, and an anonymous type read by reflection would pass
+        // on a member the serialiser drops.
+        return JsonSerializer.SerializeToElement(card, Wire).GetProperty("series");
+    }
+
+    /// <summary>The envelope's own serialiser options, so the casing matches.</summary>
+    private static readonly JsonSerializerOptions Wire = new(JsonSerializerDefaults.Web);
 
     /// <summary>Post a card through the module's own command.</summary>
     private static async Task<object?> Save(

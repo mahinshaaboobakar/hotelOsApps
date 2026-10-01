@@ -40,6 +40,15 @@ namespace HotelOS.GuestOps.Module;
 /// series shows what the property <i>would</i> mint rather than a number that
 /// has been taken.
 /// </para>
+/// <para>
+/// <b>And the sentence above was not enough — it distinguished the two facts and
+/// then drew a number from the one that cannot mint.</b> Owner decision B,
+/// 2026-10-01: on an unconfigured property the series carries <b>no number at
+/// all</b>, because <c>MintCardNumber</c> refuses and the capture answers 409.
+/// <i>Having the distinction is not the same as acting on it</i> —
+/// <see cref="GuestOpsSettings.Stored"/> was read by this file's own remarks and
+/// by nothing in its code. See <c>Series</c>.
+/// </para>
 /// </remarks>
 public sealed class RegistrationView(
     GuestOpsDbContext db, SettingsService settings, IBusinessDay businessDay)
@@ -163,21 +172,54 @@ public sealed class RegistrationView(
         };
     }
 
-    /// <summary>The card's number, or the number the property would mint for it.</summary>
+    /// <summary>
+    /// The card's number — taken, the next one, or no number at all because this
+    /// property has no settings row.
+    /// </summary>
     /// <remarks>
+    /// <para>
     /// <b>Minting is the save's, and this must not do it.</b>
     /// <c>SettingsService.MintCardNumber</c> advances the series; a read that
     /// called it would burn a number every time somebody opened a card and
     /// closed it, and a gap in the series is a question a property gets asked.
+    /// </para>
+    /// <para>
+    /// <b>The third state exists because the second one was a promise this
+    /// platform could not keep</b> — owner decision B, 2026-10-01. GUEST-Q15
+    /// made an unconfigured read answer with the declared defaults, so this
+    /// method began drawing <c>GRC-1</c> on a property where
+    /// <c>MintCardNumber</c> refuses and the capture answers 409. <i>A screen
+    /// predicting an outcome the mechanism declines</i> — and the fact that
+    /// settles it, <see cref="GuestOpsSettings.Stored"/>, was one field away.
+    /// </para>
+    /// <para>
+    /// <b>It is a STATE on the wire, not an absent number.</b> A null or empty
+    /// <c>number</c> would make <i>this property is unconfigured</i> and <i>the
+    /// service could not compute one</i> the same bytes, and the screen would
+    /// have to guess which. The discriminator makes the screen's omission a
+    /// compile error instead: the <c>unconfigured</c> arm carries no number to
+    /// render.
+    /// </para>
+    /// <para>
+    /// <b><c>taken</c> is tested FIRST, and the order is the decision.</b> A card
+    /// holds a number only if the series minted one, so a numbered card on an
+    /// unconfigured property means the settings row went away afterwards — and
+    /// the number really was issued. Reporting that as <i>unconfigured</i> would
+    /// deny a card the property has already printed.
+    /// </para>
     /// </remarks>
     private static object Series(GuestOpsSettings configuration, Registration card)
-        => card.CardNumber is { } taken
-            ? new { number = taken, taken = true }
-            : new
-            {
-                number = $"{configuration.CardNumberPrefix}{configuration.NextCardNumber}",
-                taken = false,
-            };
+    {
+        if (card.CardNumber is { } taken) return new { state = "taken", number = taken };
+
+        if (!configuration.Stored) return new { state = "unconfigured" };
+
+        return new
+        {
+            state = "next",
+            number = $"{configuration.CardNumberPrefix}{configuration.NextCardNumber}",
+        };
+    }
 
     /// <summary>One block's lines, each carrying one or two boxes.</summary>
     private static object[] Lines(
