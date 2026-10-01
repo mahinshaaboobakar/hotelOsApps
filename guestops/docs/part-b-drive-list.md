@@ -406,10 +406,115 @@ so the teardown works and they are older runs that never reached it. Not
 dropped: they cannot be attributed, and a cluster role is not mine to remove on
 a name match.
 
+## E · The 13 control sites — and the Part C combination each is pressed against
+
+> **MOVED HERE FROM `part-c-coverage.md` — 2026-10-01**, on the owner's
+> correction that *"Part C is a DATA DRIVER… it finishes when the data exists, not
+> when a control has been pressed."* **Creating the shape is Part C's; pressing the
+> control is Part B's**, so the sites belong in this list and the combination
+> belongs beside each one.
+>
+> **The pairing is the point.** A pager pressed against one page of rows renders
+> and does not page, and *that passes Part A completely* — so each row below names
+> the shape that makes the press mean something, and whether Part C has created it
+> yet. **A row whose combination is `NOT DRIVEN` cannot be driven here**, and that
+> is a Part C dependency rather than a Part B failure.
+
+**Derived: the page sizes are read from the screens, not assumed — they are not
+all 25.** `instant(…, "date")` is **formatting, not a control**, and is excluded;
+counting a formatter as a date field would put sites in this list that nobody can
+press.
+
+### E1 · Pagers — 4 sites, each needs MORE ROWS THAN ITS OWN PAGE
+
+| Site | `PAGE` | Part C combination needed | Part C status | Passes when |
+|---|---|---|---|---|
+| `attention:98` | **10** | ≥ 11 stays in an attention state | **NOT DRIVEN** — needs `CreateBooking` + a disagreement path | page 2 reached, and page 2 holds stays page 1 did not |
+| `booking:112` | **12** | one `CreateBooking` with ≥ 13 `stays` — the `stays` repeated field at *many* | **NOT DRIVEN** — `CreateBooking` undriven | the booking's own stay list pages |
+| `bookings:78` | **25** | ≥ 26 `CreateBooking` calls | **NOT DRIVEN** | page 2 reached, ordering stable across the turn |
+| `today:119` | **25** | ≥ 26 stays arriving on ONE business day | **NOT DRIVEN** | page 2 reached, **and the strip's count is not the page's length** |
+
+**The last column is the point.** *A total taken from a capped read stops growing
+at the cap* — so the count beside the pager is read against the rows, not against
+what one page returned. **`today:119` is the row where that bites**: the strip's
+four counts and the list come from one read, and a count that equals 25 forever is
+reporting a limit and calling it a quantity.
+
+### E2 · Tabs — 2 `tabs()` callers plus the bar
+
+| Site | Part C combination needed | Part C status | Passes when |
+|---|---|---|---|
+| `stay:169` | **three stays**: one with activity, requests, servicing and payment data; **one with none of them**; one with more than fits | **NOT DRIVEN** — needs `LogRequest`, `AddNote`, `RecordFiling` | renders in all three, and an empty tab says *nothing here yet* **with why** rather than drawing blank |
+| `today:91` | stays across `StayLifecycle`'s **8 members**, via `CorrectStay.to` — the single write enum | **NOT DRIVEN** — `CorrectStay` undriven, and 0 of 8 enum cases | every view switches, counts agree with the list below, and `UNSPECIFIED` is **REFUSED** |
+| the top bar | **none** — no data needed | n/a | five tabs change screen |
+
+**The empty-tab row is the one Part A cannot see at all.** A tab that draws
+nothing and a tab that says *nothing here yet, because this stay has no requests*
+are the same zero nodes to a fidelity sweep and different screens to a person.
+*That is defect 2's fix being driven, not re-asserted.*
+
+### E3 · Dropdowns — 4 sites, one shared control
+
+| Site | Choices come from | Part C combination needed | Part C status |
+|---|---|---|---|
+| `registration:242` | `AcceptedIdTypes` | `SaveSettings` with **0, 1 and 3** accepted types — the empty·single·many axis landing on a control | **CREATED, 2026-10-01** — `PartCSettingsDriver`, all three |
+| `assign:226` | `free.rooms` | Master Data rooms through **its own API** (ADR 0166), with 0, 1 and many free | **BLOCKED** — Master Data's, not GuestOps' |
+| `walkin:397` | room-type options | the same, via room types | **BLOCKED** — same |
+| `bookings/filters:49` | a static filter set | **none** | n/a — asserts every member listed and the chosen one applied |
+
+**`registration:242` is the one the owner met, and it is the only control whose
+shape now exists.** Its choices were empty because the card never rendered — the
+settings deadlock — so this row is driven *after* `7ba3d74d` and proves both
+halves: **the list is populated, and the chosen value is what is written.** Press
+it against each of the three combinations: **0 accepted types is the interesting
+one**, because an empty dropdown is indistinguishable from a broken one on screen
+and only the zero case says which.
+
+**⚠ And `registration:242` has a precondition the owner will hit first.** On a
+property with no settings row the card screen now renders (GUEST-Q15) and
+**capture is refused 409** — *"a registration card cannot be numbered until this
+property's GuestOps settings have been saved"* (`SettingsService.cs`, 2026-10-01).
+So **save Setup before driving any registration row**, and B1 comes before E3.
+
+### E4 · Date fields — 3 sites, one shared control
+
+| Site | Part C combination needed | Part C status | Passes when |
+|---|---|---|---|
+| `newbooking/query:88` | arrival/departure at each boundary, **and a rejection either side** — departure before arrival, a same-day pair | **NOT DRIVEN** — `CreateBooking` undriven | takes a valid date, refuses an invalid one **with a reason**, round-trips |
+| `walkin:377` | the same on the walk-in sheet | **NOT DRIVEN** | as above — and the sheet's submit has no handler (C2) |
+| `field.ts:173` | the **7** date-kind card boxes — `date_of_birth`, `id_expiry`, `passport_issue`, `passport_expiry`, `visa_issue`, `visa_expiry`, `arrived_in_country_on` | **NOT DRIVEN** — `CaptureRegistration` undriven | each opens, takes a date, and the value survives `CaptureRegistration` → `GetRegistration` **unchanged** |
+
+**`chrome/field.ts` is ONE control for both the dropdowns and the date fields**
+(`:147` and `:173`), so a defect there shows on both — which is why the owner
+reported them together. **Measured at `e0361fbf` the control is sound**: it builds
+the `<select>`, a blank option carrying the placeholder, one option per choice,
+sets `.value` and wires `change` → `onChange`. **So an empty `choices` is the
+failure mode, not a broken control** — and the one cause of that recorded here is
+the settings deadlock.
+
+### What a result cell in E may say
+
+```text
+PASSED       the control did the thing, against data Part C created
+FAILED       it did not, and the row names what happened
+NOT DRIVEN   no attempt — never a pass, and never an empty cell
+BLOCKED      the Part C combination does not exist yet, or a named
+             precondition outside GuestOps (Master Data rooms)
+```
+
+**11 of the 13 are `BLOCKED` on a Part C combination today**, and that is the
+honest reading of this section: **`registration:242` is drivable now, the top bar
+and `bookings/filters:49` need no data, and everything else waits on the other 11
+writes.** *Counted, so the section cannot be read as a list of things anybody can
+press this afternoon.*
+
 ## What the certificate will say it did not prove
 
 - **the atomicity of a refused multi-stay cancel** — the refusal lands on the
   first stay, so the case that would test it cannot occur until C1 unblocks;
 - **anything on the gRPC door** — no stream holds a caller with GuestOps'
   connector identity on this property;
-- **installation history** — ADR 0143.
+- **installation history** — ADR 0143;
+- **any control whose Part C combination is `NOT DRIVEN`** — §E counts them: 11
+  of 13. A control pressed against one shape says nothing about the next, which
+  is the blindness Part C exists to close and has closed for one write of twelve.
