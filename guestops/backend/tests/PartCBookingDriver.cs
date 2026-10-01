@@ -87,11 +87,21 @@ public sealed class PartCBookingDriver
     /// absence rather than invented into a guest.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// <b>The assertion is the absence row, not the guest count.</b> R25: an
     /// unnamed party is a real party, so zero guests must produce a
     /// <c>party</c> <see cref="StayAbsence"/> — a service that silently accepted
     /// an empty list and recorded nothing would pass a count-only test and lose
     /// the fact that nobody has been named.
+    /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>fef0f4c9</c>:</b> removing the service's
+    /// party-absence block gives <b>2 failed, 21 passed</b> — this test's
+    /// <c>count: 0</c> case and <c>Contact_absence_…</c>'s <c>guests: 0</c> case,
+    /// the two places that assert the row, in two tests written for two different
+    /// reasons. The <c>1</c> and <c>3</c> cases pass, so the failure is the empty
+    /// list and not the walk.
+    /// </para>
     /// </remarks>
     [Theory]
     [InlineData(0)]
@@ -132,6 +142,15 @@ public sealed class PartCBookingDriver
     /// defaulted null to false would answer identically on this call and lose
     /// <i>nobody said who the lead guest is</i> — which is a different fact from
     /// <i>this guest is not the lead</i>, with a different remedy.
+    /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>fef0f4c9</c>:</b> with
+    /// <c>IsPrimary = guest.IsPrimary ?? false</c> in the service — the exact
+    /// default this exists to prevent — the run is <b>1 failed, 22 passed</b>, and
+    /// the failure is <i>only</i> the <c>null</c> case. <b>That the <c>true</c> and
+    /// <c>false</c> cases still pass is the proof the test distinguishes three
+    /// states</b> rather than checking that a bool round-trips; a theory written
+    /// with those two alone would have been blind to the mutation.
     /// </para>
     /// </remarks>
     [Theory]
