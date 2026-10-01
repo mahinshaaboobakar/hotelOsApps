@@ -358,22 +358,75 @@ public class DeskTests
         Assert.Equal(["reporting.file"], harness.Authorizer.Permissions);
     }
 
-    /// <summary>A property nobody has configured is reported, not defaulted.</summary>
+    /// <summary>
+    /// Capturing a card on an unconfigured property is refused, and the refusal
+    /// names the remedy.
+    /// </summary>
     /// <remarks>
-    /// A property configured to require nothing and a property nobody has
-    /// configured are different facts, and only one of them is a reason to trust
-    /// a blank card.
+    /// <para>
+    /// <b>This replaces <c>An_unconfigured_property_refuses_rather_than_inventing_defaults</c>,
+    /// asserting <c>NotFoundException</c></b> — ADR 0034, a test encoding a
+    /// superseded contract. Its name stated the rule GUEST-Q15 withdrew: an
+    /// unconfigured <i>read</i> now answers with the declared defaults, so
+    /// "refuses rather than inventing defaults" is no longer GuestOps' behaviour
+    /// and a passing test under that name would be fresh evidence for a claim
+    /// nobody holds. <i>It failed instead of passing quietly, which is the better
+    /// of the two ways a stale name is found.</i>
+    /// </para>
+    /// <para>
+    /// <b>What survives is the behaviour, and the behaviour did not change:
+    /// capture has never worked on an unconfigured property.</b> It threw
+    /// <c>NotFoundException</c> from <c>LoadAsync</c> — wrong, because the
+    /// property is not missing, and the desk read 404. It now refuses from the
+    /// card series, with the reason and the remedy. <b>Only the sentence the desk
+    /// receives has moved</b>, which is why this is a replacement rather than a
+    /// new ruling.
+    /// </para>
+    /// <para>
+    /// <b>The exception class is asserted, not just the throw.</b> A
+    /// <c>PreconditionFailedException</c> is a <c>DomainException</c>, so the
+    /// envelope answers 409 <i>carrying this message</i>; the first version of the
+    /// guard threw <c>InvalidOperationException</c>, which the envelope does not
+    /// catch — 500, and the Shell drops the body. Asserting the type is what
+    /// separates "it refused" from "the desk can read why".
+    /// </para>
     /// </remarks>
     [Fact]
-    public async Task An_unconfigured_property_refuses_rather_than_inventing_defaults()
+    public async Task Capturing_a_card_before_the_property_is_configured_is_refused_with_the_remedy()
     {
         await using var harness = await DeskHarness.CreateAsync();
         var stay = await harness.SeedStayAsync(Arrival);
 
-        await Assert.ThrowsAsync<NotFoundException>(() =>
+        var refused = await Assert.ThrowsAsync<PreconditionFailedException>(() =>
             harness.Registrations.CaptureAsync(
                 harness.Scope(), stay.Id, new RegistrationEdit(NameAsOnId: "A"),
                 CancellationToken.None));
+
+        // The remedy, not just the refusal — a desk told "no" with no next step
+        // has to find someone who knows the schema.
+        Assert.Contains("Setup", refused.Message, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// And the same capture SUCCEEDS once the property is configured — the
+    /// accepting counterpart, without which the refusal proves nothing.
+    /// </summary>
+    /// <remarks>
+    /// A guard that refused every capture would pass the test above. This is the
+    /// positive control for it: same stay, same edit, one `ConfigureAsync` apart.
+    /// </remarks>
+    [Fact]
+    public async Task And_succeeds_once_it_is_configured()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var stay = await harness.SeedStayAsync(Arrival);
+        await harness.ConfigureAsync();
+
+        var card = await harness.Registrations.CaptureAsync(
+            harness.Scope(), stay.Id, new RegistrationEdit(NameAsOnId: "A"),
+            CancellationToken.None);
+
+        Assert.StartsWith("GRC-", card.Card.CardNumber, StringComparison.Ordinal);
     }
 
     /// <summary>A home country that is not a two-letter code is refused.</summary>

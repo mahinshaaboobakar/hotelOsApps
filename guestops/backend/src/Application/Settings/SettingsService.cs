@@ -201,10 +201,26 @@ public sealed class SettingsService(GuestOpsDbContext db, IKernelAuthorizer auth
     /// the next card would take the same number. <i>A gap in a registration series
     /// is a question a property gets asked at an inspection; a REPEAT is worse.</i>
     /// <para>
-    /// Nothing calls this today — the capture path does not mint — so the hazard
-    /// is not live. It is refused rather than documented because the day somebody
-    /// wires it, a comment would be the only thing standing between them and a
-    /// duplicate, and this platform has already paid for that trade.
+    /// <b>This paragraph said "Nothing calls this today — the capture path does
+    /// not mint — so the hazard is not live", and that was false when written</b>
+    /// (2026-10-01). <see cref="Registrations.RegistrationService"/>'s capture
+    /// mints on the card's first write — <c>RegistrationService.cs:75</c> — which
+    /// one <c>grep MintCardNumber</c> would have shown, and which the suite showed
+    /// instead. <i>A comment naming a mechanism is checked by greping for the
+    /// mechanism; this one asserted the absence of a call and was written in the
+    /// moment of explaining the guard.</i> The hazard is live, the guard is what
+    /// catches it, and the paragraph claiming otherwise is kept here because a
+    /// reader meeting only its replacement cannot tell a live guard from an
+    /// unexamined one.
+    /// </para>
+    /// <para>
+    /// <b>And it refuses as a PRECONDITION, not as an invalid operation.</b> The
+    /// first version threw <see cref="InvalidOperationException"/>, which is not
+    /// a <c>DomainException</c>: the module envelope does not catch it, so the
+    /// desk received <b>500 with a body the Shell drops</b> — GuestOps claiming to
+    /// have broken, mutely, for a property that simply has no settings row. A
+    /// <see cref="PreconditionFailedException"/> is a 409 carrying this sentence,
+    /// which names the remedy the operator can actually perform.
     /// </para>
     /// </remarks>
     /// <remarks>
@@ -222,10 +238,11 @@ public sealed class SettingsService(GuestOpsDbContext db, IKernelAuthorizer auth
 
         if (!settings.Stored)
         {
-            throw new InvalidOperationException(
-                "a card number cannot be minted from the declared defaults — this property "
-                + "has no settings row, so the incremented number would not be saved and the "
-                + "next card would repeat it. Save the property's settings first.");
+            throw new PreconditionFailedException(
+                "a registration card cannot be numbered until this property's GuestOps "
+                + "settings have been saved — the card series lives in that row, so the "
+                + "number would not be stored and the next card would repeat it. Open "
+                + "Setup, save the settings, then capture the card.");
         }
 
         var number = settings.NextCardNumber;

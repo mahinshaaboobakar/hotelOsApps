@@ -1,5 +1,6 @@
 using HotelOS.GuestOps.Application.Settings;
 using HotelOS.GuestOps.Domain;
+using HotelOS.Platform;
 using Xunit;
 
 namespace HotelOS.GuestOps.Tests;
@@ -119,10 +120,18 @@ public class UnconfiguredSettingsTests
     /// a registration series is a question a property gets asked at an
     /// inspection; a repeat is worse.
     /// <para>
-    /// <b>Nothing calls <c>MintCardNumber</c> today</b>, so this guards a hazard
-    /// that is not live. It is a refusal rather than a comment because the day
-    /// somebody wires the capture path to it, a comment would be the only thing
-    /// between them and a duplicate.
+    /// <b>This said "Nothing calls <c>MintCardNumber</c> today, so this guards a
+    /// hazard that is not live", and it was false when written</b> (2026-10-01).
+    /// <c>RegistrationService.cs:75</c> mints on a card's first write, so the
+    /// hazard was live on the desk's main path — and the same false sentence was
+    /// written into the method's own remarks, which is why it is corrected in both
+    /// places rather than in the one that was reported. <i>A claim gets copied;
+    /// grep the sentence, not the file.</i>
+    /// </para>
+    /// <para>
+    /// The guard caught it immediately, which is the thing to notice: the suite
+    /// failed at <c>DeskTests</c> rather than a property discovering a duplicate
+    /// card number at an inspection.
     /// </para>
     /// </remarks>
     [Fact]
@@ -130,10 +139,10 @@ public class UnconfiguredSettingsTests
     {
         var defaults = GuestOpsSettings.DefaultsFor(DeskHarness.Property);
 
-        var refused = Assert.Throws<InvalidOperationException>(
+        var refused = Assert.Throws<PreconditionFailedException>(
             () => SettingsService.MintCardNumber(defaults));
 
-        Assert.Contains("no settings row", refused.Message, StringComparison.Ordinal);
+        Assert.Contains("settings have been saved", refused.Message, StringComparison.Ordinal);
     }
 
     /// <summary>A stored row still mints, so the guard did not close the door.</summary>
