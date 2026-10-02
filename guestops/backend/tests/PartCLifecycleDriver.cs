@@ -56,16 +56,21 @@ namespace HotelOS.GuestOps.Tests;
 /// </remarks>
 public sealed class PartCLifecycleDriver
 {
-    /// <summary>⚠ <c>CheckOut</c> accepts every source state.</summary>
+    /// <summary><c>CheckOut</c> accepts ONLY an in-house stay — ADR 0365 §1.</summary>
+    /// <remarks>
+    /// <b>Every row but one was <c>true</c> until 2026-10-02</b>, and that matrix is
+    /// what raised <c>GUEST-Q16</c>. The owner ruled <i>"check-out only in house"</i>;
+    /// the six refusals are the ruling.
+    /// </remarks>
     private static readonly (StayLifecycle From, bool Accepted)[] CheckOutMatrix =
     [
-        (StayLifecycle.Waitlisted, true),
-        (StayLifecycle.Pending, true),
-        (StayLifecycle.Booked, true),
+        (StayLifecycle.Waitlisted, false),
+        (StayLifecycle.Pending, false),
+        (StayLifecycle.Booked, false),
         (StayLifecycle.InHouse, true),
-        (StayLifecycle.Departed, true),
-        (StayLifecycle.Cancelled, true),
-        (StayLifecycle.NoShow, true),
+        (StayLifecycle.Departed, false),
+        (StayLifecycle.Cancelled, false),
+        (StayLifecycle.NoShow, false),
     ];
 
     /// <summary><c>CancelStay</c> refuses the two states that record an arrival.</summary>
@@ -92,44 +97,56 @@ public sealed class PartCLifecycleDriver
         (StayLifecycle.NoShow, false),
     ];
 
-    /// <summary>
-    /// ⚠ A departure can be recorded from any state — recorded, endorsed by nothing.
-    /// </summary>
+    /// <summary>Check-out acts only on an in-house stay — ADR 0365 §1.</summary>
     /// <remarks>
     /// <para>
-    /// <c>CheckOutAsync</c> validates no lifecycle, and neither does
-    /// <c>CheckOutCommand</c>, which checks only that a stay id and a version are
-    /// present. So a <c>Waitlisted</c>, <c>Cancelled</c> or <c>NoShow</c> stay can be
-    /// marked departed, and a <c>Departed</c> one can be departed again with its
-    /// <c>DepartureAt</c> overwritten — each announcing <c>stay.departed</c> to every
-    /// consumer.
+    /// <b>This REPLACES <c>Check_out_accepts_every_source_state</c></b> — ADR 0034, a
+    /// test encoding a superseded contract. Its name asserted the behaviour the owner
+    /// withdrew on 2026-10-02, so a pass under it would have been fresh evidence,
+    /// every run, for a rule nobody holds. <i>It failed rather than passing quietly,
+    /// with the new guard's own sentence, which is the better of the two ways a stale
+    /// name is found.</i>
     /// </para>
     /// <para>
-    /// <b>Its two siblings guard their source and say why.</b> <c>CancelAsync</c>
-    /// refuses an arrival with <i>"this guest has already arrived; correct the stay
-    /// rather than cancelling it"</i>, and <c>RecordNoShowAsync</c> with <i>"only a
-    /// stay that never arrived can be a no-show"</i> — both directing the caller to
-    /// the correction. <b>Nothing in either file explains why check-out is the
-    /// exception</b>, which is why this is a measured ambiguity reported upward and not
-    /// a repair a stream makes.
+    /// <b>What it recorded was real and is why the ruling exists:</b> check-out
+    /// validated nothing, so a <c>Waitlisted</c>, <c>Cancelled</c> or <c>NoShow</c>
+    /// stay could be marked departed and a <c>Departed</c> one again with its real
+    /// departure time overwritten — each announcing <c>stay.departed</c>. Its three
+    /// siblings all guarded their source; this was the anomaly.
     /// </para>
     /// </remarks>
     [Fact]
-    public async Task Check_out_accepts_every_source_state()
+    public async Task Check_out_acts_only_on_an_in_house_stay()
     {
         await using var harness = await DeskHarness.CreateAsync();
-        var lifecycle = Lifecycle(harness);
+        var lifecycle = harness.Lifecycle();
 
-        foreach (var (from, _) in CheckOutMatrix)
+        foreach (var (from, accepted) in CheckOutMatrix)
         {
             var stay = await At(harness, lifecycle, from);
 
-            var departed = await lifecycle.CheckOutAsync(
+            var checkOut = () => lifecycle.CheckOutAsync(
                 harness.Scope(), stay.Id, stay.Version, default);
 
+            if (accepted)
+            {
+                var departed = await checkOut();
+                Assert.True(
+                    departed.Lifecycle == StayLifecycle.Departed,
+                    $"from {from}: expected Departed, got {departed.Lifecycle}");
+                continue;
+            }
+
+            var refused = await Record.ExceptionAsync(checkOut);
+
             Assert.True(
-                departed.Lifecycle == StayLifecycle.Departed,
-                $"from {from}: expected Departed, got {departed.Lifecycle}");
+                refused is InvalidRequestException,
+                $"from {from}: expected a refusal, got "
+                + (refused?.GetType().Name ?? "no exception at all"));
+
+            Assert.True(
+                refused!.Message.Contains("in house", StringComparison.Ordinal),
+                $"from {from}: refused for the wrong reason — {refused.Message}");
         }
 
         Assert.Contains("stay.departed", harness.Events.Types);
@@ -302,6 +319,163 @@ public sealed class PartCLifecycleDriver
     }
 
     /// <summary>
+    /// All three leaving paths release the room, and the ASSIGNMENT RECORD is what
+    /// says so — ADR 0365 §2 and §3.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Driven on the record, not on the projection.</b> A room is held by an
+    /// <c>Assignment</c> whose <c>ReleasedAt</c> is null; the field is a projection
+    /// of that row. So the assertion that matters is <c>ReleasedAt</c> being
+    /// stamped — a test reading only <c>CurrentRoomId</c> would pass against an
+    /// implementation that nulled the field and left the row open, which is the
+    /// second-writer defect ADR 0365 §4 forbids.
+    /// </para>
+    /// <para>
+    /// <b>Both are asserted, because they are two facts.</b> The row is the truth and
+    /// the projection is what four readers consult — among them
+    /// <c>WatchlistView.cs:48</c>, which takes <c>== null</c> as <i>no room</i>. An
+    /// implementation that closed the row and left the field set would leave the
+    /// watchlist naming a room the stay no longer holds.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Leaving_releases_the_room_on_all_three_paths()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var lifecycle = harness.Lifecycle();
+
+        var paths = new (string Name, StayLifecycle From, Func<RoomStay, Task> Act)[]
+        {
+            ("check-out", StayLifecycle.InHouse,
+                s => lifecycle.CheckOutAsync(harness.Scope(), s.Id, s.Version, default)),
+            ("cancel", StayLifecycle.Booked,
+                s => lifecycle.CancelAsync(harness.Scope(), s.Id, "rang off", s.Version, default)),
+            ("no-show", StayLifecycle.Booked,
+                s => lifecycle.RecordNoShowAsync(harness.Scope(), s.Id, s.Version, default)),
+        };
+
+        foreach (var (name, from, act) in paths)
+        {
+            var stay = await At(harness, lifecycle, from);
+            await Assigned(harness, stay);
+
+            await act(stay);
+
+            harness.Db.ChangeTracker.Clear();
+
+            var open = await harness.Db.Assignments
+                .CountAsync(a => a.StayId == stay.Id && a.ReleasedAt == null);
+            var stored = await harness.Db.Stays.FirstAsync(s => s.Id == stay.Id);
+
+            Assert.True(open == 0, $"{name}: {open} assignment(s) left open");
+            Assert.True(
+                stored.CurrentRoomId is null,
+                $"{name}: the projection still names {stored.CurrentRoomId}");
+        }
+    }
+
+    /// <summary>
+    /// The room's freedom is its OWN announcement, carrying the room — ADR 0365 §5.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The owner ruled two events.</b> Leaving is a fact about a guest; a free
+    /// room is a fact about a room, and Room Care — the consumer that needs the
+    /// second — mostly does not care about the first. Told only
+    /// <c>stay.departed</c>, it would have to reason about GuestOps' model to
+    /// conclude the room is free.
+    /// </para>
+    /// <para>
+    /// <b>The departure is asserted to still carry its room</b>, which is the half an
+    /// ordering mistake would break: the release nulls the projection, so a release
+    /// appended <i>before</i> the departure event would announce a departure from
+    /// nowhere. Read from the real event store, because the payload is the claim.
+    /// </para>
+    /// <para>
+    /// <i>The subject's spelling is the architect's proposal recorded in ADR 0365 §5,
+    /// not the owner's words — they ruled "two events" and named neither. If it is
+    /// corrected, this is where.</i>
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task The_room_being_free_is_announced_separately_and_names_the_room()
+    {
+        await using var harness = await DeskHarness.CreateAsync(withEventStore: true);
+        var appender = new EventAppender(harness.Db, harness.Clock, new ServiceIdentity("guestops"));
+        var lifecycle = harness.Lifecycle(events: appender);
+
+        var stay = await At(harness, lifecycle, StayLifecycle.InHouse);
+        var room = await Assigned(harness, stay);
+
+        await lifecycle.CheckOutAsync(harness.Scope(), stay.Id, stay.Version, default);
+
+        harness.Db.ChangeTracker.Clear();
+        var announced = await harness.Db.Set<StoredEvent>().AsNoTracking()
+            .Where(e => e.EventType == "stay.departed" || e.EventType == "stay.room_released")
+            .ToListAsync();
+
+        // **TWO events, which is the ruling.** Asserted as a set, not a sequence:
+        // `StoredEvent` carries no ordering column, and both appends share one
+        // ManualClock instant, so the order is NOT OBSERVABLE here. A test that
+        // sorted and asserted a sequence would be asserting whatever the row order
+        // happened to be.
+        Assert.Equal(
+            ["stay.departed", "stay.room_released"],
+            announced.Select(e => e.EventType).OrderBy(t => t, StringComparer.Ordinal));
+
+        // **And this is how the ORDER is tested without observing it.** The release
+        // nulls the projection, so a release appended BEFORE the departure would
+        // leave `stay.departed` carrying a null room. Both naming the room is the
+        // consequence of the ordering, and the consequence is what a consumer gets.
+        foreach (var e in announced)
+        {
+            var payload = e.Payload?.RootElement.ToString() ?? string.Empty;
+            Assert.True(
+                payload.Contains(room.ToString(), StringComparison.Ordinal),
+                $"{e.EventType} does not name the room: {payload}");
+        }
+    }
+
+    /// <summary>A stay that holds no room releases nothing and announces nothing.</summary>
+    /// <remarks>
+    /// <b>The negative case, and it is not decoration.</b> A release that announced
+    /// <c>stay.room_released</c> for a stay with no room would tell Room Care a room
+    /// is free without naming one — the gap rule, in an event payload. Cancel is the
+    /// path that reaches it, because a booked stay need never have been assigned.
+    /// </remarks>
+    [Fact]
+    public async Task A_stay_with_no_room_releases_nothing_and_announces_nothing()
+    {
+        await using var harness = await DeskHarness.CreateAsync();
+        var lifecycle = harness.Lifecycle();
+
+        var booking = await Bookings(harness).CreateAsync(
+            harness.Scope(),
+            new NewBooking(
+                Stays:
+                [
+                    new NewStay(
+                        RoomTypeId: DeskHarness.RoomType,
+                        ArrivalDate: new DateOnly(2026, 9, 3),
+                        DepartureDate: new DateOnly(2026, 9, 5),
+                        Adults: 1, Children: 0, Guests: [], WalkIn: false, Terms: null),
+                ],
+                Channel: null, TravelAgent: null, MarketCode: null, MealPlan: null,
+                ExpectedStayCount: 0),
+            default);
+
+        var stay = await harness.Db.Stays.FirstAsync(s => s.BookingId == booking.Id);
+        Assert.Null(stay.CurrentRoomId);
+        harness.Events.Types.Clear();
+
+        await lifecycle.CancelAsync(harness.Scope(), stay.Id, "rang off", stay.Version, default);
+
+        Assert.Contains("stay.cancelled", harness.Events.Types);
+        Assert.DoesNotContain("stay.room_released", harness.Events.Types);
+    }
+
+    /// <summary>
     /// Every member of <see cref="StayLifecycle"/> has a verdict in all three
     /// matrices — derived, so a new member cannot be skipped.
     /// </summary>
@@ -338,6 +512,28 @@ public sealed class PartCLifecycleDriver
         }
     }
 
+    /// <summary>Give the stay a room through the assignment API, and say which.</summary>
+    /// <remarks>
+    /// Through <c>AssignAsync</c> rather than by setting the field: the release is
+    /// tested against a room taken the way a room is really taken, so the open
+    /// <c>Assignment</c> row exists because the application made it.
+    /// <para>
+    /// <c>acceptConflict</c> is true because the conflict check is not what is under
+    /// test here and a scratch property has no availability to speak of — stated
+    /// rather than left as a bare literal.
+    /// </para>
+    /// </remarks>
+    private static async Task<Guid> Assigned(DeskHarness harness, RoomStay stay)
+    {
+        var room = Guid.CreateVersion7();
+
+        await harness.Assignments().AssignAsync(
+            harness.Scope(), stay.Id, room, AssignmentReason.Initial,
+            acceptConflict: true, stay.Version, default);
+
+        return room;
+    }
+
     /// <summary>A fresh stay at <paramref name="from"/>, reached through the API.</summary>
     /// <remarks>
     /// <para>
@@ -369,7 +565,7 @@ public sealed class PartCLifecycleDriver
         new(2026, 9, 3, 12, 0, 0, TimeSpan.Zero);
 
     private static StayLifecycleService Lifecycle(DeskHarness harness)
-        => new(harness.Db, harness.Authorizer, harness.Events, harness.Clock);
+        => harness.Lifecycle();
 
     private static BookingService Bookings(DeskHarness harness)
         => new(

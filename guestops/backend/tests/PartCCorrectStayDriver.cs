@@ -98,8 +98,7 @@ public sealed class PartCCorrectStayDriver
         var from = stay.Lifecycle;
 
         var appender = new EventAppender(harness.Db, harness.Clock, new ServiceIdentity("guestops"));
-        var lifecycle = new StayLifecycleService(
-            harness.Db, harness.Authorizer, appender, harness.Clock);
+        var lifecycle = harness.Lifecycle(events: appender);
 
         await lifecycle.CorrectAsync(
             harness.Scope(), stay.Id, StayLifecycle.InHouse, "recorded in error",
@@ -349,5 +348,5 @@ public sealed class PartCCorrectStayDriver
 
     /// <summary>The service, built as its host composes it.</summary>
     private static StayLifecycleService Lifecycle(DeskHarness harness)
-        => new(harness.Db, harness.Authorizer, harness.Events, harness.Clock);
+        => harness.Lifecycle();
 }

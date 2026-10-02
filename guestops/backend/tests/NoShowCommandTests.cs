@@ -120,8 +120,7 @@ public sealed class NoShowCommandTests
     }
 
     private static NoShowCommand Command(DeskHarness harness)
-        => new(new StayLifecycleService(
-            harness.Db, harness.Authorizer, harness.Events, harness.Clock));
+        => new(harness.Lifecycle());
 
     /// <summary>A stay still waiting to arrive.</summary>
     /// <remarks>

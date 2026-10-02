@@ -135,6 +135,103 @@ public sealed class StayAssignmentService(
         return stay;
     }
 
+    /// <summary>Let the stay's room go, and announce that the room is free.</summary>
+    /// <param name="scope">The caller, and the property they are scoped to.</param>
+    /// <param name="stay">The stay, tracked.</param>
+    /// <param name="cancellationToken">The call's token.</param>
+    /// <returns>True where a room was released; false where the stay held none.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>ADR 0365 §2 and §3 — and the mechanism was already here.</b> A room is
+    /// not held by a field, it is held by an <see cref="Assignment"/> record
+    /// carrying <c>ReleasedAt</c>, which every room MOVE above already stamps. The
+    /// defect was that cancel, no-show and check-out never called it. <i>No new
+    /// column and no new concept: this is the move's first half, on its own.</i>
+    /// </para>
+    /// <para>
+    /// <b>⚠ IT RESOLVES THE PROJECTION, BECAUSE NOTHING RESOLVES IT FOR US — and
+    /// ADR 0365 §4 says otherwise.</b> That section reads <i>"close the open
+    /// assignment and the projection follows"</i>. Measured 2026-10-02:
+    /// <c>CurrentRoomId</c> is a plain <c>Guid?</c> with an index, <b>no value
+    /// converter and no computed column</b>, set by hand at <c>:107</c>. Nothing
+    /// recomputes it, so a release that closed the record alone would leave the
+    /// field naming a room the stay no longer holds — and four readers take it as
+    /// current truth, among them <c>WatchlistView.cs:48</c>, which reads
+    /// <c>== null</c> as <i>no room</i>.
+    /// </para>
+    /// <para>
+    /// <b>So the projection is resolved HERE, which is what §4 actually
+    /// protects.</b> Its hazard is a <i>second writer</i>: three lifecycle methods
+    /// each nulling the field by hand. Keeping it in the service that owns the
+    /// record means the projection has one maintainer on the release path exactly
+    /// as it has one on the assign path — symmetric, and the callers cannot get it
+    /// wrong because they never touch it.
+    /// </para>
+    /// <para>
+    /// <b>It authorizes nothing, on <c>SettingsService.LoadAsync</c>'s
+    /// precedent.</b> Every caller has already required <c>stay.override</c> on
+    /// the stay; asking for <c>stay.assign</c> as well would mean a person who may
+    /// check a guest out also needs the permission to move rooms.
+    /// </para>
+    /// <para>
+    /// <b>The announcement is the room's, not the guest's</b> — ADR 0365 §5, the
+    /// owner's <i>"two events"</i>. Leaving is a fact about a guest and a free
+    /// room is a fact about a room; told only <c>stay.departed</c>, Room Care would
+    /// have to reason about GuestOps' model to conclude the room is free. <i>The
+    /// subject's spelling is the architect's proposal recorded in §5, not the
+    /// owner's words, and is correctable in one word.</i>
+    /// </para>
+    /// </remarks>
+    internal async Task<bool> ReleaseAsync(
+        RequestScope scope, RoomStay stay, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(stay);
+
+        // **The open row is QUERIED, never read off stay.Assignments** — and that
+        // is not a style choice. Nothing in this application enables lazy loading;
+        // `AssignAsync` Includes the collection and
+        // `StayLifecycleService.RequireWritableAsync` does not. A release that
+        // trusted the navigation would find it EMPTY on all three of its callers,
+        // return false, and silently leave the room held — a no-op that no test
+        // asserting "a room was released" would catch unless it looked at the row.
+        var open = await db.Assignments
+            .FirstOrDefaultAsync(
+                a => a.StayId == stay.Id && a.ReleasedAt == null, cancellationToken);
+
+        if (open is null) return false;
+
+        open.ReleasedAt = clock.GetUtcNow();
+
+        // The projection, resolved here for the same reason it is resolved on the
+        // assign path: it is not the truth, and it has one maintainer.
+        stay.CurrentRoomId = null;
+        stay.UpdatedBy = scope.UserId;
+
+        // **The version is advanced, and the event store is what requires it.**
+        // `uq_events__aggregate_version` is unique on
+        // (aggregate_type, aggregate_id, entity_version), so two events about one
+        // stay in one transaction CANNOT share a version — the second insert fails
+        // with 23505. ADR 0365 §5 ruled two events without that constraint in view,
+        // and a release that reused the caller's version made `stay.departed` and
+        // `stay.room_released` collide.
+        //
+        // It is also the honest value: the release changed this stay, so the change
+        // gets its own version exactly as a room MOVE does at `:109`. Callers must
+        // read the version from the returned stay rather than computing one more
+        // than they sent — which `WalkInPhasesTests` already learned the hard way.
+        stay.Version += 1;
+
+        events.Append(scope, "stay.room_released", "stay", stay.Id, stay.Version, new
+        {
+            stay_id = stay.Id,
+            property_id = stay.PropertyId,
+            room_id = open.RoomId,
+            released_at = open.ReleasedAt,
+        });
+
+        return true;
+    }
+
     /// <summary>
     /// Another stay holding this room over the same nights, if there is one.
     /// </summary>

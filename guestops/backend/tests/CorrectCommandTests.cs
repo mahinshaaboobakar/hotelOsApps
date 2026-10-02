@@ -189,7 +189,7 @@ public sealed class CorrectCommandTests
         => new(Lifecycle(harness));
 
     private static StayLifecycleService Lifecycle(DeskHarness harness)
-        => new(harness.Db, harness.Authorizer, harness.Events, harness.Clock);
+        => harness.Lifecycle();
 
     private static async Task<RoomStay> Seeded(DeskHarness harness)
         => await harness.SeedStayAsync(new DateTimeOffset(

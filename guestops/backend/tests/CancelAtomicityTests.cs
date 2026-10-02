@@ -88,7 +88,7 @@ public sealed class CancelAtomicityTests
         return new CancelCommand(
             harness.Db,
             new BookingReadService(harness.Db, kernel, new StubBusinessDay(new DateOnly(2026, 9, 1))),
-            new StayLifecycleService(harness.Db, kernel, events, harness.Clock));
+            harness.Lifecycle(kernel, events));
     }
 
     private static JsonElement Body(Guid booking) => JsonDocument.Parse(

@@ -25,7 +25,8 @@ public sealed class StayLifecycleService(
     GuestOpsDbContext db,
     IKernelAuthorizer authorizer,
     IEventAppender events,
-    TimeProvider clock)
+    TimeProvider clock,
+    StayAssignmentService assignments)
 {
     /// <summary>Check the guest in.</summary>
     /// <remarks>
@@ -82,16 +83,40 @@ public sealed class StayLifecycleService(
 
     /// <summary>Check the guest out.</summary>
     /// <remarks>
+    /// <para>
     /// Room Care learns the room is vacated and <b>decides for itself</b>
     /// whether that becomes work: cleaning is policy-driven, and a checked-out
     /// room becoming a task is a hotel policy rather than an automatic
     /// consequence (APPS-Q1). This announces the departure and asserts nothing
     /// about cleaning.
+    /// </para>
+    /// <para>
+    /// <b>Only an in-house stay can be checked out</b> — ADR 0365 §1, owner,
+    /// 2026-10-02: <i>"check-out only in house."</i> This method validated
+    /// <b>nothing</b> until then, so a <c>Waitlisted</c>, <c>Cancelled</c> or
+    /// <c>NoShow</c> stay could be marked departed and a <c>Departed</c> one
+    /// <i>again, with its real departure time overwritten</i> — each announcing
+    /// <c>stay.departed</c> to the platform. Its three siblings all guarded their
+    /// source; this was the anomaly, and ADR 0310's <c>RecordNoShowAsync</c> guard
+    /// was the only transition-guard ruling in the estate.
+    /// </para>
+    /// <para>
+    /// <b>And the room is released</b> — §2 and §3. The release is
+    /// <c>ReleasedAt</c> on the open assignment, which every room move already
+    /// stamped; the three lifecycle paths simply never called it.
+    /// </para>
     /// </remarks>
     public async Task<RoomStay> CheckOutAsync(
         RequestScope scope, Guid stayId, long version, CancellationToken cancellationToken)
     {
         var stay = await RequireWritableAsync(scope, stayId, version, cancellationToken);
+
+        if (stay.Lifecycle is not StayLifecycle.InHouse)
+        {
+            throw new InvalidRequestException(
+                "only a guest who is in house can be checked out; correct the stay "
+                + "rather than departing it");
+        }
 
         var now = clock.GetUtcNow();
 
@@ -102,6 +127,10 @@ public sealed class StayLifecycleService(
         Bump(stay, scope);
         await RecordOverrideAsync(scope, stay, wasHeld, cancellationToken);
 
+        // **Before the release, because this event carries the room.** Reading
+        // `CurrentRoomId` after letting the room go would announce a departure
+        // from nowhere — and the two events then reach consumers in the order
+        // they happened: the guest left, then the room is free.
         events.Append(scope, "stay.departed", "stay", stay.Id, stay.Version, new
         {
             stay_id = stay.Id,
@@ -110,6 +139,8 @@ public sealed class StayLifecycleService(
             departure_at = now,
             business_date = stay.BusinessDate?.ToString("yyyy-MM-dd"),
         });
+
+        await assignments.ReleaseAsync(scope, stay, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return stay;
@@ -163,6 +194,9 @@ public sealed class StayLifecycleService(
             penalty = terms?.PenaltyAmount,
         });
 
+        // ADR 0365 §2: a cancelled stay no longer holds its room.
+        await assignments.ReleaseAsync(scope, stay, cancellationToken);
+
         await db.SaveChangesAsync(cancellationToken);
         return stay;
     }
@@ -197,6 +231,9 @@ public sealed class StayLifecycleService(
             property_id = stay.PropertyId,
             business_date = stay.BusinessDate?.ToString("yyyy-MM-dd"),
         });
+
+        // ADR 0365 §2: a guest who never arrived does not hold the room.
+        await assignments.ReleaseAsync(scope, stay, cancellationToken);
 
         await db.SaveChangesAsync(cancellationToken);
         return stay;

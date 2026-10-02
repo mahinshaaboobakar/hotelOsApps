@@ -104,8 +104,7 @@ public sealed class CheckOutCommandTests
     }
 
     private static CheckOutCommand Command(DeskHarness harness)
-        => new(new StayLifecycleService(
-            harness.Db, harness.Authorizer, harness.Events, harness.Clock));
+        => new(harness.Lifecycle());
 
     private static async Task<RoomStay> InHouse(DeskHarness harness)
     {

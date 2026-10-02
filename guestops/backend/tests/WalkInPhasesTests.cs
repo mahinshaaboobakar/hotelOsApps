@@ -74,7 +74,7 @@ public sealed class WalkInPhasesTests
                 new ContactProtector(new byte[32], new byte[32]),
                 harness.Clock),
             new StayAssignmentService(harness.Db, kernel, events, new StubBusinessDay(new DateOnly(2026, 9, 1)), harness.Clock),
-            new StayLifecycleService(harness.Db, kernel, events, harness.Clock));
+            harness.Lifecycle(kernel, events));
     }
 
     private static readonly JsonElement Sheet = JsonDocument.Parse($$"""

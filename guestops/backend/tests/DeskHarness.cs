@@ -2,6 +2,7 @@ using HotelOS.GuestOps.Application.Registrations;
 using HotelOS.GuestOps.Application.Reporting;
 using HotelOS.GuestOps.Application.Requests;
 using HotelOS.GuestOps.Application.Settings;
+using HotelOS.GuestOps.Application.Stays;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
@@ -51,6 +52,59 @@ public sealed class DeskHarness : IAsyncDisposable
     public ReportingService Reporting { get; }
 
     public StayRequestService Requests { get; }
+
+    /// <summary>
+    /// The lifecycle service, composed as its host composes it — including the
+    /// assignment service it now needs.
+    /// </summary>
+    /// <param name="authorizer">A different authorizer, for the tests that refuse.</param>
+    /// <param name="events">A different appender, for the tests that read the store.</param>
+    /// <returns>A lifecycle service wired to this harness.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>One place that knows the composition, because there were eight.</b>
+    /// ADR 0365 gave <c>StayLifecycleService</c> a fifth dependency — the
+    /// assignment service owns <c>ReleasedAt</c>, so the three lifecycle paths that
+    /// release a room call it — and the compiler found eight hand-rolled
+    /// constructions across six files. <i>Eight copies of a composition is eight
+    /// things to update the next time one changes</i>, which is the duplication
+    /// rule at a test fixture.
+    /// </para>
+    /// <para>
+    /// <b>The appender is threaded into BOTH services, and that is load-bearing.</b>
+    /// The release appends <c>stay.room_released</c> from the assignment service, so
+    /// a test reading events from its own recorder must be the recorder that
+    /// receives it. Two appenders here would make the release's announcement
+    /// invisible to every assertion.
+    /// </para>
+    /// <para>
+    /// The business day is a fixed stub: it is read by the assignment service's
+    /// <i>conflict</i> check and by nothing on the release path, so a test driving a
+    /// release does not have to care what day it is.
+    /// </para>
+    /// </remarks>
+    public StayLifecycleService Lifecycle(
+        IKernelAuthorizer? authorizer = null, IEventAppender? events = null)
+    {
+        var who = authorizer ?? Authorizer;
+        var told = events ?? Events;
+
+        return new StayLifecycleService(
+            Db, who, told, Clock, Assignments(who, told));
+    }
+
+    /// <summary>The assignment service, composed as its host composes it.</summary>
+    /// <param name="authorizer">A different authorizer, for the tests that refuse.</param>
+    /// <param name="events">A different appender, for the tests that read the store.</param>
+    /// <returns>An assignment service wired to this harness.</returns>
+    public StayAssignmentService Assignments(
+        IKernelAuthorizer? authorizer = null, IEventAppender? events = null)
+        => new(
+            Db,
+            authorizer ?? Authorizer,
+            events ?? Events,
+            new StubBusinessDay(new DateOnly(2026, 9, 1)),
+            Clock);
 
     public static readonly Guid Property = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
