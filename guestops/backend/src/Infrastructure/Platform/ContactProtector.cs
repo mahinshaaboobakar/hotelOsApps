@@ -24,11 +24,25 @@ namespace HotelOS.GuestOps.Infrastructure.Platform;
 /// cannot be looked up, which nobody notices until someone rings.
 /// </para>
 /// <para>
-/// <b>The keys are not this application's.</b> <c>HUB-Q1</c>'s sibling question:
-/// an installed package has no access to the platform's field key or index key,
-/// because nothing hands one to a package at install. This implementation takes
-/// them as bytes so the composition root decides where they come from, and the
-/// answer for a <c>.hopkg</c> is round 51's.
+/// <b>The keys are not this application's, and that is now RULED</b> — ADR 0366
+/// §1 and ADR 0367 §1. Both are platform-generated, sealed persistent
+/// cryptographic state, handed to this process at start; neither may be
+/// regenerated because a package lifecycle ran again. This implementation takes
+/// them as bytes so the composition root decides where they come from, which is
+/// the shape the ruling then required.
+/// </para>
+/// <para>
+/// <b>This pointed at "round 51's" answer, and the real one is ADR 0366/0367.</b>
+/// The clause <i>field key or index key</i> was already right about the
+/// POPULATION while ADR 0366 named only <c>Pii:FieldKey</c> — ADR 0367 §1 and §3
+/// correct that, and §2 closes the population at exactly these two: no
+/// <c>Pii:*</c> wildcard.
+/// </para>
+/// <para>
+/// <b>The two keys fail differently and share one lifecycle</b> — ADR 0367 §1.
+/// A replaced field key makes protected values unreadable; a replaced index key
+/// makes blind indexes stop matching. Different symptom, identical invariant,
+/// and only one of the two is visible by looking at a row.
 /// </para>
 /// </remarks>
 public sealed class ContactProtector(byte[] fieldKey, byte[] indexKey) : IContactProtector

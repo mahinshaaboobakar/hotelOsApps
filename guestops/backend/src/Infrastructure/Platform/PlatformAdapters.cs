@@ -143,12 +143,29 @@ public static class PlatformAdapters
     /// otherwise look like success.
     /// </para>
     /// <para>
-    /// <b>Where the key comes from for a packaged application is
-    /// <c>AUTHZ-Q22</c>, open.</b> A platform service reads its material from
-    /// the secret store it was provisioned with; nothing provisions one for a
-    /// <c>.hopkg</c>. This configuration entry is the seam, not the answer —
-    /// and refusing to start without one is the behaviour that row cites as
-    /// correct meanwhile.
+    /// <b>Where the keys come from is RULED — ADR 0366 §1 and ADR 0367 §1.</b>
+    /// The Kernel generates both, seals them in the property-scoped secret
+    /// store, and supplies them to this process at start. This package does not
+    /// declare them, does not fetch them over the Secrets RPC, and never
+    /// generates one itself.
+    /// </para>
+    /// <para>
+    /// <b>This said <c>AUTHZ-Q22</c>, open</b> — kept because the sentence after
+    /// it was right and is now the ruled mechanism: <i>this configuration entry
+    /// is the seam, not the answer</i>. ADR 0366 §7 makes the contract the
+    /// ENVIRONMENT VARIABLE NAME, one spelling on both sides, so a configuration
+    /// entry is exactly the seam it claimed to be. <c>AUTHZ-Q22</c> itself was an
+    /// ARCHITECT ruling pointing the other way — a manifest-declared secret path
+    /// — and ADR 0366 §12 records its reversal: a planner ruling governs.
+    /// </para>
+    /// <para>
+    /// <b>Until the Kernel's provision-or-preserve path lands, the refusal below
+    /// stays exactly as it is</b> — ADR 0366 §11, in as many words: <i>"FF's
+    /// existing GuestOps refusal is correct until provisioning lands."</i> And it
+    /// is load-bearing beyond this file: the refusal is what keeps the property's
+    /// <c>guestops</c> tables at zero rows, which is the evidence ADR 0367 §15
+    /// and its addendum used to discharge the rollout gate. A key invented here
+    /// to make a start succeed would destroy the precondition for lifting it.
     /// </para>
     /// </remarks>
     private static byte[] RequiredKey(IConfiguration configuration, string path)
