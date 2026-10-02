@@ -36,7 +36,7 @@ export async function nobodyCameDialog(
   close: () => void,
   done: () => void,
 ): Promise<void> {
-  const loaded = await load<NoShowPlan>(host, "stay.override", "noShowPlan", { stayId });
+  const loaded = await load<NoShowPlan>(host, "reservation.read", "noShowPlan", { stayId });
 
   if (!loaded.ok) {
     into.append(failed(

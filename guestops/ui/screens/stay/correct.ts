@@ -37,7 +37,7 @@ export async function correctDialog(
   close: () => void,
   done: () => void,
 ): Promise<void> {
-  const loaded = await load<CorrectPlan>(host, "stay.override", "correctPlan", { stayId });
+  const loaded = await load<CorrectPlan>(host, "reservation.read", "correctPlan", { stayId });
 
   if (!loaded.ok) {
     into.append(failed(
