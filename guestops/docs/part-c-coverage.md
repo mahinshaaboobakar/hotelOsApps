@@ -475,6 +475,29 @@ reference to cite. *Named here so the empty cell is not read as unfinished work.
 
 ---
 
+## ⚠ What 12 of 12 does NOT mean, and it is the sentence a reader will skip
+
+**Part C's databases are dropped.** `GuestOpsScratch` creates
+`hotelos_guestops_test_<guid>` per run and discards it on dispose, so **no row any
+driver creates reaches the owner's property.**
+
+```text
+Part C proves   the API accepts or refuses every combination   a CAPABILITY claim
+Part B needs    rows on the OWNER'S property, by a supported    a DATA claim
+                path
+```
+
+**So finishing Part C unblocked nothing in Part B's §E**, and I had written that it
+unblocked one control. Corrected 2026-10-02: `registration:242` needs `SaveSettings`,
+and `screens/setup/index.ts:100` disables Setup's `Save` **by design** because
+`SaveSettings` has no module method — `desk.configure` maps one, `setup`, a read. *The
+owner has no path to call it.* **Twelve of the thirteen control sites are blocked, not
+eleven**, and the two that are not need no data at all.
+
+> **The question Part C's completion raises is not whether it is done.** It is **how
+> data reaches the property the owner walks** — and the two supported paths to a
+> booking, the PMS connector feed and the walk-in submit, are both still absent.
+
 ## What this document does not prove
 
 * **Nothing about any control.** Part C creates data; it presses nothing. The 13

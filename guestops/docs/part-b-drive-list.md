@@ -457,13 +457,50 @@ are the same zero nodes to a fidelity sweep and different screens to a person.
 
 | Site | Choices come from | Part C combination needed | Part C status |
 |---|---|---|---|
-| `registration:242` | `AcceptedIdTypes` | `SaveSettings` with **0, 1 and 3** accepted types — the empty·single·many axis landing on a control | **CREATED, 2026-10-01** — `PartCSettingsDriver`, all three |
+| `registration:242` | `AcceptedIdTypes` | `SaveSettings` with **0, 1 and 3** accepted types — the empty·single·many axis landing on a control | **BLOCKED — see the correction below.** Part C drove all three; the OWNER cannot set any of them |
 | `assign:226` | `free.rooms` | Master Data rooms through **its own API** (ADR 0166), with 0, 1 and many free | **BLOCKED** — Master Data's, not GuestOps' |
 | `walkin:397` | room-type options | the same, via room types | **BLOCKED** — same |
 | `bookings/filters:49` | a static filter set | **none** | n/a — asserts every member listed and the chosen one applied |
 
-**`registration:242` is the one the owner met, and it is the only control whose
-shape now exists.** Its choices were empty because the card never rendered — the
+### ⚠ I WROTE THAT PART C UNBLOCKED THIS, AND IT DOES NOT — corrected 2026-10-02
+
+**The row above said `CREATED, 2026-10-01 — PartCSettingsDriver, all three`.** That was
+a true measurement of something narrower than the sentence it went into: Part C drove
+`SaveSettings` **through the service, in a scratch database that is dropped when the run
+ends** (`GuestOpsScratch` creates `hotelos_guestops_test_<guid>` and discards it on
+dispose). *No row Part C creates ever reaches the owner's property.*
+
+```text
+Part C proves   the API accepts or refuses every combination   a CAPABILITY claim
+Part B needs    rows on the OWNER'S property, by a supported    a DATA claim
+                path
+```
+
+**And the owner has no path to this one.** `screens/setup/index.ts:100` disables Setup's
+`Save` deliberately, with its reason beside it — §2, C11 — because **`SaveSettings` is
+reachable only through the gRPC door**: `desk.configure` maps exactly one method,
+`setup`, which is a read. So on a fresh property:
+
+```text
+no settings row            →  Setup renders (GUEST-Q15) and its Save is OFF
+                              by design
+SaveSettings               →  no module method. gRPC only, and no screen calls it
+so the row is never saved  →  MintCardNumber's PreconditionFailed is PERMANENT
+                              through the desk, and the registration card can
+                              never be captured on the owner's property
+```
+
+**My 409 did not create that** — before GUEST-Q15 the card 404'd on an unconfigured
+property, so capture was unreachable then too. It made the refusal legible rather than
+reachable. *But B2 already recorded that Save has no handler, and I cited Part C's
+coverage as if it closed the gap anyway.*
+
+> **So of the 13 control sites, the number the owner can drive today is TWO** — the top
+> bar's tabs and `bookings/filters:49`, both of which need no data — **and not three.**
+> `registration:242` joins the eleven.
+
+**`registration:242` is still the one the owner met**, and it is the control whose
+failure is now fully traced. Its choices were empty because the card never rendered — the
 settings deadlock — so this row is driven *after* `7ba3d74d` and proves both
 halves: **the list is populated, and the chosen value is what is written.** Press
 it against each of the three combinations: **0 accepted types is the interesting
@@ -510,11 +547,15 @@ BLOCKED      the Part C combination does not exist yet, or a named
              precondition outside GuestOps (Master Data rooms)
 ```
 
-**11 of the 13 are `BLOCKED` on a Part C combination today**, and that is the
-honest reading of this section: **`registration:242` is drivable now, the top bar
-and `bookings/filters:49` need no data, and everything else waits on the other 11
-writes.** *Counted, so the section cannot be read as a list of things anybody can
-press this afternoon.*
+**12 of the 13 are `BLOCKED` today, and Part C finishing did not change that** —
+corrected 2026-10-02, having first written 11 with `registration:242` drivable. **Only
+the top bar's tabs and `bookings/filters:49` need no data.** Everything else needs rows
+on the owner's property, and the two supported paths to one are still absent: the PMS
+connector feed, or the walk-in submit wired. *Part C drove all 12 writes and left no row
+behind, by construction — its databases are dropped.*
+
+> **The useful question for the next round is therefore not "is Part C done".** It is
+> **how data reaches the property the owner walks** — and nothing in Part C answers it.
 
 ## What the certificate will say it did not prove
 
