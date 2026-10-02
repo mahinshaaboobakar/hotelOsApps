@@ -60,11 +60,22 @@ public partial class GuestOpsGrpcService
 
     /// <summary>The terms, where the desk stated any.</summary>
     /// <remarks>
+    /// <para>
     /// Absent rather than empty: a stay with no stated terms is a stay whose
     /// source did not say, and an empty row would claim a zero rate and a
     /// missing guarantee as facts.
+    /// </para>
+    /// <para>
+    /// <b>The parameter is <c>StatedTerms</c> rather than
+    /// <c>CommercialTerms</c>.</b> The request message does not carry
+    /// <c>cancellation_deadline</c>, which the domain computes — so the twelve
+    /// mappings below are the WHOLE message rather than twelve of thirteen,
+    /// and a caller can no longer state a value this method would drop in
+    /// silence. CLAUDE.md §"Clients never write a derived projection": the API
+    /// has nowhere to put it, which a client cannot work around.
+    /// </para>
     /// </remarks>
-    private static Domain.CommercialTerms? ToCommand(Contracts.V1.CommercialTerms? terms)
+    private static Domain.CommercialTerms? ToCommand(Contracts.V1.StatedTerms? terms)
         => terms is null
             ? null
             : new Domain.CommercialTerms

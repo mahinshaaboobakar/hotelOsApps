@@ -136,7 +136,9 @@ message NewStay {
   // How the guest arrived. Distinct from the source channel below.
   bool walk_in = 10;
 
-  CommercialTerms terms = 20;
+  // What the desk stated. NOT `CommercialTerms`: that one carries a
+  // computed deadline, and a request has nowhere to put a computed value.
+  StatedTerms terms = 20;
 }
 
 message NewGuest {
@@ -150,6 +152,58 @@ message NewGuest {
   string email = 5;
 
   optional bool is_primary = 6;
+}
+
+// What the desk STATED about a stay's commercial terms — the request side.
+//
+// **This is `CommercialTerms` minus one field, and the name says which one.**
+// The response's version carries `cancellation_deadline`, which
+// `CommercialTerms.CancellationDeadline(arrival, zone)` COMPUTES at the moment
+// of reading — `dto.proto:198` says so in its own words, *"computed from the
+// offset at the moment of reading. Never stored"*. A caller cannot state a
+// computed value, so this message has nowhere to put one.
+//
+// That is CLAUDE.md §"Clients never write a derived projection", which rules the
+// mechanism as well as the direction: *"a create or update message simply does
+// not carry the field, which is stronger than validating and rejecting, because
+// a client cannot express the mistake"*.
+//
+// **Before this existed, `NewStay.terms` was `CommercialTerms`** — so a caller
+// could set the deadline and `ToCommand` dropped it in silence, mapping twelve
+// fields of thirteen. The numbers below are `CommercialTerms`' own, so the two
+// messages read side by side and the gap at 30 is visible rather than counted.
+//
+// Named for what it IS rather than `NewTerms` for symmetry with `NewStay` and
+// `NewGuest`: *stated* is the REASON the deadline is absent, and a name carrying
+// the reason outlives a comment explaining it.
+message StatedTerms {
+  string rate_code = 1;
+  string rate_name = 2;
+  Money amount = 3;
+
+  string guarantee_code = 4;
+  string guarantee_description = 5;
+  bool on_hold = 6;
+
+  // Whether this booking holds a room — the source's own answer to the question
+  // availability asks.
+  bool reserves_inventory = 7;
+
+  int32 deposit_offset_days_from_booking = 10;
+  int32 cancel_offset_days_from_arrival = 11;
+  string cancel_drop_time = 12;
+
+  Money penalty_amount = 20;
+
+  // Some sources state the penalty in nights. Carried rather than converted: it
+  // cannot become money without a rate the record does not have.
+  int32 penalty_nights = 21;
+
+  // 30 is `CommercialTerms.cancellation_deadline`, and it is COMPUTED. Reserved
+  // rather than merely absent, so a field added here cannot quietly take the
+  // number the response uses for a derived value — and whoever tries meets this
+  // sentence. `reserved` is already this file's idiom (:212, :220).
+  reserved 30;
 }
 
 message CreateBookingRequest {

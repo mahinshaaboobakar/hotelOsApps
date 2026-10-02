@@ -335,22 +335,36 @@ GuestOps. Only `is_primary` was declared `optional` deliberately.*
 stays · guests · is_primary · terms          DRIVEN   PartCBookingDriver
 amount · penalty_amount                      expressible here; the FOLD is at
                                              the gRPC ToMoney, not reached
-cancellation_deadline                        NOT AN INPUT — see the correction
-                                             above. A response-only field the
-                                             request can express
+cancellation_deadline                        NOT AN INPUT — and since
+                                             2026-10-02 the request cannot
+                                             express it either. `StatedTerms`
+                                             replaced `CommercialTerms` on
+                                             `NewStay.terms`; see the closure
+                                             below
 CaptureRegistration.card                     DRIVEN   RegistrationCardTests
 ```
 
 **The arithmetic, closed:**
 
 ```text
-8   expressible on the wire
+8   expressible on the wire          ← as the wire stood on 2026-10-01
 −1  cancellation_deadline — a response-only field, not an input
  7  INPUT positions
      5  driven to their full distinction   stays · guests · is_primary · terms · card
      2  driven to the SERVICE's half only  amount · penalty_amount
  7  ✓
 ```
+
+**⚠ THE SUBTRACTION IS NOW STRUCTURAL, AND THE TWO FIGURES HAVE MET** —
+2026-10-02. `NewStay.terms` carries `StatedTerms`, which has no
+`cancellation_deadline` and `reserved 30;` where it would have gone, so
+*expressible on the wire* is **7** and *input positions* is **7** and there is
+nothing left to subtract.
+
+**The block above is kept rather than re-rendered to 7**, because this
+section's own subject is that its count was reported wrongly twice — and a
+third silent edit of the figures would leave no evidence there was ever an 8,
+which is the only thing that explains why `−1` was ever written.
 
 **A count is not a coverage claim**, and the two rows of five and two are why this
 section names each position instead of totalling them. *The first draft of this
@@ -527,8 +541,11 @@ eleven**, and the two that are not need no data at all.
   envelope, the token and the JSON a screen receives are the module-surface tier's,
   and that is also why the amount fold is out of reach here.
 * **Nothing about `cancellation_deadline` as an input**, because it is not one. The
-  driver asserts the derivation; whether the request should carry the field at all
-  is an open contract finding above.
+  driver asserts the derivation. *Whether the request should carry the field at
+  all was an open contract finding above and is **CLOSED**: it does not, as of
+  2026-10-02. The driver's position-7 case now asserts a property of the type
+  rather than a defect in it — a caller cannot state the value, so there is no
+  silent drop left to detect.*
 * **Nothing about the gRPC door's own refusals.** `CorrectStay`'s eighth value is
   accepted there and refused at the module door; the driver records the current
   behaviour and endorses nothing. No connector has been driven against that door.
