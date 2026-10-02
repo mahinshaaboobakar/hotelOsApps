@@ -567,3 +567,118 @@ behind, by construction — its databases are dropped.*
 - **any control whose Part C combination is `NOT DRIVEN`** — §E counts them: 11
   of 13. A control pressed against one shape says nothing about the next, which
   is the blindness Part C exists to close and has closed for one write of twelve.
+
+## F · The seed run of 2026-10-02 — one row per action, as the owner's run produced it
+
+**The artefact is the run, not this table.** Every row below is taken from the
+owner's own `seed-hotel.exe --book` output and from a read-only census of the dev
+`guestops` schema; nothing here is inferred from source.
+
+**The blocker, named once:** `Pii:FieldKey is not configured, and guest contact
+details cannot be stored or found without it. A generated key would silently
+orphan every contact already stored.` — `System.InvalidOperationException`, 36
+occurrences at `2026-10-02T11:38:06Z`, read from the dev Kernel's captured
+application log (`.tmp/devrun/logs/apps/guestops/current.jsonl`, `app_id:
+guestops`, `stream: stdout`).
+
+That sentence is **`AUTHZ-Q22`'s own**, written into the guard in August and
+fired in October exactly as designed: *FF correctly made an absent key fail the
+start rather than generate one.* The row is **RULED (architect, 2026-09-01)** —
+the manifest declares its secret paths under `packages/{id}/…`, Kernel-enforced —
+and *"implementation rides manifest enforcement with Software Center."* So the
+precondition that failed is known, ruled, and deliberately deferred.
+
+### The ledger
+
+| Action | Verdict | Observed |
+|---|---|---|
+| `reservation.read/today` | **PRESSED** | 200. Called twice by the seeder's `resolve`; no refusal recorded, so the door, the token, the envelope and the schema reads all work |
+| `reservation.read/attention` | **PRESSED** | 200, same evidence |
+| `stay.create/book` ×6 | **REFUSED** | HTTP 500, empty body. `Pii:FieldKey` |
+| `stay.create/walkIn` ×2 | **REFUSED** | HTTP 500, empty body. `Pii:FieldKey` |
+| `stay.assign/assign` ×2 | **ABSENT** | not attempted — no stay existed to assign. Recorded with that reason, not as a failure |
+| `stay.override/checkIn` ×2 | **ABSENT** | as above |
+| `stay.override/checkOut` | **ABSENT** | as above |
+| `stay.override/cancel` | **ABSENT** | as above — and `cancel` takes a `bookingId`, so this one needed no stay lookup and still had no booking |
+| `stay.override/noShow` | **ABSENT** | as above |
+| `stay.override/correct` | **ABSENT** | as above |
+| `request.handle/note` ×4 | **ABSENT** | as above — two requests, two notes |
+| `registration.capture/capture` | **ABSENT BY DESIGN** | never called. A card carries a passport number, a scanned document and a signature, and this tool has no legitimate source for any of them; a seeded signature would be fabricated personal data presented as a guest's own. **The reference's own shape, not my assumption:** `OnlineCheckInDocumentInfoView.java:32-38` carries `profileImage`, `signature`, `documentNo` and `address` — concept theirs, the refusal ours. Now stated in the run's own output, not only here |
+| `desk.configure/setup` | **ABSENT BY DESIGN** | never called. Desk settings are the hotel's configuration, not fixture data |
+
+### What persisted — measured, not assumed
+
+Read-only census, `docker exec … psql -U postgres -d hotelos`, the Makefile's own
+route:
+
+```text
+every guestops table            0 rows   (24 tables; __migrations holds 2)
+guests LIKE '%ZZSEED%'          0
+the deletion query's join       0
+bookings_with_no_stay           0
+stays_with_no_guest             0
+guests_with_no_contact          0
+```
+
+**The 500 wrote nothing, and that is the result worth having.** `Pii:FieldKey`
+throws inside contact protection, so a booking could plausibly have landed
+without its guest; the three orphan counts say the transaction boundary held.
+A clean refusal, not a half-written record.
+
+**So the four tabs are empty because the property has never had a stay** — not
+because a tab is broken. Today, Bookings, Attention and Stay each read zero rows
+from a schema that holds zero rows.
+
+### The owner's deletion query, one line
+
+Every name verified against the migration's literal DDL — `name_as_given` at
+`20260901035932_TheReservationBook.cs:46`, `room_stays` at `:163`,
+`pk_room_stays` at `:188`, `stay_guests` at `:419` — and the two joins are the
+declared foreign keys at `:428-441`. **Run against the live schema and it
+returns 0**, which is both the expected answer and proof the predicate parses:
+
+```sql
+SELECT s.* FROM guestops.room_stays s
+  JOIN guestops.stay_guests sg ON sg.stay_id = s.id
+  JOIN guestops.guests g       ON g.id = sg.guest_id
+ WHERE g.name_as_given LIKE '%ZZSEED%';
+```
+
+### Controls that cannot be pressed — derived, with a denominator
+
+Every `(capability, method)` pair the UI invokes, cross-checked against what
+`ModuleSurface` routes under that capability. **Positive control: the instrument
+confirms `reservation.read/today` IS routed** — without that assertion the first
+run of this check reported 40 of 40 unserved, from a dictionary keyed one way and
+queried the other.
+
+**2 of 38 non-test call sites ask a capability the surface does not route:**
+
+| Call site | Asks | The surface routes it under |
+|---|---|---|
+| `ui/screens/stay/correct.ts:40` | `stay.override/correctPlan` | `reservation.read` |
+| `ui/screens/stay/nobody-came.ts:39` | `stay.override/noShowPlan` | `reservation.read` |
+
+`OverrideAsync`'s default arm throws `InvalidRequestException` — a domain
+exception the envelope maps — so these **refuse legibly rather than crashing**.
+The consequence is that the *Correct* and *Nobody came* screens cannot load their
+plan, on a property that has stays. `cancelPlan` is called correctly at
+`ui/screens/booking/index.ts:137`, which is what makes the other two an error
+rather than a convention.
+
+**Disabled controls each state a reason, so they are results and not findings:**
+`ui/screens/assign/index.ts:255-258` sets `title` and `aria-description` to
+*"Choose a room first."*; `ui/screens/walkin/index.ts:290` computes the disabled
+button's own words from what the sheet still needs. And `newbooking/confirm.ts:59`
+records that `Create booking` is *never* disabled by a warning — the owner's rule
+of 2026-09-23.
+
+### What this run does NOT establish
+
+- **No write reached the service**, so nothing here says whether a booking, a
+  check-in or a release behaves correctly through the door. Part C's twelve
+  driven lifecycles remain the only evidence for the service layer, and they ran
+  against scratch databases.
+- **The two mis-routed plan reads are untested against data.** They refuse by
+  construction today; whether the screens recover from that refusal is unobserved.
+- **Nothing about the gRPC door**, unchanged from §D.
