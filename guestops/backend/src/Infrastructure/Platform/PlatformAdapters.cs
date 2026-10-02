@@ -122,8 +122,8 @@ public static class PlatformAdapters
         services.AddScoped<INeighbours, ContextNeighbours>();
 
         services.AddSingleton<IContactProtector>(_ => new ContactProtector(
-            RequiredKey(configuration, "Pii:FieldKey"),
-            RequiredKey(configuration, "Pii:IndexKey")));
+            RequiredKey(configuration, PiiProtection.FieldKey),
+            RequiredKey(configuration, PiiProtection.IndexKey)));
 
         return services;
     }

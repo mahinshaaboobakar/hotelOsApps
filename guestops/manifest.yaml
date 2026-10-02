@@ -43,6 +43,19 @@ database:
   # schemas, and `03-schemas.sql` names the wrong spelling outright.
   schema: guestops
 
+# **This application handles protected personal data** — ADR 0367 §§4-7. A
+# CAPABILITY statement and not a secret path: it names no key, no algorithm and
+# no custody location, and ADR 0366 §4's refusal of declared secret PATHS is
+# untouched. From this the platform derives `Pii:FieldKey` and `Pii:IndexKey`
+# (§6) and provisions them before every launch (§12).
+#
+# The spelling is a JOINT decision — §7 forbids either side choosing alone —
+# agreed with the Kernel's author and landed in `PiiProtection.cs`. The struct
+# is `deny_unknown_fields`, so a build predating the field refuses this manifest
+# rather than reading it as not requested: the one failure mode a declaration
+# nothing enforces would have had.
+protected_personal_data: true
+
 resources:
   # Requests, not rights — rule 3. Property policy decides what is granted, and
   # a request above the ceiling is clamped rather than refused.
