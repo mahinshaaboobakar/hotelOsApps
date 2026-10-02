@@ -13,7 +13,7 @@
 manifest_version: 1
 id: guestops
 name: "GuestOps"
-version: 0.3.4
+version: 0.3.5
 publisher: hotelos
 category: operations
 description: >-
