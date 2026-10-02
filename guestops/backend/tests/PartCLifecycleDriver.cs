@@ -108,6 +108,10 @@ public sealed class PartCLifecycleDriver
     /// name is found.</i>
     /// </para>
     /// <para>
+    /// <b>Shown able to fail, at <c>1444673d</c>:</b> removing the InHouse guard
+    /// gives <b>1 failed, 19 passed</b>, and the failure is this test alone.
+    /// </para>
+    /// <para>
     /// <b>What it recorded was real and is why the ruling exists:</b> check-out
     /// validated nothing, so a <c>Waitlisted</c>, <c>Cancelled</c> or <c>NoShow</c>
     /// stay could be marked departed and a <c>Departed</c> one again with its real
@@ -338,6 +342,14 @@ public sealed class PartCLifecycleDriver
     /// implementation that closed the row and left the field set would leave the
     /// watchlist naming a room the stay no longer holds.
     /// </para>
+    /// <para>
+    /// <b>Shown able to fail twice, at <c>1444673d</c>, and the pair is the point.</b>
+    /// Removing <c>ReleasedAt = clock.GetUtcNow()</c> gives <b>1 failed, 19
+    /// passed</b>; removing <c>CurrentRoomId = null</c> gives the same, and both
+    /// failures are this test. <i>So each of its two assertions is load-bearing on
+    /// its own</i> — an implementation that did one and not the other is caught
+    /// either way round, which is what ADR 0365 §4's hazard required.
+    /// </para>
     /// </remarks>
     [Fact]
     public async Task Leaving_releases_the_room_on_all_three_paths()
@@ -396,6 +408,12 @@ public sealed class PartCLifecycleDriver
     /// <i>The subject's spelling is the architect's proposal recorded in ADR 0365 §5,
     /// not the owner's words — they ruled "two events" and named neither. If it is
     /// corrected, this is where.</i>
+    /// </para>
+    /// <para>
+    /// <b>Shown able to fail, at <c>1444673d</c>:</b> not appending
+    /// <c>stay.room_released</c> gives <b>1 failed, 19 passed</b>, and the failure is
+    /// this test alone — so the two-event ruling is asserted by something that can
+    /// detect one event.
     /// </para>
     /// </remarks>
     [Fact]

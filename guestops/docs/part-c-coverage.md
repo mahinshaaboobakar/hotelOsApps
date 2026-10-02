@@ -67,22 +67,31 @@ AssignRoom            DRIVEN   by AssignCommandTests, both accept_conflict value
 
 ### The last eight, and two findings neither door guards
 
-**`CheckOut` validates NO source state** — not in the service, not in
-`CheckOutCommand`, which checks only that a stay id and a version are present. So a
-`Waitlisted`, `Cancelled` or `NoShow` stay can be marked departed, and a `Departed`
-one again with its `DepartureAt` overwritten, each announcing `stay.departed`. **Its
-two siblings guard their source and say why**, both directing the caller to the
-correction, and *nothing in either file explains why check-out is the exception.*
+**Both findings are now RULED and BUILT — `GUEST-Q16` → ADR 0365, owner, 2026-10-02.**
+What the matrix measured is below; what it became is in the ADR.
 
-**`CheckIn` guards only the ROOM**, and nothing releases `CurrentRoomId` on cancel,
-no-show or departure — that assignment appears **once** in the application, at
-`BookingService.cs:162`. `ConflictingStayAsync` counts only `Pending · Booked ·
-InHouse` as holding, so a cancelled stay does not block its room, correctly — **and
-checking it in makes it `InHouse`, which does.** If the room was reassigned in
-between, two stays are in house on one room with no `accept_conflict` in the path.
+**`CheckOut` validated NO source state** — not in the service, not in
+`CheckOutCommand`. So a `Waitlisted`, `Cancelled` or `NoShow` stay could be marked
+departed, and a `Departed` one again with its `DepartureAt` overwritten, each
+announcing `stay.departed`. Its three siblings all guarded their source and said why.
+**§1: check-out acts only on an in-house stay.** *The screen was already right —
+`StayDetailView` offers `Check out` only on the `InHouse` arm — so the desk never
+could and the gRPC door was the exposure, the same shape as `CorrectStay`'s zero.*
 
-*Both recorded in labelled tests and neither repaired: what they are is a measured
-ambiguity about which lifecycles an operational event may act on, not a ruled rule.*
+**`CheckIn` guards only the ROOM**, and nothing released the room on cancel, no-show
+or departure. `ConflictingStayAsync` counts only `Pending · Booked · InHouse` as
+holding, so a cancelled stay did not block its room — correctly — **and checking it in
+made it `InHouse`, which does.** **§2 and §3: all three leaving paths now stamp
+`ReleasedAt` on the open assignment**, the mechanism every room move already used.
+§1 makes that sequence unreachable as well, and the owner ruled both rather than
+letting one cover the other.
+
+> **The correction to my own report that the ruling carried:** I wrote that
+> `CurrentRoomId` *"appears once, at `BookingService.cs:162`"*. That is the
+> initialisation to null at creation; the write that matters is
+> `StayAssignmentService.cs:107`, and the **record** behind it is what I was looking
+> for. The conclusion held and the pointer was one layer short of the mechanism —
+> which is why reading the assignment service is what closed it.
 
 ### ⚠ And this block crossed the suite's connection ceiling
 
