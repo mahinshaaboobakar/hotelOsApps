@@ -7,7 +7,6 @@ using Wire = HotelOS.Contracts.Integration.V1;
 using HotelOS.GuestOps.Events;
 using HotelOS.Platform;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 // GuestOps — the reservation book, as an installable application.
 //
@@ -39,22 +38,31 @@ var builder = WebApplication.CreateBuilder(args);
 // that same morning, because that service wires a provider. Same code, two
 // services, one visible — three lines apart.
 //
-// **The console sink comes FIRST, then configuration**, which is Workforce's
-// finding and not a style: `appsettings.json` here declares no `Serilog`
-// section at all, so `ReadFrom.Configuration` contributes no sink. Read
-// configuration alone and Serilog finds none, and the application logs nothing
-// — which is the state this is fixing, arrived at by a different route.
+// **Through the platform's SDK, because the shape of a line is a thing the
+// writer and the PARSER must agree on.** `UseHotelOsLogging` emits Serilog
+// compact — CLEF — which `packages/logs/parse.rs` reads. A human console
+// template reaches the Kernel's capture as `unparsed`: stored verbatim, with no
+// level. Measured on this property before the change — 53,351 of 53,351
+// captured records `unparsed`, every level `unspecified`, `service` empty — so
+// an operator filtering the Logs pane by level saw nothing at all.
+//
+// *This declared its own `UseSerilog(… WriteTo.Console() …)` and said "the
+// console sink comes FIRST, then configuration", because `appsettings.json`
+// here declares no `Serilog` section and `ReadFrom.Configuration` would
+// contribute no sink. **That ordering was a workaround for the risk of NO sink,
+// and the SDK removes the risk rather than ordering around it**: it reads
+// configuration and then adds a sink unconditionally. The five platform
+// services moved the same way in `134b9aea` — five copies of one decision, all
+// drifted together.*
 //
 // **It covers what happens after `Build()`, and that is not everything.**
-// `UseSerilog` registers with the host, and the host does not exist yet — so
-// the `PlatformEnvironment.Read()` below and the refusal beneath it, which are
-// the likeliest reasons an INSTALLED application stops, still bypass it.
-// Workforce recorded that at its own `Program.cs:57`; this sink is necessary
-// and is not sufficient, and a startup failure here is still silent. That gap
-// is named rather than left for somebody to discover as a second silence.
-builder.Host.UseSerilog((context, configuration) => configuration
-    .WriteTo.Console()
-    .ReadFrom.Configuration(context.Configuration));
+// `UseHotelOsLogging` registers with the host, and the host does not exist yet
+// — so the `PlatformEnvironment.Read()` below and the refusal beneath it, which
+// are the likeliest reasons an INSTALLED application stops, still bypass it.
+// Workforce recorded that at its own `Program.cs`; this sink is necessary and is
+// not sufficient, and a startup failure here is still silent. That gap is named
+// rather than left for somebody to discover as a second silence.
+builder.Host.UseHotelOsLogging();
 
 // # `migrate` runs before the host exists
 //

@@ -66,21 +66,40 @@ public sealed class LoggingProviderGuardTests
     [Fact]
     public void A_logging_provider_is_configured_at_all()
     {
-        Assert.Matches(new Regex(@"UseSerilog\s*\("), Code());
+        Assert.Matches(new Regex(@"UseHotelOsLogging\s*\("), Code());
     }
 
+    /// <summary>
+    /// And it is the PLATFORM's, not a sink declared here.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This replaces <c>The_console_sink_is_declared_before_configuration_is_read</c>,
+    /// which asserted <c>WriteTo.Console</c> before <c>ReadFrom.Configuration</c>.
+    /// Both now live in <c>HotelOS.Platform.PlatformLogging</c>, so the old
+    /// assertion would read two absences as an ordering and pass on a file with
+    /// no logging at all — ADR 0034: a test encoding a superseded contract is
+    /// updated, not worked around.
+    /// </para>
+    /// <para>
+    /// <b>The guarantee it loses is not needed and the one it gains is
+    /// stronger.</b> The ordering was a workaround for the risk that
+    /// <c>appsettings.json</c> contributes no sink; <c>UseHotelOsLogging</c>
+    /// adds one unconditionally, so the risk is gone. What can now go wrong is
+    /// the opposite: somebody adds <c>.WriteTo.Console()</c> back for a local
+    /// debugging session, and every captured line returns to <c>unparsed</c>
+    /// with no level — the defect this application was measured at 53,351 of
+    /// 53,351 records before the change. A plain-text sink here is the
+    /// regression, so its ABSENCE is what is asserted.
+    /// </para>
+    /// </remarks>
     [Fact]
-    public void The_console_sink_is_declared_before_configuration_is_read()
+    public void No_console_sink_is_declared_here_because_the_shape_is_the_platforms()
     {
         var code = Code();
-        var console = code.IndexOf("WriteTo.Console", StringComparison.Ordinal);
-        var read = code.IndexOf("ReadFrom.Configuration", StringComparison.Ordinal);
 
-        Assert.True(console >= 0, "no console sink: the Kernel captures stdout and reads nothing else");
-        Assert.True(
-            read < 0 || console < read,
-            "the console sink must precede ReadFrom.Configuration — appsettings.json "
-            + "declares no Serilog section, so configuration alone contributes none");
+        Assert.DoesNotContain("WriteTo.Console", code, StringComparison.Ordinal);
+        Assert.DoesNotContain("UseSerilog", code, StringComparison.Ordinal);
     }
 
     /// <summary>
@@ -97,7 +116,7 @@ public sealed class LoggingProviderGuardTests
     public void The_provider_is_registered_before_the_platform_environment_is_read()
     {
         var code = Code();
-        var wired = code.IndexOf("UseSerilog", StringComparison.Ordinal);
+        var wired = code.IndexOf("UseHotelOsLogging", StringComparison.Ordinal);
         var read = code.IndexOf("PlatformEnvironment.Read", StringComparison.Ordinal);
 
         Assert.True(wired >= 0 && read >= 0, "both the provider and the platform read must be present");

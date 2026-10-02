@@ -21,7 +21,6 @@ using HotelOS.Platform;
 using HotelOS.Platform.Transport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Serilog;
 
 // Jobs — repairs and tasks, as an installable application (ADR 0122). It is
 // installed into a property that already exists, so its certificate exists
@@ -59,16 +58,24 @@ if (args is ["migrate", ..])
         args);
 }
 
-// A console sink first, then whatever configuration adds.
+// Through the platform's SDK, which emits Serilog compact — CLEF — because the
+// shape of a line is a thing the writer and `packages/logs/parse.rs` must agree
+// on. A human console template reaches the Kernel's capture as `unparsed`:
+// stored verbatim, with no level, so a level filter matches nothing.
 //
-// It read configuration alone until the first real install, where a package
-// ships no `appsettings.json` — so Serilog found no sinks, the application
-// logged **nothing**, and the Kernel's capture of a failed start was an empty
-// file. A process that cannot say why it stopped is one nobody can fix from
-// the outside, which is the whole purpose of that capture.
-builder.Host.UseSerilog((context, configuration) => configuration
-    .WriteTo.Console()
-    .ReadFrom.Configuration(context.Configuration));
+// *Two earlier states, both kept because each names a different silence. It
+// read configuration ALONE until the first real install, where a package ships
+// no `appsettings.json` — Serilog found no sinks, the application logged
+// nothing, and the capture of a failed start was an empty file. Then it
+// declared its own console sink first, which fixed the silence and left every
+// line unreadable to a filter. The SDK closes both: it reads configuration and
+// adds a sink unconditionally, in the one shape the reader parses.*
+//
+// A process that cannot say why it stopped is one nobody can fix from the
+// outside, which is the whole purpose of that capture — and a process whose
+// every line is `unparsed` can say it only to somebody reading the file by
+// hand.
+builder.Host.UseHotelOsLogging();
 
 builder.Services.AddGrpc(options =>
 {

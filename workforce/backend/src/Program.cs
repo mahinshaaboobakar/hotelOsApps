@@ -20,7 +20,6 @@ using HotelOS.Workforce.Infrastructure;
 using HotelOS.Workforce.Module;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Serilog;
 
 // Workforce — who is posted where, as an installable application.
 //
@@ -117,7 +116,10 @@ if (args is ["migrate", ..])
 // application ships no endpoint configuration at all — peers come from
 // discovery, and the Kernel's own address is the one thing discovery cannot
 // answer, so it is handed over.
-// A console sink FIRST, then whatever configuration adds.
+// Through the platform's SDK, which adds a sink unconditionally and emits
+// Serilog compact — CLEF — the shape `packages/logs/parse.rs` reads. A human
+// console template is captured as `unparsed`: stored verbatim, no level, so a
+// level filter matches nothing.
 //
 // This read configuration alone, and an installed package ships no
 // `appsettings.json` — so Serilog found no sinks, the application logged
@@ -135,15 +137,19 @@ if (args is ["migrate", ..])
 // Workforce kept the defect, and the comment there is the only reason this took
 // minutes rather than an afternoon.
 //
-// **And it is FIRST for a second reason.** The platform-environment read below
-// throws when the Kernel has not set its three variables, and that throw used to
-// happen twenty-five lines before this logger existed — so the one failure most
-// likely to stop an installed application was the one it could never report.
-// A logger configured after the thing that can fail is a logger for the happy
-// path.
-builder.Host.UseSerilog((context, configuration) => configuration
-    .WriteTo.Console()
-    .ReadFrom.Configuration(context.Configuration));
+// **And it is FIRST for a second reason, which the SDK does not change.** The
+// platform-environment read below throws when the Kernel has not set its three
+// variables, and that throw used to happen twenty-five lines before this logger
+// existed — so the one failure most likely to stop an installed application was
+// the one it could never report. A logger configured after the thing that can
+// fail is a logger for the happy path.
+//
+// *The ORDERING of the sink against configuration was this file's other
+// finding, and it is no longer this file's business: the SDK reads
+// configuration and then adds a sink regardless of what it found. The ordering
+// that still matters is this one — the logger before the throw — and it is why
+// the call stays here rather than moving to where the other services put it.*
+builder.Host.UseHotelOsLogging();
 
 //
 // Read once, through the SDK, because a second copy of a contract is the copy

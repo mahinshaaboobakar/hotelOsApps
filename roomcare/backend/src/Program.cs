@@ -7,7 +7,6 @@ using HotelOS.RoomCare.Infrastructure;
 using HotelOS.RoomCare.Module;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 
 // Room Care — are the rooms ready, as an installable application (ADR 0122).
 // Installed into a property that already exists; no bootstrap surface and no
@@ -37,11 +36,16 @@ if (args is ["migrate", ..])
         args);
 }
 
-// A console sink first: a package ships no appsettings.json, and a process that
-// cannot say why it stopped is one nobody can fix from outside.
-builder.Host.UseSerilog((context, configuration) => configuration
-    .WriteTo.Console()
-    .ReadFrom.Configuration(context.Configuration));
+// Through the platform's SDK: a package ships no `appsettings.json`, so a
+// logger that read configuration alone would find no sink and the process could
+// not say why it stopped. `UseHotelOsLogging` adds one unconditionally, and in
+// Serilog compact — CLEF — which is the shape `packages/logs/parse.rs` reads. A
+// human console template is captured as `unparsed`, with no level for a filter
+// to match.
+//
+// *It declared its own `WriteTo.Console()` for the first half of that and not
+// the second.*
+builder.Host.UseHotelOsLogging();
 
 builder.Services.AddDbContext<RoomCareDbContext>(options => options
     .UseSnakeCaseNamingConvention()
