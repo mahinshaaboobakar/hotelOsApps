@@ -101,9 +101,23 @@ public sealed class StayAssignmentService(
             Reason = reason,
         });
 
-        // The projection of the open row, resolved here. The request has
-        // nowhere to put it, which is what makes the mistake inexpressible
-        // rather than merely rejected.
+        // **Maintained here, by hand, on BOTH paths.** The request cannot carry
+        // this field, which is what makes a client's mistake inexpressible rather
+        // than merely rejected — and that is the whole of what the old wording
+        // protected.
+        //
+        // ⚠ It said "the projection of the open row, resolved here", and that was
+        // read as a mechanism. There is none: `CurrentRoomId` is a plain `Guid?`
+        // with an index and no value converter or computed column, so NOTHING
+        // recomputes it from the assignment rows. ADR 0365 §4 was built on that
+        // sentence and is withdrawn (64d6c9da) — a guarantee-comment quoted in an
+        // accepted ADR stops being a remark and acquires a decision's authority.
+        //
+        // So the two writers are this line and `ReleaseAsync`'s null, each beside
+        // the `ReleasedAt` change it belongs to. A release that left this alone
+        // would leave the field naming a room the stay no longer holds, and four
+        // readers take it as current truth — `WatchlistView.cs:48` reads `== null`
+        // as "no room".
         stay.CurrentRoomId = roomId;
         stay.UpdatedBy = scope.UserId;
         stay.Version += 1;

@@ -171,6 +171,14 @@ needs the pair.
 `RoomStay.current_room_id` is the projection of the open row, resolved by the
 service. The create and move messages carry no such field.
 
+**Resolved means *written by hand*, on every path that changes the open row** —
+added 2026-10-02, because this sentence is where a wrong inference started. There is
+no value converter and no computed column: **nothing recomputes the field from the
+assignment rows.** So `StayAssignmentService` sets it on the assign path and nulls it
+on the release path, each beside the `ReleasedAt` change it belongs to. *ADR 0365 §4
+read the service's own comment as a mechanism and was withdrawn (`64d6c9da`); the
+clause above was true and silent about the half that matters.*
+
 **An upgrade is an assignment — GUEST-Q8 (b).** Putting a guest booked into a
 Deluxe King in an Executive Suite is a **higher-type room with the terms
 unchanged**, so it is `stay.room_changed` like any other assignment (R8), with
