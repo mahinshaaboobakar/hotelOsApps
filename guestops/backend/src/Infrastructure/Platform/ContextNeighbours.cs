@@ -39,11 +39,37 @@ namespace HotelOS.GuestOps.Infrastructure.Platform;
 /// button.
 /// </para>
 /// <para>
-/// <b>A failure to reach Context answers unknown too.</b> This application has
-/// no service certificate until an installed package is enrolled with one, so
-/// today this call cannot succeed — and the honest answer to <i>is Jobs
-/// installed</i> when the only authority is unreachable is <i>nobody
-/// established it</i>. Failing closed here would dim tabs on every property.
+/// <b>A failure to reach Context answers unknown too.</b> The honest answer to
+/// <i>is Jobs installed</i>, when the only authority is unreachable, is
+/// <i>nobody established it</i>. Failing closed here would dim tabs on every
+/// property.
+/// </para>
+/// <para>
+/// <b>This said "this application has no service certificate... so today this
+/// call cannot succeed", and that expired twice over</b> - corrected
+/// 2026-10-03, kept because a reader meeting the old sentence concludes the
+/// call can never work and stops looking. GuestOps HAS a certificate
+/// (<c>CN=guestops, OU=application</c>), and <c>GetOperatingDay</c> is
+/// succeeding on this machine - 358 mentions in Context's own log, with all 16
+/// user-scoped refusals on <c>GetPropertySummary</c> and none here.
+/// </para>
+/// <para>
+/// <b>And that is why this reads the operating day rather than the property
+/// summary.</b> This call site consumes <c>Resolution</c> and nothing else;
+/// <c>OperatingDay</c> carries it, and is platform-scoped
+/// (<c>OperatingDayResolver</c>'s <c>RequirePlatformScoped</c>, whose own
+/// comment admits <i>"an installed application asking and no person's
+/// permission is asked"</i>). <c>GetPropertySummary</c> is <b>user-scoped by
+/// ruling</b> - ADR 0212, because it carries <c>staff_count</c> - so
+/// <c>RequireUserScopedAsync</c> refuses an application BY NAME, and every call
+/// from here was refused before it read a field.
+/// </para>
+/// <para>
+/// <b>The answer does not change.</b> Context still records only
+/// <c>masterdata</c>, so this still returns unknown; what changes is that the
+/// call now succeeds instead of being refused, and a refusal that reached only
+/// this method's <c>catch</c> was indistinguishable from an unreachable
+/// service.
 /// </para>
 /// </remarks>
 public sealed class ContextNeighbours(ContextService.ContextServiceClient context)
@@ -53,12 +79,12 @@ public sealed class ContextNeighbours(ContextService.ContextServiceClient contex
     public async Task<bool?> InstalledAsync(
         RequestScope scope, string domain, CancellationToken cancellationToken)
     {
-        PropertySummary summary;
+        OperatingDay day;
 
         try
         {
-            summary = await context.GetPropertySummaryAsync(
-                new GetPropertySummaryRequest
+            day = await context.GetOperatingDayAsync(
+                new GetOperatingDayRequest
                 {
                     Context = ApplicationContext.AsItself(scope),
                 },
@@ -73,7 +99,7 @@ public sealed class ContextNeighbours(ContextService.ContextServiceClient contex
             return null;
         }
 
-        if (summary.Resolution is not { } resolution)
+        if (day.Resolution is not { } resolution)
         {
             return null;
         }
