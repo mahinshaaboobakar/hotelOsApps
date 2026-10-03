@@ -110,11 +110,16 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
     private async Task<StayTime> AtAsync(
         RequestScope scope, DateOnly date, bool checkIn, CancellationToken cancellationToken)
     {
-        var summary = await context.GetPropertySummaryAsync(
-            new GetPropertySummaryRequest { Context = ApplicationContext.AsItself(scope) },
+        // **The platform-scoped facts, not the property summary** - ADR 0374.
+        // `GetPropertySummary` is user-scoped BY RULING (ADR 0212: it carries
+        // `staff_count`), so `RequireUserScopedAsync` refused this application
+        // BY NAME and every booking died here. `GetPropertyFacts` carries the
+        // bounded four and is answerable to a service principal.
+        var facts = await context.GetPropertyFactsAsync(
+            new GetPropertyFactsRequest { Context = ApplicationContext.AsItself(scope) },
             cancellationToken: cancellationToken);
 
-        var clock = checkIn ? summary.CheckInTime : summary.CheckOutTime;
+        var clock = checkIn ? facts.CheckInTime : facts.CheckOutTime;
 
         // A property that has not configured one is not the same as one that
         // checks in at midnight — Master Data keeps them apart deliberately, so
@@ -128,7 +133,21 @@ public sealed class ContextBusinessDay(ContextService.ContextServiceClient conte
         // rather than in UTC because a derived timestamp's date component must
         // be the date the desk typed — R12, and R16's reason for insisting the
         // zone is an IANA name and never an offset.
-        var zone = TimeZoneInfo.FindSystemTimeZoneById(summary.Property.Timezone);
+        // **An unset zone is not a zone, and this is newly reachable.** ADR 0337:
+        // `Property.Timezone` has no semantic default, and the field says
+        // "empty when nobody has selected one". `FindSystemTimeZoneById("")`
+        // THROWS - which never fired only because the old call was refused
+        // before it got here. Making the call succeed is what makes the throw
+        // reachable, so the absence is carried rather than defaulted: a zone
+        // nobody chose is the same answer as an hour nobody set.
+        if (string.IsNullOrEmpty(facts.Timezone))
+        {
+            return StayTime.None;
+        }
+
+        // Flat on `PropertyFacts` - `property` is RESERVED there, so there is
+        // no `PropertyRef` to reach through.
+        var zone = TimeZoneInfo.FindSystemTimeZoneById(facts.Timezone);
         var local = date.ToDateTime(hour);
         var offset = zone.GetUtcOffset(local);
 
