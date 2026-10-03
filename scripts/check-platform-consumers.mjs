@@ -225,7 +225,22 @@ function check(consumer) {
         .filter((line) => line.length > 0 && !/^\d+ Error/u.test(line)),
     )];
 
-    return { state: "broken", because: lines.slice(0, 3).join("\n      ") };
+    // NOT capped, and this is why. It was `lines.slice(0, 3)`, while ADR 0168
+    // makes this gate mandatory at phase-close AND instructs a round to quote
+    // its output — so a bound here is a limit the reader never chose and cannot
+    // see. DD, 2026-10-03: the report named 12 broken sites, which is 5
+    // consumers times 3 lines rather than a measurement; the real number was 61
+    // across 52 files, and the 49 it could not show were found only because a
+    // second run disagreed with the first.
+    //
+    // The count leads so the arithmetic is the reader's to close, and every
+    // line follows it. The de-duplication above stays: it collapses one defect
+    // repeated by a build, which is a different thing from hiding defects.
+    return {
+      state: "broken",
+      because: [`${lines.length} error line${lines.length === 1 ? "" : "s"}:`, ...lines]
+        .join("\n      "),
+    };
   }
 }
 
@@ -375,6 +390,16 @@ const unverified = results.filter((one) => one.state === "unverified").length;
 // and a measured none are different facts.
 process.stdout.write(
   `\n${results.length} consumers = ${built} built + ${broken} broken + ${unverified} unverified\n`);
+
+// WHAT THIS GATE DOES NOT REACH — printed, because the only channel to whoever
+// is holding a result is the output. It runs each consumer's BUILD and never its
+// test SUITE, so a consumer can read `ok` above with a failing test: DD found
+// `pms-oracle/ui/tests/form.test.ts` red at HEAD, and nothing in this estate was
+// going to surface it. A check that names its own population is what lets a
+// reader catch a scope the instruction forgot.
+process.stdout.write(
+  "  every consumer's BUILD was run. No consumer's SUITE was run, so an `ok`\n"
+  + "  above is a compile and not a passing test suite.\n");
 
 if (broken > 0) {
   process.stdout.write(
