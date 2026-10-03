@@ -14,7 +14,7 @@
 >
 > **So Part C has no `WebApplication`, no bearer token and no HTTP harness, and it
 > does not press anything.** Its deliverable is rows. **Operating a control is Part
-> B's**, which is why the 13 control sites that were listed here have moved into
+> B's**, which is why the 14 control sites that were listed here have moved into
 > `part-b-drive-list.md`, each carrying the Part C combination it should be pressed
 > against.
 >
@@ -514,8 +514,12 @@ Part B needs    rows on the OWNER'S property, by a supported    a DATA claim
 unblocked one control. Corrected 2026-10-02: `registration:242` needs `SaveSettings`,
 and `screens/setup/index.ts:100` disables Setup's `Save` **by design** because
 `SaveSettings` has no module method — `desk.configure` maps one, `setup`, a read. *The
-owner has no path to call it.* **Twelve of the thirteen control sites are blocked, not
+owner has no path to call it.* **Twelve of the FOURTEEN control sites are blocked, not
 eleven**, and the two that are not need no data at all.
+
+*This said **thirteen** until 2026-10-03, and 12 + 2 = 14 could not be closed against
+it. The count is derived in `part-b-drive-list.md` §E from its own enumerated rows
+— 4 + 3 + 4 + 3. **The twelve and the two were right; only the total was wrong.***
 
 > **The question Part C's completion raises is not whether it is done.** It is **how
 > data reaches the property the owner walks** — and the two supported paths to a

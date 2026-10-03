@@ -49,7 +49,12 @@ export const DRIVE = {
     + "`registration.capture`, `request.handle`, `reporting.file`, "
     + "`desk.configure`. That is the manifest this package declared, accepted at "
     + "install and read back from the platform's own registry rather than from "
-    + "the manifest it was written in.",
+    + "the manifest it was written in. "
+    + "**Nine was true of `0.1.0` and the manifest declares EIGHT from 0.3.5** "
+    + "— `guest.amend` was declared and reached by neither a service nor a "
+    + "screen, and its constant was removed on 2026-10-03. This reading is kept "
+    + "as the measurement it was: a superseded figure points forward rather than "
+    + "being rewritten, because the nine really were approved.",
 
   ran:
     "**And it ran.** Its own log is 64 lines spanning 308 milliseconds with "

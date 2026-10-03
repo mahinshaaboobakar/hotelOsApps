@@ -52,9 +52,11 @@ placed after the write it protects is not a guard, and this one is before.* A
 sweep counting `RequireAsync` per public method would have reported four of five
 unenforced.
 
-**`guest.amend` is declared in code, in no manifest, and enforced nowhere.**
-`Permissions.cs:59` holds the constant; it appears in no `manifest.yaml`, no
-service and no screen. Dead vocabulary — **mine**, to delete or declare.
+**`guest.amend` was declared in code, in no manifest, and enforced nowhere —
+REMOVED 2026-10-03.** `Permissions.cs` held the constant; it appeared in no
+`manifest.yaml`, no service and no screen. *Kept in this ledger rather than
+deleted from it, because a permission vocabulary that once carried a name is
+worth a reader knowing was considered and dropped.*
 
 ---
 
@@ -178,8 +180,8 @@ names the domain; nothing counts applications.
 | **BY CHOICE** | `dotnet test` not run for this report — it touches the shared `obj/` and `bin/` and I hold no machine slot. The `stale` change is TypeScript only | **FF** |
 | **BY OMISSION — now closed** | nothing compared the fixture to the wire. Closed above: one real difference, fixed | **FF** |
 | **BY OMISSION — now closed** | Part C's closing question read as *"the path does not exist"*. Pointed at `--book` | **FF** |
-| **DEFECT, mine** | the control-site count does not close: **13** in `part-b-drive-list.md` §E's heading, **4+3+4+3 = 14** across its subsections, and *"twelve of the thirteen are blocked… and the two that are not"* in Part C — **12 + 2 = 14 against a stated 13**. Three figures, no two agreeing, in the documents the owner walks from. To be **derived from the enumerated rows**, never restated as a fourth number | **FF** |
-| **DEFECT, not mine** | **GuestOps' `tsc` is RED AT HEAD** — `TSC_EXIT=2`, 4 errors, all `Property 'log' is missing … required in type 'HostApi'`. `48b0daa7` (2026-10-03 09:21, ADR 0364 item 4b) made `HostApi.log` required at `sdk-typescript/src/module.ts:128`; four GuestOps host doubles do not supply it. **0 of the 4 errors name a file I touched.** `packages/sdk-typescript/src/host-double.ts` is untracked, so the author is mid-remedy — reported, not fixed | **the ADR 0364 logging stream** |
+| **DEFECT, mine — CLOSED 2026-10-03** | derived from §E's enumerated rows: **4+3+4+3 = 14**, of which **12 blocked + 2 needing no data** closes at 14. The wrong figure was **13**; the twelve and the two were always right. §E now derives it and both documents say which figure was wrong. *It said:* the control-site count does not close: **13** in `part-b-drive-list.md` §E's heading, **4+3+4+3 = 14** across its subsections, and *"twelve of the thirteen are blocked… and the two that are not"* in Part C — **12 + 2 = 14 against a stated 13**. Three figures, no two agreeing, in the documents the owner walks from. To be **derived from the enumerated rows**, never restated as a fourth number | **FF** |
+| **DEFECT, not mine — CLOSED by DD** | re-measured 2026-10-03: `TSC_EXIT=0`, **0 errors, 0 naming `HostApi`**. DD's `051515d9` (the `hostDouble` factory) and `620781b` (61 sites across 52 files) closed it, and the ADR 0168 gate `819d0f7` reports 17 of 17 consumers built. *Its own output says it runs every consumer's BUILD and no consumer's SUITE.* **It said:** **GuestOps' `tsc` is RED AT HEAD** — `TSC_EXIT=2`, 4 errors, all `Property 'log' is missing … required in type 'HostApi'`. `48b0daa7` (2026-10-03 09:21, ADR 0364 item 4b) made `HostApi.log` required at `sdk-typescript/src/module.ts:128`; four GuestOps host doubles do not supply it. **0 of the 4 errors name a file I touched.** `packages/sdk-typescript/src/host-double.ts` is untracked, so the author is mid-remedy — reported, not fixed | **the ADR 0364 logging stream** |
 | **OPEN, not mine** | the staleness mechanism `Today.stale` is drawn for and nothing computes | planner / owner |
 
 *`48b0daa7` is ADR 0168's own case: an SDK change whose application consumers sit

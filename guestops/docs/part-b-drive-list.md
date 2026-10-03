@@ -406,7 +406,18 @@ so the teardown works and they are older runs that never reached it. Not
 dropped: they cannot be attributed, and a cluster role is not mine to remove on
 a name match.
 
-## E · The 13 control sites — and the Part C combination each is pressed against
+## E · The 14 control sites — and the Part C combination each is pressed against
+
+> **⚠ THIS HEADING SAID 13, AND THE ENUMERATED ROWS SAY 14** — corrected
+> 2026-10-03. The figure is now **derived from the subsections below** rather than
+> restated: **E1's 4** pagers + **E2's 3** (two `tabs()` callers and the bar) +
+> **E3's 4** dropdowns + **E4's 3** date fields = **14**.
+>
+> **12 are blocked and 2 need no data**, so the arithmetic closes at 12 + 2 = 14.
+> *The wrong figure was **13**, here and in `part-c-coverage.md`; the twelve and
+> the two were always correct.* Three figures stood in these two documents and no
+> two agreed — and this is the one the owner walks from, which is why it is
+> derived now and not restated.
 
 > **MOVED HERE FROM `part-c-coverage.md` — 2026-10-01**, on the owner's
 > correction that *"Part C is a DATA DRIVER… it finishes when the data exists, not
@@ -495,7 +506,7 @@ property, so capture was unreachable then too. It made the refusal legible rathe
 reachable. *But B2 already recorded that Save has no handler, and I cited Part C's
 coverage as if it closed the gap anyway.*
 
-> **So of the 13 control sites, the number the owner can drive today is TWO** — the top
+> **So of the 14 control sites, the number the owner can drive today is TWO** — the top
 > bar's tabs and `bookings/filters:49`, both of which need no data — **and not three.**
 > `registration:242` joins the eleven.
 

@@ -55,9 +55,6 @@ public static class Permissions
     /// <summary>Assign a room, and move one.</summary>
     public const string StayAssign = "stay.assign";
 
-    /// <summary>Guest identity records, contact points, preferences.</summary>
-    public const string GuestAmend = "guest.amend";
-
     /// <summary>The registration card, its documents and its signature.</summary>
     public const string RegistrationCapture = "registration.capture";
 
