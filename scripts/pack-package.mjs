@@ -132,9 +132,13 @@ function runtimeClosure(root, assembly) {
   for (const target of Object.values(parsed.targets ?? {})) {
     for (const body of Object.values(target)) {
       for (const path of Object.keys(body.runtime ?? {})) needed.add(basename(path));
-      for (const [path, meta] of Object.entries(body.native ?? {})) {
-        // Natives are listed per RID; only this platform's ship.
-        if ((meta.rid ?? RID) === RID || path.includes(RID)) needed.add(basename(path));
+      for (const path of Object.keys(body.native ?? {})) needed.add(basename(path));
+      // `runtimeTargets` is a THIRD key, and reading only `runtime` and `native`
+      // left the assertion unable to see a native at all: Temporalio declares
+      // its bridge here, once per RID, and all six were invisible. Measured on
+      // guestops — 35 names without this key, 36 with it.
+      for (const [path, meta] of Object.entries(body.runtimeTargets ?? {})) {
+        if (meta.rid === RID) needed.add(basename(path));
       }
     }
   }
