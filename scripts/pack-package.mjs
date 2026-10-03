@@ -187,24 +187,30 @@ function main(argv) {
   const out = chosen === null ? join(dir, ".build", `stage-${facts.version}`) : resolve(chosen);
 
   process.stdout.write(`packaging ${facts.id} ${facts.version}, kind ${facts.kind}\n`);
+
+  // PASS 1 — EVERY refusal, before any file exists.
+  //
+  // The first version created the staging and THEN validated the publish tree,
+  // so its own refusal left a `stage-<version>/manifest.yaml` behind and the
+  // next run refused on residue the refusal had made. EE met it cutting
+  // pms-oracle 0.1.1, on this tool's first real use by anybody else.
+  //
+  // It is a shape this estate has already paid for: a lock claim that built its
+  // body inside the `open(path, "x")` block created a 0-byte lock and then
+  // raised, and nothing could release it. **A guard placed after the write it
+  // protects is not a guard**, and a refusal that leaves residue makes the next
+  // honest run look like the offender.
+  //
   // REFUSED rather than removed. `guestops/.build/stage-0.3.5` existed from
-  // another stream's cut, and the first version of this would have deleted it
-  // without a word — a tool that makes a destructive act cheap and silent.
-  // A same-version staging is the version-identity collision anyway, so there
-  // is nothing here worth overwriting.
+  // another stream's cut, and an earlier version would have deleted it without
+  // a word. A same-version staging is the version-identity collision anyway.
   if (existsSync(out) && readdirSync(out).length > 0) {
     throw new Error(`${relative(process.cwd(), out)} already holds a staging — `
       + "remove it yourself or pass --out, because it may be somebody else's cut");
   }
-  mkdirSync(out, { recursive: true });
-  cpSync(join(dir, "manifest.yaml"), join(out, "manifest.yaml"));
 
-  if (facts.kind === "provider") {
-    // `openai-1.1.0` is manifest and signature alone, and ADR 0130 makes a v1
-    // provider declarative. Staging a backend for one would ship a process the
-    // platform has no mechanism to run.
-    process.stdout.write("  declarative: manifest.yaml only, no backend and no ui\n");
-  } else {
+  let plan = null;
+  if (facts.kind !== "provider") {
     if (facts.assembly === null) throw new Error(`kind ${facts.kind} declares no runtime.assembly`);
     const publishDir = join(dir, ".build", `publish-${facts.version}`);
     if (!existsSync(publishDir)) {
@@ -215,9 +221,9 @@ function main(argv) {
 
     // THE PUBLISH TREE IS THE PAYLOAD, minus what a property has no use for —
     // `e0361fb`'s arithmetic, and `deps.json` is the ASSERTION rather than the
-    // source. Deriving FROM deps.json dropped four files guestops-0.3.5 ships:
-    // `appsettings.json`, `web.config`, the static-assets manifest and the
-    // Temporal native. It names the managed closure and is silent about config
+    // source. Deriving FROM deps.json dropped three files guestops-0.3.5 ships:
+    // `appsettings.json`, `web.config` and the static-assets manifest, none of
+    // which it names. It covers the managed closure and is silent about config
     // and content, and a service with no `appsettings.json` starts and reads
     // nothing. Found by staging the third kind; the first two have no config.
     const staged = new Map();
@@ -228,21 +234,31 @@ function main(argv) {
     const absent = [...needed].filter((n) => ![...staged.keys()].some((s) => basename(s) === n));
     if (absent.length > 0) throw new Error(`deps.json names these and the publish tree lacks them: ${absent.join(", ")}`);
 
-    mkdirSync(join(out, "backend"), { recursive: true });
-    for (const [rel, full] of staged) cpSync(full, join(out, "backend", basename(rel)));
-
     const ui = join(dir, "ui");
     const built = ["module.js", "icon.svg"].filter((n) => existsSync(join(ui, n)));
-    mkdirSync(join(out, "ui"), { recursive: true });
-    for (const n of built) cpSync(join(ui, n), join(out, "ui", n));
     const widgets = join(ui, "widgets");
-    if (existsSync(widgets)) {
-      const js = readdirSync(widgets).filter((n) => n.endsWith(".js"));
-      if (js.length > 0) mkdirSync(join(out, "ui", "widgets"), { recursive: true });
-      for (const n of js) cpSync(join(widgets, n), join(out, "ui", "widgets", n));
-    }
-    process.stdout.write(`  backend  ${staged.size} files, ${needed.size} named by deps.json, 0 absent\n`);
-    process.stdout.write(`  ui       ${built.join(" · ")}${existsSync(widgets) ? ` · widgets/` : ""}\n`);
+    const js = existsSync(widgets) ? readdirSync(widgets).filter((n) => n.endsWith(".js")) : [];
+    plan = { staged, needed, ui, built, widgets, js };
+  }
+
+  // PASS 2 — the writes, now that nothing left can refuse.
+  mkdirSync(out, { recursive: true });
+  cpSync(join(dir, "manifest.yaml"), join(out, "manifest.yaml"));
+
+  if (plan === null) {
+    // `openai-1.1.0` is manifest and signature alone, and ADR 0130 makes a v1
+    // provider declarative. Staging a backend for one would ship a process the
+    // platform has no mechanism to run.
+    process.stdout.write("  declarative: manifest.yaml only, no backend and no ui\n");
+  } else {
+    mkdirSync(join(out, "backend"), { recursive: true });
+    for (const [rel, full] of plan.staged) cpSync(full, join(out, "backend", basename(rel)));
+    mkdirSync(join(out, "ui"), { recursive: true });
+    for (const n of plan.built) cpSync(join(plan.ui, n), join(out, "ui", n));
+    if (plan.js.length > 0) mkdirSync(join(out, "ui", "widgets"), { recursive: true });
+    for (const n of plan.js) cpSync(join(plan.widgets, n), join(out, "ui", "widgets", n));
+    process.stdout.write(`  backend  ${plan.staged.size} files, ${plan.needed.size} named by deps.json, 0 absent\n`);
+    process.stdout.write(`  ui       ${plan.built.join(" · ")}${plan.js.length > 0 ? " · widgets/" : ""}\n`);
   }
 
   // The floor, asserted rather than used: a predecessor cannot see an assembly
