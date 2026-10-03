@@ -76,18 +76,35 @@
 # no process**, which is `apply_connector` doing exactly what `db_connections: 0`
 # and the absent `database:` block declare.
 #
-# **0.1.1 FAILED TO INSTALL ON THE OWNER'S PROPERTY, AND THIS BLOCK'S
-# CONCLUSION IS WHY THAT IS WORTH WRITING HERE.** The block above argues
+# **0.1.1's UPDATE FAILED ON THE DEVELOPMENT PROPERTY, AND THIS BLOCK'S
+# CONCLUSION IS WHY THAT IS WORTH WRITING HERE.** The record is the DEV
+# Kernel's, so the attempt was against the development property — the same one
+# 0.1.0 was installed into above, and *"not the same claim as installed"* cuts
+# the same way here. **The owner's installed product has not been attempted**:
+# its registry holds both archives and the installed set is a separate fact. The block above argues
 # `completable()` answers `Ok(())` and both platform halves landed, which reads
 # as *Part B can be attempted* — and the owner attempted it. The Kernel refused.
-# Architect-quoted, 2026-10-03T08:26:32Z, and NOT re-read by me: I could not
-# locate the record under `%LOCALAPPDATA%\HotelOS\logs` or
-# `ProgramData\HotelOS\logs`, and `[observability]` names no `log_dir`, so
-# where it landed is unestablished by me:
+# **Read at source** — `.tmp/devrun/logs/kernel.log:2735154`, target
+# `hotelos_kernel::packages::update`. This comment first said the location was
+# *unestablished by me*, because I looked under `%LOCALAPPDATA%\HotelOS\logs`
+# and `ProgramData\HotelOS\logs` and `[observability]` names no `log_dir`.
+# **The dev Kernel writes to a dev root**, which is why asking the config
+# beats probing the roots — and the old sentence is kept because a reader who
+# meets only the citation cannot tell a verified quote from a relayed one:
 #
 #     update_failed - compensating · package pms-oracle · steps 0
-#     "pms-oracle declares no runtime.principal, so the version being
-#      restored has no certificate directory"
+#     failure "internal error"
+#     cause   "pms-oracle declares no runtime.principal, so the version being
+#              restored has no certificate directory — only an application is
+#              started here"
+#
+# **`failure: "internal error"`, and that is its own finding.** A ruled-correct
+# absence is surfaced as an INTERNAL ERROR rather than as a refusal naming an
+# unsupported operation — so the one record an operator has says the platform
+# broke, where what happened is that a connector reached a path built for an
+# application. *The same machinery compensates an application correctly: the
+# `guestops` updates two lines above reach `steps: 5` with every reversal
+# named.*
 #
 # **The absence it names is RULED AND CORRECT** — see `runtime:` below, and
 # ADR 0019. So the refusal blames the package for an absence the architecture
