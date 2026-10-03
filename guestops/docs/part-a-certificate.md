@@ -17,6 +17,56 @@
 
 ---
 
+## Run from `2026-10-03` at HEAD - 17 frames, 0 unreached, and the count is FLAT
+
+```text
+frames                    17        every one swept; 0 UNREACHED
+differing                 56        2026-10-01 also 56 - the DIRECTION is the finding
+  31  note-layout             the drawing's
+   1  individually named      adjudicate
+   1  individually named      the drawing's
+   1  individually named      neither
+  22  UNCLASSIFIED            ONE cause, measured below
+arithmetic   31 + 1 + 1 + 1 + 22 = 56   closes
+```
+
+**So the build has NOT drifted further since 2026-10-01**, across `Today.stale`,
+the count fix and DD's hostDouble over 52 files. *The count is the finding, and
+its direction is flat.*
+
+### The 22 are ONE cause, and the build is the honest side
+
+`chrome/styles/shell.ts:91` - **`.btn.off{color:var(--color-ink-faint,#5a6172);
+border-style:dashed}`** - accounts for every property in the signature at once:
+the faint colour, the dashed border, the lost accent background and the lost
+`font-weight:600` of `.btn.pri`. `#5a6172` IS `--color-ink-faint`
+(`preview/tokens.css:30`).
+
+**And `.off` is deliberate.** `chrome/element.ts:52-70`, `unavailable()`:
+
+> *"A control drawn where the design puts it, that GuestOps cannot perform yet.
+> Disabled and dashed, so it does not look pressable, and it carries its reason
+> in words a person at the desk understands."*
+
+It sets `disabled = true`, a `title` and an `aria-description`. **So these 22
+are the build stating what it cannot do, against frames that draw the control
+enabled.** The tags agree on both sides - `button` to `button` - so this is not
+a pairing collision; the census of differing nodes is `b 28 - button 25 - span 2
+- div 1`.
+
+> **This is an OWNER ADJUDICATION, not a build defect.** Either the frames draw
+> these controls off, or the capability is built. A fidelity sweep compares two
+> renderings and can never say which is correct - and *only the code said why,
+> which changed the verdict* (FF, 2026-09-10).
+
+**The classifier's own message was the thing that was wrong.** It read
+*"UNCLASSIFIED (22) - this is a build error"*, and it had measured *"in no class
+I know"*. Corrected 2026-10-03; **the class was NOT added**, because naming a
+newly-surfaced difference to make the red go away is the fault the bar exists to
+catch. The run still exits 1.
+
+---
+
 ## Run from `2026-10-01` at `e0361fbf` — 17 frames, and the build has drifted
 
 ```text

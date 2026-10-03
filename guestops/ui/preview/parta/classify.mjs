@@ -277,7 +277,17 @@ for (const [key, n] of [...counts].filter(([k]) => k.startsWith("named:"))) {
 }
 
 if (unnamed.length > 0) {
-  process.stdout.write(`\nUNCLASSIFIED (${unnamed.length}) — this is a build error:\n`);
+  // **It measures "in no class I know" and used to SAY "a build error".** FF own
+  // rule, 2026-09-10: a guard failure message is a claim about the world, and it
+  // must claim only what the guard measured. The 22 reported on 2026-10-03 were
+  // the build being CORRECT - chrome/element.ts unavailable() adds .off, sets
+  // disabled, and carries its reason in a title and an aria-description - so the
+  // old sentence accused the one side that was honest.
+  //
+  // The class is NOT added here. Naming a newly-surfaced difference to make the
+  // red go away is the fault this bar exists to catch; a control the design draws
+  // enabled that the application cannot perform is an OWNER adjudication, drawn.
+  process.stdout.write(`\nUNCLASSIFIED (${unnamed.length}) — in no class this instrument knows; read what the build says about its own choice:\n`);
   for (const node of unnamed) {
     const shape = Object.entries(node.props)
       .map(([k, [d, b]]) => `${k}: ${d} -> ${b}`).join("; ");
