@@ -67,11 +67,64 @@ public sealed class InvocationDispatch(HttpClient http)
     /// <param name="invocation">What the Hub asked for.</param>
     /// <param name="cancellationToken">The invocation's.</param>
     /// <returns>The reply payload; a faulted task becomes a <c>Fault</c> frame.</returns>
-    public ValueTask<ReadOnlyMemory<byte>> HandleAsync(
+    public async ValueTask<ReadOnlyMemory<byte>> HandleAsync(
         ConnectorInvocation invocation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(invocation);
 
+        // ONE record per invocation, at the one chokepoint every kind passes
+        // through. Instrumenting the four handlers instead would mean a call at
+        // each of their return points, and a handler somebody adds later would
+        // log nothing until they remembered to.
+        //
+        // **Four of Chapter 13's seven fields, and the other three ABSENT
+        // rather than defaulted.** `ConnectorInvocation` carries
+        // `CorrelationId`, `Kind` and `Payload` — so `integration`,
+        // `rate_limit` and `authentication` cannot be established here, and
+        // `rate_limit: false` would tell an operator the source did not
+        // throttle an operation that may never have dialled it. They are the
+        // handlers' to surface, and that is named rather than left looking
+        // covered.
+        //
+        // **UNEXERCISED BY CONSTRUCTION, not by omission.** `pms-oracle` is
+        // installed and does not run: nothing can tell the Connector Runtime
+        // Supervisor to start a connector, so no session opens and this code
+        // has never executed outside its own tests. The lines are correct and
+        // waiting for a runtime, which is a different claim from working.
+        var started = System.Diagnostics.Stopwatch.StartNew();
+
+        try
+        {
+            var reply = await DispatchAsync(invocation, cancellationToken);
+
+            ConnectorLogging.Operation(
+                integration: null,
+                operation: invocation.Kind,
+                resource: invocation.CorrelationId.ToString(),
+                duration: started.Elapsed,
+                result: "served");
+
+            return reply;
+        }
+        catch (Exception failed)
+        {
+            // The type and not the message: a fault's text can carry a
+            // property's own data, and this line goes to a file an operator
+            // reads. The Fault frame still carries the detail to the Hub.
+            ConnectorLogging.Operation(
+                integration: null,
+                operation: invocation.Kind,
+                resource: invocation.CorrelationId.ToString(),
+                duration: started.Elapsed,
+                result: $"faulted: {failed.GetType().Name}");
+
+            throw;
+        }
+    }
+
+    private ValueTask<ReadOnlyMemory<byte>> DispatchAsync(
+        ConnectorInvocation invocation, CancellationToken cancellationToken)
+    {
         return invocation.Kind switch
         {
             ConnectorProtocolKinds.Test =>
