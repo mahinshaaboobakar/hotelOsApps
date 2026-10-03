@@ -521,6 +521,59 @@ eleven**, and the two that are not need no data at all.
 > data reaches the property the owner walks** — and the two supported paths to a
 > booking, the PMS connector feed and the walk-in submit, are both still absent.
 
+### ⚠ ANSWERED — `scripts/seed-hotel --book`, 2026-10-02. The sentence above is kept because a reader meeting it alone concludes the path does not exist
+
+**It exists and it has been run by the owner.** `scripts/seed-hotel/src/book/` —
+**nine files**, persisted through **GuestOps' own module door**
+(`POST /module/{capability}/{method}`, `door.rs:197`), every guest surnamed
+**`ZZSEED`** (`dummy.rs:48`) so the owner can find and delete the lot with one
+predicate.
+
+*The architect's relay said seven files; it is nine, measured.*
+
+**Two instruments, two questions, and neither supersedes the other:**
+
+```text
+this document   does the API ACCEPT every combination the contract admits?
+                12 writes driven, against a SCRATCH database that is dropped
+                at the end of the run.  Nothing survives it, by design.
+--book          do ROWS EXIST in the property the owner walks?
+                one shape per surface, through the door a screen uses,
+                left behind on purpose.
+```
+
+**So Part C is not superseded — it is the half `--book` cannot do.** A scratch
+database is what let the drivers drive refusals, empty collections and both
+halves of a labelled fold without writing any of it onto a real property; and it
+is exactly why *"twelve driven lifecycles"* unblocked no screen, which
+`src/book/mod.rs` says of this suite in its own words.
+
+#### And the drivers CANNOT simply be re-pointed at the running application — measured 2026-10-03
+
+*The question was put as: can the existing drivers call the running GuestOps over
+the wire instead of `BookingService` in-process? Both doors were read.*
+
+```text
+the module door   loopback HTTP, no client certificate - ApplicationDoors.cs:80
+                  `stay.create/book` reaches BookCommand, whose `Draft` is NINE
+                  FIELDS: guest · phone · email · roomTypeId · arrives · departs
+                  · adults · children · overbookKnowingly
+                  and it builds NewBooking with Terms, Channel, TravelAgent,
+                  MarketCode and MealPlan hardcoded to null, one stay, one guest
+the gRPC door     mTLS, ClientCertificateMode.RequireCertificate -
+                  PlatformListener.cs:176.  It carries the full CreateBooking
+                  shape AND `ToMoney`; a test process holds no service identity
+```
+
+> **The module door is a NARROWER APERTURE than the service call, so re-pointing
+> the drivers at it would silently stop driving most of the positions** — and the
+> door that is wide enough is the one a test cannot authenticate to.
+
+*That is why `--book` is the answer to the data question and not to the coverage
+one: it reaches the property through the nine-field aperture, which is the right
+aperture for leaving a desk's worth of rows and the wrong one for proving the
+contract.*
+
 ## What this document does not prove
 
 * **Nothing about any control.** Part C creates data; it presses nothing. The 13

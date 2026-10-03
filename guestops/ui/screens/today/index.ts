@@ -111,7 +111,9 @@ export async function today(
     // what is late rather than declaring the feed down, because a connector can
     // be authenticated, polling and green while one capability has stopped —
     // and it changes no rule on the screen below it.
-    day.stale === null ? null : stale(day.stale),
+    // `== null`, not `=== null`: the wire sends no `stale` key at all, so the
+    // strict form let `undefined` through and `stale(undefined)` threw.
+    day.stale == null ? null : stale(day.stale),
 
     strip(day.stats, showing?.label ?? "", day, host.property),
     views,

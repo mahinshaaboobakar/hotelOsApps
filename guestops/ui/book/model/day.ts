@@ -187,7 +187,21 @@ export interface Today {
   rollsAt: string | null;
 
   /** Null when everything the property expects is arriving. */
-  stale: Staleness | null;
+  /**
+   * **Optional, because the wire does not send it** — measured 2026-10-03.
+   * `TodayView` returns `businessDate`, `rollsAt`, `connected`, `stats` and
+   * `lists` and nothing else, and `Staleness` appears on no response in the
+   * backend. The staleness strip is DRAWN (frame 11, S36 · GUEST-Q4 · R27) and
+   * the feed-staleness mechanism behind it is unbuilt.
+   *
+   * It was declared required here and the screen guarded with `=== null`, so on
+   * a real property `undefined` passed the guard and the first screen of the
+   * owner's walk threw. The type now says what the wire actually offers.
+   *
+   * `load<Today>` is a type ASSERTION over `unknown`, so no compiler was ever
+   * going to catch this; the model is an unchecked claim about the wire.
+   */
+  stale?: Staleness | null;
 
   /** Decides the mode sentence: Opera writes the lifecycle, or this is the book. */
   connected: boolean;
