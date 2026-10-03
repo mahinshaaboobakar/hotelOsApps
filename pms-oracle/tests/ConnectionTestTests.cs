@@ -114,6 +114,20 @@ public sealed class ConnectionTestTests
     [InlineData(HttpStatusCode.Unauthorized, ConnectionTestOutcome.Refused)]
     [InlineData(HttpStatusCode.Forbidden, ConnectionTestOutcome.Refused)]
     [InlineData(HttpStatusCode.NotFound, ConnectionTestOutcome.Unreachable)]
+    // 429 IS A DEFECT AND THE REPLACEMENT MEMBER IS NOT OURS TO PICK. A 429 is
+    // an ANSWER, and `dto.proto`'s own words for member 4 are "Nothing answered";
+    // ADR 0208:199-200 adds that REFUSED and UNREACHABLE "each blame a party
+    // nothing has been established about". So this row is wrong by the contract
+    // rather than by preference.
+    //
+    // It is left standing deliberately. The ruling reaches "not UNREACHABLE" and
+    // stops: `CONN-Q43` (ADR 0208:155-177) had a missing member ADDED and reuse
+    // REFUSED BY NAME, so choosing one here would make the decision the planner
+    // made last time. Asserting only `NotEqual(Unreachable, ...)` would redden
+    // the suite for every stream, because the mapping it tests is still live.
+    //
+    // A RECORD of a known defect with its open question, not a claim that the
+    // row is correct.
     [InlineData(HttpStatusCode.TooManyRequests, ConnectionTestOutcome.Unreachable)]
     [InlineData(HttpStatusCode.InternalServerError, ConnectionTestOutcome.Unreachable)]
     public async Task What_the_tenancy_answered_decides_which_finding_it_is(

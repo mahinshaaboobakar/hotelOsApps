@@ -370,7 +370,7 @@ reasonably stop.
 | | |
 |---|---|
 | ~~`CONN-Q92`~~ | **CLOSED while this page was being written** — ADR 0369 Addendum 1. *The row is corrected in place rather than deleted, because a reader meeting the old sentence would conclude a connector's non-UI obligation is still undesigned.* **Part C is N/A** and Chapter 18's certification is a separately required ninth row — `signoff-ledger.md` |
-| `ARCH-Q63` | a **platform process** is outside `APPS-Q4`. The Supervisor has no ruled signoff shape; `OpenSession`/`DescribeProcess` was named a candidate and deliberately not ruled in |
+| ~~`ARCH-Q63`~~ | ⚠ **RULED — ADR 0370, and it closed while this page was being written**, exactly as `CONN-Q92` did. *My own sweep found it; it was in no relay.* **What changed**: it is now a gap with a **MUST** — *"every shipping platform process MUST have an explicit certification contract"* — so **UNRULED was the wrong classification and a stream reading it would think nothing had been decided.** **What SURVIVES**: `§4` refuses `OpenSession`/`DescribeProcess` as the shape, *twice*, so *"no ruled signoff shape"* still holds. **And ADR 0370 does NOT reach a connector** — it rules PLATFORM PROCESSES, and reading it onto a package would be taxonomy by implementation resemblance |
 | `CONN-Q20` | **the owner's**, open since 2026-09-10 — no harness can mount a package UI, which is why Part A is structural |
 
 **UNBUILT — ours, and whose.**
