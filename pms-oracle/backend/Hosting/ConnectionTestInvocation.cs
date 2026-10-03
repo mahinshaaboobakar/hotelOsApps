@@ -43,12 +43,22 @@ public static class ConnectionTestInvocation
     /// <summary>Run one test and answer it.</summary>
     /// <param name="invocation">The <c>test</c> invocation, carrying the settings.</param>
     /// <param name="http">The client the token attempt dials OHIP with.</param>
+    /// <param name="observed">
+    /// Filled with what this test turned out to be about: the hotel it
+    /// dialled, whether OHIP throttled the attempt, and what OHIP said about
+    /// the credentials. Left untouched on the incomplete-configuration path,
+    /// which never reached the credential question.
+    /// </param>
     /// <param name="cancellationToken">The invocation's.</param>
     /// <returns>A <see cref="TestResult"/>, serialised.</returns>
     public static async ValueTask<ReadOnlyMemory<byte>> ServeAsync(
-        ConnectorInvocation invocation, HttpClient http, CancellationToken cancellationToken)
+        ConnectorInvocation invocation,
+        HttpClient http,
+        ConnectorObservations observed,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(invocation);
+        ArgumentNullException.ThrowIfNull(observed);
 
         var asked = TestInvocation.Parser.ParseFrom(invocation.Payload.Span);
 
@@ -59,6 +69,9 @@ public static class ConnectionTestInvocation
 
         if (!reading.TryGet(out var credentials))
         {
+            // `authentication` stays absent: a configuration that is not
+            // finished never reached the credential question, so there is
+            // nothing OHIP said about it.
             return Answer(ConnectionTest.Incomplete(reading.Missing));
         }
 
@@ -67,6 +80,10 @@ public static class ConnectionTestInvocation
         // right to hold nothing.
         var acquired = await OhipAccessToken.AcquireAsync(
             http, credentials, DateTimeOffset.UtcNow, cancellationToken);
+
+        observed.Resource = credentials.HotelCode;
+        observed.RateLimited = acquired.RateLimited;
+        observed.Authentication = acquired.Finding.Outcome.ToString();
 
         return Answer(acquired.Finding);
     }

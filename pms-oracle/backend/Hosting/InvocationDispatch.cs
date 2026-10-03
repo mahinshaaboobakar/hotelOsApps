@@ -92,17 +92,20 @@ public sealed class InvocationDispatch(HttpClient http)
         // has never executed outside its own tests. The lines are correct and
         // waiting for a runtime, which is a different claim from working.
         var started = System.Diagnostics.Stopwatch.StartNew();
+        var observed = new ConnectorObservations();
 
         try
         {
-            var reply = await DispatchAsync(invocation, cancellationToken);
+            var reply = await DispatchAsync(invocation, observed, cancellationToken);
 
             ConnectorLogging.Operation(
                 integration: null,
                 operation: invocation.Kind,
-                resource: invocation.CorrelationId.ToString(),
+                resource: Resource(invocation, observed),
                 duration: started.Elapsed,
-                result: "served");
+                result: "served",
+                rateLimited: observed.RateLimited,
+                authentication: observed.Authentication);
 
             return reply;
         }
@@ -114,24 +117,40 @@ public sealed class InvocationDispatch(HttpClient http)
             ConnectorLogging.Operation(
                 integration: null,
                 operation: invocation.Kind,
-                resource: invocation.CorrelationId.ToString(),
+                resource: Resource(invocation, observed),
                 duration: started.Elapsed,
-                result: $"faulted: {failed.GetType().Name}");
+                result: $"faulted: {failed.GetType().Name}",
+                rateLimited: observed.RateLimited,
+                authentication: observed.Authentication);
 
             throw;
         }
     }
 
+    /// <summary>What the operation acted on, or the correlation id.</summary>
+    /// <remarks>
+    /// `join` and `dedupe_key` act on bytes the Hub already holds, and this
+    /// connector knows no name for them — so they fall back to the correlation
+    /// id, which at least ties the line to the Hub's own record of the
+    /// invocation. That is a weaker resource than a hotel code and it is named
+    /// here rather than left looking like an oversight.
+    /// </remarks>
+    private static string Resource(
+        ConnectorInvocation invocation, ConnectorObservations observed) =>
+        observed.Resource ?? invocation.CorrelationId.ToString();
+
     private ValueTask<ReadOnlyMemory<byte>> DispatchAsync(
-        ConnectorInvocation invocation, CancellationToken cancellationToken)
+        ConnectorInvocation invocation,
+        ConnectorObservations observed,
+        CancellationToken cancellationToken)
     {
         return invocation.Kind switch
         {
             ConnectorProtocolKinds.Test =>
-                ConnectionTestInvocation.ServeAsync(invocation, http, cancellationToken),
+                ConnectionTestInvocation.ServeAsync(invocation, http, observed, cancellationToken),
 
             ConnectorProtocolKinds.Drain =>
-                QueueDrainInvocation.ServeAsync(invocation, http, cancellationToken),
+                QueueDrainInvocation.ServeAsync(invocation, http, observed, cancellationToken),
 
             // `join` needs neither credentials nor the network: it reads one
             // payload and says whether it is half of a check-in.

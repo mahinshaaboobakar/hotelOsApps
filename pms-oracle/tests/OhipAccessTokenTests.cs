@@ -108,6 +108,42 @@ public class OhipAccessTokenTests
         [OhipCredentials.PmsUsernameSetting] = "supervisor",
     };
 
+    /// <summary>
+    /// A rate limit is reported from the STATUS, and nothing else is reported
+    /// as one.
+    /// </summary>
+    /// <remarks>
+    /// Chapter 13 names <c>rate limit</c> as its own field, and a caller
+    /// cannot read it off <see cref="OhipTokenAcquisition.Finding"/>:
+    /// <c>CONN-Q94</c> gives <c>UNAVAILABLE</c> an OPEN cause set, so the
+    /// outcome says the attempt obtained no usable result and not why. Matching
+    /// on the detail's prose would be a heuristic on text somebody may reword.
+    /// <para>
+    /// <b>What this cannot prove, said rather than implied.</b> Only a 429
+    /// currently maps to <c>UNAVAILABLE</c>, so "keyed on the status" and
+    /// "keyed on the outcome" are extensionally the same today and NO fixture
+    /// can separate them. The status is preferred because it stays correct when
+    /// a second cause joins that member — which <c>CONN-Q94</c> says is how the
+    /// member grows, having already grown once.
+    /// </para>
+    /// <para>
+    /// The false arms are two DIFFERENT outcomes — 503 is <c>UNREACHABLE</c>,
+    /// 401 is <c>REFUSED</c> — so a constant <see langword="true"/> fails and
+    /// the assertion is not vacuous.
+    /// </para>
+    /// </remarks>
+    [Theory]
+    [InlineData(HttpStatusCode.TooManyRequests, true)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, false)]
+    [InlineData(HttpStatusCode.Unauthorized, false)]
+    public async Task Only_a_429_records_that_ohip_throttled_the_attempt(
+        HttpStatusCode status, bool throttled)
+    {
+        var acquired = await AcquireAsync(status, "{}");
+
+        Assert.Equal(throttled, acquired.RateLimited);
+    }
+
     private static Dictionary<string, string> Secrets() => new(StringComparer.Ordinal)
     {
         [OhipCredentials.ApplicationKeySecret] = "key",

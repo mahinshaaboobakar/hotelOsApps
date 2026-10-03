@@ -59,13 +59,23 @@ public static class QueueDrainInvocation
     /// <summary>Drain once and answer what was taken.</summary>
     /// <param name="invocation">The <c>drain</c> invocation, carrying the settings.</param>
     /// <param name="http">The client to dial OHIP with.</param>
+    /// <param name="observed">
+    /// Filled with the hotel this drain read, whether OHIP throttled it, and
+    /// what OHIP said about the credentials. The hotel is set BEFORE the
+    /// token is checked, so a drain that fails on credentials still records
+    /// the tenancy an operator needs.
+    /// </param>
     /// <param name="cancellationToken">The invocation's.</param>
     /// <returns>A <see cref="DrainResult"/>, serialised.</returns>
     /// <exception cref="NotSupportedException">The configuration cannot make a call.</exception>
     public static async ValueTask<ReadOnlyMemory<byte>> ServeAsync(
-        ConnectorInvocation invocation, HttpClient http, CancellationToken cancellationToken)
+        ConnectorInvocation invocation,
+        HttpClient http,
+        ConnectorObservations observed,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(invocation);
+        ArgumentNullException.ThrowIfNull(observed);
 
         var asked = DrainInvocation.Parser.ParseFrom(invocation.Payload.Span);
 
@@ -82,8 +92,16 @@ public static class QueueDrainInvocation
                 + ". Nothing was taken from the queue, so nothing was lost.");
         }
 
+        // Set BEFORE the token is checked, so the record carries the hotel
+        // even on the throw below — a drain that failed on credentials is
+        // exactly the line an operator needs the tenancy on.
+        observed.Resource = credentials.HotelCode;
+
         var acquired = await OhipAccessToken.AcquireAsync(
             http, credentials, DateTimeOffset.UtcNow, cancellationToken);
+
+        observed.RateLimited = acquired.RateLimited;
+        observed.Authentication = acquired.Finding.Outcome.ToString();
 
         if (acquired.AccessToken is not { } token)
         {

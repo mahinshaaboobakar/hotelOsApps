@@ -75,7 +75,11 @@ public static class OhipAccessToken
 
             if (response.StatusCode is not HttpStatusCode.OK)
             {
-                return new OhipTokenAcquisition(Read(response.StatusCode), null, null);
+                return new OhipTokenAcquisition(
+                    Read(response.StatusCode),
+                    null,
+                    null,
+                    RateLimited: response.StatusCode == HttpStatusCode.TooManyRequests);
             }
 
             var granted = JsonSerializer.Deserialize<TokenResponse>(
@@ -176,16 +180,36 @@ public static class OhipAccessToken
 
 /// <summary>What asking OHIP for a token produced.</summary>
 /// <param name="Finding">
-/// The verdict a connection test reports — REACHED, REFUSED or UNREACHABLE.
-/// Always present: every path through the request produces one.
+/// The verdict a connection test reports. Always present: every path through
+/// the request produces one.
+/// <para>
+/// **This said "REACHED, REFUSED or UNREACHABLE" until 2026-10-03**, and
+/// `CONN-Q94` (ADR 0208 Addendum) made that enumeration short: a rate-limited
+/// request is `UNAVAILABLE`. The three are not listed again here — the
+/// vocabulary is `ConnectionTestOutcome`'s and a second copy of it in prose is
+/// what went stale.
+/// </para>
 /// </param>
 /// <param name="AccessToken">The token, when one was granted; otherwise <c>null</c>.</param>
 /// <param name="Lifetime">
 /// What OHIP said about how long it lasts. <c>null</c> means it said nothing,
 /// which is not the same as saying zero.
 /// </param>
+/// <param name="RateLimited">
+/// Whether OHIP applied a rate or quota limit to this request.
+/// <para>
+/// Reported by the call that saw the status, because that is the only place it
+/// is established. A caller cannot read it off <paramref name="Finding"/>:
+/// `UNAVAILABLE` has an open cause set by `CONN-Q94`, so the outcome says the
+/// test obtained no usable result and not why — and matching on the detail's
+/// prose would be a heuristic on text somebody may reword.
+/// </para>
+/// </param>
 public sealed record OhipTokenAcquisition(
-    ConnectionTest Finding, string? AccessToken, TokenLifetime? Lifetime)
+    ConnectionTest Finding,
+    string? AccessToken,
+    TokenLifetime? Lifetime,
+    bool RateLimited = false)
 {
     /// <summary>Whether OHIP granted a token this connector can call with.</summary>
     public bool Granted => AccessToken is not null;
