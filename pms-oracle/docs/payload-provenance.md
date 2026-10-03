@@ -298,9 +298,12 @@ FLOW, NOW CITED     §10 and §11 — both background services, the drain
                     and the auth implementation, each read WHOLE
 FLOW, SECOND PASS   §12 — the three remaining CLOUD implementations, read
                     WHOLE: Guarantee (79), Housekeeping (152), Reservation (272)
-STILL NOT READ      209 of Reservation.java's 251 lines, and the two ON-SITE
-                    implementations: OnPremiseReservationServiceImpl (385) and
-                    WebReservationServiceImpl (433)
+FLOW, THIRD PASS    §13 — the ON-SITE pair plus WebRoomServiceImpl (89),
+                    which is what §5 cites only the models for. §5's finding is
+                    CONFIRMED from the implementation side
+STILL NOT READ      209 of Reservation.java's 251 lines — field mapping for
+                    ohip-reservation, which §2 covers from the model's side.
+                    That is the only unread Oracle flow surface left
 
                     — AND THE SENTENCE THAT STOOD HERE WAS WRONG. It read
                     "Those are FIELD MAPPING, which §1–§5 cover from the
@@ -549,3 +552,148 @@ curiosity: the action names are a control-flow key.
 | **`.get(0)` with no emptiness check** | `Guarantee:62`, `Housekeeping:82`, `Reservation:94`/`:97` | four sites |
 | **`throw new RuntimeException("Invalid Data")`** | `Reservation:178`, `:181` | a two-word message for two different causes; our refusals name the field and the raw value in the vendor's own spelling (page 75 §1) |
 | **POST/PUT from a local existence check** | `Reservation:104` | our upsert is the Hub's reconciliation against the verified signed manifest, which cannot disagree with itself |
+
+
+---
+
+## 13 · The on-site pair — and §5's finding is confirmed from the implementation side
+
+**§5 established, from the models and a vocabulary sweep, that `oracle-onpremise`
+declares `onsite-room-status` and nothing sources it. The implementations settle
+it.** Read: `OnPremiseReservationServiceImpl` (385),
+`WebReservationServiceImpl` (433), `OracleWebRoomServiceImpl` (89).
+
+### On-premise: `roomStatus` is a RESERVATION lifecycle field, and every branch proves it
+
+`processOracleOnPromiseReservation` dispatches on `reservation.getRoomStatus()`
+and on nothing else:
+
+```text
+:65-66   "Due In" | "DUE IN" | "OT"  →  rewritten to "RESERVED"
+:86      "RESERVED"        equalsIgnoreCase
+:114     "Checked In"      equals          ← CASE-SENSITIVE
+:131     "CHECKED IN"      equals          ← CASE-SENSITIVE, a SECOND branch
+                                             for the same concept
+:146     "CHECKED OUT"     equalsIgnoreCase
+:185     "CANCELLED"       equalsIgnoreCase
+:212-214 "DUE OUT" | "PENDING" | "WAITLIST"  →  dumpCollection
+:231     "RESERVED"        equalsIgnoreCase
+```
+
+**Not one branch concerns room condition or housekeeping.** `RESERVED`,
+`Checked In`, `CHECKED OUT`, `CANCELLED`, `DUE OUT`, `PENDING`, `WAITLIST` are
+reservation states. **So the sixteen room-status vocabulary hits §5 measured in
+this package are all the one misnomer**, and the on-premise flavour sources
+nothing for `onsite-room-status` at any layer — not a payload, not a service, not
+a queue.
+
+> **§5's two arms are no longer equally weighted.** Arm (a) — *the on-premise
+> agent does push room status, so the concept is uncited* — would now require a
+> source outside the reference entirely, because the reference has no on-premise
+> room-status concept at model, service or transport level. Arm (b) is the
+> better-supported reading. **Still not ours to pick**, and the declaration's
+> author or the owner settles it.
+
+### ⚠ One field, two comparison rules, seventeen lines apart
+
+`:114` and `:131` are **two branches for one concept** — `"Checked In"` and
+`"CHECKED IN"`, both `.equals()`, each performing the same merge and setting the
+same reason. The vendor sends both casings and the comparison is case-sensitive,
+so the branch was duplicated instead of the comparison being relaxed. **Meanwhile
+`:86`, `:146`, `:185`, `:212-214` and `:231` all use `equalsIgnoreCase`.**
+
+**And the web flavour accepts only the uppercase form.** `:249`
+`"CHECKED IN".equals(...)` is case-sensitive with no `"Checked In"` sibling,
+while `:175` and `:264` use `equalsIgnoreCase`.
+
+```text
+on-premise   accepts "Checked In" AND "CHECKED IN"
+web          accepts "CHECKED IN" only
+```
+
+**Two flavours that share one `OnSiteNormaliser` on our side disagree about which
+casings they accept.** `CONN-Q25` ruled that for us — case exactness is the
+decision, whitespace is absorbed, and *the test's name carries the reason*. **So
+our ruling chose where the reference holds both behaviours in one method.**
+
+### ⚠ And the status is rewritten before anything records the raw value
+
+```text
+:65-66 / web :46-47   "Due In" | "DUE IN" | "OT"  →  setRoomStatus("RESERVED")
+                      BEFORE the property is even resolved (:67 / :48)
+```
+
+**Three vendor tokens collapse into one, in place, and `"OT"` carries no comment
+anywhere.** The raw value is gone before any store or rejection can quote it —
+where page 75 §1 requires a rejection to name *"the field and the raw value in the
+vendor's own spelling"*. And the rewrite is **duplicated between the two
+flavours**, which confirms §4's twin finding at the implementation level rather
+than only in the models.
+
+### The join key's provenance, at the line
+
+`:147-157`, the check-out match, is a seven-predicate natural-key query:
+
+```text
+companyId · siteId · status ACTIVE · processed · surName · firstName
+roomStatus in ("Checked In" | …) · room · departureDate BY REGEX
+```
+
+**Guest name plus room plus date** is our `OnSiteJoinKey`, and `CONN-Q25`'s test
+pins `JoinKey.FirstName`. *The date is matched by regex on a string, which is a
+date compared as a pattern.*
+
+### The web half DOES source `onsite-room-status`, and fans one push into five messages
+
+`OracleWebRoomServiceImpl.updateHkRoomStatus` is the flow §5 cites only the models
+for:
+
+```text
+:37-42   property inactive  →  status INACTIVE, SAVED, return
+:44-46   companyId from the PROPERTY · ACTIVE · receivedServerTime
+:47-51   room blank  →  setErrorMessage("ROOM_NO_MISSING"), SAVED, return
+:52-53   nextBlockedAt  →  nextBlockedInMillis          ← R3's NextBlocked
+:55      acknowledgeRoomStatusToHK  if reservationStatus not blank
+:57                                 if foStatus not blank
+:59                                 if roomStatus not blank
+:60      acknowledgeRoomStatusToHK  UNCONDITIONAL
+:61      acknowledgeRoomStatusToHK  UNCONDITIONAL
+:62-63   setProcessed(true), save
+```
+
+**The four axes are published as up to FIVE separate queue messages**, each a
+`RoomStatusChangeRequestForHK` whose `statusFor` names the axis
+(`:76-84`, exchange `hk`, routing key `hk.room.status.change`).
+
+> **Same concept, opposite architecture.** The axes being independent is the
+> reference's concept and R1's; **ours carries them as four fields of one
+> `RoomStateFact`** — `RoomStateNormaliser.cs`: *"The four axes stay four.
+> Occupancy and condition are read through separate vocabularies into separate
+> fields."* Five messages against one fact.
+
+**⚠ And two of the five publish unconditionally** (`:60`, `:61`), while three are
+guarded by `isNotBlank`. **So two axes are announced even when the source sent
+nothing** — a message that would say the same thing if the world were otherwise.
+Our normaliser refuses exactly this, in its own words: *"an axis the source did
+not send is left **absent rather than defaulted** — a room-state screen shows what
+the PMS said, not what we assumed (R1)."*
+
+### Flow defects, third pass
+
+| | cited at | our position |
+|---|---|---|
+| **two axes published unconditionally** | `WebRoomServiceImpl:60`, `:61` | an axis the source did not send is left **absent**, never defaulted — `RoomStateNormaliser`'s own sentence |
+| **a rejection code in a free-text field** | `:48` `setErrorMessage("ROOM_NO_MISSING")` | `Rejection { reason, field, raw_value }` with an enumerated reason — page 75 §1 |
+| **⚠ the payload printed to stdout, unredacted** | `:83` `System.out.println(GsonHelper.print(request))` | every axis of every room-status push, in the clear. Redaction by identity and never by shape; and ADR 0367 governs protected data |
+| **a declared method with an empty body** | `:67-71` `addTrace` — resolves the property, throws if inactive, then does nothing | the `TokenLifetime` shape at its extreme: a method that reads as implemented |
+| **one field, two comparison rules** | `:114`/`:131` against `:86`/`:146`/`:185`/`:231`; web `:249` against `:175`/`:264` | `CONN-Q25`: case exactness ruled, whitespace absorbed, the reason in the test's name |
+| **the raw value destroyed at the door** | `:65-66`, web `:46-47` | a rejection quotes the vendor's own spelling, so the raw value must survive |
+| **two commented-out copies of the live dispatch** | web `:74-147` and `:204-217` | — |
+| **two live branches on one status** | web `:259` and `:292`, both `"CHECKED OUT"` | — |
+| **`log.error` for a routine publish** | `WebRoomServiceImpl:74` | sixth instance across §§11, 12 and 13 |
+
+**And the consumer of `hk.room.status.change` is one of the commented-out
+listeners** from §12 — `OracleCloudHousekeepingServiceImpl:39` declares
+`pms.room.status` and `:51` declares `room.status.change`, both disabled. *So the
+web half publishes room status to a queue whose only declared consumer is
+commented out, and the routing key and the queue name are not the same string.*
