@@ -151,7 +151,7 @@ name: "Jobs"
 #     drawn when 0.4.3 was built.
 #   * **The print exception does not reach Jobs**: no Jobs surface prints, so
 #     there is nothing here to except. Recorded because the ruling is estate-wide.
-version: 0.4.3
+version: 0.4.4
 publisher: hotelos
 category: operations
 description: >-
