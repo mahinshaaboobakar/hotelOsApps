@@ -147,6 +147,17 @@ public static class OhipAccessToken
         HttpStatusCode.NotFound => ConnectionTest.Unreachable(
             "That OHIP host answered, and not with a token endpoint. Check the host address."),
 
+        // `CONN-Q94`, ADR 0208 Addendum: a rate-limited test is a cause of
+        // UNAVAILABLE, never UNREACHABLE. OHIP answered, so a claim about the
+        // host or the network path is false — and the answer established
+        // neither accepted nor rejected credentials, so it is not REFUSED or
+        // REACHED either. The remedy goes in the detail, which is where the
+        // ruling puts a cause's distinct operator action.
+        HttpStatusCode.TooManyRequests => ConnectionTest.Unavailable(
+            "OHIP applied a rate or quota limit, so these credentials were never "
+            + "evaluated. Nothing is established about the host or the credentials. "
+            + "Wait for the limit to reset and test again."),
+
         _ => ConnectionTest.Unreachable(
             $"OHIP answered the token request with {(int)status}."),
     };

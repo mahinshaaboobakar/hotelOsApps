@@ -114,21 +114,14 @@ public sealed class ConnectionTestTests
     [InlineData(HttpStatusCode.Unauthorized, ConnectionTestOutcome.Refused)]
     [InlineData(HttpStatusCode.Forbidden, ConnectionTestOutcome.Refused)]
     [InlineData(HttpStatusCode.NotFound, ConnectionTestOutcome.Unreachable)]
-    // 429 IS A DEFECT AND THE REPLACEMENT MEMBER IS NOT OURS TO PICK. A 429 is
-    // an ANSWER, and `dto.proto`'s own words for member 4 are "Nothing answered";
-    // ADR 0208:199-200 adds that REFUSED and UNREACHABLE "each blame a party
-    // nothing has been established about". So this row is wrong by the contract
-    // rather than by preference.
-    //
-    // It is left standing deliberately. The ruling reaches "not UNREACHABLE" and
-    // stops: `CONN-Q43` (ADR 0208:155-177) had a missing member ADDED and reuse
-    // REFUSED BY NAME, so choosing one here would make the decision the planner
-    // made last time. Asserting only `NotEqual(Unreachable, ...)` would redden
-    // the suite for every stream, because the mapping it tests is still live.
-    //
-    // A RECORD of a known defect with its open question, not a claim that the
-    // row is correct.
-    [InlineData(HttpStatusCode.TooManyRequests, ConnectionTestOutcome.Unreachable)]
+    // `CONN-Q94`, ADR 0208 Addendum, RULED: a rate-limited test is a cause of
+    // UNAVAILABLE = 6. **This row asserted `Unreachable` until 2026-10-03**, and
+    // was carrying a recorded defect rather than a contract — the member's own
+    // words are "Nothing answered" and a 429 is an answer. The record is kept
+    // because a reader meeting the corrected row should not have to wonder
+    // whether the old one was ever ruled: it was wrong, it was known to be
+    // wrong, and the replacement was the planner's to name.
+    [InlineData(HttpStatusCode.TooManyRequests, ConnectionTestOutcome.Unavailable)]
     [InlineData(HttpStatusCode.InternalServerError, ConnectionTestOutcome.Unreachable)]
     public async Task What_the_tenancy_answered_decides_which_finding_it_is(
         HttpStatusCode status, ConnectionTestOutcome expected)
