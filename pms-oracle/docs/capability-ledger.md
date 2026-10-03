@@ -245,9 +245,10 @@ ARCH-Q60's desktop half   check_ins still live in four desktop files in the
                           BB's half is clean, measured 0 against a control
                           of 128.
 page 75 §7                five open points, plus ADR 0220
-Part C for a connector    ADR 0358 names only applications and postdates
-                          CONN-Q15's closure by three weeks. Unruled, and
-                          with the planner.
+Part C for a connector    N/A - CLOSED, ADR 0369 Addendum 1. ADR 0358 stays
+                          application-specific; the connector's non-UI
+                          obligation is Chapter 18's CERTIFICATION, which is
+                          a NINTH row and not a Part C
 ```
 
 ---
@@ -296,9 +297,21 @@ a human-operated *product* surface is the question a reader must not answer by
 assumption: it is a configuration form inside another application's module, not
 this connector operating a property.
 
-**Part C stays unruled — `CONN-Q92`, open**, and both obvious fillings were
-rejected: N/A, and *invoke its Hub API without UI*. Part A applies where the UI
-artifact exists, and ADR 0054's test split is unchanged.
+**Part C is N/A — `CONN-Q92` CLOSED**, ADR 0369 Addendum 1. *This paragraph
+said **"stays unruled … open"** until the ruling landed, and the old words are
+kept so the reversal is visible rather than remembered.*
+
+> **Connector certification is not Part C.** A connector's non-UI
+> connector-boundary obligation is **Chapter 18's Connector Testing /
+> Certification contract** — `Chapter 18_ complete engineering implementation blueprint.md:661-679` — and ADR 0358's Part C remains
+> application-specific.
+
+**So N/A here is a TAXONOMY fact, not a dispensation**: the obligation does not
+vanish, it moves to a separately required ninth row, and `signoff-ledger.md`
+carries the evidence per dimension. Part A applies where the UI artifact exists,
+and **ADR 0054's test split is unchanged** — it governs *where* a rule or a
+connection is tested; Chapter 18 governs *what* certification must demonstrate,
+and neither becomes the other.
 
 **And it does not say the permissions are granted.** The manifest requests; the
 administrator approves; the Kernel decides per user. The manifest's own words:

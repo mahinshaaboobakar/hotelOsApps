@@ -369,7 +369,7 @@ reasonably stop.
 
 | | |
 |---|---|
-| `CONN-Q92` | a connector's **Part C** is unruled. Both obvious fillings rejected by name: *"N/A"* and *"invoke its Hub API without UI"*. **No part-c-coverage is manufactured here** |
+| ~~`CONN-Q92`~~ | **CLOSED while this page was being written** — ADR 0369 Addendum 1. *The row is corrected in place rather than deleted, because a reader meeting the old sentence would conclude a connector's non-UI obligation is still undesigned.* **Part C is N/A** and Chapter 18's certification is a separately required ninth row — `signoff-ledger.md` |
 | `ARCH-Q63` | a **platform process** is outside `APPS-Q4`. The Supervisor has no ruled signoff shape; `OpenSession`/`DescribeProcess` was named a candidate and deliberately not ruled in |
 | `CONN-Q20` | **the owner's**, open since 2026-09-10 — no harness can mount a package UI, which is why Part A is structural |
 
@@ -402,11 +402,15 @@ reasonably stop.
 | `capability-ledger` | `capability-ledger.md` | current — ADR 0369's two columns, both prohibitions recorded |
 | `part-a-certificate` | **not written** | structural by `CONN-Q20`. Its reason is §6's, not an omission |
 | `part-b-drive-list` | **not written** | needs the installed package — §5 |
-| `part-c-coverage` | **REFUSED** | `CONN-Q92` forbids both fillings. *Writing one would be manufacturing the thing the ruling rejected* |
+| `part-c-coverage` | **N/A** | `CONN-Q92` CLOSED — a connector is not in ADR 0358's Part C taxonomy. *This row read **REFUSED** until the ruling landed; the correction is the taxonomy, not a change of mind about writing one* |
+| — | `signoff-ledger.md` §"Connector Certification" | the NINTH obligation — Chapter 18's eight dimensions, cited not copied |
 | `signoff-ledger` | `signoff-ledger.md` | the row citing this page |
 | — | `payload-provenance.md` | §§1–13, no GuestOps counterpart: an application has no vendor to trace |
 | — | `conn-q52-connector-evidence.md` | — |
 
-> **Two of GuestOps' six do not apply to a connector and one is forbidden.**
-> That is three absences with three different reasons, and collapsing them into
-> *"the set is incomplete"* would hide which are mine.
+> **Three of GuestOps' six do not apply to a connector as written, and the
+> reasons are three different ones.** *This said **"one is forbidden"** of
+> `part-c-coverage`, which `CONN-Q92`'s closure replaced with **N/A** — a
+> taxonomy fact rather than a prohibition.* **Collapsing them into *"the set is
+> incomplete"* would still hide which absences are mine**, and a connector
+> carries a NINTH obligation GuestOps has no counterpart for.

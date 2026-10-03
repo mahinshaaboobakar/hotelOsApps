@@ -81,7 +81,57 @@ UNPROVED    BY CONSTRUCTION (no machine here can reach it) ·
 |---|---|
 | **Part A** | **STRUCTURAL.** `CONN-Q20` — no harness can mount a package UI — **the OWNER's, open since 2026-09-10**. UNPROVED **BY CONSTRUCTION** |
 | **Part B** | **FORM RULED** — ADR 0369. Platform-served **PASS** against the installed `.hopkg`; the person column **N/A** while the package exposes no human-operated surface, *with the reason at the row*. **UNPROVED BY CONSTRUCTION today**, because §5 establishes nothing assembles a `.hopkg` to exercise. **Never written as *"Connector Part B = N/A"*** — that recreates `CONN-Q15`'s collapse and discards the served proof |
-| **Part C** | **UNRULED — `CONN-Q92`.** Both obvious fillings rejected by name. **No `part-c-coverage.md` is written here**, and its absence is this ruling rather than an omission |
+| **Part C** | **N/A — `CONN-Q92` CLOSED**, ADR 0369 Addendum 1. Not awaiting invention: **a connector is not in ADR 0358's Part C taxonomy at all.** No `part-c-coverage.md` is written, and its absence is the ruling |
+| **Connector Certification** | **SEPARATELY REQUIRED — the NINTH row**, beside A/B/C rather than inside them. Chapter 18's eight dimensions, evidence below |
+
+---
+
+## Connector Certification — Chapter 18's eight dimensions
+
+> **The authoritative home for WHAT certification contains is
+> `Chapter 18_ complete engineering implementation blueprint.md:661-679`.** `ARCH-Q60`: one live rule, one
+> authoritative home. **This ledger cites that chapter and records the EVIDENCE
+> per dimension** — it does not restate the definition, and the eight names below
+> are pointers into the chapter rather than a second copy of it.
+
+**The eight are a CLOSED REQUIRED set.** *"Connectors require certification"*
+followed by that enumeration is **not** permission to certify whichever items
+apply conveniently.
+
+> ⚠ **NO EXCEPTION IS CLAIMED HERE.** All eight are recorded as required.
+> **Four are UNPROVED with a named reason, and none is reported as
+> inapplicable** — because an item that genuinely cannot apply would need its
+> own explicit rule from the planner, never a silent disappearance from this
+> table.
+
+| | dimension | evidence, or the named gap |
+|---|---|---|
+| 1 | **Mock APIs** | ✅ four `HttpMessageHandler` fixtures answering as OHIP — `ConnectionTestTests:207` · `Hub:170` · `OhipAccessTokenTests:118` · `OhipBusinessEventQueueTests:252` |
+| 2 | **Real sandbox APIs** | ❌ **ZERO.** No sandbox reference anywhere in the package. **UNPROVED BY CONSTRUCTION** — it needs Oracle OHIP sandbox credentials, which are the owner's and exist on no machine here |
+| 3 | **Authentication** | ✅ outbound: `OhipAccessTokenTests` · `OhipPasswordGrantTests` · `OhipCredentialTests`. Inbound: `ingress_authentication` declared at `manifest.yaml:340/:362/:377`, asserted by `ManifestDeclarationTests`. ⚠ and `oracle-conformance.md` §2.4 — the chapter claims two mechanisms where **one** is declared |
+| 4 | **Retries** | ⚠ **No connector-side mechanism, and that is ADR 0128 §5** — retry and backoff are **Hub facilities**, and *a connector never implements a queue*. Recorded as required with **no evidence in this ledger**: the mechanism sits at the Hub boundary |
+| 5 | **Rate limits** | ⚠ **ONE assertion.** `ConnectionTestTests:117` maps `TooManyRequests` —> `Unreachable`. *A 429 proves the endpoint ANSWERED*, so whether `Unreachable` is the right outcome is a question this ledger records rather than settles |
+| 6 | **Disconnections** | ✅ six sites, **injected rather than asserted in prose** — `OhipBusinessEventQueueTests:108` asserts the drain throws and `:269` injects *"the connection was reset"*; `ConnectionTestTests:147/:228` · `GuaranteeFetchTests:225` · `Hub:205` |
+| 7 | **Webhook processing** | ◐ **PARTIAL.** `accepts_push` declared at `manifest.yaml:339/:361/:376` and **asserted** at `ManifestDeclarationTests:128`; the on-site normalisers are tested. **The DECLARATION is proven; an inbound push through the real ingress is the Hub's path and is not exercised here** |
+| 8 | **Offline mode** | ❌ **ZERO**, in the package and in the manifest. ADR 0128 §5 puts the offline queue with the **Hub** — the same position as retries |
+
+**Three dimensions have direct connector-side evidence; one is partial; two are
+Hub facilities with no evidence here; one has a single assertion whose
+classification is open; one is absent by construction.**
+
+> ⚠ **THE ONE AMBIGUITY, NAMED RATHER THAN RESOLVED.** Dimensions 4 and 8
+> are **Hub facilities by ADR 0128 §5**, so their mechanism is not the
+> connector's to build. **Whether the Hub's own certification discharges those
+> two dimensions for a connector, or whether this ledger owes evidence at the
+> Hub boundary, is stated by neither Chapter 18 nor ADR 0128.**
+>
+> **This is NOT recorded as an exception** — both rows stay required and
+> unproved. *The distinction matters: an exception would remove them from the
+> set, and naming the ambiguity leaves them in it.*
+
+| | |
+|---|---|
+| **OWNER** | dimensions 1, 3 and 6 are **PROVEN** and mine. 2 is **the owner's** (sandbox credentials). 5 is mine to raise. 4, 7 and 8 need the **Hub boundary** exercised, which is blocked by the same thing Part B is: `§5` establishes nothing assembles a `.hopkg` |
 
 **Two of GuestOps' six documents do not apply to a connector, one is forbidden,
 and two have no GuestOps counterpart.** `oracle-conformance.md` §7 maps all six
