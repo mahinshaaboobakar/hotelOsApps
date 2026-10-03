@@ -127,11 +127,32 @@
 #
 # **The consequence, offered as a measurement and not acted on**: an uninstall
 # of 0.1.0 followed by a FRESH install of 0.1.1 would take the path that works,
-# and `apply_connector` starting nothing is a property rather than a failure —
-# the Hub dispatches an invocation in-process (`ConnectorDispatcher.cs:82`). So
-# Part B's platform-served column may not be blocked on the Connector Runtime
-# Supervisor at all. **Whether to lift that hold is not this file's to decide,
-# and nothing here has been run against the owner's property.**
+# and `apply_connector` starting nothing is a property rather than a failure.
+# *The owner did exactly that on 2026-10-03 and 0.1.1 installed.*
+#
+# **⚠ AND THE SENTENCE THAT STOOD HERE WAS WRONG, SO IT IS QUOTED RATHER THAN
+# DELETED.** It read:
+#
+#     the Hub dispatches an invocation in-process (`ConnectorDispatcher.cs:82`).
+#     So Part B's platform-served column may not be blocked on the Connector
+#     Runtime Supervisor at all.
+#
+# **It is blocked on the Supervisor.** Dispatch opens a SESSION, not an
+# in-process call: `IConnectorChannels` is *"Opens the Connector Protocol
+# session for one integration instance — ADR 0208"*, *"a bidirectional mTLS
+# stream to the Connector Runtime"*; `integration-service/src/Program.cs:213`
+# registers **`NoConnectorRuntime`**, which its own header calls *"a refusal,
+# not a stand-in session"* because *"the pieces it depends on are still being
+# built: the Supervisor"*; and `ConnectorRuntimeChannels` — the real adapter
+# — exists and is NOT registered.
+#
+# **How the error was made, because it is the instructive part.**
+# `ConnectorDispatcher.cs:82` is a refusal the Hub makes in its OWN process, and
+# that reading was true. The claim built on it was about the DISPATCH, which is
+# a session — and the comment four lines above the line I cited says *"before
+# any session opens"*. **The word was there and I read past it.** Adjacency
+# mistaken for specificity: true about the refusal, published about the
+# dispatch.
 
 # **What has NOT changed, and the distinction is the whole of it.** ADR 0141
 # §Consequences still governs — *"`pms-oracle` may exist, build and be tested,

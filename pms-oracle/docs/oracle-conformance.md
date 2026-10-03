@@ -259,9 +259,23 @@ declared-vocabulary reading and per-integration settings (chapter 03 §§1.3, 2.
 
 | | behaviour | where it rests |
 |---|---|---|
-| ⚠ | **the two-part on-site join** — an on-site check-in arrives in **two halves that must be paired**: `PartJoinInvocation` serves it, `OnSiteJoinKey` names the key, `OnSiteStayStatus` decides *which half* a status belongs to, and `OnSiteNormaliser` returns *"half of one"* | **NO CHAPTER, EITHER REPOSITORY.** And **`join` is a DECLARED CAPABILITY** — `manifest.yaml:409`, `implements: [dedupe_key, join]`. `CONN-Q25` ruled the key's *fields*; the concept that a check-in arrives in halves is designed nowhere |
-| ⚠ | **the polling tiers** — `OhipPollingSchedule` is *"how often to ask OHIP, which is not one number"* | **a FRAME, not a chapter.** The file cites *"frame 3's two tiers"*. A drawing is not a design document, and an illustration does not define architecture |
+| ✅ | **the two-part on-site join** — `PartJoinInvocation` serves it, `OnSiteJoinKey` names the key, `OnSiteStayStatus` decides *which half*, `OnSiteNormaliser` returns *"half of one"*. **`join` is a DECLARED capability** — `manifest.yaml:409` | **TRACED TO THE REFERENCE, and no ruling is needed.** `onPremise/dao/mongo/OracleOnPremiseReservationDao.java:21` declares `fetchForCheckInDataMerge`; `onPremise/services/OracleOnPremiseReservationServiceImpl.java:115` calls it and `:116-119` rejects with `dumbReason("NO VALID DATA FOUND TO MERGE")` when the other half is absent; `:122-126` completes `reservationId`, `phone1`, `phone2`, `email` and `departureDate` from the stored record. **So an on-site check-in genuinely arrives incomplete and is completed from a prior message** — concept, logic and flow, at `file:line`. *And ours is the better architecture: we return the half as a first-class outcome for the Hub to pair, where the reference discards it with a free-text reason* |
+| ◐ | **the polling tiers** — `OhipPollingSchedule` is *"how often to ask OHIP, which is not one number"* | **THE SHAPE IS TRACED; THE VALUES ARE NOT.** The reference carries two distinct cadences — `cloud/services/impl/OracleCloudCloudAuthServiceImpl.java:40` refreshes auth on a **5-minute** `fixedDelay`, while `cloud/OracleCloudBackgroundService.java:51` drains on a **3-hour** one. *Two tiers, a frequent credential tier and an infrequent data tier.* **But all nine `@Scheduled` annotations are COMMENTED OUT**, and `:50`, `:52` and `:53` are three further competing cadences (`11:30 Asia/Kolkata`, `15:00 America/New_York`, `@hourly`) with hardcoded zones — §2.6's defect. **So the reference settles that there are two tiers and not what they are**, and frame 3 remains the only source for our numbers |
 
+> ⚠ **AND THE FIRST RUN OF THIS TABLE SEARCHED THE WRONG CORPUS.** Both rows
+> read **"NO CHAPTER, EITHER REPOSITORY"**, which was a true measurement of the
+> platform's documents and **silent about the corpus that owns the answer**: a
+> connector's CONCEPT comes from the reference project by owner rule, not from
+> the platform's chapters. *The kept sentence matters because the correction
+> dissolved one finding entirely.*
+>
+> **And my vocabulary was the platform's, not the source's.** Over the oracle
+> on-site surface: `join` **2 hits, both a repository's own filename** —
+> `pair`, `partial`, `half`, `correlate` **all 0** — and the concept sits
+> under **`merge`, 15 hits**, with `existing` at 98. *Absence under your
+> keywords is evidence about your keywords, and here it was evidence about which
+> estate's words I was using.* Controls: `reservation` 517, a fabricated term 0.
+>
 > **The first is the more serious by a distance.** A declared capability is a
 > promise the Hub dispatches against, and `$extra` is the half no input boundary
 > reaches: nothing in the estate would ever report that `join` has no design,
