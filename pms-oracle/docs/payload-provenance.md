@@ -294,14 +294,133 @@ CITED AT THE LINE   ohip-business-event · ohip-reservation (42 of 251 lines,
                     the status vocabularies · the property tables
 NOT CITED           onsite-room-status for oracle-onpremise — §5, because
                     nothing anywhere sources it
-NOT READ            209 of Reservation.java's 251 lines; the cloud service
-                    IMPLEMENTATIONS (OracleCloudEventServiceImpl,
-                    ...ReservationServiceImpl, ...HousekeepingServiceImpl,
-                    ...GuaranteeServiceImpl) — the FLOW, where this document
-                    covers the SHAPE. Flow is the next pass.
+FLOW, NOW CITED     §10 and §11 — both background services, the drain
+                    and the auth implementation, each read WHOLE
+STILL NOT READ      209 of Reservation.java's 251 lines, and the four larger
+                    normalisation implementations: ReservationServiceImpl (272),
+                    HousekeepingServiceImpl (152), OnPremiseReservationServiceImpl
+                    (385), WebReservationServiceImpl (433). Those are FIELD
+                    MAPPING, which §1–§5 cover from the models' side.
 ```
 
-**The shape is cited; the flow is not.** A payload's fields are what this document
-establishes, and *how the reference drains, orders and retries* lives in the
-`services/impl/` classes and the background services. Naming that gap here rather
-than letting a reader take §1–§6 for a flow trace.
+**This paragraph said *"the shape is cited; the flow is not"*, and named the flow
+as the next pass. That pass is §10.** The sentence is kept rather than replaced,
+so a reader can see which half arrived when — and what it still excludes is in
+the block above, narrowed rather than deleted.
+
+
+---
+
+## 10 · The flow — how the reference drains, orders, retries and refreshes
+
+**Read WHOLE, not sampled**: `cloud/services/background/OracleCloudBackgroundService.java`
+(91), `onPremise/services/background/OracleOnPremiseBackgroundService.java` (73),
+`cloud/services/impl/OracleCloudEventServiceImpl.java` (119),
+`cloud/services/impl/OracleCloudCloudAuthServiceImpl.java` (63).
+
+### The drain is an unbounded loop until the queue answers 204
+
+`OracleCloudEventServiceImpl.fetchOracleBusinessEvents`:
+
+```text
+:50-79  do { ... } while (!eventQueueEmpty)      NO cap, NO budget, NO deadline
+:53     .queryParam("limit", 20)                 20 per page
+:61     eventId = businessEventId.getId()        the dedupe identity
+:59-60  companyId / siteId stamped FROM THE
+        PROPERTY RECORD, never from the payload
+:68     .processed(false)
+:70     eventRepo.save(oracleEvent)              DURABLE BEFORE PROCESSING
+:73-75  204 -> queue empty, loop ends
+```
+
+**Two concepts ours keeps.** `:70` persists each event *before* anything processes
+it — the inbox's own ordering, and page 75 §7 Q2 is the same question at our push
+ingress. And `:61`'s `eventId` is the dedupe identity, which ADR 0246 and ADR 0255
+§2 make a connector-produced key crossing with the payload.
+
+**One ours refuses: the loop has no bound.** A property with a long queue drains
+until the vendor says 204, inside one invocation, with no deadline. Page 75's
+`cancellation` row is the opposite — *"today, the Hub ending the session"* — and
+`drain` is named there as **the one capability that reads a destructive source**.
+
+### Retry is "leave it unprocessed and re-drain"
+
+```text
+:111 / BackgroundService:83   if (instioReservation != null) event.setProcessed(true)
+:112 / :84                    eventRepo.save(event)   - saved either way
+:106-110 / :80-82             catch (Exception) { log.error(...) }  then CONTINUE
+```
+
+**The retry mechanism is the absence of a success flag**, and per-item isolation is
+real: one event's failure does not stop the batch. That is a sound concept, and it
+is the one our inbox implements with an explicit outcome vocabulary rather than a
+boolean — ADR 0284's atomic claim and compare-and-swap transition, where
+`InboxOutcome` distinguishes cases a boolean cannot.
+
+### Nothing orders the events, and the state is re-read per event
+
+```text
+:97 / BackgroundService:68   getReservationFromOracleById(event...)
+```
+
+The loop processes in the order the list arrived — no sequence, no instant
+ordering — and **re-fetches the reservation's CURRENT state for each event**. So
+two events about one reservation both read the same present state, and the earlier
+event is applied to the later world. *Last-writer-wins by construction, and nothing
+records that an earlier event was superseded rather than applied.*
+
+### ⚠ Every schedule in the reference is commented out
+
+```text
+OracleCloudBackgroundService:46-58   NINE commented variants - @Schedules({...})
+                                     and five @Scheduled(cron=...) across
+                                     Asia/Kolkata and America/New_York
+:59                                  refreshBusinessEvents() - package-private,
+                                     and nothing calls it
+OracleCloudCloudAuthServiceImpl:40   // @Scheduled(fixedDelay = 5*60*1000, ...)
+:41                                  refreshAuthTokens() - PRIVATE
+```
+
+**So the polling cadence exists as commented-out experiments in two time zones, and
+the token refresher cannot be called at all.** The concept — *a connector decides
+its own rate* — is the reference's; the mechanism is ours, and ADR 0255 §3 rules
+it: **Temporal owns the durable scheduling and the connector owns `NextPollAfter`**,
+with a ladder that *"invents nothing at any rung."* A cron literal in the source, in
+one of five candidate zones, is what that ruling replaced.
+
+### ⚠ And this is the defect `TokenLifetime` was written for, now at the line
+
+CLAUDE.md records it as *"refreshing on a hardcoded 45-minute threshold while
+`expires_in` sat unread, with the sweep that would have applied even that commented
+out."* **Both halves verified:**
+
+```text
+:40   the sweep, COMMENTED OUT
+:43   findAllByLastRefreshedLessThan(...)   keyed on lastRefreshed, a THRESHOLD
+:53   setExpiresIn(refreshedToken.getExpiresIn())
+        -> expires_in IS stored, and the refresh decision never reads it
+```
+
+*The field is written on every refresh and consulted by nothing.* Our
+`TokenLifetime` reads `expires_in` and is a port whose adapter is unimplemented —
+and its own file says so, which is the honest shape rather than this one.
+
+---
+
+## 11 · Flow defects, named — and one is a null crossing a boundary
+
+| | cited at | our position |
+|---|---|---|
+| **a REST failure returns `null`, and both callers call `.isEmpty()` on it** | returns `null` at `EventServiceImpl:84`; consumed at `BackgroundService:64-65` and `EventServiceImpl:93-94` | **a NullPointerException on any `RestClientException`**, at two call sites. **Inexpressible here**: page 75's `failure` row — a `Fault` when the capability could not run, *"never an empty result standing in for one"* — and `Reading<T>` has no `null` to return |
+| **the dispatch loop exists twice** | `BackgroundService:63-88` and `EventServiceImpl:95-114`, near line for line | one scheduled (commented out), one on demand. Two copies that must agree, and nothing compares them |
+| **only `moduleName == "Reservation"` is handled** | `:96` / `:67` | every other module's event is skipped **and never marked processed**, so it is re-drained forever. A filter with no record |
+| **`log.error` for routine progress** | `:42`, `:60`, `:74`, `:101` | *"SCHEDULER :: ... FETCHING"*, *"QUEUE EMPTY"* and *"SKIPPING UPDATE ACTION"* at error level — a log that cannot separate a failure from a heartbeat |
+| **a monetary amount parsed as a float** | `OracleOnPremiseBackgroundService:60-61` — `Float.parseFloat(getAmount())` | **ADR 0226** states the minor-unit exponent at every site and **ADR 0217** gives currency metadata one platform authority; `AmountReading` exists for exactly this. No currency accompanies the parse |
+| **a third spelling of one status** | wire `"Checked In"` (`:45`), OHIP `"CheckedOut"` (`BaseService:98`), written `"CHECKED OUT"` (`:66`) | three spellings across one reference; our vocabularies are `Reading<T>`-typed and the exactness is pinned by a test whose name carries the reason (`CONN-Q25`) |
+| **a hardcoded room serial** | `:50` `setSerialNumber("01")` | a literal where a value belongs |
+| **test scaffolding left in the file** | `AuthServiceImpl:30-38` — a commented `@PostConstruct` seeding `accessToken("sdfds")`, `expiresIn(2)` | — |
+
+**And `roomStatus` is queried as a reservation status**, which confirms §7's naming
+finding is live in the reference's own code rather than only in its models:
+`OracleOnPremiseBackgroundService:45` filters
+`Criteria.where("roomStatus").is("Checked In")`.
