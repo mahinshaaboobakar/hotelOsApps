@@ -228,6 +228,28 @@ IntegrationNotConfigured   1   <- page 75 §7 Q4 asks to reclassify this as a
 
 ## 3 · DIRECTION B — behaviour no chapter states
 
+> ✅ **ALL THREE ARE NOW SETTLED, AND THIS SECTION'S HEADING IS WHY IT IS WORTH
+> A POINTER RATHER THAN A REWRITE.** *"No chapter states"* was true, and it was a
+> measurement of the PLATFORM's documents; a connector's concept, logic and flow
+> come from the reference project by owner rule. **Swept against
+> `pms-integrations`** — `payload-provenance.md` §14:
+>
+> ```text
+> the partial-drain return  CONCEPT TRACED. OracleCloudEventServiceImpl.java:66
+>                          saves each event INSIDE the loop and :80 returns null
+>                          on failure - "what has been read is kept"
+> the short-page exit      OURS, a safe optimisation of a traced flow
+> the byte-keyed dedupe    a DIVERGENCE, with OHIP's own businessEventId.id now
+>                          cited as the alternative we did not take
+> and PageSize = 20        already matched the reference's limit=20 exactly
+> ```
+>
+> **The rows below are kept as written**, because a reader meeting only the
+> correction cannot tell a closed finding from one never made — and because
+> the reason each was recorded, that they are undocumented in OUR design record,
+> still stands for decisions 1 and 3.
+
+
 **Complete for the drain path.** Three decisions are implemented, deliberate,
 documented at the line, and **in no chapter**:
 

@@ -697,3 +697,103 @@ listeners** from §12 — `OracleCloudHousekeepingServiceImpl:39` declares
 `pms.room.status` and `:51` declares `room.status.change`, both disabled. *So the
 web half publishes room status to a queue whose only declared consumer is
 commented out, and the routing key and the queue name are not the same string.*
+
+
+---
+
+## 14 · The drain's three decisions, swept against the reference
+
+**`oracle-conformance.md` §3 called these *"designed nowhere by anyone's
+account"*. That was a measurement of OUR documents** — and a connector's
+concept, logic and flow come from the reference. Swept: 605 `.java` scoped, 87
+oracle, controls `businessEvent` 23 · `ResponseEntity` 22 · a token
+minted this run 0.
+
+**The reference's drain is `OracleCloudEventServiceImpl.java:46-84`**, and
+reading it settles all three.
+
+### ✅ The page size was already traced, and nobody had noticed
+
+```text
+reference :52   .queryParam("limit", 20)
+ours      :54   public const int PageSize = 20;
+```
+
+**The same number, from the same source.** *Not a coincidence anybody had
+recorded — it is traced now.*
+
+### ✅ Decision 2 — the partial-drain return. THE CONCEPT IS TRACED, and it is the one that mattered
+
+**The question was: what happens when a drain fails after taking some
+payloads?** The reference answers it structurally rather than in a branch:
+
+```text
+:66  eventRepo.save(oracleEvent);     INSIDE the loop, per event
+:67  events.add(oracleEvent);
+:80  catch (RestClientException e)  ->  log, and `return null`
+```
+
+> **Each event is durably stored as it is read, so losing the return value
+> loses nothing.** The reference can afford to return `null` on a transport
+> failure precisely because the events are already in `eventRepo`.
+
+**That is the principle: *what has been read is kept, never discarded.*** And
+our partial-return is **the same principle expressed through the Hub's inbox
+instead of a connector-owned repository** — which is not a preference but a
+requirement: ADR 0128 §5 makes the durable inbox a Hub facility and *"a
+connector never implements a queue"*, so handing the taken payloads up IS our
+only way to keep them.
+
+**So the behaviour our code argues for in prose** — *"a page is read whole or
+not at all, so what is here is intact"* — **is the reference's own concept,
+and no ruling is needed.**
+
+### ⚠ Decision 1 — the short-page exit is OURS, and the reference confirms it is a divergence
+
+```text
+reference :73-75   eventQueueEmpty = true  ONLY on 204
+          :79      the do/while condition is !eventQueueEmpty
+          :76-77   any OTHER status -> log.error and LOOP AGAIN
+ours      :116     page.Count < PageSize  ->  stop
+          :145     any other status      ->  THROW, naming it
+```
+
+**Our code already said so** — *"the reference asks until a 204; this stops
+one call earlier and still ends on OHIP's answer"* — **and that sentence is
+now verified at the line rather than asserted.** It is a safe optimisation of a
+traced flow, and the non-200/204 throw fixes the reference's infinite loop,
+which is §2.2's recorded defect seen in its own source.
+
+### ◐ Decision 3 — a traced ALTERNATIVE we did not take, and it is a real divergence
+
+```text
+reference :60   .eventId(businessEvent.getBusinessEventId().getId())
+                OHIP's OWN identifier - and OracleEvent.java:24 is a plain
+                String with NO unique index, so it is STORED, not deduplicated
+ours      :176  PayloadIdentity.For(EventPayload, bytes) - a hash of the bytes
+```
+
+> **OHIP supplies a natural identifier and we do not key on it.** The reference
+> stores it without enforcing uniqueness, so *dedupe* is ours either way —
+> ADR 0255 §2 gives the connector the key — but the vendor's id is stable
+> across re-serialisation where a byte hash is not.
+
+**Ours is argued at the site** (*"the same bytes a quarantined payload is
+re-submitted with, so a record drained and later re-submitted cannot become two
+facts"*) **and the alternative is now cited rather than absent.** *A divergence
+with both sides named is a decision; one with only our side named is a decision
+nobody can review.*
+
+### So the §3 row changes
+
+```text
+was   three behaviours designed nowhere - the only row with no owner
+now   decision 2  CONCEPT TRACED to the reference. No question travels
+      decision 1  ours, a safe optimisation of a traced flow, verified
+      decision 3  a DIVERGENCE with the traced alternative cited
+```
+
+**Third time today the reference closed a finding our own documents could not**
+— after `fetchForCheckInDataMerge` and the two polling tiers. *And the pattern
+in all three is the same: our vocabulary was not the source's, and the
+measurement of our documents was true and about the wrong corpus.*
