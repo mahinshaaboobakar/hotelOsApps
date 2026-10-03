@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -32,7 +32,7 @@ function host(
   refuse?: HostCallError,
   timezone: string | null = "Asia/Kolkata",
 ): HostApi {
-  return {
+  return hostDouble({
     identity: {
       id: "workforce",
       version: "0.1.0",
@@ -52,7 +52,7 @@ function host(
       return Promise.resolve({ id: "d-new", version: 1 });
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

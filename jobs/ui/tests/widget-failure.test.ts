@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { PANELS } from "../preview/widgets";
@@ -55,13 +55,13 @@ const GRANTS = ["job.read"];
 function failing(
   kind: "unavailable" | "forbidden" | "internal" | "local_forbidden" | "user_forbidden" | "model_unavailable",
 ): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.4.1", capabilities: GRANTS },
     property: PROPERTY,
     call: (capability: string, method: string) =>
       Promise.reject(new HostCallError({ kind, message: `${capability}/${method} refused for the test` })),
     on: () => () => {},
-  };
+  });
 }
 
 /** Each state: the kind that produces it, and what only that state says. */

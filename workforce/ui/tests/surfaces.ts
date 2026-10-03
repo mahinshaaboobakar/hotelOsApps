@@ -7,7 +7,7 @@
  * here, and a new screen is added once.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { recordedDay } from "../roster/attendance";
 import { recordedRegister } from "../roster/duty";
@@ -51,14 +51,14 @@ export const ANSWERS: Record<string, unknown> = {
 
 /** A host answering every recorded read, in the given locale. */
 export function surfaceHost(locale: string): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale },
     call: (_capability: string, method: string) => method in ANSWERS
       ? Promise.resolve(ANSWERS[method])
       : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" })),
     on: () => () => {},
-  };
+  });
 }
 
 /** Draw one surface into a container. */

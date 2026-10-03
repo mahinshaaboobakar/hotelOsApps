@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -34,12 +35,12 @@ const INVENTED = [
 ];
 
 function host(answers: Record<string, unknown>): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (_capability, method) => Promise.resolve(answers[method]),
     on: () => () => {},
-  };
+  });
 }
 
 function clean(text: string, where: string): void {

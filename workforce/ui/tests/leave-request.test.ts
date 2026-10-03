@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -19,7 +20,7 @@ const TYPES: Balance[] = [
 ];
 
 function host(calls: unknown[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["leave.request"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability: string, method: string, params?: unknown) => {
@@ -27,7 +28,7 @@ function host(calls: unknown[]): HostApi {
       return Promise.resolve({ id: "new", version: 1, days: 3 });
     },
     on: () => () => {},
-  };
+  });
 }
 
 function set(form: HTMLElement, selector: string, value: string): void {

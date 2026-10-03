@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -43,7 +43,7 @@ function watching(granted: readonly string[] = ALL): { host: HostApi; calls: Mad
 
   return {
     calls,
-    host: {
+    host: hostDouble({
       identity: { id: "jobs", version: "0.1.0", capabilities: granted },
       property: { timezone: "Asia/Qatar", locale: "en-GB" },
       call: (capability, method, params) => {
@@ -54,7 +54,7 @@ function watching(granted: readonly string[] = ALL): { host: HostApi; calls: Mad
           : Promise.resolve(answer);
       },
       on: () => () => {},
-    },
+    }),
   };
 }
 

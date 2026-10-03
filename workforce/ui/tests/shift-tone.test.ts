@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { recordedPolicy, type Policy } from "../roster/policy";
@@ -31,14 +31,14 @@ const rose: Policy = {
 };
 
 function host(): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (_capability: string, method: string) => method === "policy"
       ? Promise.resolve(rose)
       : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" })),
     on: () => () => {},
-  };
+  });
 }
 
 describe("a shift's tone", () => {

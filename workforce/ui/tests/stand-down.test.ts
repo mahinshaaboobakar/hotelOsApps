@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -28,7 +28,7 @@ interface Sent {
 }
 
 function host(sent: Sent[], refuse?: HostCallError): HostApi {
-  return {
+  return hostDouble({
     identity: {
       id: "workforce",
       version: "0.1.0",
@@ -48,7 +48,7 @@ function host(sent: Sent[], refuse?: HostCallError): HostApi {
       return Promise.resolve({ id: "t-mc", version: 2, active: false });
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

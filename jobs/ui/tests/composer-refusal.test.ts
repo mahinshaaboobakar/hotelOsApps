@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -21,7 +21,7 @@ const REFUSAL = "that category isn't in this organisation's catalogue";
 
 function host(): HostApi {
   const answers: Record<string, unknown> = { today: recordedToday, board: recordedBoard, catalogue: recordedCatalogue };
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.4.4", capabilities: ["job.read", "job.curate"] },
     property: { timezone: "Asia/Qatar", locale: "en-GB" },
     call: (_capability, method) => {
@@ -30,7 +30,7 @@ function host(): HostApi {
       return Promise.reject(new HostCallError({ kind: "invalid", message: REFUSAL }));
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function catalogue(): Promise<HTMLElement> {
@@ -107,14 +107,14 @@ describe("the Record tab says who, beside when", () => {
     const answers: Record<string, unknown> = {
       today: recordedToday, board: recordedBoard, catalogue: recordedCatalogue, job: detail,
     };
-    const h: HostApi = {
+    const h: HostApi = hostDouble({
       identity: { id: "jobs", version: "0.4.4", capabilities: ["job.read"] },
       property: { timezone: "Asia/Qatar", locale: "en-GB" },
       call: (_c, method) => (answers[method] === undefined
         ? Promise.reject(new HostCallError({ kind: "unavailable", message: "not answered" }))
         : Promise.resolve(answers[method])),
       on: () => () => {},
-    };
+    });
     const root = document.createElement("div");
     document.body.replaceChildren(root);
     mount(h).mount(root);

@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { WriteRefused, write } from "../roster";
@@ -21,12 +21,12 @@ import { WriteRefused, write } from "../roster";
  */
 
 function host(kind: ConstructorParameters<typeof HostCallError>[0]["kind"]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.plan"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: () => Promise.reject(new HostCallError({ kind, message: "diagnostic, not for people" })),
     on: () => () => {},
-  };
+  });
 }
 
 async function said(kind: Parameters<typeof host>[0]): Promise<string> {

@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -24,7 +24,7 @@ import { recordedPeople } from "../roster/people";
  * which is what a property without a Workforce client actually sees.
  */
 function host(answers: Record<string, unknown>): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: null },
     call: (capability: string, method: string) => {
@@ -36,7 +36,7 @@ function host(answers: Record<string, unknown>): HostApi {
         : Promise.resolve(answer);
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function mount(api: HostApi): Promise<HTMLElement> {

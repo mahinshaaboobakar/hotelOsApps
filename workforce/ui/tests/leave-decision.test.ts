@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { recordedLeave } from "../roster/leave";
@@ -19,7 +19,7 @@ interface Call { capability: string; method: string; params?: unknown }
 const property = { timezone: "Asia/Kolkata", locale: "en-GB" };
 
 function host(calls: Call[], fail = false): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["leave.approve"] },
     property,
     call: (capability: string, method: string, params?: unknown) => {
@@ -29,7 +29,7 @@ function host(calls: Call[], fail = false): HostApi {
         : Promise.resolve({ id: "x", version: 2, state: "Approved" });
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

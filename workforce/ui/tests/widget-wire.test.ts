@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { attendanceToday } from "../widgets/panel/attendance-today";
@@ -15,14 +15,14 @@ import { pendingRequests } from "../widgets/panel/pending-requests";
  */
 
 function host(method: string, answer: unknown): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (_capability: string, asked: string) => asked === method
       ? Promise.resolve(answer)
       : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" })),
     on: () => () => {},
-  };
+  });
 }
 
 const texts = (root: HTMLElement, selector: string): string[] =>

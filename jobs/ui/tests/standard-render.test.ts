@@ -1,4 +1,4 @@
-import { FAILURE_LABELS, HostCallError, failureDrawing, type HostApi, type ReadFailure } from "@hotelos/sdk";
+import { FAILURE_LABELS, HostCallError, failureDrawing, hostDouble, type HostApi, type ReadFailure } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -24,7 +24,7 @@ import { status } from "../chrome/marks";
 const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
 
 function host(answers: Record<string, unknown>, property: HostApi["property"] = PROPERTY): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.4.2", capabilities: ["job.read", "job.create", "job.assign", "job.complete", "job.cancel", "job.amend", "job.configure", "job.curate"] },
     property,
     call: (_capability, method) => {
@@ -34,7 +34,7 @@ function host(answers: Record<string, unknown>, property: HostApi["property"] = 
         : Promise.resolve(answer);
     },
     on: () => () => {},
-  };
+  });
 }
 
 const ANSWERS = {

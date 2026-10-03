@@ -19,7 +19,7 @@
  * what it is taken for.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { stylesheet } from "../widgets/card";
 import { attendanceToday } from "../widgets/panel/attendance-today";
@@ -68,7 +68,7 @@ const WIDGET_FAIL: Record<string, Kind> = {
 };
 
 function host(): HostApi {
-  return {
+  return hostDouble({
     identity: {
       id: "workforce",
       version: "0.1.0",
@@ -87,7 +87,7 @@ function host(): HostApi {
       message: "the capture pass serves recorded facts",
     })),
     on: () => () => {},
-  };
+  });
 }
 
 async function draw(): Promise<void> {

@@ -7,6 +7,8 @@ import { join } from "node:path";
 
 import { Window } from "happy-dom";
 
+import { hostDouble } from "@hotelos/sdk";
+
 import { start } from "../../application";
 import {
   recordedActivity,
@@ -211,7 +213,7 @@ function host(params: URLSearchParams): Parameters<typeof start>[0] {
     me: { name: "Anitha Menon", where: "Front Office · Avenue Regent" },
   };
 
-  return {
+  return hostDouble({
     identity: {
       id: "guestops",
       version: "0.1.0",
@@ -232,7 +234,7 @@ function host(params: URLSearchParams): Parameters<typeof start>[0] {
     on(): () => void {
       return () => undefined;
     },
-  };
+  });
 }
 
 /**

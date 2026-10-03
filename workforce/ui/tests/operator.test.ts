@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -21,14 +21,14 @@ import { activate } from "../application";
 
 /** A host that answers `me` with whatever a test hands it, and refuses the rest. */
 function host(me: unknown, granted: readonly string[] = ["roster.read"]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: granted },
     property: { timezone: "Asia/Kolkata", locale: "en-IN" },
     call: (_capability: string, method: string) => method === "me"
       ? Promise.resolve(me)
       : Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" })),
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

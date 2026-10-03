@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -25,14 +25,14 @@ import { settle } from "./walk";
 
 function host(): HostApi {
   const answers: Record<string, unknown> = { today: recordedToday, board: recordedBoard, settings: recordedSettings };
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.4.4", capabilities: ["job.read", "job.configure"] },
     property: { timezone: "Asia/Qatar", locale: "en-GB" },
     call: (_capability, method) => (answers[method] === undefined
       ? Promise.reject(new HostCallError({ kind: "unavailable", message: "not answered" }))
       : Promise.resolve(answers[method])),
     on: () => () => {},
-  };
+  });
 }
 
 async function access(): Promise<HTMLElement> {

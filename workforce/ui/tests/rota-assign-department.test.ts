@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -22,7 +23,7 @@ import { picker } from "../screens/rota/picker";
 interface Call { capability: string; method: string; params?: unknown }
 
 function host(calls: Call[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.plan"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability: string, method: string, params?: unknown) => {
@@ -30,7 +31,7 @@ function host(calls: Call[]): HostApi {
       return Promise.resolve({ id: "c-1", version: 1 });
     },
     on: () => () => {},
-  };
+  });
 }
 
 /** The week as a real property's read answers it: no department named. */

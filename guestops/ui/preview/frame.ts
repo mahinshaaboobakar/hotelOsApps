@@ -19,7 +19,7 @@
  * nothing and exercises the fallback.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { start } from "../application";
 import { listState, page, repeated, rowsFor } from "./lists";
@@ -51,7 +51,7 @@ import {
  * banner is a design element the audit has to be able to see.
  */
 function host(granted: readonly string[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "guestops", version: "0.1.0", capabilities: granted },
 
     // The host tells a module its property's zone and locale. Both are `null`
@@ -117,7 +117,7 @@ function host(granted: readonly string[]): HostApi {
     on(): () => void {
       return () => {};
     },
-  };
+  });
 }
 
 const params = new URLSearchParams(location.search);

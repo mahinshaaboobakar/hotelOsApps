@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -43,7 +43,7 @@ const CAPABILITIES = [
 ];
 
 function host(calls: Call[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: CAPABILITIES },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability: string, method: string, params?: unknown) => {
@@ -57,7 +57,7 @@ function host(calls: Call[]): HostApi {
       return Promise.resolve({ id: "00000000-0000-4000-8000-000000000001", version: 2, state: "Approved" });
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

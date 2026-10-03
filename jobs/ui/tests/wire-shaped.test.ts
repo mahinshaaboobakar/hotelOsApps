@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -77,14 +77,14 @@ const WIRE: readonly (readonly [string, RegExp])[] = [
 
 function host(): HostApi {
   const answers: Record<string, unknown> = { today: recordedToday, board: recordedBoard, job, live, settings };
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.4.3", capabilities: ["job.read", "job.configure"] },
     property: { timezone: "Asia/Qatar", locale: "en-GB" },
     call: (_c, method) => (answers[method] === undefined
       ? Promise.reject(new HostCallError({ kind: "unavailable", message: "not answered" }))
       : Promise.resolve(answers[method])),
     on: () => () => {},
-  };
+  });
 }
 
 async function reach(steps: readonly string[]): Promise<HTMLElement> {

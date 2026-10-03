@@ -30,7 +30,7 @@
  *   with no recorded answer is counted on `data-unanswered-calls`.
  */
 
-import { HostCallError, type Cause, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type Cause, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
 import { arrivalsWaiting, attendantsNow, attention, pendingPolicy, roomsReady } from "../widgets/panel/panels";
@@ -111,7 +111,7 @@ const fail = params.get("fail") as keyof typeof KINDS | null;
 const failing = (method: string): boolean =>
   fail !== null && (params.get("at") === null ? screen === "widgets" && method.startsWith("widget") : params.get("at") === method);
 
-const host: HostApi = {
+const host: HostApi = hostDouble({
   identity: { id: "roomcare", version: "0.1.0", capabilities: attendant ? ["roomcare.read", "room.clean"] : ["roomcare.read", "roomcare.assign", "roomcare.amend", "roomcare.configure", "roomcare.plan"] },
   property: params.get("nl") === null ? { timezone: "Asia/Kolkata", locale: "en-GB" } : { timezone: null, locale: null },
   call(capability, method, body) {
@@ -125,7 +125,7 @@ const host: HostApi = {
       : Promise.resolve(answer);
   },
   on: () => () => {},
-};
+});
 
 const missed: string[] = [];
 const settle = (): Promise<void> => new Promise((done) => setTimeout(done, 30));

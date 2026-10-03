@@ -10,7 +10,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 const FILES: Record<string, string> = {
   me: "me", board: "board", prepare: "prepare", attendants: "attendants", states: "states", supervision: "supervision",
@@ -34,7 +34,7 @@ export interface Call {
 }
 
 export function host(capabilities: readonly string[], overrides: Record<string, unknown> = {}, calls: Call[] = []): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "roomcare", version: "0.1.0", capabilities },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability, method, params) => {
@@ -51,7 +51,7 @@ export function host(capabilities: readonly string[], overrides: Record<string, 
         : Promise.resolve(recorded(file));
     },
     on: () => () => {},
-  };
+  });
 }
 
 export async function settle(): Promise<void> {

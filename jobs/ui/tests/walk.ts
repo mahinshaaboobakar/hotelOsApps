@@ -9,7 +9,7 @@
  * reason that has nothing to do with the rule.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { recordedBoard, recordedToday } from "../board/recorded/board";
 import { recordedCatalogue } from "../board/recorded/catalogue";
@@ -25,7 +25,7 @@ export function host(): HostApi {
     scheduled: recordedScheduledPage, catalogue: recordedCatalogue, settings: recordedSettings,
   };
 
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: ALL },
     property: { timezone: "Asia/Qatar", locale: "en-GB" },
     call: (capability, method) => {
@@ -35,7 +35,7 @@ export function host(): HostApi {
         : Promise.resolve(answer);
     },
     on: () => () => {},
-  };
+  });
 }
 
 export async function settle(): Promise<void> {

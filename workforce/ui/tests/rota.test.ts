@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -15,17 +15,17 @@ import { recordedOvertime, recordedWeek } from "../roster/recorded";
 
 /** A host granting everything and answering from a fixture. */
 function host(answer: unknown, granted: readonly string[] = ["roster.read"]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: granted },
     property: { timezone: "Asia/Kolkata", locale: null },
     call: () => Promise.resolve(answer),
     on: () => () => {},
-  };
+  });
 }
 
 /** A host that is granted the capability and cannot answer. */
 function failing(): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: null },
     // `unavailable` is not `isForPeople`, so the module shows its own words
@@ -33,7 +33,7 @@ function failing(): HostApi {
     call: () => Promise.reject(
       new HostCallError({ kind: "unavailable", message: "no Workforce client" })),
     on: () => () => {},
-  };
+  });
 }
 
 async function mount(api: HostApi): Promise<HTMLElement> {
@@ -154,12 +154,12 @@ describe("the Team Rota", () => {
 
   it("does not ask when the capability was not granted", async () => {
     let asked = false;
-    const api: HostApi = {
+    const api: HostApi = hostDouble({
       identity: { id: "workforce", version: "0.1.0", capabilities: [] },
       property: { timezone: "Asia/Kolkata", locale: null },
       call: () => { asked = true; return Promise.resolve(recordedWeek); },
       on: () => () => {},
-    };
+    });
 
     await mount(api);
 

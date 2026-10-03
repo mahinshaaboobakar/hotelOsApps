@@ -14,7 +14,7 @@
  * are the shipped ones, so what appears here is what a property would see.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
 import { recordedOvertime, recordedWeek } from "../roster/recorded";
@@ -74,7 +74,7 @@ const week = params.get("state") === "overtime" ? recordedOvertime : recordedWee
  * note is a design element the audit has to be able to see.
  */
 function host(granted: readonly string[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: granted },
 
     // What the host tells a module at connect — `JOBS-Q1(8)`. The harness has
@@ -212,7 +212,7 @@ function host(granted: readonly string[]): HostApi {
     on(): () => void {
       return () => {};
     },
-  };
+  });
 }
 
 const granted = params.get("granted") === "none"

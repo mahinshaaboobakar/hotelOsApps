@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { recordedEscalated, recordedMine, recordedQuiet } from "../board/recorded/widget";
@@ -14,17 +14,17 @@ import { theBoard } from "../widgets/panel/the-board";
 const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
 
 function answering(answer: unknown, granted: readonly string[] = ["job.read"]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: granted },
     property: PROPERTY,
     call: () => Promise.resolve(answer),
     on: () => () => {},
-  };
+  });
 }
 
 /** A host that answers both widget reads and records what was asked of it. */
 function widgetHost(calls: { capability: string; method: string; params: unknown }[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: ["job.read"] },
     property: PROPERTY,
     call: (capability, method, params) => {
@@ -37,16 +37,16 @@ function widgetHost(calls: { capability: string; method: string; params: unknown
       return Promise.resolve(null);
     },
     on: () => () => {},
-  };
+  });
 }
 
 function unavailable(): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: ["job.read"] },
     property: PROPERTY,
     call: () => Promise.reject(new HostCallError({ kind: "unavailable", message: "no Jobs client" })),
     on: () => () => {},
-  };
+  });
 }
 
 describe("the jobs-now widget", () => {
@@ -93,12 +93,12 @@ describe("the jobs-now widget", () => {
 
   it("does not call the platform for a capability it was not granted", async () => {
     let called = false;
-    const panel = await jobsNow({
+    const panel = await jobsNow(hostDouble({
       identity: { id: "jobs", version: "0.1.0", capabilities: [] },
       property: PROPERTY,
       call: () => { called = true; return Promise.resolve(recordedQuiet); },
       on: () => () => {},
-    });
+    }));
     // The seam refuses without a round trip — asking for a capability nobody
     // granted is not worth one, and the answer is the platform's own: refused.
     expect(called).toBe(false);

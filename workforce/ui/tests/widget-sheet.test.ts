@@ -1,4 +1,4 @@
-import { HostCallError, causeOf, type HostApi } from "@hotelos/sdk";
+import { HostCallError, causeOf, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { attendanceToday } from "../widgets/panel/attendance-today";
@@ -35,12 +35,12 @@ import { WIDGET_CSS } from "../widgets/styles";
 type Kind = ConstructorParameters<typeof HostCallError>[0]["kind"];
 
 function failing(kind: Kind): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: () => Promise.reject(new HostCallError({ kind, message: "the test asked" })),
     on: () => () => {},
-  };
+  });
 }
 
 const PANELS = [shiftBoard, attendanceToday, pendingRequests, comingUp, onLeave];

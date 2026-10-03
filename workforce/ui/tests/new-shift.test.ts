@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -13,7 +14,7 @@ import { newShift } from "../screens/policy/dialog";
  */
 
 function host(calls: unknown[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.configure"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability: string, method: string, params?: unknown) => {
@@ -21,7 +22,7 @@ function host(calls: unknown[]): HostApi {
       return Promise.resolve({ id: "new", version: 1 });
     },
     on: () => () => {},
-  };
+  });
 }
 
 function type(form: HTMLElement, name: string, value: string): void {

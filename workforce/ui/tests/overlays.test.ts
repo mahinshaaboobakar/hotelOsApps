@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { recordedRegister } from "../roster/duty";
@@ -26,12 +26,12 @@ import { standDown } from "../screens/teams/stand-down";
  * doing when they arrive** — §9's own test — and every one on the shared parts.
  */
 
-const host: HostApi = {
+const host: HostApi = hostDouble({
   identity: { id: "workforce", version: "0.1.0", capabilities: [] },
   property: { timezone: "Asia/Kolkata", locale: "en-GB" },
   call: () => Promise.reject(new Error("not called")),
   on: () => () => {},
-};
+});
 const nothing = (): void => {};
 const detail = recordedTeams.detail;
 if (detail === null) throw new Error("the recorded teams carry an open team");

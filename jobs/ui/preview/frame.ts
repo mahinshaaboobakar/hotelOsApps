@@ -10,7 +10,7 @@
  * here is what a property would see.
  */
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { activate } from "../application";
 import type { BoardPage } from "../board";
@@ -104,7 +104,7 @@ function boardFor(state: string | null): BoardPage {
 const ONLY = params.get("only");
 
 function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine"): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: granted },
     property: PROPERTY,
     call(capability: string, method: string): Promise<unknown> {
@@ -137,7 +137,7 @@ function host(granted: readonly string[], widget?: "quiet" | "escalated" | "mine
     on(): () => void {
       return () => {};
     },
-  };
+  });
 }
 
 /**

@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -21,7 +21,7 @@ import { recordedWeek } from "../roster/recorded";
 interface Call { capability: string; method: string; params?: unknown }
 
 function host(calls: Call[]): HostApi {
-  return {
+  return hostDouble({
     identity: {
       id: "workforce", version: "0.1.0", capabilities: ["roster.read", "roster.plan"],
     },
@@ -33,7 +33,7 @@ function host(calls: Call[]): HostApi {
       return Promise.reject(new HostCallError({ kind: "unavailable", message: "not this test" }));
     },
     on: () => () => {},
-  };
+  });
 }
 
 async function settle(): Promise<void> {

@@ -23,18 +23,18 @@
 
 import { describe, expect, it } from "vitest";
 
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 
 import { perform } from "../book";
 import { notCancelled } from "../screens/booking";
 
 function failingWith(kind: string, message = "the service's own sentence"): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "guestops", version: "0.3.2", capabilities: ["stay.override"] },
     property: { timezone: null, locale: null },
     call: () => Promise.reject(new HostCallError({ kind, message } as never)),
     on: () => () => {},
-  } as HostApi;
+  }) as HostApi;
 }
 
 async function said(kind: string): Promise<string> {

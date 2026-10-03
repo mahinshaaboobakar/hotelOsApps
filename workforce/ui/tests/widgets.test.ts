@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
 import { attendanceToday } from "../widgets/panel/attendance-today";
@@ -26,7 +26,7 @@ import {
 
 /** A host that cannot answer — the shell today, with no Workforce client. */
 function unavailable(): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: null },
     call: () =>
@@ -34,7 +34,7 @@ function unavailable(): HostApi {
         new HostCallError({ kind: "unavailable", message: "no Workforce client" }),
       ),
     on: () => () => {},
-  };
+  });
 }
 
 /** A host that answers, so the live path is exercised too. */
@@ -42,12 +42,12 @@ function answering(
   answer: unknown,
   property: HostApi["property"] = { timezone: "Asia/Kolkata", locale: null },
 ): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property,
     call: () => Promise.resolve(answer),
     on: () => () => {},
-  };
+  });
 }
 
 /** A host that cannot answer, in a property whose locale is established. */
@@ -151,7 +151,7 @@ describe("every Workforce widget", () => {
 
   it("taps through with shell.open, naming no application", async () => {
     const asked: { capability: string; method: string; params: unknown }[] = [];
-    const host: HostApi = {
+    const host: HostApi = hostDouble({
       identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
       property: { timezone: "Asia/Kolkata", locale: null },
       call: (capability, method, params) => {
@@ -161,7 +161,7 @@ describe("every Workforce widget", () => {
         return Promise.resolve(capability === "roster.read" ? recordedShiftBoard : null);
       },
       on: () => () => {},
-    };
+    });
 
     const card = await shiftBoard(host);
     asked.length = 0;

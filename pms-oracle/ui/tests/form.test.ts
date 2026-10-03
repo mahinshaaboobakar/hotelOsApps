@@ -16,6 +16,7 @@ import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
 import { SECRETS, SETTINGS } from "../configuration";
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 
 const GRANTED = ["integration.read", "integration.configure"];
@@ -29,7 +30,7 @@ const CONFIGURATION = {
 };
 
 function host(granted: readonly string[] = GRANTED): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "pms-oracle", version: "0.1.0", capabilities: granted },
 
     // The host hands every module its property's zone and locale — the SDK
@@ -40,7 +41,7 @@ function host(granted: readonly string[] = GRANTED): HostApi {
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: () => Promise.resolve(CONFIGURATION),
     on: () => () => {},
-  };
+  });
 }
 
 /** Mount the module and let its first call resolve. */

@@ -1,4 +1,4 @@
-import { HostCallError, type HostApi } from "@hotelos/sdk";
+import { HostCallError, hostDouble, type HostApi } from "@hotelos/sdk";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { activate } from "../application";
@@ -13,7 +13,7 @@ const ALL = ["job.read", "job.create", "job.assign", "job.complete", "job.cancel
 const PROPERTY = { timezone: "Asia/Qatar", locale: "en-GB" };
 
 function host(granted: readonly string[] = ALL, answers: Record<string, unknown> = live()): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "jobs", version: "0.1.0", capabilities: granted },
     property: PROPERTY,
     call: (capability, method) => {
@@ -23,7 +23,7 @@ function host(granted: readonly string[] = ALL, answers: Record<string, unknown>
         : Promise.resolve(answer);
     },
     on: () => () => {},
-  };
+  });
 }
 
 function live(): Record<string, unknown> {

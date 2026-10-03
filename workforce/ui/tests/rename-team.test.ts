@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -14,7 +15,7 @@ const open = recordedTeams.detail;
 if (open === null) throw new Error("the recorded teams carry an open team");
 
 function host(calls: unknown[]): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["posting.assign"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: (capability: string, method: string, params?: unknown) => {
@@ -22,7 +23,7 @@ function host(calls: unknown[]): HostApi {
       return Promise.resolve({ id: open!.team.id, version: open!.team.version + 1, name: "x" });
     },
     on: () => () => {},
-  };
+  });
 }
 
 const CONFIRM = ".acts button:last-of-type";

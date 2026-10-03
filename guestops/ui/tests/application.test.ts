@@ -14,13 +14,14 @@ import { describe, expect, it } from "vitest";
 
 import { activate } from "../application";
 import { recordedAttention, recordedStay, recordedToday } from "../book/recorded";
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 
 const GRANTED = ["reservation.read", "stay.override", "registration.capture", "request.handle"];
 
 /** A host that answers from the recorded facts, granting what is asked for. */
 function host(granted: readonly string[] = GRANTED): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "guestops", version: "0.1.0", capabilities: granted },
 
     // The host tells a module its property's zone and locale. Both are `null`
@@ -37,7 +38,7 @@ function host(granted: readonly string[] = GRANTED): HostApi {
       return Promise.resolve(recordedToday);
     },
     on: () => () => {},
-  };
+  });
 }
 
 /** Mount the module and let its first screen resolve. */

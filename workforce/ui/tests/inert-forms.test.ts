@@ -1,3 +1,4 @@
+import { hostDouble } from "@hotelos/sdk";
 import type { HostApi } from "@hotelos/sdk";
 import { describe, expect, it } from "vitest";
 
@@ -26,12 +27,12 @@ const INVENTED = [
 ];
 
 function leaveHost(): HostApi {
-  return {
+  return hostDouble({
     identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.read"] },
     property: { timezone: "Asia/Kolkata", locale: "en-GB" },
     call: () => Promise.resolve(recordedLeave),
     on: () => () => {},
-  };
+  });
 }
 
 async function leaveForm(): Promise<HTMLElement> {
@@ -44,12 +45,12 @@ async function leaveForm(): Promise<HTMLElement> {
 }
 
 /** A host the shift form is built with; nothing here presses its confirm. */
-const shiftHost: HostApi = {
+const shiftHost: HostApi = hostDouble({
   identity: { id: "workforce", version: "0.1.0", capabilities: ["roster.configure"] },
   property: { timezone: "Asia/Kolkata", locale: "en-GB" },
   call: () => Promise.reject(new Error("the form sent something while it opened")),
   on: () => () => {},
-};
+});
 
 function shiftForm(): HTMLElement {
   const form = newShift(shiftHost, () => {}, () => {}).querySelector(".sheet");
