@@ -76,6 +76,46 @@
 # no process**, which is `apply_connector` doing exactly what `db_connections: 0`
 # and the absent `database:` block declare.
 #
+# **0.1.1 FAILED TO INSTALL ON THE OWNER'S PROPERTY, AND THIS BLOCK'S
+# CONCLUSION IS WHY THAT IS WORTH WRITING HERE.** The block above argues
+# `completable()` answers `Ok(())` and both platform halves landed, which reads
+# as *Part B can be attempted* — and the owner attempted it. The Kernel refused.
+# Architect-quoted, 2026-10-03T08:26:32Z, and NOT re-read by me: I could not
+# locate the record under `%LOCALAPPDATA%\HotelOS\logs` or
+# `ProgramData\HotelOS\logs`, and `[observability]` names no `log_dir`, so
+# where it landed is unestablished by me:
+#
+#     update_failed - compensating · package pms-oracle · steps 0
+#     "pms-oracle declares no runtime.principal, so the version being
+#      restored has no certificate directory"
+#
+# **The absence it names is RULED AND CORRECT** — see `runtime:` below, and
+# ADR 0019. So the refusal blames the package for an absence the architecture
+# requires, which a reader will act on wrongly.
+#
+# **AND THE CAUSE IS NOT WHAT IT FIRST READS AS. The connector INSTALL path
+# EXISTS and the UPDATE path is what has none:**
+#
+#     install.rs:335     calls `apply_connector` — the connector path
+#     command.rs:279     "connector: `apply_connector` seals no credential and
+#                        starts nothing"
+#     the refusal        "the version being RESTORED" — restoration is the
+#                        update's COMPENSATION, not an install
+#
+# So *"the platform has no install path for a connector"* is too broad: 0.1.0
+# installed exit 0 through that path, recorded above. **The owner's operation
+# was an UPDATE over an installed 0.1.0**, and the compensation step wants the
+# restored version's certificate directory, which a connector has none of
+# BY RULING.
+#
+# **The consequence, offered as a measurement and not acted on**: an uninstall
+# of 0.1.0 followed by a FRESH install of 0.1.1 would take the path that works,
+# and `apply_connector` starting nothing is a property rather than a failure —
+# the Hub dispatches an invocation in-process (`ConnectorDispatcher.cs:82`). So
+# Part B's platform-served column may not be blocked on the Connector Runtime
+# Supervisor at all. **Whether to lift that hold is not this file's to decide,
+# and nothing here has been run against the owner's property.**
+
 # **What has NOT changed, and the distinction is the whole of it.** ADR 0141
 # §Consequences still governs — *"`pms-oracle` may exist, build and be tested,
 # and stays unpublished"* — and the reason `floor()` used to give is still true
