@@ -57,7 +57,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 
 /** The runtime identifier this platform ships. Natives for any other are dropped. */
@@ -109,8 +109,14 @@ function published(root) {
       if (entry.isDirectory()) { walk(full); continue; }
       const rel = relative(root, full).replaceAll("\\", "/");
       // A native sits at runtimes/<rid>/native/x.dll in a publish tree and at
-      // backend/x.dll in a package — the flattening `jobs-0.4.3` shows.
-      found.set(rel.startsWith("runtimes/") ? basename(rel) : rel, full);
+      // backend/x.dll in a package — the flattening `jobs-0.4.3` shows. Another
+      // platform's is dropped rather than flattened: a Windows MSI carrying 24
+      // Linux and macOS natives is a measured `$extra` defect in this estate.
+      if (rel.startsWith("runtimes/")) {
+        if (rel.startsWith(`runtimes/${RID}/`)) found.set(basename(rel), full);
+        continue;
+      }
+      found.set(rel, full);
     }
   };
   walk(root);
@@ -154,17 +160,38 @@ function predecessorFloor(id) {
 }
 
 function main(argv) {
-  const args = argv.slice(2).filter((a) => !a.startsWith("--"));
-  if (args.length !== 1) throw new Error("usage: pack-package.mjs <package-dir> [--out <dir>]");
-  const dir = resolve(args[0]);
-  const outFlag = argv.indexOf("--out");
+  // A filter on `--` drops flags and keeps their VALUES, so `--out <path>`
+  // arrived as a second positional and the usage line refused its own flag.
+  // Found by staging the third kind: the two that worked never passed one.
+  let given = null;
+  let chosen = null;
+  const rest = argv.slice(2);
+  for (let i = 0; i < rest.length; i += 1) {
+    if (rest[i] === "--out") {
+      chosen = rest[i + 1] ?? null;
+      if (chosen === null || chosen.startsWith("--")) throw new Error("--out needs a directory");
+      i += 1;
+      continue;
+    }
+    if (rest[i].startsWith("--")) throw new Error(`unknown flag ${rest[i]}`);
+    if (given !== null) throw new Error("one package directory, not several");
+    given = rest[i];
+  }
+  if (given === null) throw new Error("usage: pack-package.mjs <package-dir> [--out <dir>]");
+  const dir = resolve(given);
   const facts = manifestFacts(dir);
-  const out = outFlag === -1
-    ? join(dir, ".build", `stage-${facts.version}`)
-    : resolve(argv[outFlag + 1]);
+  const out = chosen === null ? join(dir, ".build", `stage-${facts.version}`) : resolve(chosen);
 
   process.stdout.write(`packaging ${facts.id} ${facts.version}, kind ${facts.kind}\n`);
-  rmSync(out, { recursive: true, force: true });
+  // REFUSED rather than removed. `guestops/.build/stage-0.3.5` existed from
+  // another stream's cut, and the first version of this would have deleted it
+  // without a word — a tool that makes a destructive act cheap and silent.
+  // A same-version staging is the version-identity collision anyway, so there
+  // is nothing here worth overwriting.
+  if (existsSync(out) && readdirSync(out).length > 0) {
+    throw new Error(`${relative(process.cwd(), out)} already holds a staging — `
+      + "remove it yourself or pass --out, because it may be somebody else's cut");
+  }
   mkdirSync(out, { recursive: true });
   cpSync(join(dir, "manifest.yaml"), join(out, "manifest.yaml"));
 
@@ -182,13 +209,17 @@ function main(argv) {
     const tree = published(publishDir);
     const needed = runtimeClosure(publishDir, facts.assembly);
 
+    // THE PUBLISH TREE IS THE PAYLOAD, minus what a property has no use for —
+    // `e0361fb`'s arithmetic, and `deps.json` is the ASSERTION rather than the
+    // source. Deriving FROM deps.json dropped four files guestops-0.3.5 ships:
+    // `appsettings.json`, `web.config`, the static-assets manifest and the
+    // Temporal native. It names the managed closure and is silent about config
+    // and content, and a service with no `appsettings.json` starts and reads
+    // nothing. Found by staging the third kind; the first two have no config.
     const staged = new Map();
     for (const [rel, full] of tree) {
-      const keep = needed.has(basename(rel))
-        || basename(rel) === facts.assembly.replace(/\.dll$/u, ".exe")
-        || /\.(runtimeconfig|deps)\.json$/u.test(rel)
-        || basename(rel) === facts.assembly;
-      if (keep && !NOT_SHIPPED.some((ext) => rel.endsWith(ext))) staged.set(rel, full);
+      if (NOT_SHIPPED.some((ext) => rel.endsWith(ext))) continue;
+      staged.set(rel, full);
     }
     const absent = [...needed].filter((n) => ![...staged.keys()].some((s) => basename(s) === n));
     if (absent.length > 0) throw new Error(`deps.json names these and the publish tree lacks them: ${absent.join(", ")}`);
