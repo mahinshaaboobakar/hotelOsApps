@@ -764,25 +764,47 @@ now verified at the line rather than asserted.** It is a safe optimisation of a
 traced flow, and the non-200/204 throw fixes the reference's infinite loop,
 which is §2.2's recorded defect seen in its own source.
 
-### ◐ Decision 3 — a traced ALTERNATIVE we did not take, and it is a real divergence
+### ✅ Decision 3 — THERE IS NO DIVERGENCE. We already key on OHIP's own id
+
+> ⚠ **THIS SECTION CLAIMED ONE, AND THE CLAIM WAS MINE AND WRONG.** It read
+> *"ours `:176` `PayloadIdentity.For(EventPayload, bytes)` — a hash of the
+> bytes"*, and called it *"a traced ALTERNATIVE we did not take"*. **I read the
+> ARGUMENT and not the FUNCTION.** `bytes` is what is passed in; what comes out is
+> the source's identifier wherever the source has one.
 
 ```text
-reference :60   .eventId(businessEvent.getBusinessEventId().getId())
-                OHIP's OWN identifier - and OracleEvent.java:24 is a plain
-                String with NO unique index, so it is STORED, not deduplicated
-ours      :176  PayloadIdentity.For(EventPayload, bytes) - a hash of the bytes
+reference  :60   businessEventId.getId()          OHIP's own identifier
+ours             PayloadIdentity.For dispatches ON THE KIND:
+   ohip-business-event  ->  BusinessEventId(payload)   THE SAME OHIP id
+   ohip-guarantee       ->  GuaranteeKey(payload)      the source's identity
+   every other kind     ->  SHA-256 of the bytes       because those kinds
+                                                       carry no source identity
 ```
 
-> **OHIP supplies a natural identifier and we do not key on it.** The reference
-> stores it without enforcing uniqueness, so *dedupe* is ours either way —
-> ADR 0255 §2 gives the connector the key — but the vendor's id is stable
-> across re-serialisation where a byte hash is not.
+**And the re-serialisation argument the comparison was meant to raise is already
+made at the site, in its own words:**
 
-**Ours is argued at the site** (*"the same bytes a quarantined payload is
-re-submitted with, so a record drained and later re-submitted cannot become two
-facts"*) **and the alternative is now cited rather than absent.** *A divergence
-with both sides named is a decision; one with only our side named is a decision
-nobody can review.*
+> *"Two kinds carry the source's own identity and the rest are digested. An OHIP
+> business event and a guarantee both name a fact the source can restate — so
+> keying them on the bytes would make two deliveries of one unchanged fact into
+> two facts, and a policy the property edited into a third, with nothing saying
+> which is current (ADR 0147)."*
+
+**So the vendor id is preferred exactly where it exists, for exactly the reason
+the comparison would have reached** — and the digest is the fallback for kinds
+that have no id, never a replacement for one that does.
+
+**The file also records the version of this error that came before mine.** The
+drain once returned `Guid.CreateVersion7()` for an id-less event, and the digest
+replaced it: *"the SAME bytes get the SAME key, so a redelivered malformed event
+deduplicates instead of arriving twice. The identifier was strictly weaker, and
+it was mine."*
+
+> **Second time today I published a claim from a call site without reading the
+> callee** — the first was `ConnectorDispatcher.cs:82`, where a refusal made in
+> the Hub's own process became *"the Hub dispatches in-process"*. *Reading a
+> value means reading what RECEIVES it; reading a call means reading what it
+> RETURNS.*
 
 ### So the §3 row changes
 
