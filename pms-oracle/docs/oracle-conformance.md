@@ -33,7 +33,7 @@ name it, which is what makes the zero-assignments result a measurement rather
 than a broken pattern; the `RejectionReason` sweep returned 31 sites across five
 reasons.
 
-**NOT REACHED, by choice and with the reason** — Direction B is **complete for
+**DIRECTION B IS NOW COMPLETE** — §3's second pass ran, over all 48 files' derived purposes. *This block said it was* **complete for
 the drain path and partial for the other 40 backend files**. The nine claims
 were the named priority and they are where the `# Errors` exposure is; a full
 48-file behaviour sweep against three chapters is a second pass. **Named as
@@ -244,9 +244,33 @@ documented at the line, and **in no chapter**:
 > pages would silently drop the remainder of the queue. The argument is
 > sound and it is stated nowhere a designer would meet it.
 
-**NOT REACHED**: the other 40 backend files, by choice (§0). *A chapter home
-exists for the vocabularies, the normalisers and the hosting surface via §1.1–1.3;
-whether every behaviour in them is stated there is the second pass.*
+### The second pass, run — and TWO concepts are in no chapter at all
+
+**All 48 files' stated purposes were derived**, and the concepts they name were
+probed against **Oracle's three chapters and the platform's 53**, with controls:
+`OHIP` 3 of 3 Oracle chapters, `connector` 48 platform files, a fabricated term
+0. *An earlier run of these probes returned five zeros and they were an
+instrument artefact — `grep -E` with `\|` escapes the pipe into a literal, so
+every probe searched for a string containing one. The controls are what made the
+re-run worth doing.*
+
+**COVERED**, so these are not findings: the refusal vocabulary (chapter 02), the
+declared-vocabulary reading and per-integration settings (chapter 03 §§1.3, 2.9).
+
+| | behaviour | where it rests |
+|---|---|---|
+| ⚠ | **the two-part on-site join** — an on-site check-in arrives in **two halves that must be paired**: `PartJoinInvocation` serves it, `OnSiteJoinKey` names the key, `OnSiteStayStatus` decides *which half* a status belongs to, and `OnSiteNormaliser` returns *"half of one"* | **NO CHAPTER, EITHER REPOSITORY.** And **`join` is a DECLARED CAPABILITY** — `manifest.yaml:409`, `implements: [dedupe_key, join]`. `CONN-Q25` ruled the key's *fields*; the concept that a check-in arrives in halves is designed nowhere |
+| ⚠ | **the polling tiers** — `OhipPollingSchedule` is *"how often to ask OHIP, which is not one number"* | **a FRAME, not a chapter.** The file cites *"frame 3's two tiers"*. A drawing is not a design document, and an illustration does not define architecture |
+
+> **The first is the more serious by a distance.** A declared capability is a
+> promise the Hub dispatches against, and `$extra` is the half no input boundary
+> reaches: nothing in the estate would ever report that `join` has no design,
+> because every check asks whether what was *expected* is present.
+
+**And neither is a defect in the code.** Both are implemented coherently and both
+are cited — one to a ruling that settles a narrower question, one to a frame.
+*The finding is that the design record has a hole where the implementation does
+not.*
 
 ---
 
