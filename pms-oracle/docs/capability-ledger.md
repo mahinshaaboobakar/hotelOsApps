@@ -261,8 +261,44 @@ management interface."*
 
 **It does not say a capability has been observed arriving on a property.** Both
 fact-classes have built normalisers and the dispatcher reads `implements`; whether
-any of it has run against a real OHIP tenant is Part B's question, and Part B's
-form for a package with no screens is with the planner.
+any of it has run against a real OHIP tenant is Part B's question.
+
+### Part B's form is RULED — ADR 0369
+
+**This section said Part B's form for a package with no screens was "with the
+planner". It is ruled**, and the sentence is corrected rather than deleted so a
+reader can see when the answer arrived.
+
+> **An installable connector owes the platform-served portion of Part B, but
+> *reachable by a person* is structurally N/A unless that connector actually
+> exposes a human-operated product surface.**
+
+```text
+Platform-served         PASS — exercised against the installed .hopkg,
+                        through the real Hub / session / runtime path
+Reachable by a person   N/A  — connector exposes no human-operated surface
+```
+
+**Two prohibitions the ruling names, and both are recorded here because this is
+the file a later author will edit:**
+
+* **Never write "Connector Part B = N/A."** That recreates `CONN-Q15`'s stale
+  collapse and discards the served proof ADR 0152 holds to be independently
+  meaningful.
+* **Do not manufacture a person path.** *"An operator can click Sync in
+  Integration Hub"* is a **Hub** capability, and its human reachability belongs
+  to the Hub's surface. It cannot be borrowed to make this column green.
+
+**And the classification follows the ARTIFACT, not the kind** — a future
+connector that ships a human surface loses the N/A. This package ships a
+`ui.module` that Software Center hosts (`CONN-Q9` (b)), so whether that counts as
+a human-operated *product* surface is the question a reader must not answer by
+assumption: it is a configuration form inside another application's module, not
+this connector operating a property.
+
+**Part C stays unruled — `CONN-Q92`, open**, and both obvious fillings were
+rejected: N/A, and *invoke its Hub API without UI*. Part A applies where the UI
+artifact exists, and ADR 0054's test split is unchanged.
 
 **And it does not say the permissions are granted.** The manifest requests; the
 administrator approves; the Kernel decides per user. The manifest's own words:

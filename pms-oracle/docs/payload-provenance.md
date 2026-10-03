@@ -296,11 +296,19 @@ NOT CITED           onsite-room-status for oracle-onpremise — §5, because
                     nothing anywhere sources it
 FLOW, NOW CITED     §10 and §11 — both background services, the drain
                     and the auth implementation, each read WHOLE
-STILL NOT READ      209 of Reservation.java's 251 lines, and the four larger
-                    normalisation implementations: ReservationServiceImpl (272),
-                    HousekeepingServiceImpl (152), OnPremiseReservationServiceImpl
-                    (385), WebReservationServiceImpl (433). Those are FIELD
-                    MAPPING, which §1–§5 cover from the models' side.
+FLOW, SECOND PASS   §12 — the three remaining CLOUD implementations, read
+                    WHOLE: Guarantee (79), Housekeeping (152), Reservation (272)
+STILL NOT READ      209 of Reservation.java's 251 lines, and the two ON-SITE
+                    implementations: OnPremiseReservationServiceImpl (385) and
+                    WebReservationServiceImpl (433)
+
+                    — AND THE SENTENCE THAT STOOD HERE WAS WRONG. It read
+                    "Those are FIELD MAPPING, which §1–§5 cover from the
+                    models' side." All three cloud implementations carry FLOW:
+                    a cache with a defective key, two commented-out message
+                    listeners, a hardcoded tenant, and an upsert decided by a
+                    local existence check. §12 is what reading them found,
+                    and the classification was mine rather than measured.
 ```
 
 **This paragraph said *"the shape is cited; the flow is not"*, and named the flow
@@ -424,3 +432,120 @@ and its own file says so, which is the honest shape rather than this one.
 finding is live in the reference's own code rather than only in its models:
 `OracleOnPremiseBackgroundService:45` filters
 `Criteria.where("roomStatus").is("Checked In")`.
+
+
+---
+
+## 12 · The flow, second pass — and it corrected a classification of mine
+
+**§9 said the three remaining cloud implementations were "FIELD MAPPING, which
+§1–§5 cover from the models' side." That was wrong, and reading them is what
+established it.** All three carry flow, and two carry defects nothing in the
+models could have shown.
+
+Read WHOLE: `OracleCloudGuaranteeServiceImpl` (79),
+`OracleCloudHousekeepingServiceImpl` (152),
+`OracleCloudReservationServiceImpl` (272).
+
+### ⚠ The guarantee service is a cache, and its key omits the parameter that varies the answer
+
+```text
+:36-39  CacheConfiguration  100 entries, timeToLiveExpiration(1 hour)
+:41     its own CacheManager, built in a field initialiser
+:52     guaranteeCache.containsKey(property.getHotelId())   ← the KEY
+:59     .queryParam("arrivalDate", arrivalDate)             ← the VARYING INPUT
+:63     guaranteeCache.put(property.getHotelId(), guarantee)
+```
+
+**The cache is keyed on the hotel; the request is keyed on the hotel AND the
+arrival date.** So a guarantee fetched for one arrival date is served for every
+other arrival date at that hotel for up to an hour. *A cache key that omits a
+request parameter is a wrong answer with a time limit.*
+
+**And our architecture moves the cache out of the connector entirely** — the
+manifest's own words, quoted in the ledger: *"the Hub owns the inbox, the queue,
+retry and the cache (ADR 0128 §5), so this process holds no durable state of its
+own."* **This defect is the argument for that boundary rather than an illustration
+of it.**
+
+Also: `:62` `.resGuarantees.get(0)` takes the first of a list with no emptiness
+check; `:68-69` catches `Exception` and calls `e.printStackTrace()`; `:51` and
+`:71` return `null`.
+
+### ⚠ Both housekeeping listeners are commented out — making it THREE entry points
+
+```text
+:39   // @RabbitListener(bindings = @QueueBinding(value = @Queue("pms.room.status"), …
+:51   // @RabbitListener(queuesToDeclare = @Queue("room.status.change"))
+```
+
+With §10's scheduler and token refresher, **every entry point into the Oracle
+cloud flow is commented out.** That is a pattern rather than three instances: the
+reference's triggers are all disabled, so the flow it documents has no live
+caller anywhere.
+
+### ⚠ A hardcoded property id, while the request carries its own
+
+```text
+:58  instioService.fetchActiveInstioProperty("6257ef1…")   ← a LITERAL
+:72  the same literal, in the sibling method
+:60  log.error("Property {} Not Active", request.getSiteId())   ← the request's
+:74  the same                                                     own id, used
+                                                                  ONLY to log
+```
+
+**Both housekeeping paths resolve one hardcoded tenant and use the request's
+`siteId` only in the failure message.** A multi-tenant surface pinned to a
+constant, and the log makes it look as though the request decided.
+
+### And this settles the `housekeepingStatus` ambiguity §7 surfaced
+
+The reference reads **both** confusable fields, in one builder:
+
+```text
+:86  reservationStatus  ← parseInstioReservationStatus(…getReservationStatusList())
+                          the LIST overload — §6's last-wins reduce, at its call site
+:87  roomStatus         ← …getHousekeepingRoomStatus().getHousekeepingRoomStatus()
+:88  foStatus           ← …getFrontOfficeStatus()
+:89  hkStatus           ← …getHousekeepingStatus()
+```
+
+> **So `housekeepingRoomStatus` maps to `roomStatus`, and `housekeepingStatus`
+> maps to `hkStatus`.** CLAUDE.md:408's example — *a rejection quoting
+> `"housekeepingStatus"`* — corresponds to **`hkStatus`**, the housekeeping axis,
+> and not to the room-status axis one letter-group away.
+
+*That is the live ambiguity answered from the reference's own mapping rather than
+by choosing. The constitution's sentence is the architect's to amend; this is the
+measurement it was missing.*
+
+### The reservation service: an upsert decided locally, and two bare throws
+
+```text
+:104  if (isReservationExist(reservationId)) method = HttpMethod.PUT;
+        → POST vs PUT chosen by a LOCAL existence check, not by the vendor
+:120-124  if (!status.equals("booking")) { if (!validRoom(…)) return null; }
+:127-128  if (successCode != null) log.error("…updated at INSTIO:: {}")   ← SUCCESS
+:163  return null on RestClientException
+:178, :181  throw new RuntimeException("Invalid Data")   — twice, two words
+:226-241  four branches on "booking" / "checkIn" / "checkOut" / "cancelled"
+            — §6's camelCase ACTION vocabulary, used as a dispatch
+:142  if (dumb)  — a branch on a variable named `dumb`
+```
+
+**The four-branch dispatch at `:226-241` is where §6's first overload is
+consumed**, which is what makes the two vocabularies a live hazard rather than a
+curiosity: the action names are a control-flow key.
+
+### Flow defects, second pass
+
+| | cited at | our position |
+|---|---|---|
+| **a cache key omitting a varying parameter** | `Guarantee:52`, `:59`, `:63` | the cache is the Hub's (ADR 0128 §5); the connector holds no durable state |
+| **all three remaining triggers commented out** | `Housekeeping:39`, `:51`, with §10's `:40` and `:46-58` | ADR 0255 §3: Temporal owns the schedule, the connector owns `NextPollAfter` |
+| **a hardcoded tenant id in a multi-tenant path** | `Housekeeping:58`, `:72` | the Hub stamps `property_id` from the session binding and ignores anything a connector supplies — ADR 0128 §6 |
+| **`log.error` for success** | `Housekeeping:119`, `Reservation:127-128` | third and fourth instances, after §11's two |
+| **`e.printStackTrace()`** | `Guarantee:69`, `Housekeeping:107`, `:124` | a stack trace to stdout in place of a diagnostic |
+| **`.get(0)` with no emptiness check** | `Guarantee:62`, `Housekeeping:82`, `Reservation:94`/`:97` | four sites |
+| **`throw new RuntimeException("Invalid Data")`** | `Reservation:178`, `:181` | a two-word message for two different causes; our refusals name the field and the raw value in the vendor's own spelling (page 75 §1) |
+| **POST/PUT from a local existence check** | `Reservation:104` | our upsert is the Hub's reconciliation against the verified signed manifest, which cannot disagree with itself |
