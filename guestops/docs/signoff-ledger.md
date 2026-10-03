@@ -20,6 +20,42 @@ data, then B on the installed build.
 
 ---
 
+## 0 · THE SIGNOFF — every row, its disposition, its evidence
+
+**A signoff leads this document; the sections below are how each row was
+reached.** Dispositions as of 2026-10-03.
+
+| | Row | Evidence |
+|---|---|---|
+| **PROVEN** | **Capabilities.** 8 declared, 21 enforcement sites, none enforced-but-undeclared, none declared-but-unenforced | derived from the authorization CALL on both sides · §1 |
+| **PROVEN** | **Part A fidelity, FLAT at 56** across three rounds of change — `Today.stale`, the count fix, DD's hostDouble over 52 files | 17 frames, 0 unreached, exit 0; arithmetic closes 31+1+1+1+22 · `d4efde97` |
+| **PROVEN** | **`ContextNeighbours` reaches Context.** It consumed `Resolution` alone and was refused for fields it never read | `c680ea8a`, build 0/0 |
+| **PROVEN** | **The booking's refusal is understood and repaired.** `GetPropertySummary` is user-scoped by ADR 0212; `AtAsync` now reads the platform-scoped `GetPropertyFacts`, and an unset zone returns `StayTime.None` rather than throwing | `136052a3`, build 0/0 in a slot I held |
+| **PROVEN** | **ADR 0211's thirteen-day precondition.** A GuestOps → Context call HAS succeeded on this machine | the architect's measurement: `GetOperatingDay` 358 mentions, all 16 user-scoped refusals on `GetPropertySummary`. *Not my stated condition — I had permitting code and no observed success, and was right not to close it on that alone* |
+| **PROVEN** | **`Today.stale` no longer throws on the first screen of the walk** | `TodayView` sends five keys and not `stale`; positive control: the same view's `connected` IS sent · `d1d01260` |
+| **UNRULED** | **13 capabilities** whose controls the design draws enabled and the application cannot perform — **the owner's**, drawn both ways to their end states | `docs/mockups/09-controls-the-desk-cannot-press.html` · `7879f075` |
+| **UNRULED** | **The staleness mechanism** that `Today.stale` is drawn for, and nothing computes | planner / owner |
+| **UNBUILT** | **No booking has been COMPLETED end to end.** The refusal is repaired; the proof is a run | the owner's, on the installed build |
+| **UNBUILT** | **0.3.5 is cut and not installed**, so `protected_personal_data` is unproven at install | **MM** · `sha256:9c8eed08…` |
+| **UNPROVED — BY CONSTRUCTION** | the gRPC door's own refusals; every NESTED response field, since the wire/fixture comparison reads top-level keys only; `attention`'s shape, answered through a paging helper | §2a |
+| **UNPROVED — BY CHOICE** | the Part C drivers are not re-pointed at the wire. The module door's `Draft` is nine fields with five hardcoded null — a narrower aperture, so re-pointing would silently stop driving most positions | §3 |
+| **NEVER — by omission** | none outstanding | — |
+
+> **What this signoff does NOT say.** It does not say a control works — that is
+> Part B, and Part B is the owner's walk. Every row is a statement about what was
+> measured and by what, and the two UNBUILT rows are what stand between here and
+> a signed Part B.
+
+**And the number the owner is asked for is 13, not 22** — narrowed three times,
+each time by deriving rather than counting: 22 differing nodes → 21 controls
+(one node is label text) → 16 reasons, not the 15 a grep finds, because the
+walk-in's is composed by `missing(draft)` at render → **13**, after three turn
+out not to be capability gaps at all: a property fact, a data state and an
+incomplete form. *They are drawn as what they are rather than excluded silently,
+because an exclusion taken on trust is not a decision.*
+
+---
+
 ## 1 · Capabilities — keyed on where authorization is ENFORCED
 
 Derived rather than hand-listed: the manifest side read from `manifest.yaml`,
