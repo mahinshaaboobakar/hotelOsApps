@@ -284,7 +284,7 @@ unconditional are separated, because a table calling a conditional greying
 | `Export` · `stay/index.ts:313` | **f4 OFF**, reason in the label | **MATCHES.** SHELL-Q23's file-save half — a platform gap, not GuestOps' |
 | `＋ Raise a job`, Jobs absent · `:321` | **f6 OFF** — *not f5b, which does not exist* | **MATCHES.** `APPS-Q2`: an absent neighbour loses its capability, never the flow |
 | `＋ Log a request` · `requests-tab.ts:64` | **f5 and f6 LIVE** | **MATCHES** — *conditional*, off only where the host serves no method. Flows §10: the request is recorded *"always, installed or not"* |
-| `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE**, `btn pri`, in the HEADER | **the CAPABILITY IS BUILT AND REACHABLE** — `requests-tab.ts:84` already draws `Log and raise a job` live. What is off is the header's second affordance, and **what it opens is drawn nowhere** — see below |
+| `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE**, `btn pri`, TITLE BAR, tab-scoped by the owner's own words | **IT OPENS A FORM — f5 draws it open.** Not navigation, and not the body's control: `＋ Log a request` logs with NO job. **Two of the form's five fields are carried; `Kind`, `Priority` and `Detail` are carried by nothing, and `Priority` contradicts the flows page** — see below |
 | `Ask for service` · `:326` | **f7 LIVE** — *not f6* | **UNBUILT — and the RECORD is unruled.** Flows §10 rules the concept (*"the same shape, from Room Care"*); no servicing write exists and `handOff` hands off to Jobs by name — see below |
 | `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **THE LABEL IS CORRECT AND RULED — ADR 0212's own Consequences name GuestOps' *"forty-two interim 'the PMS' sentences"* and say they take the connected system's name *"once this ships"*.** The build draws today's ruled state and the page draws the end state. **The CONTROL waits on an ADDRESS**, whose pattern is ruled AND BUILT — see below |
 | `Keep 214` · `Take Opera's 208` · `banner.ts` | **f3 LIVE** — `btn sm pri` and `btn sm` | ✅ **BUILT — `482d23be`, `b468fc05`.** And the premise was wrong in my favour: **`ReconciliationService.ClearAsync` carried the whole ruling, with three tests driving it, reachable by NOTHING** — no module arm, no gRPC method, no caller outside `tests/`. Not *mechanism ruled, door missing* but *service built and tested, door missing*. Probes: 2 of 281 (UI, a split), 1 of 7 (the arm removed) |
@@ -424,6 +424,114 @@ it, and the flows page draws the flow without one. **Two readings — route to t
 tab and focus the input, or open a dialog — and the page draws neither**, so
 building either would be a design decision wearing a wiring change. *Reported
 rather than chosen: the owner draws.*
+
+#### ⚠ ＋ RAISE A JOB OPENS A FORM, AND TWO OF ITS FIVE FIELDS ARE CARRIED
+
+**Three readings of this control were wrong, mine and the architect's, and all
+three assumed a CATEGORY the measurement could not establish.**
+
+```text
+I measured   actions() is keyed per tab, so the button is drawn only on Requests
+I concluded  navigating there is a no-op  -> read it as NAVIGATION
+the architect
+  concluded  "a frame drawn in its post-NAVIGATION state is the destination"
+the owner    "＋ Raise a job only shows when we click the 3 tab - each each
+             there on buttons (some have) - so this button not always in in
+             the bar"
+             -> the title bar's action area IS per tab. My measurement was
+                the SPECIFICATION.
+and the frame
+  settles it f5 draws the RAISE FORM OPEN, twenty lines below the button. It
+             is the post-CLICK state, and the destination is a FORM.
+```
+
+> **A correct measurement of a mechanism does not say whether the mechanism is
+> the specification or the defect, and nothing in the measurement can.** *Third
+> instance from me in one day: `0 .inp` read as a missing form when the content
+> WAS the data; `actions()` per tab read as a gap when it is the contract; six
+> `GetPropertySummary` text hits read as two call sites when all six are prose.*
+
+##### And the two controls are not one — I had that wrong too
+
+**The frame's own caption**: *"A request is a fact about the guest's stay and
+lives here whether or not any work follows from it."*
+
+```text
+＋ Log a request   in the BODY. Records a request. NO JOB.
+＋ Raise a job     in the TITLE BAR, tab 3. Opens the form that CREATES one.
+```
+
+*I reported the body control as "the control that actually raises". It logs —
+and conflating them is what made the header one look redundant.*
+
+##### The form, read as RENDERED TEXT, against what the record and the event carry
+
+```text
+Raise a job   From Rajesh Pillai's stay · room 214 · in house until 4 Sep
+What is wrong   "AC not cooling"                       -> StayRequest.Text        ✓
+Kind            "Engineering ▾"                        -> CARRIED BY NOTHING
+Priority        "Guest in house — urgent ▾"             -> CARRIED BY NOTHING
+Where           "Room 214 from the stay"               -> StayRequestRaised.RoomId ✓
+                "the room comes from the stay's current assignment"  DERIVED, not entered
+Detail          "Guest reports the room is not cooling…" -> CARRIED BY NOTHING
+Cancel · Raise job
+```
+
+**`StayRequest`** holds `Id · StayId · Text · LoggedBy · LoggedAt · HandedOff ·
+CorrelationId · JobId`. **`StayRequestRaised`** carries `RequestId · StayId ·
+PropertyId · RoomId · Text · CorrelationId`. *So the flow the form's caption
+describes — "records a request on the stay and announces it" — is built, and
+`LogAsync(…, handOff: true)` is it.*
+
+##### ⚠ AND `Priority` CONTRADICTS AN APPROVED PAGE — both statements quoted
+
+**`priority` appears EXACTLY ONCE in this application's entire documentation**,
+and it is in the flows page:
+
+> **`02-guestops-flows.html`**: *"Announced with the stay and its current room ·
+> **GuestOps never calls Jobs** → **Jobs creates JOB-8821, assigns, PRIORITISES,
+> tracks, closes**, carrying the stay reference."*
+
+> **`01-guestops-gold.html` `f5`**: a **`Priority ▾`** select, in GuestOps,
+> reading *"Guest in house — urgent"*.
+
+```text
+the flows page   Jobs prioritises                      -> not GuestOps' field
+the gold page    Priority is a field on this form       -> GuestOps collects it
+the record       carries no priority                    -> agrees with FLOWS
+Jobs' own
+  approved
+  vocabulary     P1 · P2 · P3 · NOT_TRIAGED             -> and NOT_TRIAGED
+                                                           existing means Jobs
+                                                           triages; "Guest in
+                                                           house — urgent" is
+                                                           none of the four
+```
+
+**So the gold page's select offers a vocabulary Jobs does not have, for a
+decision the flows page gives to Jobs** — and the implementation agrees with the
+flows page.
+
+##### What is ruled, and what one sentence would settle
+
+```text
+RULED    the button exists, is tab-scoped in the title bar, and opens a form
+         - the owner, twice, in their own words
+RULED    the flow the form performs - "records a request on the stay and
+         announces it", flows §10, and LogAsync(handOff: true) is it
+RULED    Where is DERIVED from the stay's current assignment, not entered
+CARRIED  What is wrong -> Text · Where -> RoomId
+NOT      Kind · Priority · Detail - carried by no record and no event
+RULED
+CONFLICT Priority, between two approved pages
+```
+
+**Not built, and deliberately not built partially.** The owner's rule is *"that
+exact UI and working mechanism"*; a form drawing two of five fields is a
+different form. *And the sweep says the field set is documented nowhere — the
+raise form's fields return ZERO across all four chapters and the flows page,
+with `APPS-Q1` as a positive control present in all five and a negative minted
+this run absent from all five.*
 
 #### Ask for service — the CONCEPT is ruled and the RECORD is not
 
