@@ -95,7 +95,7 @@ describe("Today's nights", () => {
   });
 
   const drawn = (r: DayRow, property: PropertyEnvironment): string =>
-    table([r], 1, () => {}, () => {}, property).querySelector(".tr.act > div:nth-child(5)")?.textContent ?? "";
+    table([r], 1, { open: () => {}, noShow: () => {}, assign: () => {} }, property).querySelector(".tr.act > div:nth-child(5)")?.textContent ?? "";
 
   it("composes the range from the two days, in the property's form", () => {
     expect(drawn(row("2026-08-31", "2026-09-02"), UNKNOWN)).toBe("2026-08-31 → 2026-09-02");

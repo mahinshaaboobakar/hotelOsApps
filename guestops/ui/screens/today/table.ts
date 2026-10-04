@@ -24,24 +24,56 @@ import { formatNumber, type PropertyEnvironment } from "@hotelos/sdk";
 
 import type { DayRow } from "../../book/model";
 import { span } from "../../chrome/when";
-import { control, el, fill, opener, unavailable } from "../../chrome/element";
+import { control, el, fill, opener } from "../../chrome/element";
 import { tags } from "../../chrome/marks";
 
 const COLUMNS = ["Guest", "Booking", "Room type", "Room", "Nights", ""] as const;
+
+/**
+ * The three things a row can do — named rather than ordered.
+ *
+ * **Three callbacks of one type, bound by position, is a swap no compiler can
+ * see.** `open`, `noShow` and `assign` all take a row and return nothing, so
+ * passing them in the wrong order compiles and misroutes two controls — the
+ * positional-argument hazard, which bites exactly when one type fills more
+ * than one parameter. Named fields make it inexpressible.
+ */
+export interface DayActs {
+  /** Open the stay. */
+  open: (row: DayRow) => void;
+
+  /** Record that nobody came — the owner's N2, ruled 2026-09-24. */
+  noShow: (row: DayRow) => void;
+
+  /**
+   * Give this stay a room — the day list's `＋ assign`.
+   *
+   * **The sheet existed and nothing reached it.** `overlays.ts` and
+   * `screens/assign/index.ts` each said, in their own words, *"and the day
+   * list's `＋ assign`"* — a guarantee asserted in two files and wired in
+   * neither, while the control was drawn off saying it was unavailable. The
+   * owner's gold page draws it LIVE on seven rows.
+   *
+   * It routes to the stay and opens the sheet there, exactly as `noShow`
+   * does: one sheet, one place, and the stay is what the desk lands on if
+   * they close it.
+   */
+  assign: (row: DayRow) => void;
+}
 
 /**
  * Draw the table.
  *
  * @param rows the day's rows — this page of them
  * @param total how many the LIST holds, which is not how many this page does
- * @param open what to do when a row is chosen
+ * @param acts what a row can do, by name
+ * @param property whose zone and conventions the values are drawn in
  * @returns the table
  */
 export function table(
   rows: readonly DayRow[],
   total: number,
-  open: (row: DayRow) => void,
-  noShow: (row: DayRow) => void,
+  acts: DayActs,
   property: PropertyEnvironment,
 ): HTMLElement {
   const element = el("div", "tbl");
@@ -67,7 +99,7 @@ export function table(
   }
 
   for (const row of rows) {
-    element.append(line(row, open, noShow, property));
+    element.append(line(row, acts, property));
   }
 
   return element;
@@ -75,15 +107,14 @@ export function table(
 
 function line(
   row: DayRow,
-  open: (row: DayRow) => void,
-  noShow: (row: DayRow) => void,
+  acts: DayActs,
   property: PropertyEnvironment,
 ): HTMLElement {
   const element = el("div", "tr act");
 
   const name = el("div", "nm");
   name.append(opener(row.unnamed ? el("b", "un", row.guest) : el("b", undefined, row.guest),
-    () => open(row)));
+    () => acts.open(row)));
 
   // The second line, only where there is one to draw. A contact is ruled
   // absent (GUEST-Q12) and a party count is not, so this renders whichever
@@ -100,7 +131,14 @@ function line(
     row.room === null
       // Inline, and a control rather than a chip: the state with the
       // affordance, which is what the list is for.
-      ? unavailable("link", "＋ assign", "Assigning a room from GuestOps is not available yet.")
+      //
+      // **It drew OFF until 2026-10-04**, saying *"assigning a room from
+      // GuestOps is not available yet"* — and the sheet had been there all
+      // along, named by `overlays.ts` and by `screens/assign/index.ts`'s own
+      // header. The owner's gold page draws it live on seven rows. The old
+      // sentence is recorded here because a reader meeting only the wiring
+      // cannot tell a route that was always intended from one somebody added.
+      ? control("link", "＋ assign", () => acts.assign(row))
       : document.createTextNode(row.room),
   );
 
@@ -116,7 +154,7 @@ function line(
   // and the frame's are `Guest · Booking · Room · Dates · State · ―`. That
   // difference is older than this action and is not closed here.
   if (row.mayRecordNoShow) {
-    chips.append(control("link", "nobody came", () => noShow(row)));
+    chips.append(control("link", "nobody came", () => acts.noShow(row)));
   }
 
   element.append(
@@ -136,7 +174,7 @@ function line(
   // dialog it opens.
   element.addEventListener("click", (event) => {
     if ((event.target as Element).closest("button") !== null) return;
-    open(row);
+    acts.open(row);
   });
 
   return element;

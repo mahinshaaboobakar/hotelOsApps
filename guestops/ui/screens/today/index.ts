@@ -15,14 +15,14 @@ import { formatNumber, type HostApi, type PropertyEnvironment } from "@hotelos/s
 
 import {
   APP, failureDrawing, load,
-  type DayRow, type Stat, type Staleness, type Today,
+  type Stat, type Staleness, type Today,
 } from "../../book";
 import { control, el, fill } from "../../chrome/element";
 import { failed } from "../../chrome/marks";
 import { day as calendarDay, instant } from "../../chrome/when";
 import { tabs } from "../../chrome/panel";
 import { pager } from "../../chrome/pager";
-import { table } from "./table";
+import { table, type DayActs } from "./table";
 
 /**
  * How many rows a page of the day holds.
@@ -42,7 +42,8 @@ const PAGE = 25;
  * @param page which page of that list, 0-based
  * @param go what to do when another list is chosen
  * @param turn what to do when another page is chosen
- * @param open what to do when a stay is picked
+ * @param acts what a row can do — opening the stay, recording a no-show,
+ *   and assigning a room — by name rather than by position
  * @param walk what the Walk-in action does
  * @param book what the New booking action does
  */
@@ -53,16 +54,17 @@ export async function today(
   page: number,
   go: (list: string) => void,
   turn: (page: number) => void,
-  open: (row: DayRow) => void,
-
   /**
-   * Record that nobody came — the owner's N2, ruled 2026-09-24.
+   * What a row can do.
    *
-   * Its own parameter rather than a second meaning for `open`: closing the day
-   * is a list task, and routing it through the stay page would be the four
-   * extra clicks the frame exists to remove.
+   * **One named object rather than three positional callbacks.** Each takes a
+   * row and returns nothing, so an ordering mistake would compile and
+   * misroute two controls; `DayActs` names them. `noShow` and `assign` are
+   * each their own member rather than a second meaning for `open`, because
+   * closing the day and giving a room are list tasks — routing either through
+   * the stay page would be the extra clicks the frames exist to remove.
    */
-  noShow: (row: DayRow) => void,
+  acts: DayActs,
   walk: () => void,
   book: () => void,
 ): Promise<void> {
@@ -117,7 +119,7 @@ export async function today(
 
     strip(day.stats, showing?.label ?? "", day, host.property),
     views,
-    table(showing?.rows ?? [], showing?.count ?? 0, open, noShow, host.property),
+    table(showing?.rows ?? [], showing?.count ?? 0, acts, host.property),
     pager(showing?.count ?? 0, page, PAGE, showing?.rows.length ?? 0, turn, host.property),
   );
 

@@ -440,20 +440,33 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
         // Another list starts at its own beginning.
         (list) => show({ list, page: 0 }),
         (page) => show({ page }),
-        (row) => show({ screen: "Stay", tab: "Overview", stayId: row.id }),
+        // **Named, not ordered.** Three row actions of one shape; passing
+        // them positionally would compile with two of them swapped.
+        {
+          open: (row) => show({ screen: "Stay", tab: "Overview", stayId: row.id }),
 
-        // **N2 — the same dialog, opened from the list.** It routes to the
-        // stay and opens the overlay there rather than drawing a second
-        // dialog here: one confirmation, one place, and the stay is what the
-        // desk lands on if they close it. The four clicks the frame removes
-        // are the ones spent OPENING each stay to find the action, and this
-        // removes them.
-        (row) => show({
-          screen: "Stay",
-          tab: "Overview",
-          stayId: row.id,
-          overlay: "nobodyCame",
-        }),
+          // **N2 — the same dialog, opened from the list.** It routes to the
+          // stay and opens the overlay there rather than drawing a second
+          // dialog here: one confirmation, one place, and the stay is what the
+          // desk lands on if they close it. The four clicks the frame removes
+          // are the ones spent OPENING each stay to find the action, and this
+          // removes them.
+          noShow: (row) => show({
+            screen: "Stay",
+            tab: "Overview",
+            stayId: row.id,
+            overlay: "nobodyCame",
+          }),
+
+          // The day list's `＋ assign`, on the same route for the same
+          // reason — and `overlays.ts` was already written to receive it.
+          assign: (row) => show({
+            screen: "Stay",
+            tab: "Overview",
+            stayId: row.id,
+            overlay: "assign",
+          }),
+        },
 
         () => show({ overlay: "walkin" }),
         () => show({ screen: "NewBooking", overlay: null }),

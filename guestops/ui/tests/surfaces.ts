@@ -63,7 +63,11 @@ type Draw = (host: HostApi, into: HTMLElement) => Promise<void>;
 
 /** Every screen, and every state of one that shows different text. */
 export const SCREENS: readonly (readonly [string, Draw])[] = [
-  ["today", (host, into) => today(host, into, "arrivals", 0, none, none, none, none, none, none)],
+  ["today", (host, into) => today(
+    host, into, "arrivals", 0, none, none,
+    { open: none, noShow: none, assign: none },
+    none, none,
+  )],
   ["bookings", (host, into) => bookings(host, into, 0, none, none, none, none)],
   ["booking", (host, into) => booking(host, into, "b1", 0, none, false, none, none, none)],
   ["booking, cancelling", (host, into) => booking(host, into, "b1", 0, none, true, none, none, none)],

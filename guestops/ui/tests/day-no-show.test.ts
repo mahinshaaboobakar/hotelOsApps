@@ -33,7 +33,18 @@ function row(over: Partial<DayRow>): DayRow {
 }
 
 const drawn = (r: DayRow): HTMLElement =>
-  table([r], 1, (x) => opened.push(x.id), (x) => recorded.push(x.id), property);
+  table(
+    [r],
+    1,
+    {
+      open: (x) => opened.push(x.id),
+      noShow: (x) => recorded.push(x.id),
+
+      // Not this file's subject; `day-assign.test.ts` drives it.
+      assign: () => {},
+    },
+    property,
+  );
 
 const action = (root: HTMLElement): HTMLButtonElement | undefined =>
   [...root.querySelectorAll("button")].find((b) => b.textContent === "nobody came");
