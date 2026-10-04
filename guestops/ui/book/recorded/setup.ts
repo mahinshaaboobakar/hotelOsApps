@@ -31,11 +31,33 @@ export const recordedFirstRun: FirstRun = {
  * drawn as a button.
  */
 export const recordedSetup: Setup = {
+  // **The owner's five labels, and three disabled with their own sentence.**
+  // The fixture said four and the service sent three — `Registration · Card
+  // series · Reporting` — so a capture of this screen was evidence about
+  // itself: `Card series` appears on no approved page, and §2.8 puts the
+  // series inside registration.
   sections: [
     { label: "Registration", on: true },
     { label: "Guest reporting", on: false },
-    { label: "Stop-sell", on: false },
-    { label: "Stay defaults", on: false },
+    {
+      label: "Stop-sell",
+      on: false,
+      reason: "Closing a room type for dates is not available from this screen yet.",
+    },
+    {
+      label: "Reasons",
+      on: false,
+      reason: "Editing the reason lists is not available from this screen yet.",
+    },
+    {
+      label: "Stay defaults",
+      on: false,
+
+      // **ADR 0378's reason, and it is the owner's to approve** — it reaches
+      // them through ADR 0235's temp page rather than as a question. It states
+      // what is ABSENT, promises nothing, and must not read as a defect.
+      reason: "This tab holds no settings. Nothing about a stay is configured from here.",
+    },
   ],
 
   lead: {

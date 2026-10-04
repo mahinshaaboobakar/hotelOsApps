@@ -41,7 +41,14 @@ export function day(
  * server's.
  *
  * **The arrow join is a decision, not a gap — do not "improve" it into a
- * compressed range** (owner ruling, 2026-09-20, option B long). `3–7 Sept`
+ * compressed range** (ADR 0175, planner, 2026-09-16 — *"the reader composes
+ * the order · the separator · the grouping · the hour cycle · the abbreviation ·
+ * **the range dash** · the unit"* — as chosen by the owner's ruling of
+ * 2026-09-20, option B long). **Two rulings, and both are needed**: ADR 0175
+ * makes the dash the READER's at all, and the owner's ruling picks which of
+ * the reader's two forms. Citing only the second is how a sweep for
+ * *"compressed range"* found nothing across 377 ADR bodies while the
+ * governing decision sat under the word *locale*. `3–7 Sept`
  * reads shorter and carries a grammar: the month sits at the second end only
  * because this locale puts the month after the day, and the same two days read
  * `Sep 3 – 7` in `en-US`. **Two separately formatted days joined by an arrow

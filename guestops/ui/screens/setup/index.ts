@@ -80,14 +80,23 @@ export async function setup(
  * in one sitting and saves once.
  */
 function sections(
-  list: readonly { label: string; on: boolean }[],
+  // The model's own type rather than a second copy: a strip that declared its
+  // parameter inline is how `reason` existed on the wire and not here.
+  list: Setup["sections"],
   showing: string,
   go: (section: string) => void,
 ): HTMLElement {
   const bar = el("div", "tabs");
 
   for (const one of list) {
-    bar.append(control(one.label === showing ? "tab on" : "tab", one.label, () => go(one.label)));
+    // **A reason means the tab is drawn with nothing behind it** — ADR 0378.
+    // Disabled with the reason, rather than live-and-inert, which is the shape
+    // the ruling rejects and §2's C11 already forbade for an action with
+    // nothing to send. The reason states what is ABSENT: a promise about what
+    // is coming would be a claim about a mechanism nobody owes.
+    bar.append(one.reason === undefined
+      ? control(one.label === showing ? "tab on" : "tab", one.label, () => go(one.label))
+      : unavailable("tab", one.label, one.reason));
   }
 
   // **Off, with the reason beside them** — §2, C11: "a primary action with

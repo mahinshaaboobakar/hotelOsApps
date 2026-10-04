@@ -43,11 +43,39 @@ public sealed class SetupView(SettingsService settings)
         {
             // The screen's own left rail. `on` marks where a person is; the
             // module owns that, so only the first is true here.
+            // **The five the approved page draws, and three disabled with their
+            // own sentence.** This sent `Registration · Card series · Reporting`
+            // while `f17` draws `Registration · Guest reporting · Stop-sell · Stay
+            // defaults` and `fV2` adds `Reasons` — so the harness rendered a strip
+            // no property would, and `Card series` appears on no approved page at
+            // all, because §2.8 puts the series inside registration.
+            //
+            // A `reason` means the tab is drawn with nothing behind it — ADR 0378,
+            // which refuses both removing it and leaving it live and inert. The
+            // sentences state what is ABSENT and promise nothing; Stay defaults'
+            // is the owner's to approve through ADR 0235's temp page.
             sections = new object[]
             {
                 new { label = "Registration", on = true },
-                new { label = "Card series", on = false },
-                new { label = "Reporting", on = false },
+                new { label = "Guest reporting", on = false },
+                new
+                {
+                    label = "Stop-sell",
+                    on = false,
+                    reason = "Closing a room type for dates is not available from this screen yet.",
+                },
+                new
+                {
+                    label = "Reasons",
+                    on = false,
+                    reason = "Editing the reason lists is not available from this screen yet.",
+                },
+                new
+                {
+                    label = "Stay defaults",
+                    on = false,
+                    reason = "This tab holds no settings. Nothing about a stay is configured from here.",
+                },
             },
 
             lead = Registration(it),

@@ -71,7 +71,21 @@ export interface SettingCard {
  */
 export interface Setup {
   /** The section tabs — Registration, Guest reporting, Stop-sell, Stay defaults. */
-  sections: readonly { label: string; on: boolean }[];
+  /**
+   * The tab strip.
+   *
+   * **A section carrying a `reason` is drawn DISABLED with that reason beside
+   * it** — ADR 0378: *"a surface element that is drawn and undesigned is
+   * drawn disabled with a reason stating what is absent. Not removed, not
+   * enabled, not promised."* The alternative the ruling rejects is the silent
+   * one — enabled and inert — and §2's C11 already forbade it for an
+   * action with nothing to send.
+   *
+   * **Absent means live.** A section with no reason is one whose content
+   * exists, so the field being optional is what keeps a working tab from
+   * having to declare that nothing is wrong with it.
+   */
+  sections: readonly { label: string; on: boolean; reason?: string }[];
 
   /** The full-width card above the two columns. */
   lead: SettingCard;

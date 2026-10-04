@@ -207,4 +207,49 @@ public class ModuleSurfaceTests
         Assert.Contains("saving settings needs", said);
         Assert.DoesNotContain("is not a method this application serves", said);
     }
+
+    /// <summary>
+    /// Setup answers with the five sections the approved page draws, three of them
+    /// carrying a reason — ADR 0378.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Written because changing this list from three to five broke no test.</b>
+    /// It sent <c>Registration · Card series · Reporting</c> while <c>f17</c> draws
+    /// <c>Registration · Guest reporting · Stop-sell · Stay defaults</c> and
+    /// <c>fV2</c> adds <c>Reasons</c> — so the harness rendered a strip no property
+    /// would, and nothing in either suite could see it.
+    /// </para>
+    /// <para>
+    /// <b>Over the door rather than against the view</b>, because the question is
+    /// what a bundle receives. A reason is what makes an undesigned tab drawn and
+    /// disabled rather than removed or live-and-inert.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Setup_answers_with_the_five_sections_the_page_draws()
+    {
+        await using var surface = await ModuleSurface.StartAsync();
+
+        var (status, body) = await surface.CallAsync("desk.configure", "setup");
+
+        Assert.Equal(200, status);
+        var sections = body!.Value.GetProperty("sections").EnumerateArray().ToList();
+
+        Assert.Equal(
+            new[] { "Registration", "Guest reporting", "Stop-sell", "Reasons", "Stay defaults" },
+            sections.Select(one => one.GetProperty("label").GetString()).ToArray());
+
+        // Three carry a reason and two do not: a strip that disabled everything
+        // would satisfy a count, and a working tab must not have to declare that
+        // nothing is wrong with it.
+        var reasons = sections
+            .Where(one => one.TryGetProperty("reason", out _))
+            .Select(one => one.GetProperty("reason").GetString())
+            .ToList();
+
+        Assert.Equal(3, reasons.Count);
+        Assert.Equal(3, reasons.Distinct().Count());
+        Assert.All(reasons, reason => Assert.DoesNotContain("coming", reason!.ToLowerInvariant()));
+    }
 }
