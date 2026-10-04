@@ -27,6 +27,34 @@ public class StopSell
     /// <summary>Master Data's room type. Referenced, never copied.</summary>
     public Guid RoomTypeId { get; set; }
 
+    /// <summary>
+    /// Optionally ONE room of that type — ADR 0377, owner ruling 2026-10-04.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Hierarchical, never exclusive.</b> The owner's words are
+    /// <i>"they can choose room type and or speciic room in a room type"</i>, so
+    /// a room is chosen INSIDE a type: <c>RoomTypeId</c> is required and this is
+    /// not. <b>A room with no type is not expressible</b>, which is the shape the
+    /// ruling chose over <i>type OR room</i> — that would have let a stop-sell
+    /// name a room without saying what it is a room of.
+    /// </para>
+    /// <para>
+    /// <b>Null means the whole type is held for the dates</b>, and availability
+    /// reads it that way. The room-within-type invariant is validated at the
+    /// write boundary rather than by a foreign key, because the rooms are Master
+    /// Data's and this application references them without owning them — which
+    /// is also GUEST-Q15's shape: the owning application validates at the write.
+    /// </para>
+    /// <para>
+    /// <b>And a per-room hold is still COMMERCIAL.</b> ADR 0377 adopted the
+    /// argument: <i>"do not sell 214 this week"</i> is not <i>"214 is broken"</i>.
+    /// Out-of-order remains EngineeringOps's and arrives as an event; this stays
+    /// the seller's control, and the two are still different sentences.
+    /// </para>
+    /// </remarks>
+    public Guid? RoomId { get; set; }
+
     /// <summary>Inclusive.</summary>
     public DateOnly FromDate { get; set; }
 

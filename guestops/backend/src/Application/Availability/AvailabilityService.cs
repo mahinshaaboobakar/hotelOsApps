@@ -153,11 +153,50 @@ public sealed class AvailabilityService(
                     // full across the board.
                     outOfOrder.Count(r => r.RoomTypeId == typeId
                                           && Covers(r.FromDate, r.ToDate, date)),
-                    stopSells.Count(s => s.RoomTypeId == typeId && Covers(s.FromDate, s.ToDate, date))));
+                    StopSold(stopSells, typeId, total, date)));
             }
         }
 
         return answer;
+    }
+
+    /// <summary>
+    /// How many rooms of a type a stop-sell withholds on one date — ADR 0377.
+    /// </summary>
+    /// <param name="stopSells">Every stop-sell read for this property.</param>
+    /// <param name="typeId">The type being counted.</param>
+    /// <param name="total">How many rooms of that type the property has.</param>
+    /// <param name="date">The night.</param>
+    /// <returns>Rooms withheld, never more than the type has.</returns>
+    /// <remarks>
+    /// <para>
+    /// <b>This was a COUNT OF ROWS until 2026-10-04</b>, so one hold on a
+    /// four-room type withheld ONE room — while the approved page draws
+    /// <c>Suite … Stop-sell 4</c> over the caption <i>"four suites are physically
+    /// fine, unsold, and not for sale"</i>. ADR 0377 states the arithmetic:
+    /// <i>"room type alone — the whole type is held for the dates"</i>.
+    /// </para>
+    /// <para>
+    /// <b>A type-wide hold absorbs every per-room hold on the same night</b>
+    /// rather than adding to it. Two holds naming one room withhold one room, so
+    /// the rooms are counted DISTINCT — counting rows would withhold inventory
+    /// the property has not got, and <c>Free</c>'s clamp would hide it at zero
+    /// while the figure on the screen stayed wrong.
+    /// </para>
+    /// </remarks>
+    private static int StopSold(
+        IReadOnlyList<StopSell> stopSells, Guid typeId, int total, DateOnly date)
+    {
+        var covering = stopSells
+            .Where(s => s.RoomTypeId == typeId && Covers(s.FromDate, s.ToDate, date))
+            .ToList();
+
+        if (covering.Exists(s => s.RoomId is null))
+        {
+            return total;
+        }
+
+        return Math.Min(total, covering.Select(s => s.RoomId).Distinct().Count());
     }
 
     /// <summary>Which rooms of one type nobody is holding over these dates.</summary>

@@ -311,6 +311,12 @@ public static class ModuleSurface
             "configure" => services.GetRequiredService<SettingsCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
+            // **Setup's Stop-sell tab — ADR 0377.** Availability has subtracted
+            // stop-sells since the first migration and nothing could create one,
+            // so one of the five tabs was readable and unwritable.
+            "stopSelling" => services.GetRequiredService<StopSellCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };

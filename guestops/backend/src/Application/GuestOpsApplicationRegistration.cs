@@ -63,6 +63,8 @@ public static class GuestOpsApplicationRegistration
         services.AddScoped<Module.CorrectCommand>();
         services.AddScoped<Module.ReconciliationCommand>();
         services.AddScoped<Module.SettingsCommand>();
+        services.AddScoped<StopSellService>();
+        services.AddScoped<Module.StopSellCommand>();
         services.AddScoped<Module.ActivityView>();
         services.AddScoped<Module.RequestsView>();
         services.AddScoped<Module.ServicingView>();
