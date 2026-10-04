@@ -289,7 +289,7 @@ unconditional are separated, because a table calling a conditional greying
 | `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **THE LABEL IS CORRECT AND RULED — ADR 0212's own Consequences name GuestOps' *"forty-two interim 'the PMS' sentences"* and say they take the connected system's name *"once this ships"*.** The build draws today's ruled state and the page draws the end state. **The CONTROL waits on an ADDRESS**, whose pattern is ruled AND BUILT — see below |
 | `Keep 214` · `Take Opera's 208` · `banner.ts` | **f3 LIVE** — `btn sm pri` and `btn sm` | ✅ **BUILT — `482d23be`, `b468fc05`.** And the premise was wrong in my favour: **`ReconciliationService.ClearAsync` carried the whole ruling, with three tests driving it, reachable by NOTHING** — no module arm, no gRPC method, no caller outside `tests/`. Not *mechanism ruled, door missing* but *service built and tested, door missing*. Probes: 2 of 281 (UI, a split), 1 of 7 (the arm removed) |
 | `Save` · `Discard` · `setup/index.ts:100-101` | **f17 and fV2 LIVE** — *not f16, whose control is `Save and check in` and which has no `Discard`* | ✅ **THE DOOR IS BUILT — `4b341985`.** `SettingsService.SaveAsync` already had ADR 0356's ruled shape and no module arm, **so no property could ever store a settings row through the desk — and that is why frame 15's capture is 409.** Probe: 1 of 8, a split. **The SCREEN stays off on a PAGE GAP** — see below |
-| three `＋ Add` · `setup/card.ts:37` | **fV2 LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
+| three `＋ Add` · `setup/card.ts:37` | **fV2 LIVE** — the `Reasons` TAB, and the three `＋ Add` are ONE PER LIST; `＋ Close a room type for dates` is `Stop-sell`'s and `Record a filing` / `Open the list` are `Guest reporting`'s | **UNBUILT, and now PER TAB** — four of the five tabs are documented, one is not, and Stop-sell's documentation conflicts with the owner's description. See below |
 | four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything `btn sm pri` · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
 | `＋ assign` · `today/table.ts` | **LIVE, ×7** | ✅ **BUILT — `a36bbc89`.** A ROUTE, not a capability: the sheet, the overlay arm and the module-door method all existed, and **`overlays.ts:70` and `screens/assign/index.ts:3` each named *"the day list's `＋ assign`"* while the control drew off** — a guarantee-comment PAIR. Probe: 2 failed of 276, a split |
 | `Reinstate` · `stay/index.ts:384` fall-through | **fN1b and fRI1 LIVE** — *fRI2 draws no `Reinstate` node* | ✅ **BUILT today** — `200fe4da` |
@@ -443,6 +443,102 @@ ServicingView        a READ
 > *implementation detail mistaken for a contract* this estate warns about, in the
 > cheaper direction: quietly implemented differently and found much later.
 
+#### ⚠ SETUP IS FIVE TABS, AND MY CENSUS MEASURED ONE CARD — re-read PER TAB
+
+**The owner has ruled A: each tab is a form, and each has its own duty.** My
+*"0 `.inp`, 18 `.k`/`.v`"* was a measurement of **one card spanning four tabs'
+content**, so the page-gap question I routed upward was malformed — I asked
+*"form or values"* about a card that is five forms.
+
+**Re-measured from the markup, per frame:**
+
+```text
+f17   Registration(ON) · Guest reporting · Stop-sell · Stay defaults      FOUR
+fV2   Registration · Guest reporting · Stop-sell · Reasons(ON) ·
+      Stay defaults                                                        FIVE
+```
+
+> **And `fV2` IS the per-tab drawing of `Reasons`.** Its **7** value rows are the
+> three lists' entries — *Guest cancelled · flight changed 41*, *no penalty
+> agreed 18*, *Property cancelled · overbooked 2*, and so on — and its **three
+> `＋ Add` controls are one per list.** So `Save` over `＋ Add` is coherent: the
+> fields ARE the entries, and a mock showing stored state has no `.inp` to draw.
+> **The page gap as I framed it is WITHDRAWN**, from the artefact rather than from
+> the correction.
+
+##### Each tab's duty, measured against the app's own chapters — list derived by `ls`
+
+```text
+01-the-front-desk-scenarios.md   50.7 KB   (I had named this NOT REACHED)
+02-the-guestops-design.md        66.0 KB   (I had read §3-§4 only)
+03-the-open-questions.md         27.5 KB
+04-the-code-readiness-note.md    20.0 KB
+```
+
+| tab | documented where | disposition |
+|---|---|---|
+| **Registration** | all four chapters · and ADR 0356's eight classified keys | **DOCUMENTED → a build** |
+| **Guest reporting** | chapters 01 · 02 · 03 | **DOCUMENTED → a build** |
+| **Stop-sell** | chapter 01:178,188 · chapter 02 §5.3 · the gold page ×3 · the flows and new-booking pages | **DOCUMENTED → a build — AND the owner's description today CONFLICTS on one axis** |
+| **Reasons** | **ADR 0305**, owner, 2026-09-28 — *three lists, one per operation*; every chapter PREDATES it and none mentions it | **RULED → a build** |
+| **Stay defaults** | **the gold page's tab label, twice, and nothing else in either repository** | **UNDOCUMENTED — the owner's description is the ruling** |
+
+*Controls, in the same run: positive `GUEST-Q` — 58 · 60 · 26 · 26 across the four
+chapters; negative `ZQT-4471902` — 0 in all four. And the two zeros were re-measured
+on widened terms before being reported, because a zero from a pattern is a
+measurement of the pattern: bare `reason` hits all four chapters while ADR 0305's own
+words hit none, and `Stay defaults` is absent from every document that is not the
+gold page.*
+
+##### ⚠ THE STOP-SELL CONFLICT, with both statements quoted
+
+**OLD — chapter 02 §5.3, the schema in full:**
+
+```text
+stop_sell_id · property_id
+room_type_id      Master Data ref          <- ROOM TYPE, and no room
+from_date · to_date
+reason            free text
+set_by · set_at
+```
+
+**and chapter 01:188, drawing the boundary in as many words:**
+
+> *"Stop-sell is the seller's control, not an inventory fact. **'We choose not to
+> sell this type on these dates'** is a commercial decision belonging to whoever
+> runs the book; **'this room cannot be used' is EngineeringOps's**, and they are
+> different sentences."*
+
+**and the gold page says the same thing three times** — *"our own setting, per room
+type and date range"* · *"ours — room type + date range + reason"* · and the drawn
+row `Executive Suite · 3 Sep → 7 Sep · 4 rooms · wedding party`, where **`4 rooms`
+is the narrative quantity of a type held whole**, matching the availability table's
+`Suite … Stop-sell 4`.
+
+**NEW — the owner, today:**
+
+> *"Stop-sell → stopping a room type **or room** from selling set by operator. Then
+> can choose room type **or specific room** and from & to date."*
+
+```text
+chapter 01 · chapter 02 §5.3 · the gold page ×3   TYPE + DATES
+the owner, today                                  TYPE **OR A SPECIFIC ROOM**
+                                                  + DATES
+```
+
+> **What I still hold from both.** The owner's *who*, *what* and *from & to date*
+> match every document. **The per-ROOM axis is carried by no document**, and it
+> lands adjacent to the one distinction two chapters draw explicitly — *we choose
+> not to sell* versus *this room cannot be used*. **A per-room stop-sell is still
+> commercial** (*"do not sell 214 this week"* is not *"214 is broken"*), so it is
+> not necessarily that boundary being crossed — **and it widens §5.3's schema, and
+> the chapter is the thing an ADR amends rather than the thing that yields
+> silently.**
+
+**Reported rather than resolved either way**: building per-room would implement a
+sentence three documents contradict, and building type-only would implement a
+document the owner has just spoken past.
+
 #### The setup write — ruled in detail, and the question was answered by the page itself
 
 **My row said *"mine, and one question"*: whether the desk's own setup screen
@@ -476,6 +572,15 @@ ModuleSurface   NO ARM                              <- the whole gap
 > *"Save is OFF by design"* was the stale half.
 
 #### ⚠ AND THE SCREEN IS A PAGE GAP, WHICH IS NOT MINE TO DECIDE ALONE
+
+> **⚠ THIS FRAMING IS WITHDRAWN — the owner ruled A, each tab is a form.** The
+> census below measured **one card spanning four tabs' content**, so *"form or
+> values"* was the wrong question about a card that is five forms. *Kept rather
+> than deleted, because the measurement is correct and only the conclusion drawn
+> from it was wrong — and a reader meeting the per-tab section alone cannot see
+> that the question was asked at the wrong granularity.* **The per-tab reading is
+> the section above.**
+
 
 **The tag census, derived from the owner's own page:**
 
