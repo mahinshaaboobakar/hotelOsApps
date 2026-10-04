@@ -425,6 +425,70 @@ tab and focus the input, or open a dialog — and the page draws neither**, so
 building either would be a design decision wearing a wiring change. *Reported
 rather than chosen: the owner draws.*
 
+#### An undesigned tab is drawn DISABLED with its reason — ADR 0378
+
+**The owner ruled B of three** — drop it, keep it disabled with a reason, or supply a
+sentence — and the general shape is the ADR's:
+
+> **A surface element that is drawn and undesigned is drawn DISABLED with a reason
+> stating what is absent. Not removed, not enabled, not promised.**
+
+```text
+NOT removed    removal discards a deliberate drawing
+NOT enabled    nothing stands behind it
+NOT promised   "coming soon" is a claim about a mechanism, and none is owed
+DISABLED       with a reason STATING WHAT IS ABSENT
+```
+
+**The reason, drafted here and the owner's to approve through ADR 0235's temp page:**
+
+> *"This tab holds no settings. Nothing about a stay is configured from here."*
+
+**The alternative the ruling rejects is the silent one** — enabled and inert —
+**which is the shape this round measured sixteen times.** §2's C11 already forbade it
+for an action with nothing to send; ADR 0378 extends it to a surface element.
+
+##### And the strip itself was a closed loop
+
+```text
+the service sent   Registration · Card series · Reporting          THREE
+f17 draws          Registration · Guest reporting · Stop-sell ·
+                   Stay defaults                                  FOUR
+fV2 adds           Reasons                                        FIVE
+`Card series`      appears on NO approved page — §2.8 puts the series inside
+                   registration
+```
+
+**Changing the list from three to five broke no test**, so a strip no property would
+render survived in the harness. Both halves are asserted now: the **screen** (a section
+with a reason draws disabled with that reason; one without stays live; nothing is disabled
+when every section has content) and the **wire** (the door's own answer carries the five
+labels in order and three distinct reasons). *A test over the fixture would have been a
+claim about a claim.*
+
+**The three reasons differ deliberately.** *Ruled but not built* and *nothing is designed*
+have opposite remedies, and one shared sentence would report them alike.
+
+##### The seven stale date ranges, and the ruling neither of us found at first
+
+```text
+fN1   :705                      19 – 20 Aug  →  19 Aug → 20 Aug
+f9    :1306 :1309 :1310 :1312    3 – 7 Sep   →  3 Sep → 7 Sep
+fRI1  :1890 :1893               19 – 20 Aug  →  19 Aug → 20 Aug
+```
+
+**The target form is the page's own** — the gold page already held the long form in
+39 places, `19 Aug → 20 Aug` and `3 Sep → 7 Sep` among them — so the
+seven are stragglers inside a conforming page, which is itself the evidence they are stale
+rather than a deliberate alternative.
+
+**Two rulings govern and both are needed**: ADR 0175 (planner, 2026-09-16) puts *"the
+order · the separator · the grouping · the hour cycle · the abbreviation
+· **the range dash** · the unit"* on the reader's side; the owner's ruling of
+2026-09-20 chose which of the reader's two forms. **`when.ts` cited only the second**,
+which is how a sweep for *"compressed range"* found nothing across 377 ADR bodies while
+the governing decision sat under the word *locale*. It cites both now.
+
 #### ⚠ ＋ RAISE A JOB OPENS A FORM, AND TWO OF ITS FIVE FIELDS ARE CARRIED
 
 **Three readings of this control were wrong, mine and the architect's, and all
@@ -589,7 +653,7 @@ fV2   Registration · Guest reporting · Stop-sell · Reasons(ON) ·
 | **Guest reporting** | chapters 01 · 02 · 03 | **DOCUMENTED → a build** |
 | **Stop-sell** | chapter 01:178,188 · chapter 02 §5.3 · the gold page ×3 · the flows and new-booking pages | **DOCUMENTED → a build — AND the owner's description today CONFLICTS on one axis** |
 | **Reasons** | **ADR 0305**, owner, 2026-09-28 — *three lists, one per operation*; every chapter PREDATES it and none mentions it | **RULED → a build** |
-| **Stay defaults** | **the gold page's tab label, twice, and nothing else in either repository** | **UNDOCUMENTED — the owner's description is the ruling** |
+| **Stay defaults** | **the gold page's tab label, twice, and nothing else in either repository** | **ADR 0378 — RULED and BUILT, drawn DISABLED with its reason.** The owner chose B of three, and their own answer to *what is it for* was *"i dont know for what this tab"* — so there is nothing to describe and nothing to promise |
 
 *Controls, in the same run: positive `GUEST-Q` — 58 · 60 · 26 · 26 across the four
 chapters; negative `ZQT-4471902` — 0 in all four. And the two zeros were re-measured
