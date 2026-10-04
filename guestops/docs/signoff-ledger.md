@@ -37,7 +37,9 @@ reached.** Dispositions as of 2026-10-03.
 | **PROVEN** | **The correction dialog is driven by a test at all.** It was driven by none — both arms, including the departure shipped 2026-09-24 — and a mutation found it rather than a reading | `57320c58`; the probe that found it left 264 passing |
 | ~~**UNRULED**~~ **→ APPROVED, UNBUILT** | ~~13 capabilities whose controls the design draws enabled and the application cannot perform — **the owner's**~~ **This row was wrong about WHOSE they are.** The owner's `docs/mockups/` IS the authored specification (owner, 2026-10-04), so the design is settled and the deliverable is a build that matches it. **They are mine, not a question** — §5 dispositions each one | the old reading is kept because it is what I sent up as a question, and a reader meeting only the correction cannot see that the menu was offered · `7879f075` |
 | **PROVEN** | **The day list's `＋ assign` reaches the sheet.** Two files already asserted the route and nothing wired it | `a36bbc89` · tsc 0, vitest 276; probe 2 failed of 276, a split |
-| **UNBUILT** | **7 ROWS the owner's pages draw LIVE and the build draws off** — each with what it is waiting on, three mine outright, three needing a contract, one a conflict | §5 |
+| **PROVEN** | **GUEST-Q3's clear reaches a door**, and **the settings write reaches a door** — both services were complete, tested and callable by nothing | `482d23be` · `b468fc05` · `4b341985` · probes split 2-of-281, 1-of-7, 1-of-8 |
+| **UNBUILT / REPORTED** | **§5's census now closes at 4 BUILT · 3 MATCHES · 4 UNBUILT · 2 SURPLUS · 1 CORRECT-BY-CONSTRUCTION · 1 REPORTED · 1 infrastructure = 16** — derived from the table rather than counted, after my first classifier matched `BUILT` inside `UNBUILT` and reported nine | §5 |
+| | ⚠ *This said **7 ROWS**, and before that **12 controls**. The row count is derived from §5's table and stated with its buckets; the CONTROL count is not derivable — the setup card greys whatever labels its panel declares.* | |
 | | ⚠ *This said **12 controls**. The row count is 8, now 7, and is derived from the table; the CONTROL count is not derivable — the setup card greys whatever labels its panel declares, so a figure stated here would be a number nobody measured.* | |
 | **UNRULED** | **One divergence INSIDE the owner's own pages.** `fRI1`'s prose draws the compressed range `19 – 20 Aug`; the owner ruled the LONG form on 2026-09-20 against mockup 07 B, eight days earlier | §5 · the owner's, and asserted in both directions meanwhile so it cannot close quietly |
 | **UNRULED** | **The staleness mechanism** that `Today.stale` is drawn for, and nothing computes | planner / owner |
@@ -286,7 +288,7 @@ unconditional are separated, because a table calling a conditional greying
 | `Ask for service` · `:326` | **f7 LIVE** — *not f6* | **UNBUILT — and the RECORD is unruled.** Flows §10 rules the concept (*"the same shape, from Room Care"*); no servicing write exists and `handOff` hands off to Jobs by name — see below |
 | `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **UNBUILT, mine — and the LABEL differs too.** A link out, asserting nothing about the folio |
 | `Keep 214` · `Take Opera's 208` · `banner.ts` | **f3 LIVE** — `btn sm pri` and `btn sm` | ✅ **BUILT — `482d23be`, `b468fc05`.** And the premise was wrong in my favour: **`ReconciliationService.ClearAsync` carried the whole ruling, with three tests driving it, reachable by NOTHING** — no module arm, no gRPC method, no caller outside `tests/`. Not *mechanism ruled, door missing* but *service built and tested, door missing*. Probes: 2 of 281 (UI, a split), 1 of 7 (the arm removed) |
-| `Save` · `Discard` · `setup/index.ts:100-101` | **f17 and fV2 LIVE** — *not f16, whose control is `Save and check in` and which has no `Discard`* | **UNBUILT, mine.** Unconditional; settings are reachable only through the gRPC door |
+| `Save` · `Discard` · `setup/index.ts:100-101` | **f17 and fV2 LIVE** — *not f16, whose control is `Save and check in` and which has no `Discard`* | ✅ **THE DOOR IS BUILT — `4b341985`.** `SettingsService.SaveAsync` already had ADR 0356's ruled shape and no module arm, **so no property could ever store a settings row through the desk — and that is why frame 15's capture is 409.** Probe: 1 of 8, a split. **The SCREEN stays off on a PAGE GAP** — see below |
 | three `＋ Add` · `setup/card.ts:37` | **fV2 LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
 | four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything `btn sm pri` · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
 | `＋ assign` · `today/table.ts` | **LIVE, ×7** | ✅ **BUILT — `a36bbc89`.** A ROUTE, not a capability: the sheet, the overlay arm and the module-door method all existed, and **`overlays.ts:70` and `screens/assign/index.ts:3` each named *"the day list's `＋ assign`"* while the control drew off** — a guarantee-comment PAIR. Probe: 2 failed of 276, a split |
@@ -440,6 +442,127 @@ ServicingView        a READ
 > or is it its own record? — and deciding it inside a door would be exactly the
 > *implementation detail mistaken for a contract* this estate warns about, in the
 > cheaper direction: quietly implemented differently and found much later.
+
+#### The setup write — ruled in detail, and the question was answered by the page itself
+
+**My row said *"mine, and one question"*: whether the desk's own setup screen
+writes property configuration, or whether that is Core Administration's. The
+owner's `f17` answers it in its own caption, citing the ADR:**
+
+> *"**Configuration is the application's own** — an application is a bundle of
+> UI, backend, schema, permissions, events and configuration (ADR 0051) — and
+> **none of it belongs in Master Data, because none of it describes what the
+> property is.**"*
+
+**And the sweep found it ruled twice over.** `ADR 0356` records **`GUEST-Q15`** —
+*my own question*, ruled by the planner on 2026-09-30:
+
+> *"For application-owned policy **the owning application persists it, validates
+> it at the write boundary, and owns its concurrency/version semantics.**"*
+
+```text
+SaveAsync   desk.configure at the boundary          ADR 0356's shape, complete
+            HomeCountry and ReportingDueHours
+              each refused with a reason
+            optimistic version, persist + increment
+ModuleSurface   NO ARM                              <- the whole gap
+```
+
+> **The consequence was not cosmetic, and my own Part B list already recorded
+> it:** *"`SaveSettings` — no module method. gRPC only, and no screen calls it ·
+> so the row is never saved · `MintCardNumber`'s PreconditionFailed is PERMANENT
+> through the desk."* **One missing arm made the registration card unnumberable
+> for every property, through the product's own path** — and the ledger's
+> *"Save is OFF by design"* was the stale half.
+
+#### ⚠ AND THE SCREEN IS A PAGE GAP, WHICH IS NOT MINE TO DECIDE ALONE
+
+**The tag census, derived from the owner's own page:**
+
+```text
+f16  the registration card   18 .inp  · 18 <label>  ·  0 .k/.v     A FORM
+f17  Setup                    0 .inp  ·  0 <label>  · 18 .k/.v     VALUES
+fV2  the reason lists         0 .inp  ·  0 <label>  ·  7 .k/.v     VALUES
+```
+
+**So the page HAS a convention for a field — `f16` uses it eighteen times — and
+`f17` draws none, with `Save` and `Discard` live.** The build's own comment says
+the same thing from the other side: *"nothing on this screen is an input (every
+field is a drawn `.inp`, §10)"*.
+
+> **`Discard` is the discriminator.** A discard only means something over an
+> unsaved edit buffer — so **the page intends fields and draws none**, which is
+> a page gap rather than a build gap. *Two readings survive otherwise: `Save`
+> persists the values as displayed, or `Save` commits edits in fields nobody
+> drew, and the page draws neither outcome.*
+
+**And the screen cannot send an edit today for a second, independent reason**:
+`SetupView` answers with rendered `k`/`v` rows, not the raw fields, so a screen
+redrawing from it has nothing to put in a `SettingsEdit`. *Whether the read
+carries the values is downstream of which values are editable, so it waits on the
+same answer.*
+
+#### ⚠ ADR 0356 §6 OWES ME A CLASSIFICATION, AND NOTHING RECORDS IT
+
+> *"Do not perform a mechanical 'remove all eight manifest keys' change based
+> solely on their count or present location… classify EACH existing GuestOps key
+> with §1's discriminator… **record the classification ALONGSIDE the change** so
+> the next application does not rediscover `GUEST-Q15` from precedent."*
+> **Owners: FF.**
+
+**Measured: the eight declared manifest keys are the SAME EIGHT FIELDS
+`SettingsEdit` writes.**
+
+```text
+guestops.home_country                      -> HomeCountry
+guestops.registration.signature_required   -> SignatureRequired
+guestops.registration.print_on_check_in    -> PrintOnCheckIn
+guestops.registration.card_prefix          -> CardNumberPrefix
+guestops.reporting.required                -> ReportingRequired
+guestops.reporting.applies_to              -> ReportingAppliesTo
+guestops.reporting.authority               -> ReportingAuthority
+guestops.reporting.due_hours               -> ReportingDueHours
+```
+
+**Applying §1's discriminator to each** — *does it configure the application's
+platform or runtime attachment, or express how its domain should operate?*
+
+```text
+home_country         WHICH GUESTS COUNT AS FROM OUTSIDE    -> application state
+signature_required   what a card demands                   -> application state
+print_on_check_in    whether the card prints in the flow    -> application state
+card_prefix          the GRC series' own shape              -> application state
+reporting.required   whether this property files at all     -> application state
+reporting.applies_to a selection over a GuestOps vocabulary -> application state
+reporting.authority  "Kerala Police - the property names
+                      its own"                              -> application state
+reporting.due_hours  an offset from arrival, R18            -> application state
+```
+
+**None is a credential, an endpoint or a provider choice. All eight are business
+policy, and all eight are already written as application state by
+`SaveAsync`** — so **one value has two writable homes today**, which is the
+duplication the ruling exists to end.
+
+> **This is a classification, not a mechanical removal** — §6 forbids removing
+> them *"based solely on their count or present location"*, and each row above
+> carries the discriminator's own question and its answer. *The removal is its
+> own change with its own consumers (`GetConfig` callers), and it is owed rather
+> than done here; nothing in either repository records the classification, which
+> is the half §6 asks for by name.*
+
+#### And a divergence between the two doors onto one view — reported, not changed
+
+```text
+gRPC    GetSettings     reservation.read   "a receptionist must see the form they
+                                            have to fill in without being able to
+                                            change what it demands"
+module  "setup"         desk.configure     - it is in ConfigureAsync
+```
+
+**So through the pane a receptionist cannot READ the Setup screen, while over
+gRPC they can.** *The write is correctly `desk.configure` on both. Moving the
+module read is a privilege decision rather than a repair, so it is reported.*
 
 #### The activity filters are two rows, not one — and the service's own comment is half right
 
