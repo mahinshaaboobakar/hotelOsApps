@@ -33,7 +33,11 @@ reached.** Dispositions as of 2026-10-03.
 | **PROVEN** | **The booking's refusal is understood and repaired.** `GetPropertySummary` is user-scoped by ADR 0212; `AtAsync` now reads the platform-scoped `GetPropertyFacts`, and an unset zone returns `StayTime.None` rather than throwing | `136052a3`, build 0/0 in a slot I held |
 | **PROVEN** | **ADR 0211's thirteen-day precondition.** A GuestOps → Context call HAS succeeded on this machine | the architect's measurement: `GetOperatingDay` 358 mentions, all 16 user-scoped refusals on `GetPropertySummary`. *Not my stated condition — I had permitting code and no observed success, and was right not to close it on that alone* |
 | **PROVEN** | **`Today.stale` no longer throws on the first screen of the walk** | `TodayView` sends five keys and not `stale`; positive control: the same view's `connected` IS sent · `d1d01260` |
-| **UNRULED** | **13 capabilities** whose controls the design draws enabled and the application cannot perform — **the owner's**, drawn both ways to their end states | `docs/mockups/09-controls-the-desk-cannot-press.html` · `7879f075` |
+| **PROVEN** | **`Reinstate…` is wired to the dialog the owner drew.** The build greyed it on a reason that was TRUE on 2026-09-24 and that `247c854` falsified on 2026-09-28 — `fRI1` draws the dialog to its end | `200fe4da` · `57320c58` · tsc 0, vitest 273, dotnet 0/0, 340 tests. Probe 1 split 1-of-264; probe 2 split 4-of-273, departure arm green |
+| **PROVEN** | **The correction dialog is driven by a test at all.** It was driven by none — both arms, including the departure shipped 2026-09-24 — and a mutation found it rather than a reading | `57320c58`; the probe that found it left 264 passing |
+| ~~**UNRULED**~~ **→ APPROVED, UNBUILT** | ~~13 capabilities whose controls the design draws enabled and the application cannot perform — **the owner's**~~ **This row was wrong about WHOSE they are.** The owner's `docs/mockups/` IS the authored specification (owner, 2026-10-04), so the design is settled and the deliverable is a build that matches it. **They are mine, not a question** — §5 dispositions each one | the old reading is kept because it is what I sent up as a question, and a reader meeting only the correction cannot see that the menu was offered · `7879f075` |
+| **UNBUILT** | **12 controls the owner's pages draw LIVE and the build draws off** — enumerated, each with what it needs | §5 · mine |
+| **UNRULED** | **One divergence INSIDE the owner's own pages.** `fRI1`'s prose draws the compressed range `19 – 20 Aug`; the owner ruled the LONG form on 2026-09-20 against mockup 07 B, eight days earlier | §5 · the owner's, and asserted in both directions meanwhile so it cannot close quietly |
 | **UNRULED** | **The staleness mechanism** that `Today.stale` is drawn for, and nothing computes | planner / owner |
 | **UNBUILT** | **No booking has been COMPLETED end to end.** The refusal is repaired; the proof is a run | the owner's, on the installed build |
 | **UNBUILT** | **0.3.5 is cut and not installed**, so `protected_personal_data` is unproven at install | **MM** · `sha256:9c8eed08…` |
@@ -238,3 +242,98 @@ against.** Two things to know before starting:
   before launch.
 
 **I do not sign Part B.** Every row above names an owner; none says *someone*.
+
+## 5 · Against the owner's authored pages — the control census
+
+**The reversal this section records.** I had read the mockups as drawings *we*
+produce for the owner to choose from, and sent thirteen greyed controls up as a
+question. The owner's ruling of 2026-10-04 is that `docs/mockups/` is the
+authored specification — *"i need that exact ui and working mechanism what we
+designed there"* — so **a greyed control with a reason on it is a specification
+OF that reason, and where the build and the page disagree the build moves.**
+
+**What the owner's page actually greys, derived rather than recalled:**
+
+```text
+01-guestops-gold.html        27 frames          ids derived from the markup
+  btn nodes                  78   ·   3 OFF
+  link nodes                 18   ·   0 OFF
+                             ---------------
+                             96 controls, 3 off nodes = TWO distinct controls
+
+    Export          fC2 and f4, the second carrying its reason in the label:
+                    `NEEDS SHELL-Q23'S FILE-SAVE HALF`
+    ＋ Raise a job   f5b ONLY — the frame headed *"with Jobs not installed"*.
+                    f5, where Jobs IS installed, draws it LIVE
+```
+
+> **So the owner's page has exactly ONE permanent capability caveat — a PLATFORM
+> gap, named — and one absent-neighbour frame state.** The build's Part A capture
+> draws **22** `.btn.off`, from **16** production `unavailable()` call sites.
+
+**Every one of those sixteen, against what the page draws. Conditional and
+unconditional are separated, because a table calling a conditional greying
+*always off* would be a false row.**
+
+| the build | the owner's page | disposition |
+|---|---|---|
+| `Export` · `stay/index.ts:313` | **f4 OFF**, reason in the label | **MATCHES.** SHELL-Q23's file-save half — a platform gap, not GuestOps' |
+| `＋ Raise a job`, Jobs absent · `:321` | **f5b OFF** | **MATCHES.** `APPS-Q2`: an absent neighbour loses its capability, never the flow |
+| `＋ Log a request` · `requests-tab.ts:64` | **f5 and f5b LIVE** | **MATCHES** — *conditional*, off only where the host serves no method. Flows §10: the request is recorded *"always, installed or not"* |
+| `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE** | **UNBUILT, mine.** GuestOps records and announces; it never calls Jobs (flows §10) |
+| `Ask for service` · `:326` | **f6 LIVE** | **UNBUILT, mine.** The same shape from Room Care |
+| `Open in the PMS` · `:332` | **f7 LIVE as `Open in Opera`** | **UNBUILT, mine — and the LABEL differs too.** A link out, asserting nothing about the folio |
+| `Keep 214` · `Take Opera's 208` · `banner.ts:51` | **f3 LIVE** | **UNBUILT, mine.** Unconditional. Settling a disagreement has no module door — `GUEST-Q3` ruled the mechanism, and both choices take the stay's write permission |
+| `Save` · `Discard` · `setup/index.ts:100-101` | **f16 and the reason-lists frame LIVE** | **UNBUILT, mine.** Unconditional; settings are reachable only through the gRPC door |
+| three `＋ Add` · `setup/card.ts:37` | **LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
+| four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
+| `＋ assign` · `today/table.ts:103` | **LIVE, ×7** | **UNBUILT, mine — and it is a ROUTE, not a capability.** `acts.assign` is already wired on the stay page for `Move room` |
+| `Reinstate` · `stay/index.ts:384` fall-through | **fRI1 · fRI2 LIVE** | ✅ **BUILT today** — `200fe4da` |
+| the generic fall-through · `:384` | — | **CORRECT, and narrowed rather than removed.** An action nobody drew still draws off with a reason |
+| `＋ add a guest in this room` · `newbooking/guest.ts:58` | **ABSENT from the page** | **SURPLUS to the specification.** The build drew a control the owner did not. Honest — it is off and says why — and it is not in the design |
+| a servicing night action · `servicing-tab.ts:77` | **ABSENT from the page** | **SURPLUS**, same shape |
+| a tag link · `chrome/marks.ts:79` | — | infrastructure, not a control of the design |
+
+**The arithmetic closes: 2 match · 1 matches conditionally · 9 unbuilt · 1 built
+today · 1 correct by construction · 2 surplus · 1 infrastructure = 17 rows over
+16 call sites**, because `＋ Raise a job` is two sites in one row pair and is
+counted on both arms.
+
+### The divergence inside the owner's own pages, and why it is not mine to close
+
+`fRI1` draws the stay's dates as **`19 – 20 Aug`** — the compressed range. The
+owner ruled the **long** form on **2026-09-20**, against mockup `07` B, and
+`chrome/when.ts` carries that ruling at the site: *"do not 'improve' it into a
+compressed range"* and *"No shared range formatter is to be added for it."*
+
+```text
+2026-09-20   owner rules the long form, mockup 07 B
+2026-09-28   fRI1 lands, drawing the short form in its prose
+```
+
+**So this is owner ruling against owner drawing, eight days apart, and the
+drawing is prose inside a static page rather than a rendered component.** The
+build consumes `span()` — the ruled form — and the difference is asserted in
+**both** directions in `correct-dialog.test.ts`, so it cannot be closed either
+way without meeting the ruling:
+
+```text
+expect(line).toContain("→")             the form the owner ruled
+expect(line).not.toContain("– 20 Aug")  the form fRI1's prose draws
+```
+
+*Reported rather than resolved: matching the page would reverse a ruling, and
+ignoring the page would hide a conflict.*
+
+### What the widgets page already says about its own authority
+
+`03-guestops-widgets.html` states the owner's 2026-10-04 ruling in its own
+words, written by its author before that ruling existed:
+
+> *"If a frame here is wrong, the build changes. The frames are the
+> specification from the moment they are approved, exactly as the seventeen
+> are."*
+
+**And it declares what the five deliberately do not do — no writes, no number
+the backend cannot honestly compute, no sizing.** So no greyed widget control is
+expected, and none is drawn.
