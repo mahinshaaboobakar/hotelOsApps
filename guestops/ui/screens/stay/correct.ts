@@ -49,30 +49,7 @@ export async function correctDialog(
 
   const plan = loaded.value;
 
-  // `Rajesh Pillai · 214 · checked out 07:02`, and fRI1's four-part form for a
-  // no-show — facts, joined here, with every instant and day read in the
-  // property's own zone rather than the machine's.
-  //
-  // **`span` is consumed rather than composed.** A range's separator and the
-  // month's position are a locale's grammar: the owner ruled the long form on
-  // 2026-09-20 (mockup 07 B) and `when.ts` carries the reason. fRI1's prose
-  // draws the short `19 – 20 Aug`, which that ruling refused eight days before
-  // the frame landed — so the ruling governs, and the difference is reported
-  // rather than matched here.
-  const subject = [
-    plan.guest,
-    plan.reference,
-    plan.room,
-    plan.arrive === null ? null : span(plan.arrive, plan.depart, property),
-    plan.departedAt === null
-      ? null
-      : `checked out ${instant(plan.departedAt, property, "time")}`,
-    plan.noShowAt === null
-      ? null
-      : `recorded as a no-show ${instant(plan.noShowAt, property, "date-time")}`,
-  ].filter((part): part is string => part !== null).join(" · ");
-
-  const drawn = correct(plan, subject, close, (to, reason) => {
+  const drawn = correct(plan, subjectOf(plan, property), close, (to, reason) => {
     void perform(host, "stay.override", "correct",
       { stayId, version: plan.version, to, reason }).then(done);
   });
@@ -87,7 +64,7 @@ export async function correctDialog(
   // send somebody to check the service, which is working.
   into.append(sheet({
     title: "This correction is not designed yet",
-    subtitle: subject,
+    subtitle: subjectOf(plan, property),
     body: [cannot(
       `Putting a stay back from ${plan.from} has no approved screen`,
       "The platform can record it and no frame draws what it should ask you"
@@ -97,6 +74,47 @@ export async function correctDialog(
     actions: [{ label: "Close", onClick: close }],
     onDismiss: close,
   }));
+}
+
+/**
+ * The head's second line — `Rajesh Pillai · 214 · checked out 07:02`, and
+ * fRI1's four-part form for a no-show.
+ *
+ * **Facts, joined here**, with every instant and day read in the property's own
+ * zone rather than the machine's (ADR 0175). Each part is omitted where the
+ * plan does not carry it, so a departure correction draws no no-show time and
+ * a reinstatement draws no room.
+ *
+ * **`span` is consumed rather than composed.** A range's separator and the
+ * month's position are a locale's grammar: the owner ruled the LONG form on
+ * 2026-09-20 against mockup 07 B, and `when.ts` carries that ruling with *"do
+ * not improve it into a compressed range"*. **fRI1's prose draws the short
+ * `19 – 20 Aug`, which that ruling refused eight days before the frame
+ * landed** — so the ruling governs here and the difference is reported rather
+ * than matched, because matching it would reverse a ruling and ignoring it
+ * would hide a conflict.
+ *
+ * Exported because it is the part a test can reach: `correctDialog` reads the
+ * platform first, and the composition is where a locale's grammar would
+ * otherwise be asserted by nobody.
+ *
+ * @param plan what correcting it would do
+ * @param property whose zone and conventions the parts are read in
+ * @returns the parts the plan carries, joined
+ */
+export function subjectOf(plan: CorrectPlan, property: PropertyEnvironment): string {
+  return [
+    plan.guest,
+    plan.reference,
+    plan.room,
+    plan.arrive === null ? null : span(plan.arrive, plan.depart, property),
+    plan.departedAt === null
+      ? null
+      : `checked out ${instant(plan.departedAt, property, "time")}`,
+    plan.noShowAt === null
+      ? null
+      : `recorded as a no-show ${instant(plan.noShowAt, property, "date-time")}`,
+  ].filter((part): part is string => part !== null).join(" · ");
 }
 
 /**
