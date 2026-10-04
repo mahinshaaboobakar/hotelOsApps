@@ -489,6 +489,91 @@ order · the separator · the grouping · the hour cycle · the abbreviation
 which is how a sweep for *"compressed range"* found nothing across 377 ADR bodies while
 the governing decision sat under the word *locale*. It cites both now.
 
+#### ✅ q10 IS ANSWERED, AND DOES NOT TRAVEL — the gap closed against its OWN claim
+
+**The four zeros supporting *"registered nowhere"* were over the ADRs and the
+register. They were not over `04`, `05`, the capability-ledger or the seven
+mockups** — and a ruling about where a guest's rating lives is exactly what a
+ledger or a mockup carries. **Measured over that population, two tokens hit:**
+
+```text
+guest-facing surface · the guest's request · guest_requestable · guest identity   0
+raised_via                                        3   01-the-jobs-screens.html
+rating                                           38   incl. 04 · 05 · the ledger
+CONTROL  positive "priority" 37      negative ZQX-7731904  0
+```
+
+##### Both halves of q10 are ruled, and one by the approved DRAWING
+
+> **`mockups/01-the-jobs-screens.html`** — *"Guest raises from the room. Guest app
+> (stay link) or room QR → **job RAISED with `raised_via`, `stay_id`** → flow
+> sets priority from PMS occupancy → AUTO assigns"*
+
+> **`chapters/02`** — *"**Storage — in Jobs, one table, because the rating is a
+> fact about the job's outcome:** `job_rating` · `job_id · stay_id · stars`"*,
+> with `job.rated` as the event.
+
+**So Jobs holds a STAY LINK and not a guest identity, and the rating lives in
+Jobs.** *q10 asked both; its own chapter answers both.*
+
+##### And §S1.16 rules the DESK raise explicitly, in the owner's own example
+
+**`chapters/02` §S1.16 — *"Who raised it, who it is for, and when it may start
+— owner, 2026-09-03"*:**
+
+```text
+raised_via      STAFF_APP · GUEST_QR · ROOM_CARE · ENGINEERING_PPM · …   (ruled)
+raised_by_kind  STAFF · GUEST · APPLICATION
+raised_by_id    STAFF → the staff user_id
+guest_stay_id   the guest concerned, if any — SET WHETHER STAFF OR THE
+                GUEST RAISED IT
+origin_app      the application whose record started it
+origin_ref      that application's own id for it
+```
+
+> **The owner's own sentence: *"a receptionist raises a job **for** Mr Rao; Mr Rao
+> raises one for himself."*** *That is the desk raising from the stay page, ruled,
+> with the who-raised-it / who-it-is-for split GuestOps' case needs.*
+
+**So the wire is `origin_app: guestops` + `origin_ref: <request id>` +
+`guest_stay_id`.** *Nothing here is unruled, and nothing travels.*
+
+##### ⚠ AND THE DESIGN CHAPTER DISAGREES WITH THE OWNER-RULED WALKTHROUGH ON A SECOND ENUM
+
+**I checked whether Set A merely predates the redesign. The ordering refuses it:**
+
+```text
+§S1.16, the owner's ruling   line 2296
+SET A, marked "(ruled)"      2234 · 2306 · 2596   <- 2306 is INSIDE §S1.16
+SET B                        2667 · 2830
+03-the-jobs-design.md:135    raised_via enum = APP · QR · GUEST_APP · WHATSAPP
+```
+
+**So `03:135` contradicts the owner's `(ruled)` set, exactly as `03:733`
+contradicts the owner's priority ruling** — and `raised_by_kind` (§S1.16) against
+`raised_kind` (`03`) is a third. *Measured rather than inferred from the first
+instance: I went looking for the ordering that would have made it history, and the
+line numbers refused it.* **Jobs' files, the architect's to route.**
+
+##### Dispositions, final
+
+```text
+What is wrong  → StayRequest.Text                                 CARRIED
+Where          → StayRequestRaised.RoomId, derived                 CARRIED
+Priority       RULED — the desk's OVERRIDE is layer 1 and must      RULED,
+               cross the wire; absent means layer 2 derives it       UNBUILT  mine
+Kind           RULED — the catalogue's category → item, which      RULED,
+               02:822 names GuestOps as a reader. GuestOps has NO    MECHANISM
+               catalogue read, and that is build work, not a ruling  UNBUILT  mine
+Detail         ruled NOWHERE, measured over every Jobs population:
+               the only `detail` hit is "the job detail's             UNRULED,
+               assembly". Jobs' job table has no such field, so it    a build
+               is GuestOps' own request text                          judgement
+```
+
+*No row is the planner's. No row is the owner's. One conflict report; the rest is
+mine to build.*
+
 #### ⚠ THE RAISE FORM'S THREE FIELDS — TWO ARE RULED BY AN OWNER RULING I HAD NOT SWEPT
 
 **I reported `Kind`, `Priority` and `Detail` as carried by nothing and `Priority`
