@@ -137,4 +137,40 @@ public class ModuleSurfaceTests
 
         Assert.Equal(404, status);
     }
+
+    /// <summary>
+    /// Settling a disagreement has a door at all — which it did not until
+    /// 2026-10-04, while the service behind it was complete and tested.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>This is the only test that can fail if the arm is removed.</b>
+    /// <c>ReconciliationCommandTests</c> constructs the command directly, so it
+    /// proves the capability and says nothing about whether a caller can reach
+    /// it; <c>ManifestRoutingTests</c> walks CAPABILITIES, and
+    /// <c>stay.override</c> already had a door through <c>correct</c>. The
+    /// missing thing was a METHOD, and nothing in the estate asserted one.
+    /// </para>
+    /// <para>
+    /// <b>404 and the word are a double discriminator.</b> The scratch database
+    /// holds no disagreement, so a routed call reaches <c>ClearAsync</c> and
+    /// fails its own lookup — <i>"disagreement ‹id› was not found"</i>, 404. An
+    /// UNSERVED method on a declared capability is an
+    /// <c>InvalidRequestException</c> and answers 400 with <i>"is not a method
+    /// this application serves"</i>, so neither the status nor the message can be
+    /// reached by the unrouted path.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Settling_a_disagreement_has_a_door()
+    {
+        await using var surface = await ModuleSurface.StartAsync();
+
+        var (status, body) = await surface.CallAsync(
+            "stay.override", "clear",
+            new { disagreementId = Guid.CreateVersion7(), side = "ours" });
+
+        Assert.Equal(404, status);
+        Assert.Contains("disagreement", body?.ToString() ?? string.Empty);
+    }
 }
