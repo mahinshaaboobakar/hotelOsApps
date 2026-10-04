@@ -25,7 +25,7 @@ public class ReconciliationTests
     {
         await using var harness = await InboundHarness.CreateAsync();
         var scope = harness.Scope();
-        var stay = await SeedOverriddenStayAsync(harness, ours: StayLifecycle.InHouse);
+        var stay = await harness.SeedOverriddenStayAsync(ours: StayLifecycle.InHouse);
 
         harness.Events.Types.Clear();
 
@@ -56,7 +56,7 @@ public class ReconciliationTests
     {
         await using var harness = await InboundHarness.CreateAsync();
         var scope = harness.Scope();
-        var stay = await SeedOverriddenStayAsync(harness, ours: StayLifecycle.InHouse);
+        var stay = await harness.SeedOverriddenStayAsync(ours: StayLifecycle.InHouse);
 
         harness.Events.Types.Clear();
 
@@ -87,7 +87,7 @@ public class ReconciliationTests
     {
         await using var harness = await InboundHarness.CreateAsync();
         var scope = harness.Scope();
-        await SeedOverriddenStayAsync(harness, ours: StayLifecycle.InHouse);
+        await harness.SeedOverriddenStayAsync(ours: StayLifecycle.InHouse);
 
         await harness.Inbound.ApplyAsync(
             scope, InboundHarness.Fact(StayLifecycle.Departed, room: InboundHarness.Room),
@@ -118,7 +118,7 @@ public class ReconciliationTests
     {
         await using var harness = await InboundHarness.CreateAsync();
         var scope = harness.Scope();
-        await SeedOverriddenStayAsync(harness, ours: StayLifecycle.InHouse);
+        await harness.SeedOverriddenStayAsync(ours: StayLifecycle.InHouse);
 
         await harness.Inbound.ApplyAsync(
             scope, InboundHarness.Fact(StayLifecycle.Departed, room: InboundHarness.Room),
@@ -147,7 +147,7 @@ public class ReconciliationTests
     {
         await using var harness = await InboundHarness.CreateAsync();
         var scope = harness.Scope();
-        await SeedOverriddenStayAsync(harness, ours: StayLifecycle.InHouse);
+        await harness.SeedOverriddenStayAsync(ours: StayLifecycle.InHouse);
 
         await harness.Inbound.ApplyAsync(
             scope, InboundHarness.Fact(StayLifecycle.Departed, room: InboundHarness.Room),
@@ -271,35 +271,5 @@ public class ReconciliationTests
         await Assert.ThrowsAsync<InvalidRequestException>(() =>
             harness.Reconciliation.DecideCandidateAsync(
                 scope, candidate.Id, sameStay: false, CancellationToken.None));
-    }
-
-    /// <summary>A stay the PMS knows, with a staff override standing on it.</summary>
-    private static async Task<RoomStay> SeedOverriddenStayAsync(
-        InboundHarness harness, StayLifecycle ours)
-    {
-        var scope = harness.Scope();
-
-        await harness.Inbound.ApplyAsync(
-            scope, InboundHarness.Fact(StayLifecycle.Booked, room: InboundHarness.Room),
-            CancellationToken.None);
-
-        var stay = await harness.Db.Stays.SingleAsync();
-        stay.Lifecycle = ours;
-
-        harness.Db.Disagreements.Add(new StayDisagreement
-        {
-            Id = Guid.CreateVersion7(),
-            StayId = stay.Id,
-            Aspect = DisagreementAspect.Lifecycle,
-            OurValue = ours.ToString(),
-            PmsValueAtOverride = StayLifecycle.Booked.ToString(),
-            OverrideActor = scope.UserId,
-            OverrideAt = harness.Clock.GetUtcNow(),
-            RaisedAt = harness.Clock.GetUtcNow(),
-            State = DisagreementState.Overridden,
-        });
-
-        await harness.Db.SaveChangesAsync();
-        return stay;
     }
 }

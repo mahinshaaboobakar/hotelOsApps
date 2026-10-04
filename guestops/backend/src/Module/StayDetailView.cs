@@ -235,13 +235,42 @@ public sealed class StayDetailView(GuestOpsDbContext db, IBusinessDay businessDa
         ];
 
     /// <summary>A value the feed disagrees with, over a value a person set.</summary>
+    /// <summary>The amber band, and the two decisions it offers.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The id and the side are FACTS, and the screen cannot derive either.</b>
+    /// Until 2026-10-04 this sent two bare label strings, so a screen wanting to
+    /// settle the disagreement had no row to name and would have had to decide
+    /// which side a button meant by reading its own English. A control whose
+    /// meaning is recoverable only by parsing its caption is a control that
+    /// breaks when the caption is reworded.
+    /// </para>
+    /// <para>
+    /// The captions stay composed here, beside the three sentences above them
+    /// — moving one of four to the screen would leave a reader unable to tell
+    /// which side owns the band's words. <b>And the owner's `f3` draws
+    /// <i>"Take Opera's 208"</i></b>: the integration's NAME, which ADR 0212
+    /// rules a fact Context resolves, and which nothing here holds. That
+    /// divergence is reported rather than guessed at.
+    /// </para>
+    /// </remarks>
     private static object Banner(StayDisagreement row)
         => new
         {
             headline = "The PMS disagrees about this stay.",
             detail = $"You have {row.OurValue} — the PMS says {row.PmsValue}, not applied.",
             attribution = "Your entry stands everywhere until somebody decides.",
-            actions = new[] { $"Keep {row.OurValue}", $"Take {row.PmsValue}" },
+
+            // The row being decided. `ClearAsync` takes this, not the stay:
+            // one stay can hold disagreements about different aspects.
+            disagreementId = row.Id.ToString(),
+
+            actions = new[]
+            {
+                new { label = $"Keep {row.OurValue}", side = "ours" },
+                new { label = $"Take {row.PmsValue}", side = "pms" },
+            },
+
             // A `time` rendered "HH:mm" was sent here until 2026-09-19 and no
             // screen ever read it; it went rather than being converted.
             tone = "warn",

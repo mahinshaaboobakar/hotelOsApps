@@ -2,6 +2,7 @@ using HotelOS.GuestOps.Application.Inbound;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.Platform;
+using Microsoft.EntityFrameworkCore;
 
 namespace HotelOS.GuestOps.Tests;
 
@@ -83,6 +84,52 @@ public sealed class InboundHarness : IAsyncDisposable
     }
 
     public RequestScope Scope() => new() { PropertyId = Property, UserId = Guid.NewGuid() };
+
+
+    /// <summary>A stay the PMS knows, with a staff override standing on it.</summary>
+    /// <remarks>
+    /// <para>
+    /// <b>Here rather than in a test class, because two now need it.</b> It was
+    /// <c>ReconciliationTests</c>' private helper until 2026-10-04, when
+    /// <c>ReconciliationCommandTests</c> needed the same arrangement — and a
+    /// seed copied into a second file drifts in the way a fixture must not: two
+    /// suites claiming to arrange one world, arranging two, with both green.
+    /// </para>
+    /// <para>
+    /// The stay arrives through <c>ApplyAsync</c> rather than being written
+    /// directly, so it is a stay the PMS genuinely knows; only the override and
+    /// its row are placed by hand, because nothing yet offers a staff write on
+    /// a PMS-managed stay at this layer.
+    /// </para>
+    /// </remarks>
+    /// <param name="ours">The lifecycle the staff override put the stay in.</param>
+    /// <returns>The stay, with the override standing on it.</returns>
+    public async Task<RoomStay> SeedOverriddenStayAsync(StayLifecycle ours)
+    {
+        var scope = Scope();
+
+        await Inbound.ApplyAsync(
+            scope, Fact(StayLifecycle.Booked, room: Room), CancellationToken.None);
+
+        var stay = await Db.Stays.SingleAsync();
+        stay.Lifecycle = ours;
+
+        Db.Disagreements.Add(new StayDisagreement
+        {
+            Id = Guid.CreateVersion7(),
+            StayId = stay.Id,
+            Aspect = DisagreementAspect.Lifecycle,
+            OurValue = ours.ToString(),
+            PmsValueAtOverride = StayLifecycle.Booked.ToString(),
+            OverrideActor = scope.UserId,
+            OverrideAt = Clock.GetUtcNow(),
+            RaisedAt = Clock.GetUtcNow(),
+            State = DisagreementState.Overridden,
+        });
+
+        await Db.SaveChangesAsync();
+        return stay;
+    }
 
     /// <summary>A fact, with the parts a test cares about.</summary>
     public static InboundStayFact Fact(

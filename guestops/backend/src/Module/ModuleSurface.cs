@@ -347,6 +347,17 @@ public static class ModuleSurface
             "correct" => services.GetRequiredService<CorrectCommand>()
                 .RunAsync(request.Scope, request.Body, cancellationToken),
 
+            // **The capability was built, ruled and tested, and reachable by
+            // nothing.** `ReconciliationService.ClearAsync` has carried
+            // GUEST-Q3 (2) and (3) in full since it was written — both sides,
+            // who and when, both values kept, and the PMS side publishing the
+            // same correction a room move does — with three tests driving it
+            // and no caller anywhere outside them. Neither this door nor the
+            // gRPC surface served it, so the band on frame 3 drew its two
+            // controls off and said the capability was missing.
+            "clear" => services.GetRequiredService<ReconciliationCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
 
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),

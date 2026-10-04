@@ -38,7 +38,16 @@ export const recordedStay: StayPage = {
     attribution:
       "Your entry stands everywhere until someone decides: override by Anitha Menon at 14:10, "
       + "when the PMS said due in, no room.",
-    actions: ["Keep 214", "Take the PMS's 208"],
+    // **The fixture said `Take the PMS's 208` and the service sends
+    // `Take 208`**, so the harness rendered a caption no property ever would
+    // and a capture of this band was evidence about itself. The owner's `f3`
+    // draws a THIRD — `Take Opera's 208`, the integration's name — which is
+    // ADR 0212's unruled fact and is reported rather than guessed here.
+    disagreementId: "01J8D0000000000000000DG1",
+    actions: [
+      { label: "Keep 214", side: "ours" },
+      { label: "Take 208", side: "pms" },
+    ],
   },
   standing: "override standing",
   rows: [

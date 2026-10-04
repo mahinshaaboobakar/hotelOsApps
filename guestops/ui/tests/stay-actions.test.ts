@@ -32,6 +32,11 @@ const acts: Acts = {
   checkOut: () => pressed.push("checkOut"),
   cancel: () => pressed.push("cancel"),
   noShow: () => pressed.push("noShow"),
+
+  // Not this file's subject — `banner.test.ts` drives it. Named rather than
+  // omitted because `Acts` requires every member: a swap of two identical
+  // shapes is what the type exists to prevent.
+  clear: () => pressed.push("clear"),
   correct: () => pressed.push("correct"),
 };
 

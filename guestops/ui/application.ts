@@ -423,6 +423,19 @@ export function start(host: HostApi, opening?: Opening): HostedModule {
           // reads its own plan so the figure it shows was fetched for it.
           noShow: () => show({ overlay: "nobodyCame" }),
           correct: () => show({ overlay: "correct" }),
+
+          // **GUEST-Q3's clear, under the same capability as the override**
+          // that caused it — the ruling refused a permission of its own by
+          // name. Direct rather than through a dialog: the owner's `f3` draws
+          // both controls bare, and both values survive either choice.
+          //
+          // The screen redraws from the service afterwards instead of patching
+          // its own copy, exactly as the correction does — which side won is
+          // the service's record, and a client editing its own would be a
+          // second place it is decided.
+          clear: (disagreementId, side) => void perform(
+            host, "stay.override", "clear", { disagreementId, side },
+          ).then(() => show({ overlay: null })),
         },
       ).then(drawOverlay);
     }

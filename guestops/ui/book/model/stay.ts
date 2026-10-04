@@ -22,14 +22,32 @@ export interface DetailRow {
   tags: readonly Tag[];
 }
 
+/** Which value a person kept — GUEST-Q3 (2). */
+export type ClearSide = "ours" | "pms";
+
 /** The amber band: a disagreement standing over an override. */
 export interface Banner {
   headline: string;
   detail: string;
   attribution: string;
 
-  /** The first is the primary. Both values stay on the record either way. */
-  actions: readonly string[];
+  /**
+   * The row being decided.
+   *
+   * One stay can hold disagreements about different aspects, so the clear names
+   * the row rather than the stay — and the screen cannot derive it.
+   */
+  disagreementId: string;
+
+  /**
+   * The first is the primary. Both values stay on the record either way.
+   *
+   * **`side` is a fact, not a restatement of the label.** Until 2026-10-04
+   * these were bare strings, so settling the disagreement would have meant
+   * deciding which side a button meant by reading its own English — a control
+   * that breaks the day somebody rewords the caption.
+   */
+  actions: readonly { label: string; side: ClearSide }[];
 }
 
 /** One entry of the activity timeline. */

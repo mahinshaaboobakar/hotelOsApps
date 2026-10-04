@@ -19,18 +19,31 @@
  * the override. Author-only clearing fails across shifts and supervisor-only
  * escalates a routine reconciliation; GUEST-Q3 refused both by name, which is
  * why there is no separate control here for a supervisor.
+ *
+ * # What drew these controls off until 2026-10-04
+ *
+ * *"Settling a disagreement with the PMS is not available from this screen
+ * yet."* — **and the capability had been complete the whole time.**
+ * `ReconciliationService.ClearAsync` carried the entire ruling with three tests
+ * driving it, and no door served it: not this module's, not the gRPC surface.
+ * The band was honest about what it could reach and wrong about what the
+ * application could do.
  */
 
-import type { Banner } from "../../book/model";
-import { el, unavailable } from "../../chrome/element";
+import type { Banner, ClearSide } from "../../book/model";
+import { control, el } from "../../chrome/element";
 
 /**
  * Draw the band.
  *
  * @param banner the disagreement standing on this stay
+ * @param clear what settling it does — the row, and the side that stands
  * @returns the band
  */
-export function banner(banner: Banner): HTMLElement {
+export function banner(
+  banner: Banner,
+  clear: (disagreementId: string, side: ClearSide) => void,
+): HTMLElement {
   const element = el("div", "ban");
   const said = el("div");
 
@@ -45,11 +58,16 @@ export function banner(banner: Banner): HTMLElement {
 
   const acts = el("div", "grow");
 
-  // Settling a disagreement has no door in GuestOps' module yet: both choices
-  // drawn off, with the reason beside them.
-  const reason = "Settling a disagreement with the PMS is not available from this screen yet.";
-  for (const label of banner.actions) acts.append(unavailable("btn sm", label, reason));
-  if (banner.actions.length > 0) acts.append(el("div", "hint", reason));
+  // The side is read from the action rather than from its caption: the two
+  // controls differ by which value they keep, and nothing about the English
+  // says which. Reworded tomorrow, this still settles the right way.
+  for (const action of banner.actions) {
+    acts.append(control(
+      "btn sm",
+      action.label,
+      () => clear(banner.disagreementId, action.side),
+    ));
+  }
 
   element.append(said, acts);
   return element;

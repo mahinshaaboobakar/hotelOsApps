@@ -77,7 +77,7 @@ export const SCREENS: readonly (readonly [string, Draw])[] = [
     [`setup · ${section.label}`, (host: HostApi, into: HTMLElement) => setup(host, into, section.label, none)] as const),
   ...["Overview", "Activity", "Requests", "Servicing", "Payment"].map((tab) =>
     [`stay · ${tab}`, (host: HostApi, into: HTMLElement) => stay(host, into, "s1", tab, none, { register: none, assign: none, checkOut: none, cancel: none,
-      noShow: none, correct: none })] as const),
+      noShow: none, correct: none, clear: none })] as const),
 ];
 
 /** Every widget, by its bundle's entry name. */

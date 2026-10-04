@@ -40,6 +40,7 @@ import {
   load,
   perform,
   type Activity,
+  type ClearSide,
   type Payment,
   type Requests,
   type Servicing,
@@ -83,6 +84,17 @@ export interface Acts {
 
   /** Open C1's dialog — put right a lifecycle fact recorded in error. */
   correct: () => void;
+
+  /**
+   * Settle the band's disagreement — GUEST-Q3 (2).
+   *
+   * **Takes the row and the side**, where the other six take nothing: a clear
+   * is about one disagreement of possibly several on a stay, and which value
+   * stands is the whole decision. No confirmation dialog, because the owner's
+   * `f3` draws neither — both values survive the choice, so there is nothing
+   * to warn about.
+   */
+  clear: (disagreementId: string, side: ClearSide) => void;
 }
 
 /**
@@ -170,7 +182,11 @@ export async function stay(
   );
 
   if (tab === "Overview") {
-    fill(body, page.banner === null ? null : banner(page.banner), overview(page, () => go("Activity")));
+    fill(
+      body,
+      page.banner === null ? null : banner(page.banner, acts.clear),
+      overview(page, () => go("Activity")),
+    );
   } else if (tab.startsWith("Requests")) {
     fill(body, ...requestsTab(requests, host.property, (text, handOff) => {
       // **Re-read rather than patched.** What was recorded is the service's
