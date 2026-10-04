@@ -489,6 +489,108 @@ order · the separator · the grouping · the hour cycle · the abbreviation
 which is how a sweep for *"compressed range"* found nothing across 377 ADR bodies while
 the governing decision sat under the word *locale*. It cites both now.
 
+#### ⚠ THE RAISE FORM'S THREE FIELDS — TWO ARE RULED BY AN OWNER RULING I HAD NOT SWEPT
+
+**I reported `Kind`, `Priority` and `Detail` as carried by nothing and `Priority`
+as CONTRADICTING the flows page. The sweep of Jobs' own chapters reverses both.**
+
+##### `Priority` is ruled, and f5's select is the ruling rather than a conflict
+
+**`jobs/docs/chapters/02-the-jobs-walkthrough-and-sign-off.md`, `S1-D4` and
+§S1.4 — *"How priority is set — RULED, owner 2026-09-02"*:**
+
+```text
+Levels   Emergency · High · Normal · Low, plus NOT TRIAGED
+1  a person chose one          → that wins, and is recorded as manual
+2  the guest flow decides it   → NEEDS PMS OR GUESTOPS INSTALLED
+3  the service's own default   → always available
+4  nothing matched             → NOT TRIAGED, a real state
+```
+
+**Layer 2's table, first row:** *"**Occupied, guest in house** | somebody is
+affected right now | **raise it**"* — **which is f5's `Guest in house — urgent`.**
+And the section's own rule 1: ***"A human override always wins and always
+sticks."*** *That is what makes it a `▾` rather than a label.*
+
+> **So the flows page and the gold page were never in conflict.** *"Jobs …
+> assigns, **prioritises**, tracks, closes"* is true — Jobs owns the chain and
+> records which layer decided. **GuestOps is layer 2's named prerequisite, and
+> the desk changing the select is layer 1.** *My finding was a true reading of
+> two true sentences, joined by an assumption neither of them makes.*
+
+##### `Kind` is ruled too — it is Jobs' catalogue, which GuestOps is named as reading
+
+```text
+02:822   "Room Care, Maintenance and GuestOps read the CATALOGUE. Nobody but
+          Jobs reads the POLICY."
+03:177   category  · code · name jsonb · DEPARTMENT_CODE · icon
+03:178   item      · category_id · guest_requestable · applies_to · …
+02:2188  "A guest-raised job is an ordinary job with raised_via: GUEST_QR, a
+          stay link and no chosen assignee — nothing else in Jobs changes"
+```
+
+**`Engineering` is a category's `department_code`**, not a GuestOps invention.
+
+##### ⚠ AND THE VOCABULARY I QUOTED IS A REGISTER ROW MISQUOTING AN OWNER RULING
+
+**Measured across all six of Jobs' documents, both vocabularies, whole files:**
+
+```text
+Emergency · High · Normal · Low · Not triaged    30 in the walkthrough
+                                             5 in 03-the-jobs-design.md
+                                             0 in the other four
+P1 · P2 · P3 · NOT_TRIAGED                   ONE occurrence IN THE WHOLE SET
+                                             03-the-jobs-design.md:733
+```
+
+**`JOBS-Q3`'s register row says *"the WALKTHROUGH's `P1 · P2 · P3 · NOT_TRIAGED`
+vocabulary … govern"*. The walkthrough contains that string ZERO times**, and
+states the owner's five levels thirty. *And `03`'s own :133 lists the five, so the
+design chapter contradicts itself at :133 against :733 — in a sentence whose next
+clause reads "translating quietly would put two vocabularies in one product".*
+
+> **This is where my wrong figure came from: I read it off the register.** *CC's
+> rule — a register row cannot tell a reader it is a compression, and the row's
+> reader is the one most likely to re-quote it.* **Not mine to fix: Jobs'
+> chapters and the register are not my files, and an owner ruling in conflict
+> with a register row is the architect's to reconcile.**
+
+##### The dispositions, and ONE row needs a ruling
+
+```text
+What is wrong   → StayRequest.Text                     CARRIED      build
+Where           → StayRequestRaised.RoomId, derived     CARRIED      build
+Priority        RULED, owner 2026-09-02. What must cross   RULED,
+                the wire is the OVERRIDE when the desk     UNBUILT      build
+                makes one, so Jobs can record layer 1
+Kind            RULED as a CONCEPT — Jobs' catalogue,     RULED,
+                GuestOps named as a reader. But GuestOps   MECHANISM
+                HAS NO CATALOGUE READ, and inventing one   UNRULED
+                is a cross-application coupling decision
+Detail          ruled NOWHERE: 0 in the register, 0 in
+                379 ADR bodies, absent from every Jobs     UNRULED
+                field list
+```
+
+**And the open row is already asked, by Jobs, and registered nowhere.**
+`01-the-jobs-reference-survey.md`, question 10: *"**Does Jobs carry a
+guest-facing surface at all?** … GuestOps owns the guest. **Is the guest's
+request a GuestOps object that produces a job by event, with Jobs holding no
+guest identity** — and if so, where does the rating live?"*
+
+```text
+"guest-facing surface"  register 0   ADR bodies 0
+"guest's request"       register 0
+"raised_via"            register 0   ADR bodies 0
+guest_requestable                    ADR bodies 0
+NOT_TRIAGED                          ADR bodies 0
+```
+
+**So Jobs' entire priority and catalogue vocabulary lives in its own chapters and
+the register, and in NO ADR.** *An ADR-only sweep could not have found any of it
+— which is why the gate names the app's own chapters first, and why my earlier
+"nothing rules this" was a measurement of the wrong population.*
+
 #### ⚠ ＋ RAISE A JOB OPENS A FORM, AND TWO OF ITS FIVE FIELDS ARE CARRIED
 
 **Three readings of this control were wrong, mine and the architect's, and all
