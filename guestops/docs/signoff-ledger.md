@@ -280,17 +280,17 @@ unconditional are separated, because a table calling a conditional greying
 | the build | the owner's page | disposition |
 |---|---|---|
 | `Export` · `stay/index.ts:313` | **f4 OFF**, reason in the label | **MATCHES.** SHELL-Q23's file-save half — a platform gap, not GuestOps' |
-| `＋ Raise a job`, Jobs absent · `:321` | **f5b OFF** | **MATCHES.** `APPS-Q2`: an absent neighbour loses its capability, never the flow |
-| `＋ Log a request` · `requests-tab.ts:64` | **f5 and f5b LIVE** | **MATCHES** — *conditional*, off only where the host serves no method. Flows §10: the request is recorded *"always, installed or not"* |
-| `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE** | **UNBUILT, mine.** GuestOps records and announces; it never calls Jobs (flows §10) |
-| `Ask for service` · `:326` | **f6 LIVE** | **UNBUILT, mine.** The same shape from Room Care |
-| `Open in the PMS` · `:332` | **f7 LIVE as `Open in Opera`** | **UNBUILT, mine — and the LABEL differs too.** A link out, asserting nothing about the folio |
-| `Keep 214` · `Take Opera's 208` · `banner.ts:51` | **f3 LIVE** | **UNBUILT, mine.** Unconditional. Settling a disagreement has no module door — `GUEST-Q3` ruled the mechanism, and both choices take the stay's write permission |
-| `Save` · `Discard` · `setup/index.ts:100-101` | **f16 and the reason-lists frame LIVE** | **UNBUILT, mine.** Unconditional; settings are reachable only through the gRPC door |
-| three `＋ Add` · `setup/card.ts:37` | **LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
-| four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
+| `＋ Raise a job`, Jobs absent · `:321` | **f6 OFF** — *not f5b, which does not exist* | **MATCHES.** `APPS-Q2`: an absent neighbour loses its capability, never the flow |
+| `＋ Log a request` · `requests-tab.ts:64` | **f5 and f6 LIVE** | **MATCHES** — *conditional*, off only where the host serves no method. Flows §10: the request is recorded *"always, installed or not"* |
+| `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE**, `btn pri`, in the HEADER | **the CAPABILITY IS BUILT AND REACHABLE** — `requests-tab.ts:84` already draws `Log and raise a job` live. What is off is the header's second affordance, and **what it opens is drawn nowhere** — see below |
+| `Ask for service` · `:326` | **f7 LIVE** — *not f6* | **UNBUILT — and the RECORD is unruled.** Flows §10 rules the concept (*"the same shape, from Room Care"*); no servicing write exists and `handOff` hands off to Jobs by name — see below |
+| `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **UNBUILT, mine — and the LABEL differs too.** A link out, asserting nothing about the folio |
+| `Keep 214` · `Take Opera's 208` · `banner.ts` | **f3 LIVE** — `btn sm pri` and `btn sm` | ✅ **BUILT — `482d23be`, `b468fc05`.** And the premise was wrong in my favour: **`ReconciliationService.ClearAsync` carried the whole ruling, with three tests driving it, reachable by NOTHING** — no module arm, no gRPC method, no caller outside `tests/`. Not *mechanism ruled, door missing* but *service built and tested, door missing*. Probes: 2 of 281 (UI, a split), 1 of 7 (the arm removed) |
+| `Save` · `Discard` · `setup/index.ts:100-101` | **f17 and fV2 LIVE** — *not f16, whose control is `Save and check in` and which has no `Discard`* | **UNBUILT, mine.** Unconditional; settings are reachable only through the gRPC door |
+| three `＋ Add` · `setup/card.ts:37` | **fV2 LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
+| four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything `btn sm pri` · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
 | `＋ assign` · `today/table.ts` | **LIVE, ×7** | ✅ **BUILT — `a36bbc89`.** A ROUTE, not a capability: the sheet, the overlay arm and the module-door method all existed, and **`overlays.ts:70` and `screens/assign/index.ts:3` each named *"the day list's `＋ assign`"* while the control drew off** — a guarantee-comment PAIR. Probe: 2 failed of 276, a split |
-| `Reinstate` · `stay/index.ts:384` fall-through | **fRI1 · fRI2 LIVE** | ✅ **BUILT today** — `200fe4da` |
+| `Reinstate` · `stay/index.ts:384` fall-through | **fN1b and fRI1 LIVE** — *fRI2 draws no `Reinstate` node* | ✅ **BUILT today** — `200fe4da` |
 | the generic fall-through · `:384` | — | **CORRECT, and narrowed rather than removed.** An action nobody drew still draws off with a reason |
 | `＋ add a guest in this room` · `newbooking/guest.ts:58` | **ABSENT from the page** | **SURPLUS to the specification.** The build drew a control the owner did not. Honest — it is off and says why — and it is not in the design |
 | a servicing night action · `servicing-tab.ts:77` | **ABSENT from the page** | **SURPLUS**, same shape |
@@ -337,6 +337,109 @@ need a contract somebody owns, and one is a conflict.
 | **the setup card's action blocks** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | the same settings write, plus a stop-sell write and a filing record. `StopSell` and `StayReporting` are **designed** (design §2.7, §5.3) and unbuilt behind the door | **mine, after the write exists** |
 | **the four activity filters** | **SPLIT by measurement — see below.** Two are servable today; two turn on a ruling | **two mine, two the owner's** |
 | **`Open in the PMS`** → the page's **`Open in Opera`** | a URL nobody owns, and a LABEL that is a fact | **UNRULED** — see below |
+
+#### ⚠ SIX OF THIS TABLE'S FRAME CITATIONS WERE WRONG, AND ONE FRAME DOES NOT EXIST
+
+**Corrected 2026-10-04 by deriving each control's frame from the node's own
+position, rather than reading the frames in order.** The CONTROL inventory above
+was right — which controls, in which state — and the LOCATIONS were not:
+
+```text
+my row said                       derived
+f5b   Raise a job OFF             f6    - AND THERE IS NO f5b IN THE PAGE
+f5b   Log a request LIVE          f6
+f6    Ask for service LIVE        f7
+f7    Open in the PMS LIVE        f8    - where the label is `Open in Opera`
+f16   Save / Discard LIVE         f17 and fV2 - f16's control is `Save and
+                                        check in`, which is a DIFFERENT one,
+                                        and f16 has no `Discard` at all
+fRI1 · fRI2  Reinstate LIVE       fN1b and fRI1 - fRI2 has no Reinstate node
+×7 (no frames named)             f1 ×6 + fN2 ×1 = 7
+```
+
+**Already right, and re-measured rather than assumed**: `Export` — `fC2` and
+`f4`, both OFF · the banner — `f3` · the four filters — `f4` · the three
+`＋ Add` — `fV2`.
+
+> **A wrong count announces itself; a wrong LOCATION looks exactly like a
+> location.** Nothing in the old table disagreed with anything — the states were
+> right, the totals were right (96 nodes, 3 off), and six rows pointed at frames
+> that do not hold what they claimed. **A reader checking one would have found
+> the control somewhere and assumed a typo.**
+
+**AND MY FIRST SELF-CHECK PRODUCED 21 FALSE FAILURES**, including rows derived
+from the same file minutes earlier. It read the class from a 200-character window
+before the label and took the FIRST match, so it reported the PREVIOUS node's
+class — it gave `Ours` the class the walk gives `Everything`. *A detector is a
+hypothesis about the fault's shape, and this one was wrong by one node; believing
+it would have concluded the gold page has almost no controls where I had just
+derived 96.*
+
+**The sound check reuses the proven walk** — the node and its own attributes
+captured together — and carries both controls in the same run:
+
+```text
+positive   96 btn/link nodes, 3 OFF   agrees with the independent census
+negative   a label minted this run     0 nodes
+claims     23 of 23 corrected rows pass
+mismatches 2 - EXACTLY the two citations this table had wrong: f5b and fRI2
+```
+
+**One weakness, stated rather than left**: the check matches a SUBSTRING, so
+`Save` matches `Save and check in`. That is how `f16` passed at all, and reading
+the matched text is what showed it was the wrong control.
+
+#### ＋ Raise a job — the capability is BUILT AND ALREADY REACHABLE; the header is not
+
+**My row called this *"UNBUILT, mine"*. Measured, that is wrong in the same
+direction as the banner's:**
+
+```text
+RequestCommand      serves `log` with a `handOff` flag, and echoes `handedOff`
+                    from what was STORED - Module/RequestCommand.cs:67-88
+StayRequestService  LogAsync(scope, stayId, text, handOff, ct)
+requests-tab.ts:84  ALREADY DRAWS `Log and raise a job`, LIVE, conditional on
+                    `requests.jobsInstalled !== false`
+stay/index.ts:322   the HEADER's `＋ Raise a job`, drawn OFF in both arms
+```
+
+> **So a desk with Jobs installed can raise a job today.** The thing drawn off is
+> a SECOND affordance for a capability that works — *absence of a control is
+> evidence about controls, and becomes evidence about capability only after
+> following the call to where the thing is actually done.*
+
+**And the divergence is a LAYOUT one the page is explicit about:**
+
+```text
+the owner's f5    header  `btn pri`  ＋ Raise a job
+                  body    `btn sm`   ＋ Log a request
+the build         body    both: `Log` and `Log and raise a job`
+```
+
+**What the header control OPENS is drawn nowhere.** `f5` shows it with the
+Requests tab already active and the body's input visible; no dialog is drawn for
+it, and the flows page draws the flow without one. **Two readings — route to the
+tab and focus the input, or open a dialog — and the page draws neither**, so
+building either would be a design decision wearing a wiring change. *Reported
+rather than chosen: the owner draws.*
+
+#### Ask for service — the CONCEPT is ruled and the RECORD is not
+
+`f7`'s header `btn`, live. Flows §10 rules the concept in four words —
+*"Servicing across the stay — **the same shape**, from Room Care"* — and the
+service layer has no write for it:
+
+```text
+StayRequestService   LogAsync · RecordJobAsync · AddNoteAsync
+                     and `handOff` hands off to JOBS, by name
+ServicingView        a READ
+```
+
+> **"The same shape" is a concept, not a contract.** A second hand-off target is
+> a schema decision — does a service request reuse `StayRequest` with a target,
+> or is it its own record? — and deciding it inside a door would be exactly the
+> *implementation detail mistaken for a contract* this estate warns about, in the
+> cheaper direction: quietly implemented differently and found much later.
 
 #### The activity filters are two rows, not one — and the service's own comment is half right
 
