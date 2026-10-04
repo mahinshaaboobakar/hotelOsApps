@@ -40,7 +40,7 @@ public partial class GuestOpsGrpcService
             request.PrintOnCheckIn,
             request.CardNumberPrefix,
             request.ReportingRequired,
-            ParseScope(request.ReportingAppliesTo),
+            ReportingScopes.Parse(request.ReportingAppliesTo),
             OrNull(request.ReportingAuthority),
             request.ReportingDueHours);
 
@@ -53,20 +53,6 @@ public partial class GuestOpsGrpcService
         return ToProto(saved);
     }
 
-    /// <summary>Who the reporting obligation covers.</summary>
-    /// <remarks>
-    /// An unrecognised value is refused rather than defaulted. Defaulting to
-    /// from-outside would quietly narrow a property's obligation, and the
-    /// property would not find out until an inspection.
-    /// </remarks>
-    private static ReportingScope ParseScope(string value) => value switch
-    {
-        "from_outside" => ReportingScope.FromOutside,
-        "every_guest" => ReportingScope.EveryGuest,
-        _ => throw new InvalidRequestException(
-            "reporting_applies_to must be from_outside or every_guest"),
-    };
-
     private static Contracts.V1.GuestOpsSettings ToProto(Domain.GuestOpsSettings row)
     {
         var message = new Contracts.V1.GuestOpsSettings
@@ -77,9 +63,7 @@ public partial class GuestOpsGrpcService
             PrintOnCheckIn = row.PrintOnCheckIn,
             CardNumberPrefix = row.CardNumberPrefix,
             ReportingRequired = row.ReportingRequired,
-            ReportingAppliesTo = row.ReportingAppliesTo == ReportingScope.EveryGuest
-                ? "every_guest"
-                : "from_outside",
+            ReportingAppliesTo = ReportingScopes.Wire(row.ReportingAppliesTo),
             ReportingAuthority = row.ReportingAuthority ?? string.Empty,
             ReportingDueHours = row.ReportingDueHours,
             Version = row.Version,

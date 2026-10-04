@@ -44,6 +44,7 @@ public sealed class InboundHarness : IAsyncDisposable
         // container does.
         var creator = new InboundStayCreator(db, Events, clock);
         Inbound = new InboundFactService(db, matcher, creator, Events, clock);
+        Settings = new Application.Settings.SettingsService(db, Authorizer);
         Reconciliation = new Application.Reconciliation.ReconciliationService(
             db, Authorizer, Events, clock);
     }
@@ -59,6 +60,14 @@ public sealed class InboundHarness : IAsyncDisposable
     public InboundFactService Inbound { get; }
 
     public Application.Reconciliation.ReconciliationService Reconciliation { get; }
+
+    /// <summary>This application's own configuration, read and written.</summary>
+    /// <remarks>
+    /// Over the same scratch database as everything else here, so a test that
+    /// saves settings and then drives a registration card is driving one world
+    /// rather than two that happen to agree.
+    /// </remarks>
+    public Application.Settings.SettingsService Settings { get; }
 
     public static readonly Guid Property = Guid.Parse("11111111-1111-1111-1111-111111111111");
 

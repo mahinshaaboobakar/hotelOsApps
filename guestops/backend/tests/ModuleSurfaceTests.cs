@@ -173,4 +173,38 @@ public class ModuleSurfaceTests
         Assert.Equal(404, status);
         Assert.Contains("disagreement", body?.ToString() ?? string.Empty);
     }
+
+    /// <summary>
+    /// Saving this application's configuration has a door — which it did not
+    /// until 2026-10-04, while the write was served over gRPC the whole time.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// <b>The only test that can fail if the arm is removed.</b>
+    /// <c>SettingsCommandTests</c> constructs the command directly;
+    /// <c>ManifestRoutingTests</c> walks CAPABILITIES, and <c>desk.configure</c>
+    /// already had a door through <c>setup</c>. The missing thing was a METHOD.
+    /// </para>
+    /// <para>
+    /// <b>400 and the word are the discriminator.</b> A routed call reaches the
+    /// command and fails its own body check — <i>"saving settings needs the
+    /// version the configuration was read at"</i>, an
+    /// <c>InvalidRequestException</c>. An UNSERVED method is the same exception
+    /// type with a different sentence, so the STATUS cannot separate them and the
+    /// message can: an unrouted call can only say <i>"is not a method this
+    /// application serves"</i>.
+    /// </para>
+    /// </remarks>
+    [Fact]
+    public async Task Saving_the_configuration_has_a_door()
+    {
+        await using var surface = await ModuleSurface.StartAsync();
+
+        var (status, body) = await surface.CallAsync("desk.configure", "configure", new { });
+        var said = body?.ToString() ?? string.Empty;
+
+        Assert.InRange(status, 400, 499);
+        Assert.Contains("saving settings needs", said);
+        Assert.DoesNotContain("is not a method this application serves", said);
+    }
 }

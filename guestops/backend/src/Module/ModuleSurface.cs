@@ -298,6 +298,19 @@ public static class ModuleSurface
             "setup" => services.GetRequiredService<SetupView>()
                 .AnswerAsync(request.Scope, cancellationToken),
 
+            // **The write was reachable over gRPC and from no screen**, so the
+            // Setup bar's `Save` drew off and the row was never stored — and
+            // `MintCardNumber` refuses a card until it is, which made frame 15's
+            // capture permanently 409 THROUGH THE DESK. The service already had
+            // ADR 0356's ruled shape: validated at the write boundary, refusing
+            // an unknown value, versioned. Only the door was missing.
+            //
+            // In THIS switch rather than the read's, so the write takes
+            // `desk.configure` — AUTHZ-Q24's renamed permission — and inherits
+            // nothing from whatever may read.
+            "configure" => services.GetRequiredService<SettingsCommand>()
+                .RunAsync(request.Scope, request.Body, cancellationToken),
+
             _ => throw new InvalidRequestException(
                 $"'{request.Method}' is not a method this application serves"),
         };
