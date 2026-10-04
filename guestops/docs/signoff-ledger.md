@@ -36,7 +36,9 @@ reached.** Dispositions as of 2026-10-03.
 | **PROVEN** | **`Reinstate…` is wired to the dialog the owner drew.** The build greyed it on a reason that was TRUE on 2026-09-24 and that `247c854` falsified on 2026-09-28 — `fRI1` draws the dialog to its end | `200fe4da` · `57320c58` · tsc 0, vitest 273, dotnet 0/0, 340 tests. Probe 1 split 1-of-264; probe 2 split 4-of-273, departure arm green |
 | **PROVEN** | **The correction dialog is driven by a test at all.** It was driven by none — both arms, including the departure shipped 2026-09-24 — and a mutation found it rather than a reading | `57320c58`; the probe that found it left 264 passing |
 | ~~**UNRULED**~~ **→ APPROVED, UNBUILT** | ~~13 capabilities whose controls the design draws enabled and the application cannot perform — **the owner's**~~ **This row was wrong about WHOSE they are.** The owner's `docs/mockups/` IS the authored specification (owner, 2026-10-04), so the design is settled and the deliverable is a build that matches it. **They are mine, not a question** — §5 dispositions each one | the old reading is kept because it is what I sent up as a question, and a reader meeting only the correction cannot see that the menu was offered · `7879f075` |
-| **UNBUILT** | **12 controls the owner's pages draw LIVE and the build draws off** — enumerated, each with what it needs | §5 · mine |
+| **PROVEN** | **The day list's `＋ assign` reaches the sheet.** Two files already asserted the route and nothing wired it | `a36bbc89` · tsc 0, vitest 276; probe 2 failed of 276, a split |
+| **UNBUILT** | **7 ROWS the owner's pages draw LIVE and the build draws off** — each with what it is waiting on, three mine outright, three needing a contract, one a conflict | §5 |
+| | ⚠ *This said **12 controls**. The row count is 8, now 7, and is derived from the table; the CONTROL count is not derivable — the setup card greys whatever labels its panel declares, so a figure stated here would be a number nobody measured.* | |
 | **UNRULED** | **One divergence INSIDE the owner's own pages.** `fRI1`'s prose draws the compressed range `19 – 20 Aug`; the owner ruled the LONG form on 2026-09-20 against mockup 07 B, eight days earlier | §5 · the owner's, and asserted in both directions meanwhile so it cannot close quietly |
 | **UNRULED** | **The staleness mechanism** that `Today.stale` is drawn for, and nothing computes | planner / owner |
 | **UNBUILT** | **No booking has been COMPLETED end to end.** The refusal is repaired; the proof is a run | the owner's, on the installed build |
@@ -287,17 +289,116 @@ unconditional are separated, because a table calling a conditional greying
 | `Save` · `Discard` · `setup/index.ts:100-101` | **f16 and the reason-lists frame LIVE** | **UNBUILT, mine.** Unconditional; settings are reachable only through the gRPC door |
 | three `＋ Add` · `setup/card.ts:37` | **LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
 | four activity filters · `activity-tab.ts:46` | **f4 LIVE** — Everything · Ours · Opera · Other apps | **UNBUILT, mine.** Unconditional |
-| `＋ assign` · `today/table.ts:103` | **LIVE, ×7** | **UNBUILT, mine — and it is a ROUTE, not a capability.** `acts.assign` is already wired on the stay page for `Move room` |
+| `＋ assign` · `today/table.ts` | **LIVE, ×7** | ✅ **BUILT — `a36bbc89`.** A ROUTE, not a capability: the sheet, the overlay arm and the module-door method all existed, and **`overlays.ts:70` and `screens/assign/index.ts:3` each named *"the day list's `＋ assign`"* while the control drew off** — a guarantee-comment PAIR. Probe: 2 failed of 276, a split |
 | `Reinstate` · `stay/index.ts:384` fall-through | **fRI1 · fRI2 LIVE** | ✅ **BUILT today** — `200fe4da` |
 | the generic fall-through · `:384` | — | **CORRECT, and narrowed rather than removed.** An action nobody drew still draws off with a reason |
 | `＋ add a guest in this room` · `newbooking/guest.ts:58` | **ABSENT from the page** | **SURPLUS to the specification.** The build drew a control the owner did not. Honest — it is off and says why — and it is not in the design |
 | a servicing night action · `servicing-tab.ts:77` | **ABSENT from the page** | **SURPLUS**, same shape |
 | a tag link · `chrome/marks.ts:79` | — | infrastructure, not a control of the design |
 
-**The arithmetic closes: 2 match · 1 matches conditionally · 9 unbuilt · 1 built
-today · 1 correct by construction · 2 surplus · 1 infrastructure = 17 rows over
-16 call sites**, because `＋ Raise a job` is two sites in one row pair and is
-counted on both arms.
+> ### ⚠ THE ARITHMETIC DID NOT CLOSE, AND THE WRONG FIGURE TRAVELLED INTO AN ASSIGNMENT
+>
+> **This said: *"2 match · 1 matches conditionally · 9 unbuilt · 1 built today · 1
+> correct by construction · 2 surplus · 1 infrastructure = 17 rows over 16 call
+> sites, because `＋ Raise a job` is two sites in one row pair and is counted on
+> both arms."*** **Derived from the table itself: 16 rows, of which EIGHT are
+> unbuilt.**
+>
+> ```text
+> 2  match                     1  matches conditionally
+> 8  UNBUILT  (published as 9)  2  built            (assign joined Reinstate)
+> 1  correct by construction    2  surplus          1  infrastructure
+> --                            --
+> 16 rows, and 16 is the total  — published as 17
+> ```
+>
+> **`＋ Raise a job` genuinely IS two rows** — one matching (Jobs absent) and one
+> unbuilt (Jobs installed) — **and I then added one MORE for the pair, and wrote
+> a sentence explaining the extra.** *The explanation was composed to justify a
+> number that was already wrong, which is why it reads as reasoning.*
+>
+> **The architect's relay said *"build the nine"*, quoting my figure.** A count
+> published beside its own enumeration is checked by nobody unless somebody adds
+> the column up — and the author is the one person who has just counted it and
+> will not count it again.
+
+### The seven that remain — measured 2026-10-04, each with what it is waiting on
+
+**One of the eight is built. The other seven were measured rather than
+estimated**, and they do not share a blocker: three are mine outright, three
+need a contract somebody owns, and one is a conflict.
+
+| row | what it needs | whose |
+|---|---|---|
+| **`＋ Raise a job`**, Jobs installed | the record and the announcement. Flows §10 rules it: *"Request logged on the stay — GuestOps's own record — always"* and *"GuestOps never calls Jobs"*. `RequestCommand` is **already served** under `log`/`note` | **mine** |
+| **`Ask for service`** | the same shape from Room Care. Flows §10 rules the shape; `ServicingView` is a **read** and no command answers it | **mine** |
+| **the banner's `Keep 214` / `Take Opera's 208`** | a module-door method. `GUEST-Q3` ruled the whole mechanism — both choices take the stay's write permission, both values are kept, and clearing to the PMS's side *"publishes the same correction a room move does"* | **mine** |
+| **setup `Save` / `Discard`** | a settings WRITE. `"setup"` serves `SetupView`, a read, and **nothing in the module door writes `GuestOpsSettings`** | **mine, and one question** — see below |
+| **the setup card's action blocks** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | the same settings write, plus a stop-sell write and a filing record. `StopSell` and `StayReporting` are **designed** (design §2.7, §5.3) and unbuilt behind the door | **mine, after the write exists** |
+| **the four activity filters** | **SPLIT by measurement — see below.** Two are servable today; two turn on a ruling | **two mine, two the owner's** |
+| **`Open in the PMS`** → the page's **`Open in Opera`** | a URL nobody owns, and a LABEL that is a fact | **UNRULED** — see below |
+
+#### The activity filters are two rows, not one — and the service's own comment is half right
+
+**The owner's `f4` draws four**: `Everything · Ours · Opera · Other apps`.
+**`ActivityView` deliberately serves two**, with its reason written at the site:
+
+> *"Only the filters this projection can honour. `Opera` and `Other apps` are in
+> the design and would return nothing here, and a filter that is always empty
+> teaches an operator that a source has gone quiet when it was never being
+> read."*
+
+**Measured: the projection CAN honour all four.** `Who(actorType, source)` maps
+`1 → override` (a person), `2 → pms` (named by the source), `_ → other` — and
+`who.mark` is **already on the wire for every entry**. So the axis exists and the
+entries carry it.
+
+```text
+Everything   every entry                 servable today
+Ours         who.mark === "override"     servable today
+Opera        who.mark === "pms"          servable — and see the LABEL below
+Other apps   who.mark === "other"        servable today
+```
+
+> **So *"would return nothing here"* is a claim about a STANDALONE PROPERTY'S
+> DATA, not about the projection.** On a PMS-connected property — which the gold
+> page draws as `f11` — `actorType = 2` entries exist and the filter works. On a
+> standalone one it returns nothing, **which is honest**: the property genuinely
+> has no PMS facts, and that is not a source having gone quiet.
+
+**And the fourth filter's LABEL is why this is not simply mine to build.** The
+page draws **`Opera`** — the connected system's name — and **ADR 0212 rules that
+Context resolves an integration's name.** So the label is a *fact*, not a screen
+word, and nobody has ruled whether the filter set is **static four** or **derived
+from the integrations this property has connected**. *Composing `Opera` into the
+screen would hardcode one vendor into a platform sold to properties running
+others.*
+
+#### `Open in Opera` — two things are missing and neither is mine to invent
+
+```text
+the LABEL   the integration's name — ADR 0212 rules it a fact Context resolves
+the TARGET  a deep link into the PMS. Measured: nothing in this estate holds a
+            PMS console address, and v1's connector contract is INBOUND-ONLY
+            (ADR 0128 §4), so no connector supplies one either
+```
+
+**The build's own comment states the intent honestly** — *"a link, not an
+integration: it takes the user to the system that holds the folio and asserts
+nothing about what is in it"* — **and a link needs an address.** *Drawing a live
+control over an address nobody holds would be the copy-outruns-the-mechanism
+class with a click attached.*
+
+#### And the setup write raises one question rather than being blocked by it
+
+`GuestOpsSettings` holds registration, reporting and numbering; `f16` is the
+screen the owner asked for, and `ADR 0305` ruled the reason vocabulary's shape.
+**What is unstated is whether the desk's own setup screen writes those settings,
+or whether property configuration is Core Administration's** — the build's
+current sentence says *"settings are shown here and cannot be changed from this
+screen yet"*, which is a true description of today and not a design.
+
+---
 
 ### The divergence inside the owner's own pages, and why it is not mine to close
 
