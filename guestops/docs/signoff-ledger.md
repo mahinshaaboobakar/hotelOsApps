@@ -286,7 +286,7 @@ unconditional are separated, because a table calling a conditional greying
 | `＋ Log a request` · `requests-tab.ts:64` | **f5 and f6 LIVE** | **MATCHES** — *conditional*, off only where the host serves no method. Flows §10: the request is recorded *"always, installed or not"* |
 | `＋ Raise a job`, Jobs installed · `:322` | **f5 LIVE**, `btn pri`, in the HEADER | **the CAPABILITY IS BUILT AND REACHABLE** — `requests-tab.ts:84` already draws `Log and raise a job` live. What is off is the header's second affordance, and **what it opens is drawn nowhere** — see below |
 | `Ask for service` · `:326` | **f7 LIVE** — *not f6* | **UNBUILT — and the RECORD is unruled.** Flows §10 rules the concept (*"the same shape, from Room Care"*); no servicing write exists and `handOff` hands off to Jobs by name — see below |
-| `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **UNBUILT, mine — and the LABEL differs too.** A link out, asserting nothing about the folio |
+| `Open in the PMS` · `:332` | **f8 LIVE as `Open in Opera`** — *not f7* | **THE LABEL IS CORRECT AND RULED — ADR 0212's own Consequences name GuestOps' *"forty-two interim 'the PMS' sentences"* and say they take the connected system's name *"once this ships"*.** The build draws today's ruled state and the page draws the end state. **The CONTROL waits on an ADDRESS**, whose pattern is ruled AND BUILT — see below |
 | `Keep 214` · `Take Opera's 208` · `banner.ts` | **f3 LIVE** — `btn sm pri` and `btn sm` | ✅ **BUILT — `482d23be`, `b468fc05`.** And the premise was wrong in my favour: **`ReconciliationService.ClearAsync` carried the whole ruling, with three tests driving it, reachable by NOTHING** — no module arm, no gRPC method, no caller outside `tests/`. Not *mechanism ruled, door missing* but *service built and tested, door missing*. Probes: 2 of 281 (UI, a split), 1 of 7 (the arm removed) |
 | `Save` · `Discard` · `setup/index.ts:100-101` | **f17 and fV2 LIVE** — *not f16, whose control is `Save and check in` and which has no `Discard`* | ✅ **THE DOOR IS BUILT — `4b341985`.** `SettingsService.SaveAsync` already had ADR 0356's ruled shape and no module arm, **so no property could ever store a settings row through the desk — and that is why frame 15's capture is 409.** Probe: 1 of 8, a split. **The SCREEN stays off on a PAGE GAP** — see below |
 | three `＋ Add` · `setup/card.ts:37` | **fV2 LIVE** — `＋ Add` ×3, `＋ Close a room type for dates`, `Record a filing`, `Open the list` | **UNBUILT, mine.** Unconditional |
@@ -599,6 +599,141 @@ word, and nobody has ruled whether the filter set is **static four** or **derive
 from the integrations this property has connected**. *Composing `Opera` into the
 screen would hardcode one vendor into a platform sold to properties running
 others.*
+
+#### ⚠ THE SWEEP I NAMED AS NOT REACHED CORRECTED TWO OF MY OWN DISPOSITIONS
+
+**I closed the connector repository's documents, and the result is that I had
+been reporting a RULING as a blocker.**
+
+```text
+my earlier figure   pms-oracle: 1 document      <- a count of docs/mockups/ ONLY
+derived             9 - three chapters, a conformance page, a provenance page,
+                    two ledgers, a mockup, an evidence page
+```
+
+##### The LABEL is ruled, and the build's `Open in the PMS` is the ruled INTERIM
+
+**`ADR 0212` — planner, 2026-09-20, closing `CONN-Q44`, which the planner had
+RETURNED ONCE for want of measured evidence — read in full:**
+
+> **"Context owns the application-facing resolution `integration_id → integration
+> name`, sourcing the authoritative installed-integration record from the
+> Integration Hub."**
+
+**And its Consequences name this application by name:**
+
+> *"**GuestOps' forty-two interim *'the PMS'* sentences take the connected
+> system's own name ONCE THIS SHIPS**, so a property running Oracle OPERA Cloud
+> reads `Oracle OPERA Cloud` and one running anything else reads that instead."*
+
+```text
+the build       "Open in the PMS"    the ruled INTERIM state
+the owner's f8  "Open in Opera"      the state AFTER the Context RPC ships
+measured        context/v1/service.proto has NO integration-name RPC, and the
+                Context Service has no implementation
+rejected by     stamping the name into Provenance · widening the Hub's
+0212, by name   user-scoped RPC · APPLICATIONS CALLING THE HUB DIRECTLY
+```
+
+> **So the label is RULED, the platform's half is UNBUILT, and the workaround is
+> refused by name.** *My row said **"UNBUILT, mine — and the LABEL differs too"**
+> and both halves were wrong: it is not unruled, and it is not mine.*
+
+**The same correction applies to the `Opera` activity filter.** Its label is the
+same ADR 0212 fact, so today it reads *"the PMS"* — correctly — and takes the
+integration's own name when the RPC lands.
+
+##### And the ADDRESS has a pattern that is ruled AND BUILT
+
+**`ADR 0243` — read in full, closing `OPS-Q10` B1–B2 and `OPS-Q13` B3–B5:**
+
+> **B3: "The declared `console_url` values are configuration, so the correct
+> direction is to make them available through the existing configuration
+> surface"** — *"a configuration-surface correction, not a `GetConsoleAddresses`
+> RPC."*
+> **B4: "The configured address, never inferred from the running process."**
+> **B5: "The field's existence proves that remote observability is a supported
+> case"** — and refusing a non-local address *"would contradict the reason
+> `console_url` was introduced."*
+
+**B3's five requirements are binding and they LANDED** — CC, `fa397d1c`: *five
+machine-sourced keys outside `DECLARED`, answered before `stores()`, refused by
+`SetConfig`, `CONFIG_SCOPE_MACHINE` on the wire, blank resolved to absent.* **So
+a configured, read-only, database-independent, absent-distinguishable external
+console address is a mechanism this platform has, not one it needs.**
+
+```text
+1  one key per SECTION, sourced from the LOADED FILE
+2  read-only - SetConfig refuses them
+3  resolves WITHOUT the database, before get_config opens a repository
+4  "not set" distinguishable - console_url = "" is not an address
+5  CONFIG_SCOPE_MACHINE, because UNSPECIFIED would mean the declaration's default
+```
+
+> **Requirement 1 is where the question actually sits**: *one key per section*,
+> and an installed integration is not a platform configuration section. **So the
+> narrow question is whether an installed integration declares a sixth such key
+> or declares it some other way** — not *"nothing holds a PMS console
+> address"*, which is what I reported.
+
+##### And ADR 0362 §4 rules WHEN that pattern transfers, which is the discriminator
+
+> **"ADR 0243 B3's alternative — the existing configuration surface — does NOT
+> transfer, because log sources are DERIVED and are CONFIGURED NOWHERE."**
+
+```text
+configured somewhere          -> ADR 0243 B3's configuration surface
+derived, configured nowhere   -> a served enumeration (ADR 0362 §1)
+```
+
+**Applied to the two halves, and they fall on opposite sides:**
+
+```text
+a PMS console ADDRESS    a human types where OPERA's web UI lives.
+                         Nothing can derive it            -> CONFIGURED -> 0243
+the FILTER SET           which integrations this property has connected.
+                         Nobody configures it             -> DERIVED   -> 0362
+```
+
+**And ADR 0362 §10 states the consumer side**: *"individual applications NEVER
+self-declare their logging identity to the UI"*, and consumers do not construct or
+merge independent source vocabularies. *So a filter set over integrations would be
+a projection the capability serves, not four labels a screen composes.*
+
+> **⚠ BOTH PRECEDENTS ARE IN THE LOGGING AND PLATFORM-CONFIG DOMAINS, AND A
+> MECHANISM'S TRANSFERABILITY IS NOT EVIDENCE ABOUT A TAXONOMY'S SCOPE** (II,
+> 2026-10-03). **ADR 0212 rules the integration-name resolution for integrations
+> specifically, so the LABEL needs no transfer.** The SET and the ADDRESS each
+> need one sentence from the planner, and each now arrives with its own precedent
+> named rather than as *"nobody has ruled this"*.
+
+##### `Ask for service` — the concept is ruled and the record is still not
+
+**Swept and genuinely absent**, with the populations stated:
+
+```text
+flows §10             rules the CONCEPT - "the same shape, from Room Care"
+roomcare chapter 01   DESIGNS the receiving side - "a GuestOps object (the
+                      guest, the stay, the request) that reaches Room Care"
+roomcare's door       13 served methods; NONE receives a request from another
+                      application
+the register          the only two rows naming `Ask for service` are
+                      `ARCH-Q20`'s pairing class - a drawing's control
+                      rendered as a div - and say nothing about the record
+```
+
+##### And one vocabulary collision, because a reader meets both documents together
+
+```text
+the connector's design   "the only OUTBOUND integration of the three" - the
+                         poller, which DIALS OUT to fetch
+ADR 0128 §4              "v1 connector scope is INBOUND-ONLY" - the direction
+                         of DATA
+```
+
+**Both true, on different axes** — and a reader meeting the first concludes the
+platform writes back. *My own claim survives; its stated reason needed the
+distinction.*
 
 #### `Open in Opera` — two things are missing and neither is mine to invent
 
