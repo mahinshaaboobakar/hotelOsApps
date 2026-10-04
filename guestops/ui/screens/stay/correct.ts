@@ -9,7 +9,7 @@ import { APP, failureDrawing, load, perform, type CorrectPlan } from "../../book
 import { el } from "../../chrome/element";
 import { field } from "../../chrome/field";
 import { cannot, failed } from "../../chrome/marks";
-import { instant } from "../../chrome/when";
+import { instant, span } from "../../chrome/when";
 import { detail } from "../../chrome/panel";
 import { dialog, sheet } from "../../chrome/overlay";
 
@@ -49,14 +49,27 @@ export async function correctDialog(
 
   const plan = loaded.value;
 
-  // `Rajesh Pillai · 214 · checked out 07:02` — facts, joined here, with the
-  // instant read in the property's own zone rather than the machine's.
+  // `Rajesh Pillai · 214 · checked out 07:02`, and fRI1's four-part form for a
+  // no-show — facts, joined here, with every instant and day read in the
+  // property's own zone rather than the machine's.
+  //
+  // **`span` is consumed rather than composed.** A range's separator and the
+  // month's position are a locale's grammar: the owner ruled the long form on
+  // 2026-09-20 (mockup 07 B) and `when.ts` carries the reason. fRI1's prose
+  // draws the short `19 – 20 Aug`, which that ruling refused eight days before
+  // the frame landed — so the ruling governs, and the difference is reported
+  // rather than matched here.
   const subject = [
     plan.guest,
+    plan.reference,
     plan.room,
+    plan.arrive === null ? null : span(plan.arrive, plan.depart, property),
     plan.departedAt === null
       ? null
       : `checked out ${instant(plan.departedAt, property, "time")}`,
+    plan.noShowAt === null
+      ? null
+      : `recorded as a no-show ${instant(plan.noShowAt, property, "date-time")}`,
   ].filter((part): part is string => part !== null).join(" · ");
 
   const drawn = correct(plan, subject, close, (to, reason) => {
@@ -135,15 +148,15 @@ export function correct(
   // cancellation reports.
   const reason = plan.reasons[0] ?? null;
 
+  // **The clause names the fact being corrected**, because that is what the
+  // desk is being told is kept. C1 says *departure*; fRI1 says *no-show*, and
+  // a dialog putting back a stay that never arrived has no departure to talk
+  // about.
   const kept = el("div", "note");
 
   kept.append(
-    el("b", undefined, "The departure is not erased."),
-    document.createTextNode(
-      " It happened, it was announced, and consumers acted on it — so this is"
-      + " recorded as a correction beside it, and both stay in the stay's"
-      + " history.",
-    ),
+    el("b", undefined, said.notErased),
+    document.createTextNode(said.because),
   );
 
   return dialog({
@@ -154,6 +167,7 @@ export function correct(
       kept,
       detail({ label: "Back to", value: "", strong: said.backTo, tags: [] }),
       room(plan),
+      comesOff(plan),
       field({
         label: "Why",
         value: reason,
@@ -176,6 +190,30 @@ export function correct(
     ],
 
     onDismiss: close,
+  });
+}
+
+/**
+ * What a reinstatement takes off — and ADR 0310 is why the answer is nothing.
+ *
+ * **Drawn only where there is a question.** A departure correction has no
+ * forfeit to discuss; fRI1 draws this row because a no-show looks like the kind
+ * of thing that charges something. It does not: `RecordNoShowAsync` moves the
+ * lifecycle, bumps the version, records the override and publishes
+ * `stay.no_show`, and **writes no forfeiture record of any kind** — planner,
+ * ADR 0310. So the dialog says so rather than leaving the desk to wonder
+ * whether putting the stay back undoes a charge.
+ *
+ * **If a forfeit ever becomes a recorded thing, this row moves WITH the service
+ * change** and not ahead of it — ADR 0310's own sequencing.
+ */
+function comesOff(plan: CorrectPlan): HTMLElement | null {
+  if (plan.to !== "Booked") return null;
+
+  return detail({
+    label: "Nothing comes off",
+    value: "no charge was ever applied",
+    tags: [{ kind: "pill", tone: "ok", text: "nothing to reverse" }],
   });
 }
 
@@ -246,18 +284,51 @@ function confirmation(
 /**
  * The words for a correction into a given state — where they were drawn.
  *
- * **Null is the honest answer for a target nobody drew.** `Reinstate…` is on
- * N1's end state and what it opens is not in any frame; a title composed here
- * would read as approved design to the next person who finds it, which is the
- * provenance hazard no test can catch. The caller offers nothing rather than
- * offering an invention.
+ * **Null is still the honest answer for a target nobody drew**, and the set of
+ * drawn targets is now two rather than one.
+ *
+ * ⚠ **This said: *"`Reinstate…` is on N1's end state and what it opens is not
+ * in any frame"*.** That was true when it was written, on 2026-09-24, and
+ * `247c854` falsified it four days later: the owner's `fRI1` draws the dialog
+ * to its end — the title below, the no-show-not-erased clause, `Back to
+ * Booked`, `Nothing comes off`, the reason required from ADR 0305's configured
+ * list, and `Leave it` beside `Put back on the list`. **The old sentence is
+ * kept because a reader meeting only the second arm cannot otherwise tell a
+ * design that was drawn from one somebody composed here.**
  */
-function words(to: string | null): { title: string; backTo: string; confirm: string } | null {
-  return to === "InHouse"
-    ? {
+function words(to: string | null): Said | null {
+  if (to === "InHouse") {
+    return {
       title: "Put this stay back in house?",
       backTo: "In house",
       confirm: "Put back in house",
-    }
-    : null;
+      notErased: "The departure is not erased.",
+      because: " It happened, it was announced, and consumers acted on it — so"
+        + " this is recorded as a correction beside it, and both stay in the"
+        + " stay's history.",
+    };
+  }
+
+  if (to === "Booked") {
+    return {
+      title: "Put this stay back on the arrivals list?",
+      backTo: "Booked",
+      confirm: "Put back on the list",
+      notErased: "The no-show is not erased.",
+      because: " It was recorded, it was announced, and it stays in the stay's"
+        + " history — this is a correction beside it, exactly as a mistaken"
+        + " check-out is.",
+    };
+  }
+
+  return null;
+}
+
+/** The sentences one correction needs, all of them the screen's (ADR 0175). */
+interface Said {
+  title: string;
+  backTo: string;
+  confirm: string;
+  notErased: string;
+  because: string;
 }

@@ -194,6 +194,26 @@ export interface CorrectPlan {
   departedAt: string | null;
 
   /**
+   * When the no-show was recorded, as an ISO instant. Null for a departure.
+   *
+   * **From the event store, which is where the fact is.** `RecordNoShowAsync`
+   * writes no such column and skips its override row for a stay the PMS has
+   * never seen, so the stay row cannot answer this — and the Activity tab
+   * already reads the same `stay.no_show` event, so a dialog reading it too
+   * cannot disagree with the list behind it.
+   */
+  noShowAt: string | null;
+
+  /** The booking's reference, where the source gave one. */
+  reference: string | null;
+
+  /** The booked arrival, ISO `yyyy-MM-dd`. */
+  arrive: string | null;
+
+  /** The booked departure, ISO `yyyy-MM-dd`. */
+  depart: string | null;
+
+  /**
    * Whether the room is still nobody else's.
    *
    * **Null is not a missing boolean** — it means no room is in the question,

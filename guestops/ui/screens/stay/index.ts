@@ -373,13 +373,21 @@ function actions(
     // departure is kept and the correction recorded beside it.
     if (action.label === "Correct") return control("btn", `${action.label}…`, acts.correct);
 
-    // **`Reinstate` is NOT wired, and this is a reported divergence rather
-    // than an oversight.** N1's end state draws `Reinstate…` as a live button
-    // and NO FRAME DRAWS THE DIALOG BEHIND IT. `CorrectAsync` and the plan
-    // read both handle it; what is missing is the design. Composing a title
-    // and a confirm label here would ship an application design the owner has
-    // not seen, and it would read as approved to whoever found it next — so
-    // it falls through to the unavailable form below, which says so.
+    // **`Reinstate…` IS wired, and the reason it was not is kept rather than
+    // deleted.** It read: *"N1's end state draws `Reinstate…` as a live button
+    // and NO FRAME DRAWS THE DIALOG BEHIND IT."* True on 2026-09-24;
+    // `247c854` falsified it on 2026-09-28, when the owner's `fRI1` drew that
+    // dialog to its end. **ADR 0310** rules what pressing it means — the
+    // lifecycle reverses and there is no forfeiture to reverse — and **ADR
+    // 0305** rules where its reason comes from.
+    //
+    // It is the same operation as `Correct…`: `CorrectPlanView.Target` answers
+    // `NoShow -> Booked`, so the dialog reads the plan and composes fRI1's
+    // words from it rather than a second command being invented here.
+    if (action.label === "Reinstate") {
+      return control("btn", `${action.label}…`, acts.correct);
+    }
+
 
     return unavailable("btn", action.label,
       "This action is not available from this screen yet.");

@@ -169,27 +169,31 @@ describe("frame 3's header actions", () => {
     expect(pressed).toEqual(["correct"]);
   });
 
-  it("draws Reinstate OFF, because no frame draws the dialog behind it", async () => {
-    // **A reported divergence from an approved frame, asserted so it cannot be
-    // quietly closed either way.** N1's end state draws `Reinstate…` live;
-    // `CorrectAsync` and the plan read both handle it. What is missing is the
-    // DESIGN — no frame draws what the dialog asks — and composing a title
-    // here would ship an application design the owner has not seen, which
-    // would read as approved to whoever found it next.
+  it("opens the correction from Reinstate, which the owner's fRI1 draws", async () => {
+    // **This test asserted the opposite until 2026-10-04, and its NAME said
+    // so**: *"draws Reinstate OFF, because no frame draws the dialog behind
+    // it"*. It was right on 2026-09-24 and `247c854` ended it four days later
+    // — the owner's `fRI1` draws the dialog to its end. Its own closing line
+    // was *"when the owner rules on the dialog, this test is what has to be
+    // argued with"*, and this is the argument.
     //
-    // So it falls through to the unavailable form, which says so. When the
-    // owner rules on the dialog, this test is what has to be argued with.
+    // A stale test NAME is a guarantee-comment that runs: it passes every run,
+    // so the suite becomes fresh evidence for a claim that was withdrawn.
+    //
+    // The ellipsis is asserted with the wiring, because fRI1's header draws
+    // `Reinstate…` — the ellipsis is the affordance saying it opens something
+    // rather than acting.
     const noShow: StayPage = {
       ...recordedStay,
       actions: [{ label: "Reinstate", danger: false }],
     };
 
     const into = await drawn(noShow);
-    const control = button(into, "Reinstate");
+    const control = button(into, "Reinstate…");
 
-    expect(control.disabled).toBe(true);
-    expect(control.title).not.toBe("");
-    expect(pressed).toEqual([]);
+    expect(control.disabled).toBe(false);
+    control.click();
+    expect(pressed).toEqual(["correct"]);
   });
 
   it("still draws an unmapped action off, with a reason", async () => {

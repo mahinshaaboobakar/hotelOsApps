@@ -1,3 +1,4 @@
+using HotelOS.GuestOps.Application.Bookings;
 using HotelOS.GuestOps.Domain;
 using HotelOS.GuestOps.Infrastructure;
 using HotelOS.GuestOps.Infrastructure.ReadModels;
@@ -35,7 +36,13 @@ namespace HotelOS.GuestOps.Module;
 /// </para>
 /// </remarks>
 /// <param name="db">This application's own schema.</param>
-public sealed class CorrectPlanView(GuestOpsDbContext db)
+/// <param name="bookings">
+/// The booking read, <b>consumed rather than repeated</b>. The reference and
+/// the booked days are resolved there, in the property's own zone, and they are
+/// the same facts frame 8's cancellation subject carries — a second resolution
+/// here would be free to disagree with it the day either changes.
+/// </param>
+public sealed class CorrectPlanView(GuestOpsDbContext db, BookingReadService bookings)
 {
     /// <summary>What correcting this stay would do.</summary>
     /// <param name="scope">The caller, their property and their user.</param>
@@ -62,6 +69,27 @@ public sealed class CorrectPlanView(GuestOpsDbContext db)
             .FirstOrDefaultAsync(cancellationToken);
 
         var to = Target(stay.Lifecycle);
+
+        // The reference and the booked days `fRI1` puts in the dialog's second
+        // line, from the one place that resolves them.
+        var booking = await bookings.GetAsync(scope, stay.BookingId, cancellationToken);
+
+        // **When the no-show was recorded — from the event, because the stay
+        // row does not hold it.** `RecordNoShowAsync` writes no such column,
+        // and its override row is skipped entirely for a PMS-unknown stay,
+        // which is exactly the stay `fRI1` draws (<i>created here</i>). The
+        // Activity tab already reads this event for the same instant, so one
+        // source means the dialog and the list behind it cannot disagree.
+        var noShowAt = to != StayLifecycle.Booked
+            ? null
+            : await db.Set<StoredEvent>()
+                .Where(stored => stored.PropertyId == scope.PropertyId
+                    && stored.AggregateType == "stay"
+                    && stored.AggregateId == stay.Id
+                    && stored.EventType == "stay.no_show")
+                .OrderByDescending(stored => stored.OccurredAt)
+                .Select(stored => (DateTimeOffset?)stored.OccurredAt)
+                .FirstOrDefaultAsync(cancellationToken);
 
         // **Only a stay going back into a room needs a room.** Reinstating a
         // no-show returns it to `Booked`, which holds no room, so asking about
@@ -101,6 +129,15 @@ public sealed class CorrectPlanView(GuestOpsDbContext db)
             // property's zone and the reader's conventions.
             guest = string.IsNullOrWhiteSpace(guest) ? "Not yet named" : guest,
             departedAt = stay.DepartureAt.At?.ToString("O"),
+
+            // **Facts, never a rendering** (ADR 0175). The screen composes
+            // `recorded as a no-show 1 Sep 23:14` and the day range, because
+            // the month's position and a range's separator are the reader's
+            // locale's grammar rather than this service's.
+            noShowAt = noShowAt?.ToString("O"),
+            reference = booking.Reference,
+            arrive = booking.Arrival?.ToString("yyyy-MM-dd"),
+            depart = booking.Departure?.ToString("yyyy-MM-dd"),
 
             // **Three values, and the third is not a missing boolean.** Null
             // means no room is involved at all — reinstating a no-show returns
